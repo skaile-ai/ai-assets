@@ -1,0 +1,57 @@
+{
+  "name": "taskflow",
+  "slug": "taskflow",
+  "description": "A simple task manager for small teams.",
+  "projectType": "standalone",
+  "version": "0.1.0",
+  "auth": {
+    "provider": "keycloak",
+    "roleClaimPath": "realm_access.roles",
+    "defaultDeny": true
+  },
+  "schemas": [{"name": "PXL"}, {"name": "Data"}],
+  "defaultSchema": "Data",
+  "systemUser": {"name": "System", "email": "system@taskflow.io"},
+  "standardModels": ["User", "Action", "ActionOperation", "File", "TableView", "Comment"],
+  "models": {
+    "Task": {
+      "description": "A unit of work assigned to a team member.",
+      "schema": "Data",
+      "standardFields": ["id", "createdAt", "updatedAt"],
+      "labelField": "title",
+      "fields": {
+        "title": {
+          "type": "String",
+          "label": "Title",
+          "description": "The name of the task."
+        },
+        "description": {
+          "type": "String?",
+          "label": "Description",
+          "description": "Detailed task description."
+        },
+        "status": {
+          "type": {
+            "Todo": "Not yet started.",
+            "InProgress": "Currently being worked on.",
+            "Done": "Completed."
+          },
+          "label": "Status"
+        },
+        "assignedToId": {
+          "type": "User?",
+          "label": "Assigned To",
+          "description": "The user responsible for this task."
+        },
+        "dueDate": {
+          "type": "DateTime?",
+          "label": "Due Date",
+          "description": "When the task is due."
+        }
+      },
+      "actions": {
+        "complete": "Mark the task as done."
+      }
+    }
+  }
+}

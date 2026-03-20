@@ -1,0 +1,883 @@
+{
+  "version": "2.0",
+  "phases": {
+    "conceptualization": {
+      "name": "Conceptualization",
+      "description": "Full concept pipeline from brief to screen specs",
+      "order": 1,
+      "sub_phases": {
+        "overall-concept": {
+          "name": "Overall Concept",
+          "order": 1
+        },
+        "functionality": {
+          "name": "Functionality",
+          "order": 2
+        },
+        "brand": {
+          "name": "Brand & Identity",
+          "order": 3
+        },
+        "techstack": {
+          "name": "Tech Stack",
+          "order": 4
+        },
+        "datamodel": {
+          "name": "Data Model",
+          "order": 5
+        },
+        "architecture": {
+          "name": "System Architecture",
+          "order": 6
+        },
+        "ui-planning": {
+          "name": "UI Planning",
+          "order": 7
+        }
+      }
+    },
+    "implementation": {
+      "name": "Implementation",
+      "description": "Building the app from concept artifacts",
+      "order": 2,
+      "sub_phases": {
+        "bootstrap": {
+          "name": "Bootstrap",
+          "order": 1
+        },
+        "build": {
+          "name": "Build",
+          "order": 2
+        }
+      }
+    },
+    "testing": {
+      "name": "Testing",
+      "description": "Test generation and execution",
+      "order": 3
+    },
+    "quality": {
+      "name": "Quality",
+      "description": "Audits, reviews, cross-reference repair, and readiness gates",
+      "order": 4
+    }
+  },
+  "steps": [
+    {
+      "id": "concept/reverse-engineer",
+      "name": "Reverse Engineer from Repository",
+      "skill": "concept/reverse-engineer",
+      "phase": "conceptualization",
+      "sub_phase": "overall-concept",
+      "folder": "_concept/",
+      "hard_gates": [],
+      "user_inputs": {
+        "dialog": [
+          {
+            "id": "repo_path",
+            "label": "Repository Path",
+            "type": "text",
+            "required": true
+          },
+          {
+            "id": "concept_path",
+            "label": "Concept Output Path",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "extraction_scope",
+            "label": "What to Extract",
+            "type": "multiselect",
+            "options": [
+              "overview",
+              "techstack",
+              "features",
+              "datamodel",
+              "brand",
+              "screens"
+            ],
+            "default": [
+              "overview",
+              "techstack",
+              "features",
+              "datamodel",
+              "brand",
+              "screens"
+            ],
+            "required": false
+          },
+          {
+            "id": "overwrite_mode",
+            "label": "Existing Files",
+            "type": "select",
+            "options": [
+              "skip",
+              "diff_and_confirm",
+              "overwrite"
+            ],
+            "default": "skip",
+            "required": false
+          },
+          {
+            "id": "app_description_hint",
+            "label": "App Description Hint",
+            "type": "text",
+            "required": false
+          }
+        ],
+        "files": []
+      },
+      "description": "Generates full _concept/ from an existing repository: overview, techstack, features, datamodel, brand, screens",
+      "ui": {
+        "show_in_sidebar": false
+      }
+    },
+    {
+      "id": "concept/discovery/overview",
+      "name": "Project Overview",
+      "skill": "concept/discovery/overview",
+      "phase": "conceptualization",
+      "sub_phase": "overall-concept",
+      "folder": "01_project/",
+      "hard_gates": [],
+      "user_inputs": {
+        "dialog": [
+          {
+            "id": "app_name",
+            "label": "App Name",
+            "type": "text",
+            "required": true
+          },
+          {
+            "id": "elevator_pitch",
+            "label": "Elevator Pitch",
+            "type": "textarea",
+            "required": true
+          },
+          {
+            "id": "target_audience",
+            "label": "Target Audience",
+            "type": "textarea",
+            "required": true
+          },
+          {
+            "id": "problem_statement",
+            "label": "Problem Statement",
+            "type": "textarea",
+            "required": true
+          },
+          {
+            "id": "complexity",
+            "label": "App Complexity",
+            "type": "select",
+            "options": [
+              "simple",
+              "moderate",
+              "complex",
+              "enterprise"
+            ],
+            "required": true
+          },
+          {
+            "id": "research_depth",
+            "label": "Research Depth",
+            "type": "select",
+            "options": [
+              "skip",
+              "light",
+              "moderate",
+              "deep"
+            ],
+            "default": "moderate"
+          }
+        ],
+        "files": [
+          "01_project/brief.md"
+        ]
+      },
+      "description": "Elevator pitch, audience, problem, hero flow",
+      "ui": {
+        "start_questions": [
+          "I have an app idea \u2014 help me write the brief",
+          "What problem does my app solve?",
+          "Who is the target audience?",
+          "Describe the hero flow step by step"
+        ],
+        "scaffold_on_init": true
+      }
+    },
+    {
+      "id": "concept/experience/journeys",
+      "name": "User Journeys",
+      "skill": "concept/experience/journeys",
+      "phase": "conceptualization",
+      "sub_phase": "functionality",
+      "folder": "02_journeys/",
+      "hard_gates": [
+        "01_project/brief.md",
+        "01_project/goals.md"
+      ],
+      "user_inputs": {
+        "dialog": [],
+        "files": [
+          "02_journeys/stories.json"
+        ]
+      },
+      "description": "Map user journeys with personas, story maps (hero/vital/hygiene/backlog), and EARS acceptance criteria. Produces stories.json for the features skill."
+    },
+    {
+      "id": "concept/experience/features",
+      "name": "Features",
+      "skill": "concept/experience/features",
+      "phase": "conceptualization",
+      "sub_phase": "functionality",
+      "folder": "03_features/",
+      "hard_gates": [
+        {
+          "type": "file_exists",
+          "path": "01_project/brief.md"
+        }
+      ],
+      "user_inputs": {
+        "dialog": [
+          {
+            "id": "feature_priorities",
+            "label": "Feature Priorities",
+            "type": "textarea",
+            "required": false
+          }
+        ],
+        "files": []
+      },
+      "description": "Feature specs in numbered groups",
+      "ui": {
+        "start_questions": [
+          "Generate feature specs from the project brief",
+          "What are the core user workflows?",
+          "Break features into numbered groups",
+          "Add acceptance criteria to each feature"
+        ],
+        "impl_status_tracking": true,
+        "scaffold_on_init": true
+      }
+    },
+    {
+      "id": "concept/experience/behaviors",
+      "name": "Behavioral Specs",
+      "skill": "concept/experience/behaviors",
+      "phase": "conceptualization",
+      "sub_phase": "functionality",
+      "folder": "03b_behavior/",
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Formalize entity states, transition rules, and boundary surfaces from features",
+      "ui": {
+        "start_questions": [
+          "Formalize entity state machines from features",
+          "Define transition rules and guards",
+          "Map boundary surfaces between entities"
+        ]
+      }
+    },
+    {
+      "id": "concept/blueprint/datamodel",
+      "name": "Data Model",
+      "skill": "concept/blueprint/datamodel",
+      "phase": "conceptualization",
+      "sub_phase": "datamodel",
+      "folder": "06_datamodel/",
+      "hard_gates": [
+        {
+          "type": "file_exists",
+          "path": "03_features/"
+        }
+      ],
+      "user_inputs": null,
+      "description": "Stack-independent entities, relationships, enums, seed data",
+      "ui": {
+        "start_questions": [
+          "Generate a data model from the features",
+          "Define entities and their relationships",
+          "Add seed data scenarios",
+          "Create the DBML schema"
+        ]
+      }
+    },
+    {
+      "id": "concept/discovery/brand-visual",
+      "name": "Brand \u2014 Visual Identity",
+      "skill": "concept/discovery/brand-visual",
+      "phase": "conceptualization",
+      "sub_phase": "brand",
+      "folder": "04_brand/",
+      "hard_gates": [],
+      "user_inputs": {
+        "dialog": [
+          {
+            "id": "reference_urls",
+            "label": "Reference URLs",
+            "type": "textarea",
+            "required": false
+          },
+          {
+            "id": "mood",
+            "label": "Mood / Vibe",
+            "type": "text",
+            "required": false
+          },
+          {
+            "id": "light_dark",
+            "label": "Light or Dark Mode",
+            "type": "select",
+            "options": [
+              "light",
+              "dark",
+              "both"
+            ],
+            "default": "light"
+          },
+          {
+            "id": "font_preferences",
+            "label": "Font Preferences",
+            "type": "text",
+            "required": false
+          }
+        ],
+        "files": []
+      },
+      "description": "Visual identity \u2014 colors, fonts, tone, design tokens",
+      "ui": {
+        "start_questions": [
+          "Create a visual identity for this project",
+          "Define brand colors and typography",
+          "Set the tone of voice and writing style",
+          "Generate design tokens"
+        ]
+      }
+    },
+    {
+      "id": "concept/discovery/brand-behavioral",
+      "name": "Brand \u2014 Behavioral",
+      "skill": "concept/discovery/brand-behavioral",
+      "phase": "conceptualization",
+      "sub_phase": "brand",
+      "folder": "04_brand/",
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Behavioral brand guidelines \u2014 tone, micro-copy patterns, interaction personality",
+      "ui": {}
+    },
+    {
+      "id": "concept/experience/screens",
+      "name": "Screens",
+      "skill": "concept/experience/screens",
+      "phase": "conceptualization",
+      "sub_phase": "ui-planning",
+      "folder": "07_screens/",
+      "hard_gates": [
+        {
+          "type": "file_exists",
+          "path": "03_features/"
+        },
+        {
+          "type": "file_exists",
+          "path": "04_brand/tokens.json"
+        }
+      ],
+      "user_inputs": null,
+      "description": "Screen specs with component inventory, states, template data",
+      "ui": {
+        "start_questions": [
+          "Specify screens for each feature group",
+          "Design the app layout shell",
+          "Define component inventory per screen",
+          "Map screen states and template data"
+        ],
+        "impl_status_tracking": true,
+        "scaffold_on_init": true
+      }
+    },
+    {
+      "id": "concept/experience/mock",
+      "name": "HTML Mockups",
+      "skill": "concept/experience/mock",
+      "phase": "conceptualization",
+      "sub_phase": "ui-planning",
+      "folder": "05_mockups/",
+      "hard_gates": [
+        {
+          "type": "file_exists",
+          "path": "07_screens/"
+        },
+        {
+          "type": "file_exists",
+          "path": "04_brand/tokens.json"
+        },
+        {
+          "type": "file_exists",
+          "path": "06_datamodel/seed.json"
+        }
+      ],
+      "user_inputs": {
+        "dialog": [
+          {
+            "id": "mockup_style",
+            "label": "Mockup Style",
+            "type": "select",
+            "options": [
+              "alpine_shoelace",
+              "vue_primevue",
+              "preact_htm"
+            ],
+            "default": "alpine_shoelace",
+            "required": false
+          }
+        ],
+        "files": []
+      },
+      "description": "Linked HTML prototype with Alpine.js, brand tokens, and seed data",
+      "ui": {
+        "start_questions": [
+          "Generate HTML mockups from screen specs",
+          "Create a linked prototype I can click through",
+          "Show me what the app looks like",
+          "Build the prototype with seed data"
+        ],
+        "special_viewer": "mockups"
+      }
+    },
+    {
+      "id": "concept/experience/storybook",
+      "name": "Storybook",
+      "skill": "concept/experience/storybook",
+      "phase": "conceptualization",
+      "sub_phase": "ui-planning",
+      "folder": "_concept/08_storybook/",
+      "hard_gates": [
+        { "type": "file_exists", "path": "07_screens/" },
+        { "type": "file_exists", "path": "04_brand/tokens.json" },
+        { "type": "file_exists", "path": "05_techstack/stack.md" }
+      ],
+      "user_inputs": { "dialog": [], "files": [] },
+      "description": "3-layer Storybook: building-block components, screen compositions, journey flow stories. Uses tech-stack addon."
+    },
+    {
+      "id": "concept/experience/components",
+      "name": "Component Inventory",
+      "skill": "concept/experience/components",
+      "phase": "conceptualization",
+      "sub_phase": "ui-planning",
+      "folder": "07_screens/components/",
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Reusable component specs extracted from screen definitions",
+      "ui": {}
+    },
+    {
+      "id": "concept/blueprint/techstack",
+      "name": "Tech Stack",
+      "skill": "concept/blueprint/techstack",
+      "phase": "conceptualization",
+      "sub_phase": "techstack",
+      "folder": "05_techstack/",
+      "hard_gates": [],
+      "user_inputs": {
+        "dialog": [
+          {
+            "id": "framework_experience",
+            "label": "Framework Experience",
+            "type": "textarea",
+            "required": false
+          },
+          {
+            "id": "platform",
+            "label": "Platform",
+            "type": "select",
+            "options": [
+              "web",
+              "mobile",
+              "desktop",
+              "cross-platform"
+            ],
+            "default": "web"
+          },
+          {
+            "id": "data_heavy",
+            "label": "Data-Heavy App?",
+            "type": "select",
+            "options": [
+              "yes",
+              "no"
+            ],
+            "default": "no"
+          },
+          {
+            "id": "managed_vs_selfhosted",
+            "label": "Managed vs Self-Hosted",
+            "type": "select",
+            "options": [
+              "managed",
+              "selfhosted",
+              "hybrid"
+            ],
+            "default": "managed"
+          },
+          {
+            "id": "frontend_framework",
+            "label": "Frontend Framework",
+            "type": "select",
+            "options": [
+              "Vue 3 / Nuxt",
+              "React / Next.js",
+              "React / Remix",
+              "SvelteKit",
+              "Angular",
+              "Astro",
+              "Other"
+            ],
+            "required": false
+          },
+          {
+            "id": "ui_library",
+            "label": "UI Library",
+            "type": "select",
+            "options": [
+              "Tailwind CSS",
+              "PrimeVue",
+              "shadcn/ui",
+              "Material UI",
+              "Ant Design",
+              "Chakra UI",
+              "DaisyUI",
+              "None"
+            ],
+            "required": false
+          },
+          {
+            "id": "backend_technology",
+            "label": "Backend Technology",
+            "type": "select",
+            "options": [
+              "Node.js (Nitro / Nuxt)",
+              "Node.js (Express)",
+              "Node.js (Fastify)",
+              "Python (FastAPI)",
+              "Python (Django)",
+              "Go",
+              "Rust (Axum)",
+              "Ruby on Rails",
+              "Laravel (PHP)",
+              "ASP.NET Core",
+              "Supabase (BaaS)",
+              "Firebase (BaaS)",
+              "Other"
+            ],
+            "required": false
+          }
+        ],
+        "files": []
+      },
+      "description": "Framework, UI library, backend, database, hosting",
+      "ui": {
+        "start_questions": [
+          "Recommend a tech stack for this project",
+          "Compare framework options for the requirements",
+          "What database fits best?"
+        ]
+      }
+    },
+    {
+      "id": "concept/blueprint/architecture",
+      "name": "System Architecture",
+      "skill": "concept/blueprint/architecture",
+      "phase": "conceptualization",
+      "sub_phase": "architecture",
+      "folder": "05b_architecture/",
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "System architecture: apps, backend structure, data flow, protocols, and infrastructure beyond stack defaults",
+      "ui": {}
+    },
+    {
+      "id": "implement/scaffold",
+      "name": "Bootstrap / Scaffold",
+      "skill": "implement/scaffold",
+      "phase": "implementation",
+      "sub_phase": "bootstrap",
+      "folder": null,
+      "hard_gates": [
+        {
+          "type": "file_exists",
+          "path": "05_techstack/stack.md"
+        }
+      ],
+      "user_inputs": null,
+      "description": "Project scaffolding with chosen framework",
+      "ui": {}
+    },
+    {
+      "id": "implement/foundation",
+      "name": "Foundation",
+      "skill": "implement/foundation",
+      "phase": "implementation",
+      "sub_phase": "bootstrap",
+      "folder": null,
+      "hard_gates": [
+        { "type": "file_exists", "path": "04_brand/tokens.json" },
+        { "type": "file_exists", "path": "05_techstack/stack.md" }
+      ],
+      "user_inputs": null,
+      "description": "Apply brand tokens as CSS variables, configure auth, create app shell layout using tech-stack skill recipe."
+    },
+    {
+      "id": "implement/design",
+      "name": "Design",
+      "skill": "implement/design",
+      "phase": "implementation",
+      "sub_phase": "bootstrap",
+      "folder": null,
+      "hard_gates": [
+        { "type": "file_exists", "path": "07_screens/" },
+        { "type": "file_exists", "path": "04_brand/tokens.json" },
+        { "type": "file_exists", "path": "05_techstack/stack.md" }
+      ],
+      "user_inputs": null,
+      "description": "High-fidelity UI mockups using the actual production component library. Runs after foundation."
+    },
+    {
+      "id": "implement/orchestrator",
+      "name": "Implementation Plan",
+      "skill": "implement/orchestrator",
+      "phase": "implementation",
+      "sub_phase": "build",
+      "folder": null,
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Generate implementation plan from concept",
+      "ui": {}
+    },
+    {
+      "id": "implement/feature",
+      "name": "Implement Feature",
+      "skill": "implement/feature",
+      "phase": "implementation",
+      "sub_phase": "build",
+      "folder": null,
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Implement single feature with TDD. References prog-expert-* skills externally.",
+      "ui": {}
+    },
+    {
+      "id": "implement/migrate",
+      "name": "Database Migration",
+      "skill": "implement/migrate",
+      "phase": "implementation",
+      "sub_phase": "build",
+      "folder": null,
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Generate and run database migrations from data model",
+      "ui": {}
+    },
+    {
+      "id": "implement/seed",
+      "name": "Seed Data",
+      "skill": "implement/seed",
+      "phase": "implementation",
+      "sub_phase": "build",
+      "folder": null,
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Load seed data scenarios into database",
+      "ui": {}
+    },
+    {
+      "id": "support/test-plan",
+      "name": "Test Plan",
+      "skill": "support/test-plan",
+      "phase": "testing",
+      "sub_phase": null,
+      "folder": "_concept/08_testing/",
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Generate test plan from features, screens, and data model",
+      "ui": {}
+    },
+    {
+      "id": "support/test-unit",
+      "name": "Unit Tests",
+      "skill": "support/test-unit",
+      "phase": "testing",
+      "sub_phase": null,
+      "folder": null,
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Generate and run unit tests for implemented features",
+      "ui": {}
+    },
+    {
+      "id": "support/test-integration",
+      "name": "Integration Tests",
+      "skill": "support/test-integration",
+      "phase": "testing",
+      "sub_phase": null,
+      "folder": null,
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Generate and run integration tests across feature boundaries",
+      "ui": {}
+    },
+    {
+      "id": "support/e2e",
+      "name": "E2E Tests",
+      "skill": "support/e2e",
+      "phase": "testing",
+      "sub_phase": null,
+      "folder": null,
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Browser-based end-to-end journey testing",
+      "ui": {}
+    },
+    {
+      "id": "concept/review",
+      "name": "Review & Gardening",
+      "skill": "concept/review",
+      "phase": "quality",
+      "sub_phase": null,
+      "folder": null,
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Structure audit + entropy check + gardening",
+      "ui": {}
+    },
+    {
+      "id": "support/audit",
+      "name": "Code Audit",
+      "skill": "support/audit",
+      "phase": "quality",
+      "sub_phase": null,
+      "folder": null,
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Static code + structure analysis",
+      "ui": {}
+    },
+    {
+      "id": "support/sync",
+      "name": "Cross-Reference Sync",
+      "skill": "support/sync",
+      "phase": "quality",
+      "sub_phase": null,
+      "folder": null,
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Cross-reference repair",
+      "ui": {}
+    },
+    {
+      "id": "support/ready",
+      "name": "Readiness Gate",
+      "skill": "support/ready",
+      "phase": "quality",
+      "sub_phase": null,
+      "folder": null,
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Pre-flight readiness check before implementation",
+      "ui": {}
+    },
+    {
+      "id": "implement/verify",
+      "name": "Verification",
+      "skill": "implement/verify",
+      "phase": "quality",
+      "sub_phase": null,
+      "folder": null,
+      "hard_gates": [],
+      "user_inputs": null,
+      "description": "Post-implementation verification against concept specs",
+      "ui": {}
+    }
+  ],
+  "feedback_loops": [
+    {
+      "from": "concept/experience/screens",
+      "to": "concept/experience/features",
+      "field": "screens",
+      "description": "Screen skill registers itself in feature frontmatter"
+    },
+    {
+      "from": "concept/blueprint/datamodel",
+      "to": "concept/experience/features",
+      "field": "data_entities",
+      "description": "Datamodel skill sets data_entities in feature frontmatter"
+    }
+  ],
+  "config": {
+    "orchestrator_skill": "concept/orchestrator",
+    "standalone_mode": {
+      "enabled": true,
+      "description": "Skills run independently, checking own hard_gates. Orchestrator suggests next steps after completion."
+    },
+    "standards_mode": {
+      "skill": "standards/discover",
+      "output_folder": "_standards/",
+      "parallel": true,
+      "description": "Discovers codebase conventions and writes them to _concept/_standards/"
+    },
+    "standards_injection": {
+      "skill": "standards/inject",
+      "description": "Matches discovered standards to requesting skill by applies_to + keyword overlap"
+    },
+    "profiles_file": "shared/contracts/profiles.json",
+    "grounding_mode": {
+      "skill": "concept/discovery/research",
+      "output_folder": "_grounding/",
+      "deprecated_folder": "_research/",
+      "parallel": true,
+      "description": "Research and grounding material for the concept. Step subfolders store per-step research, user_input.json, and context files.",
+      "hidden_from_sidebar": [
+        "_grounding",
+        "_research"
+      ],
+      "sub_folders": [
+        "general/",
+        "findings/"
+      ],
+      "general_topics": [
+        "domain",
+        "competitors",
+        "audiences",
+        "design_inspiration",
+        "patterns",
+        "colors_fonts",
+        "behavioral_patterns"
+      ],
+      "step_folders": {
+        "concept/discovery/overview": "overview/",
+        "concept/reverse-engineer": "reverse_engineer/",
+        "concept/experience/features": "features/",
+        "concept/experience/behaviors": "behaviors/",
+        "concept/discovery/brand-visual": "brand_visual/",
+        "concept/discovery/brand-behavioral": "brand_behavioral/",
+        "concept/blueprint/techstack": "techstack/",
+        "concept/blueprint/architecture": "architecture/",
+        "concept/blueprint/datamodel": "datamodel/",
+        "concept/experience/screens": "screens/",
+        "concept/experience/components": "components/",
+        "concept/experience/journeys": "journeys/",
+        "concept/experience/storybook": "storybook/",
+        "implement/foundation": "foundation/",
+        "implement/design": "design/"
+      }
+    },
+    "note": "This file is the skill catalog: hard_gates, user_inputs, folders, and phase taxonomy per skill. Flow sequencing, parameters, and execution order are defined in flows/*.json. Tech-stack-specific implementation details are in tech-stack/*.json.",
+    "flows_dir": "flows/",
+    "tech_stack_dir": "tech-stack/",
+    "flow_schema": "flows/flow.schema.json"
+  },
+  "incremental_note": "Incremental flows (add-feature, etc.) are defined in flows/ as separate flow files."
+}

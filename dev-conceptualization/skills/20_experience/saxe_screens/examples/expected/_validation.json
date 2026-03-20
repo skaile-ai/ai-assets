@@ -1,0 +1,65 @@
+{
+  "skill": "concept-2-experience-3-screens",
+  "description": "Given features + brand + stack + data model, produces screen specs and registers back into features",
+  "checks": [
+    {
+      "type": "file_exists",
+      "path": "2_experience/3_screens/00_layout/shell.md"
+    },
+    {
+      "type": "file_exists",
+      "path": "2_experience/3_screens/01_user_auth/login.md"
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "2_experience/3_screens/01_user_auth/login.md",
+      "field": "status",
+      "expected": "draft"
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "2_experience/3_screens/01_user_auth/login.md",
+      "field": "implements",
+      "min_length": 1
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "2_experience/3_screens/01_user_auth/login.md",
+      "field": "data_entities",
+      "min_length": 1
+    },
+    {
+      "type": "section_exists",
+      "path": "2_experience/3_screens/01_user_auth/login.md",
+      "heading": "## Component Inventory"
+    },
+    {
+      "type": "section_exists",
+      "path": "2_experience/3_screens/01_user_auth/login.md",
+      "heading": "## States"
+    },
+    {
+      "type": "section_exists",
+      "path": "2_experience/3_screens/01_user_auth/login.md",
+      "heading": "## Template Data"
+    },
+    {
+      "type": "cross_reference",
+      "path": "2_experience/3_screens/01_user_auth/login.md",
+      "field": "implements",
+      "comment": "Every feature path in implements must resolve to an existing file"
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "2_experience/2_features/01_user_auth/login.md",
+      "field": "screens",
+      "min_length": 1,
+      "comment": "Feedback loop: screen should have registered itself in feature frontmatter"
+    },
+    {
+      "type": "folder_numbered",
+      "path": "2_experience/3_screens/",
+      "pattern": "^\\d{2}_"
+    }
+  ]
+}

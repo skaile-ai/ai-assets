@@ -1,0 +1,76 @@
+{
+  "skill": "concept-2-experience-2-features",
+  "description": "Given a task manager brief, produces 2 feature groups with 3 features",
+  "checks": [
+    {
+      "type": "file_exists",
+      "path": "2_experience/2_features/01_user_auth/login.md"
+    },
+    {
+      "type": "file_exists",
+      "path": "2_experience/2_features/01_user_auth/registration.md"
+    },
+    {
+      "type": "file_exists",
+      "path": "2_experience/2_features/02_tasks/create_task.md"
+    },
+    {
+      "type": "folder_numbered",
+      "path": "2_experience/2_features/",
+      "pattern": "^\\d{2}_"
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "2_experience/2_features/01_user_auth/login.md",
+      "field": "status",
+      "expected": "draft"
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "2_experience/2_features/01_user_auth/login.md",
+      "field": "priority",
+      "one_of": ["must-have", "nice-to-have"]
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "2_experience/2_features/01_user_auth/login.md",
+      "field": "screens",
+      "expected": []
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "2_experience/2_features/01_user_auth/login.md",
+      "field": "data_entities",
+      "expected": []
+    },
+    {
+      "type": "frontmatter_present",
+      "path": "2_experience/2_features/02_tasks/create_task.md"
+    },
+    {
+      "type": "section_exists",
+      "path": "2_experience/2_features/01_user_auth/login.md",
+      "heading": "## Description"
+    },
+    {
+      "type": "section_exists",
+      "path": "2_experience/2_features/01_user_auth/login.md",
+      "heading": "## Requirements"
+    },
+    {
+      "type": "section_exists",
+      "path": "2_experience/2_features/01_user_auth/login.md",
+      "heading": "## Error States"
+    },
+    {
+      "type": "contains_checkbox",
+      "path": "2_experience/2_features/01_user_auth/login.md",
+      "min_count": 1
+    },
+    {
+      "type": "contains_checkbox",
+      "path": "2_experience/2_features/02_tasks/create_task.md",
+      "min_count": 1
+    }
+  ]
+}

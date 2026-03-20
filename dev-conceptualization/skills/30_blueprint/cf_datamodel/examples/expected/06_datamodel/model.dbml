@@ -1,0 +1,31 @@
+Table user {
+  id uuid [pk]
+  email email [unique, not null]
+  display_name string [not null]
+  role user_role [default: 'member']
+  avatar image
+  created_at datetime [not null]
+  updated_at datetime [not null]
+}
+
+Table task {
+  id uuid [pk]
+  title string [not null]
+  description richtext
+  status task_status [default: 'todo']
+  assigned_to uuid [ref: > user.id]
+  due_date date
+  created_at datetime [not null]
+  updated_at datetime [not null]
+}
+
+Enum user_role {
+  admin
+  member
+}
+
+Enum task_status {
+  todo
+  in_progress
+  done
+}

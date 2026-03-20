@@ -1,0 +1,167 @@
+# Skill Self-Testing Convention
+
+Every skill should have testable examples — known input/output pairs that
+validate the skill produces correct artifacts.
+
+## Directory Structure
+
+```
+app-<skill>/
+├── SKILL.md
+├── CLI.md
+├── examples/
+│   ├── README.md             ← describes each fixture
+│   ├── input/                ← simulated _concept/ state before skill runs
+│   │   ├── 01_project/
+│   │   │   └── brief.md
+│   │   ├── 03_features/
+│   │   │   └── ...
+│   │   └── ...
+│   └── expected/             ← what the skill should produce
+│       ├── 03_features/      ← (or whichever step the skill writes)
+│       │   └── ...
+│       └── _validation.json  ← machine-checkable assertions
+└── ...
+```
+
+## _validation.json Format
+
+Each fixture includes a `_validation.json` that defines what to check.
+
+```json
+{
+  "skill": "cf_concept_functionality_features",
+  "description": "Given a brief about a task management app, produces 3 feature groups",
+  "checks": [
+    {
+      "type": "file_exists",
+      "path": "03_features/01_user_auth/login.md"
+    },
+    {
+      "type": "file_exists",
+      "path": "03_features/01_user_auth/registration.md"
+    },
+    {
+      "type": "file_exists",
+      "path": "03_features/02_dashboard/overview.md"
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "03_features/01_user_auth/login.md",
+      "field": "status",
+      "expected": "draft"
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "03_features/01_user_auth/login.md",
+      "field": "priority",
+      "one_of": ["must-have", "nice-to-have"]
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "03_features/01_user_auth/login.md",
+      "field": "screens",
+      "expected": []
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "03_features/01_user_auth/login.md",
+      "field": "data_entities",
+      "expected": []
+    },
+    {
+      "type": "section_exists",
+      "path": "03_features/01_user_auth/login.md",
+      "heading": "## Description"
+    },
+    {
+      "type": "section_exists",
+      "path": "03_features/01_user_auth/login.md",
+      "heading": "## Requirements"
+    },
+    {
+      "type": "contains_checkbox",
+      "path": "03_features/01_user_auth/login.md",
+      "min_count": 1
+    },
+    {
+      "type": "folder_numbered",
+      "path": "03_features/",
+      "pattern": "^\\d{2}_"
+    },
+    {
+      "type": "json_valid",
+      "path": "06_datamodel/model.json"
+    },
+    {
+      "type": "json_field",
+      "path": "06_datamodel/model.json",
+      "json_path": "version",
+      "expected": "1.0"
+    },
+    {
+      "type": "json_field",
+      "path": "06_datamodel/model.json",
+      "json_path": "entities",
+      "min_length": 1
+    },
+    {
+      "type": "json_field",
+      "path": "06_datamodel/seed.json",
+      "json_path": "scenarios.empty",
+      "exists": true
+    },
+    {
+      "type": "json_field",
+      "path": "06_datamodel/seed.json",
+      "json_path": "scenarios.populated",
+      "exists": true
+    }
+  ]
+}
+```
+
+## Check Types
+
+| Type | What it validates | Parameters |
+|------|-------------------|------------|
+| `file_exists` | File was created | `path` |
+| `file_not_exists` | File was NOT created | `path` |
+| `frontmatter_field` | YAML field has expected value | `path`, `field`, `expected` or `one_of` |
+| `frontmatter_present` | YAML frontmatter exists at all | `path` |
+| `section_exists` | Markdown heading exists in body | `path`, `heading` |
+| `contains_checkbox` | File has `- [ ]` checkboxes | `path`, `min_count` |
+| `folder_numbered` | All subfolders match pattern | `path`, `pattern` |
+| `json_valid` | File is parseable JSON | `path` |
+| `json_field` | JSON path has expected value | `path`, `json_path`, `expected` or `exists` or `min_length` |
+| `cross_reference` | Frontmatter path resolves | `path`, `field` — checks each entry in array resolves to a file |
+
+## How to Run
+
+A validation script reads `_validation.json` and checks each assertion
+against the `expected/` folder:
+
+```bash
+# conceptual — could be a script or agent task
+for check in _validation.json.checks:
+    verify(check, base_path="examples/expected/")
+```
+
+Skills can also be tested by an agent:
+1. Copy `examples/input/` to a temp `_concept/` folder
+2. Run the skill
+3. Compare output against `examples/expected/`
+4. Run assertions from `_validation.json`
+
+## What to Cover
+
+Each skill should have at least one example fixture covering:
+
+| Skill | Fixture should demonstrate |
+|-------|---------------------------|
+| `cf_concept_overview` | Brief from 5 user answers → 3 files in 01_project/ |
+| `cf_concept_functionality_features` | Brief → numbered feature groups with valid frontmatter |
+| `cf_concept_techstack` | Brief + features → stack.md with preset in frontmatter |
+| `cf_concept_datamodel` | Features + stack → model.dbml, model.json, seed.json |
+| `cf_concept_ui_screens` | All inputs → screens with implements[], feedback to features |
+| `cf_quality_review` | Mixed state _concept/ → health report with correct score |

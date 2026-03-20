@@ -1,0 +1,71 @@
+{
+  "skill": "concept-3-blueprint-3-datamodel",
+  "description": "Given task manager features + PostXL stack, produces User and Task models with Prisma-based types",
+  "checks": [
+    {
+      "type": "file_exists",
+      "path": "3_blueprint/3_datamodel/postxl-schema.json"
+    },
+    {
+      "type": "file_exists",
+      "path": "3_blueprint/3_datamodel/seed.json"
+    },
+    {
+      "type": "file_exists",
+      "path": "3_blueprint/3_datamodel/feature_map.json"
+    },
+    {
+      "type": "json_valid",
+      "path": "3_blueprint/3_datamodel/postxl-schema.json"
+    },
+    {
+      "type": "json_field",
+      "path": "3_blueprint/3_datamodel/postxl-schema.json",
+      "json_path": "models",
+      "exists": true,
+      "comment": "models is an object keyed by model name"
+    },
+    {
+      "type": "json_field",
+      "path": "3_blueprint/3_datamodel/postxl-schema.json",
+      "json_path": "standardModels",
+      "exists": true,
+      "comment": "standardModels lists auto-generated models like User, Action, etc."
+    },
+    {
+      "type": "json_valid",
+      "path": "3_blueprint/3_datamodel/seed.json"
+    },
+    {
+      "type": "json_field",
+      "path": "3_blueprint/3_datamodel/seed.json",
+      "json_path": "scenarios.empty",
+      "exists": true
+    },
+    {
+      "type": "json_field",
+      "path": "3_blueprint/3_datamodel/seed.json",
+      "json_path": "scenarios.single_user",
+      "exists": true
+    },
+    {
+      "type": "json_field",
+      "path": "3_blueprint/3_datamodel/seed.json",
+      "json_path": "scenarios.populated",
+      "exists": true
+    },
+    {
+      "type": "json_field",
+      "path": "3_blueprint/3_datamodel/seed.json",
+      "json_path": "scenarios.edge_cases",
+      "exists": true
+    },
+    {
+      "type": "frontmatter_field",
+      "path": "2_experience/2_features/01_user_auth/login.md",
+      "field": "data_entities",
+      "min_length": 1,
+      "comment": "Feedback loop: datamodel should have populated data_entities"
+    }
+  ]
+}
