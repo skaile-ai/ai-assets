@@ -1,0 +1,102 @@
+name: propose-change
+version: "1.0"
+description: >-
+  Creates a git branch, commits a proposed change to the agent definition
+  (SOUL.md, RULES.md, DUTIES.md, or a skill SKILL.md), and opens a pull request.
+  Never commits directly to the default branch. The user must review and merge.
+  Triggered by: "change my persona", "add a new skill", "update my rules", etc.
+
+inputs:
+  - id: change_type
+    type: enum
+    values: [persona, rules, duties, skill]
+    description: Which part of the agent definition is being changed
+
+  - id: target_file
+    type: string
+    description: Relative path to the file being changed (e.g., agent/SOUL.md)
+
+  - id: proposed_content
+    type: string
+    description: The new content for the target file
+
+  - id: change_summary
+    type: string
+    description: One-line summary of the change (used in branch name + PR title)
+
+  - id: change_reason
+    type: string
+    description: Why this change is being made (from user request)
+
+  - id: change_impact
+    type: string
+    description: How agent behavior will differ after this change
+
+steps:
+  - id: validate-target
+    description: Ensure target_file is within agent/ directory
+    action: assert
+    condition: "inputs.target_file.startsWith('agent/')"
+    error: "propose-change may only modify files under agent/"
+
+  - id: create-branch
+    description: Create a new branch for this proposal
+    action: git_create_branch
+    branch: "agent/{change_type}/{slugify(change_summary)}"
+    from: main
+
+  - id: write-change
+    description: Write the proposed content
+    action: write_file
+    path: "{inputs.target_file}"
+    content: "{inputs.proposed_content}"
+
+  - id: stage-and-commit
+    description: Commit the change
+    action: git_commit
+    files:
+      - "{inputs.target_file}"
+    message: |
+      agent({change_type}): {change_summary}
+
+      Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+  - id: push-branch
+    description: Push branch to origin
+    action: git_push
+    branch: "agent/{change_type}/{slugify(change_summary)}"
+
+  - id: open-pr
+    description: Create pull request
+    action: bitbucket_create_pr
+    title: "agent({change_type}): {change_summary}"
+    body: |
+      ## What
+      {inputs.change_summary}
+
+      **File changed:** `{inputs.target_file}`
+
+      ## Why
+      {inputs.change_reason}
+
+      ## Impact
+      {inputs.change_impact}
+
+      ---
+      *Proposed by Pichi agent — review before merging.*
+    source_branch: "agent/{change_type}/{slugify(change_summary)}"
+    target_branch: main
+    store_as: pr_url
+
+  - id: notify
+    description: Report the PR URL to the user
+    action: respond
+    message: |
+      PR opened: {pr_url}
+
+      Review the proposed {change_type} change and merge when satisfied.
+      Pichi will not merge this automatically.
+
+output:
+  pr_url: "{pr_url}"
+  branch: "agent/{change_type}/{slugify(change_summary)}"
