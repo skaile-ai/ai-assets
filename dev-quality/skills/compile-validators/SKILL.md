@@ -1,31 +1,54 @@
 ---
 name: compile-validators
 description: "Compiles MUST/NEVER/CHECKLIST rules from SKILL.md files into fast, deterministic Python validators. Run after editing or creating a skill to generate its validator.py. Replaces slow LLM-based validation with sub-second checks."
-keywords: validation, rules, compilation, deterministic, fast, linting
-metadata:
-  stage: alpha
-  requires:
-  - quality-contract
+keywords: [validation, rules, compilation, deterministic, fast, linting]
+source: MERGED
+version: 1.0.0
+user_inputs:
+  dialog: []
+  files: []
+---
+
+# Compile Validators — Validator Generator
+
+## Overview
+
+Reads SKILL.md rule blocks (MUST, NEVER, CHECKLIST) and generates fast Python
+validator scripts that check output artifacts deterministically, without calling
+an LLM. Replaces slow LLM-based validation with sub-second structural checks.
+
+## When to Use
+
+- After creating or editing a SKILL.md with MUST/NEVER/CHECKLIST rules
+- To regenerate a stale `validator.py` after skill rules change
+- To bootstrap validators for all skills at once (`compile-validators all`)
+
+## When NOT to Use
+
+- The skill has no MUST/NEVER/CHECKLIST rules — nothing to compile
+- The validator already exists and rules haven't changed
+
 ---
 
 ROLE  Validator Compiler — reads SKILL.md rules and generates fast Python validator scripts
       that check output artifacts deterministically, without calling an LLM.
 
 READS
-  skills/<category>/<skill>/SKILL.md          — the skill definition containing rules to compile
+  <skill-dir>/SKILL.md                 — the skill definition containing rules to compile
 
 WRITES
-  skills/<category>/<skill>/validator.py      — generated deterministic validator
+  <skill-dir>/validator.py             — generated deterministic validator
 
 REFERENCES
-  shared/scripts/validator_lib.py             — shared validation library (read for full API)
-  shared/contracts/skill_grammar.md           — MUST/NEVER/CHECKLIST DSL keywords
+  dev-shared/scripts/validator_lib.py        — shared validation library (read for full API)
+  dev-shared/contracts/skill_grammar.md      — MUST/NEVER/CHECKLIST DSL keywords
 
 STEP 1: Determine scope
-  IF user names a specific skill (e.g. "compile-validators concept-2-experience-1-journeys")
+  IF user names a specific skill (e.g. "compile-validators journeys")
+    - Find the SKILL.md in the appropriate ai-resources/<domain>/skills/ directory
     - Compile only that skill
   ELSE IF user says "all" or gives no argument
-    - Find all skills with MUST/NEVER/CHECKLIST rules
+    - Find all SKILL.md files with MUST/NEVER/CHECKLIST rules under ai-resources/
     - Compile each one
 
 STEP 2: For each skill, read the SKILL.md
@@ -46,7 +69,7 @@ STEP 3: Classify each rule
     - JSON key values: "set status: draft", "exactly one hero"
     - JSON Schema validation: "validate against schema.json"
     - Frontmatter field presence: "include frontmatter: X, Y, Z"
-    - Frontmatter field values: "set status: draft on all new features"
+    - Frontmatter field values: "set priority on all features"
     - Folder naming: "numbered group folders", "NN_ prefix"
     - Cross-references: "every model maps to a feature", "trace to story"
     - Counting: "exactly one", "at least one per", "every X has Y"
@@ -57,21 +80,31 @@ STEP 3: Classify each rule
     - Quality: "generic", "cookie-cutter", "rich", "memorable"
     - Relevance: "focus on custom business logic"
     - Process: "discuss with user first", "ask before writing"
-    - Runtime: "builds without errors", "pxl validate passes"
+    - Runtime: "builds without errors", "passes lint"
     - Subjective: "justified typography choices", "not just hex values"
 
 STEP 4: Generate validator.py
-  Read skills/shared/scripts/validator_lib.py to understand the full API.
+
+  **Determining sys.path depth:**
+  Skill validators live at different nesting depths within ai-resources/:
+  - Flat: `ai-resources/<domain>/skills/<skill>/validator.py` → 3 parents = `ai-resources/`
+  - Grouped: `ai-resources/<domain>/skills/<group>/<skill>/validator.py` → 4 parents = `ai-resources/`
+
+  Count the directory depth of the skill relative to `ai-resources/` and use the
+  corresponding number of parents: 3 for flat (`skills/<skill>/`), 4 for grouped
+  (`skills/<group>/<skill>/`).
+
+  Read ai-resources/dev-shared/scripts/validator_lib.py to understand the full API.
   Generate a Python script following this exact template:
 
-  OUTPUT skills/<category>/<skill>/validator.py
+  OUTPUT <skill-dir>/validator.py
     #!/usr/bin/env python3
     """Auto-generated validator for <skill-name>.
     Re-generate with: /compile-validators <skill-name>
     """
     import sys
     from pathlib import Path
-    sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "shared" / "scripts"))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[N] / "dev-shared" / "scripts"))
     from validator_lib import Validator, main
 
     SKILL = "<skill-name>"
@@ -96,10 +129,6 @@ STEP 4: Generate validator.py
     if __name__ == "__main__":
         main(validate)
 
-  IMPORTANT: The sys.path line resolves the import relative to the validator's location.
-  All validators live at skills/<category>/<skill>/validator.py, so the path to
-  skills/shared/scripts/ is always: parent.parent.parent / "shared" / "scripts".
-
 STEP 5: Write checks using the validator_lib API
 
   Common patterns (read validator_lib.py for the full API):
@@ -112,7 +141,7 @@ STEP 5: Write checks using the validator_lib API
 
   # JSON top-level keys
   v.must("tokens.json has all sections",
-         lambda: v.json_field_exists("_concept/1_discovery/3_brand/tokens.json",
+         lambda: v.json_field_exists("_concept/1_discovery/2_brand/tokens.json",
                                      "colors", "fonts", "radius", "mode", "shadows", "atmosphere", "tailwind"))
 
   # JSON nested structure — use inline lambda with read_json
@@ -138,7 +167,7 @@ STEP 5: Write checks using the validator_lib API
   v.must("all features have required frontmatter",
          lambda: v.all_files_have_frontmatter(
              "_concept/2_experience/2_features/**/*.md",
-             "status", "priority", "roles", "last_updated"))
+             "priority", "story_refs", "roles", "last_updated"))
 
   # Folder naming pattern
   v.must("numbered group folders",
@@ -150,7 +179,7 @@ STEP 5: Write checks using the validator_lib API
   v.checklist("stories.json validates against schema", lambda: (
       v.json_schema_validate(
           "_concept/2_experience/1_journeys/stories.json",
-          "skills/shared/contracts/stories_schema.json")
+          "ai-resources/dev-shared/contracts/stories_schema.json")
   ))
 
   # Cross-reference: every key maps to existing files
@@ -163,7 +192,7 @@ STEP 5: Write checks using the validator_lib API
   v.skip("focus on custom business logic", rule_type="MUST", reason="semantic — content relevance")
 
 STEP 6: Test the generated validator
-  RUN  python3 skills/<category>/<skill>/validator.py --cwd <project-dir> --json
+  RUN  python3 <skill-dir>/validator.py --cwd <project-dir> --json
   - Verify no import errors
   - Verify the JSON output has the expected structure
   - Fix any issues
@@ -178,7 +207,7 @@ STEP 7: Report
 MUST  read validator_lib.py before generating any validator (for the full API)
 MUST  handle missing files gracefully — check existence before reading content
 MUST  mark all semantic/subjective rules with v.skip() and a clear reason
-MUST  use the exact sys.path boilerplate from the OUTPUT template above
+MUST  use the correct sys.path depth (3 for flat skills, 4 for grouped skills)
 MUST  test each generated validator runs without errors
 NEVER  use external dependencies beyond Python stdlib + validator_lib
 NEVER  generate validators that call an LLM, subprocess, or network
@@ -189,6 +218,7 @@ CHECKLIST
   - [ ] validator_lib.py was read for the full API
   - [ ] Every MUST/NEVER rule is either a structural check or explicitly skipped
   - [ ] Every CHECKLIST item is either a structural check or explicitly skipped
+  - [ ] Correct sys.path depth used (count parents to ai-resources/)
   - [ ] Generated validator runs without import or runtime errors
   - [ ] Semantic rules have clear skip reasons
   - [ ] No external dependencies used

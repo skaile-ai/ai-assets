@@ -931,4 +931,62 @@ Source: MERGED — CF + Saxe variants.
 
 ---
 
+## quality skills
+
+Source: MERGED — CF + Saxe variants.
+
+### audit
+
+| Dimension | CF | Saxe | Merged |
+|---|---|---|---|
+| Skill name | `audit` (cf_quality_audit) | `app-audit` | **`audit`** |
+| Format | Prose workflow | DSL | **Hybrid** (prose header + DSL body) |
+| Sub-agents | 3 parallel (Logic, UI/UX, Security) | 3 parallel (identical scope) | **Adopted verbatim** — both identical |
+| Structure check | When `_concept/` exists | When `_concept/` exists | **Kept** — both identical |
+| Schema reference | None | `postxl-schema.json` | **Dropped** — structure check uses canonical paths |
+| Contract refs | `cf__shared/` | `shared/contracts/` | **`dev-shared/contracts/`** |
+| Offer fixes | Present | Present | **Kept** |
+| Event prefix | `[cf_quality_audit]` | `[app-audit]` | **`[audit]`** — canonical |
+
+### e2e
+
+| Dimension | CF | Saxe | Merged |
+|---|---|---|---|
+| Skill name | `e2e` (cf_test_e2e) | `app-e2e` | **`e2e`** |
+| Format | Prose workflow | DSL | **Hybrid** (prose header + DSL body) |
+| Paths | Old flat paths (`01_project/`, `03_features/`, `06_datamodel/`) | Canonical phase-grouped | **Canonical phase-grouped** (Saxe) |
+| Data model | `06_datamodel/model.json` | `3_blueprint/3_datamodel/postxl-schema.json` | **`3_blueprint/3_datamodel/model.json`** |
+| DB validation | Against `model.json` entity definitions | Against `postxl-schema.json` models | **Against `model.json`** |
+| `status: tested` | Updates `impl_status: tested` in feature frontmatter | Updates `status: tested` | **Dropped** — update `last_updated` only (status globally removed) |
+| MUST/NEVER rules | Implicit in prose | Explicit DSL block | **Saxe's explicit rules adopted** |
+| Event prefix | `[cf_test_e2e]` | `[app-e2e]` | **`[e2e]`** — canonical |
+| Contract refs | `cf__shared/` | `shared/contracts/` | **`dev-shared/contracts/`** |
+
+### ready
+
+| Dimension | CF | Saxe | Merged |
+|---|---|---|---|
+| Skill name | `ready` (cf_quality_ready) | `app-ready` | **`ready`** |
+| Format | Prose workflow | DSL | **Hybrid** (prose header + DSL body) |
+| Paths | Old flat paths (`03_features/`, `07_screens/`, etc.) | Canonical phase-grouped | **Canonical phase-grouped** (Saxe) |
+| Data model | `06_datamodel/model.json` | `3_blueprint/3_datamodel/postxl-schema.json` | **`3_blueprint/3_datamodel/model.json` + `feature_map.json`** |
+| Brand tokens path | `04_brand/tokens.json` | `1_discovery/3_brand/tokens.json` | **`1_discovery/2_brand/tokens.json`** (canonical renumbering) |
+| Status check | `impl_status: implemented` | `status: implemented` or `status: mockup_ready` | **Dropped** — status globally removed from frontmatter |
+| Mockup check | `05_mockups/*.html` | `05_mockups/*.html` | **Generalized** — storybook compositions (`2_experience/4_storybook/`) OR mockup HTML; soft check |
+| Fix skill refs | CF directory names | Path-based IDs | **Canonical names**: `screens`, `datamodel`, `storybook` |
+| Event prefix | `[cf_quality_ready]` | `[app-ready]` | **`[ready]`** — canonical |
+
+### compile-validators
+
+| Dimension | Saxe (only source) | Merged |
+|---|---|---|
+| Skill name | `compile-validators` | **`compile-validators`** — unchanged |
+| Script path | `shared/scripts/validator_lib.py` | **`dev-shared/scripts/validator_lib.py`** |
+| Contract path | `shared/contracts/skill_grammar.md` | **`dev-shared/contracts/skill_grammar.md`** |
+| Skill paths | `skills/<category>/<skill>/` | **`ai-resources/<domain>/skills/<skill>/`** or `ai-resources/<domain>/skills/<group>/<skill>/` |
+| sys.path depth | `parents[3]` (fixed 3-level nesting) | **Variable** — 3 for flat skills, 4 for grouped skills |
+| JSON Schema path | `skills/shared/contracts/stories_schema.json` | **`ai-resources/dev-shared/contracts/stories_schema.json`** |
+
+---
+
 ## (more skills to follow as merges complete)
