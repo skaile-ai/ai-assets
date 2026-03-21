@@ -19,3 +19,5 @@ includes:
   - skill:generate
   - skill:migrate
   - skill:seed
+  # Domain agent
+  - agent:impl-orchestrator

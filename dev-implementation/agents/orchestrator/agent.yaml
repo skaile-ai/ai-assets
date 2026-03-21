@@ -1,5 +1,5 @@
 spec_version: "0.1.0"
-name: orchestrator
+name: impl-orchestrator
 version: 1.0.0
 description: Implementation pipeline orchestrator — drives the full implementation lifecycle from project scaffolding through TDD feature development, UAT, and final verification. Consumes _concept/ artifacts from the concept pipeline.
 

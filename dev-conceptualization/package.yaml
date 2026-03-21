@@ -33,3 +33,5 @@ includes:
   - skill:add-feature
   - skill:reverse-engineer
   - skill:review
+  # Domain agent
+  - agent:concept-orchestrator
