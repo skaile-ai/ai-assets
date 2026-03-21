@@ -2,17 +2,15 @@
 name: test-unit
 description: "Use when you need unit test files generated from feature specs. Reads existing source code patterns and feature requirements, then produces one test file per feature with test cases mapped to requirements."
 keywords: [testing, unit-tests, vitest, jest, code-generation, tdd]
+source: MIGRATED
+version: 1.0.0
 subagent: true
 user_inputs:
   dialog: []
   files: []
-metadata:
-  stage: alpha
-  requires:
-  - quality-contract
 ---
 
-# App Test Unit — Feature-Driven Unit Test Generation
+# Test Unit — Feature-Driven Unit Test Generation
 
 ## Overview
 
@@ -25,49 +23,41 @@ individual functions, composables, utilities, and component logic in isolation.
 
 - After implementation exists — to add test coverage for implemented features
 - When the user says "generate unit tests", "write tests", or "test coverage"
-- After `cf_test_plan` — to generate executable tests from the plan
+- After `test-plan` — to generate executable tests from the plan
 - As part of a TDD workflow — to generate test stubs before implementation
 
 ## When NOT to Use
 
-- For API endpoint or database tests — use `cf_test_integration`
-- For browser-based testing — use `cf_test_e2e`
-- For spec-fidelity checks — use `cf_quality_verify`
-- For generating a test plan (not code) — use `cf_test_plan`
+- For API endpoint or database tests — use `test-integration`
+- For browser-based testing — use `e2e`
+- For spec-fidelity checks — use `verify`
+- For generating a test plan (not code) — use `test-plan`
 - When no source code exists at all — run implementation first
 
 ## Prerequisites
 
-<HARD-GATE> Source code must exist. Check for `package.json`, `nuxt.config.ts`, `pyproject.toml`, or equivalent. If missing: "No application source found. Implementation must exist before generating unit tests."
-
-<HARD-GATE> Feature specs must exist in `_concept/03_features/`. If missing: "No feature specs found. Run `cf_concept_functionality_features` first."
-
-<HARD-GATE> Tech stack must be known. Check `_concept/05_techstack/stack.md` or infer from `package.json`. If neither exists: "Cannot determine test framework. Run `cf_concept_techstack` or ensure package.json exists."
-
-## Standalone Mode
-This skill can be invoked directly without the orchestrator.
-**Gate check:** Source code (package.json or equivalent), feature specs (`03_features/`), tech stack (`05_techstack/stack.md` or package.json)
-**If gates fail:** Run `cf_concept_functionality_features` or `cf_concept_techstack` as needed
-**On completion:** Present summary, then suggest next steps.
+**Hard gates:**
+1. Source code must exist (`package.json`, `pyproject.toml`, or equivalent)
+2. Feature specs must exist in `_concept/2_experience/2_features/`
+3. Tech stack must be known — `_concept/3_blueprint/1_techstack/stack.md` or infer from `package.json`
 
 ## Shared Contracts
 
 Before starting, read:
-- `cf__shared/concept_structure.md` — valid _concept/ paths
-- `cf__shared/frontmatter.md` — feature frontmatter fields
-- `cf__shared/iron_laws.md` — non-negotiable constraints (questions-as-standalone-messages, no overwrite without approval)
-- `cf__shared/agent_patterns.md` — communication style, read-context-first, standalone mode
+- `dev-shared/contracts/concept_structure.md` — valid _concept/ paths
+- `dev-shared/contracts/frontmatter.md` — feature frontmatter fields
+- `dev-shared/contracts/iron_laws.md` — non-negotiable constraints
 
 ## Context Budget
 
-| Source | Token estimate | Priority |
-|--------|---------------|----------|
-| `_concept/03_features/**/*.md` | ~3000 | Required |
-| `_concept/05_techstack/stack.md` | ~500 | Required |
-| `package.json` (deps + scripts) | ~500 | Required |
-| Existing test files (pattern discovery) | ~2000 | Required |
-| Source code for features under test | ~4000 | Required |
-| `_concept/08_testing/test_plan.md` | ~2000 | Optional |
+| Source | Priority |
+|--------|----------|
+| `_concept/2_experience/2_features/**/*.md` | Required |
+| `_concept/3_blueprint/1_techstack/stack.md` | Required |
+| `package.json` (deps + scripts) | Required |
+| Existing test files (pattern discovery) | Required |
+| Source code for features under test | Required |
+| `_concept/testing/test_plan.md` | Optional |
 
 ## Workflow
 
@@ -89,7 +79,7 @@ If no test framework is configured:
 
 #### Sub-agent 2: Feature-to-Source Mapping
 
-For each feature in `_concept/03_features/`:
+For each feature in `_concept/2_experience/2_features/`:
 
 1. Read the feature spec — extract requirements and success criteria
 2. Find the corresponding source files (pages, components, composables, API routes)
@@ -157,13 +147,9 @@ describe('Feature: <feature_name>', () => {
 
 ### Phase 3: Verify Tests Run
 
-```bash
-# Run the generated tests to verify they at least parse and execute
-npm run test -- --run <test-file-pattern>
-```
-
-If tests fail due to missing mocks or imports, fix them.
-If tests fail due to actual bugs found — report them, do not change the test.
+Run the generated tests to verify they at least parse and execute. If tests fail due
+to missing mocks or imports, fix them. If tests fail due to actual bugs found —
+report them, do not change the test.
 
 ### Phase 4: Present Report
 
@@ -175,7 +161,6 @@ If tests fail due to actual bugs found — report them, do not change the test.
 |---------|------|-------|---------------------|
 | Login | tests/auth/login.test.ts | 8 | 4/4 |
 | Dashboard | tests/dashboard/overview.test.ts | 12 | 6/6 |
-| Settings | tests/settings/preferences.test.ts | 5 | 3/3 |
 
 ### Test Results
 - Total: N tests
@@ -199,42 +184,17 @@ If tests fail due to actual bugs found — report them, do not change the test.
 - One test file per feature, placed according to project conventions
 - Test generation report (displayed to user)
 
-## Completion Summary
-
-Present to user: files produced, key decisions made, suggested next steps (which skills are now unblocked).
-
-> "Generated N test files with N test cases covering N requirements. N tests
-> passing, N failing (potential bugs). Next: run `cf_test_integration` for API/data flow
-> tests, or `cf_test_e2e` for browser-based testing."
-
 ## Common Mistakes
 
-| Mistake | Why it happens | What to do instead |
-|---------|---------------|-------------------|
-| Ignoring existing test patterns | Writing tests in a different style | Read 2-3 existing tests first and match conventions exactly |
-| Testing implementation details | Coupling to internal structure | Test behavior described in the requirement, not internal methods |
-| Generating tests that need a database | Blurring unit vs. integration | Mock all external dependencies; leave DB tests for integration |
-| Writing snapshot tests for everything | Lazy coverage | Only snapshot when the output shape matters to the requirement |
-| Skipping error state tests | Only testing happy paths | Every error state in the feature spec needs a test |
-| Creating tests in the wrong location | Not checking project structure | Match the existing test file layout exactly |
+| Mistake | What to do instead |
+|---------|-------------------|
+| Ignoring existing test patterns | Read 2-3 existing tests first and match conventions exactly |
+| Testing implementation details | Test behavior described in the requirement, not internal methods |
+| Generating tests that need a database | Mock all external dependencies; leave DB tests for integration |
+| Writing snapshot tests for everything | Only snapshot when the output shape matters to the requirement |
+| Skipping error state tests | Every error state in the feature spec needs a test |
+| Creating tests in the wrong location | Match the existing test file layout exactly |
 
-## Integration
-
-- **Upstream:** Implementation (code must exist), `cf_concept_functionality_features` (specs), `cf_concept_techstack` (framework)
-- **Called by:** orchestrator or standalone
-- **Downstream:** CI pipeline, `cf_quality_verify` (test results feed verification)
-- **Parallel with:** `cf_test_integration` (different test scope, can run simultaneously)
-- **Consumes:** `_concept/08_testing/test_plan.md` (if exists, use its scenarios)
-- **Events:**
-  ```
-  [cf_test_unit] started
-    run_id: <uuid>
-  [cf_test_unit] checkpoint feature=login tests=8 passing=7 failing=1
-  [cf_test_unit] completed
-    run_id: <uuid>
-    features: N
-    test_files: N
-    tests_total: N
-    tests_passing: N
-    tests_failing: N
-  ```
+EMIT  [test-unit] started run_id=<uuid>
+EMIT  [test-unit] checkpoint feature=<name> tests=<N> passing=<N> failing=<N>
+EMIT  [test-unit] completed run_id=<uuid> features=<N> test_files=<N> tests_total=<N> tests_passing=<N> tests_failing=<N>

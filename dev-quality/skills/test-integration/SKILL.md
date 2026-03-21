@@ -2,17 +2,15 @@
 name: test-integration
 description: "Use when you need integration tests that verify API endpoints, data flow, and cross-feature interactions against a real database. Reads feature specs and data model to generate tests covering the full request-response cycle."
 keywords: [testing, integration, api, database, endpoints, data-flow]
+source: MIGRATED
+version: 1.0.0
 subagent: true
 user_inputs:
   dialog: []
   files: []
-metadata:
-  stage: alpha
-  requires:
-  - quality-contract
 ---
 
-# App Test Integration — API & Data Flow Testing
+# Test Integration — API & Data Flow Testing
 
 ## Overview
 
@@ -25,54 +23,45 @@ cycle — from HTTP request through business logic to database mutation and resp
 
 - After implementation and database migration are complete
 - When the user says "integration tests", "API tests", or "test data flow"
-- After `cf_test_unit` — to add the next layer of test coverage
+- After `test-unit` — to add the next layer of test coverage
 - When testing cross-feature interactions (e.g., creating a task updates the dashboard count)
 
 ## When NOT to Use
 
-- For testing isolated functions/composables — use `cf_test_unit`
-- For browser-based testing — use `cf_test_e2e`
-- For spec-fidelity checks — use `cf_quality_verify`
-- For generating a test plan (not code) — use `cf_test_plan`
+- For testing isolated functions/composables — use `test-unit`
+- For browser-based testing — use `e2e`
+- For spec-fidelity checks — use `verify`
+- For generating a test plan (not code) — use `test-plan`
 - When no database or API exists yet — implementation and migration must come first
 
 ## Prerequisites
 
-<HARD-GATE> Source code must exist with API endpoints. Check for `server/api/`, `routes/`, or equivalent. If missing: "No API endpoints found. Implementation must exist before generating integration tests."
-
-<HARD-GATE> Feature specs must exist in `_concept/03_features/`. If missing: "No feature specs found. Run `cf_concept_functionality_features` first."
-
-<HARD-GATE> Data model must exist at `_concept/06_datamodel/model.json`. If missing: "No data model found. Run `cf_concept_datamodel` first."
-
-<HARD-GATE> Database must be accessible. Check `.env` or `.env.example` for connection details. If no database configuration found: "No database connection configured. Run migration first."
-
-## Standalone Mode
-This skill can be invoked directly without the orchestrator.
-**Gate check:** Source code with API endpoints, feature specs (`03_features/`), data model (`06_datamodel/model.json`), database accessible
-**If gates fail:** Run `cf_implement_feature`, `cf_concept_functionality_features`, `cf_concept_datamodel`, or `cf_implement_migrate` as needed
-**On completion:** Present summary, then suggest next steps.
+**Hard gates:**
+1. Source code must exist with API endpoints (`server/api/`, `routes/`, or equivalent)
+2. Feature specs must exist in `_concept/2_experience/2_features/`
+3. Data model must exist at `_concept/3_blueprint/3_datamodel/model.json`
+4. Database must be accessible (check `.env` or `.env.example` for connection details)
 
 ## Shared Contracts
 
 Before starting, read:
-- `cf__shared/concept_structure.md` — valid _concept/ paths
-- `cf__shared/frontmatter.md` — feature frontmatter fields
-- `cf__shared/seed_data.md` — scenario-based seed data convention
-- `cf__shared/iron_laws.md` — non-negotiable constraints (questions-as-standalone-messages, no overwrite without approval)
-- `cf__shared/agent_patterns.md` — communication style, read-context-first, standalone mode
+- `dev-shared/contracts/concept_structure.md` — valid _concept/ paths
+- `dev-shared/contracts/frontmatter.md` — feature frontmatter fields
+- `dev-shared/contracts/seed_data.md` — scenario-based seed data convention
+- `dev-shared/contracts/iron_laws.md` — non-negotiable constraints
 
 ## Context Budget
 
-| Source | Token estimate | Priority |
-|--------|---------------|----------|
-| `_concept/03_features/**/*.md` | ~3000 | Required |
-| `_concept/06_datamodel/model.json` | ~2000 | Required |
-| `_concept/06_datamodel/seed.json` | ~1500 | Required |
-| `_concept/05_techstack/stack.md` | ~500 | Required |
-| API route source files | ~4000 | Required |
-| Existing test files (patterns) | ~2000 | Required |
-| `_concept/08_testing/test_plan.md` | ~2000 | Optional |
-| `.env.example` | ~200 | Required |
+| Source | Priority |
+|--------|----------|
+| `_concept/2_experience/2_features/**/*.md` | Required |
+| `_concept/3_blueprint/3_datamodel/model.json` | Required |
+| `_concept/3_blueprint/3_datamodel/seed.json` | Required |
+| `_concept/3_blueprint/1_techstack/stack.md` | Required |
+| API route source files | Required |
+| Existing test files (patterns) | Required |
+| `.env.example` | Required |
+| `_concept/testing/test_plan.md` | Optional |
 
 ## Workflow
 
@@ -80,9 +69,9 @@ Before starting, read:
 
 #### Sub-agent 1: API & Database Inventory
 
-1. Read `_concept/06_datamodel/model.json` — all entities, relationships, field constraints
-2. Read `_concept/06_datamodel/seed.json` — test data scenarios
-3. Read API route files (`server/api/`, `routes/`, etc.) — map endpoints to entities
+1. Read `_concept/3_blueprint/3_datamodel/model.json` — all entities, relationships, field constraints
+2. Read `_concept/3_blueprint/3_datamodel/seed.json` — test data scenarios
+3. Read API route files — map endpoints to entities
 4. Read `.env.example` — database type, connection pattern
 5. Read migration files — understand actual schema
 
@@ -118,7 +107,7 @@ If no integration test setup exists, generate:
 beforeAll(async () => {
   // Connect to test database
   // Run migrations
-  // Seed with base data from seed.json
+  // Seed with base data from seed.json populated scenario
 })
 
 afterEach(async () => {
@@ -169,7 +158,6 @@ describe('POST /api/tasks', () => {
   })
 
   it('requires authentication', async () => {
-    // Test without auth token
     const response = await request.post('/api/tasks').send({ ... })
     expect(response.status).toBe(401)
   })
@@ -186,7 +174,7 @@ describe('Cross-feature: Task → Dashboard', () => {
     const before = await request.get('/api/dashboard/stats').set(...)
     await request.post('/api/tasks').set(...).send({ ... })
     const after = await request.get('/api/dashboard/stats').set(...)
-    expect(after.body.taskCount).toBe(before.body.taskCount + 1)
+    expect(after.body.task_count).toBe(before.body.task_count + 1)
   })
 })
 ```
@@ -196,7 +184,7 @@ describe('Cross-feature: Task → Dashboard', () => {
 Verify database constraints from model.json:
 
 ```typescript
-describe('Data integrity: Task entity', () => {
+describe('Data integrity: task entity', () => {
   it('has id, created_at, updated_at on creation', async () => { ... })
   it('updates updated_at on modification', async () => { ... })
   it('cascades delete to related comments', async () => { ... })
@@ -211,18 +199,13 @@ Use each seed.json scenario:
 | Scenario | Test Purpose |
 |----------|-------------|
 | `empty` | API returns empty arrays, correct default states |
+| `single_user` | Basic operations with minimal data |
 | `populated` | CRUD operations on existing data |
 | `edge_cases` | Boundary values, max-length fields, special characters |
-| `permissions` | Role-based access (if present) |
 
 ### Phase 4: Run Tests
 
-```bash
-# Run integration tests
-npm run test:integration -- --run
-```
-
-If tests fail:
+Run integration tests. If tests fail:
 - **Missing tables/columns:** report migration gap
 - **Auth errors:** report auth setup issue
 - **Constraint violations:** likely a bug — report it
@@ -238,13 +221,11 @@ If tests fail:
 |---------|------|-------|-------------------|
 | Auth | tests/integration/auth.test.ts | 12 | 3 |
 | Tasks | tests/integration/tasks.test.ts | 18 | 4 |
-| Dashboard | tests/integration/dashboard.test.ts | 6 | 2 |
 
 ### Cross-Feature Tests
 | Test | Features Involved | Entities |
 |------|------------------|----------|
 | Task creation updates dashboard | Tasks + Dashboard | task, dashboard_stats |
-| User deletion cascades to tasks | Auth + Tasks | user, task |
 
 ### Test Results
 - Total: N tests
@@ -255,7 +236,6 @@ If tests fail:
 | Test | Issue | Severity | File |
 |------|-------|----------|------|
 | Task cascade delete | Comments not deleted | HIGH | server/api/tasks/[id].delete.ts |
-| Auth rate limit | No rate limiting on login | MEDIUM | server/api/auth/login.post.ts |
 
 ### Database Coverage
 | Entity | Create | Read | Update | Delete | Constraints |
@@ -270,42 +250,17 @@ If tests fail:
 - Test infrastructure (setup, helpers) if not already present
 - Test generation report (displayed to user)
 
-## Completion Summary
-
-Present to user: files produced, key decisions made, suggested next steps (which skills are now unblocked).
-
-> "Generated N integration test files with N test cases covering N API endpoints.
-> N tests passing, N failing. Next: run `cf_test_e2e` for browser-based testing,
-> or `cf_quality_verify` to verify implementation against the concept."
-
 ## Common Mistakes
 
-| Mistake | Why it happens | What to do instead |
-|---------|---------------|-------------------|
-| Using mocks instead of real database | Habit from unit tests | Integration tests use real database — that's the point |
-| Not resetting state between tests | Tests depend on order | Truncate or rollback after each test |
-| Hardcoding test data | Not using seed.json | Use seed.json scenarios for consistent, meaningful test data |
-| Testing only happy paths | Skipping constraint validation | Test field constraints, auth requirements, and error responses |
-| Ignoring cross-feature flows | Testing endpoints in isolation | model.json relationships reveal cross-feature data dependencies |
-| Using production database | Dangerous default | Always use a separate test database or transaction rollback |
+| Mistake | What to do instead |
+|---------|-------------------|
+| Using mocks instead of real database | Integration tests use real database — that's the point |
+| Not resetting state between tests | Truncate or rollback after each test |
+| Hardcoding test data | Use seed.json scenarios for consistent, meaningful test data |
+| Testing only happy paths | Test field constraints, auth requirements, and error responses |
+| Ignoring cross-feature flows | model.json relationships reveal cross-feature data dependencies |
+| Using production database | Always use a separate test database or transaction rollback |
 
-## Integration
-
-- **Upstream:** Implementation + migration (code and DB must exist), `cf_concept_functionality_features`, `cf_concept_datamodel`
-- **Called by:** orchestrator or standalone
-- **Downstream:** CI pipeline, `cf_quality_verify` (test results feed verification)
-- **Parallel with:** `cf_test_unit` (different test scope, can run simultaneously)
-- **Consumes:** `_concept/08_testing/test_plan.md` (if exists, use its scenarios)
-- **Events:**
-  ```
-  [cf_test_integration] started
-    run_id: <uuid>
-  [cf_test_integration] checkpoint feature=auth tests=12 passing=11 failing=1
-  [cf_test_integration] completed
-    run_id: <uuid>
-    features: N
-    test_files: N
-    tests_total: N
-    endpoints_covered: N
-    cross_feature_tests: N
-  ```
+EMIT  [test-integration] started run_id=<uuid>
+EMIT  [test-integration] checkpoint feature=<name> tests=<N> passing=<N> failing=<N>
+EMIT  [test-integration] completed run_id=<uuid> features=<N> test_files=<N> tests_total=<N> endpoints_covered=<N> cross_feature_tests=<N>
