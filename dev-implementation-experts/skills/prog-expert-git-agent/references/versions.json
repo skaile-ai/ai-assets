@@ -1,0 +1,14 @@
+{
+  "gitagent": {
+    "spec_version": "0.1.0",
+    "cli_package": "gitagent",
+    "repo": "https://github.com/open-gitagent/gitagent",
+    "last_checked": "2026-03-17"
+  },
+  "agent-skills": {
+    "spec_url": "https://agentskills.io/specification",
+    "validator_package": "skills-ref",
+    "repo": "https://github.com/agentskills/agentskills",
+    "last_checked": "2026-03-17"
+  }
+}
