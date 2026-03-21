@@ -1,9 +1,0 @@
-{
-  "User": [
-    "2_experience/2_features/01_user_auth/login.md",
-    "2_experience/2_features/01_user_auth/registration.md"
-  ],
-  "Task": [
-    "2_experience/2_features/02_tasks/create_task.md"
-  ]
-}

@@ -2,6 +2,8 @@
 name: reverse-engineer
 description: "Use when the user has an existing project repository and wants to generate or bootstrap a _concept/ folder from it. Triggered by: 'reverse engineer this project', 'generate concept from existing code', 'I have a codebase, extract the concept', 'document this existing app', 'build concept from repo'."
 keywords: [reverse, existing, codebase, repo, extract, import, bootstrap, existing-project, infer, scan]
+source: MIGRATED
+version: 1.0.0
 user_inputs:
   dialog:
   - id: repo_path
@@ -36,10 +38,6 @@ user_inputs:
     default:
     hint: "Brief description to help the agent when README is sparse or missing."
   files: []
-metadata:
-  stage: alpha
-  requires:
-  - conceptualization-contract
 ---
 
 # Reverse Engineer — Concept from Existing Repository
@@ -87,17 +85,17 @@ However, before starting:
 ### Shared Contracts
 
 Before starting, read:
-- `cf__shared/concept_structure.md` — canonical `_concept/` paths and naming rules
-- `cf__shared/frontmatter.md` — required YAML fields and status lifecycle
-- `cf__shared/semantic_types.md` — stack-independent types (data model output uses these)
-- `cf__shared/iron_laws.md` — non-negotiable constraints (questions-as-standalone-messages, no overwrite without approval)
-- `cf__shared/agent_patterns.md` — communication style, read-context-first, standalone mode
+- `dev-shared/contracts/concept_structure.md` — canonical `_concept/` paths and naming rules
+- `dev-shared/contracts/frontmatter.md` — required YAML fields and status lifecycle
+- `dev-shared/contracts/semantic_types.md` — stack-independent types (data model output uses these)
+- `dev-shared/contracts/iron_laws.md` — non-negotiable constraints (questions-as-standalone-messages, no overwrite without approval)
+- `dev-shared/contracts/agent_patterns.md` — communication style, read-context-first, standalone mode
 
 ## Context Budget
 
 | Action | Path |
 |--------|------|
-| **Must read (contracts)** | `cf__shared/concept_structure.md`, `cf__shared/frontmatter.md`, `cf__shared/semantic_types.md` |
+| **Must read (contracts)** | `dev-shared/contracts/concept_structure.md`, `dev-shared/contracts/frontmatter.md`, `dev-shared/contracts/semantic_types.md` |
 | **Read from repo** | `<repo_path>/README.md`, root package manifests, router files, schema/model files, config files |
 | **Never load** | Compiled output (`dist/`, `build/`, `.next/`, `node_modules/`), binary assets, lockfiles |
 
@@ -109,11 +107,11 @@ read selectively based on file purpose.
 This skill can be invoked directly without the orchestrator.
 **Gate check:** None (this skill is an entry point)
 **If gates fail:** N/A
-**On completion:** Present summary, then suggest next steps (cf_quality_review to audit extraction, cf_concept_functionality_features to refine features, cf_concept_datamodel to refine data model).
+**On completion:** Present summary, then suggest next steps (`review` to audit extraction, `features` to refine features, `datamodel` to refine data model).
 
 ## Completion Summary
 
-Present to user: files produced (all _concept/ artifacts generated), key decisions made (extraction confidence levels, project type detection, feature grouping), suggested next steps (which skills are now unblocked — cf_quality_review, cf_concept_functionality_features, cf_concept_datamodel, cf_concept_brand_visual).
+Present to user: files produced (all _concept/ artifacts generated), key decisions made (extraction confidence levels, project type detection, feature grouping), suggested next steps (which skills are now unblocked — `review`, `features`, `datamodel`, `brand-visual`).
 
 ## Workflow
 
@@ -170,7 +168,7 @@ Emit:
 
 ### Step 3: Overview Extraction (scope: overview)
 
-**Goal:** Produce `01_project/brief.md`, `goals.md`, `comparable.md`.
+**Goal:** Produce `1_discovery/1_overview/brief.md`, `goals.md`, `comparable.md`.
 
 Read in order:
 1. `README.md` (or docs/README.md, docs/index.md)
@@ -194,7 +192,7 @@ Confidence tagging rules:
 
 Write:
 
-**`_concept/01_project/brief.md`**
+**`_concept/1_discovery/1_overview/brief.md`**
 ```yaml
 ---
 elevator_pitch: "<extracted or inferred>"
@@ -213,10 +211,10 @@ extraction_confidence:
 
 Body: narrative description synthesizing what was found.
 
-**`_concept/01_project/goals.md`**
+**`_concept/1_discovery/1_overview/goals.md`**
 Success criteria from README, milestones, known constraints (license, platform targets).
 
-**`_concept/01_project/comparable.md`**
+**`_concept/1_discovery/1_overview/comparable.md`**
 Products mentioned in the README. If none found, note that comparables were not documented.
 Never fabricate comparables.
 
@@ -224,7 +222,7 @@ Never fabricate comparables.
 
 ### Step 4: Tech Stack Detection (scope: techstack)
 
-**Goal:** Produce `05_techstack/stack.md`.
+**Goal:** Produce `3_blueprint/1_techstack/stack.md`.
 
 Read:
 - Root manifest and lock file
@@ -249,7 +247,7 @@ Detect each dimension:
 
 Write:
 
-**`_concept/05_techstack/stack.md`**
+**`_concept/3_blueprint/1_techstack/stack.md`**
 ```yaml
 ---
 platform: "<detected>"
@@ -272,7 +270,7 @@ Body: notes on version constraints, known tradeoffs, or unusual combinations obs
 
 ### Step 5: Feature Extraction (scope: features)
 
-**Goal:** Produce `03_features/<NN_group>/<feature>.md` files.
+**Goal:** Produce `2_experience/2_features/<NN_group>/<feature>.md` files.
 
 Feature extraction is a two-pass process: route discovery → behavioral inference.
 
@@ -312,7 +310,7 @@ Assign sequential two-digit prefixes: `01_`, `02_`, `03_`…
 
 Write one `.md` per logical feature within each group:
 
-**`_concept/03_features/<NN_group>/<feature>.md`**
+**`_concept/2_experience/2_features/<NN_group>/<feature>.md`**
 ```yaml
 ---
 priority: must-have
@@ -341,7 +339,7 @@ Emit:
 
 ### Step 6: Data Model Extraction (scope: datamodel)
 
-**Goal:** Produce `06_datamodel/model.dbml`, `model.json`, `seed.json`.
+**Goal:** Produce `3_blueprint/3_datamodel/model.dbml`, `model.json`, `seed.json`.
 
 Read in priority order:
 1. **Prisma schema** — `prisma/schema.prisma` (most explicit)
@@ -355,7 +353,7 @@ Read in priority order:
 
 For each entity/model found:
 - Extract field names and types
-- Map framework types → semantic types (see `cf__shared/semantic_types.md`):
+- Map framework types → semantic types (see `dev-shared/contracts/semantic_types.md`):
   - `String` → `string`, `Int`/`Float` → `number`, `Boolean` → `boolean`
   - `DateTime` → `datetime`, `Json`/`jsonb` → `json`, `@id` fields → `uuid`
   - `@relation` → `relation`, `String @db.Text` → `richtext`, file fields → `image`/`file`
@@ -365,11 +363,11 @@ For each entity/model found:
 
 Write:
 
-**`_concept/06_datamodel/model.dbml`** — using DBML syntax with semantic types
+**`_concept/3_blueprint/3_datamodel/model.dbml`** — using DBML syntax with semantic types
 
-**`_concept/06_datamodel/model.json`** — using the editor-native format (see `cf_concept_datamodel/SKILL.md` for schema)
+**`_concept/3_blueprint/3_datamodel/model.json`** — using the editor-native format (see `datamodel/SKILL.md` for schema)
 
-**`_concept/06_datamodel/seed.json`** — Generate four standard scenarios (`empty`,
+**`_concept/3_blueprint/3_datamodel/seed.json`** — Generate four standard scenarios (`empty`,
 `single_user`, `populated`, `edge_cases`) using data inferred from the entity
 structure. If the repo has fixture/seed/factory files, use their data as the
 `populated` scenario.
@@ -390,7 +388,7 @@ Emit:
 
 ### Step 7: Brand / Visual Extraction (scope: brand)
 
-**Goal:** Produce `04_brand/identity.md` and `04_brand/tokens.json`.
+**Goal:** Produce `1_discovery/2_brand/identity.md` and `1_discovery/2_brand/tokens.json`.
 
 Read:
 - `tailwind.config.ts` / `tailwind.config.js` — `theme.extend.colors`, fonts
@@ -409,7 +407,7 @@ Extract:
 
 Write:
 
-**`_concept/04_brand/identity.md`**
+**`_concept/1_discovery/2_brand/identity.md`**
 ```yaml
 ---
 mood: []
@@ -422,7 +420,7 @@ extraction_confidence: extracted | inferred | needs_review
 Body: describe the visual character inferred from the color palette, typography, and
 component style. Note: this is derived from the existing implementation, not prescribed.
 
-**`_concept/04_brand/tokens.json`**
+**`_concept/1_discovery/2_brand/tokens.json`**
 ```json
 {
   "colors": {
@@ -459,7 +457,7 @@ Never invent a color palette from scratch — mark it `needs_review`.
 
 ### Step 8: Screen Extraction (scope: screens)
 
-**Goal:** Produce `07_screens/<NN_group>/<screen>.md` files.
+**Goal:** Produce `2_experience/3_screens/<NN_group>/<screen>.md` files.
 
 Use the same route groups established in Step 5 (features). For each route,
 read the corresponding page/view component:
@@ -480,7 +478,7 @@ For each screen, extract:
 
 Write:
 
-**`_concept/07_screens/<NN_group>/<screen>.md`**
+**`_concept/2_experience/3_screens/<NN_group>/<screen>.md`**
 ```yaml
 ---
 implements: []
@@ -512,14 +510,14 @@ Run ID: <uuid>
 
 ### Artifacts Generated
 
-| Artifact               | Files | Extracted | Inferred | Needs Review |
-|------------------------|-------|-----------|----------|--------------|
-| 01_project/            | 3     | N         | N        | N            |
-| 05_techstack/stack.md  | 1     | N         | N        | N            |
-| 03_features/           | N     | N         | N        | N            |
-| 06_datamodel/          | 3     | N         | N        | N            |
-| 04_brand/              | 2     | N         | N        | N            |
-| 07_screens/            | N     | N         | N        | N            |
+| Artifact                          | Files | Extracted | Inferred | Needs Review |
+|-----------------------------------|-------|-----------|----------|--------------|
+| 1_discovery/1_overview/           | 3     | N         | N        | N            |
+| 3_blueprint/1_techstack/stack.md  | 1     | N         | N        | N            |
+| 2_experience/2_features/          | N     | N         | N        | N            |
+| 3_blueprint/3_datamodel/          | 3     | N         | N        | N            |
+| 1_discovery/2_brand/              | 2     | N         | N        | N            |
+| 2_experience/3_screens/           | N     | N         | N        | N            |
 
 ### Fields Needing Human Review
 
@@ -547,17 +545,17 @@ Emit:
 
 | File | Description |
 |------|-------------|
-| `_concept/01_project/brief.md` | Project vision, audience, problem, hero flow |
-| `_concept/01_project/goals.md` | Goals, constraints, deadlines inferred from docs |
-| `_concept/01_project/comparable.md` | Products mentioned in README / docs |
-| `_concept/05_techstack/stack.md` | Tech stack detected from manifests and config |
-| `_concept/03_features/<NN>/<feature>.md` | Features inferred from routes and components |
-| `_concept/06_datamodel/model.dbml` | Data model extracted from ORM/schema files |
-| `_concept/06_datamodel/model.json` | Editor-native data model format |
-| `_concept/06_datamodel/seed.json` | Scenario seed data (4 standard scenarios) |
-| `_concept/04_brand/identity.md` | Brand character extracted from CSS/theme |
-| `_concept/04_brand/tokens.json` | Design tokens extracted from config |
-| `_concept/07_screens/<NN>/<screen>.md` | Screen specs extracted from page components |
+| `_concept/1_discovery/1_overview/brief.md` | Project vision, audience, problem, hero flow |
+| `_concept/1_discovery/1_overview/goals.md` | Goals, constraints, deadlines inferred from docs |
+| `_concept/1_discovery/1_overview/comparable.md` | Products mentioned in README / docs |
+| `_concept/3_blueprint/1_techstack/stack.md` | Tech stack detected from manifests and config |
+| `_concept/2_experience/2_features/<NN>/<feature>.md` | Features inferred from routes and components |
+| `_concept/3_blueprint/3_datamodel/model.dbml` | Data model extracted from ORM/schema files |
+| `_concept/3_blueprint/3_datamodel/model.json` | Editor-native data model format |
+| `_concept/3_blueprint/3_datamodel/seed.json` | Scenario seed data (4 standard scenarios) |
+| `_concept/1_discovery/2_brand/identity.md` | Brand character extracted from CSS/theme |
+| `_concept/1_discovery/2_brand/tokens.json` | Design tokens extracted from config |
+| `_concept/2_experience/3_screens/<NN>/<screen>.md` | Screen specs extracted from page components |
 
 ## Common Mistakes
 
@@ -568,7 +566,7 @@ Emit:
 | "I'll generate seed data from the test fixtures" | Yes — use fixture data for the `populated` scenario. But also generate the other three required scenarios (`empty`, `single_user`, `edge_cases`). |
 | "The entities in the ORM map 1:1 to features" | Features and entities are not 1:1. Group entities by the user-facing feature they serve. Infrastructure entities (sessions, audit logs) belong to their closest functional feature. |
 | "I can skip screens — the features already cover the routes" | Screens are separate artifacts. Features describe intent; screens describe layout, data binding, and states. Both are required for downstream design and testing skills. |
-| "I'll use the ORM's native types in model.dbml" | Translate to semantic types from `cf__shared/semantic_types.md`. Stack-specific types belong in stack translations, not the core model. |
+| "I'll use the ORM's native types in model.dbml" | Translate to semantic types from `dev-shared/contracts/semantic_types.md`. Stack-specific types belong in stack translations, not the core model. |
 | "There are no comparables mentioned, I'll suggest some" | Never fabricate comparables. Write `"No comparables documented in repository."` in comparable.md and mark as `needs_review`. |
 | "I'll mark everything as approved since I extracted it from real code" | `extracted` means high confidence in correctness, but approval still requires human review. Only `brief.md` and `stack.md` are approved after the checkpoint. All others stay `draft`. |
 | "I found all these API routes so I'll list them in the feature requirements" | Routes are evidence, not output. Feature requirements must describe user-facing behavior only. Never write `GET /api/...`, server method signatures, internal file paths, or event type names into feature files. |
@@ -577,13 +575,13 @@ Emit:
 ## Integration
 
 - **Called by:** orchestrator or standalone
-- **Replaces:** `cf_concept_overview` + `cf_concept_techstack` as entry points (generates their outputs in one pass)
+- **Replaces:** `overview` + `techstack` as entry points (generates their outputs in one pass)
 - **Feeds into:** all downstream pipeline skills via normal artifact paths
 - **Recommended next steps:**
-  - `cf_quality_review` — to audit extraction quality and find gaps
-  - `cf_concept_functionality_features` — to refine and approve extracted features
-  - `cf_concept_datamodel` — to refine and approve extracted data model
-  - `cf_concept_brand_visual` — to refine brand tokens with user intent
+  - `review` — to audit extraction quality and find gaps
+  - `features` — to refine and approve extracted features
+  - `datamodel` — to refine and approve extracted data model
+  - `brand-visual` — to refine brand tokens with user intent
 - **Feedback loops:** Populates `screens[]` in feature frontmatter, `data_entities[]` in both features and screens
 
 ## Research Mode
@@ -591,9 +589,9 @@ Emit:
 When `research_depth` is not `skip`, the skill can dispatch parallel research to
 ground the extraction in external context:
 
-- **`_research/general/domain.md`** — validate detected domain, find terminology, regulatory context
-- **`_research/general/competitors.md`** — research products found in README comparables section
-- **`_research/general/patterns.md`** — validate architectural patterns detected in codebase
+- **`_grounding/general/domain.md`** — validate detected domain, find terminology, regulatory context
+- **`_grounding/general/competitors.md`** — research products found in README comparables section
+- **`_grounding/general/patterns.md`** — validate architectural patterns detected in codebase
 
-If research data already exists in `_research/` (or legacy `_grounding/`) from a prior research run, incorporate
+If research data already exists in `_grounding/` from a prior research run, incorporate
 it into the extracted artifacts (especially brief.md and comparable.md).

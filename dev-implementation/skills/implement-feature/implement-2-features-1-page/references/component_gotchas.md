@@ -1,1 +1,0 @@
-../../implement-2-features/references/component_gotchas.md
