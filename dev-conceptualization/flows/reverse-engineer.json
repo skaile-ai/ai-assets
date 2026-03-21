@@ -1,5 +1,5 @@
 {
-  "$schema": "./flow.schema.json",
+  "$schema": "../../dev-shared/flow.schema.json",
   "id": "reverse-engineer",
   "version": "1.0",
   "name": "Reverse Engineer",
@@ -21,17 +21,13 @@
     "verbosity": "detailed"
   },
   "modes": {
-    "research": {
-      "enabled": false
-    },
+    "research": { "enabled": false },
     "standards": {
       "enabled": true,
-      "skill": "standards/discover",
-      "inject_skill": "standards/inject",
+      "skill": "standards-discover",
+      "inject_skill": "standards-inject",
       "trigger_after": "reverse-engineer",
-      "parameters": {
-        "note": "Discover conventions from the repo being reverse-engineered"
-      }
+      "parameters": { "note": "Discover conventions from the repo being reverse-engineered" }
     }
   },
   "nodes": [
@@ -50,21 +46,26 @@
       "data": { "label": "Optional — Continue with Concept Steps", "phase": "conceptualization" }
     },
 
-    { "id": "reverse-engineer", "type": "skill", "parentNode": "g-extract",          "position": { "x": 40,  "y": 100 }, "data": { "skill": "concept/reverse-engineer",       "label": "Reverse Engineer",  "optional": false, "subagent": true, "parameters": { "extraction_scope": ["overview", "features", "screens", "datamodel", "techstack"] } } },
-    { "id": "journeys",          "type": "skill", "parentNode": "g-optional-concept", "position": { "x": 40,  "y": 60  }, "data": { "skill": "concept/experience/journeys",    "label": "User Journeys",     "optional": true,  "parameters": { "note": "Derive journeys from the extracted concept" } } },
-    { "id": "architecture",      "type": "skill", "parentNode": "g-optional-concept", "position": { "x": 280, "y": 60  }, "data": { "skill": "concept/blueprint/architecture", "label": "Architecture",      "optional": true,  "subagent": true } },
-    { "id": "datamodel",         "type": "skill", "parentNode": "g-optional-concept", "position": { "x": 280, "y": 160 }, "data": { "skill": "concept/blueprint/datamodel",   "label": "Data Model",        "optional": true,  "subagent": true } },
-    { "id": "screens",           "type": "skill", "parentNode": "g-optional-concept", "position": { "x": 560, "y": 100 }, "data": { "skill": "concept/experience/screens",     "label": "Screens",           "optional": true,  "subagent": true } },
-    { "id": "storybook",         "type": "skill", "parentNode": "g-optional-concept", "position": { "x": 560, "y": 160 }, "data": { "skill": "concept/experience/storybook",   "label": "Storybook",         "optional": true  } }
+    { "id": "reverse-engineer", "type": "skill", "parentNode": "g-extract",          "position": { "x": 40,  "y": 100 }, "data": { "skill": "reverse-engineer", "label": "Reverse Engineer", "optional": false, "subagent": true, "parameters": { "extraction_scope": ["overview", "features", "screens", "datamodel", "techstack"] } } },
+    { "id": "journeys",         "type": "skill", "parentNode": "g-optional-concept", "position": { "x": 40,  "y": 60  }, "data": { "skill": "journeys",         "label": "User Journeys",    "optional": true,  "parameters": { "note": "Derive journeys from the extracted concept" } } },
+    { "id": "architecture",     "type": "skill", "parentNode": "g-optional-concept", "position": { "x": 280, "y": 60  }, "data": { "skill": "architecture",     "label": "Architecture",     "optional": true,  "subagent": true } },
+    { "id": "datamodel",        "type": "skill", "parentNode": "g-optional-concept", "position": { "x": 280, "y": 160 }, "data": { "skill": "datamodel",        "label": "Data Model",       "optional": true,  "subagent": true } },
+    { "id": "screens",          "type": "skill", "parentNode": "g-optional-concept", "position": { "x": 560, "y": 100 }, "data": { "skill": "screens",          "label": "Screens",          "optional": true,  "subagent": true } },
+    { "id": "storybook",        "type": "skill", "parentNode": "g-optional-concept", "position": { "x": 560, "y": 160 }, "data": { "skill": "storybook",        "label": "Storybook",        "optional": true  } }
   ],
   "edges": [
-    { "id": "e-re-journeys",      "source": "reverse-engineer", "target": "journeys",     "type": "optional" },
-    { "id": "e-re-architecture",  "source": "reverse-engineer", "target": "architecture", "type": "optional" },
-    { "id": "e-re-datamodel",     "source": "reverse-engineer", "target": "datamodel",    "type": "optional" },
-    { "id": "e-re-screens",       "source": "reverse-engineer", "target": "screens",      "type": "optional" },
-    { "id": "e-architecture-dm",  "source": "architecture",     "target": "datamodel",    "type": "optional" },
-    { "id": "e-datamodel-screens","source": "datamodel",        "target": "screens",      "type": "optional" },
-    { "id": "e-screens-storybook","source": "screens",          "target": "storybook",    "type": "optional" }
+    { "id": "e-re-journeys",       "source": "reverse-engineer", "target": "journeys",     "type": "optional" },
+    { "id": "e-re-architecture",   "source": "reverse-engineer", "target": "architecture", "type": "optional" },
+    { "id": "e-re-datamodel",      "source": "reverse-engineer", "target": "datamodel",    "type": "optional" },
+    { "id": "e-re-screens",        "source": "reverse-engineer", "target": "screens",      "type": "optional" },
+    { "id": "e-architecture-dm",   "source": "architecture",     "target": "datamodel",    "type": "optional" },
+    { "id": "e-datamodel-screens", "source": "datamodel",        "target": "screens",      "type": "optional" },
+    { "id": "e-screens-storybook", "source": "screens",          "target": "storybook",    "type": "optional" }
   ],
-  "entry": "reverse-engineer"
+  "entry": "reverse-engineer",
+
+  "next_flows": [
+    { "id": "concept-only", "domain": "dev-conceptualization", "label": "Enrich Concept →", "hint": "Run the full concept pipeline to enrich and validate the extracted concept." },
+    { "id": "standard",     "domain": "dev-implementation",    "label": "Implement →",       "hint": "Proceed to implementation using the extracted concept as foundation." }
+  ]
 }

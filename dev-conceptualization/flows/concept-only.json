@@ -1,5 +1,5 @@
 {
-  "$schema": "./flow.schema.json",
+  "$schema": "../../dev-shared/flow.schema.json",
   "id": "concept-only",
   "version": "1.0",
   "name": "Concept Only",
@@ -23,15 +23,13 @@
   "modes": {
     "research": {
       "enabled": true,
-      "skill": "concept/discovery/research",
+      "skill": "research",
       "triggers": ["overview", "features", "brand-visual", "datamodel", "screens"],
       "parameters": {
         "topics": ["domain", "competitors", "audiences", "design_inspiration", "patterns"]
       }
     },
-    "standards": {
-      "enabled": false
-    }
+    "standards": { "enabled": false }
   },
   "nodes": [
     {
@@ -42,41 +40,46 @@
       "data": { "label": "Concept", "phase": "conceptualization" }
     },
 
-    { "id": "overview",        "type": "skill", "parentNode": "g-concept", "position": { "x": 40,   "y": 200 }, "data": { "skill": "concept/discovery/overview",        "label": "Project Brief",    "optional": false } },
-    { "id": "journeys",        "type": "skill", "parentNode": "g-concept", "position": { "x": 280,  "y": 80  }, "data": { "skill": "concept/experience/journeys",       "label": "User Journeys",    "optional": false, "parameters": { "hero_approval_required": true } } },
-    { "id": "brand-visual",    "type": "skill", "parentNode": "g-concept", "position": { "x": 280,  "y": 240 }, "data": { "skill": "concept/discovery/brand-visual",    "label": "Brand Visual",     "optional": false, "parallel_group": "identity" } },
-    { "id": "techstack",       "type": "skill", "parentNode": "g-concept", "position": { "x": 280,  "y": 380 }, "data": { "skill": "concept/blueprint/techstack",       "label": "Tech Stack",       "optional": false, "parallel_group": "identity" } },
-    { "id": "features",        "type": "skill", "parentNode": "g-concept", "position": { "x": 560,  "y": 200 }, "data": { "skill": "concept/experience/features",       "label": "Features",         "optional": false, "subagent": true } },
-    { "id": "brand-behavioral","type": "skill", "parentNode": "g-concept", "position": { "x": 560,  "y": 80  }, "data": { "skill": "concept/discovery/brand-behavioral","label": "Brand Behavioral", "optional": true  } },
-    { "id": "behaviors",       "type": "skill", "parentNode": "g-concept", "position": { "x": 560,  "y": 340 }, "data": { "skill": "concept/experience/behaviors",      "label": "Behaviors",        "optional": true  } },
-    { "id": "architecture",    "type": "skill", "parentNode": "g-concept", "position": { "x": 840,  "y": 80  }, "data": { "skill": "concept/blueprint/architecture",    "label": "Architecture",     "optional": false, "subagent": true } },
-    { "id": "datamodel",       "type": "skill", "parentNode": "g-concept", "position": { "x": 840,  "y": 240 }, "data": { "skill": "concept/blueprint/datamodel",       "label": "Data Model",       "optional": false, "subagent": true } },
-    { "id": "screens",         "type": "skill", "parentNode": "g-concept", "position": { "x": 1120, "y": 200 }, "data": { "skill": "concept/experience/screens",        "label": "Screens",          "optional": false, "subagent": true } },
-    { "id": "components",      "type": "skill", "parentNode": "g-concept", "position": { "x": 1120, "y": 60  }, "data": { "skill": "concept/experience/components",     "label": "Components",       "optional": true  } },
-    { "id": "storybook",       "type": "skill", "parentNode": "g-concept", "position": { "x": 1120, "y": 200 }, "data": { "skill": "concept/experience/storybook",      "label": "Storybook",        "optional": true  } },
-    { "id": "mock",            "type": "skill", "parentNode": "g-concept", "position": { "x": 1120, "y": 340 }, "data": { "skill": "concept/experience/mock",           "label": "Mockups",          "optional": true,  "parameters": { "framework": "vue" } } }
+    { "id": "overview",         "type": "skill", "parentNode": "g-concept", "position": { "x": 40,   "y": 200 }, "data": { "skill": "overview",         "label": "Project Brief",     "optional": false } },
+    { "id": "journeys",         "type": "skill", "parentNode": "g-concept", "position": { "x": 280,  "y": 80  }, "data": { "skill": "journeys",         "label": "User Journeys",     "optional": false, "parameters": { "hero_approval_required": true } } },
+    { "id": "brand-visual",     "type": "skill", "parentNode": "g-concept", "position": { "x": 280,  "y": 240 }, "data": { "skill": "brand-visual",     "label": "Brand Visual",      "optional": false, "parallel_group": "identity" } },
+    { "id": "techstack",        "type": "skill", "parentNode": "g-concept", "position": { "x": 280,  "y": 380 }, "data": { "skill": "techstack",        "label": "Tech Stack",        "optional": false, "parallel_group": "identity" } },
+    { "id": "features",         "type": "skill", "parentNode": "g-concept", "position": { "x": 560,  "y": 200 }, "data": { "skill": "features",         "label": "Features",          "optional": false, "subagent": true } },
+    { "id": "brand-behavioral", "type": "skill", "parentNode": "g-concept", "position": { "x": 560,  "y": 80  }, "data": { "skill": "brand-behavioral", "label": "Brand Behavioral",  "optional": true  } },
+    { "id": "behaviors",        "type": "skill", "parentNode": "g-concept", "position": { "x": 560,  "y": 340 }, "data": { "skill": "behaviors",        "label": "Behaviors",         "optional": true  } },
+    { "id": "architecture",     "type": "skill", "parentNode": "g-concept", "position": { "x": 840,  "y": 80  }, "data": { "skill": "architecture",     "label": "Architecture",      "optional": false, "subagent": true } },
+    { "id": "datamodel",        "type": "skill", "parentNode": "g-concept", "position": { "x": 840,  "y": 240 }, "data": { "skill": "datamodel",        "label": "Data Model",        "optional": false, "subagent": true } },
+    { "id": "screens",          "type": "skill", "parentNode": "g-concept", "position": { "x": 1120, "y": 200 }, "data": { "skill": "screens",          "label": "Screens",           "optional": false, "subagent": true } },
+    { "id": "components",       "type": "skill", "parentNode": "g-concept", "position": { "x": 1120, "y": 60  }, "data": { "skill": "components",       "label": "Components",        "optional": true  } },
+    { "id": "storybook",        "type": "skill", "parentNode": "g-concept", "position": { "x": 1120, "y": 340 }, "data": { "skill": "storybook",        "label": "Storybook",         "optional": true  } },
+    { "id": "mock",             "type": "skill", "parentNode": "g-concept", "position": { "x": 1120, "y": 200 }, "data": { "skill": "mock",             "label": "Mockups",           "optional": true,  "parameters": { "framework": "vue" } } }
   ],
   "edges": [
-    { "id": "e-overview-journeys",     "source": "overview",       "target": "journeys",        "type": "flow"     },
-    { "id": "e-overview-brand",        "source": "overview",       "target": "brand-visual",    "type": "parallel" },
-    { "id": "e-overview-techstack",    "source": "overview",       "target": "techstack",       "type": "parallel" },
-    { "id": "e-journeys-features",     "source": "journeys",       "target": "features",        "type": "flow"     },
-    { "id": "e-brand-behavioral",      "source": "brand-visual",   "target": "brand-behavioral","type": "optional" },
-    { "id": "e-features-behaviors",    "source": "features",       "target": "behaviors",       "type": "optional" },
-    { "id": "e-features-architecture", "source": "features",       "target": "architecture",    "type": "flow"     },
-    { "id": "e-techstack-architecture","source": "techstack",      "target": "architecture",    "type": "flow"     },
-    { "id": "e-features-datamodel",    "source": "features",       "target": "datamodel",       "type": "flow"     },
-    { "id": "e-techstack-datamodel",   "source": "techstack",      "target": "datamodel",       "type": "flow"     },
-    { "id": "e-architecture-datamodel","source": "architecture",   "target": "datamodel",       "type": "flow"     },
-    { "id": "e-behaviors-datamodel",   "source": "behaviors",      "target": "datamodel",       "type": "optional" },
-    { "id": "e-datamodel-screens",     "source": "datamodel",      "target": "screens",         "type": "flow"     },
-    { "id": "e-brand-screens",         "source": "brand-visual",   "target": "screens",         "type": "flow"     },
-    { "id": "e-techstack-screens",     "source": "techstack",      "target": "screens",         "type": "flow"     },
-    { "id": "e-screens-components",    "source": "screens",        "target": "components",      "type": "optional" },
-    { "id": "e-screens-storybook",     "source": "screens",        "target": "storybook",       "type": "optional" },
-    { "id": "e-techstack-storybook",   "source": "techstack",      "target": "storybook",       "type": "optional" },
-    { "id": "e-brand-storybook",       "source": "brand-visual",   "target": "storybook",       "type": "optional" },
-    { "id": "e-screens-mock",          "source": "screens",        "target": "mock",            "type": "optional" }
+    { "id": "e-overview-journeys",      "source": "overview",       "target": "journeys",        "type": "flow"     },
+    { "id": "e-overview-brand",         "source": "overview",       "target": "brand-visual",    "type": "parallel" },
+    { "id": "e-overview-techstack",     "source": "overview",       "target": "techstack",       "type": "parallel" },
+    { "id": "e-journeys-features",      "source": "journeys",       "target": "features",        "type": "flow"     },
+    { "id": "e-brand-behavioral",       "source": "brand-visual",   "target": "brand-behavioral","type": "optional" },
+    { "id": "e-features-behaviors",     "source": "features",       "target": "behaviors",       "type": "optional" },
+    { "id": "e-features-architecture",  "source": "features",       "target": "architecture",    "type": "flow"     },
+    { "id": "e-techstack-architecture", "source": "techstack",      "target": "architecture",    "type": "flow"     },
+    { "id": "e-features-datamodel",     "source": "features",       "target": "datamodel",       "type": "flow"     },
+    { "id": "e-techstack-datamodel",    "source": "techstack",      "target": "datamodel",       "type": "flow"     },
+    { "id": "e-architecture-datamodel", "source": "architecture",   "target": "datamodel",       "type": "flow"     },
+    { "id": "e-behaviors-datamodel",    "source": "behaviors",      "target": "datamodel",       "type": "optional" },
+    { "id": "e-datamodel-screens",      "source": "datamodel",      "target": "screens",         "type": "flow"     },
+    { "id": "e-brand-screens",          "source": "brand-visual",   "target": "screens",         "type": "flow"     },
+    { "id": "e-techstack-screens",      "source": "techstack",      "target": "screens",         "type": "flow"     },
+    { "id": "e-screens-components",     "source": "screens",        "target": "components",      "type": "optional" },
+    { "id": "e-screens-storybook",      "source": "screens",        "target": "storybook",       "type": "optional" },
+    { "id": "e-techstack-storybook",    "source": "techstack",      "target": "storybook",       "type": "optional" },
+    { "id": "e-brand-storybook",        "source": "brand-visual",   "target": "storybook",       "type": "optional" },
+    { "id": "e-screens-mock",           "source": "screens",        "target": "mock",            "type": "optional" }
   ],
-  "entry": "overview"
+  "entry": "overview",
+
+  "next_flows": [
+    { "id": "standard", "domain": "dev-implementation", "label": "Implement →", "hint": "Scaffold, implement features with TDD, run tests, and verify." },
+    { "id": "full",     "domain": "dev-implementation", "label": "Full Production →", "hint": "Readiness gate, design pass, comprehensive test suite, verify." }
+  ]
 }
