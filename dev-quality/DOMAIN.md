@@ -6,7 +6,7 @@ building_blocks:
   contracts: "Quality criteria, audit checklists, test structure conventions, and acceptance criteria shared across all quality skills."
   docs: "Quality workflow guides, test strategy documentation, and audit format specifications."
   skills: "Skills for auditing code, generating tests, checking readiness gates, syncing cross-references, and compiling validators."
-  agents: "TBD"
+  agents: "agents/quality/ (GitAgent spec v0.1.0)"
   prompts: "TBD"
   tools: "Validator scripts, lint tools (lint_concept.py)."
 stage: alpha

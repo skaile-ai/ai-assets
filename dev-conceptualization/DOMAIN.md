@@ -6,7 +6,7 @@ building_blocks:
   contracts: "CF and Saxe shared contracts (concept_structure.md, frontmatter.md, golden_principles.md, iron_laws.md, feedback_loop.md, semantic_types.md) governing all concept artifacts."
   docs: "Pipeline architecture, observability specifications, and workflow guides for the conceptualization process."
   skills: "Numbered skill groups (00–90) covering orchestration, discovery, experience design, blueprint, feature addition, reverse engineering, and review."
-  agents: "TBD"
+  agents: "agents/conceptualization/ (GitAgent spec v0.1.0)"
   prompts: "Reusable prompt fragments for project briefing, user research, and concept elicitation."
   tools: "TBD"
 stage: alpha

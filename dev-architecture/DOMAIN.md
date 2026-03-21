@@ -6,7 +6,7 @@ building_blocks:
   contracts: "Architecture review criteria, system design constraints, and integration patterns shared by architecture skills."
   docs: "Architecture decision records (ADRs), reference architectures, and integration pattern documentation."
   skills: "Invocable skills for AI agent integration architecture and skill system design."
-  agents: "TBD"
+  agents: "agents/architecture/ (GitAgent spec v0.1.0)"
   prompts: "TBD"
   tools: "TBD"
 stage: alpha

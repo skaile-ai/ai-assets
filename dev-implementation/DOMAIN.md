@@ -6,7 +6,7 @@ building_blocks:
   contracts: "CF and Saxe contracts for implementation structure, acceptance criteria, git workflow, and verification protocols."
   docs: "Implementation workflow guides, TDD patterns, and migration conventions."
   skills: "Numbered skill groups (00–utilities) covering orchestration, project setup, feature implementation, verification, and utilities."
-  agents: "TBD"
+  agents: "agents/implementation/ (GitAgent spec v0.1.0)"
   prompts: "TBD"
   tools: "TBD"
 stage: alpha

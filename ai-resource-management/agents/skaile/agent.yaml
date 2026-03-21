@@ -1,0 +1,80 @@
+spec_version: "0.1.0"
+name: skaile
+version: 1.0.0
+description: Skaile unified AI agent — orchestrates conceptualization, architecture, implementation, and quality workflows across the full software development lifecycle.
+
+model:
+  preferred: claude-opus-4-6
+  fallback:
+    - claude-sonnet-4-6
+    - claude-haiku-4-5-20251001
+  constraints:
+    temperature: 0.2
+    max_tokens: 8192
+
+delegation:
+  mode: router
+  router: orchestrator
+
+agents:
+  conceptualization:
+    description: Structured project concept pipeline — discovery, experience design, and technical blueprint
+    delegation:
+      mode: auto
+      triggers:
+        - concept_requested
+        - discovery_requested
+        - blueprint_requested
+        - feature_spec_requested
+  implementation:
+    description: Implementation pipeline — scaffolding, TDD feature development, verification, migrations, seed data
+    delegation:
+      mode: auto
+      triggers:
+        - implementation_requested
+        - scaffold_requested
+        - feature_implementation_requested
+        - migration_requested
+  quality:
+    description: Quality assurance — code audits, test generation, readiness gates, cross-reference repair
+    delegation:
+      mode: auto
+      triggers:
+        - quality_check_requested
+        - audit_requested
+        - test_generation_requested
+        - readiness_check_requested
+  architecture:
+    description: System architecture and AI agent integration design — produces design documents and integration blueprints
+    delegation:
+      mode: auto
+      triggers:
+        - architecture_requested
+        - integration_design_requested
+        - system_design_requested
+
+dependencies:
+  - name: conceptualization
+    source: ../../dev-conceptualization/agents/orchestrator
+    version: 1.0.0
+    mount: agents/conceptualization
+  - name: implementation
+    source: ../../dev-implementation/agents/orchestrator
+    version: 1.0.0
+    mount: agents/implementation
+  - name: quality
+    source: ../../dev-quality/agents/quality
+    version: 1.0.0
+    mount: agents/quality
+  - name: architecture
+    source: ../../dev-architecture/agents/architecture
+    version: 1.0.0
+    mount: agents/architecture
+
+author: skaile
+license: MIT
+tags: [ai-agent, skills, conceptualization, implementation, quality, architecture]
+metadata:
+  monorepo: skaile-skills
+  framework: gitagent
+  spec_source: gitagent.sh
