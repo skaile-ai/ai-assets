@@ -6,6 +6,10 @@ subagent: true
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - quality-contract
 ---
 
 # App Test Unit — Feature-Driven Unit Test Generation

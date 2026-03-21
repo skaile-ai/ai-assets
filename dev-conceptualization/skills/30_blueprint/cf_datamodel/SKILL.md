@@ -5,8 +5,12 @@ keywords: [data, schema, database, entities, relationships, dbml, typebox, model
 user_inputs:
   dialog: []
   files:
-    - "03_features/**/*.md"
-    - "05_techstack/stack.md"
+  - "03_features/**/*.md"
+  - "05_techstack/stack.md"
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Data Model

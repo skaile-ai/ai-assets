@@ -4,6 +4,10 @@ description: "DEPRECATED — Behavioral specifications are now captured as EARS 
 keywords: deprecated, behavior, allium
 deprecated: true
 replaced_by: concept-2-experience-1-journeys
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 DEPRECATED

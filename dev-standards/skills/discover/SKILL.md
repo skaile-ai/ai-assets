@@ -4,19 +4,23 @@ description: "Use when analyzing an existing codebase to extract conventions, pa
 keywords: [standards, conventions, patterns, codebase, analyze, discover]
 user_inputs:
   dialog:
-    - id: target_path
-      label: "Target Codebase Path"
-      type: text
-      required: true
-      hint: "Path to the existing codebase to analyze"
-    - id: domains
-      label: "Domains to Analyze"
-      type: multiselect
-      options: ["api", "database", "ui", "naming", "testing", "architecture"]
-      default: ["api", "database", "ui", "naming", "testing", "architecture"]
-      required: false
-      hint: "Which convention domains to discover"
+  - id: target_path
+    label: "Target Codebase Path"
+    type: text
+    required: true
+    hint: "Path to the existing codebase to analyze"
+  - id: domains
+    label: "Domains to Analyze"
+    type: multiselect
+    options: ["api", "database", "ui", "naming", "testing", "architecture"]
+    default: ["api", "database", "ui", "naming", "testing", "architecture"]
+    required: false
+    hint: "Which convention domains to discover"
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - standards-contract
 ---
 
 # Discover Standards

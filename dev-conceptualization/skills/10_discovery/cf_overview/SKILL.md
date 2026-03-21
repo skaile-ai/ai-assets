@@ -4,47 +4,51 @@ description: "Use when starting a new concept and no _concept/01_project/ exists
 keywords: [brief, idea, project, vision, start, new, pitch, audience, problem]
 user_inputs:
   dialog:
-    - id: raw_description
-      label: "Describe your idea"
-      type: textarea
-      required: false
-      hint: "Free-form description — app name, audience, problem, hero flow can all be inferred from this"
-    - id: app_name
-      label: "App Name"
-      type: text
-      required: false
-      hint: "Working name for the app (inferred from raw_description if provided)"
-    - id: elevator_pitch
-      label: "What does the app do?"
-      type: text
-      required: false
-      hint: "One sentence: who is it for and what does it do?"
-    - id: target_audience
-      label: "Who is the primary user?"
-      type: text
-      required: false
-      hint: "Role, context, skill level"
-    - id: problem_statement
-      label: "What problem does it solve?"
-      type: text
-      required: false
-      hint: "The single most important problem"
-    - id: hero_flow
-      label: "Most important user action"
-      type: text
-      required: false
-      hint: "The one thing every user must be able to do"
-    - id: comparable_products
-      label: "Similar apps"
-      type: text
-      required: false
-      hint: "Apps that do something similar (for reference)"
-    - id: success_criteria
-      label: "What does success look like?"
-      type: text
-      required: false
-      hint: "Goals, constraints, deadlines"
+  - id: raw_description
+    label: "Describe your idea"
+    type: textarea
+    required: false
+    hint: "Free-form description — app name, audience, problem, hero flow can all be inferred from this"
+  - id: app_name
+    label: "App Name"
+    type: text
+    required: false
+    hint: "Working name for the app (inferred from raw_description if provided)"
+  - id: elevator_pitch
+    label: "What does the app do?"
+    type: text
+    required: false
+    hint: "One sentence: who is it for and what does it do?"
+  - id: target_audience
+    label: "Who is the primary user?"
+    type: text
+    required: false
+    hint: "Role, context, skill level"
+  - id: problem_statement
+    label: "What problem does it solve?"
+    type: text
+    required: false
+    hint: "The single most important problem"
+  - id: hero_flow
+    label: "Most important user action"
+    type: text
+    required: false
+    hint: "The one thing every user must be able to do"
+  - id: comparable_products
+    label: "Similar apps"
+    type: text
+    required: false
+    hint: "Apps that do something similar (for reference)"
+  - id: success_criteria
+    label: "What does success look like?"
+    type: text
+    required: false
+    hint: "Goals, constraints, deadlines"
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Overview — Project Brief

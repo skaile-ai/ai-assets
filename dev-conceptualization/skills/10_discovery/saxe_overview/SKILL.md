@@ -2,6 +2,10 @@
 name: concept-1-discovery-1-overview
 description: "Step 1: Project brief. Asks clarifying questions and writes _concept/1_discovery/1_overview/ (brief, goals, comparables). Pauses for human approval before any further planning."
 keywords: product, pm, spec, overview, planning, brief
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Product Definition agent — produces _concept/1_discovery/1_overview/ artifacts only.

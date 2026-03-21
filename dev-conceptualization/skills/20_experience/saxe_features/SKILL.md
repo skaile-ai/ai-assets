@@ -2,6 +2,10 @@
 name: concept-2-experience-2-features
 description: "Step 5: Feature planning. Derives features from approved user journeys, reads the approved project brief and writes feature docs organized in numbered groups. Pauses for human review before handing off."
 keywords: product, features, modules, planning, agile
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Feature Planning agent — derives features from approved user journeys and the project brief, producing feature files organized in numbered groups.

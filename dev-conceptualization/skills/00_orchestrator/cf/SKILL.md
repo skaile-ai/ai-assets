@@ -2,6 +2,10 @@
 name: concept
 description: "Use when running the full concept-to-implementation pipeline, resuming an interrupted session, or when the user says 'start a new concept', 'let's build an app', 'continue where we left off'. This is the pipeline controller that also handles user communication directly."
 keywords: [pipeline, orchestrate, concept, full, end-to-end, resume, plan, start]
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Orchestrator

@@ -2,6 +2,10 @@
 name: concept-3-blueprint-1-techstack
 description: "Step 7: Tech stack documentation for PostXL. Documents the fixed PostXL production stack (Vite + React 19, NestJS, tRPC, Prisma, PostgreSQL, Keycloak) and identifies any additional integrations needed."
 keywords: techstack, postxl, react, nestjs, trpc, prisma, postgresql, keycloak, tailwind, radix
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Tech Stack Advisor — documents the fixed PostXL stack and identifies additional integrations.

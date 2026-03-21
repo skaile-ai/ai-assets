@@ -2,6 +2,10 @@
 name: concept-3-blueprint-3-datamodel
 description: "Step 9: PostXL data model. Reads features and produces postxl-schema.json (schema) + seed.json (test data). The schema is consumed by PostXL code generators. Seed data uses named scenarios for mockups and testing."
 keywords: data, schema, database, entities, relationships, postxl, prisma
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Data Model agent — produces postxl-schema.json, seed.json, and feature_map.json from features and architecture.

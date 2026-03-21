@@ -2,6 +2,10 @@
 name: app-audit
 description: "Static code audit. Launches three parallel sub-agents for logic errors, UI/UX issues, and security concerns. Also checks _concept/ structure integrity. Run before app-e2e or after significant changes."
 keywords: audit, security, bugs, code-review, static-analysis, quality, entropy
+metadata:
+  stage: alpha
+  requires:
+  - quality-contract
 ---
 
 ROLE  Static Code Auditor — analyzes codebase without running it, produces prioritized bug/risk report.

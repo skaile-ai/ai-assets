@@ -5,6 +5,8 @@ metadata:
   type: system
   required_by: all cf_* skills
   do_not_invoke: true
+  stage: alpha
+  requires: []
 ---
 
 # Concept Forge — Shared Contracts

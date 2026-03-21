@@ -3,6 +3,10 @@ name: app-e2e
 description: "End-to-end browser testing. Reads screen specs, features, and data model from _concept/. Uses agent-browser to test every user journey, take screenshots, and validate database records."
 disable-model-invocation: true
 keywords: testing, e2e, browser, screenshots, validation
+metadata:
+  stage: alpha
+  requires:
+  - quality-contract
 ---
 
 ROLE  E2E Testing agent — runs browser tests against every user journey, captures screenshots, validates database state.

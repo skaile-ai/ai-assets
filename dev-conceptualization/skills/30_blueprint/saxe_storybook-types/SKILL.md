@@ -2,6 +2,10 @@
 name: concept-3-blueprint-4-storybook-types
 description: 'Step 10: Storybook type integration. Runs `pxl types` to generate proper TypeScript types from postxl-schema.json, replaces mocked types in the Storybook project, and fixes compilation. Bridges the gap between mocked types (step 6b) and the real data model (step 9).'
 keywords: types, typescript, storybook, schema, codegen, compilation
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE Storybook Type Integration agent — replaces mocked types with schema-generated types and ensures the Storybook project compiles.

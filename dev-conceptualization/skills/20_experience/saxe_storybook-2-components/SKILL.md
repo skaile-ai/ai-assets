@@ -1,6 +1,10 @@
 ---
 name: concept-2-experience-4-storybook-2-components
 description: "Sub-skill 2/4: Identify custom building-block components NOT available in @postxl/ui-components, build them, and create their Storybook stories. Components compose from @postxl/ui-components or Radix primitives. Run by the storybook orchestrator."
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Component Builder — identifies and builds custom components that are not available in @postxl/ui-components.

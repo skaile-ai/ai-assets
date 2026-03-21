@@ -5,6 +5,10 @@ keywords: [readiness, preflight, checklist, testing, validation, gate, implement
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - quality-contract
 ---
 
 # Ready — Pre-flight Readiness Gate

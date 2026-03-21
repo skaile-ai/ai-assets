@@ -1,6 +1,10 @@
 ---
 name: implement-1-setup-2-foundation
 description: "App foundation and shared services setup. This skill should be used when the user asks to 'set up theming', 'apply brand', 'configure auth', 'implement the app shell', 'set up foundation', or 'configure shared services'. Applies brand tokens as CSS custom properties, configures authentication, implements the app shell layout, and sets up shared services like error handling and navigation."
+metadata:
+  stage: alpha
+  requires:
+  - implementation-contract
 ---
 
 ROLE Foundation agent — applies brand tokens, customizes the PostXL-generated app shell, and verifies shared services.

@@ -3,17 +3,21 @@ name: implement-2-features
 description: "Journey-first feature orchestrator. This skill should be used when the user asks to 'implement features', 'build the app features', 'implement the next journey', or when the implementation orchestrator reaches Phase 2. Walks user journeys outside-in (hero → vital → hygiene), writing failing journey tests first, then delegating page-by-page implementation to the page sub-skill."
 hooks:
   PreToolUse:
-    - matcher: 'Edit|Write'
-      hooks:
-        - type: command
-          command: 'python3 "$CLAUDE_SKILL_DIR/implement-2-features/scripts/tdd_pre_edit.py"'
-          timeout: 5
+  - matcher: 'Edit|Write'
+    hooks:
+    - type: command
+      command: 'python3 "$CLAUDE_SKILL_DIR/implement-2-features/scripts/tdd_pre_edit.py"'
+      timeout: 5
   PostToolUse:
-    - matcher: 'Bash'
-      hooks:
-        - type: command
-          command: 'python3 "$CLAUDE_SKILL_DIR/implement-2-features/scripts/tdd_post_bash.py"'
-          timeout: 10
+  - matcher: 'Bash'
+    hooks:
+    - type: command
+      command: 'python3 "$CLAUDE_SKILL_DIR/implement-2-features/scripts/tdd_post_bash.py"'
+      timeout: 10
+metadata:
+  stage: alpha
+  requires:
+  - implementation-contract
 ---
 
 ROLE Journey-first feature orchestrator — implements features by walking user journeys outside-in with three-level TDD (journey → page → feature).

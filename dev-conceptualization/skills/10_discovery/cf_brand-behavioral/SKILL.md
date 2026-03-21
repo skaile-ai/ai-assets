@@ -4,17 +4,21 @@ description: "Brand behavioral identity. Use when the visual brand exists and yo
 keywords: brand, tone, voice, copy, microcopy, errors, empty-states, notifications, messaging, ux-writing
 user_inputs:
   dialog:
-    - id: tone
-      label: "What tone should your app speak in?"
-      type: select
-      options: [friendly, professional, playful, serious]
-      default: friendly
-    - id: formality_level
-      label: "How formal should the language be? (1 = casual chat, 5 = corporate)"
-      type: select
-      options: ["1", "2", "3", "4", "5"]
-      default: "3"
+  - id: tone
+    label: "What tone should your app speak in?"
+    type: select
+    options: [friendly, professional, playful, serious]
+    default: friendly
+  - id: formality_level
+    label: "How formal should the language be? (1 = casual chat, 5 = corporate)"
+    type: select
+    options: ["1", "2", "3", "4", "5"]
+    default: "3"
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # App Brand — Behavioral Identity

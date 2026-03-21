@@ -4,29 +4,33 @@ description: "Use when the project brief exists and tech stack hasn't been chose
 keywords: [techstack, framework, database, hosting, architecture, nuxt, next, primevue, radix]
 user_inputs:
   dialog:
-    - id: framework_experience
-      label: "Framework experience"
-      type: text
-      required: false
-      hint: "Vue, React, or starting fresh?"
-    - id: platform
-      label: "Platform"
-      type: select
-      required: true
-      options: [web, mobile, api, desktop]
-      hint: "What are you building?"
-    - id: data_heavy
-      label: "Data-heavy app?"
-      type: boolean
-      required: false
-      hint: "Lots of tables, lists, sorting, and filtering?"
-    - id: managed_vs_selfhosted
-      label: "Hosting preference"
-      type: select
-      required: false
-      options: [self-hosted, managed/cloud]
-      hint: "Manage your own server or use hosted services?"
+  - id: framework_experience
+    label: "Framework experience"
+    type: text
+    required: false
+    hint: "Vue, React, or starting fresh?"
+  - id: platform
+    label: "Platform"
+    type: select
+    required: true
+    options: [web, mobile, api, desktop]
+    hint: "What are you building?"
+  - id: data_heavy
+    label: "Data-heavy app?"
+    type: boolean
+    required: false
+    hint: "Lots of tables, lists, sorting, and filtering?"
+  - id: managed_vs_selfhosted
+    label: "Hosting preference"
+    type: select
+    required: false
+    options: [self-hosted, managed/cloud]
+    hint: "Manage your own server or use hosted services?"
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Tech Stack — Stack Selection

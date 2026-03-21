@@ -5,6 +5,10 @@ keywords: [behavior, specification, allium, rules, states, transitions, domain, 
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Behaviors — Behavioral Specification

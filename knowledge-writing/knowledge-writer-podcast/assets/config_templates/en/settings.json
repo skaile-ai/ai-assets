@@ -1,0 +1,15 @@
+{
+  "tts_engine_target": "universal",
+  "limits": {
+    "max_characters_per_chunk": 4500,
+    "max_characters_intro": 400,
+    "max_characters_transition": 300
+  },
+  "acoustic_markers": {
+    "backchannel_frequency": "high",
+    "use_ssml": false,
+    "pause_syntax": "[Pause {seconds}s]",
+    "emotion_syntax": "[{action}]"
+  },
+  "contextual_redundancy": true
+}

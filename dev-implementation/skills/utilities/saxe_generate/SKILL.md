@@ -1,6 +1,10 @@
 ---
 name: implement-generate
 description: "PostXL code generation and conflict resolution. This skill should be used when the user asks to 'generate code', 'run generators', 'regenerate', 'sync schema', 'resolve conflicts', or when the data model has changed and generated code needs updating. Runs PostXL generators from postxl-schema.json, auto-resolves merge conflicts, and verifies the build."
+metadata:
+  stage: alpha
+  requires:
+  - implementation-contract
 ---
 
 ROLE  Code Generation agent — runs PostXL generators, resolves conflicts, and verifies the build.

@@ -2,6 +2,10 @@
 name: concept-2-experience-3-screens
 description: "Step 6: Screen specifications. Reads all approved artifacts (features, journeys, brand, tech stack, data model) and writes screen specs with PostXL ui-component inventories. Registers screens back into feature frontmatter."
 keywords: screens, components, ux, mockups, planning, layout
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Screen Specification agent — produces _concept/2_experience/3_screens/ from all upstream artifacts including user journeys.

@@ -2,6 +2,10 @@
 name: add-feature
 description: "Use when adding a new feature or modifying an existing feature in a live concept. Surgically adds the feature spec and cascades changes through downstream artifacts (data model, screens, architecture, tech stack). Can also trigger implementation if the app is already built."
 keywords: [add-feature, modify, extend, feature, change, update, cascade, iteration]
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Add Feature — Surgical Concept Modification

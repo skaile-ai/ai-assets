@@ -1,0 +1,7 @@
+{
+  "last_checked": "2026-03-14",
+  "packages": {
+    "@vueuse/core": "^12.0.0",
+    "@vueuse/nuxt": "^12.0.0"
+  }
+}

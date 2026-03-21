@@ -2,6 +2,10 @@
 name: concept-add-feature
 description: "Add or modify a feature in an existing concept. This skill should be used when the user asks to 'add a feature', 'add X to the concept', 'I want a new feature for Y', 'modify the login feature', 'change the requirements for X', 'update feature Y', or wants to extend an existing concept with new or changed functionality. Cascades changes through downstream artifacts (data model, screens, architecture) and optionally implements if the app is already built."
 keywords: feature, add, modify, update, extend, concept, cascade, incremental
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Feature Addition agent — surgically adds or modifies features while cascading changes through all downstream artifacts.

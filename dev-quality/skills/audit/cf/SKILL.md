@@ -5,6 +5,10 @@ keywords: [audit, security, bugs, code-review, static-analysis, quality, entropy
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - quality-contract
 ---
 
 # Audit — Static Code Analysis

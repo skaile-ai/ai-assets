@@ -2,6 +2,10 @@
 name: concept-2-experience-1-journeys
 description: "Step 4: User journey mapping. Reads the approved project brief, goals, and optional research to define personas and story maps organized by stage (hero, vital, hygiene, backlog). Writes stories.json with EARS acceptance criteria. Features (step 5) derive from these journeys."
 keywords: journeys, stories, personas, story map, user flow, acceptance criteria, EARS
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Journey Mapping agent — reads the approved project brief and produces user journey

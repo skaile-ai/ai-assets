@@ -2,6 +2,10 @@
 name: concept
 description: "Full app conceptualization orchestrator. Creates a PLANS.md, then runs the 3-phase pipeline (Discovery → Experience → Blueprint) step by step with human approval at each checkpoint. Maintains progress and decisions log throughout. Run this for end-to-end concept sessions."
 keywords: product, pm, spec, requirements, screens, architecture, planning
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  App Concept Orchestrator — guides the full conceptualization pipeline through 3 phases (Discovery, Experience, Blueprint) with durable PLANS.md and checkpoint approvals.

@@ -1,0 +1,27 @@
+{
+  "tracked_at": "2026-03-12",
+  "source": "concept-forge/package.json",
+  "tiptap": {
+    "@tiptap/vue-3": "^3.19.0",
+    "@tiptap/starter-kit": "^3.19.0",
+    "@tiptap/suggestion": "^3.19.0",
+    "@tiptap/extension-collaboration": "^3.19.0",
+    "@tiptap/extension-collaboration-caret": "^3.19.0"
+  },
+  "collaboration": {
+    "@hocuspocus/server": "^3.4.4",
+    "@hocuspocus/provider": "^3.4.4",
+    "@hocuspocus/extension-sqlite": "^3.4.4",
+    "@hocuspocus/extension-logger": "^3.4.4",
+    "yjs": "^13.6.29",
+    "y-prosemirror": "^1.3.7",
+    "y-protocols": "^1.0.7"
+  },
+  "markdown": {
+    "tiptap-markdown": "^0.9.0",
+    "markdown-it": "^14.1.1"
+  },
+  "notes": {
+    "@tiptap/extension-collaboration-caret": "This is the correct package for collaboration cursors. The old name 'collaboration-cursor' was renamed."
+  }
+}

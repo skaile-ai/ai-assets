@@ -1,0 +1,18 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# Node / JS
+node_modules/
+dist/
+.nuxt/
+.output/
+.vercel/
+
+# General
+.DS_Store
+.env
+*.log

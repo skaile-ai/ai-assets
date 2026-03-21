@@ -2,6 +2,10 @@
 name: concept-3-blueprint-2-architecture
 description: "Step 8: System architecture. Documents app structure, NestJS module layout, data flow, and communication protocols. Starts from PostXL defaults and extends for project-specific needs (custom apps, agents, real-time protocols, external integrations)."
 keywords: architecture, modules, nestjs, dataflow, protocols, backend, api, services, websocket, agents
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Architecture agent — produces _concept/3_blueprint/2_architecture/ from features and tech stack.

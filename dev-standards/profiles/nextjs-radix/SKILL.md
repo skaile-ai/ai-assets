@@ -2,6 +2,10 @@
 name: tech-stack-nextjs-radix
 description: "Reference document and invocable skill for the Next.js 15 + Radix UI + Directus stack. Read by scaffold, foundation, design, mock, and storybook skills when 05_techstack/stack.md selects this stack."
 keywords: [nextjs, next15, radix-ui, directus, postgresql, react, rsc, app-router, tailwind, pnpm, accessible, enterprise, vercel]
+metadata:
+  stage: alpha
+  requires:
+  - standards-contract
 ---
 
 # Tech Stack: Next.js 15 + Radix UI + Directus

@@ -1,0 +1,576 @@
+                                 
+ Usage: docling [OPTIONS] source 
+                                 
+╭─ Arguments ───────────────────╮
+│ *    inpu…      sourc  PDF    │
+│                 e      files  │
+│                        to     │
+│                        conve… │
+│                        Can be │
+│                        local  │
+│                        file / │
+│                        direc… │
+│                        paths  │
+│                        or     │
+│                        URL.   │
+│                        [requ… │
+╰───────────────────────────────╯
+╭─ Options ─────────────────────╮
+│ --fr…              [do  Spec… │
+│                    cx|  input │
+│                    ppt  form… │
+│                    x|h  to    │
+│                    tml  conv… │
+│                    |im  from. │
+│                    age  Defa… │
+│                    |pd  to    │
+│                    f|a  all   │
+│                    sci  form… │
+│                    ido        │
+│                    c|m        │
+│                    d|c        │
+│                    sv|        │
+│                    xls        │
+│                    x|x        │
+│                    ml_        │
+│                    usp        │
+│                    to|        │
+│                    xml        │
+│                    _ja        │
+│                    ts|        │
+│                    met        │
+│                    s_g        │
+│                    bs|        │
+│                    jso        │
+│                    n_d        │
+│                    ocl        │
+│                    ing        │
+│                    |au        │
+│                    dio        │
+│                    |vt        │
+│                    t]         │
+│ --to               [md  Spec… │
+│                    |js  outp… │
+│                    on|  form… │
+│                    htm  Defa… │
+│                    l|h  to    │
+│                    tml  Mark… │
+│                    _sp        │
+│                    lit        │
+│                    _pa        │
+│                    ge|        │
+│                    tex        │
+│                    t|d        │
+│                    oct        │
+│                    ags        │
+│                    ]          │
+│ --sh…      --n…         If    │
+│                         enab… │
+│                         the   │
+│                         page  │
+│                         imag… │
+│                         will  │
+│                         show  │
+│                         the   │
+│                         boun… │
+│                         of    │
+│                         the   │
+│                         item… │
+│                         [def… │
+│                         no-s… │
+│ --he…              TEX  Spec… │
+│                    T    http  │
+│                         requ… │
+│                         head… │
+│                         used  │
+│                         when  │
+│                         fetc… │
+│                         url   │
+│                         input │
+│                         sour… │
+│                         in    │
+│                         the   │
+│                         form  │
+│                         of a  │
+│                         JSON  │
+│                         stri… │
+│ --im…              [pl  Image │
+│                    ace  expo… │
+│                    hol  mode  │
+│                    der  for   │
+│                    |em  the   │
+│                    bed  docu… │
+│                    ded  (only │
+│                    |re  in    │
+│                    fer  case  │
+│                    enc  of    │
+│                    ed]  JSON, │
+│                         Mark… │
+│                         or    │
+│                         HTML… │
+│                         With  │
+│                         `pla… │
+│                         only  │
+│                         the   │
+│                         posi… │
+│                         of    │
+│                         the   │
+│                         image │
+│                         is    │
+│                         mark… │
+│                         in    │
+│                         the   │
+│                         outp… │
+│                         In    │
+│                         `emb… │
+│                         mode, │
+│                         the   │
+│                         image │
+│                         is    │
+│                         embe… │
+│                         as    │
+│                         base… │
+│                         enco… │
+│                         stri… │
+│                         In    │
+│                         `ref… │
+│                         mode, │
+│                         the   │
+│                         image │
+│                         is    │
+│                         expo… │
+│                         in    │
+│                         PNG   │
+│                         form… │
+│                         and   │
+│                         refe… │
+│                         from  │
+│                         the   │
+│                         main  │
+│                         expo… │
+│                         docu… │
+│                         [def… │
+│                         embe… │
+│ --pi…              [st  Choo… │
+│                    and  the   │
+│                    ard  pipe… │
+│                    |vl  to    │
+│                    m|a  proc… │
+│                    sr]  PDF   │
+│                         or    │
+│                         image │
+│                         file… │
+│                         [def… │
+│                         stan… │
+│ --vl…              [sm  Choo… │
+│                    old  the   │
+│                    ocl  VLM   │
+│                    ing  model │
+│                    |sm  to    │
+│                    old  use   │
+│                    ocl  with  │
+│                    ing  PDF   │
+│                    _vl  or    │
+│                    lm|  image │
+│                    gra  file… │
+│                    nit  [def… │
+│                    e_v  gran… │
+│                    isi        │
+│                    on|        │
+│                    gra        │
+│                    nit        │
+│                    e_v        │
+│                    isi        │
+│                    on_        │
+│                    vll        │
+│                    m|g        │
+│                    ran        │
+│                    ite        │
+│                    _vi        │
+│                    sio        │
+│                    n_o        │
+│                    lla        │
+│                    ma|        │
+│                    got        │
+│                    _oc        │
+│                    r_2        │
+│                    |gr        │
+│                    ani        │
+│                    te_        │
+│                    doc        │
+│                    lin        │
+│                    g|g        │
+│                    ran        │
+│                    ite        │
+│                    _do        │
+│                    cli        │
+│                    ng_        │
+│                    vll        │
+│                    m]         │
+│ --as…              [wh  Choo… │
+│                    isp  the   │
+│                    er_  ASR   │
+│                    tin  model │
+│                    y|w  to    │
+│                    his  use   │
+│                    per  with  │
+│                    _sm  audi… │
+│                    all  file… │
+│                    |wh  [def… │
+│                    isp  whis… │
+│                    er_        │
+│                    med        │
+│                    ium        │
+│                    |wh        │
+│                    isp        │
+│                    er_        │
+│                    bas        │
+│                    e|w        │
+│                    his        │
+│                    per        │
+│                    _la        │
+│                    rge        │
+│                    |wh        │
+│                    isp        │
+│                    er_        │
+│                    tur        │
+│                    bo]        │
+│ --ocr      --n…         If    │
+│                         enab… │
+│                         the   │
+│                         bitm… │
+│                         cont… │
+│                         will  │
+│                         be    │
+│                         proc… │
+│                         using │
+│                         OCR.  │
+│                         [def… │
+│                         ocr]  │
+│ --fo…      --n…         Repl… │
+│                         any   │
+│                         exis… │
+│                         text  │
+│                         with  │
+│                         OCR   │
+│                         gene… │
+│                         text  │
+│                         over  │
+│                         the   │
+│                         full  │
+│                         cont… │
+│                         [def… │
+│                         no-f… │
+│ --ta…      --n…         If    │
+│                         enab… │
+│                         the   │
+│                         table │
+│                         stru… │
+│                         model │
+│                         will  │
+│                         be    │
+│                         used  │
+│                         to    │
+│                         extr… │
+│                         table │
+│                         info… │
+│                         [def… │
+│                         tabl… │
+│ --oc…              TEX  The   │
+│                    T    OCR   │
+│                         engi… │
+│                         to    │
+│                         use.  │
+│                         When  │
+│                         --al… │
+│                         is    │
+│                         *not* │
+│                         set,  │
+│                         the   │
+│                         avai… │
+│                         valu… │
+│                         are:  │
+│                         auto, │
+│                         easy… │
+│                         ocrm… │
+│                         rapi… │
+│                         tess… │
+│                         tess… │
+│                         Use   │
+│                         the   │
+│                         opti… │
+│                         --sh… │
+│                         to    │
+│                         see   │
+│                         the   │
+│                         opti… │
+│                         allo… │
+│                         with  │
+│                         exte… │
+│                         plug… │
+│                         [def… │
+│                         auto] │
+│ --oc…              TEX  Prov… │
+│                    T    a     │
+│                         comm… │
+│                         list  │
+│                         of    │
+│                         lang… │
+│                         used  │
+│                         by    │
+│                         the   │
+│                         OCR   │
+│                         engi… │
+│                         Note  │
+│                         that  │
+│                         each  │
+│                         OCR   │
+│                         engi… │
+│                         has   │
+│                         diff… │
+│                         valu… │
+│                         for   │
+│                         the   │
+│                         lang… │
+│                         name… │
+│ --psm              INT  Page  │
+│                    EGE  Segm… │
+│                    R    Mode  │
+│                         for   │
+│                         the   │
+│                         OCR   │
+│                         engi… │
+│                         (0-1… │
+│ --pd…              [py  The   │
+│                    pdf  PDF   │
+│                    ium  back… │
+│                    2|d  to    │
+│                    lpa  use.  │
+│                    rse  [def… │
+│                    _v1  dlpa… │
+│                    |dl        │
+│                    par        │
+│                    se_        │
+│                    v2|        │
+│                    dlp        │
+│                    ars        │
+│                    e_v        │
+│                    4]         │
+│ --ta…              [fa  The   │
+│                    st|  mode  │
+│                    acc  to    │
+│                    ura  use   │
+│                    te]  in    │
+│                         the   │
+│                         table │
+│                         stru… │
+│                         mode… │
+│                         [def… │
+│                         accu… │
+│ --en…      --n…         Enab… │
+│                         the   │
+│                         code  │
+│                         enri… │
+│                         model │
+│                         in    │
+│                         the   │
+│                         pipe… │
+│                         [def… │
+│                         no-e… │
+│ --en…      --n…         Enab… │
+│                         the   │
+│                         form… │
+│                         enri… │
+│                         model │
+│                         in    │
+│                         the   │
+│                         pipe… │
+│                         [def… │
+│                         no-e… │
+│ --en…      --n…         Enab… │
+│                         the   │
+│                         pict… │
+│                         clas… │
+│                         enri… │
+│                         model │
+│                         in    │
+│                         the   │
+│                         pipe… │
+│                         [def… │
+│                         no-e… │
+│ --en…      --n…         Enab… │
+│                         the   │
+│                         pict… │
+│                         desc… │
+│                         model │
+│                         in    │
+│                         the   │
+│                         pipe… │
+│                         [def… │
+│                         no-e… │
+│ --ar…              PAT  If    │
+│                    H    prov… │
+│                         the   │
+│                         loca… │
+│                         of    │
+│                         the   │
+│                         model │
+│                         arti… │
+│ --en…      --n…         Must  │
+│                         be    │
+│                         enab… │
+│                         when  │
+│                         using │
+│                         mode… │
+│                         conn… │
+│                         to    │
+│                         remo… │
+│                         serv… │
+│                         [def… │
+│                         no-e… │
+│ --al…      --n…         Must  │
+│                         be    │
+│                         enab… │
+│                         for   │
+│                         load… │
+│                         modu… │
+│                         from  │
+│                         thir… │
+│                         plug… │
+│                         [def… │
+│                         no-a… │
+│ --sh…      --n…         List  │
+│                         the   │
+│                         thir… │
+│                         plug… │
+│                         which │
+│                         are   │
+│                         avai… │
+│                         when  │
+│                         the   │
+│                         opti… │
+│                         --al… │
+│                         is    │
+│                         set.  │
+│                         [def… │
+│                         no-s… │
+│ --ab…      --n…         If    │
+│                         enab… │
+│                         the   │
+│                         proc… │
+│                         will  │
+│                         be    │
+│                         abor… │
+│                         when  │
+│                         the   │
+│                         first │
+│                         error │
+│                         is    │
+│                         enco… │
+│                         [def… │
+│                         no-a… │
+│ --ou…              PAT  Outp… │
+│                    H    dire… │
+│                         where │
+│                         resu… │
+│                         are   │
+│                         save… │
+│                         [def… │
+│                         .]    │
+│ --ve…  -v          INT  Set   │
+│                    EGE  the   │
+│                    R    verb… │
+│                         leve… │
+│                         -v    │
+│                         for   │
+│                         info  │
+│                         logg… │
+│                         -vv   │
+│                         for   │
+│                         debug │
+│                         logg… │
+│                         [def… │
+│                         0]    │
+│ --de…      --n…         Enab… │
+│                         debug │
+│                         outp… │
+│                         which │
+│                         visu… │
+│                         the   │
+│                         PDF   │
+│                         cells │
+│                         [def… │
+│                         no-d… │
+│ --de…      --n…         Enab… │
+│                         debug │
+│                         outp… │
+│                         which │
+│                         visu… │
+│                         the   │
+│                         OCR   │
+│                         cells │
+│                         [def… │
+│                         no-d… │
+│ --de…      --n…         Enab… │
+│                         debug │
+│                         outp… │
+│                         which │
+│                         visu… │
+│                         the   │
+│                         layo… │
+│                         clus… │
+│                         [def… │
+│                         no-d… │
+│ --de…      --n…         Enab… │
+│                         debug │
+│                         outp… │
+│                         which │
+│                         visu… │
+│                         the   │
+│                         table │
+│                         cells │
+│                         [def… │
+│                         no-d… │
+│ --ve…                   Show  │
+│                         vers… │
+│                         info… │
+│ --do…              FLO  The   │
+│                    AT   time… │
+│                         for   │
+│                         proc… │
+│                         each  │
+│                         docu… │
+│                         in    │
+│                         seco… │
+│ --nu…              INT  Numb… │
+│                    EGE  of    │
+│                    R    thre… │
+│                         [def… │
+│                         4]    │
+│ --de…              [au  Acce… │
+│                    to|  devi… │
+│                    cpu  [def… │
+│                    |cu  auto] │
+│                    da|        │
+│                    mps        │
+│                    ]          │
+│ --lo…                   Docl… │
+│                         logo  │
+│ --pa…              INT  Numb… │
+│                    EGE  of    │
+│                    R    pages │
+│                         proc… │
+│                         in    │
+│                         one   │
+│                         batc… │
+│                         Defa… │
+│                         4     │
+│                         [def… │
+│                         4]    │
+│ --he…                   Show  │
+│                         this  │
+│                         mess… │
+│                         and   │
+│                         exit. │
+╰───────────────────────────────╯
+

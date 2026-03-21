@@ -1,6 +1,10 @@
 ---
 name: implement
 description: "Full app implementation orchestrator. This skill should be used when the user asks to 'implement the app', 'build the app from concept', 'start implementation', 'continue implementation', or wants to turn a completed _concept/ into a working application. Guides the entire pipeline from project scaffold through feature implementation to verified, deployable application. Manages checkpoints, git workflow, and progress tracking."
+metadata:
+  stage: alpha
+  requires:
+  - implementation-contract
 ---
 
 ROLE  Implementation Orchestrator — drives a completed _concept/ through scaffold, foundation, features, and verification.

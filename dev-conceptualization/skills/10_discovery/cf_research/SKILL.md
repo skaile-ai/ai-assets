@@ -4,13 +4,17 @@ description: "Use when grounding decisions in real-world data — competitor ana
 keywords: [research, competitors, market, audience, personas, brand, inspiration, templates, layouts, design, patterns, grounding]
 user_inputs:
   dialog:
-    - id: research_scope
-      label: "Research scope"
-      type: select
-      required: true
-      options: [domain, competitors, audiences, design, patterns, colors, behavioral, all]
-      hint: "What area to research (select 'all' for comprehensive research)"
+  - id: research_scope
+    label: "Research scope"
+    type: select
+    required: true
+    options: [domain, competitors, audiences, design, patterns, colors, behavioral, all]
+    hint: "What area to research (select 'all' for comprehensive research)"
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Research — Domain Research Mode

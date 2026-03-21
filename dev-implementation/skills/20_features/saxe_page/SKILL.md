@@ -3,17 +3,21 @@ name: implement-2-features-1-page
 description: 'Page-level feature implementation with TDD Guard. Implements all features within one page using outside-in TDD: writes failing page tests, then for each feature writes failing feature tests and implements until green. Uses storybook page compositions as UI starting point. TDD Guard enforces red-green discipline at the feature level.'
 hooks:
   PreToolUse:
-    - matcher: 'Edit|Write'
-      hooks:
-        - type: command
-          command: 'python3 "$CLAUDE_SKILL_DIR/implement-2-features/scripts/tdd_pre_edit.py"'
-          timeout: 5
+  - matcher: 'Edit|Write'
+    hooks:
+    - type: command
+      command: 'python3 "$CLAUDE_SKILL_DIR/implement-2-features/scripts/tdd_pre_edit.py"'
+      timeout: 5
   PostToolUse:
-    - matcher: 'Bash'
-      hooks:
-        - type: command
-          command: 'python3 "$CLAUDE_SKILL_DIR/implement-2-features/scripts/tdd_post_bash.py"'
-          timeout: 10
+  - matcher: 'Bash'
+    hooks:
+    - type: command
+      command: 'python3 "$CLAUDE_SKILL_DIR/implement-2-features/scripts/tdd_post_bash.py"'
+      timeout: 10
+metadata:
+  stage: alpha
+  requires:
+  - implementation-contract
 ---
 
 ROLE Page implementer — implements all features within one page using TDD Guard-enforced red-green cycles.

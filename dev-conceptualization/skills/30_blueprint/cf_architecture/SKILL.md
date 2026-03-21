@@ -2,6 +2,10 @@
 name: architecture
 description: "Step 5b: System architecture. Documents app structure, backend module layout, API patterns, data flow, and communication protocols. Adapts to the chosen tech stack and identifies project-specific extensions beyond defaults (custom services, agents, real-time protocols, external integrations)."
 keywords: architecture, modules, dataflow, protocols, backend, api, services, websocket, agents, infrastructure
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # App Architecture

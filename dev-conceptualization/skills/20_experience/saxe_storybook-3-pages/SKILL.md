@@ -1,6 +1,10 @@
 ---
 name: concept-2-experience-4-storybook-3-pages
 description: "Sub-skill 3/4: Build full-page compositions from screen specs and their Storybook stories. Each page uses @postxl/ui-components directly for library components and custom components from the previous step. Includes state variants, seed data scenarios, and responsive viewports. Run by the storybook orchestrator."
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Page Builder — creates full-page React compositions from screen specs and their stories.

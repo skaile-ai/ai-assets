@@ -2,6 +2,10 @@
 name: concept-1-discovery-3-brand
 description: "Step 3: Brand identity. Guides the user through defining visual identity — aesthetic direction, colors, typography, tone of voice. Extracts palettes from reference URLs. Produces identity.md + tokens.json (with Tailwind CSS custom properties for PostXL/Radix/Tailwind theming) in _concept/1_discovery/3_brand/. Downstream skills consume these tokens — no more inventing colors."
 keywords: brand, design, colors, fonts, typography, aesthetic, tone, tokens, identity
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Brand Identity Designer — defines visual identity, produces tokens consumed by all downstream skills.

@@ -5,6 +5,10 @@ keywords: [review, audit, status, entropy, checklist, progress, health, gardenin
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Review — Structure Audit and Gardening

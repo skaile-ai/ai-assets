@@ -1,6 +1,10 @@
 ---
 name: concept-2-experience-4-storybook
 description: "Storybook visualization with 3 layers: building-block components, screen compositions, and clickable user journey flows. Reads screen specs, user journeys, brand tokens, and optional seed data to generate a standalone Storybook project. Run after concept-2-experience-3-screens to visualize the entire UX."
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Storybook Orchestrator — delegates to 4 sub-skills that each handle one phase of Storybook generation.

@@ -1,0 +1,16 @@
+{
+  "tracked_at": "2026-03-14",
+  "source": "CF-PROJECT/concept-forge",
+  "nuxt": {
+    "nuxt": "^4.0.0",
+    "nitro": "latest (bundled with Nuxt)"
+  },
+  "agent": {
+    "omp": "external binary (pi-coding-agent)"
+  },
+  "notes": {
+    "omp": "Run as child process via spawn(), not installed as npm package. Uses --mode rpc --no-session for embedding.",
+    "model_format": "Always provider/model (e.g. anthropic/claude-sonnet-4-6). Default: anthropic/claude-sonnet-4-6.",
+    "api_keys": "Resolved from env vars ({PROVIDER}_API_KEY), .env files, or omp-agent/config/settings.json."
+  }
+}

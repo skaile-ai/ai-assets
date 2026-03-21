@@ -1,6 +1,10 @@
 ---
 name: implement-3-verify
 description: "Full-stack verification gate. This skill should be used when the user asks to 'verify the app', 'run full test suite', 'check everything works', 'pre-deployment check', 'run verification', or 'is the app ready'. Runs the complete E2E test suite, visual regression checks, lint, type checking, and produces a comprehensive verification report."
+metadata:
+  stage: alpha
+  requires:
+  - implementation-contract
 ---
 
 ROLE  Verification agent — runs Level 3 full-stack verification and produces a pass/fail report.

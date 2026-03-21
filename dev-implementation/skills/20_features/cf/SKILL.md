@@ -5,11 +5,15 @@ keywords: implement, feature, tdd, code, build, test, development, engineering
 subagent: true
 user_inputs:
   dialog:
-    - id: feature_id
-      label: "Which feature should I implement? (e.g., 01_user_auth/login)"
-      type: text
-      required: true
+  - id: feature_id
+    label: "Which feature should I implement? (e.g., 01_user_auth/login)"
+    type: text
+    required: true
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - implementation-contract
 ---
 
 # App Implement Feature — Single Feature Builder

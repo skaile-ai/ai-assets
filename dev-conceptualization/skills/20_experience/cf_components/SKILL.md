@@ -5,6 +5,10 @@ keywords: components, patterns, reusable, inventory, ui, datatable, forms, cards
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # App Components — Reusable Component Inventory

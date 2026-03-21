@@ -5,10 +5,14 @@ keywords: [screens, pages, ui, layout, user-experience, navigation]
 user_inputs:
   dialog: []
   files:
-    - "03_features/**/*.md"
-    - "04_brand/tokens.json"
-    - "05_techstack/stack.md"
-    - "06_datamodel/model.json"
+  - "03_features/**/*.md"
+  - "04_brand/tokens.json"
+  - "05_techstack/stack.md"
+  - "06_datamodel/model.json"
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Screens

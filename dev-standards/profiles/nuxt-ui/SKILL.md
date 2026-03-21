@@ -2,6 +2,10 @@
 name: tech-stack-nuxt-ui
 description: "Reference document and invocable skill for the Nuxt 4 + @nuxt/ui v3 + Directus stack. Read by scaffold, foundation, design, mock, and storybook skills when 05_techstack/stack.md selects this stack."
 keywords: [nuxt, nuxt-ui, reka-ui, radix-vue, directus, postgresql, ssr, vue3, tailwind, bun, consumer, branded, design-forward]
+metadata:
+  stage: alpha
+  requires:
+  - standards-contract
 ---
 
 # Tech Stack: Nuxt 4 + @nuxt/ui + Directus

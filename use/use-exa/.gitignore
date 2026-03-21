@@ -1,0 +1,11 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# General
+.DS_Store
+.env
+*.log

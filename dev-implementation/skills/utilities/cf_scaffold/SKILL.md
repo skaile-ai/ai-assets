@@ -5,6 +5,10 @@ keywords: [scaffold, init, setup, boilerplate, nuxt, node, python, bun, uv, skil
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - implementation-contract
 ---
 
 # Bootstrap — Project Scaffolding

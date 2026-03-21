@@ -6,6 +6,10 @@ keywords: [testing, e2e, browser, screenshots, validation, journey, playwright]
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - quality-contract
 ---
 
 # Test E2E — End-to-End Browser Testing

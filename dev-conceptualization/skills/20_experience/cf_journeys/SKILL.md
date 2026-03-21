@@ -2,6 +2,10 @@
 name: journeys
 description: "Use after project brief is approved to map user journeys. Produces stories.json with personas, story maps organized by stage (hero/vital/hygiene/backlog), and EARS acceptance criteria. Required before features skill."
 keywords: [journeys, stories, personas, user-stories, acceptance-criteria, ears, flow, experience]
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Journeys — User Journey Mapping

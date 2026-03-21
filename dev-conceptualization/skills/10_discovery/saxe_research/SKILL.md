@@ -2,6 +2,10 @@
 name: concept-1-discovery-2-research
 description: "Step 2: Domain research. Investigates comparable products, competitor features, target audiences, brand/design inspiration, and layout patterns. Writes structured findings to _concept/1_discovery/2_research/. Feeds into features, brand, and screen decisions."
 keywords: research, competitors, market, audience, personas, brand inspiration, templates, layouts, design patterns
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Domain Research agent — investigates comparable products, competitor features,

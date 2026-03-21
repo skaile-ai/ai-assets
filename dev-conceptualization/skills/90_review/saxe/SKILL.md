@@ -2,6 +2,10 @@
 name: concept-review
 description: "Structure audit + entropy check + doc gardening. Scans _concept/ for completeness, cross-reference integrity, stale artifacts, and broken links. In gardening mode, auto-fixes safe issues. Presents a health report with quality score."
 keywords: review, audit, status, entropy, checklist, progress, health, gardening
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Structure Auditor and Doc Gardener — scans _concept/ for completeness, consistency, and entropy.

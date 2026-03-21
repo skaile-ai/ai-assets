@@ -1,0 +1,24 @@
+{
+  "deepgram": {
+    "sdk": "@deepgram/sdk",
+    "version": "^3.9.0",
+    "api_model": "nova-3",
+    "api_base": "https://api.deepgram.com/v1",
+    "ws_base": "wss://api.deepgram.com/v1/listen",
+    "last_checked": "2026-03-12"
+  },
+  "elevenlabs": {
+    "sdk": "elevenlabs",
+    "version": "^1.50.0",
+    "api_base": "https://api.elevenlabs.io/v1",
+    "default_model": "eleven_multilingual_v2",
+    "default_voice_id": "pNInz6obpgDQGcFmaJgB",
+    "last_checked": "2026-03-12"
+  },
+  "nuxt": {
+    "version": "^4.3.1",
+    "ws_config": "nitro.experimental.websocket = true",
+    "last_checked": "2026-03-12"
+  },
+  "note": "Run scripts/track_versions.py to refresh these versions from npm/PyPI registries."
+}

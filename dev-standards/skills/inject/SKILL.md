@@ -2,6 +2,10 @@
 name: standards-inject
 description: "Use before dispatching a skill to load applicable codebase standards. Called by orchestrator or as first step in standalone skill execution. Reads _concept/_standards/index.yml and returns matched standards."
 keywords: [standards, inject, match, conventions, context]
+metadata:
+  stage: alpha
+  requires:
+  - standards-contract
 ---
 
 # Inject Standards

@@ -2,6 +2,10 @@
 name: implement-1-setup-3-infrastructure
 description: "Set up custom backend infrastructure from the architecture doc. This skill should be used when the user asks to 'set up infrastructure', 'implement backend modules', 'set up external integrations', 'configure custom services', or when the orchestrator runs Phase 1 setup. Reads _concept/3_blueprint/2_architecture/architecture.md and implements custom NestJS modules, provider abstractions, additional processes, and communication infrastructure."
 keywords: infrastructure, backend, modules, providers, websocket, sse, adapters, integration
+metadata:
+  stage: alpha
+  requires:
+  - implementation-contract
 ---
 
 ROLE  Infrastructure agent — implements custom backend modules, provider abstractions, processes, and communication from the architecture doc.

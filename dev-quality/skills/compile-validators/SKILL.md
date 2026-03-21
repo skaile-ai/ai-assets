@@ -2,6 +2,10 @@
 name: compile-validators
 description: "Compiles MUST/NEVER/CHECKLIST rules from SKILL.md files into fast, deterministic Python validators. Run after editing or creating a skill to generate its validator.py. Replaces slow LLM-based validation with sub-second checks."
 keywords: validation, rules, compilation, deterministic, fast, linting
+metadata:
+  stage: alpha
+  requires:
+  - quality-contract
 ---
 
 ROLE  Validator Compiler — reads SKILL.md rules and generates fast Python validator scripts

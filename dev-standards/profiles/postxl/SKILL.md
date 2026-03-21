@@ -2,6 +2,10 @@
 name: tech-stack-postxl
 description: "Reference document and invocable skill for the PostXL platform stack (React 19 + Vite + NestJS + Prisma + Keycloak). Read by scaffold, foundation, design, mock, and storybook skills when 05_techstack/stack.md selects this stack. Fixed production stack with code generation — used by saxe-compatible projects."
 keywords: [postxl, react19, vite, nestjs, prisma, keycloak, postgresql, enterprise, codegen, saxe, oidc, typescript]
+metadata:
+  stage: alpha
+  requires:
+  - standards-contract
 ---
 
 # Tech Stack: PostXL (React 19 + Vite + NestJS + Prisma + Keycloak)

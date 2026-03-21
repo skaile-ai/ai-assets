@@ -2,6 +2,10 @@
 name: tech-stack-nuxt-primevue
 description: "Reference document and invocable skill for the Nuxt 4 + PrimeVue 4 + Directus stack. Read by scaffold, foundation, design, mock, and storybook skills when 05_techstack/stack.md selects this stack."
 keywords: [nuxt, primevue, directus, postgresql, ssr, vue3, tailwind, bun, saas, dashboard, admin, crm]
+metadata:
+  stage: alpha
+  requires:
+  - standards-contract
 ---
 
 # Tech Stack: Nuxt 4 + PrimeVue + Directus

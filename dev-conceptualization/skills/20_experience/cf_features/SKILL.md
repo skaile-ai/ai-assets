@@ -4,15 +4,19 @@ description: "Use when _concept/01_project/brief.md exists and is approved but _
 keywords: [features, requirements, modules, functionality, user-stories, groups, must-have, nice-to-have]
 user_inputs:
   dialog:
-    - id: feature_priorities
-      label: "Priority focus"
-      type: select
-      options: ["must-have features only", "must-have + nice-to-have", "comprehensive"]
-      required: false
-      default: "must-have + nice-to-have"
-      hint: "How broad should the feature set be?"
+  - id: feature_priorities
+    label: "Priority focus"
+    type: select
+    options: ["must-have features only", "must-have + nice-to-have", "comprehensive"]
+    required: false
+    default: "must-have + nice-to-have"
+    hint: "How broad should the feature set be?"
   files:
-    - "01_project/brief.md"
+  - "01_project/brief.md"
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Features — Feature Planning

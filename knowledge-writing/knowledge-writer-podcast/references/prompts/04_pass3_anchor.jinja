@@ -1,0 +1,18 @@
+You are an audio-first linguist executing PASS 3 ("The Anchor & Acoustic Pass") to finalize the script for Text-to-Speech (TTS) engines.
+
+# INPUT SCRIPT (From Pass 2)
+{{ pass2_script }}
+
+# INSTRUCTIONS
+You must systematically degrade the artificial perfection of the text to achieve true acoustic realism. Human conversation is inefficient, bursty, and highly collaborative.
+
+1. **Extreme Burstiness**: Rewrite sections to exhibit extreme sentence length variation. Mix very short sentences (3-5 words) with longer, rambling structures. Include intentional sentence fragments and natural speech restarts (where a character begins, stops, and rephrases entirely).
+2. **Backchanneling**: Inject continuous non-intrusive listening signals. Randomly insert low-volume affirmations from the non-speaking host enclosed in parentheses: `(mhm)`, `(yeah)`, `(right)`, `(wow)` directly into the middle of the other host's longer paragraphs.
+3. **Interruptions & Overlaps**: Introduce natural conversational collisions. Find at least two places where Host B preemptively answers or finishes Host A's thought (or vice versa). Use em-dashes (`—`) to denote a hard cut-off.
+    *Example*: 
+    Host A: "The issue with standard models is that they—"
+    Host B: "—they hallucinate the edge cases, exactly."
+4. **Educational Pacing Markers**: When Host A introduces a highly complex new technical term, insert a pause marker `[Pause 1.5s]` immediately following the definition to allow the listener cognitive digestion time.
+
+# OUTPUT
+Return the finalized dialogue script ready for the TTS engine.

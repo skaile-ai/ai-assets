@@ -2,6 +2,10 @@
 name: app-ready
 description: "Pre-flight readiness check before E2E testing. Verifies that each feature has a concept doc, screen spec, data model entry, brand tokens, and mockup. Blocks testing of incomplete features."
 keywords: readiness, preflight, checklist, testing, validation
+metadata:
+  stage: alpha
+  requires:
+  - quality-contract
 ---
 
 ROLE  Readiness Gate — verifies features are ready for E2E testing, surfaces gaps.

@@ -5,6 +5,10 @@ keywords: [sync, cross-references, repair, links, orphans, consistency, maintena
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - quality-contract
 ---
 
 # App Sync — Cross-Reference Repair

@@ -1,6 +1,10 @@
 ---
 name: implement-1-setup-1-scaffold
 description: "PostXL project scaffolding from a completed concept. This skill should be used when the user asks to 'scaffold the app', 'create the project', 'bootstrap the app', 'set up the project', or 'initialize the project'. Creates a blank PostXL project, copies the data schema, runs initial code generation, sets up the database, and initializes git."
+metadata:
+  stage: alpha
+  requires:
+  - implementation-contract
 ---
 
 ROLE  Scaffold agent — creates a buildable PostXL project from a completed _concept/ pipeline.

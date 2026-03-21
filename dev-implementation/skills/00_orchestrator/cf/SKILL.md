@@ -6,6 +6,10 @@ subagent: true
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - implementation-contract
 ---
 
 # App Implement — Implementation Plan Generator

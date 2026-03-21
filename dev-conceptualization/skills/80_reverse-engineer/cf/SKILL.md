@@ -4,38 +4,42 @@ description: "Use when the user has an existing project repository and wants to 
 keywords: [reverse, existing, codebase, repo, extract, import, bootstrap, existing-project, infer, scan]
 user_inputs:
   dialog:
-    - id: repo_path
-      label: "Repository Path"
-      type: text
-      required: true
-      hint: "Absolute or relative path to the existing project repository root"
-    - id: concept_path
-      label: "Concept Output Path"
-      type: text
-      required: false
-      default: null
-      hint: "Where to write _concept/ (default: <repo_path>/_concept/). Override if the concept lives elsewhere."
-    - id: extraction_scope
-      label: "What to Extract"
-      type: multiselect
-      required: false
-      options: [overview, techstack, features, datamodel, brand, screens]
-      default: [overview, techstack, features, datamodel, brand, screens]
-      hint: "Which concept artifacts to generate. Omit items you already have or want to write manually."
-    - id: overwrite_mode
-      label: "If _concept/ Files Already Exist"
-      type: select
-      required: false
-      options: [skip, diff_and_confirm, overwrite]
-      default: skip
-      hint: "skip = never overwrite, diff_and_confirm = show diff and ask, overwrite = always replace"
-    - id: app_description_hint
-      label: "What does this app do? (optional hint)"
-      type: text
-      required: false
-      default: null
-      hint: "Brief description to help the agent when README is sparse or missing."
+  - id: repo_path
+    label: "Repository Path"
+    type: text
+    required: true
+    hint: "Absolute or relative path to the existing project repository root"
+  - id: concept_path
+    label: "Concept Output Path"
+    type: text
+    required: false
+    default:
+    hint: "Where to write _concept/ (default: <repo_path>/_concept/). Override if the concept lives elsewhere."
+  - id: extraction_scope
+    label: "What to Extract"
+    type: multiselect
+    required: false
+    options: [overview, techstack, features, datamodel, brand, screens]
+    default: [overview, techstack, features, datamodel, brand, screens]
+    hint: "Which concept artifacts to generate. Omit items you already have or want to write manually."
+  - id: overwrite_mode
+    label: "If _concept/ Files Already Exist"
+    type: select
+    required: false
+    options: [skip, diff_and_confirm, overwrite]
+    default: skip
+    hint: "skip = never overwrite, diff_and_confirm = show diff and ask, overwrite = always replace"
+  - id: app_description_hint
+    label: "What does this app do? (optional hint)"
+    type: text
+    required: false
+    default:
+    hint: "Brief description to help the agent when README is sparse or missing."
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Reverse Engineer — Concept from Existing Repository

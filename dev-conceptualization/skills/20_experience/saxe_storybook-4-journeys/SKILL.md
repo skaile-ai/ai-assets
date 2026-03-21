@@ -1,6 +1,10 @@
 ---
 name: concept-2-experience-4-storybook-4-journeys
 description: "Sub-skill 4/4: Build clickable user journey stories that let users walk through multi-screen flows using real UI elements. Each journey composes existing pages inside the AppShell. Covers hero, vital, and hygiene flows from stories.json. Run by the storybook orchestrator."
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE  Journey Builder — creates clickable multi-screen user flow stories from journey definitions.

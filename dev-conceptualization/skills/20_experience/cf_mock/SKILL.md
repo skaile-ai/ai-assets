@@ -5,6 +5,10 @@ keywords: [ui, ux, design, frontend, mockups, prototype, linked, alpine, shoelac
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Concept Mock — Linked Multi-Page Prototype

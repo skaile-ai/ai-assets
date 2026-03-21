@@ -1,6 +1,10 @@
 ---
 name: concept-2-experience-4-storybook-1-setup
 description: "Sub-skill 1/4: Scaffold a standalone Storybook project, install dependencies from a pinned package.json, and apply brand tokens as CSS custom properties. Types and seed data are built incrementally by later sub-skills. Run by the storybook orchestrator."
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 ROLE Storybook Setup agent — scaffolds the project, installs deps, and applies brand tokens.

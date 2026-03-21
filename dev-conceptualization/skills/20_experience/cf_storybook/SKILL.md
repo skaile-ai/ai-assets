@@ -5,6 +5,10 @@ keywords: [storybook, components, stories, visualization, ui, design-system, jou
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - conceptualization-contract
 ---
 
 # Storybook — 3-Layer Component & Journey Visualization

@@ -5,6 +5,10 @@ keywords: [foundation, theming, brand, css-vars, auth, app-shell, layout, naviga
 user_inputs:
   dialog: []
   files: []
+metadata:
+  stage: alpha
+  requires:
+  - implementation-contract
 ---
 
 # Foundation — Brand, Auth, and App Shell
