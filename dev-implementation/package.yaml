@@ -1,0 +1,21 @@
+name: dev-implementation
+description: "Full implementation pipeline — Setup (scaffold, foundation, infrastructure) → Features (TDD per-feature implementation) → Verify."
+version: "0.1.0"
+includes:
+  # Contract (required by all skills in this domain)
+  - skill:implementation-contract
+  # Orchestrator
+  - skill:implement
+  # Setup phase
+  - skill:scaffold
+  - skill:foundation
+  - skill:infrastructure
+  # Features phase
+  - skill:implement-feature
+  - skill:implement-feature-page
+  # Verify phase
+  - skill:verify
+  # Utilities
+  - skill:generate
+  - skill:migrate
+  - skill:seed

@@ -1,0 +1,6 @@
+name: dev-implementation-experts-typst
+description: "Typst document system expertise and implementation expert router — advises on which expert skill to use for a given tech stack."
+version: "0.1.0"
+includes:
+  - skill:prog-expert-advisor
+  - skill:prog-expert-typst

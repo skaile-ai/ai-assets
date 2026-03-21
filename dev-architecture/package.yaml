@@ -1,0 +1,11 @@
+name: dev-architecture
+description: "System architecture and AI agent integration design — produces architecture documents, AI agent integration blueprints, and skill system design."
+version: "0.1.0"
+includes:
+  # Contract
+  - skill:architecture-contract
+  # Skills
+  - skill:prog-expert-integration-ai-agents
+  - skill:prog-expert-skill-system
+  # Domain agent
+  - agent:architecture

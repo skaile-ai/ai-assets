@@ -1,0 +1,35 @@
+name: dev-conceptualization
+description: "Full conceptualization pipeline — Discovery (overview, research, brand) → Experience (features, screens, mock) → Blueprint (architecture, datamodel, techstack)."
+version: "0.1.0"
+includes:
+  # Contract (required by all skills in this domain)
+  - skill:conceptualization-contract
+  # Orchestrator
+  - skill:concept
+  # Discovery
+  - skill:overview
+  - skill:research
+  - skill:brand-visual
+  - skill:brand-behavioral
+  # Experience
+  - skill:features
+  - skill:behaviors
+  - skill:components
+  - skill:journeys
+  - skill:mock
+  - skill:screens
+  - skill:screens-technical
+  - skill:storybook
+  - skill:storybook-setup
+  - skill:storybook-components
+  - skill:storybook-pages
+  - skill:storybook-journeys
+  # Blueprint
+  - skill:architecture
+  - skill:datamodel
+  - skill:techstack
+  - skill:storybook-types
+  # Utilities
+  - skill:add-feature
+  - skill:reverse-engineer
+  - skill:review

@@ -1,0 +1,10 @@
+name: skaile-dev
+description: "Full development toolkit — conceptualization through quality assurance. Excludes knowledge tools, external integrations, and meta-management."
+version: "0.1.0"
+includes:
+  - package:dev-shared
+  - package:dev-conceptualization
+  - package:dev-implementation
+  - package:dev-quality
+  - package:dev-standards
+  - package:dev-architecture

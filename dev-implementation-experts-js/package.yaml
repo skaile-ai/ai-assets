@@ -1,0 +1,17 @@
+name: dev-implementation-experts-js
+description: "Deep JavaScript/TypeScript framework expertise — Nuxt, Directus, TipTap, PrimeVue, VueUse, UnoCSS, and more. Consumed by feature-implementation skills to apply stack-specific patterns."
+version: "0.1.0"
+includes:
+  # Contract (required by all expert skills)
+  - skill:impl-experts-js-contract
+  # Expert skills
+  - skill:prog-expert-directus
+  - skill:prog-expert-nuxt
+  - skill:prog-expert-omp
+  - skill:prog-expert-primevue
+  - skill:prog-expert-scadcn
+  - skill:prog-expert-tiptap
+  - skill:prog-expert-tts-stt-integration
+  - skill:prog-expert-una
+  - skill:prog-expert-uno
+  - skill:prog-expert-vueuse

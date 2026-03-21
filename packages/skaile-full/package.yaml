@@ -1,0 +1,23 @@
+name: skaile-full
+description: "Complete Skaile skill ecosystem — all domains including conceptualization, implementation, quality, standards, architecture, resource management, knowledge tools, and external integrations."
+version: "0.1.0"
+includes:
+  # Core shared contracts
+  - package:dev-shared
+  # Development pipeline
+  - package:dev-conceptualization
+  - package:dev-implementation
+  - package:dev-quality
+  - package:dev-standards
+  - package:dev-architecture
+  # Implementation experts
+  - package:dev-implementation-experts-js
+  - package:dev-implementation-experts-python
+  - package:dev-implementation-experts-typst
+  # Meta-management
+  - package:ai-resource-management
+  # Knowledge tools
+  - package:knowledge-research
+  - package:knowledge-writing
+  # External integrations
+  - package:use

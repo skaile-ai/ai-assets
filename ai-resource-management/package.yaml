@@ -1,0 +1,13 @@
+name: ai-resource-management
+description: "Meta-management of the skill ecosystem — scaffold skills and domains, build CLI tools, navigate the asset catalog."
+version: "0.1.0"
+includes:
+  # Contract
+  - skill:skill-builder-contract
+  # Invocable skills
+  - skill:ai-resource-navigator
+  - skill:domain-builder
+  - skill:skill-builder
+  - skill:uv-cli-implementer
+  # Root orchestrator agent
+  - agent:skaile
