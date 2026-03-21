@@ -1,6 +1,6 @@
 ---
 name: tech-stack-postxl
-description: "Reference document and invocable skill for the PostXL platform stack (React 19 + Vite + NestJS + Prisma + Keycloak). Read by scaffold, foundation, design, mock, and storybook skills when 05_techstack/stack.md selects this stack. Fixed production stack with code generation — used by saxe-compatible projects."
+description: "Reference document and invocable skill for the PostXL platform stack (React 19 + Vite + NestJS + Prisma + Keycloak). Read by scaffold, foundation, design, mock, and storybook skills when 3_blueprint/1_techstack/stack.md selects this stack. Fixed production stack with code generation — used by saxe-compatible projects."
 keywords: [postxl, react19, vite, nestjs, prisma, keycloak, postgresql, enterprise, codegen, saxe, oidc, typescript]
 metadata:
   stage: alpha
@@ -115,7 +115,7 @@ bootstrap()
 
 ## CSS Variables / Theming
 
-@postxl/ui-components uses a CSS custom property system similar to shadcn/ui but with PostXL-specific token names. Brand tokens from `04_brand/tokens.json` are applied in `globals.css` and Tailwind's `@theme` block.
+@postxl/ui-components uses a CSS custom property system similar to shadcn/ui but with PostXL-specific token names. Brand tokens from `1_discovery/2_brand/tokens.json` are applied in `globals.css` and Tailwind's `@theme` block.
 
 **`apps/frontend/src/styles/globals.css`:**
 ```css
@@ -500,7 +500,7 @@ pnpm prisma generate
 
 **When to run `pnpm run generate`:**
 - After modifying `postxl-schema.json` (data model definitions)
-- After adding new entities or relations in the concept's `06_datamodel/`
+- After adding new entities or relations in the concept's `3_blueprint/3_datamodel/`
 - After changing field types that affect DTO validation
 - Before running `prisma migrate dev` — generators update `schema.prisma` from `postxl-schema.json`
 

@@ -25,9 +25,7 @@ license: MIT
 tags: [orchestrator, implementation-pipeline, scaffolding, tdd, uat, verification, plans]
 metadata:
   domain: dev-implementation
-  skill_merged: skills/00_orchestrator/SKILL.md
-  skill_cf: skills/00_orchestrator/cf/SKILL.md
-  skill_saxe: skills/00_orchestrator/saxe/SKILL.md
+  skill_merged: skills/implement/SKILL.md
   phases: "Setup, Features, UAT, Verification"
   complexity_tiers: "small, standard, complex"
   consumes: "_concept/ artifacts (1_discovery, 2_experience, 3_blueprint)"

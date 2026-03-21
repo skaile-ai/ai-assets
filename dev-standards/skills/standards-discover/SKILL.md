@@ -86,7 +86,7 @@ Each standard file is concise markdown:
 ---
 domain: api
 keywords: [routing, rest, endpoints]
-applies_to: [cf_implement_feature, cf_concept_architecture]
+applies_to: [implement-feature, architecture]
 last_updated: YYYY-MM-DD
 ---
 
@@ -113,11 +113,11 @@ standards:
   - path: api/route_naming.md
     domain: api
     keywords: [routing, rest, endpoints]
-    applies_to: [cf_implement_feature, cf_concept_architecture]
+    applies_to: [implement-feature, architecture]
   - path: database/migration_pattern.md
     domain: database
     keywords: [migration, schema, sql]
-    applies_to: [cf_implement_migrate, cf_concept_datamodel]
+    applies_to: [migrate, datamodel]
 ```
 
 ## Outputs

@@ -25,8 +25,7 @@ license: MIT
 tags: [orchestrator, concept-pipeline, discovery, experience, blueprint, plans]
 metadata:
   domain: dev-conceptualization
-  skill_cf: skills/00_orchestrator/cf/SKILL.md
-  skill_saxe: skills/00_orchestrator/saxe/SKILL.md
+  skill_merged: skills/orchestrator/SKILL.md
   phases: "Discovery, Experience, Blueprint"
   complexity_tiers: "small, standard, complex"
   produces: "_concept/ artifacts, PLANS.md, approval snapshots, LEARNINGS.md"
