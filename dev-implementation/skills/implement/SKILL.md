@@ -16,6 +16,47 @@ metadata:
     - "verify"
     - "journey"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        gate: hard
+        description: "Project brief required for app name and implementation scope"
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "Features required — implementation builds features in journey order"
+        min_entries: 1
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        gate: hard
+        description: "Tech stack required for scaffold, foundation, and feature recipes"
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        gate: hard
+        description: "Data model required for schema generation and feature implementation"
+      - path: "_concept/2_experience/3_screens"
+        gate: hard
+        description: "Screen specs required for feature page implementation"
+        min_entries: 1
+    inputs_optional:
+      - id: complexity_tier
+        label: "Project complexity (controls checkpoint frequency and testing depth)"
+        type: select
+        options:
+          - small
+          - standard
+          - complex
+        default: standard
+        hint: "small = consolidated setup, standard = separate scaffold+foundation, complex = all checkpoints separate"
+    reads:
+      - path: "_concept/2_experience/1_journeys/stories.json"
+        description: "Journey stages for feature implementation ordering (hero → vital → hygiene)"
+    produces:
+      - path: "_implementation/PLANS.md"
+        description: "Structured implementation plan with dependency-ordered task list"
+      - path: "_implementation/progress.json"
+        description: "Feature implementation progress tracking"
+      - path: "_implementation/decisions.md"
+        description: "Implementation decisions log"
+      - path: "_implementation/LEARNINGS.md"
+        description: "Patterns and gotchas discovered during implementation"
   user_inputs:
     dialog:
       - id: "complexity_tier"

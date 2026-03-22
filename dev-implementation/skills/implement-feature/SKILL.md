@@ -14,6 +14,34 @@ metadata:
     - "build"
     - "engineering"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "Feature specs required for implementation targets"
+        min_entries: 1
+      - path: "_concept/2_experience/3_screens"
+        gate: hard
+        description: "Screen specs required for page implementation"
+        min_entries: 1
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        gate: hard
+        description: "Data model required for entity and migration implementation"
+      - path: "package.json"
+        gate: hard
+        description: "Dev stack must be running (project scaffolded and foundation applied)"
+    inputs_optional:
+      - id: feature_id
+        label: "Single feature to implement? (e.g., 01_user_auth/login) — leave blank for journey-first mode"
+        type: text
+    reads:
+      - path: "_concept/2_experience/1_journeys/stories.json"
+        description: "Journey stages for hero → vital → hygiene implementation order"
+      - path: "_concept/2_experience/4_storybook/src/pages"
+        description: "Storybook page compositions as UI starting point for each page"
+    produces:
+      - path: "_implementation/progress.json"
+        description: "Updated feature implementation status after each page completes"
   user_inputs:
     dialog:
       - id: "feature_id"

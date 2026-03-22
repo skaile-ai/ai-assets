@@ -13,6 +13,19 @@ metadata:
     - "regenerate"
     - "sync"
   source: "SAXE"
+  prerequisites:
+    files:
+      - path: "postxl-schema.json"
+        gate: hard
+        description: "PostXL schema file required — this skill is PostXL-specific"
+    reads:
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        description: "Data model for sync-check between concept and PostXL schema"
+      - path: "postxl-lock.json"
+        description: "Lock file to detect schema drift and guide conflict resolution"
+    produces:
+      - path: "src"
+        description: "Generated backend and frontend code from PostXL schema"
 ---
 
 # Generate — PostXL Code Generation

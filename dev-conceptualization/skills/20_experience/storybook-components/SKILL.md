@@ -10,6 +10,21 @@ metadata:
     - "building-blocks"
     - "custom-components"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/4_storybook"
+        gate: hard
+        description: "Storybook project must be scaffolded first (run storybook-setup)"
+      - path: "_concept/2_experience/3_screens"
+        gate: hard
+        description: "Screen specs required to identify custom building-block components"
+        min_entries: 1
+    reads:
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        description: "Brand tokens for component styling"
+    produces:
+      - path: "_concept/2_experience/4_storybook/src/components"
+        description: "Custom building-block component files and barrel export"
 ---
 
 # Storybook Components (Sub-skill 2/4)

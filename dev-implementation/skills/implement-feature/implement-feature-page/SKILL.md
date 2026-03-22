@@ -13,6 +13,30 @@ metadata:
     - "e2e"
     - "component"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/3_screens"
+        gate: hard
+        description: "Screen spec for this page (passed by implement-feature orchestrator)"
+        min_entries: 1
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "Feature specs for this page's features"
+        min_entries: 1
+      - path: "package.json"
+        gate: hard
+        description: "Dev stack must be running with passing test baseline"
+    reads:
+      - path: "_concept/2_experience/4_storybook/src/pages"
+        description: "Storybook page compositions as UI starting point"
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        description: "Data model for entity implementation"
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        description: "Seed data for realistic test fixtures"
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        description: "Brand tokens for styled component implementation"
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        description: "Tech stack for framework-specific implementation patterns"
 ---
 
 # Implement Feature Page — Page-Level Implementation with TDD Guard

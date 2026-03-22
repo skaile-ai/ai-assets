@@ -14,6 +14,40 @@ metadata:
     - "iteration"
     - "incremental"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        gate: hard
+        description: "Project brief must exist — add-feature requires an existing concept"
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "At least one feature group must exist to add to"
+        min_entries: 1
+    inputs_required:
+      - id: feature_description
+        label: "What feature do you want to add or change?"
+        type: text
+        hint: "Describe it in plain language — what should the user be able to do?"
+      - id: feature_mode
+        label: "New feature or modification?"
+        type: select
+        options:
+          - new
+          - modification
+    reads:
+      - path: "_concept/2_experience/1_journeys/stories.json"
+        description: "Existing journeys for cascade impact assessment"
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        description: "Tech stack for implementation cascade planning"
+      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+        description: "Architecture for service boundary impact"
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        description: "Data model for entity cascade"
+      - path: "_concept/2_experience/3_screens"
+        description: "Existing screens to identify cascade targets"
+    produces:
+      - path: "_concept/2_experience/2_features"
+        description: "New or modified feature spec file"
   user_inputs:
     dialog:
       - id: "feature_description"

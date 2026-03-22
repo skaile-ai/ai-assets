@@ -12,6 +12,31 @@ metadata:
     - "data-flow"
   source: "MIGRATED"
   subagent: true
+  prerequisites:
+    files:
+      - path: "package.json"
+        gate: hard
+        description: "Source code with API endpoints must exist"
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "Feature specs required for API endpoint coverage"
+        min_entries: 1
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        gate: hard
+        description: "Data model required for database operation test scenarios"
+      - path: ".env.example"
+        gate: hard
+        description: "Database connection info required (database must be accessible)"
+    reads:
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        description: "Seed scenarios for test fixture data"
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        description: "Tech stack for test framework and API client selection"
+      - path: "_concept/testing/test_plan.md"
+        description: "Test plan for API test scenario coverage"
+    produces:
+      - path: "src"
+        description: "Integration test files covering API endpoints and data flows"
 ---
 
 # Test Integration — API & Data Flow Testing

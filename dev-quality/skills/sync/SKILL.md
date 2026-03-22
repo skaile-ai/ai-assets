@@ -12,6 +12,23 @@ metadata:
     - "consistency"
     - "maintenance"
   source: "MIGRATED"
+  prerequisites:
+    files:
+      - path: "_concept"
+        gate: hard
+        description: "_concept/ folder must exist to scan cross-references"
+    reads:
+      - path: "_concept/2_experience/2_features"
+        description: "Feature files to check bidirectional links to screens"
+      - path: "_concept/2_experience/3_screens"
+        description: "Screen files to check implements: references back to features"
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        description: "Data model to find orphaned entities without feature map entries"
+      - path: "_concept/3_blueprint/3_datamodel/feature_map.json"
+        description: "Feature map to repair model-to-feature cross-references"
+    produces:
+      - path: "_concept"
+        description: "Repaired cross-reference fields across _concept/ files (shown as diff before applying)"
 ---
 
 # Sync — Cross-Reference Repair

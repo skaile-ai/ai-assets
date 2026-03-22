@@ -14,6 +14,26 @@ metadata:
     - "integration"
     - "nestjs"
   source: "SAXE"
+  prerequisites:
+    files:
+      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+        gate: hard
+        description: "Architecture doc defines custom_modules and processes that this skill implements"
+      - path: "backend"
+        gate: hard
+        description: "Project must be scaffolded with a backend directory before infrastructure can be added"
+    reads:
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        description: "Tech stack for backend framework patterns and library choices"
+      - path: "_concept/2_experience/2_features"
+        description: "Features to understand which infrastructure modules are needed"
+    produces:
+      - path: "backend/libs"
+        description: "Custom backend modules, providers, and service abstractions"
+      - path: "docker-compose.yml"
+        description: "Container orchestration for databases and external services"
+      - path: ".env.example"
+        description: "Environment variable template for infrastructure configuration"
 ---
 
 # Infrastructure — Custom Backend Modules and Services

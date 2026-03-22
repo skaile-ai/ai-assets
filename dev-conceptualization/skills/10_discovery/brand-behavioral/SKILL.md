@@ -15,6 +15,53 @@ metadata:
     - "messaging"
     - "ux-writing"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        gate: hard
+        description: "Project brief required for brand voice alignment"
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "Features must exist so behavioral copy can cover all UI states"
+        min_entries: 1
+      - path: "_concept/1_discovery/2_brand/identity.md"
+        gate: hard
+        description: "Visual identity must exist before defining behavioral companion"
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        gate: hard
+        description: "Design tokens must exist (confirms visual brand step is complete)"
+      - path: "_concept/2_experience/3_screens"
+        gate: soft
+        description: "Screen specs improve copy specificity but are not blocking"
+        min_entries: 1
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        gate: soft
+        description: "Seed data helps write realistic example copy"
+    inputs_optional:
+      - id: tone
+        label: "What tone should your app speak in?"
+        type: select
+        options:
+          - friendly
+          - professional
+          - playful
+          - serious
+        default: friendly
+      - id: formality_level
+        label: "How formal should the language be? (1 = casual chat, 5 = corporate)"
+        type: select
+        options:
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+        default: "3"
+    produces:
+      - path: "_concept/1_discovery/2_brand/behavioral.md"
+        description: "Tone of voice, personality, and communication principles"
+      - path: "_concept/1_discovery/2_brand/copy_guidelines.md"
+        description: "Error messages, empty states, notifications, micro-copy patterns"
   user_inputs:
     dialog:
       - id: "tone"

@@ -12,6 +12,25 @@ metadata:
     - "gate"
     - "implementation"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "At least one feature must exist to check readiness"
+        min_entries: 1
+    reads:
+      - path: "_concept/2_experience/3_screens"
+        description: "Screen specs for feature-to-screen coverage check"
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        description: "Data model for feature-to-model coverage check"
+      - path: "_concept/3_blueprint/3_datamodel/feature_map.json"
+        description: "Feature map for model-to-feature cross-reference"
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        description: "Brand tokens existence check (global prerequisite)"
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        description: "Tech stack existence check (global prerequisite)"
+      - path: "_concept/2_experience/4_storybook/src/pages"
+        description: "Storybook pages for soft mockup/composition check"
 ---
 
 # Ready — Pre-flight Readiness Gate

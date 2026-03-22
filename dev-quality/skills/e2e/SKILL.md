@@ -13,6 +13,36 @@ metadata:
     - "playwright"
     - "agent-browser"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "package.json"
+        gate: hard
+        description: "Source code must exist (or pyproject.toml equivalent)"
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        gate: hard
+        description: "Project brief required for app name and test scope"
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "Feature specs required for user journey test coverage"
+        min_entries: 1
+      - path: "_concept/2_experience/3_screens"
+        gate: hard
+        description: "Screen specs required for route and interaction testing"
+        min_entries: 1
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        gate: hard
+        description: "Data model required for database record validation"
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        gate: hard
+        description: "Seed scenarios required for all test data inputs"
+    reads:
+      - path: ".env.example"
+        description: "Auth and database connection info for test setup"
+    produces:
+      - path: "e2e-screenshots"
+        description: "Per-journey step screenshots organized by journey name"
+      - path: "e2e-test-report.md"
+        description: "Full markdown test report (user opt-in)"
 ---
 
 # E2E — End-to-End Browser Testing

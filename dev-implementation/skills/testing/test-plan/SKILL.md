@@ -11,6 +11,36 @@ metadata:
     - "coverage"
     - "acceptance"
   source: "MIGRATED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "Feature specs required to generate test scenarios"
+        min_entries: 1
+      - path: "_concept/2_experience/3_screens"
+        gate: hard
+        description: "Screen specs required for UI state test coverage"
+        min_entries: 1
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        gate: hard
+        description: "Data model required for data validation test scenarios"
+    inputs_required:
+      - id: test_scope
+        label: "Test Scope"
+        type: select
+        options:
+          - must-have-only
+          - all-features
+        default: all-features
+        hint: "Whether to generate test scenarios for must-have features only or all features"
+    reads:
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        description: "Seed scenarios for test fixture mapping"
+      - path: "_concept/2_experience/4_behaviors"
+        description: "Behavioral specs for state machine test coverage"
+    produces:
+      - path: "_concept/testing/test_plan.md"
+        description: "Structured test plan with scenarios per feature"
   user_inputs:
     dialog:
       - id: "test_scope"

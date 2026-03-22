@@ -16,6 +16,44 @@ metadata:
     - "atmosphere"
     - "brandbook"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        gate: hard
+        description: "Project brief must exist before defining visual identity"
+    inputs_required:
+      - id: mood
+        label: "Desired feeling"
+        type: text
+        hint: "What feeling should the app give? calm/bold/professional/playful..."
+      - id: light_dark
+        label: "Color mode"
+        type: select
+        options:
+          - light
+          - dark
+          - both
+        default: dark
+        hint: "Light mode, dark mode, or both?"
+    inputs_optional:
+      - id: reference_urls
+        label: "Reference websites"
+        type: text
+        hint: "Show a website you love — I'll extract palette and style"
+      - id: font_preferences
+        label: "Font preferences"
+        type: text
+        hint: "Any font preferences or constraints?"
+    reads:
+      - path: "_concept/_grounding/general/design_inspiration.md"
+        description: "Design inspiration from research phase (if available)"
+    produces:
+      - path: "_concept/1_discovery/2_brand/identity.md"
+        description: "Brand identity: palette, typography, atmosphere"
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        description: "Design tokens consumed by all downstream skills"
+      - path: "_concept/1_discovery/2_brand/brandbook.html"
+        description: "Visual preview of the complete brand"
   user_inputs:
     dialog:
       - id: "reference_urls"

@@ -15,6 +15,29 @@ metadata:
     - "build"
     - "lint"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_implementation/progress.json"
+        gate: hard
+        description: "All features must be approved in progress.json before full verification"
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "Feature specs required for acceptance criteria matrix"
+        min_entries: 1
+      - path: "_concept/2_experience/3_screens"
+        gate: hard
+        description: "Screen specs required for spec-fidelity checks"
+        min_entries: 1
+    reads:
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        description: "Data model for data validation checks"
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        description: "Seed data for test fixture population"
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        description: "Brand tokens for visual regression baseline"
+    produces:
+      - path: "_implementation/verification/reports/full-verification.json"
+        description: "Complete verification report with feature × acceptance criteria matrix"
 ---
 
 # Verify — Full-Stack Verification Gate

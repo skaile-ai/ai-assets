@@ -14,6 +14,54 @@ metadata:
     - "audience"
     - "problem"
   source: "MERGED"
+  prerequisites:
+    inputs_optional:
+      - id: raw_description
+        label: "Describe your idea"
+        type: textarea
+        hint: "Free-form description — app name, audience, problem, hero flow can all be inferred from this"
+      - id: app_name
+        label: "App Name"
+        type: text
+        hint: "Working name for the app (inferred from raw_description if provided)"
+      - id: elevator_pitch
+        label: "What does the app do?"
+        type: text
+        hint: "One sentence: who is it for and what does it do?"
+      - id: target_audience
+        label: "Who is the primary user?"
+        type: text
+        hint: "Role, context, skill level"
+      - id: problem_statement
+        label: "What problem does it solve?"
+        type: text
+        hint: "The single most important problem"
+      - id: hero_flow
+        label: "Most important user action"
+        type: text
+        hint: "The one thing every user must be able to do"
+      - id: comparable_products
+        label: "Similar apps"
+        type: text
+        hint: "Apps that do something similar (for reference)"
+      - id: success_criteria
+        label: "What does success look like?"
+        type: text
+        hint: "Goals, constraints, deadlines"
+    reads:
+      - path: "_concept/_grounding/overview/user_input.json"
+        description: "Pre-collected dialog answers"
+      - path: "_concept/_grounding/general/domain.md"
+        description: "Domain research (if research ran first)"
+      - path: "_concept/_grounding/general/competitors.md"
+        description: "Competitor research (if research ran first)"
+    produces:
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        description: "Elevator pitch, audience, problem, hero flow"
+      - path: "_concept/1_discovery/1_overview/goals.md"
+        description: "Success criteria, constraints, deadlines"
+      - path: "_concept/1_discovery/1_overview/comparable.md"
+        description: "Similar apps with lessons learned"
   user_inputs:
     dialog:
       - id: "raw_description"

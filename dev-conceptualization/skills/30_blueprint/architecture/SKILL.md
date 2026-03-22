@@ -15,6 +15,26 @@ metadata:
     - "agents"
     - "infrastructure"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        gate: hard
+        description: "Project brief required for system context and scope"
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "Features drive architectural decisions (services, protocols, integrations)"
+        min_entries: 1
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        gate: hard
+        description: "Tech stack determines default architecture; extends only where features demand"
+    reads:
+      - path: "_concept/_grounding/overview/user_input.json"
+        description: "Complexity tier for architectural depth"
+      - path: "_concept/2_experience/4_behaviors"
+        description: "Behavioral specs for state machine and lifecycle architecture"
+    produces:
+      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+        description: "System design: modules, data flow, protocols, infrastructure, integrations"
 ---
 
 # Architecture — System Architecture

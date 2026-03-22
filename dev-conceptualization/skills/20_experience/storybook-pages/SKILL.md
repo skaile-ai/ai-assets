@@ -12,6 +12,25 @@ metadata:
     - "states"
     - "responsive"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/4_storybook/src/components"
+        gate: hard
+        description: "Custom components must be built first (run storybook-components)"
+      - path: "_concept/2_experience/3_screens"
+        gate: hard
+        description: "Screen specs required to build full-page compositions"
+        min_entries: 1
+    reads:
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        description: "Brand tokens for page styling"
+      - path: "_concept/2_experience/3_screens/00_layout/shell.md"
+        description: "App shell structure and navigation for AppShell component"
+    produces:
+      - path: "_concept/2_experience/4_storybook/src/pages"
+        description: "Full-page screen compositions including AppShell"
+      - path: "_concept/2_experience/4_storybook/src/pages/manifest.json"
+        description: "Screen-to-page mapping consumed by storybook-journeys"
 ---
 
 # Storybook Pages (Sub-skill 3/4)

@@ -13,6 +13,15 @@ metadata:
     - "entropy"
     - "accessibility"
   source: "MERGED"
+  prerequisites:
+    reads:
+      - path: "package.json"
+        description: "Project marker for source existence check (or pyproject.toml equivalent)"
+      - path: "_concept"
+        description: "Optional: _concept/ structure for cross-reference integrity checks"
+    produces:
+      - path: "audit-report.md"
+        description: "Prioritized bug/risk report (user opt-in)"
 ---
 
 # Audit — Static Code Analysis

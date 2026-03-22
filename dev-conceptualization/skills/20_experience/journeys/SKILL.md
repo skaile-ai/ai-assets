@@ -13,6 +13,21 @@ metadata:
     - "ears"
     - "experience"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        gate: hard
+        description: "Project brief must exist and be approved before mapping journeys"
+    reads:
+      - path: "_concept/_grounding/general/audiences.md"
+        description: "Audience personas from research phase"
+      - path: "_concept/_grounding/general/competitors.md"
+        description: "Competitor analysis for journey gaps"
+      - path: "_concept/_grounding/general/domain.md"
+        description: "Domain context for journey staging"
+    produces:
+      - path: "_concept/2_experience/1_journeys/stories.json"
+        description: "Personas, story maps by stage, EARS acceptance criteria"
 ---
 
 # Journeys — User Journey Mapping

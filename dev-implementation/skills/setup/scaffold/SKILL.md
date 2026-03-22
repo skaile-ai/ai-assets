@@ -13,6 +13,29 @@ metadata:
     - "git"
     - "structure"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        gate: hard
+        description: "Tech stack definition required to select scaffold commands and conventions"
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        gate: hard
+        description: "Project brief required for app name and directory naming"
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        gate: hard
+        description: "Data model required for initial schema generation and migration setup"
+    reads:
+      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+        description: "Architecture for monorepo vs single-app scaffold decisions"
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        description: "Seed data to configure initial seed script"
+    produces:
+      - path: "_implementation/PLANS.md"
+        description: "Implementation plan with feature queue"
+      - path: "_implementation/progress.json"
+        description: "Feature implementation progress tracking"
+      - path: "_implementation/decisions.md"
+        description: "Scaffold decisions log"
 ---
 
 # Scaffold — Project Scaffolding

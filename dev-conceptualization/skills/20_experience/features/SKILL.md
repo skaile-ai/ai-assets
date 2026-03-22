@@ -13,6 +13,34 @@ metadata:
     - "must-have"
     - "nice-to-have"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        gate: hard
+        description: "Project brief required for feature context and scope"
+      - path: "_concept/2_experience/1_journeys/stories.json"
+        gate: hard
+        description: "User journeys must exist — features are derived from story candidates"
+    inputs_optional:
+      - id: feature_priorities
+        label: "Feature scope"
+        type: select
+        options:
+          - "must-have features only"
+          - "must-have + nice-to-have"
+          - comprehensive
+        default: "must-have + nice-to-have"
+        hint: "How broad should the feature set be? Story stages set the default — this overrides the scope."
+    reads:
+      - path: "_concept/_grounding/general/domain.md"
+        description: "Domain context to inform feature naming and scope"
+      - path: "_concept/_grounding/general/competitors.md"
+        description: "Competitor gaps to incorporate as differentiation features"
+      - path: "_concept/_grounding/general/audiences.md"
+        description: "Audience needs to prioritize feature depth"
+    produces:
+      - path: "_concept/2_experience/2_features"
+        description: "Feature files organized in numbered groups (one .md per feature)"
   user_inputs:
     dialog:
       - id: "feature_priorities"

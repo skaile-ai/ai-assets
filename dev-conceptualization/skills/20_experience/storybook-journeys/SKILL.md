@@ -13,6 +13,22 @@ metadata:
     - "vital"
     - "hygiene"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/4_storybook/src/pages"
+        gate: hard
+        description: "Page components must be built first (run storybook-pages)"
+      - path: "_concept/2_experience/4_storybook/src/pages/manifest.json"
+        gate: hard
+        description: "Page manifest required for screen-to-story mapping"
+    reads:
+      - path: "_concept/2_experience/1_journeys/stories.json"
+        description: "User journeys: story maps, personas, and journey stages for story titles"
+      - path: "_concept/2_experience/3_screens"
+        description: "Screen specs as fallback for page mapping"
+    produces:
+      - path: "_concept/2_experience/4_storybook/src/stories/Journeys"
+        description: "Clickable multi-screen journey stories (hero, vital, hygiene)"
 ---
 
 # Storybook Journeys (Sub-skill 4/4)

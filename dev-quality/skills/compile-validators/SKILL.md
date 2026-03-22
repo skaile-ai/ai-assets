@@ -11,6 +11,13 @@ metadata:
     - "fast"
     - "linting"
   source: "MERGED"
+  prerequisites:
+    reads:
+      - path: "ai-resources"
+        description: "SKILL.md files across the skill library (target skill or all skills)"
+    produces:
+      - path: "ai-resources"
+        description: "validator.py files alongside each processed SKILL.md"
 ---
 
 # Compile Validators — Validator Generator

@@ -13,6 +13,32 @@ metadata:
     - "experience"
     - "user-perspective"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "At least one feature must exist — screens implement features"
+        min_entries: 1
+    reads:
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        description: "App name, purpose, hero flow for navigation design"
+      - path: "_concept/2_experience/1_journeys/stories.json"
+        description: "User journeys to ensure screens cover all story flows"
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        description: "Design tokens for brand-aware component suggestions"
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        description: "Tech stack for routing patterns and component conventions"
+      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+        description: "Architecture for API surface awareness"
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        description: "Data model for data display and form field mapping"
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        description: "Seed data for realistic screen template data"
+      - path: "_concept/_grounding/general/design_inspiration.md"
+        description: "Design references for layout inspiration"
+    produces:
+      - path: "_concept/2_experience/3_screens"
+        description: "Per-screen specification files organized in numbered groups"
 ---
 
 # Screens — Screen Specifications

@@ -14,6 +14,21 @@ metadata:
     - "cards"
     - "navigation"
   source: "MIGRATED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/3_screens"
+        gate: hard
+        description: "Screen specs required to identify shared UI patterns across screens"
+        min_entries: 1
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        gate: hard
+        description: "Design tokens required for component styling context"
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        gate: hard
+        description: "Tech stack required to map abstract components to concrete library components"
+    produces:
+      - path: "_concept/2_experience/3_screens/components"
+        description: "Component inventory files with props, variants, states, and accessibility notes"
 ---
 
 # App Components — Reusable Component Inventory

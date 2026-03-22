@@ -10,6 +10,22 @@ metadata:
     - "brand-tokens"
     - "config"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        gate: hard
+        description: "Brand tokens required for CSS custom properties and Storybook theming"
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        gate: hard
+        description: "App name required for Storybook project branding"
+    reads:
+      - path: "_concept/1_discovery/2_brand/identity.md"
+        description: "Design philosophy and atmosphere for Storybook customization"
+      - path: "_concept/2_experience/3_screens/00_layout/shell.md"
+        description: "Responsive breakpoints for Storybook viewport presets"
+    produces:
+      - path: "_concept/2_experience/4_storybook"
+        description: "Storybook project scaffold with brand token integration"
 ---
 
 # Storybook Setup (Sub-skill 1/4)

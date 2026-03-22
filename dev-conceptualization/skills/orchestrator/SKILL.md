@@ -13,6 +13,27 @@ metadata:
     - "blueprint"
     - "checkpoint"
   source: "MERGED"
+  prerequisites:
+    inputs_optional:
+      - id: complexity_tier
+        label: "Project complexity (controls checkpoint frequency)"
+        type: select
+        options:
+          - small
+          - standard
+          - complex
+        default: standard
+        hint: "small = consolidated checkpoints, standard = phase-level checkpoints, complex = per-skill checkpoints"
+    reads:
+      - path: "_concept/PLANS.md"
+        description: "Existing plan for resuming an interrupted pipeline session"
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        description: "Existing brief to resume from a known pipeline stage"
+    produces:
+      - path: "_concept/PLANS.md"
+        description: "Structured concept plan tracking pipeline phases and checkpoints"
+      - path: "_concept/decisions.md"
+        description: "Key decisions made during the pipeline session"
   user_inputs:
     dialog:
       - id: "complexity_tier"

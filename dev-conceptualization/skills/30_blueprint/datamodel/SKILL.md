@@ -14,6 +14,35 @@ metadata:
     - "seed"
     - "feature-map"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "Features drive data model entities — features must exist first"
+        min_entries: 1
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        gate: hard
+        description: "Tech stack determines storage type and semantic type mapping"
+    reads:
+      - path: "_concept/_grounding/overview/user_input.json"
+        description: "Complexity tier for model depth"
+      - path: "_concept/2_experience/1_journeys/stories.json"
+        description: "User journeys for data flow context"
+      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+        description: "Architecture for service boundaries and data ownership"
+      - path: "_concept/2_experience/4_behaviors"
+        description: "Behavioral specs for entity state machine fields"
+      - path: "_concept/_grounding/general/patterns.md"
+        description: "Domain patterns for semantic type selection"
+    produces:
+      - path: "_concept/3_blueprint/3_datamodel/model.dbml"
+        description: "Human-readable DBML entity definitions"
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        description: "Editor canvas state for visual data model"
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        description: "Scenario-based test data for all downstream testing"
+      - path: "_concept/3_blueprint/3_datamodel/feature_map.json"
+        description: "Model-to-feature cross-reference for readiness checks"
 ---
 
 # Data Model

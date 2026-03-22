@@ -15,6 +15,29 @@ metadata:
     - "seed"
     - "storybook"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "package.json"
+        gate: hard
+        description: "Project must be scaffolded before applying foundation layers"
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        gate: hard
+        description: "Brand tokens required for CSS variable generation"
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        gate: hard
+        description: "Tech stack required to select foundation recipes (auth, layout, theme)"
+    reads:
+      - path: "_concept/1_discovery/2_brand/identity.md"
+        description: "Brand identity for theme customization"
+      - path: "_concept/2_experience/3_screens/00_layout/shell.md"
+        description: "App shell structure for navigation and layout implementation"
+      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+        description: "Architecture for auth provider and session configuration"
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        description: "Seed data for initial database population"
+    produces:
+      - path: "_implementation/progress.json"
+        description: "Foundation layer completion status"
 ---
 
 # Foundation — Brand, Auth, App Shell, and Seed

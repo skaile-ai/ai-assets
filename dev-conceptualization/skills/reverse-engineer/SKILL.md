@@ -15,6 +15,51 @@ metadata:
     - "infer"
     - "scan"
   source: "MIGRATED"
+  prerequisites:
+    inputs_required:
+      - id: repo_path
+        label: "Repository Path"
+        type: text
+        hint: "Absolute or relative path to the existing project repository root"
+    inputs_optional:
+      - id: concept_path
+        label: "Concept Output Path"
+        type: text
+        hint: "Where to write _concept/ (default: <repo_path>/_concept/). Override if the concept lives elsewhere."
+      - id: extraction_scope
+        label: "What to Extract"
+        type: multiselect
+        options:
+          - overview
+          - techstack
+          - features
+          - datamodel
+          - brand
+          - screens
+        default:
+          - overview
+          - techstack
+          - features
+          - datamodel
+          - brand
+          - screens
+        hint: "Which concept artifacts to generate. Omit items you already have or want to write manually."
+      - id: overwrite_mode
+        label: "If _concept/ Files Already Exist"
+        type: select
+        options:
+          - skip
+          - diff_and_confirm
+          - overwrite
+        default: skip
+        hint: "skip = never overwrite, diff_and_confirm = show diff and ask, overwrite = always replace"
+      - id: app_description_hint
+        label: "What does this app do? (optional hint)"
+        type: text
+        hint: "Brief description to help the agent when README is sparse or missing."
+    produces:
+      - path: "_concept"
+        description: "Full _concept/ structure extracted and inferred from the existing repository"
   user_inputs:
     dialog:
       - id: "repo_path"

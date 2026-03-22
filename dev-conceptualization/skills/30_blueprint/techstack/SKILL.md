@@ -12,6 +12,43 @@ metadata:
     - "profile"
     - "stack-selection"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        gate: hard
+        description: "Project brief required to recommend appropriate tech stack"
+    inputs_required:
+      - id: platform
+        label: "Platform"
+        type: select
+        options:
+          - web
+          - mobile
+          - api
+          - desktop
+        hint: "What are you building?"
+    inputs_optional:
+      - id: framework_experience
+        label: "Framework experience"
+        type: text
+        hint: "Vue, React, Python, or starting fresh?"
+      - id: data_heavy
+        label: "Data-heavy app?"
+        type: boolean
+        hint: "Lots of tables, lists, sorting, and filtering?"
+      - id: managed_vs_selfhosted
+        label: "Hosting preference"
+        type: select
+        options:
+          - self-hosted
+          - managed/cloud
+        hint: "Manage your own server or use hosted services?"
+    reads:
+      - path: "_concept/2_experience/2_features"
+        description: "Feature complexity and count to inform stack recommendation"
+    produces:
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        description: "Chosen tech stack with profile reference for downstream skills"
   user_inputs:
     dialog:
       - id: "framework_experience"

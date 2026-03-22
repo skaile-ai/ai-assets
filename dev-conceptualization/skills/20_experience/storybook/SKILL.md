@@ -13,6 +13,26 @@ metadata:
     - "journeys"
     - "screens"
   source: "MERGED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/3_screens"
+        gate: hard
+        description: "Screen specs required — storybook generates components and pages from screen specs"
+        min_entries: 1
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        gate: hard
+        description: "Design tokens required for brand-accurate component styling"
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        gate: hard
+        description: "Tech stack determines storybook addon, story format, and component library"
+    reads:
+      - path: "_concept/2_experience/1_journeys/stories.json"
+        description: "User journeys for journey flow stories (4th storybook layer)"
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        description: "Seed data for realistic story args"
+    produces:
+      - path: "_concept/2_experience/4_storybook"
+        description: "Complete storybook project: setup, components, pages, journey stories"
 ---
 
 # Storybook — 3-Layer Component & Journey Visualization

@@ -17,6 +17,37 @@ metadata:
     - "patterns"
     - "grounding"
   source: "MERGED"
+  prerequisites:
+    inputs_required:
+      - id: research_scope
+        label: "Research scope"
+        type: select
+        options:
+          - domain
+          - competitors
+          - audiences
+          - design
+          - patterns
+          - colors
+          - behavioral
+          - all
+        hint: "What area to research (select 'all' for comprehensive research)"
+    reads:
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        description: "App name, problem statement, target audience for focused research"
+      - path: "_concept/_grounding/overview/user_input.json"
+        description: "Pre-collected answers to sharpen research scope"
+    produces:
+      - path: "_concept/_grounding/general/domain.md"
+        description: "Domain landscape findings"
+      - path: "_concept/_grounding/general/competitors.md"
+        description: "Competitor analysis"
+      - path: "_concept/_grounding/general/audiences.md"
+        description: "Target audience personas"
+      - path: "_concept/_grounding/general/design_inspiration.md"
+        description: "Visual and layout references"
+      - path: "_concept/_grounding/general/behavioral_patterns.md"
+        description: "UX behavioral patterns"
   user_inputs:
     dialog:
       - id: "research_scope"

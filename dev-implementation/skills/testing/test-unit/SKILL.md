@@ -12,6 +12,24 @@ metadata:
     - "tdd"
   source: "MIGRATED"
   subagent: true
+  prerequisites:
+    files:
+      - path: "package.json"
+        gate: hard
+        description: "Source code must exist — unit tests require implemented functions to test"
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "Feature specs required — each requirement becomes a test case"
+        min_entries: 1
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        gate: hard
+        description: "Tech stack required to select correct test framework (vitest/jest)"
+    reads:
+      - path: "_concept/testing/test_plan.md"
+        description: "Test plan for structured test scenario coverage"
+    produces:
+      - path: "src"
+        description: "One test file per feature (in stack-appropriate test directory)"
 ---
 
 # Test Unit — Feature-Driven Unit Test Generation

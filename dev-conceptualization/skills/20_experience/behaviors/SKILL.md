@@ -14,6 +14,18 @@ metadata:
     - "lifecycle"
     - "state-machine"
   source: "MIGRATED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/2_features"
+        gate: hard
+        description: "Features must exist — behavioral specs formalize feature rules into state machines"
+        min_entries: 1
+    reads:
+      - path: "_concept/_grounding/general/behavioral_patterns.md"
+        description: "Domain behavioral patterns from research phase"
+    produces:
+      - path: "_concept/2_experience/4_behaviors"
+        description: "Allium behavioral specification files (one per feature group)"
 ---
 
 # Behaviors — Behavioral Specification

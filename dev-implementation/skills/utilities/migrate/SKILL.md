@@ -14,6 +14,20 @@ metadata:
     - "ddl"
     - "migration"
   source: "CF"
+  prerequisites:
+    files:
+      - path: "_concept/3_blueprint/3_datamodel/model.dbml"
+        gate: hard
+        description: "DBML model required for entity and field definitions"
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        gate: hard
+        description: "JSON model required for relationship and type mapping"
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        gate: hard
+        description: "Tech stack required to select target ORM and migration framework"
+    produces:
+      - path: "migrations"
+        description: "Stack-specific migration files (Prisma schema, Drizzle migrations, SQL DDL)"
 ---
 
 # Migrate — Database Migration Generator

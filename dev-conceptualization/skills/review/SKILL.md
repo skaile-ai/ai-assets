@@ -15,6 +15,26 @@ metadata:
     - "cleanup"
     - "quality"
   source: "MERGED"
+  prerequisites:
+    inputs_optional:
+      - id: mode
+        label: "Audit or garden?"
+        type: select
+        options:
+          - audit
+          - garden
+        default: audit
+        hint: "audit = report issues; garden = auto-fix safe issues"
+    reads:
+      - path: "_concept"
+        description: "All _concept/ files scanned for completeness, cross-references, and entropy"
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        description: "Data model for cross-reference integrity checks"
+      - path: "_concept/3_blueprint/3_datamodel/feature_map.json"
+        description: "Feature map for entity-to-feature cross-reference validation"
+    produces:
+      - path: "_concept/quality.json"
+        description: "Health report with quality score (0–100) and issue inventory"
   user_inputs:
     dialog:
       - id: "mode"

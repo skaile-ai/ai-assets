@@ -15,6 +15,23 @@ metadata:
     - "drizzle"
     - "sql"
   source: "CF"
+  prerequisites:
+    files:
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        gate: hard
+        description: "Seed data scenarios required to generate seed scripts"
+      - path: "_concept/3_blueprint/3_datamodel/model.json"
+        gate: hard
+        description: "Data model required for entity type validation and relationship seeding"
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        gate: hard
+        description: "Tech stack required to select seed script format (Prisma, Drizzle, raw SQL)"
+      - path: "migrations"
+        gate: hard
+        description: "Migrations must exist before seed scripts can be run"
+    produces:
+      - path: "scripts/seed"
+        description: "Executable seed scripts per scenario (empty, single_user, populated, edge_cases)"
 ---
 
 # Seed — Seed Script Generator

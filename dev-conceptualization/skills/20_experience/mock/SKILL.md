@@ -18,6 +18,29 @@ metadata:
     - "preact"
     - "htm"
   source: "MIGRATED"
+  prerequisites:
+    files:
+      - path: "_concept/2_experience/3_screens"
+        gate: hard
+        description: "Screen specs must exist — mockup renders screen specs as HTML"
+        min_entries: 1
+      - path: "_concept/1_discovery/2_brand/tokens.json"
+        gate: hard
+        description: "Design tokens required for brand-accurate styling"
+      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+        gate: hard
+        description: "Seed data required for realistic mock content"
+      - path: "_concept/3_blueprint/1_techstack/stack.md"
+        gate: soft
+        description: "Tech stack used to auto-select mockup stack template"
+    reads:
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        description: "App name and navigation structure"
+      - path: "_concept/2_experience/2_features"
+        description: "Feature list for page inventory"
+    produces:
+      - path: "_concept/mockups"
+        description: "Linked multi-page HTML prototype files"
 ---
 
 # Concept Mock — Linked Multi-Page Prototype
