@@ -95,3 +95,25 @@ that user input is needed.
 | "I'll fix the cross-references later" | Fix them now. Broken links compound exponentially. |
 | "Testing can wait" | Write the test plan alongside features. Testing is not an afterthought. |
 | "I'll just ask at the end of this update" | Send the question as a separate message. Users miss questions buried in long outputs. |
+| "The spec seems fine, let me check code quality" | Run spec compliance first. Quality review on a misbuilt feature is wasted work. |
+| "I already know the context from the conversation" | The `_concept/` artifacts are the source of truth. Read them. |
+| "I'm almost done — I'll clean up at the end" | You will not get back to it. Write the clean version now. |
+
+---
+
+## Red Flags — Stop and Reflect
+
+If you catch yourself thinking any of the following, **name the pattern before continuing**.
+These are the most common points of self-deception under time pressure or sunk-cost pressure.
+
+| Thought pattern | What it signals |
+|---|---|
+| "I know what's needed — I can skip the spec read" | You are about to build the wrong thing |
+| "I'll do a quick implementation and test later" | You are skipping the Red→Green cycle |
+| "The tests are too hard to write for this" | The implementation is too complex — simplify it first |
+| "I've been working on this a while, it's probably fine" | Sunk cost. Run the checks. |
+| "The quality looks good, I'll skip the spec review" | Spec compliance must come before quality review |
+| "I'll ask when I have more to show" | You are burying a question. Send it now, standalone. |
+| "This edge case is unlikely, I'll skip it" | Edge cases compound. Address it or document the known gap. |
+
+Violating the letter is violating the spirit. No rationalization overrides these laws.

@@ -170,11 +170,44 @@ See `feedback_loop.md` for the full cross-reference protocol.
 When a flow node has `"subagent": true`:
 1. Orchestrator creates a fresh agent context
 2. Context includes ONLY: the skill's SKILL.md, required `dev-shared/` contracts, input `_concept/` folders
-3. Subagent runs to completion
-4. Orchestrator collects output artifacts
-5. Orchestrator runs completion check
+3. **Paste the full task text verbatim into the subagent prompt** — never ask the subagent to read the plan file
+4. Subagent runs to completion and reports one of four statuses (see Implementer Status Report below)
+5. Orchestrator handles the status and collects output artifacts
 
 **Never forward full conversation history to subagents.** Fresh context = focused output.
+
+### Implementer Status Report
+
+Every subagent MUST end with a status block using one of four codes:
+
+```
+STATUS: DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED
+
+[If DONE_WITH_CONCERNS]  Concerns: <trade-offs, deviations, debt incurred>
+[If NEEDS_CONTEXT]       Missing:  <what is absent>
+                         Question: <single specific question for the user or orchestrator>
+[If BLOCKED]             Reason:   <what cannot be resolved>
+                         Route:    context | escalate-model | decompose
+```
+
+| Status | Meaning | Orchestrator action |
+|---|---|---|
+| `DONE` | All requirements met, tests pass | Accept output, advance flow |
+| `DONE_WITH_CONCERNS` | Implemented but with trade-offs or notes | Accept, log concerns in `decisions.md`, advance |
+| `NEEDS_CONTEXT` | Missing information or ambiguous requirement | Surface specific question to user; resume when answered |
+| `BLOCKED` | Cannot proceed — see route | See BLOCKED sub-routes below |
+
+**BLOCKED sub-routes:**
+
+| Route | When to use | Orchestrator response |
+|---|---|---|
+| `context` | A specific question can unblock the task | Escalate question to user; re-dispatch with answer |
+| `escalate-model` | Task exceeded model capability | Note in `decisions.md`; re-dispatch on higher-tier model |
+| `decompose` | Task is too large to execute atomically | Break into smaller tasks; re-dispatch each |
+
+**Why this matters:** Subagents that silently produce partial output or fail without a clear status
+cause the orchestrator to make incorrect assumptions. Explicit status codes make failure modes
+actionable rather than opaque.
 
 ---
 

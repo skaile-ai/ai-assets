@@ -141,12 +141,14 @@ MUST  implement journeys in stage order: hero → vital → hygiene
 MUST  write failing journey tests BEFORE implementing any pages
 MUST  deduplicate pages across journeys — implement once, verify in each
 MUST  run ALL tests after each page to catch regressions
+MUST  run spec-compliance review before code-quality review after each journey
 MUST  use populated scenario seed data by default
 MUST  use test IDs (data-testid) for element addressing in tests
 MUST  use one git branch per journey, squash-merged after approval
 NEVER implement pages before journey tests exist
 NEVER use screenshot assertions — use test IDs and value assertions
 NEVER skip regression testing (all prior tests must still pass)
+NEVER skip spec-compliance review to go straight to quality review
 NEVER modify _concept/ files
 
 # ── Standalone Mode (single feature) ──────────────────────────────
@@ -254,6 +256,27 @@ STEP 6: Fix until journey tests pass
     UNTIL journey tests pass AND all prior tests still pass
     $ git commit -m "feat: complete journey <journey-label>"
 
+STEP 6a: Spec compliance review (REQUIRED before quality review)
+  - Read each feature spec in this journey against the actual code produced, line by line
+  - Assume the implementer "finished suspiciously quickly" — do not trust passing tests alone
+  - Verify: every requirement in the spec is present in the code, not just implied
+  - Verify: acceptance criteria (EARS) are all addressable by a test
+  - If any requirement is missing or misimplemented:
+    - Fix it now. Do NOT proceed to quality review with an incomplete spec.
+    - Re-run tests after the fix.
+  - Record result: COMPLIANT | NON_COMPLIANT (with list of gaps)
+  EMIT [implement-feature] spec_review journey=<id> result=<COMPLIANT|NON_COMPLIANT> gaps=<N>
+
+STEP 6b: Code quality review (only runs after spec compliance passes)
+  IF spec compliance result is NON_COMPLIANT → fix gaps, repeat STEP 6a
+  ELSE
+    - Check test coverage: all feature code paths have at least one test
+    - Check file boundaries: no feature bleeds into another's files
+    - Check naming: matches golden_principles conventions
+    - Check no debugging artifacts (console.log, TODO, commented-out blocks) remain
+    - If issues found: fix and re-run tests
+  EMIT [implement-feature] quality_review journey=<id> result=<PASS|FAIL> issues=<N>
+
 STEP 7: Journey checkpoint
   CHECKPOINT journey_complete
     > "Journey '<journey-label>' is complete. Users can now:
@@ -297,6 +320,8 @@ CHECKLIST
 | Implementing pages before journey tests | Always write failing journey tests first |
 | Numeric feature-group order instead of journey order | Use stories.json stage order: hero → vital → hygiene |
 | Not running regression tests after each page | Run ALL tests after each page, not just the current journey |
+| Skipping spec compliance and going straight to quality | Spec compliance must pass before quality review — both are required |
+| Running quality review on a misbuilt feature | Fix spec gaps first; quality review on wrong code is wasted work |
 | Screenshot assertions in tests | Use data-testid + value assertions only |
 | Modifying `_concept/` files | concept is read-only — update last_updated only via feedback loop |
 

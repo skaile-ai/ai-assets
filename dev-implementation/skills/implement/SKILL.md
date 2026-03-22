@@ -432,9 +432,22 @@ PROCEDURE update_progress
   - Commit: "chore: update implementation progress"
 
 PROCEDURE feature_auto_review
-  - Check all criteria in references/auto_review.md
-  - IF all pass → auto-approve, log approval_method: "auto" in progress.json
-  - ELSE → escalate to human with failing checks highlighted
+  - Check the subagent's status code (see dev-shared/contracts/agent_patterns.md Implementer Status Report)
+  - IF status is DONE:
+    - Check all criteria in references/auto_review.md
+    - IF all pass → auto-approve, log approval_method: "auto" in progress.json
+    - ELSE → escalate to human with failing checks highlighted
+  - IF status is DONE_WITH_CONCERNS:
+    - Log concerns in _implementation/decisions.md
+    - Check auto_review criteria
+    - IF all pass → auto-approve, log approval_method: "auto_with_concerns"
+    - ELSE → escalate to human with concerns AND failing checks highlighted
+  - IF status is NEEDS_CONTEXT:
+    - Surface the specific question to the user (standalone message)
+    - Resume the feature after answer is received
+  - IF status is BLOCKED:
+    - Route: context → surface question to user; escalate-model → note in decisions.md; decompose → break task and re-dispatch
+    - Log block reason in _implementation/decisions.md
 
 CHECKLIST
   - [ ] PLANS.md created or resumed before any work
