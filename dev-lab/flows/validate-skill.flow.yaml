@@ -1,0 +1,27 @@
+id: validate-skill
+version: "1.0"
+name: "Validate Skill"
+description: "Run a skill's test suite in Docker and produce a validation report"
+entry: run-cases
+nodes:
+  - id: run-cases
+    type: skill
+    data:
+      skill: lab-validate
+      label: "Execute test cases"
+      parameters:
+        phase: "execute"
+  - id: judge-quality
+    type: skill
+    data:
+      skill: lab-judge
+      label: "Judge output quality"
+      optional: true
+  - id: report
+    type: skill
+    data:
+      skill: lab-report
+      label: "Generate report"
+edges:
+  - { id: e1, source: run-cases, target: judge-quality, type: flow }
+  - { id: e2, source: judge-quality, target: report, type: flow }
