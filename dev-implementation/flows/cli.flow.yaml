@@ -1,36 +1,35 @@
-id: cli
+id: "cli"
 version: "1.0"
-name: CLI Implementation
-description: >-
-  Implementation pipeline for command-line tools. No UI shell, no design pass,
-  no E2E. Scaffold, foundation (headless), optional migrate/seed, feature TDD,
-  unit and integration tests, verify.
-
-meta:
-  icon: i-heroicons-command-line
-  category: cli
-  tags: [cli, implementation, no-ui, tdd]
-
+name: "CLI Implementation"
+description: "Implementation pipeline for command-line tools. No UI shell, no design pass, no E2E. Scaffold, foundation (headless), optional migrate/seed, feature TDD, unit and integration tests, verify."
+metadata:
+  tags:
+    - "cli"
+    - "implementation"
+    - "no-ui"
+    - "tdd"
+  stage: "stable"
+  icon: "i-heroicons-command-line"
+  category: "cli"
 globals:
-  research_depth: skip
-  approval_mode: checkpoint
+  research_depth: "skip"
+  approval_mode: "checkpoint"
   auto_review: false
   subagent_mode: true
-  verbosity: standard
+  verbosity: "standard"
   cli_mode: true
-
 modes:
   research:
     enabled: false
   standards:
     enabled: false
-
-entry: scaffold
-
+entry: "scaffold"
 nodes:
-  - id: g-implement
-    type: group
-    position: {x: 0, y: 0}
+  - id: "g-implement"
+    type: "group"
+    position:
+      x: 0
+      y: 0
     style:
       width: 1280
       height: 320
@@ -38,105 +37,138 @@ nodes:
       border: "1px solid rgba(16,185,129,0.2)"
       borderRadius: "12px"
     data:
-      label: Implementation
-      phase: implementation
-
-  - id: scaffold
-    type: skill
-    parentNode: g-implement
-    position: {x: 40, y: 140}
+      label: "Implementation"
+      phase: "implementation"
+  - id: "scaffold"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 40
+      y: 140
     data:
-      skill: scaffold
-      label: Scaffold
+      skill: "scaffold"
+      label: "Scaffold"
       optional: false
       parameters:
-        project_type: cli
-        package_manager: bun
-
-  - id: foundation
-    type: skill
-    parentNode: g-implement
-    position: {x: 280, y: 140}
+        project_type: "cli"
+        package_manager: "bun"
+  - id: "foundation"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 280
+      y: 140
     data:
-      skill: foundation
-      label: Foundation
+      skill: "foundation"
+      label: "Foundation"
       optional: true
       parameters:
         skip_ui_shell: true
-
-  - id: migrate
-    type: skill
-    parentNode: g-implement
-    position: {x: 520, y: 60}
+  - id: "migrate"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 520
+      y: 60
     data:
-      skill: migrate
-      label: Migrate
+      skill: "migrate"
+      label: "Migrate"
       optional: true
-
-  - id: seed
-    type: skill
-    parentNode: g-implement
-    position: {x: 520, y: 220}
+  - id: "seed"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 520
+      y: 220
     data:
-      skill: seed
-      label: Seed
+      skill: "seed"
+      label: "Seed"
       optional: true
-
-  - id: implement-feature
-    type: skill
-    parentNode: g-implement
-    position: {x: 760, y: 140}
+  - id: "implement-feature"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 760
+      y: 140
     data:
-      skill: implement-feature
-      label: Feature
+      skill: "implement-feature"
+      label: "Feature"
       optional: false
       subagent: true
       parameters:
         tdd: true
-
-  - id: test-unit
-    type: skill
-    parentNode: g-implement
-    position: {x: 1000, y: 60}
+  - id: "test-unit"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 1000
+      y: 60
     data:
-      skill: test-unit
-      label: Unit Tests
+      skill: "test-unit"
+      label: "Unit Tests"
       optional: false
       subagent: true
-
-  - id: test-integration
-    type: skill
-    parentNode: g-implement
-    position: {x: 1000, y: 200}
+  - id: "test-integration"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 1000
+      y: 200
     data:
-      skill: test-integration
-      label: Integration Tests
+      skill: "test-integration"
+      label: "Integration Tests"
       optional: false
       subagent: true
-
-  - id: verify
-    type: skill
-    parentNode: g-implement
-    position: {x: 1240, y: 140}
+  - id: "verify"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 1240
+      y: 140
     data:
-      skill: verify
-      label: Verify
+      skill: "verify"
+      label: "Verify"
       optional: false
       subagent: true
-
 edges:
-  - {id: e-scaffold-foundation,  source: scaffold,          target: foundation,        type: optional}
-  - {id: e-scaffold-migrate,     source: scaffold,          target: migrate,           type: optional}
-  - {id: e-scaffold-feature,     source: scaffold,          target: implement-feature, type: flow}
-  - {id: e-foundation-feature,   source: foundation,        target: implement-feature, type: optional}
-  - {id: e-migrate-seed,         source: migrate,           target: seed,              type: optional}
-  - {id: e-feature-unit,         source: implement-feature, target: test-unit,         type: flow}
-  - {id: e-feature-integration,  source: implement-feature, target: test-integration,  type: flow}
-  - {id: e-unit-verify,          source: test-unit,         target: verify,            type: flow}
-  - {id: e-integration-verify,   source: test-integration,  target: verify,            type: flow}
-
+  - id: "e-scaffold-foundation"
+    source: "scaffold"
+    target: "foundation"
+    type: "optional"
+  - id: "e-scaffold-migrate"
+    source: "scaffold"
+    target: "migrate"
+    type: "optional"
+  - id: "e-scaffold-feature"
+    source: "scaffold"
+    target: "implement-feature"
+    type: "flow"
+  - id: "e-foundation-feature"
+    source: "foundation"
+    target: "implement-feature"
+    type: "optional"
+  - id: "e-migrate-seed"
+    source: "migrate"
+    target: "seed"
+    type: "optional"
+  - id: "e-feature-unit"
+    source: "implement-feature"
+    target: "test-unit"
+    type: "flow"
+  - id: "e-feature-integration"
+    source: "implement-feature"
+    target: "test-integration"
+    type: "flow"
+  - id: "e-unit-verify"
+    source: "test-unit"
+    target: "verify"
+    type: "flow"
+  - id: "e-integration-verify"
+    source: "test-integration"
+    target: "verify"
+    type: "flow"
 next_flows:
-  - id: audit
-    domain: dev-quality
-    label: "Audit \u2192"
-    hint: Run static analysis and structure audit on the CLI codebase.
+  - id: "audit"
+    domain: "dev-quality"
+    label: "Audit →"
+    hint: "Run static analysis and structure audit on the CLI codebase."

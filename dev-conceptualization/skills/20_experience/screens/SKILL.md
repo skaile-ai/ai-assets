@@ -1,12 +1,18 @@
 ---
-name: screens
+name: "screens"
 description: "Use after features are approved to write screen specifications. Reads features, optional brand/techstack/datamodel/journeys artifacts, and produces per-screen docs organized in numbered groups. Registers screens back into feature frontmatter via feedback loop."
-keywords: [screens, pages, ui, layout, navigation, ux, experience, user-perspective]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "screens"
+    - "pages"
+    - "ui"
+    - "layout"
+    - "navigation"
+    - "ux"
+    - "experience"
+    - "user-perspective"
+  source: "MERGED"
 ---
 
 # Screens — Screen Specifications

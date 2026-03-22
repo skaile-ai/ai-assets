@@ -1,12 +1,23 @@
 ---
-name: mock
+name: "mock"
 description: "Use when screen specs are approved and user wants interactive HTML mockups. Also when user says 'mockup', 'prototype', 'show me what it looks like'. Generates a linked multi-page prototype. Supports 3 stacks: Alpine.js+Shoelace, Vue 3+PrimeVue, Preact+HTM. Auto-selects stack template from tech-stack profile if stack.md exists."
-keywords: [ui, ux, design, frontend, mockups, prototype, linked, alpine, shoelace, primevue, vue3, preact, htm]
-source: MIGRATED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "ui"
+    - "ux"
+    - "design"
+    - "frontend"
+    - "mockups"
+    - "prototype"
+    - "linked"
+    - "alpine"
+    - "shoelace"
+    - "primevue"
+    - "vue3"
+    - "preact"
+    - "htm"
+  source: "MIGRATED"
 ---
 
 # Concept Mock — Linked Multi-Page Prototype

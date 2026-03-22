@@ -1,12 +1,20 @@
 ---
-name: architecture
+name: "architecture"
 description: "Use after features and techstack are approved to document system architecture. Produces architecture.md with system overview, backend structure, data flow, communication protocols, external integrations, and infrastructure."
-keywords: [architecture, modules, dataflow, protocols, backend, api, services, websocket, agents, infrastructure]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "architecture"
+    - "modules"
+    - "dataflow"
+    - "protocols"
+    - "backend"
+    - "api"
+    - "services"
+    - "websocket"
+    - "agents"
+    - "infrastructure"
+  source: "MERGED"
 ---
 
 # Architecture — System Architecture

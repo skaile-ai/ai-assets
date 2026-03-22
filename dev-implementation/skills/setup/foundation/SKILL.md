@@ -1,12 +1,20 @@
 ---
-name: foundation
+name: "foundation"
 description: "Applies the three foundational layers every app needs before feature work: brand tokens → CSS variables, authentication setup, and app shell layout. Also seeds initial data and configures Storybook with brand theme if present. Reads the tech stack profile for stack-specific recipes. Run after scaffold, before implement-feature."
-keywords: [foundation, theming, brand, css-vars, auth, app-shell, layout, navigation, seed, storybook]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "foundation"
+    - "theming"
+    - "brand"
+    - "css-vars"
+    - "auth"
+    - "app-shell"
+    - "layout"
+    - "navigation"
+    - "seed"
+    - "storybook"
+  source: "MERGED"
 ---
 
 # Foundation — Brand, Auth, App Shell, and Seed

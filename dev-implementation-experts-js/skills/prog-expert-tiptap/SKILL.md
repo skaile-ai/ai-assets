@@ -1,14 +1,11 @@
 ---
-name: prog-expert-tiptap
-source: MIGRATED
-description: Use when you need to use when you need to implement advanced tiptap editors in nuxt 3, including collaboration, custom node views, and context menus.. Expert-level programming and pattern management.
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-tiptap"
+description: "Use when you need to use when you need to implement advanced tiptap editors in nuxt 3, including collaboration, custom node views, and context menus.. Expert-level programming and pattern management."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - impl-experts-js-contract
+    - "impl-experts-js-contract"
 ---
 
 # Prog Expert Tiptap

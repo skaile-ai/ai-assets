@@ -1,11 +1,9 @@
 ---
-name: knowledge-writing-contract
+name: "knowledge-writing-contract"
 description: "Shared contract for all knowledge-writing skills. Describes writing output formats, chapter/episode structure, template conventions, and how writing skills consume research artifacts."
 metadata:
-  type: system
+  stage: "alpha"
   do_not_invoke: true
-  stage: alpha
-  requires: []
 ---
 
 # Knowledge Writing — Shared Contract

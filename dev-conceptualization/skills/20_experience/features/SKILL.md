@@ -1,19 +1,31 @@
 ---
-name: features
+name: "features"
 description: "Use after user journeys are approved to plan features. Derives features from stories.json candidate hints and the project brief. Writes feature files organized in numbered groups. Required before screens and datamodel skills."
-keywords: [features, requirements, modules, functionality, planning, story-refs, must-have, nice-to-have]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog:
-    - id: feature_priorities
-      label: "Feature scope"
-      type: select
-      options: ["must-have features only", "must-have + nice-to-have", "comprehensive"]
-      required: false
-      default: "must-have + nice-to-have"
-      hint: "How broad should the feature set be? Story stages set the default — this overrides the scope."
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "features"
+    - "requirements"
+    - "modules"
+    - "functionality"
+    - "planning"
+    - "story-refs"
+    - "must-have"
+    - "nice-to-have"
+  source: "MERGED"
+  user_inputs:
+    dialog:
+      - id: "feature_priorities"
+        label: "Feature scope"
+        type: "select"
+        options:
+          - "must-have features only"
+          - "must-have + nice-to-have"
+          - "comprehensive"
+        required: false
+        default: "must-have + nice-to-have"
+        hint: "How broad should the feature set be? Story stages set the default — this overrides the scope."
+    files: []
 ---
 
 # Features — Feature Planning

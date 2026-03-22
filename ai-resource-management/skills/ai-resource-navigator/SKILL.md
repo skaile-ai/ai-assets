@@ -1,11 +1,22 @@
 ---
-name: ai-resource-navigator
+name: "ai-resource-navigator"
 description: "Use when you need to browse, search, install, or deploy skills and agents from the ai-resources catalog. Wraps the `arm` CLI (ai-asset-manager) for discovering what is available, resolving dependencies, and deploying assets to agent config directories."
-keywords: [arm, catalog, install, deploy, skill, agent, discover, search, browse, resource, asset-manager]
 metadata:
-  stage: alpha
+  tags:
+    - "arm"
+    - "catalog"
+    - "install"
+    - "deploy"
+    - "skill"
+    - "agent"
+    - "discover"
+    - "search"
+    - "browse"
+    - "resource"
+    - "asset-manager"
+  stage: "alpha"
   requires:
-  - skill-builder-contract
+    - "skill-builder-contract"
 ---
 
 # AI Resource Navigator

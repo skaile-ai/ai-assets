@@ -1,12 +1,18 @@
 ---
-name: storybook
+name: "storybook"
 description: "Use after screens are approved to generate a 3-layer Storybook project: custom building-block components, full-page screen compositions, and clickable user journey flows. Framework-agnostic — resolves addon and story format from dev-standards/profiles/. Delegates to 4 sub-skills in sequence."
-keywords: [storybook, components, stories, visualization, ui, design-system, journeys, screens]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "storybook"
+    - "components"
+    - "stories"
+    - "visualization"
+    - "ui"
+    - "design-system"
+    - "journeys"
+    - "screens"
+  source: "MERGED"
 ---
 
 # Storybook — 3-Layer Component & Journey Visualization

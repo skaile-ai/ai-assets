@@ -1,14 +1,11 @@
 ---
-name: prog-expert-una
-source: MIGRATED
-description: Use when you need to implement UnaUI (@una-ui/nuxt) in Nuxt 3/4 — N* component usage, color tokens, slot patterns, UnoCSS-driven theming, and UnaUI module configuration.
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-una"
+description: "Use when you need to implement UnaUI (@una-ui/nuxt) in Nuxt 3/4 — N* component usage, color tokens, slot patterns, UnoCSS-driven theming, and UnaUI module configuration."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - impl-experts-js-contract
+    - "impl-experts-js-contract"
 ---
 
 # Prog Expert UnaUI

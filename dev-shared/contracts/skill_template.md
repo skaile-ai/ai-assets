@@ -1,24 +1,26 @@
 ---
 name: skill-name
 description: "Use when [triggering conditions — symptoms, user phrases, workspace state]. NOT a workflow summary."
-version: "1.0.0"
-tags: [keyword1, keyword2]
-stage: alpha
-source: MERGED           # CF | SAXE | MERGED | MIGRATED — omit for new skills with no lineage
-requires:
-  - contract-name        # bare string for same-resource contract dependencies
-user_inputs:
-  dialog:
-    - id: input_name
-      label: "Human-readable label"
-      type: text | select | multiselect | boolean | number
-      required: true | false
-      options: []   # for select/multiselect only
-      default: null
-      hint: "Help text for UI forms"
-  files: []   # _concept/ paths this skill needs as pre-supplied input
-reads_from: []    # _concept/ paths this skill reads
-writes_to: []     # _concept/ paths this skill creates or modifies
+license: MIT
+metadata:
+  version: "1.0.0"
+  tags: [keyword1, keyword2]
+  stage: alpha
+  source: MERGED           # CF | SAXE | MERGED | MIGRATED — omit for new skills
+  requires:
+    - contract-name        # bare string for same-resource contract dependencies
+  user_inputs:
+    dialog:
+      - id: input_name
+        label: "Human-readable label"
+        type: text | select | multiselect | boolean | number
+        required: true | false
+        options: []   # for select/multiselect only
+        default: null
+        hint: "Help text for UI forms"
+    files: []   # _concept/ paths this skill needs as pre-supplied input
+  reads_from: []    # _concept/ paths this skill reads
+  writes_to: []     # _concept/ paths this skill creates or modifies
 ---
 
 # Skill Name

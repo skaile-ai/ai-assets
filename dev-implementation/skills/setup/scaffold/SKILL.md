@@ -1,12 +1,18 @@
 ---
-name: scaffold
+name: "scaffold"
 description: "Scaffolds a new project from a completed concept. Reads stack.md to determine the tech stack, uses the stack's profile for scaffold commands and conventions, creates the project directory structure, initializes git, and sets up _implementation/ tracking. Run before foundation and feature implementation."
-keywords: [scaffold, init, setup, boilerplate, project, bootstrap, git, structure]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "scaffold"
+    - "init"
+    - "setup"
+    - "boilerplate"
+    - "project"
+    - "bootstrap"
+    - "git"
+    - "structure"
+  source: "MERGED"
 ---
 
 # Scaffold — Project Scaffolding

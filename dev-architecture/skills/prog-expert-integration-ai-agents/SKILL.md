@@ -1,16 +1,13 @@
 ---
-name: prog-expert-integration-ai-agents
-source: MIGRATED
+name: "prog-expert-integration-ai-agents"
 description: "Use when integrating LLM agent sidecars (omp RPC) into a web frontend. Covers the Typed Action Protocol: SkillAction/ConsumerResponse bidirectional events, skill state machine, adapter layer, structured input/approval flows, API key resolution, and default model selection. Expert-level programming and pattern management."
-env_vars:
-  OPENROUTER_API_KEY: "Optional — for omp to access models via OpenRouter."
-keywords: []
-reads_from: []
-writes_to: []
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - architecture-contract
+    - "architecture-contract"
+  env_vars:
+    OPENROUTER_API_KEY: "Optional — for omp to access models via OpenRouter."
 ---
 
 # Prog Expert: AI Agent Integration (omp + Nuxt 4)

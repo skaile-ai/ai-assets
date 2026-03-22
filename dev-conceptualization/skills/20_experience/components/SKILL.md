@@ -1,12 +1,19 @@
 ---
-name: components
+name: "components"
 description: "Reusable component inventory. Use when screen specs exist and you need to identify shared UI patterns (data tables, forms, cards, navigation) across screens. Maps components to the tech stack's component library. Outputs to _concept/2_experience/3_screens/components/."
-keywords: [components, patterns, reusable, inventory, ui, datatable, forms, cards, navigation]
-source: MIGRATED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "components"
+    - "patterns"
+    - "reusable"
+    - "inventory"
+    - "ui"
+    - "datatable"
+    - "forms"
+    - "cards"
+    - "navigation"
+  source: "MIGRATED"
 ---
 
 # App Components — Reusable Component Inventory

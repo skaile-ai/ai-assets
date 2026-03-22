@@ -1,14 +1,11 @@
 ---
-name: knowledge-paper-extractor
-source: MIGRATED
-description: Use when you need to extract metadata (title, authors, abstract) and references from scientific PDF papers or book chapters.
-keywords: []
-reads_from: []
-writes_to: []
+name: "knowledge-paper-extractor"
+description: "Use when you need to extract metadata (title, authors, abstract) and references from scientific PDF papers or book chapters."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - knowledge-research-contract
+    - "knowledge-research-contract"
 ---
 
 # Knowledge Paper Extractor

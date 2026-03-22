@@ -1,14 +1,11 @@
 ---
-name: prog-expert-uno
-source: MIGRATED
-description: Use when you need to implement or configure UnoCSS in Nuxt 3/4 projects — presets (wind4, icons, attributify, typography), uno.config.ts theming, dark mode, safelist, layers, and UnoCSS module integration.
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-uno"
+description: "Use when you need to implement or configure UnoCSS in Nuxt 3/4 projects — presets (wind4, icons, attributify, typography), uno.config.ts theming, dark mode, safelist, layers, and UnoCSS module integration."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - impl-experts-js-contract
+    - "impl-experts-js-contract"
 ---
 
 # Prog Expert UnoCSS

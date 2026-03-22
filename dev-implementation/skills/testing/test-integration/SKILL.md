@@ -1,13 +1,17 @@
 ---
-name: test-integration
+name: "test-integration"
 description: "Use when you need integration tests that verify API endpoints, data flow, and cross-feature interactions against a real database. Reads feature specs and data model to generate tests covering the full request-response cycle."
-keywords: [testing, integration, api, database, endpoints, data-flow]
-source: MIGRATED
-version: 1.0.0
-subagent: true
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "testing"
+    - "integration"
+    - "api"
+    - "database"
+    - "endpoints"
+    - "data-flow"
+  source: "MIGRATED"
+  subagent: true
 ---
 
 # Test Integration — API & Data Flow Testing

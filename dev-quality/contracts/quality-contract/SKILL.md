@@ -1,11 +1,9 @@
 ---
-name: quality-contract
+name: "quality-contract"
 description: "Shared contract for all dev-quality skills. Describes quality report formats, score schema, audit output structure, test file conventions, and cross-reference integrity rules."
 metadata:
-  type: system
+  stage: "alpha"
   do_not_invoke: true
-  stage: alpha
-  requires: []
 ---
 
 # Quality Domain — Shared Contract

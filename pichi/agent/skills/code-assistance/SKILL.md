@@ -1,9 +1,6 @@
 ---
-name: code-assistance
-description: >-
-  Write, edit, refactor, debug, and explain code in any language. Read files
-  before modifying them. Propose minimal diffs. Enforce security best practices.
-  Use when the user asks to write, fix, improve, or understand source code.
+name: "code-assistance"
+description: "Write, edit, refactor, debug, and explain code in any language. Read files before modifying them. Propose minimal diffs. Enforce security best practices. Use when the user asks to write, fix, improve, or understand source code."
 ---
 
 ## Workflow

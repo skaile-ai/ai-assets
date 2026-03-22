@@ -1,16 +1,13 @@
 ---
-name: use-elevenlabs
-source: MIGRATED
-description: Use when you need to convert markdown speaker dialogue and text into audio using the ElevenLabs API. Includes support for single voice TTS and multi-voice conversational dialogues.
-env_vars:
-  ELEVENLABS_API_KEY: "Required. Your ElevenLabs API key for authentication."
-keywords: []
-reads_from: []
-writes_to: []
+name: "use-elevenlabs"
+description: "Use when you need to convert markdown speaker dialogue and text into audio using the ElevenLabs API. Includes support for single voice TTS and multi-voice conversational dialogues."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - use-contract
+    - "use-contract"
+  env_vars:
+    ELEVENLABS_API_KEY: "Required. Your ElevenLabs API key for authentication."
 ---
 
 # Use ElevenLabs

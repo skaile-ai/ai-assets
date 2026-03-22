@@ -1,12 +1,17 @@
 ---
-name: storybook-pages
+name: "storybook-pages"
 description: "Sub-skill 3/4: Build AppShell and full-page screen compositions from screen specs. Each page includes all state variants and responsive viewports. Writes manifest.json for the journeys sub-skill. Called by the storybook orchestrator."
-keywords: [storybook, pages, screens, compositions, app-shell, states, responsive]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "storybook"
+    - "pages"
+    - "screens"
+    - "compositions"
+    - "app-shell"
+    - "states"
+    - "responsive"
+  source: "MERGED"
 ---
 
 # Storybook Pages (Sub-skill 3/4)

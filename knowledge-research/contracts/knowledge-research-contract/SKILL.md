@@ -1,11 +1,9 @@
 ---
-name: knowledge-research-contract
+name: "knowledge-research-contract"
 description: "Shared contract for all knowledge-research skills. Describes research output folder structure, findings format, citation conventions, and how research artifacts are consumed by downstream skills."
 metadata:
-  type: system
+  stage: "alpha"
   do_not_invoke: true
-  stage: alpha
-  requires: []
 ---
 
 # Knowledge Research — Shared Contract

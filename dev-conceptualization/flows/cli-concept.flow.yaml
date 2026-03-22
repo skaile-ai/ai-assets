@@ -1,42 +1,47 @@
-id: cli-concept
+id: "cli-concept"
 version: "1.0"
-name: CLI Concept
-description: >-
-  Concept phase for command-line tools. No UI, no brand, no screens.
-  Covers project brief, commands/features, tech stack, and data model.
-
-meta:
-  icon: i-heroicons-command-line
-  category: cli
-  tags: [cli, tool, no-ui, concept]
+name: "CLI Concept"
+description: "Concept phase for command-line tools. No UI, no brand, no screens. Covers project brief, commands/features, tech stack, and data model."
+metadata:
+  tags:
+    - "cli"
+    - "tool"
+    - "no-ui"
+    - "concept"
+  stage: "stable"
+  icon: "i-heroicons-command-line"
+  category: "cli"
   onboarding:
-    input_style: freeform
+    input_style: "freeform"
     placeholder: "e.g. A CLI tool that converts CSV files to JSON with column filtering and schema validation..."
-
 globals:
-  research_depth: light
-  approval_mode: checkpoint
+  research_depth: "light"
+  approval_mode: "checkpoint"
   auto_review: false
   subagent_mode: true
-  verbosity: standard
+  verbosity: "standard"
   cli_mode: true
-
 modes:
   research:
     enabled: true
-    skill: research
-    triggers: [overview, features]
+    skill: "research"
+    triggers:
+      - "overview"
+      - "features"
     parameters:
-      topics: [domain, competitors, patterns]
+      topics:
+        - "domain"
+        - "competitors"
+        - "patterns"
   standards:
     enabled: false
-
-entry: overview
-
+entry: "overview"
 nodes:
-  - id: g-concept
-    type: group
-    position: {x: 0, y: 0}
+  - id: "g-concept"
+    type: "group"
+    position:
+      x: 0
+      y: 0
     style:
       width: 920
       height: 360
@@ -44,88 +49,120 @@ nodes:
       border: "1px solid rgba(99,102,241,0.2)"
       borderRadius: "12px"
     data:
-      label: Concept
-      phase: conceptualization
-
-  - id: overview
-    type: skill
-    parentNode: g-concept
-    position: {x: 40, y: 140}
+      label: "Concept"
+      phase: "conceptualization"
+  - id: "overview"
+    type: "skill"
+    parentNode: "g-concept"
+    position:
+      x: 40
+      y: 140
     data:
-      skill: overview
-      label: Project Brief
+      skill: "overview"
+      label: "Project Brief"
       optional: false
       parameters:
-        input_style: freeform
-        note: Describe CLI commands, flags, and expected output
-
-  - id: journeys
-    type: skill
-    parentNode: g-concept
-    position: {x: 280, y: 60}
+        input_style: "freeform"
+        note: "Describe CLI commands, flags, and expected output"
+  - id: "journeys"
+    type: "skill"
+    parentNode: "g-concept"
+    position:
+      x: 280
+      y: 60
     data:
-      skill: journeys
-      label: User Journeys
+      skill: "journeys"
+      label: "User Journeys"
       optional: true
       parameters:
-        min_stages: [hero]
-        note: Map command-line workflows as journeys
-
-  - id: features
-    type: skill
-    parentNode: g-concept
-    position: {x: 280, y: 200}
+        min_stages:
+          - "hero"
+        note: "Map command-line workflows as journeys"
+  - id: "features"
+    type: "skill"
+    parentNode: "g-concept"
+    position:
+      x: 280
+      y: 200
     data:
-      skill: features
-      label: Features
+      skill: "features"
+      label: "Features"
       optional: false
       parameters:
         cli_mode: true
         describe_as_commands: true
-
-  - id: techstack
-    type: skill
-    parentNode: g-concept
-    position: {x: 280, y: 320}
+  - id: "techstack"
+    type: "skill"
+    parentNode: "g-concept"
+    position:
+      x: 280
+      y: 320
     data:
-      skill: techstack
-      label: Tech Stack
+      skill: "techstack"
+      label: "Tech Stack"
       optional: false
-      parallel_group: identity
-
-  - id: architecture
-    type: skill
-    parentNode: g-concept
-    position: {x: 560, y: 60}
+      parallel_group: "identity"
+  - id: "architecture"
+    type: "skill"
+    parentNode: "g-concept"
+    position:
+      x: 560
+      y: 60
     data:
-      skill: architecture
-      label: Architecture
+      skill: "architecture"
+      label: "Architecture"
       optional: true
-
-  - id: datamodel
-    type: skill
-    parentNode: g-concept
-    position: {x: 560, y: 200}
+  - id: "datamodel"
+    type: "skill"
+    parentNode: "g-concept"
+    position:
+      x: 560
+      y: 200
     data:
-      skill: datamodel
-      label: Data Model
+      skill: "datamodel"
+      label: "Data Model"
       optional: false
       parameters:
-        note: Config files, storage schemas, output formats
-
+        note: "Config files, storage schemas, output formats"
 edges:
-  - {id: e-overview-journeys,      source: overview,     target: journeys,     type: optional}
-  - {id: e-overview-features,      source: overview,     target: features,     type: flow}
-  - {id: e-overview-techstack,     source: overview,     target: techstack,    type: parallel}
-  - {id: e-journeys-features,      source: journeys,     target: features,     type: optional}
-  - {id: e-features-architecture,  source: features,     target: architecture, type: optional}
-  - {id: e-techstack-architecture, source: techstack,    target: architecture, type: optional}
-  - {id: e-features-datamodel,     source: features,     target: datamodel,    type: flow}
-  - {id: e-techstack-datamodel,    source: techstack,    target: datamodel,    type: flow}
-  - {id: e-architecture-datamodel, source: architecture, target: datamodel,    type: optional}
-
+  - id: "e-overview-journeys"
+    source: "overview"
+    target: "journeys"
+    type: "optional"
+  - id: "e-overview-features"
+    source: "overview"
+    target: "features"
+    type: "flow"
+  - id: "e-overview-techstack"
+    source: "overview"
+    target: "techstack"
+    type: "parallel"
+  - id: "e-journeys-features"
+    source: "journeys"
+    target: "features"
+    type: "optional"
+  - id: "e-features-architecture"
+    source: "features"
+    target: "architecture"
+    type: "optional"
+  - id: "e-techstack-architecture"
+    source: "techstack"
+    target: "architecture"
+    type: "optional"
+  - id: "e-features-datamodel"
+    source: "features"
+    target: "datamodel"
+    type: "flow"
+  - id: "e-techstack-datamodel"
+    source: "techstack"
+    target: "datamodel"
+    type: "flow"
+  - id: "e-architecture-datamodel"
+    source: "architecture"
+    target: "datamodel"
+    type: "optional"
 next_flows:
-  - id: cli
-    domain: dev-implementation
-    label: "Implement CLI \u2192"
-    hint: Scaffold the CLI project and implement features with unit and integration tests.
+  - id: "cli"
+    domain: "dev-implementation"
+    label: "Implement CLI →"
+    hint: "Scaffold the CLI project and implement features with unit and integration tests."

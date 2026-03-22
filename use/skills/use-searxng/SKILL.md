@@ -1,16 +1,13 @@
 ---
-name: use-searxng
-source: MIGRATED
-description: Use when you need to search the internet for current information, research topics, find news, or look up web content. Queries a local SearXNG instance with Google as the primary search engine and returns clean, structured markdown results.
-env_vars:
-  SEARXNG_URL: "Optional. The base URL of your SearXNG instance (default: http://localhost:8080)."
-keywords: []
-reads_from: []
-writes_to: []
+name: "use-searxng"
+description: "Use when you need to search the internet for current information, research topics, find news, or look up web content. Queries a local SearXNG instance with Google as the primary search engine and returns clean, structured markdown results."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - use-contract
+    - "use-contract"
+  env_vars:
+    SEARXNG_URL: "Optional. The base URL of your SearXNG instance (default: http://localhost:8080)."
 ---
 
 # use-searxng Skill

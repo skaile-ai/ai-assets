@@ -1,12 +1,18 @@
 ---
-name: audit
+name: "audit"
 description: "Static code audit. Launches three parallel sub-agents for logic errors, UI/UX issues, and security concerns. Also checks _concept/ structure integrity. Run before e2e or after significant changes."
-keywords: [audit, security, bugs, code-review, static-analysis, quality, entropy, accessibility]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "audit"
+    - "security"
+    - "bugs"
+    - "code-review"
+    - "static-analysis"
+    - "quality"
+    - "entropy"
+    - "accessibility"
+  source: "MERGED"
 ---
 
 # Audit — Static Code Analysis

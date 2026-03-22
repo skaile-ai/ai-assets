@@ -1,11 +1,9 @@
 ---
-name: standards-contract
+name: "standards-contract"
 description: "Shared contract for all dev-standards skills. Describes _standards/ folder layout, profile format, standards injection protocol, and how profiles map to tech-stack choices."
 metadata:
-  type: system
+  stage: "alpha"
   do_not_invoke: true
-  stage: alpha
-  requires: []
 ---
 
 # Standards Domain — Shared Contract

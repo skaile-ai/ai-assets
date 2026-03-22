@@ -1,11 +1,15 @@
 ---
 name: skill-builder
 description: "Analyzes requirements, scaffolds directory structures, and implements new Agent skills. Use when you need to create a new agentic workflow or encapsulate custom tools into a reusable skill. Supports domain folders (ai-resources), local project skill folders (.claude/skills, .agents/skills), and global skill folders (~/.claude/skills)."
-keywords: [skill, scaffold, build, create-skill, new-skill, agent-skill, workflow]
+license: MIT
+compatibility: "Requires Python 3.12+ and uv for scaffold scripts"
 metadata:
+  version: "1.0.0"
+  author: skaile
+  tags: [skill, scaffold, build, create-skill, new-skill, agent-skill, workflow]
   stage: alpha
   requires:
-  - skill-builder-contract
+    - skill-builder-contract
 ---
 
 # Skill Builder Pro
@@ -17,6 +21,20 @@ You are an expert Agentic ecosystem architect. Your goal is to translate user re
 1. **Metadata (Trigger)**: Name + description. Always in context. Use to route.
 2. **SKILL.md (Workflow)**: Core instructions. Loaded when skill triggers. Keep under 500 lines.
 3. **Resources (Details)**: Scripts, references, assets. Loaded only as needed.
+
+## Specification Compliance
+
+Generated skills follow the [Agent Skills Specification](https://agentskills.io/specification):
+
+- `name` and `description` at root — the only required fields per spec
+- All skaile-specific fields go inside `metadata:` — `version`, `tags`, `stage`, `source`, `requires`, `user_inputs`, `reads_from`, `writes_to`, `env_vars`
+- Optional root fields: `license`, `compatibility`, `allowed-tools`
+- Directory structure: `SKILL.md` + optional `scripts/`, `references/`, `assets/`, `examples/`
+- `name` must be kebab-case, 1–64 chars, match the parent directory name
+- `description` must be 1–1024 chars, include trigger keywords for agent routing
+- Main SKILL.md body should be under 500 lines; move detailed references to `references/`
+
+See `dev-shared/contracts/asset_frontmatter.md` for the full schema and `dev-shared/contracts/skill_template.md` for the scaffold template.
 
 ## Modes of Operation
 
@@ -102,6 +120,8 @@ uv run scripts/scaffold_skill.py create <skill-name> "<description>" \
 
 The script creates the full folder structure, SKILL.md, and boilerplate scripts.
 
+> **Note:** The scaffold script should generate frontmatter in the agentskills.io-compatible format: `name` and `description` at root level, with all skaile-specific fields nested inside `metadata:`.
+
 ---
 
 ### Step 4: Implement Resources
@@ -126,6 +146,16 @@ The script creates the full folder structure, SKILL.md, and boilerplate scripts.
 - Do not hallucinate dependencies — use PEP 723 `# /// script` headers.
 - Do not overwrite existing skills without explicit user confirmation.
 - Always confirm the resolved target path with the user before scaffolding.
+
+## Agent Builder Companion
+
+To create a **GitAgent** (agent.yaml + SOUL.md + RULES.md) instead of a skill, use the `agent-builder` skill. Skills define what an agent *can do*; agents define *who the agent is*.
+
+| Want to create... | Use |
+|---|---|
+| A reusable workflow/capability | `skill-builder` (this skill) |
+| An agent identity with model/delegation config | `agent-builder` |
+| A slash command prompt | Manual: create `<name>.prompt.md` |
 
 ## Related Skills
 

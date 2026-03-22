@@ -1,11 +1,24 @@
 ---
-name: tech-stack-nuxt-minimal
+name: "tech-stack-nuxt-minimal"
 description: "Reference document and invocable skill for the Nuxt 4 + Tailwind + Drizzle + SQLite stack. Read by scaffold, foundation, design, mock, and storybook skills when 05_techstack/stack.md selects this stack."
-keywords: [nuxt, tailwind, drizzle, sqlite, nitro, nuxt-auth-utils, bun, minimal, personal, blog, tool, prototype, learning]
 metadata:
-  stage: alpha
+  tags:
+    - "nuxt"
+    - "tailwind"
+    - "drizzle"
+    - "sqlite"
+    - "nitro"
+    - "nuxt-auth-utils"
+    - "bun"
+    - "minimal"
+    - "personal"
+    - "blog"
+    - "tool"
+    - "prototype"
+    - "learning"
+  stage: "alpha"
   requires:
-  - standards-contract
+    - "standards-contract"
 ---
 
 # Tech Stack: Nuxt 4 Minimal (Tailwind + Drizzle + SQLite)

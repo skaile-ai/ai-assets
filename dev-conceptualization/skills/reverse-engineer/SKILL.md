@@ -1,41 +1,67 @@
 ---
-name: reverse-engineer
+name: "reverse-engineer"
 description: "Use when the user has an existing project repository and wants to generate or bootstrap a _concept/ folder from it. Triggered by: 'reverse engineer this project', 'generate concept from existing code', 'I have a codebase, extract the concept', 'document this existing app', 'build concept from repo'."
-keywords: [reverse, existing, codebase, repo, extract, import, bootstrap, existing-project, infer, scan]
-source: MIGRATED
-version: 1.0.0
-user_inputs:
-  dialog:
-  - id: repo_path
-    label: "Repository Path"
-    type: text
-    required: true
-    hint: "Absolute or relative path to the existing project repository root"
-  - id: concept_path
-    label: "Concept Output Path"
-    type: text
-    required: false
-    hint: "Where to write _concept/ (default: <repo_path>/_concept/). Override if the concept lives elsewhere."
-  - id: extraction_scope
-    label: "What to Extract"
-    type: multiselect
-    required: false
-    options: [overview, techstack, features, datamodel, brand, screens]
-    default: [overview, techstack, features, datamodel, brand, screens]
-    hint: "Which concept artifacts to generate. Omit items you already have or want to write manually."
-  - id: overwrite_mode
-    label: "If _concept/ Files Already Exist"
-    type: select
-    required: false
-    options: [skip, diff_and_confirm, overwrite]
-    default: skip
-    hint: "skip = never overwrite, diff_and_confirm = show diff and ask, overwrite = always replace"
-  - id: app_description_hint
-    label: "What does this app do? (optional hint)"
-    type: text
-    required: false
-    hint: "Brief description to help the agent when README is sparse or missing."
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "reverse"
+    - "existing"
+    - "codebase"
+    - "repo"
+    - "extract"
+    - "import"
+    - "bootstrap"
+    - "existing-project"
+    - "infer"
+    - "scan"
+  source: "MIGRATED"
+  user_inputs:
+    dialog:
+      - id: "repo_path"
+        label: "Repository Path"
+        type: "text"
+        required: true
+        hint: "Absolute or relative path to the existing project repository root"
+      - id: "concept_path"
+        label: "Concept Output Path"
+        type: "text"
+        required: false
+        hint: "Where to write _concept/ (default: <repo_path>/_concept/). Override if the concept lives elsewhere."
+      - id: "extraction_scope"
+        label: "What to Extract"
+        type: "multiselect"
+        required: false
+        options:
+          - "overview"
+          - "techstack"
+          - "features"
+          - "datamodel"
+          - "brand"
+          - "screens"
+        default:
+          - "overview"
+          - "techstack"
+          - "features"
+          - "datamodel"
+          - "brand"
+          - "screens"
+        hint: "Which concept artifacts to generate. Omit items you already have or want to write manually."
+      - id: "overwrite_mode"
+        label: "If _concept/ Files Already Exist"
+        type: "select"
+        required: false
+        options:
+          - "skip"
+          - "diff_and_confirm"
+          - "overwrite"
+        default: "skip"
+        hint: "skip = never overwrite, diff_and_confirm = show diff and ask, overwrite = always replace"
+      - id: "app_description_hint"
+        label: "What does this app do? (optional hint)"
+        type: "text"
+        required: false
+        hint: "Brief description to help the agent when README is sparse or missing."
+    files: []
 ---
 
 # Reverse Engineer — Concept from Existing Repository

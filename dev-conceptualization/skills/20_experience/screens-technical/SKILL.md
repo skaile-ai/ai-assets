@@ -1,12 +1,18 @@
 ---
-name: screens-technical
+name: "screens-technical"
 description: "Technical variant of the screens skill with component inventories. Use when screen specs exist and require precise component-level breakdowns. NOT in pipeline — experimental variant for testing purposes."
-keywords: [screens, pages, ui, layout, components, states, routes, navigation]
-source: MIGRATED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "screens"
+    - "pages"
+    - "ui"
+    - "layout"
+    - "components"
+    - "states"
+    - "routes"
+    - "navigation"
+  source: "MIGRATED"
 ---
 
 > **NOTE:** This skill is a variant of `screens` reserved for future testing and

@@ -1,12 +1,20 @@
 ---
-name: seed
+name: "seed"
 description: "Generates seed scripts from seed.json. Reads seed.json scenarios (empty, single_user, populated, edge_cases) and generates executable seed scripts for the chosen stack (Prisma, Drizzle, raw SQL, etc.). Each scenario is independently runnable. Run after migrate."
-keywords: [seed, data, fixtures, testing, development, demo, scenarios, prisma, drizzle, sql]
-source: CF
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "seed"
+    - "data"
+    - "fixtures"
+    - "testing"
+    - "development"
+    - "demo"
+    - "scenarios"
+    - "prisma"
+    - "drizzle"
+    - "sql"
+  source: "CF"
 ---
 
 # Seed — Seed Script Generator

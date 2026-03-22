@@ -1,16 +1,26 @@
 ---
-name: implement-feature
+name: "implement-feature"
 description: "Journey-first feature orchestrator with TDD Guard. Builds features by walking user journeys outside-in (hero → vital → hygiene from stories.json), writing failing journey e2e tests first, then delegating page-by-page implementation to the implement-feature-page sub-skill. Can also implement a single feature standalone using the feature_id input."
-keywords: [implement, feature, tdd, journey, e2e, test-first, code, build, engineering]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog:
-    - id: feature_id
-      label: "Single feature to implement? (e.g., 01_user_auth/login) — leave blank for journey-first mode"
-      type: text
-      required: false
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "implement"
+    - "feature"
+    - "tdd"
+    - "journey"
+    - "e2e"
+    - "test-first"
+    - "code"
+    - "build"
+    - "engineering"
+  source: "MERGED"
+  user_inputs:
+    dialog:
+      - id: "feature_id"
+        label: "Single feature to implement? (e.g., 01_user_auth/login) — leave blank for journey-first mode"
+        type: "text"
+        required: false
+    files: []
 ---
 
 # Implement Feature — Journey-First Feature Orchestrator

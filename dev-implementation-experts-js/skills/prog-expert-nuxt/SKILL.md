@@ -1,14 +1,11 @@
 ---
-name: prog-expert-nuxt
-source: MIGRATED
-description: Use when you need to expert-level nuxt development. Expert-level programming and pattern management.
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-nuxt"
+description: "Use when you need to expert-level nuxt development. Expert-level programming and pattern management."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - impl-experts-js-contract
+    - "impl-experts-js-contract"
 ---
 
 # Prog Expert Nuxt

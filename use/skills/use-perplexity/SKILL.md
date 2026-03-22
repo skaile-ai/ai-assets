@@ -1,16 +1,13 @@
 ---
-name: use-perplexity
-source: MIGRATED
-description: Use when you need to research topics or answer complex questions by querying Perplexity via the OpenRouter API.
-env_vars:
-  OPENROUTER_API_KEY: "Required. API key for OpenRouter to access Perplexity models."
-keywords: []
-reads_from: []
-writes_to: []
+name: "use-perplexity"
+description: "Use when you need to research topics or answer complex questions by querying Perplexity via the OpenRouter API."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - use-contract
+    - "use-contract"
+  env_vars:
+    OPENROUTER_API_KEY: "Required. API key for OpenRouter to access Perplexity models."
 ---
 
 # `use-perplexity`

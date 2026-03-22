@@ -1,12 +1,17 @@
 ---
-name: ready
+name: "ready"
 description: "Pre-flight readiness check before E2E testing. Verifies that each feature has a concept doc, screen spec, data model entry, brand tokens, and tech stack. Surfaces gaps with remediation commands. Blocks testing of incomplete features."
-keywords: [readiness, preflight, checklist, testing, validation, gate, implementation]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "readiness"
+    - "preflight"
+    - "checklist"
+    - "testing"
+    - "validation"
+    - "gate"
+    - "implementation"
+  source: "MERGED"
 ---
 
 # Ready — Pre-flight Readiness Gate

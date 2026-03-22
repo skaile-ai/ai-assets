@@ -1,16 +1,19 @@
 ---
-name: use-context7-api
-source: MIGRATED
-description: Use when you need to search for programming library documentation or fetch up-to-date code examples via the Context7 REST API. Provides direct CLI access to Context7 without requiring the MCP server — search libraries by name and retrieve markdown documentation with code examples. Use when the user asks about library APIs, how to use a package, or needs current documentation for a specific library version.
-keywords: ["context7", "documentation", "libraries", "api", "code-examples"]
-env_vars:
-  CONTEXT7_API_KEY: "Optional. Increases rate limits and provides access to private repositories."
-reads_from: []
-writes_to: []
+name: "use-context7-api"
+description: "Use when you need to search for programming library documentation or fetch up-to-date code examples via the Context7 REST API. Provides direct CLI access to Context7 without requiring the MCP server — search libraries by name and retrieve markdown documentation with code examples. Use when the user asks about library APIs, how to use a package, or needs current documentation for a specific library version."
 metadata:
-  stage: alpha
+  tags:
+    - "context7"
+    - "documentation"
+    - "libraries"
+    - "api"
+    - "code-examples"
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - use-contract
+    - "use-contract"
+  env_vars:
+    CONTEXT7_API_KEY: "Optional. Increases rate limits and provides access to private repositories."
 ---
 
 # Use Context7 API

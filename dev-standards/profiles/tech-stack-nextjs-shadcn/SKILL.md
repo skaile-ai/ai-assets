@@ -1,11 +1,25 @@
 ---
-name: tech-stack-nextjs-shadcn
+name: "tech-stack-nextjs-shadcn"
 description: "Reference document and invocable skill for the Next.js 15 + shadcn/ui + Supabase stack. Read by scaffold, foundation, design, mock, and storybook skills when 05_techstack/stack.md selects this stack."
-keywords: [nextjs, next15, shadcn, supabase, postgresql, react, rsc, app-router, tailwind, pnpm, mvp, saas, indie, prototype]
 metadata:
-  stage: alpha
+  tags:
+    - "nextjs"
+    - "next15"
+    - "shadcn"
+    - "supabase"
+    - "postgresql"
+    - "react"
+    - "rsc"
+    - "app-router"
+    - "tailwind"
+    - "pnpm"
+    - "mvp"
+    - "saas"
+    - "indie"
+    - "prototype"
+  stage: "alpha"
   requires:
-  - standards-contract
+    - "standards-contract"
 ---
 
 # Tech Stack: Next.js 15 + shadcn/ui + Supabase

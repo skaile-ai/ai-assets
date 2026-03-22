@@ -1,12 +1,20 @@
 ---
-name: verify
+name: "verify"
 description: "Full-stack verification gate. Runs the complete E2E test suite, visual regression checks, lint, type checking, Storybook, and browser walkthrough. Also verifies the running app matches concept specs (feature × acceptance criteria matrix). Produces full-verification.json. Run after all features are implemented."
-keywords: [verify, validation, e2e, acceptance, spec-check, browser, implementation, qa, build, lint]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "verify"
+    - "validation"
+    - "e2e"
+    - "acceptance"
+    - "spec-check"
+    - "browser"
+    - "implementation"
+    - "qa"
+    - "build"
+    - "lint"
+  source: "MERGED"
 ---
 
 # Verify — Full-Stack Verification Gate

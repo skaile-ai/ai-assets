@@ -1,42 +1,45 @@
-id: reverse-engineer
+id: "reverse-engineer"
 version: "1.0"
-name: Reverse Engineer
-description: >-
-  Extract a full concept from an existing codebase, then optionally continue
-  with any concept or implementation steps.
-
-meta:
-  icon: i-heroicons-arrow-path
-  category: maintenance
-  tags: [reverse-engineer, existing-codebase, extraction, migration]
+name: "Reverse Engineer"
+description: "Extract a full concept from an existing codebase, then optionally continue with any concept or implementation steps."
+metadata:
+  tags:
+    - "reverse-engineer"
+    - "existing-codebase"
+    - "extraction"
+    - "migration"
+  stage: "stable"
+  icon: "i-heroicons-arrow-path"
+  category: "maintenance"
   onboarding:
-    input_style: repo
-    fields: [repo_path, branch, context]
-
+    input_style: "repo"
+    fields:
+      - "repo_path"
+      - "branch"
+      - "context"
 globals:
-  research_depth: light
-  approval_mode: checkpoint
+  research_depth: "light"
+  approval_mode: "checkpoint"
   auto_review: false
   subagent_mode: true
-  verbosity: detailed
-
+  verbosity: "detailed"
 modes:
   research:
     enabled: false
   standards:
     enabled: true
-    skill: standards-discover
-    inject_skill: standards-inject
-    trigger_after: reverse-engineer
+    skill: "standards-discover"
+    inject_skill: "standards-inject"
+    trigger_after: "reverse-engineer"
     parameters:
-      note: Discover conventions from the repo being reverse-engineered
-
-entry: reverse-engineer
-
+      note: "Discover conventions from the repo being reverse-engineered"
+entry: "reverse-engineer"
 nodes:
-  - id: g-extract
-    type: group
-    position: {x: 0, y: 0}
+  - id: "g-extract"
+    type: "group"
+    position:
+      x: 0
+      y: 0
     style:
       width: 400
       height: 240
@@ -44,12 +47,13 @@ nodes:
       border: "1px solid rgba(245,158,11,0.2)"
       borderRadius: "12px"
     data:
-      label: Extraction
-      phase: reverse-engineer
-
-  - id: g-optional-concept
-    type: group
-    position: {x: 440, y: 0}
+      label: "Extraction"
+      phase: "reverse-engineer"
+  - id: "g-optional-concept"
+    type: "group"
+    position:
+      x: 440
+      y: 0
     style:
       width: 1080
       height: 240
@@ -57,86 +61,116 @@ nodes:
       border: "1px dashed rgba(99,102,241,0.3)"
       borderRadius: "12px"
     data:
-      label: "Optional \u2014 Continue with Concept Steps"
-      phase: conceptualization
-
-  - id: reverse-engineer
-    type: skill
-    parentNode: g-extract
-    position: {x: 40, y: 100}
+      label: "Optional — Continue with Concept Steps"
+      phase: "conceptualization"
+  - id: "reverse-engineer"
+    type: "skill"
+    parentNode: "g-extract"
+    position:
+      x: 40
+      y: 100
     data:
-      skill: reverse-engineer
-      label: Reverse Engineer
+      skill: "reverse-engineer"
+      label: "Reverse Engineer"
       optional: false
       subagent: true
       parameters:
-        extraction_scope: [overview, features, screens, datamodel, techstack]
-
-  - id: journeys
-    type: skill
-    parentNode: g-optional-concept
-    position: {x: 40, y: 60}
+        extraction_scope:
+          - "overview"
+          - "features"
+          - "screens"
+          - "datamodel"
+          - "techstack"
+  - id: "journeys"
+    type: "skill"
+    parentNode: "g-optional-concept"
+    position:
+      x: 40
+      y: 60
     data:
-      skill: journeys
-      label: User Journeys
+      skill: "journeys"
+      label: "User Journeys"
       optional: true
       parameters:
-        note: Derive journeys from the extracted concept
-
-  - id: architecture
-    type: skill
-    parentNode: g-optional-concept
-    position: {x: 280, y: 60}
+        note: "Derive journeys from the extracted concept"
+  - id: "architecture"
+    type: "skill"
+    parentNode: "g-optional-concept"
+    position:
+      x: 280
+      y: 60
     data:
-      skill: architecture
-      label: Architecture
+      skill: "architecture"
+      label: "Architecture"
       optional: true
       subagent: true
-
-  - id: datamodel
-    type: skill
-    parentNode: g-optional-concept
-    position: {x: 280, y: 160}
+  - id: "datamodel"
+    type: "skill"
+    parentNode: "g-optional-concept"
+    position:
+      x: 280
+      y: 160
     data:
-      skill: datamodel
-      label: Data Model
+      skill: "datamodel"
+      label: "Data Model"
       optional: true
       subagent: true
-
-  - id: screens
-    type: skill
-    parentNode: g-optional-concept
-    position: {x: 560, y: 100}
+  - id: "screens"
+    type: "skill"
+    parentNode: "g-optional-concept"
+    position:
+      x: 560
+      y: 100
     data:
-      skill: screens
-      label: Screens
+      skill: "screens"
+      label: "Screens"
       optional: true
       subagent: true
-
-  - id: storybook
-    type: skill
-    parentNode: g-optional-concept
-    position: {x: 560, y: 160}
+  - id: "storybook"
+    type: "skill"
+    parentNode: "g-optional-concept"
+    position:
+      x: 560
+      y: 160
     data:
-      skill: storybook
-      label: Storybook
+      skill: "storybook"
+      label: "Storybook"
       optional: true
-
 edges:
-  - {id: e-re-journeys,       source: reverse-engineer, target: journeys,     type: optional}
-  - {id: e-re-architecture,   source: reverse-engineer, target: architecture, type: optional}
-  - {id: e-re-datamodel,      source: reverse-engineer, target: datamodel,    type: optional}
-  - {id: e-re-screens,        source: reverse-engineer, target: screens,      type: optional}
-  - {id: e-architecture-dm,   source: architecture,     target: datamodel,    type: optional}
-  - {id: e-datamodel-screens, source: datamodel,        target: screens,      type: optional}
-  - {id: e-screens-storybook, source: screens,          target: storybook,    type: optional}
-
+  - id: "e-re-journeys"
+    source: "reverse-engineer"
+    target: "journeys"
+    type: "optional"
+  - id: "e-re-architecture"
+    source: "reverse-engineer"
+    target: "architecture"
+    type: "optional"
+  - id: "e-re-datamodel"
+    source: "reverse-engineer"
+    target: "datamodel"
+    type: "optional"
+  - id: "e-re-screens"
+    source: "reverse-engineer"
+    target: "screens"
+    type: "optional"
+  - id: "e-architecture-dm"
+    source: "architecture"
+    target: "datamodel"
+    type: "optional"
+  - id: "e-datamodel-screens"
+    source: "datamodel"
+    target: "screens"
+    type: "optional"
+  - id: "e-screens-storybook"
+    source: "screens"
+    target: "storybook"
+    type: "optional"
 next_flows:
-  - id: concept-only
-    domain: dev-conceptualization
-    label: "Enrich Concept \u2192"
-    hint: Run the full concept pipeline to enrich and validate the extracted concept.
-  - id: standard
-    domain: dev-implementation
-    label: "Implement \u2192"
-    hint: Proceed to implementation using the extracted concept as foundation.
+  - id: "concept-only"
+    domain: "dev-conceptualization"
+    label: "Enrich Concept →"
+    hint: "Run the full concept pipeline to enrich and validate the extracted concept."
+  - id: "standard"
+    domain: "dev-implementation"
+    label: "Implement →"
+    hint: "Proceed to implementation using the extracted concept as foundation."

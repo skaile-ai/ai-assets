@@ -1,13 +1,17 @@
 ---
-name: test-unit
+name: "test-unit"
 description: "Use when you need unit test files generated from feature specs. Reads existing source code patterns and feature requirements, then produces one test file per feature with test cases mapped to requirements."
-keywords: [testing, unit-tests, vitest, jest, code-generation, tdd]
-source: MIGRATED
-version: 1.0.0
-subagent: true
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "testing"
+    - "unit-tests"
+    - "vitest"
+    - "jest"
+    - "code-generation"
+    - "tdd"
+  source: "MIGRATED"
+  subagent: true
 ---
 
 # Test Unit — Feature-Driven Unit Test Generation

@@ -1,11 +1,9 @@
 ---
-name: use-contract
+name: "use-contract"
 description: "Shared contract for all use-* integration skills. Describes integration skill conventions, API key handling patterns, MCP vs direct-API usage, output format, and how use skills are composed with other skills."
 metadata:
-  type: system
+  stage: "alpha"
   do_not_invoke: true
-  stage: alpha
-  requires: []
 ---
 
 # Use (Integration) Domain — Shared Contract

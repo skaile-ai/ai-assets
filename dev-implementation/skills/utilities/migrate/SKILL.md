@@ -1,12 +1,19 @@
 ---
-name: migrate
+name: "migrate"
 description: "Generates database migrations from the data model. Reads model.dbml + model.json and stack.md, then generates migration files for the target ORM (Prisma, Drizzle, Directus, raw SQL). Translates semantic types using dev-shared/contracts/semantic_types.md. Run before implement-feature."
-keywords: [migrate, database, schema, prisma, directus, drizzle, sql, ddl, migration]
-source: CF
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "migrate"
+    - "database"
+    - "schema"
+    - "prisma"
+    - "directus"
+    - "drizzle"
+    - "sql"
+    - "ddl"
+    - "migration"
+  source: "CF"
 ---
 
 # Migrate — Database Migration Generator

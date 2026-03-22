@@ -1,9 +1,6 @@
 ---
-name: project-exploration
-description: >-
-  Understand an unfamiliar codebase. Map directory structure, identify entry
-  points, trace data flow, locate where a feature is implemented. Use when the
-  user asks "how does X work", "where is Y defined", or "what does this project do".
+name: "project-exploration"
+description: "Understand an unfamiliar codebase. Map directory structure, identify entry points, trace data flow, locate where a feature is implemented. Use when the user asks \"how does X work\", \"where is Y defined\", or \"what does this project do\"."
 ---
 
 ## Approach

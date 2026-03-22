@@ -1,11 +1,9 @@
 ---
-name: architecture-contract
+name: "architecture-contract"
 description: "Shared contract for dev-architecture skills. Describes architecture artifact locations, AI agent integration patterns, expert skill naming convention, and system design file structure."
 metadata:
-  type: system
+  stage: "alpha"
   do_not_invoke: true
-  stage: alpha
-  requires: []
 ---
 
 # Architecture Domain — Shared Contract

@@ -1,19 +1,16 @@
 ---
-name: prog-expert-directus
-source: MIGRATED
-description: Use when you need to set up, develop, or integrate Directus into your project, especially with Docker and Nuxt 3. Triggers include "setup directus with docker", "configure directus local development", "generate directus types", "integrate directus with nuxt", or "authenticate with directus sdk".
-env_vars:
-  DIRECTUS_URL: "Required. The URL of your Directus instance."
-  DIRECTUS_TOKEN: "Required for SDK. A valid static token for a Directus user."
-  ADMIN_EMAIL: "Optional. Admin email for initial Docker setup."
-  ADMIN_PASSWORD: "Optional. Admin password for initial Docker setup."
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-directus"
+description: "Use when you need to set up, develop, or integrate Directus into your project, especially with Docker and Nuxt 3. Triggers include \"setup directus with docker\", \"configure directus local development\", \"generate directus types\", \"integrate directus with nuxt\", or \"authenticate with directus sdk\"."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - impl-experts-js-contract
+    - "impl-experts-js-contract"
+  env_vars:
+    DIRECTUS_URL: "Required. The URL of your Directus instance."
+    DIRECTUS_TOKEN: "Required for SDK. A valid static token for a Directus user."
+    ADMIN_EMAIL: "Optional. Admin email for initial Docker setup."
+    ADMIN_PASSWORD: "Optional. Admin password for initial Docker setup."
 ---
 
 # Directus Expert Pro

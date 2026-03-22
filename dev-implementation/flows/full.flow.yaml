@@ -1,38 +1,37 @@
-id: full
+id: "full"
 version: "1.0"
-name: Full Production
-description: >-
-  Complete implementation pipeline — readiness gate, scaffold, foundation,
-  optional design pass, migrate/seed, feature TDD, full test suite
-  (unit, integration, E2E), verify.
-
-meta:
-  icon: i-heroicons-building-office-2
-  category: full-stack
-  tags: [implementation, production, tdd, full-pipeline]
-
+name: "Full Production"
+description: "Complete implementation pipeline — readiness gate, scaffold, foundation, optional design pass, migrate/seed, feature TDD, full test suite (unit, integration, E2E), verify."
+metadata:
+  tags:
+    - "implementation"
+    - "production"
+    - "tdd"
+    - "full-pipeline"
+  stage: "stable"
+  icon: "i-heroicons-building-office-2"
+  category: "full-stack"
 globals:
-  research_depth: skip
-  approval_mode: checkpoint
+  research_depth: "skip"
+  approval_mode: "checkpoint"
   auto_review: true
   subagent_mode: true
-  verbosity: detailed
-
+  verbosity: "detailed"
 modes:
   research:
     enabled: false
   standards:
     enabled: true
-    skill: standards-discover
-    inject_skill: standards-inject
-    trigger_after: scaffold
-
-entry: ready
-
+    skill: "standards-discover"
+    inject_skill: "standards-inject"
+    trigger_after: "scaffold"
+entry: "ready"
 nodes:
-  - id: g-implement
-    type: group
-    position: {x: 0, y: 0}
+  - id: "g-implement"
+    type: "group"
+    position:
+      x: 0
+      y: 0
     style:
       width: 1760
       height: 460
@@ -40,149 +39,201 @@ nodes:
       border: "1px solid rgba(16,185,129,0.2)"
       borderRadius: "12px"
     data:
-      label: Implementation
-      phase: implementation
-
-  - id: ready
-    type: skill
-    parentNode: g-implement
-    position: {x: 40, y: 180}
+      label: "Implementation"
+      phase: "implementation"
+  - id: "ready"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 40
+      y: 180
     data:
-      skill: ready
-      label: Readiness Gate
+      skill: "ready"
+      label: "Readiness Gate"
       optional: false
-
-  - id: scaffold
-    type: skill
-    parentNode: g-implement
-    position: {x: 280, y: 180}
+  - id: "scaffold"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 280
+      y: 180
     data:
-      skill: scaffold
-      label: Scaffold
+      skill: "scaffold"
+      label: "Scaffold"
       optional: false
       parameters:
-        package_manager: bun
-
-  - id: foundation
-    type: skill
-    parentNode: g-implement
-    position: {x: 520, y: 180}
+        package_manager: "bun"
+  - id: "foundation"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 520
+      y: 180
     data:
-      skill: foundation
-      label: Foundation
+      skill: "foundation"
+      label: "Foundation"
       optional: false
-
-  - id: design
-    type: skill
-    parentNode: g-implement
-    position: {x: 520, y: 320}
+  - id: "design"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 520
+      y: 320
     data:
-      skill: design
-      label: Design
+      skill: "design"
+      label: "Design"
       optional: true
-
-  - id: migrate
-    type: skill
-    parentNode: g-implement
-    position: {x: 760, y: 80}
+  - id: "migrate"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 760
+      y: 80
     data:
-      skill: migrate
-      label: Migrate
+      skill: "migrate"
+      label: "Migrate"
       optional: false
-
-  - id: seed
-    type: skill
-    parentNode: g-implement
-    position: {x: 760, y: 280}
+  - id: "seed"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 760
+      y: 280
     data:
-      skill: seed
-      label: Seed
+      skill: "seed"
+      label: "Seed"
       optional: false
-
-  - id: implement-feature
-    type: skill
-    parentNode: g-implement
-    position: {x: 1000, y: 180}
+  - id: "implement-feature"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 1000
+      y: 180
     data:
-      skill: implement-feature
-      label: Feature
+      skill: "implement-feature"
+      label: "Feature"
       optional: false
       subagent: true
       parameters:
         tdd: true
         coverage_threshold: 80
-
-  - id: test-plan
-    type: skill
-    parentNode: g-implement
-    position: {x: 1000, y: 60}
+  - id: "test-plan"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 1000
+      y: 60
     data:
-      skill: test-plan
-      label: Test Plan
+      skill: "test-plan"
+      label: "Test Plan"
       optional: false
-
-  - id: test-unit
-    type: skill
-    parentNode: g-implement
-    position: {x: 1240, y: 60}
+  - id: "test-unit"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 1240
+      y: 60
     data:
-      skill: test-unit
-      label: Unit Tests
-      optional: false
-      subagent: true
-
-  - id: test-integration
-    type: skill
-    parentNode: g-implement
-    position: {x: 1240, y: 200}
-    data:
-      skill: test-integration
-      label: Integration Tests
+      skill: "test-unit"
+      label: "Unit Tests"
       optional: false
       subagent: true
-
-  - id: e2e
-    type: skill
-    parentNode: g-implement
-    position: {x: 1240, y: 340}
+  - id: "test-integration"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 1240
+      y: 200
     data:
-      skill: e2e
-      label: E2E Tests
+      skill: "test-integration"
+      label: "Integration Tests"
       optional: false
       subagent: true
-
-  - id: verify
-    type: skill
-    parentNode: g-implement
-    position: {x: 1520, y: 200}
+  - id: "e2e"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 1240
+      y: 340
     data:
-      skill: verify
-      label: Verify
+      skill: "e2e"
+      label: "E2E Tests"
       optional: false
       subagent: true
-
+  - id: "verify"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 1520
+      y: 200
+    data:
+      skill: "verify"
+      label: "Verify"
+      optional: false
+      subagent: true
 edges:
-  - {id: e-ready-scaffold,         source: ready,             target: scaffold,          type: flow}
-  - {id: e-scaffold-foundation,    source: scaffold,          target: foundation,        type: flow}
-  - {id: e-foundation-design,      source: foundation,        target: design,            type: optional}
-  - {id: e-foundation-migrate,     source: foundation,        target: migrate,           type: flow}
-  - {id: e-foundation-feature,     source: foundation,        target: implement-feature, type: flow}
-  - {id: e-design-feature,         source: design,            target: implement-feature, type: optional}
-  - {id: e-migrate-seed,           source: migrate,           target: seed,              type: flow}
-  - {id: e-feature-test-plan,      source: implement-feature, target: test-plan,         type: flow}
-  - {id: e-test-plan-unit,         source: test-plan,         target: test-unit,         type: flow}
-  - {id: e-feature-integration,    source: implement-feature, target: test-integration,  type: flow}
-  - {id: e-feature-e2e,            source: implement-feature, target: e2e,               type: flow}
-  - {id: e-unit-verify,            source: test-unit,         target: verify,            type: flow}
-  - {id: e-integration-verify,     source: test-integration,  target: verify,            type: flow}
-  - {id: e-e2e-verify,             source: e2e,               target: verify,            type: flow}
-
+  - id: "e-ready-scaffold"
+    source: "ready"
+    target: "scaffold"
+    type: "flow"
+  - id: "e-scaffold-foundation"
+    source: "scaffold"
+    target: "foundation"
+    type: "flow"
+  - id: "e-foundation-design"
+    source: "foundation"
+    target: "design"
+    type: "optional"
+  - id: "e-foundation-migrate"
+    source: "foundation"
+    target: "migrate"
+    type: "flow"
+  - id: "e-foundation-feature"
+    source: "foundation"
+    target: "implement-feature"
+    type: "flow"
+  - id: "e-design-feature"
+    source: "design"
+    target: "implement-feature"
+    type: "optional"
+  - id: "e-migrate-seed"
+    source: "migrate"
+    target: "seed"
+    type: "flow"
+  - id: "e-feature-test-plan"
+    source: "implement-feature"
+    target: "test-plan"
+    type: "flow"
+  - id: "e-test-plan-unit"
+    source: "test-plan"
+    target: "test-unit"
+    type: "flow"
+  - id: "e-feature-integration"
+    source: "implement-feature"
+    target: "test-integration"
+    type: "flow"
+  - id: "e-feature-e2e"
+    source: "implement-feature"
+    target: "e2e"
+    type: "flow"
+  - id: "e-unit-verify"
+    source: "test-unit"
+    target: "verify"
+    type: "flow"
+  - id: "e-integration-verify"
+    source: "test-integration"
+    target: "verify"
+    type: "flow"
+  - id: "e-e2e-verify"
+    source: "e2e"
+    target: "verify"
+    type: "flow"
 next_flows:
-  - id: audit
-    domain: dev-quality
-    label: "Audit \u2192"
-    hint: Run static analysis and structure audit on the implemented codebase.
-  - id: e2e
-    domain: dev-quality
-    label: "E2E Suite \u2192"
-    hint: Run the full browser-based E2E journey test suite.
+  - id: "audit"
+    domain: "dev-quality"
+    label: "Audit →"
+    hint: "Run static analysis and structure audit on the implemented codebase."
+  - id: "e2e"
+    domain: "dev-quality"
+    label: "E2E Suite →"
+    hint: "Run the full browser-based E2E journey test suite."

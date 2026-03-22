@@ -1,16 +1,12 @@
 ---
-name: deep-research
+name: "deep-research"
 description: "Integrated deep research skill that collects documents from multiple sources, stores them in organized folders, and synthesizes findings into a comprehensive research report with citations."
-source: MIGRATED
-version: 1.0.0
-risk: safe
-keywords: []
-reads_from: []
-writes_to: []
 metadata:
-  stage: alpha
+  version: "1.0.0"
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - knowledge-research-contract
+    - "knowledge-research-contract"
 ---
 
 # Deep Research - Integrated Research Skill

@@ -1,12 +1,15 @@
 ---
-name: storybook-components
+name: "storybook-components"
 description: "Sub-skill 2/4: Identify custom building-block components from screen specs, build them using the project's component library, and create their Storybook stories. Called by the storybook orchestrator."
-keywords: [storybook, components, stories, building-blocks, custom-components]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "storybook"
+    - "components"
+    - "stories"
+    - "building-blocks"
+    - "custom-components"
+  source: "MERGED"
 ---
 
 # Storybook Components (Sub-skill 2/4)

@@ -1,11 +1,17 @@
 ---
-name: domain-builder
+name: "domain-builder"
 description: "Use when you need to create a new skill domain — a named folder grouping related skills, agents, prompts, and tools under a shared contract. Scaffolds the full domain folder structure, writes a DOMAIN.md describing purpose and building blocks, and creates an empty <domain>-contract skill."
-keywords: [domain, scaffold, structure, create-domain, new-domain, organize-skills]
 metadata:
-  stage: alpha
+  tags:
+    - "domain"
+    - "scaffold"
+    - "structure"
+    - "create-domain"
+    - "new-domain"
+    - "organize-skills"
+  stage: "alpha"
   requires:
-  - skill-builder-contract
+    - "skill-builder-contract"
 ---
 
 # Domain Builder

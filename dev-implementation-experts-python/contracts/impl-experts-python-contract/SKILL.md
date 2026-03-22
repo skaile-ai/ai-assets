@@ -1,11 +1,9 @@
 ---
-name: impl-experts-python-contract
+name: "impl-experts-python-contract"
 description: "Shared contract for all Python implementation expert skills. Describes the expert skill folder structure, discovery conventions, and how Python experts are consumed by implementation skills."
 metadata:
-  type: system
+  stage: "alpha"
   do_not_invoke: true
-  stage: alpha
-  requires: []
 ---
 
 # Python Implementation Experts — Shared Contract

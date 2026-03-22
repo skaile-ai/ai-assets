@@ -1,14 +1,11 @@
 ---
-name: knowledge-writer-podcast
-source: MIGRATED
-description: Use when you need to generate long form podcast content from documents using a sophisticated multi-agent orchestration process.
-keywords: []
-reads_from: []
-writes_to: []
+name: "knowledge-writer-podcast"
+description: "Use when you need to generate long form podcast content from documents using a sophisticated multi-agent orchestration process."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - knowledge-writing-contract
+    - "knowledge-writing-contract"
 ---
 
 # Knowledge Writer Podcast

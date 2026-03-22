@@ -1,22 +1,34 @@
 ---
-name: add-feature
+name: "add-feature"
 description: "Use when adding a new feature or modifying an existing feature in a live concept. Surgically adds the feature spec, cascades changes through downstream artifacts (journeys, tech stack, architecture, data model, screens), and optionally triggers implementation if the app is already built."
-keywords: [add-feature, modify, extend, feature, change, update, cascade, iteration, incremental]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog:
-    - id: feature_description
-      label: "What feature do you want to add or change?"
-      type: text
-      required: true
-      hint: "Describe it in plain language — what should the user be able to do?"
-    - id: feature_mode
-      label: "New feature or modification?"
-      type: select
-      options: [new, modification]
-      required: true
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "add-feature"
+    - "modify"
+    - "extend"
+    - "feature"
+    - "change"
+    - "update"
+    - "cascade"
+    - "iteration"
+    - "incremental"
+  source: "MERGED"
+  user_inputs:
+    dialog:
+      - id: "feature_description"
+        label: "What feature do you want to add or change?"
+        type: "text"
+        required: true
+        hint: "Describe it in plain language — what should the user be able to do?"
+      - id: "feature_mode"
+        label: "New feature or modification?"
+        type: "select"
+        options:
+          - "new"
+          - "modification"
+        required: true
+    files: []
 ---
 
 # Add Feature — Surgical Concept Modification

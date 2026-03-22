@@ -1,11 +1,9 @@
 ---
-name: skill-builder-contract
+name: "skill-builder-contract"
 description: "Shared contract for all skill-builder domain skills. Describes skill folder structure, SKILL.md frontmatter conventions, CLI.md format, progressive disclosure loading strategy, and how skill-builder skills are composed. REQUIRED reading for skills that create or scaffold other skills."
 metadata:
-  type: system
+  stage: "alpha"
   do_not_invoke: true
-  stage: alpha
-  requires: []
 ---
 
 # Skill Builder Domain — Shared Contract

@@ -1,12 +1,19 @@
 ---
-name: behaviors
+name: "behaviors"
 description: "Use when features are approved and user wants to formalize behavioral rules, state machines, or entity lifecycle. Also when user says 'behavioral specs', 'state machine', 'formalize rules', 'allium specs'."
-keywords: [behavior, specification, allium, rules, states, transitions, domain, lifecycle, state-machine]
-source: MIGRATED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "behavior"
+    - "specification"
+    - "allium"
+    - "rules"
+    - "states"
+    - "transitions"
+    - "domain"
+    - "lifecycle"
+    - "state-machine"
+  source: "MIGRATED"
 ---
 
 # Behaviors — Behavioral Specification

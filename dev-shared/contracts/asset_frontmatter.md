@@ -4,135 +4,142 @@ Canonical frontmatter definitions for the four AI asset types: **skill**, **prom
 
 This document covers the manifest metadata of assets in `ai-resources/`. It is distinct from `frontmatter.md`, which covers YAML fields in `_concept/` output artifacts.
 
----
+## Design Principles
 
-## Common Fields
+Skills and prompts follow the [Agent Skills Specification](https://agentskills.io/specification) for maximum interoperability — `name` and `description` at root, everything else in `metadata:`.
 
-Every asset type shares these fields. All are required unless marked optional.
+Agents follow the [GitAgent Specification](https://www.gitagent.sh/) — a git-native standard with its own root-level field structure. The `metadata:` block holds skaile-specific extensions.
 
-```yaml
-name: string          # Primary identifier. kebab-case. Used by arm for install/lookup.
-description: string   # One line. Used for catalog search, routing, and sidebar labels.
-version: string       # Semver string: "1.0.0". Required on all new assets.
-tags: [string]        # Searchable keywords. Replaces `keywords` (skills) and aligns with agent `tags`.
-stage: alpha | beta | stable   # Maturity level. Moved from metadata.stage.
-author: string        # Optional. Omit for assets owned by the monorepo.
-license: string       # Optional. Defaults to MIT if omitted.
-```
+Flows use a custom schema optimised for the skaile-agent-flow-engine.
 
 ---
 
-## Dependencies — unified `requires:`
+## Root Fields — agentskills.io Compatible
 
-All asset types use `requires:` for declaring dependencies. Two forms:
+These two fields are required on **every** asset type and follow the [Agent Skills spec](https://agentskills.io/specification):
 
-**Bare string** — for same-resource dependencies (contracts, sibling skills):
 ```yaml
-requires:
-  - skill-builder-contract
-  - knowledge-research-contract
+name: string          # Required. kebab-case. 1–64 chars. a-z, 0-9, hyphens only.
+                      # Must not start/end with hyphen or contain consecutive hyphens.
+                      # Must match the parent directory name (skills) or filename stem (prompts, flows).
+description: string   # Required. 1–1024 chars. Describes what the asset does AND when to use it.
+                      # Skills: start with "Use when..." for trigger-based routing.
 ```
-
-**Object** — for cross-resource dependencies with versioning (agents, skill packages):
-```yaml
-requires:
-  - name: concept-orchestrator
-    source: ../../dev-conceptualization/agents/orchestrator
-    version: "1.0.0"      # optional — omit to accept any
-    optional: false        # optional — default false
-```
-
-Mix both forms in one list if needed. This replaces `metadata.requires` (skills) and `dependencies:` (agents).
 
 ---
 
 ## Skill — SKILL.md
 
+Follows the [Agent Skills Specification](https://agentskills.io/specification). Root fields are spec-defined; `metadata:` holds skaile extensions.
+
 ```yaml
 ---
 name: skill-name
-description: "Use when [trigger conditions]. NOT a workflow summary."
-version: "1.0.0"
-tags: [keyword1, keyword2]
-stage: alpha | beta | stable
-source: CF | SAXE | MERGED | MIGRATED   # lineage tracking; omit for net-new skills
-requires:
-  - contract-name           # bare strings for contract deps
-do_not_invoke: false        # true for system contracts that are context-only, never triggered
-user_inputs:
-  dialog:
-    - id: input_name
-      label: "Human-readable label"
-      type: text | select | multiselect | boolean | number
-      required: true
-      options: []           # for select / multiselect only
-      default: null
-      hint: "Help text shown in UI forms"
-  files: []                 # _concept/ paths to pre-supply as input
-reads_from: []              # _concept/ paths this skill reads
-writes_to: []               # _concept/ paths this skill creates or modifies
-env_vars:                   # environment variables required at runtime
-  VAR_NAME: "Description of what this variable does and where to get it."
-subagent: false             # true if this skill is invoked as a sub-agent (spawns its own context)
+description: "Use when [trigger conditions]. Specific keywords for agent routing."
+license: MIT                            # optional — agentskills.io field
+compatibility: "Requires Python 3.12+"  # optional — agentskills.io field; environment requirements
+allowed-tools: Bash(git:*) Read Edit    # optional — agentskills.io experimental; pre-approved tools
+metadata:
+  version: "1.0.0"
+  author: skaile                        # optional — omit for monorepo-owned assets
+  tags: [keyword1, keyword2]            # searchable; used by arm catalog and routing
+  stage: alpha | beta | stable
+  source: CF | SAXE | MERGED | MIGRATED # lineage tracking; omit for new skills
+  requires:                             # dependency declarations
+    - contract-name                     # bare string for same-resource contracts
+  do_not_invoke: false                  # true for system contracts (context-only, never triggered)
+  subagent: false                       # true if skill runs as a sub-agent
+  user_inputs:                          # omit entirely if skill needs no user input
+    dialog:
+      - id: input_name
+        label: "Human-readable label"
+        type: text | select | multiselect | boolean | number
+        required: true
+        options: []                     # for select/multiselect only
+        default: null
+        hint: "Help text shown in UI forms"
+    files: []                           # _concept/ paths to pre-supply as input
+  reads_from: []                        # _concept/ paths this skill reads
+  writes_to: []                         # _concept/ paths this skill creates/modifies
+  env_vars:                             # environment variables required at runtime
+    VAR_NAME: "Description and where to get it."
 ---
 ```
 
-### Field notes
+### Skill field reference
 
-| Field | Required | Notes |
-|---|---|---|
-| `name` | yes | kebab-case; must be unique within domain |
-| `description` | yes | trigger-oriented: "Use when..." — what signals this skill |
-| `version` | yes | semver |
-| `tags` | yes | replaces old `keywords`; at least 2–3 tags |
-| `stage` | yes | replaces `metadata.stage` |
-| `source` | no | CF/SAXE/MERGED/MIGRATED — omit for new skills with no lineage |
-| `requires` | no | bare strings pointing to contract names in same resource |
-| `do_not_invoke` | no | default false; true for shared contracts/system context |
-| `user_inputs` | no | omit entirely if skill needs no user input |
-| `reads_from` | no | helpful for pipeline dependency graphs; use `[]` if none |
-| `writes_to` | no | helpful for pipeline dependency graphs; use `[]` if none |
-| `env_vars` | no | omit if none; include any env var the skill body references |
-| `subagent` | no | default false |
+| Field | Location | Required | Notes |
+|---|---|---|---|
+| `name` | root | yes | kebab-case; unique within domain; must match directory name |
+| `description` | root | yes | trigger-oriented: "Use when..." |
+| `license` | root | no | agentskills.io field; default MIT |
+| `compatibility` | root | no | agentskills.io field; environment requirements |
+| `allowed-tools` | root | no | agentskills.io experimental; space-delimited tool list |
+| `metadata.version` | metadata | yes | semver |
+| `metadata.author` | metadata | no | omit for monorepo-owned |
+| `metadata.tags` | metadata | yes | at least 2–3 tags |
+| `metadata.stage` | metadata | yes | alpha / beta / stable |
+| `metadata.source` | metadata | no | CF / SAXE / MERGED / MIGRATED |
+| `metadata.requires` | metadata | no | bare strings or `{name, source, version?, optional?}` objects |
+| `metadata.do_not_invoke` | metadata | no | default false; true for shared contracts |
+| `metadata.subagent` | metadata | no | default false |
+| `metadata.user_inputs` | metadata | no | omit if no user input needed |
+| `metadata.reads_from` | metadata | no | `[]` if none |
+| `metadata.writes_to` | metadata | no | `[]` if none |
+| `metadata.env_vars` | metadata | no | omit if none |
 
-**Removed:** `metadata:` blob. Any domain-specific notes that don't fit the above belong in the SKILL.md body, not frontmatter.
+### Skill directory structure (agentskills.io)
+
+```
+skill-name/
+├── SKILL.md          # Required: metadata + instructions
+├── scripts/          # Optional: executable code (PEP 723 / bash / node)
+├── references/       # Optional: detailed docs loaded on demand
+├── assets/           # Optional: templates, schemas, static resources
+└── examples/         # Optional: calibration / few-shot examples
+```
+
+### Progressive disclosure
+
+1. **Metadata** (~100 tokens): `name` + `description` loaded at startup for all skills
+2. **Instructions** (<5000 tokens): Full SKILL.md body loaded when skill activates. Keep under 500 lines.
+3. **Resources** (as needed): Files in `scripts/`, `references/`, `assets/` loaded only when required
 
 ---
 
 ## Prompt — *.prompt.md
 
+Minimal variant of the skill format. The body IS the prompt text — no workflow layer.
+
 ```yaml
 ---
 name: command-name
-description: "One line: what this command does and when to invoke it."
-version: "1.0.0"
-tags: [tag1, tag2]
-stage: alpha | beta | stable
+description: "What this command does and when to invoke it."
+metadata:
+  version: "1.0.0"
+  tags: [tag1, tag2]
+  stage: alpha | beta | stable
 ---
 ```
 
-Prompts are intentionally minimal. The body IS the prompt — there is no workflow layer to declare. When installed to `.claude/commands/`, the `name` field becomes the slash command name.
-
-Optional field for prompts with an explicit command name different from the filename:
-```yaml
-command: explicit-name    # only needed if name differs from the desired /command slug
-```
+When installed to `.claude/commands/`, the `name` field becomes the slash command name (e.g. `commit` → `/commit`).
 
 ---
 
 ## Agent — agent.yaml
 
+Follows the [GitAgent Specification](https://www.gitagent.sh/). Root fields are gitagent-native; `metadata:` holds skaile extensions.
+
 ```yaml
-spec_version: "0.1.0"
-name: agent-name
-version: "1.0.0"
-description: "One line: what this agent does and when it is invoked."
-tags: [tag1, tag2]
-stage: alpha | beta | stable
+spec_version: "0.1.0"                  # gitagent spec version
+name: agent-name                        # kebab-case identifier
+version: "1.0.0"                        # semver
+description: "What this agent does."
 author: skaile
 license: MIT
+tags: [tag1, tag2]                      # gitagent puts tags at root
 
-extends: ../path/to/base-agent/agent.yaml    # optional inheritance
+extends: ../path/to/base-agent/agent.yaml  # optional inheritance
 
 model:
   preferred: claude-opus-4-6
@@ -143,49 +150,96 @@ model:
     temperature: 0.2
     max_tokens: 8192
 
+skills: []                              # skill names this agent can invoke
 delegation:
   mode: explicit | router | auto
 
 runtime:
   max_turns: 100
-  timeout: 1800          # seconds
+  timeout: 1800                         # seconds
 
-requires:                # replaces old `dependencies:` array
+requires:                               # agent dependencies (gitagent: dependencies → requires)
   - name: concept-orchestrator
     source: ../../dev-conceptualization/agents/orchestrator
     version: "1.0.0"
     optional: false
+    mount: agents/conceptualization     # where to mount sub-agent
 
-metadata:                # domain-specific context — keep minimal; prefer dedicated fields above
+compliance:                             # optional — gitagent regulatory metadata
+  risk_tier: low | medium | high
+  supervision:
+    human_in_the_loop: never | on_risk | always
+    kill_switch: false
+
+metadata:                               # skaile extensions
+  stage: alpha | beta | stable
   domain: domain-name
   produces: "What this agent writes"
   consumes: "What this agent reads"
 ```
 
-### Field notes
+### GitAgent directory structure
 
-The top-level `tags` replaces the old bare `tags:` array (no change in value, just clarified as part of the common schema). The `dependencies:` key is renamed to `requires:` — same object format, just a consistent name.
+```
+agent-name/
+├── agent.yaml          # Required: manifest with version, model, compliance
+├── SOUL.md             # Required: identity, personality, communication style
+├── RULES.md            # Hard constraints and safety boundaries
+├── DUTIES.md           # Segregation of duties and role policies
+├── AGENTS.md           # Framework-agnostic fallback instructions
+├── skills/             # Reusable capability modules
+├── tools/              # MCP-compatible tool schemas
+├── workflows/          # Multi-step YAML procedures
+├── knowledge/          # Reference documents (sorted by index.yaml priority)
+│   └── index.yaml      # Priority ordering for knowledge files
+├── memory/runtime/     # Live agent state (gitignored)
+├── hooks/              # Lifecycle handlers (bootstrap, teardown)
+├── config/             # Environment-specific overrides
+├── compliance/         # Regulatory artifacts and audit logs
+├── agents/             # Sub-agent definitions (recursive composition)
+└── examples/           # Calibration interactions (few-shot)
+```
 
-`metadata:` may remain for domain-specific documentation fields (`produces`, `consumes`, `phases`, `resume`, `expert_routing`) that are informational only, not parsed by tooling.
+### Imprint assembly order
+
+`buildAgentImprint()` in skaile-agent-runner assembles the system prompt:
+
+1. `SOUL.md` — agent identity and values
+2. `RULES.md` — behavioral constraints
+3. `knowledge/*.md` — sorted by `index.yaml` priority (default: 99)
+4. Project `CLAUDE.md` overlay — optional
+
+Parts joined with `\n\n---\n\n`.
+
+### Export adapters (gitagent CLI)
+
+| Format | Target |
+|---|---|
+| `system-prompt` | Plain text for any LLM |
+| `claude-code` | Claude Code CLAUDE.md |
+| `openai` | OpenAI Agents SDK |
+| `crewai` | CrewAI YAML |
+| `github` | GitHub Actions |
 
 ---
 
 ## Flow — *.flow.yaml
 
+Custom schema for skaile-agent-flow-engine. Uses `id` as the machine identifier (distinct from display `name`).
+
 ```yaml
-id: flow-id             # machine identifier; kebab-case; used by skaile run <id>
-name: Human Name        # display name
+id: flow-id                             # machine identifier; used by `skaile run <id>`
+name: Human Readable Name
 version: "1.0"
 description: >-
-  One paragraph describing what this flow does.
-tags: [tag1, tag2]      # top-level tags for catalog search
-stage: alpha | beta | stable
+  What this flow does.
 
-meta:                   # UI / presentation metadata (not parsed by runner)
-  icon: i-heroicons-rocket-launch
+metadata:
+  tags: [tag1, tag2]
+  stage: alpha | beta | stable
+  icon: i-heroicons-rocket-launch       # UI icon class
   category: full-stack | prototype | concept | cli | maintenance
-  tags: [tag1, tag2]    # duplicates top-level tags for UI consumers — keep both for now
-  onboarding:           # optional — for flows with a structured onboarding form
+  onboarding:                           # optional structured onboarding form
     input_style: structured | repo
     fields: [app_name, problem, audience]
 
@@ -195,7 +249,7 @@ globals:
   auto_review: false
   subagent_mode: true
   verbosity: brief | standard | detailed
-  cli_mode: false       # optional; true for CLI-only flows
+  cli_mode: false
 
 modes:
   research:
@@ -210,46 +264,72 @@ modes:
     trigger_after: scaffold
     parameters: {}
 
-entry: node-id          # first node to execute
+entry: node-id
+nodes: [...]
+edges: [...]
 ```
 
-### Field notes
+### Flow field notes
 
-Flows already have `id` at root (distinct from `name`). The new `tags` field at top-level enables catalog indexing. `meta.tags` is kept for UI consumers but `tags` is the canonical catalog field. `stage` is new for flows — add for all new flows; existing flows default to `stable`.
+Flows keep `id`, `version`, `name`, `description` at root because the flow-engine and runner parse them directly. The `metadata:` block holds catalog/UI fields (`tags`, `stage`, `icon`, `category`, `onboarding`) — previously split between root and a `meta:` block.
 
 ---
 
-## Migration Notes
+## Domain — DOMAIN.md
 
-### For skill files (bulk update needed)
+Domain manifest for directories under `ai-resources/`. Not managed by arm but read by agents and documentation.
 
-| Old field | New field | Action |
+```yaml
+---
+name: domain-name
+description: "One-line summary of this domain."
+metadata:
+  stage: alpha | beta | stable
+  type: domain
+---
+```
+
+---
+
+## Migration from Previous Schema
+
+### Skill files
+
+| Old | New | Action |
 |---|---|---|
-| `keywords: []` | `tags: []` | Rename |
-| `metadata.stage: alpha` | `stage: alpha` | Promote to top-level |
-| `metadata.requires: [...]` | `requires: [...]` | Promote to top-level |
-| `metadata.do_not_invoke: true` | `do_not_invoke: true` | Promote to top-level |
+| `keywords: [...]` | `metadata.tags: [...]` | Move into metadata, rename |
+| `metadata.stage: alpha` | `metadata.stage: alpha` | Keep in metadata (no change) |
+| `metadata.requires: [...]` | `metadata.requires: [...]` | Keep in metadata (no change) |
+| `metadata.do_not_invoke: true` | `metadata.do_not_invoke: true` | Keep in metadata (no change) |
 | `metadata.type: system` | remove | Redundant with `do_not_invoke` |
-| `metadata: {}` (empty) | remove | Delete empty blocks |
-| `metadata:` (domain-only fields) | keep | `phases`, `produces`, `consumes`, `resume` stay in metadata |
+| `source: CF` (root) | `metadata.source: CF` | Move into metadata |
+| `version: "1.0.0"` (root) | `metadata.version: "1.0.0"` | Move into metadata |
+| `reads_from: []` (root) | `metadata.reads_from: []` | Move into metadata |
+| `writes_to: []` (root) | `metadata.writes_to: []` | Move into metadata |
+| `user_inputs:` (root) | `metadata.user_inputs:` | Move into metadata |
+| `subagent: true` (root) | `metadata.subagent: true` | Move into metadata |
+| `env_vars:` (root) | `metadata.env_vars:` | Move into metadata |
+| `risk: safe` (root) | remove | Not in spec |
 
-### For agent.yaml files
+### Agent files
 
-| Old field | New field | Action |
+| Old | New | Action |
 |---|---|---|
-| `dependencies: [...]` | `requires: [...]` | Rename; keep object format |
-| `tags: [...]` | no change | Already correct |
+| `dependencies: [...]` | `requires: [...]` | Rename at root |
+| `tags: [...]` | no change | Already at root (gitagent) |
+| add `metadata.stage` | | New field |
 
-### For flow.yaml files
+### Flow files
 
-| Action | |
-|---|---|
-| Add `tags: [...]` at top-level | Copy from `meta.tags` |
-| Add `stage: stable` | New field; existing flows are stable |
+| Old | New | Action |
+|---|---|---|
+| `meta:` block | `metadata:` block | Rename; absorb `icon`, `category`, `tags`, `onboarding` |
+| add `metadata.stage` | | New field |
 
-### For prompt files
+### Prompt files
 
-| Action | |
-|---|---|
-| Add `tags: [...]` | New field |
-| Add `stage: alpha` | New field |
+| Old | New | Action |
+|---|---|---|
+| `version:` (root) | `metadata.version:` | Move into metadata |
+| `tags:` (root) | `metadata.tags:` | Move into metadata |
+| `stage:` (root) | `metadata.stage:` | Move into metadata |

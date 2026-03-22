@@ -1,12 +1,18 @@
 ---
-name: storybook-journeys
+name: "storybook-journeys"
 description: "Sub-skill 4/4: Build clickable multi-screen user journey stories (click-dummies). Each journey flows through real page components inside AppShell. Covers hero, vital, and hygiene flows from stories.json. Called by the storybook orchestrator."
-keywords: [storybook, journeys, click-dummy, user-flows, interactive, hero, vital, hygiene]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "storybook"
+    - "journeys"
+    - "click-dummy"
+    - "user-flows"
+    - "interactive"
+    - "hero"
+    - "vital"
+    - "hygiene"
+  source: "MERGED"
 ---
 
 # Storybook Journeys (Sub-skill 4/4)

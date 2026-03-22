@@ -1,14 +1,11 @@
 ---
-name: knowledge-paper-podcast
-source: MIGRATED
-description: Use when you need to create a podcast script from the output of the knowledge-paper-research skill.
-keywords: []
-reads_from: []
-writes_to: []
+name: "knowledge-paper-podcast"
+description: "Use when you need to create a podcast script from the output of the knowledge-paper-research skill."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - knowledge-writing-contract
+    - "knowledge-writing-contract"
 ---
 
 # Knowledge Paper Podcast

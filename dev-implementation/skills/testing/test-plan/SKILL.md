@@ -1,19 +1,28 @@
 ---
-name: test-plan
+name: "test-plan"
 description: "Use when you need a comprehensive test plan derived from concept specs. Generates test scenarios per feature covering happy paths, error states, edge cases, and permissions, mapped to seed data scenarios."
-keywords: [testing, test-plan, qa, scenarios, coverage, acceptance]
-source: MIGRATED
-version: 1.0.0
-user_inputs:
-  dialog:
-  - id: test_scope
-    label: "Test Scope"
-    type: select
-    options: ["must-have-only", "all-features"]
-    required: true
-    default: "all-features"
-    hint: "Whether to generate test scenarios for must-have features only or all features"
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "testing"
+    - "test-plan"
+    - "qa"
+    - "scenarios"
+    - "coverage"
+    - "acceptance"
+  source: "MIGRATED"
+  user_inputs:
+    dialog:
+      - id: "test_scope"
+        label: "Test Scope"
+        type: "select"
+        options:
+          - "must-have-only"
+          - "all-features"
+        required: true
+        default: "all-features"
+        hint: "Whether to generate test scenarios for must-have features only or all features"
+    files: []
 ---
 
 # Test Plan — Concept-Driven Test Generation

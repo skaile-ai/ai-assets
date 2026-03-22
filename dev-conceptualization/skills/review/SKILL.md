@@ -1,19 +1,32 @@
 ---
-name: review
+name: "review"
 description: "Structure audit + entropy check + doc gardening for _concept/. In audit mode: scan completeness, cross-reference integrity, golden principle compliance, and entropy; produce quality.json with score. In gardening mode: auto-fix safe issues and report what changed."
-keywords: [review, audit, status, entropy, checklist, progress, health, gardening, cleanup, quality]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog:
-    - id: mode
-      label: "Audit or garden?"
-      type: select
-      options: [audit, garden]
-      required: false
-      default: audit
-      hint: "audit = report issues; garden = auto-fix safe issues"
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "review"
+    - "audit"
+    - "status"
+    - "entropy"
+    - "checklist"
+    - "progress"
+    - "health"
+    - "gardening"
+    - "cleanup"
+    - "quality"
+  source: "MERGED"
+  user_inputs:
+    dialog:
+      - id: "mode"
+        label: "Audit or garden?"
+        type: "select"
+        options:
+          - "audit"
+          - "garden"
+        required: false
+        default: "audit"
+        hint: "audit = report issues; garden = auto-fix safe issues"
+    files: []
 ---
 
 # Review — Structure Audit and Gardening

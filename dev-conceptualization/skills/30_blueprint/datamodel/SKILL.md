@@ -1,12 +1,19 @@
 ---
-name: datamodel
+name: "datamodel"
 description: "Use when features are approved but _concept/3_blueprint/3_datamodel/ is empty. Produces model.dbml (DBML), model.json (editor canvas), seed.json (test scenarios), and feature_map.json (model-to-feature cross-reference)."
-keywords: [data, schema, database, entities, relationships, dbml, model, seed, feature-map]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "data"
+    - "schema"
+    - "database"
+    - "entities"
+    - "relationships"
+    - "dbml"
+    - "model"
+    - "seed"
+    - "feature-map"
+  source: "MERGED"
 ---
 
 # Data Model

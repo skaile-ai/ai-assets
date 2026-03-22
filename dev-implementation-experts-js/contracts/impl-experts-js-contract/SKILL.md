@@ -1,11 +1,9 @@
 ---
-name: impl-experts-js-contract
+name: "impl-experts-js-contract"
 description: "Shared contract for all JavaScript/TypeScript implementation expert skills. Describes the expert skill folder structure (recipes, atomic-examples, reference-implementations), discovery conventions, and how experts are consumed by implementation skills."
 metadata:
-  type: system
+  stage: "alpha"
   do_not_invoke: true
-  stage: alpha
-  requires: []
 ---
 
 # JS/TS Implementation Experts — Shared Contract

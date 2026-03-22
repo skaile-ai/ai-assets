@@ -1,13 +1,18 @@
 ---
-name: e2e
+name: "e2e"
 description: "End-to-end browser testing. Reads screen specs, features, and data model from _concept/. Uses agent-browser to test every user journey, take screenshots, and validate database records."
-keywords: [testing, e2e, browser, screenshots, validation, journey, playwright, agent-browser]
-source: MERGED
-version: 1.0.0
-disable-model-invocation: true
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "testing"
+    - "e2e"
+    - "browser"
+    - "screenshots"
+    - "validation"
+    - "journey"
+    - "playwright"
+    - "agent-browser"
+  source: "MERGED"
 ---
 
 # E2E — End-to-End Browser Testing

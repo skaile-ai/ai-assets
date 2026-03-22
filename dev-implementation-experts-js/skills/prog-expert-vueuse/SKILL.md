@@ -1,14 +1,11 @@
 ---
-name: prog-expert-vueuse
-source: MIGRATED
-description: Use when you need to implement VueUse composables in Nuxt 3, including auto-import configuration, composable selection, conflict handling with Nuxt built-ins, and reactive browser/state/DOM utilities. Expert-level programming and pattern management.
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-vueuse"
+description: "Use when you need to implement VueUse composables in Nuxt 3, including auto-import configuration, composable selection, conflict handling with Nuxt built-ins, and reactive browser/state/DOM utilities. Expert-level programming and pattern management."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - impl-experts-js-contract
+    - "impl-experts-js-contract"
 ---
 
 # Prog Expert VueUse

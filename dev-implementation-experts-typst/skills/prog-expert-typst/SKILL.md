@@ -1,13 +1,9 @@
 ---
-name: prog-expert-typst
-source: MIGRATED
-description: Use when you need to implement a typst template from an image or pdf reference iteratively. Expert-level programming and pattern management.
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-typst"
+description: "Use when you need to implement a typst template from an image or pdf reference iteratively. Expert-level programming and pattern management."
 metadata:
-  stage: alpha
-  requires: []
+  stage: "alpha"
+  source: "MIGRATED"
 ---
 
 # Prog Expert Typst

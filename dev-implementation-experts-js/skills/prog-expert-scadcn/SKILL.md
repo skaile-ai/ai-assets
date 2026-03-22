@@ -1,14 +1,11 @@
 ---
-name: prog-expert-scadcn
-source: MIGRATED
-description: Use when you need to implement shadcn-vue (shadcn-nuxt) in Nuxt 3/4 — component registry via components.json, Tailwind CSS v4 with @tailwindcss/vite, class-variance-authority, tailwind-merge, and auto-imported shadcn components.
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-scadcn"
+description: "Use when you need to implement shadcn-vue (shadcn-nuxt) in Nuxt 3/4 — component registry via components.json, Tailwind CSS v4 with @tailwindcss/vite, class-variance-authority, tailwind-merge, and auto-imported shadcn components."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - impl-experts-js-contract
+    - "impl-experts-js-contract"
 ---
 
 # Prog Expert shadcn-vue

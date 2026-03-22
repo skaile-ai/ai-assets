@@ -1,22 +1,42 @@
 ---
-name: brand-behavioral
+name: "brand-behavioral"
 description: "Use when the visual brand exists and you need to define communication tone, error message style, empty state messaging, micro-copy guidelines, and notification voice. Produces behavioral.md + copy_guidelines.md in _concept/1_discovery/2_brand/."
-keywords: [brand, tone, voice, copy, microcopy, errors, empty-states, notifications, messaging, ux-writing]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog:
-    - id: tone
-      label: "What tone should your app speak in?"
-      type: select
-      options: [friendly, professional, playful, serious]
-      default: friendly
-    - id: formality_level
-      label: "How formal should the language be? (1 = casual chat, 5 = corporate)"
-      type: select
-      options: ["1", "2", "3", "4", "5"]
-      default: "3"
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "brand"
+    - "tone"
+    - "voice"
+    - "copy"
+    - "microcopy"
+    - "errors"
+    - "empty-states"
+    - "notifications"
+    - "messaging"
+    - "ux-writing"
+  source: "MERGED"
+  user_inputs:
+    dialog:
+      - id: "tone"
+        label: "What tone should your app speak in?"
+        type: "select"
+        options:
+          - "friendly"
+          - "professional"
+          - "playful"
+          - "serious"
+        default: "friendly"
+      - id: "formality_level"
+        label: "How formal should the language be? (1 = casual chat, 5 = corporate)"
+        type: "select"
+        options:
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+        default: "3"
+    files: []
 ---
 
 # Brand Behavioral Identity

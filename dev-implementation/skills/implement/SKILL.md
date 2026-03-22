@@ -1,19 +1,34 @@
 ---
-name: implement
+name: "implement"
 description: "Full app implementation orchestrator. Reads the completed _concept/ and drives the entire pipeline from project scaffold through feature implementation to verified, deployable application. Creates the implementation plan, manages checkpoints, git workflow, and progress tracking. Journey-first feature strategy (hero → vital → hygiene from stories.json). Supports resume from any interrupted phase."
-keywords: [implement, orchestrate, build, app, pipeline, plan, scaffold, foundation, features, verify, journey]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog:
-    - id: complexity_tier
-      label: "Project complexity (controls checkpoint frequency and testing depth)"
-      type: select
-      options: [small, standard, complex]
-      required: false
-      default: standard
-      hint: "small = consolidated setup, standard = separate scaffold+foundation, complex = all checkpoints separate"
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "implement"
+    - "orchestrate"
+    - "build"
+    - "app"
+    - "pipeline"
+    - "plan"
+    - "scaffold"
+    - "foundation"
+    - "features"
+    - "verify"
+    - "journey"
+  source: "MERGED"
+  user_inputs:
+    dialog:
+      - id: "complexity_tier"
+        label: "Project complexity (controls checkpoint frequency and testing depth)"
+        type: "select"
+        options:
+          - "small"
+          - "standard"
+          - "complex"
+        required: false
+        default: "standard"
+        hint: "small = consolidated setup, standard = separate scaffold+foundation, complex = all checkpoints separate"
+    files: []
 ---
 
 # Implement — Full App Implementation Orchestrator

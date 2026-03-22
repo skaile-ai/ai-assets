@@ -1,12 +1,19 @@
 ---
-name: infrastructure
+name: "infrastructure"
 description: "Sets up custom backend infrastructure from the architecture doc. Implements custom NestJS/backend modules, provider abstractions (real + in-memory), additional processes, and communication infrastructure (WebSocket, SSE). Only needed when architecture.md defines custom_modules or processes beyond the standard stack. Reads _concept/3_blueprint/2_architecture/architecture.md."
-keywords: [infrastructure, backend, modules, providers, websocket, sse, adapters, integration, nestjs]
-source: SAXE
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "infrastructure"
+    - "backend"
+    - "modules"
+    - "providers"
+    - "websocket"
+    - "sse"
+    - "adapters"
+    - "integration"
+    - "nestjs"
+  source: "SAXE"
 ---
 
 # Infrastructure — Custom Backend Modules and Services

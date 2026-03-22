@@ -1,12 +1,17 @@
 ---
-name: storybook-types
+name: "storybook-types"
 description: "PostXL-specific: replaces mocked Storybook types with schema-generated types from model.json. Runs pxl types to generate TypeScript interfaces, preserves UI-only types, and ensures the Storybook project compiles. Use after datamodel is finalized and Storybook stories use placeholder types."
-keywords: [types, typescript, storybook, schema, codegen, compilation, postxl]
-source: MIGRATED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "types"
+    - "typescript"
+    - "storybook"
+    - "schema"
+    - "codegen"
+    - "compilation"
+    - "postxl"
+  source: "MIGRATED"
 ---
 
 > **NOTE:** This skill is PostXL-specific. It requires the `pxl` CLI tool for type

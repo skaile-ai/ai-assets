@@ -1,12 +1,10 @@
 ---
-name: cf__shared
+name: "cf__shared"
 description: "Shared contracts for the Concept Forge skill suite. REQUIRED dependency — install this alongside any cf_* skill. Contains pipeline definition, concept folder structure, frontmatter rules, semantic types, iron laws, profiles, and agent patterns that all cf_* skills read before operating."
 metadata:
-  type: system
-  required_by: all cf_* skills
+  stage: "alpha"
   do_not_invoke: true
-  stage: alpha
-  requires: []
+  required_by: "all cf_* skills"
 ---
 
 # Concept Forge — Shared Contracts

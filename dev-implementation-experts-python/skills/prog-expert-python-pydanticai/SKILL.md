@@ -1,14 +1,11 @@
 ---
-name: prog-expert-python-pydanticai
-source: MIGRATED
-description: Use when you need to implement pydantic-ai Agent API patterns including structured outputs with result_type, message history, OpenAI/Gemini model backends, async streaming with run_stream(), and multi-provider integration. Expert-level programming and pattern management.
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-python-pydanticai"
+description: "Use when you need to implement pydantic-ai Agent API patterns including structured outputs with result_type, message history, OpenAI/Gemini model backends, async streaming with run_stream(), and multi-provider integration. Expert-level programming and pattern management."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - impl-experts-python-contract
+    - "impl-experts-python-contract"
 ---
 
 # Prog Expert Python Pydanticai

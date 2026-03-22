@@ -1,12 +1,15 @@
 ---
-name: storybook-setup
+name: "storybook-setup"
 description: "Sub-skill 1/4: Scaffold a standalone Storybook project, install dependencies, and apply brand tokens as CSS custom properties. Called by the storybook orchestrator."
-keywords: [storybook, setup, scaffold, brand-tokens, config]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "storybook"
+    - "setup"
+    - "scaffold"
+    - "brand-tokens"
+    - "config"
+  source: "MERGED"
 ---
 
 # Storybook Setup (Sub-skill 1/4)

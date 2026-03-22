@@ -1,12 +1,18 @@
 ---
-name: journeys
+name: "journeys"
 description: "Use after project brief is approved to map user journeys. Reads the approved brief, goals, and optional research to define personas and story maps organized by stage (hero, vital, hygiene, backlog). Writes stories.json with EARS acceptance criteria. Required before features skill."
-keywords: [journeys, stories, personas, story-map, user-flow, acceptance-criteria, ears, experience]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "journeys"
+    - "stories"
+    - "personas"
+    - "story-map"
+    - "user-flow"
+    - "acceptance-criteria"
+    - "ears"
+    - "experience"
+  source: "MERGED"
 ---
 
 # Journeys — User Journey Mapping

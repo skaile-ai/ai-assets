@@ -1,14 +1,11 @@
 ---
-name: prog-expert-skill-system
-source: MIGRATED
-description: Use when you need to design, build, or refine LLM agent skill systems with pipeline orchestration, artifact-based gates, cross-references, profiles, and UI integration. Expert-level skill architecture and pattern management.
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-skill-system"
+description: "Use when you need to design, build, or refine LLM agent skill systems with pipeline orchestration, artifact-based gates, cross-references, profiles, and UI integration. Expert-level skill architecture and pattern management."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - architecture-contract
+    - "architecture-contract"
 ---
 
 # Prog Expert Skill System

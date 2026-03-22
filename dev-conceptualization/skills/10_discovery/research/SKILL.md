@@ -1,18 +1,39 @@
 ---
-name: research
+name: "research"
 description: "Use when grounding decisions in real-world data — competitor analysis, audience research, design inspiration, behavioral patterns, color/font research. Research is a MODE that runs in parallel with other steps, not a sequential pipeline step."
-keywords: [research, competitors, market, audience, personas, brand, inspiration, templates, layouts, design, patterns, grounding]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog:
-  - id: research_scope
-    label: "Research scope"
-    type: select
-    required: true
-    options: [domain, competitors, audiences, design, patterns, colors, behavioral, all]
-    hint: "What area to research (select 'all' for comprehensive research)"
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "research"
+    - "competitors"
+    - "market"
+    - "audience"
+    - "personas"
+    - "brand"
+    - "inspiration"
+    - "templates"
+    - "layouts"
+    - "design"
+    - "patterns"
+    - "grounding"
+  source: "MERGED"
+  user_inputs:
+    dialog:
+      - id: "research_scope"
+        label: "Research scope"
+        type: "select"
+        required: true
+        options:
+          - "domain"
+          - "competitors"
+          - "audiences"
+          - "design"
+          - "patterns"
+          - "colors"
+          - "behavioral"
+          - "all"
+        hint: "What area to research (select 'all' for comprehensive research)"
+    files: []
 ---
 
 # Research — Domain Research Mode

@@ -1,14 +1,11 @@
 ---
-name: use-docling
-source: MIGRATED
-description: Use when you need to convert documents (PDF, DOCX, etc.), perform OCR, export images, transcribe audio, or extract structured data using the local docling CLI tool.
-keywords: []
-reads_from: []
-writes_to: []
+name: "use-docling"
+description: "Use when you need to convert documents (PDF, DOCX, etc.), perform OCR, export images, transcribe audio, or extract structured data using the local docling CLI tool."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - use-contract
+    - "use-contract"
 ---
 
 # Docling Document Processor

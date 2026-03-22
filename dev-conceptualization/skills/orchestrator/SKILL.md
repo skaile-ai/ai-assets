@@ -1,19 +1,31 @@
 ---
-name: orchestrator
+name: "orchestrator"
 description: "Full concept pipeline orchestrator. Runs the complete conceptualization pipeline (Discovery -> Experience -> Blueprint) with checkpoint approvals, PLANS.md tracking, and auto-review mode. Dispatches sub-skills for each pipeline step and manages user communication."
-keywords: [orchestrate, concept, pipeline, plan, discovery, experience, blueprint, checkpoint]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog:
-    - id: complexity_tier
-      label: "Project complexity (controls checkpoint frequency)"
-      type: select
-      options: [small, standard, complex]
-      required: false
-      default: standard
-      hint: "small = consolidated checkpoints, standard = phase-level checkpoints, complex = per-skill checkpoints"
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "orchestrate"
+    - "concept"
+    - "pipeline"
+    - "plan"
+    - "discovery"
+    - "experience"
+    - "blueprint"
+    - "checkpoint"
+  source: "MERGED"
+  user_inputs:
+    dialog:
+      - id: "complexity_tier"
+        label: "Project complexity (controls checkpoint frequency)"
+        type: "select"
+        options:
+          - "small"
+          - "standard"
+          - "complex"
+        required: false
+        default: "standard"
+        hint: "small = consolidated checkpoints, standard = phase-level checkpoints, complex = per-skill checkpoints"
+    files: []
 ---
 
 # Orchestrator — Full Concept Pipeline

@@ -1,12 +1,18 @@
 ---
-name: implement-feature-page
+name: "implement-feature-page"
 description: "Page-level feature implementation with TDD Guard. Implements all features within one page using outside-in TDD: writes failing page tests, then for each feature writes failing feature tests and implements until green. Uses storybook page compositions as UI starting point if available. TDD Guard enforces red-green discipline at the feature level."
-keywords: [implement, feature, page, tdd, tdd-guard, test-first, e2e, component]
-source: MERGED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "implement"
+    - "feature"
+    - "page"
+    - "tdd"
+    - "tdd-guard"
+    - "test-first"
+    - "e2e"
+    - "component"
+  source: "MERGED"
 ---
 
 # Implement Feature Page — Page-Level Implementation with TDD Guard

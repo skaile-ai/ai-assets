@@ -1,26 +1,34 @@
 ---
-name: standards-sync
+name: "standards-sync"
 description: "Use when pushing proven project standards back to profiles, or syncing profile standards into a project. Triggered by 'sync standards', 'update profile conventions', or 'push standards to profile'."
-keywords: [standards, sync, profile, conventions, push, pull]
-user_inputs:
-  dialog:
-  - id: direction
-    label: "Sync Direction"
-    type: select
-    options: ["project_to_profile", "profile_to_project"]
-    required: true
-    hint: "Push project standards to profile, or pull profile standards into project"
-  - id: profile_name
-    label: "Profile Name"
-    type: text
-    required: false
-    default: "default"
-    hint: "Which profile to sync with"
-  files: []
 metadata:
-  stage: alpha
+  tags:
+    - "standards"
+    - "sync"
+    - "profile"
+    - "conventions"
+    - "push"
+    - "pull"
+  stage: "alpha"
   requires:
-  - standards-contract
+    - "standards-contract"
+  user_inputs:
+    dialog:
+      - id: "direction"
+        label: "Sync Direction"
+        type: "select"
+        options:
+          - "project_to_profile"
+          - "profile_to_project"
+        required: true
+        hint: "Push project standards to profile, or pull profile standards into project"
+      - id: "profile_name"
+        label: "Profile Name"
+        type: "text"
+        required: false
+        default: "default"
+        hint: "Which profile to sync with"
+    files: []
 ---
 
 # Sync Standards

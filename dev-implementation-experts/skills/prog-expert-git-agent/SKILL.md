@@ -1,6 +1,6 @@
 ---
-name: prog-expert-git-agent
-description: Use when you need to create, configure, or manage GitAgent-compatible agent definitions (agent.yaml, SOUL.md, RULES.md, SKILL.md). Expert-level programming and pattern management for the GitAgent open standard (spec v0.1.0).
+name: "prog-expert-git-agent"
+description: "Use when you need to create, configure, or manage GitAgent-compatible agent definitions (agent.yaml, SOUL.md, RULES.md, SKILL.md). Expert-level programming and pattern management for the GitAgent open standard (spec v0.1.0)."
 ---
 
 # Prog Expert Git Agent

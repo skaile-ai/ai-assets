@@ -1,14 +1,11 @@
 ---
-name: prog-expert-python
-source: MIGRATED
-description: Use when you need to implement Python 3.12+ patterns, uv workspace monorepo management, async Python, decorator patterns, pytest/mock testing, ruff/mypy configuration, Rich CLI output, pydantic-settings config, and Protocol-based interface design. Expert-level programming and pattern management.
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-python"
+description: "Use when you need to implement Python 3.12+ patterns, uv workspace monorepo management, async Python, decorator patterns, pytest/mock testing, ruff/mypy configuration, Rich CLI output, pydantic-settings config, and Protocol-based interface design. Expert-level programming and pattern management."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - impl-experts-python-contract
+    - "impl-experts-python-contract"
 ---
 
 # Prog Expert Python

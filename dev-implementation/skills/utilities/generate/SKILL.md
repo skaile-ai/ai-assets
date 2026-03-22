@@ -1,12 +1,18 @@
 ---
-name: generate
+name: "generate"
 description: "PostXL code generation and conflict resolution. Runs PostXL generators from postxl-schema.json, auto-resolves merge conflicts using a four-level cascade, and verifies the build. Only applicable when using the PostXL tech stack. Re-run after any schema change or custom action addition."
-keywords: [generate, codegen, postxl, schema, conflicts, prisma, regenerate, sync]
-source: SAXE
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "generate"
+    - "codegen"
+    - "postxl"
+    - "schema"
+    - "conflicts"
+    - "prisma"
+    - "regenerate"
+    - "sync"
+  source: "SAXE"
 ---
 
 # Generate — PostXL Code Generation

@@ -1,16 +1,13 @@
 ---
-name: prog-expert-omp
-source: MIGRATED
-description: Use when you need to work with omp (pi-coding-agent), including RPC mode integration, skill authoring, extension development, agent embedding, and CLI configuration. Expert-level programming and pattern management.
-env_vars:
-  OPENROUTER_API_KEY: "Typically required for omp to access models via OpenRouter."
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-omp"
+description: "Use when you need to work with omp (pi-coding-agent), including RPC mode integration, skill authoring, extension development, agent embedding, and CLI configuration. Expert-level programming and pattern management."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - impl-experts-js-contract
+    - "impl-experts-js-contract"
+  env_vars:
+    OPENROUTER_API_KEY: "Typically required for omp to access models via OpenRouter."
 ---
 
 # Prog Expert OMP

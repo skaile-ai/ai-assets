@@ -1,11 +1,9 @@
 ---
-name: implementation-contract
+name: "implementation-contract"
 description: "Shared contract for all dev-implementation skills. Describes _implementation/ folder layout, scaffold-to-verify pipeline, progress.json format, git workflow, and how implementation reads from _concept/. REQUIRED reading for any implementation skill."
 metadata:
-  type: system
+  stage: "alpha"
   do_not_invoke: true
-  stage: alpha
-  requires: []
 ---
 
 # Implementation Domain — Shared Contract

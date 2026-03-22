@@ -1,14 +1,11 @@
 ---
-name: prog-expert-marimo
-source: MIGRATED
-description: Use when you need to create, edit, or debug Marimo reactive Python notebooks, including cell structure, reactivity rules, output display, and the Lint-Export-Assert test protocol. Expert-level programming and pattern management.
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-marimo"
+description: "Use when you need to create, edit, or debug Marimo reactive Python notebooks, including cell structure, reactivity rules, output display, and the Lint-Export-Assert test protocol. Expert-level programming and pattern management."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - impl-experts-python-contract
+    - "impl-experts-python-contract"
 ---
 
 # Prog Expert Marimo

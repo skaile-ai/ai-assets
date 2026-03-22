@@ -1,9 +1,6 @@
 ---
-name: file-management
-description: >-
-  Read, write, create, and delete files within the project workspace. List
-  directory trees. All operations are scoped to the active project workspace.
-  Use when the user wants to open, save, browse, or manage project files.
+name: "file-management"
+description: "Read, write, create, and delete files within the project workspace. List directory trees. All operations are scoped to the active project workspace. Use when the user wants to open, save, browse, or manage project files."
 ---
 
 ## Constraints

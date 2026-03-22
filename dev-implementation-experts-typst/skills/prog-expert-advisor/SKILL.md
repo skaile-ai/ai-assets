@@ -1,13 +1,9 @@
 ---
-name: prog-expert-advisor
-source: MIGRATED
-description: Use when you need to analyze a user request and find the appropriate prog-expert-* skill from the programming-* directories (e.g. programming-js, programming-python), or when you need to store new implementation knowledge and need to know which expert should learn it.
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-advisor"
+description: "Use when you need to analyze a user request and find the appropriate prog-expert-* skill from the programming-* directories (e.g. programming-js, programming-python), or when you need to store new implementation knowledge and need to know which expert should learn it."
 metadata:
-  stage: alpha
-  requires: []
+  stage: "alpha"
+  source: "MIGRATED"
 ---
 
 # Prog Expert Advisor

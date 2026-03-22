@@ -1,12 +1,9 @@
 ---
-name: conceptualization-contract
+name: "conceptualization-contract"
 description: "Shared contract for all dev-conceptualization skills. Describes _concept/ folder layout, skill naming conventions, pipeline phase structure, and file ownership rules. REQUIRED reading for any cf_* or saxe_* conceptualization skill."
 metadata:
-  type: system
+  stage: "alpha"
   do_not_invoke: true
-  stage: alpha
-  requires: []
-disable-model-invocation: true
 ---
 
 # Conceptualization Domain — Shared Contract

@@ -1,19 +1,11 @@
 ---
-name: book-writer
-source: MIGRATED
-description: >
-  Autonomous multi-agent skill for writing professional medical textbooks in child and
-  adolescent psychiatry. Simulates a 5-agent team (Architect, Researcher, Pedagogue, Writer,
-  Critic) to produce evidence-based, guideline-grounded content using a layered file architecture.
-  Concept, research, scaffolds, and prose are stored in separate files.
-  Triggers: "Write a book about...", "Start a book...", "/start_book", "/plan_chapter", "/write_chapter".
-keywords: []
-reads_from: []
-writes_to: []
+name: "book-writer"
+description: "Autonomous multi-agent skill for writing professional medical textbooks in child and adolescent psychiatry. Simulates a 5-agent team (Architect, Researcher, Pedagogue, Writer, Critic) to produce evidence-based, guideline-grounded content using a layered file architecture. Concept, research, scaffolds, and prose are stored in separate files. Triggers: \"Write a book about...\", \"Start a book...\", \"/start_book\", \"/plan_chapter\", \"/write_chapter\".\n"
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - knowledge-writing-contract
+    - "knowledge-writing-contract"
 ---
 
 # Book Writer: Autonomous Medical Authoring System

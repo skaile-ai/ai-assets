@@ -1,22 +1,20 @@
 ---
-name: knowledge-paper-research
-source: MIGRATED
-description: >
-  Given a scientific paper (PDF or Markdown), run a full structured-knowledge
-  extraction and web-research pipeline. Produces one metadata file next to the
-  paper and a dedicated <stem>_research/ folder containing four thematic research
-  files plus one per-author profile file (prefixed author_). Use whenever you need
-  to deeply understand a paper, prepare a research briefing, or enrich a paper's
-  content with external context.
-keywords: ["research", "paper", "science", "knowledge-extraction", "web-research", "authors"]
-env_vars:
-  SEARXNG_URL: "Optional. The base URL of your SearXNG instance (default: http://localhost:8080)."
-reads_from: []
-writes_to: []
+name: "knowledge-paper-research"
+description: "Given a scientific paper (PDF or Markdown), run a full structured-knowledge extraction and web-research pipeline. Produces one metadata file next to the paper and a dedicated <stem>_research/ folder containing four thematic research files plus one per-author profile file (prefixed author_). Use whenever you need to deeply understand a paper, prepare a research briefing, or enrich a paper's content with external context.\n"
 metadata:
-  stage: alpha
+  tags:
+    - "research"
+    - "paper"
+    - "science"
+    - "knowledge-extraction"
+    - "web-research"
+    - "authors"
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - knowledge-research-contract
+    - "knowledge-research-contract"
+  env_vars:
+    SEARXNG_URL: "Optional. The base URL of your SearXNG instance (default: http://localhost:8080)."
 ---
 
 # Knowledge Paper Research

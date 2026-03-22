@@ -1,14 +1,11 @@
 ---
-name: use-exa
-source: MIGRATED
-description: Use when you need to search the web or find code examples using Exa's AI-powered search. Queries Exa's public MCP endpoint with JSON-RPC — no API key required for basic web search and code search.
-keywords: []
-reads_from: []
-writes_to: []
+name: "use-exa"
+description: "Use when you need to search the web or find code examples using Exa's AI-powered search. Queries Exa's public MCP endpoint with JSON-RPC — no API key required for basic web search and code search."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - use-contract
+    - "use-contract"
 ---
 
 # Use Exa

@@ -1,12 +1,17 @@
 ---
-name: sync
+name: "sync"
 description: "Use when cross-references in _concept/ are broken or out of sync. Scans the entire concept folder, finds broken links, missing bidirectional references, and orphaned entities, then shows a diff before applying fixes."
-keywords: [sync, cross-references, repair, links, orphans, consistency, maintenance]
-source: MIGRATED
-version: 1.0.0
-user_inputs:
-  dialog: []
-  files: []
+metadata:
+  version: "1.0.0"
+  tags:
+    - "sync"
+    - "cross-references"
+    - "repair"
+    - "links"
+    - "orphans"
+    - "consistency"
+    - "maintenance"
+  source: "MIGRATED"
 ---
 
 # Sync — Cross-Reference Repair

@@ -1,17 +1,14 @@
 ---
-name: prog-expert-tts-stt-integration
-source: MIGRATED
-description: Use when you need to implement TTS (text-to-speech) or STT (speech-to-text) integrations in Nuxt 3/Nitro applications, including Deepgram streaming STT via WebSocket, ElevenLabs TTS, browser MediaRecorder, and audio settings management. Expert-level programming and pattern management.
-env_vars:
-  DEEPGRAM_API_KEY: "Required for STT. Your Deepgram API key."
-  ELEVENLABS_API_KEY: "Required for TTS. Your ElevenLabs API key."
-keywords: []
-reads_from: []
-writes_to: []
+name: "prog-expert-tts-stt-integration"
+description: "Use when you need to implement TTS (text-to-speech) or STT (speech-to-text) integrations in Nuxt 3/Nitro applications, including Deepgram streaming STT via WebSocket, ElevenLabs TTS, browser MediaRecorder, and audio settings management. Expert-level programming and pattern management."
 metadata:
-  stage: alpha
+  stage: "alpha"
+  source: "MIGRATED"
   requires:
-  - impl-experts-js-contract
+    - "impl-experts-js-contract"
+  env_vars:
+    DEEPGRAM_API_KEY: "Required for STT. Your Deepgram API key."
+    ELEVENLABS_API_KEY: "Required for TTS. Your ElevenLabs API key."
 ---
 
 # Prog Expert TTS/STT Integration
