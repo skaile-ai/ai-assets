@@ -13,16 +13,16 @@ Developer tooling for working *on* the skaile-dev repository. Skills in this dom
 
 | Folder | Purpose |
 |--------|---------|
-| `skills/` | Invocable developer workflow skills |
+| `prompts/` | Slash command prompts — installed to `.claude/commands/` |
 
-## Skills
+## Prompts
 
-| Skill | Purpose |
-|-------|---------|
-| `commit` | Write a devlog entry summarising the session's changes and commit everything |
+| Prompt | Command | Purpose |
+|--------|---------|---------|
+| `commit.prompt.md` | `/commit` | Write a devlog entry summarising the session's changes and commit everything |
 
 ## Conventions
 
-- All skills assume `cwd` = `skaile-dev/` monorepo root
+- All prompts assume `cwd` = `skaile-dev/` monorepo root
 - Devlog files live at `_devlog/<YYYY-MM-DD>_<slug>.md`
 - Commit messages follow: `<type>(<scope>): <description>` with `Co-Authored-By` trailer
