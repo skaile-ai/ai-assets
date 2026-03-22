@@ -93,6 +93,9 @@ nodes:
       optional: true
       parameters:
         note: "Derive journeys from the extracted concept"
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
   - id: "architecture"
     type: "skill"
     parentNode: "g-optional-concept"
@@ -104,6 +107,10 @@ nodes:
       label: "Architecture"
       optional: true
       subagent: true
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
+          - "_concept/2_experience/2_features"
   - id: "datamodel"
     type: "skill"
     parentNode: "g-optional-concept"
@@ -115,6 +122,9 @@ nodes:
       label: "Data Model"
       optional: true
       subagent: true
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
   - id: "screens"
     type: "skill"
     parentNode: "g-optional-concept"
@@ -126,6 +136,9 @@ nodes:
       label: "Screens"
       optional: true
       subagent: true
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
   - id: "storybook"
     type: "skill"
     parentNode: "g-optional-concept"
@@ -136,6 +149,9 @@ nodes:
       skill: "storybook"
       label: "Storybook"
       optional: true
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
 edges:
   - id: "e-re-journeys"
     source: "reverse-engineer"

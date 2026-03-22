@@ -76,6 +76,9 @@ nodes:
         hero_approval_required: true
         min_stages:
           - "hero"
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
   - id: "brand-visual"
     type: "skill"
     parentNode: "g-concept"
@@ -87,6 +90,9 @@ nodes:
       label: "Brand Visual"
       optional: false
       parallel_group: "identity"
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
   - id: "techstack"
     type: "skill"
     parentNode: "g-concept"
@@ -98,6 +104,9 @@ nodes:
       label: "Tech Stack"
       optional: false
       parallel_group: "identity"
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
   - id: "features"
     type: "skill"
     parentNode: "g-concept"
@@ -108,6 +117,10 @@ nodes:
       skill: "features"
       label: "Features"
       optional: false
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
+          - "_concept/2_experience/1_journeys/stories.json"
   - id: "screens"
     type: "skill"
     parentNode: "g-concept"
@@ -118,6 +131,9 @@ nodes:
       skill: "screens"
       label: "Screens"
       optional: false
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
   - id: "mock"
     type: "skill"
     parentNode: "g-concept"
@@ -132,6 +148,9 @@ nodes:
         framework: "alpine"
         include_seed_data: true
         include_interactions: true
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
   - id: "storybook"
     type: "skill"
     parentNode: "g-concept"
@@ -142,6 +161,9 @@ nodes:
       skill: "storybook"
       label: "Storybook"
       optional: true
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
 edges:
   - id: "e-overview-journeys"
     source: "overview"

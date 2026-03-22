@@ -82,6 +82,9 @@ nodes:
       optional: false
       parameters:
         hero_approval_required: true
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
   - id: "brand-visual"
     type: "skill"
     parentNode: "g-concept"
@@ -93,6 +96,9 @@ nodes:
       label: "Brand Visual"
       optional: false
       parallel_group: "identity"
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
   - id: "techstack"
     type: "skill"
     parentNode: "g-concept"
@@ -104,6 +110,9 @@ nodes:
       label: "Tech Stack"
       optional: false
       parallel_group: "identity"
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
   - id: "features"
     type: "skill"
     parentNode: "g-concept"
@@ -115,6 +124,10 @@ nodes:
       label: "Features"
       optional: false
       subagent: true
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
+          - "_concept/2_experience/1_journeys/stories.json"
   - id: "brand-behavioral"
     type: "skill"
     parentNode: "g-concept"
@@ -125,6 +138,9 @@ nodes:
       skill: "brand-behavioral"
       label: "Brand Behavioral"
       optional: true
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
   - id: "behaviors"
     type: "skill"
     parentNode: "g-concept"
@@ -135,6 +151,9 @@ nodes:
       skill: "behaviors"
       label: "Behaviors"
       optional: true
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
   - id: "architecture"
     type: "skill"
     parentNode: "g-concept"
@@ -146,6 +165,10 @@ nodes:
       label: "Architecture"
       optional: false
       subagent: true
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
+          - "_concept/2_experience/2_features"
   - id: "datamodel"
     type: "skill"
     parentNode: "g-concept"
@@ -157,6 +180,9 @@ nodes:
       label: "Data Model"
       optional: false
       subagent: true
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
   - id: "screens"
     type: "skill"
     parentNode: "g-concept"
@@ -168,6 +194,9 @@ nodes:
       label: "Screens"
       optional: false
       subagent: true
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
   - id: "components"
     type: "skill"
     parentNode: "g-concept"
@@ -178,6 +207,9 @@ nodes:
       skill: "components"
       label: "Components"
       optional: true
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
   - id: "storybook"
     type: "skill"
     parentNode: "g-concept"
@@ -188,6 +220,9 @@ nodes:
       skill: "storybook"
       label: "Storybook"
       optional: true
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
   - id: "mock"
     type: "skill"
     parentNode: "g-concept"
@@ -200,6 +235,9 @@ nodes:
       optional: true
       parameters:
         framework: "vue"
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
 edges:
   - id: "e-overview-journeys"
     source: "overview"

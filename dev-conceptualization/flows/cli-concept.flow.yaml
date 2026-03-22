@@ -78,6 +78,9 @@ nodes:
         min_stages:
           - "hero"
         note: "Map command-line workflows as journeys"
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
   - id: "features"
     type: "skill"
     parentNode: "g-concept"
@@ -91,6 +94,10 @@ nodes:
       parameters:
         cli_mode: true
         describe_as_commands: true
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
+          - "_concept/2_experience/1_journeys/stories.json"
   - id: "techstack"
     type: "skill"
     parentNode: "g-concept"
@@ -102,6 +109,9 @@ nodes:
       label: "Tech Stack"
       optional: false
       parallel_group: "identity"
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
   - id: "architecture"
     type: "skill"
     parentNode: "g-concept"
@@ -112,6 +122,10 @@ nodes:
       skill: "architecture"
       label: "Architecture"
       optional: true
+      overrides:
+        skip_checks:
+          - "_concept/1_discovery/1_overview/brief.md"
+          - "_concept/2_experience/2_features"
   - id: "datamodel"
     type: "skill"
     parentNode: "g-concept"
@@ -124,6 +138,9 @@ nodes:
       optional: false
       parameters:
         note: "Config files, storage schemas, output formats"
+      overrides:
+        skip_checks:
+          - "_concept/2_experience/2_features"
 edges:
   - id: "e-overview-journeys"
     source: "overview"
