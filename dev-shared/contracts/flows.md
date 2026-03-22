@@ -202,7 +202,22 @@ Each concept flow ends with a `next_flows` array pointing to the appropriate imp
     "parameters": {
       "tdd": true
       // Skill-specific config. Merged over globals (node wins on conflict).
+    },
+
+    // ── Prerequisite overrides ─────────────────────────────────────────────
+    "overrides": {
+      "skip_checks": [
+        "_concept/1_discovery/1_overview/brief.md"
+        // Paths listed here are skipped during gate validation for this node.
+        // Use when a preceding node in the flow guarantees the file exists,
+        // making the hard-gate check redundant and avoiding false failures.
+      ]
     }
+    // Use overrides sparingly. Prefer expressing ordering guarantees via edges
+    // (edge ordering ensures a node runs after its dependency). Only add
+    // skip_checks when the dependency is produced by a node that is not a
+    // direct predecessor in the edge graph (e.g. produced by a parallel branch
+    // or guaranteed by the flow entry node).
 
   }
 }
@@ -220,6 +235,20 @@ Each concept flow ends with a `next_flows` array pointing to the appropriate imp
 
 **Edges express preferred execution order. `requires` expresses hard blockers.**
 A skill with `requires` checks those paths regardless of which edges reached it.
+
+### Overrides vs. edge ordering
+
+Use `data.overrides.skip_checks` when a node's prerequisite is guaranteed by the flow but the
+gate would still fire (e.g. the producer is in a parallel branch with no direct edge to the
+consumer). Do **not** use overrides as a shortcut to silence gates that represent real
+dependencies.
+
+| Situation | Correct approach |
+|---|---|
+| Node B depends on Node A's output and A runs first | Add a `flow` edge A → B. No override needed. |
+| Node B depends on Node A's output; A runs in a parallel branch | Add `skip_checks` for A's output path in B's `overrides`. |
+| Node B depends on the flow entry node's output | Add `skip_checks` for the entry output in B's `overrides`. |
+| Gate fires but the file will not exist until user uploads it | Keep the gate; surface the error to the user. Never skip. |
 
 ---
 

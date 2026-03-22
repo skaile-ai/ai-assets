@@ -49,7 +49,31 @@ metadata:
     - contract-name                     # bare string for same-resource contracts
   do_not_invoke: false                  # true for system contracts (context-only, never triggered)
   subagent: false                       # true if skill runs as a sub-agent
-  user_inputs:                          # omit entirely if skill needs no user input
+  prerequisites:                        # skill dependencies and inputs (preferred over user_inputs)
+    files:                              # files/dirs that must exist before skill runs
+      - path: "_concept/path/to/file"
+        gate: hard | soft               # hard = block execution, soft = warn and continue
+        description: "Why this file is needed"
+        min_entries: 1                  # for directories: minimum entry count
+    inputs_required:                    # user inputs that MUST be collected before skill runs
+      - id: input_name
+        label: "Human-readable label"
+        type: text | textarea | select | multiselect | boolean | number
+        options: []                     # for select/multiselect
+        default: null
+        hint: "Help text"
+        schema: {}                      # optional JSON Schema for validation
+    inputs_optional:                    # user inputs that MAY be collected
+      - id: input_name
+        label: "Human-readable label"
+        type: text
+    reads:                              # optional data sources (never blocks execution)
+      - path: "_concept/path/to/optional/source"
+        description: "What this provides"
+    produces:                           # what this skill creates
+      - path: "_concept/path/to/output"
+        description: "What is produced"
+  user_inputs:                          # DEPRECATED — use metadata.prerequisites instead
     dialog:
       - id: input_name
         label: "Human-readable label"
@@ -83,9 +107,15 @@ metadata:
 | `metadata.requires` | metadata | no | bare strings or `{name, source, version?, optional?}` objects |
 | `metadata.do_not_invoke` | metadata | no | default false; true for shared contracts |
 | `metadata.subagent` | metadata | no | default false |
-| `metadata.user_inputs` | metadata | no | omit if no user input needed |
-| `metadata.reads_from` | metadata | no | `[]` if none |
-| `metadata.writes_to` | metadata | no | `[]` if none |
+| `metadata.prerequisites` | metadata | no | preferred; replaces `user_inputs`, `reads_from`, `writes_to` |
+| `metadata.prerequisites.files` | metadata | no | file/dir gates; each entry has `path`, `gate`, `description`, optional `min_entries` |
+| `metadata.prerequisites.inputs_required` | metadata | no | user inputs that block skill start until collected |
+| `metadata.prerequisites.inputs_optional` | metadata | no | user inputs collected opportunistically |
+| `metadata.prerequisites.reads` | metadata | no | optional data sources; never blocks execution |
+| `metadata.prerequisites.produces` | metadata | no | output paths this skill creates |
+| `metadata.user_inputs` | metadata | no | **DEPRECATED** — use `metadata.prerequisites` instead |
+| `metadata.reads_from` | metadata | no | **DEPRECATED** — use `metadata.prerequisites.reads` instead |
+| `metadata.writes_to` | metadata | no | **DEPRECATED** — use `metadata.prerequisites.produces` instead |
 | `metadata.env_vars` | metadata | no | omit if none |
 
 ### Skill directory structure (agentskills.io)
@@ -310,6 +340,11 @@ metadata:
 | `subagent: true` (root) | `metadata.subagent: true` | Move into metadata |
 | `env_vars:` (root) | `metadata.env_vars:` | Move into metadata |
 | `risk: safe` (root) | remove | Not in spec |
+| `metadata.user_inputs` | `metadata.prerequisites` | Deprecated; migrate to prerequisites schema |
+| `metadata.reads_from` | `metadata.prerequisites.reads` | Deprecated; migrate to prerequisites.reads |
+| `metadata.writes_to` | `metadata.prerequisites.produces` | Deprecated; migrate to prerequisites.produces |
+
+**Migration note — prerequisites schema:** New skills should use `metadata.prerequisites` exclusively. It consolidates file gate checks (`files`), user input collection (`inputs_required`, `inputs_optional`), optional reads (`reads`), and declared outputs (`produces`) into a single block. Existing skills using the deprecated fields continue to work but should be migrated when next touched.
 
 ### Agent files
 

@@ -65,14 +65,39 @@ REFERENCES
 
 ### REQUIRES
 
-Tool and state prerequisites. `hard:` = fail without. `soft:` = warn and continue.
+File and tool prerequisites. `hard:` = block execution without it. `soft:` = warn and continue.
+Path lines accept `_concept/` paths (files or directories) or tool names.
 
 ```
 REQUIRES
+  hard: _concept/1_discovery/1_overview/brief.md  — Project brief must exist
+  soft: _concept/2_experience/1_journeys/stories.json  — Enriches output but not required
   hard: git
   soft: docker (database setup deferred without it)
   state: _concept/2_experience/2_features/ contains at least one .md file
 ```
+
+`hard:` lines map to `metadata.prerequisites.files[].gate: hard` in the frontmatter schema.
+`soft:` lines map to `gate: soft`. The orchestrator enforces `hard` gates before dispatching;
+`soft` gates emit a warning to the user and continue.
+
+---
+
+### INPUT
+
+User input declaration. Declares where pre-collected inputs are read from and what to ask if
+missing. Corresponds to `metadata.prerequisites.inputs_required` and `inputs_optional`.
+
+```
+INPUT
+  Read from: _concept/_grounding/{skill-id}/input.json
+  If missing, ask the user:
+  - scope: Feature scope (required) [must-have-only | all-features] default: all-features
+  - target_stack: Target technology stack (optional) [nuxt | nextjs | sveltekit]
+```
+
+Format for each input line: `- <id>: <label> (<required|optional>) [<option1> | <option2>] default: <value>`
+Omit options for free-text inputs. Omit default if none.
 
 ---
 
@@ -268,5 +293,7 @@ PATTERNS
 - **`$ ` prefix** in step body means shell command (equivalent to RUN).
 - **`> "..."` in CHECKPOINT** is the prompt shown to the user.
 - **`DO <name>`** invokes a PROCEDURE defined elsewhere in the skill.
+- **`hard:` / `soft:` in REQUIRES** maps to `gate: hard` / `gate: soft` in frontmatter `prerequisites.files`.
+- **INPUT** declares pre-collection location and fallback prompts; maps to `prerequisites.inputs_required` / `inputs_optional`.
 - Prose explanations belong in `references/` files, not in the DSL body.
 - YAML frontmatter is preserved unchanged for skill discovery tooling.
