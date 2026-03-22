@@ -1,4 +1,7 @@
-# Frontmatter Schema
+# Frontmatter Schema — _concept/ Output Files
+
+> **Scope:** This document defines YAML frontmatter for files written *into* `_concept/` by skills (brief.md, feature files, screen files, stack.md, etc.).
+> For the manifest frontmatter of skills, agents, prompts, and flows themselves, see `asset_frontmatter.md`.
 
 All markdown files in `_concept/` use YAML frontmatter.
 Skills must use these field names exactly.

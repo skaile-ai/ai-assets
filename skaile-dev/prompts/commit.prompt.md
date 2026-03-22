@@ -1,7 +1,9 @@
 ---
 name: commit
 description: "Wrap up the current skaile-dev work session: survey git changes, write a _devlog entry, and commit."
-version: "1.0"
+version: "1.0.0"
+tags: [git, commit, devlog, session, wrap-up]
+stage: alpha
 ---
 
 Survey the current git state, write a concise devlog entry, then stage and commit everything from this session.

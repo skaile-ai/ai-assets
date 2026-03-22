@@ -1,7 +1,12 @@
 ---
 name: skill-name
 description: "Use when [triggering conditions — symptoms, user phrases, workspace state]. NOT a workflow summary."
-keywords: [keyword1, keyword2]
+version: "1.0.0"
+tags: [keyword1, keyword2]
+stage: alpha
+source: MERGED           # CF | SAXE | MERGED | MIGRATED — omit for new skills with no lineage
+requires:
+  - contract-name        # bare string for same-resource contract dependencies
 user_inputs:
   dialog:
     - id: input_name
@@ -12,6 +17,8 @@ user_inputs:
       default: null
       hint: "Help text for UI forms"
   files: []   # _concept/ paths this skill needs as pre-supplied input
+reads_from: []    # _concept/ paths this skill reads
+writes_to: []     # _concept/ paths this skill creates or modifies
 ---
 
 # Skill Name
