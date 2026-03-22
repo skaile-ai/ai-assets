@@ -7,7 +7,7 @@ description: The master library of AI agent skills, flows, and agents for the Sk
 
 ## Two Ways to Use
 
-### Via skaile CLI (recommended for running flows)
+### Via [skaile](/cli/) CLI (recommended for running flows)
 
 ```bash
 skaile flow list                                    # see what's available
@@ -15,7 +15,7 @@ skaile run cli-concept --project-dir ./my-project  # run a flow
 skaile skill list dev-conceptualization             # browse skills
 ```
 
-### Via arm (recommended for installing/deploying skills)
+### Via [arm](/arm/) (recommended for installing/deploying skills)
 
 ```bash
 arm resource add <path-to-ai-resources> --name ai-resources
