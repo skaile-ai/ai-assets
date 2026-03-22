@@ -5,7 +5,7 @@ description: The GitAgent format — agent.yaml spec, SOUL.md, RULES.md, knowled
 
 An **agent** in ai-resources is a [GitAgent](https://gitagent.sh) — a portable, version-controlled agent definition stored as a plain directory. The GitAgent format defines the structure and schema; the `skaile-agent-runner` assembles the definition into a system prompt (called an **imprint**) before executing a flow.
 
-→ [GitAgent specification on GitHub](https://github.com/gitagent/spec)
+> [GitAgent specification on GitHub](https://github.com/gitagent/spec)
 
 ## Directory Structure
 
