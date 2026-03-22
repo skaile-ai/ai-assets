@@ -37,6 +37,51 @@ metadata:
 | `reads_from` | No | `_concept/` paths this skill reads |
 | `writes_to` | No | `_concept/` paths this skill writes |
 | `metadata` | No | Freeform — phase, domain, pipeline position, etc. |
+| `metadata.prerequisites` | No | Structured requirements — file gates, inputs, reads, produces (see below) |
+
+## metadata.prerequisites
+
+Skills can declare their dependencies and outputs in `metadata.prerequisites`. This block is read by `skaile-agent-resolver` to validate requirements before execution.
+
+```yaml
+metadata:
+  prerequisites:
+    files:                              # files/dirs that must exist
+      - path: "_concept/1_discovery/1_overview/brief.md"
+        gate: hard                      # hard = block, soft = warn
+        description: "Project brief"
+        min_entries: 1                  # for directories only
+    inputs_required:                    # user inputs that MUST be collected
+      - id: scope
+        label: "Feature scope"
+        type: select                    # text | textarea | select | multiselect | boolean | number
+        options: ["must-have-only", "all-features"]
+        default: "all-features"
+        hint: "How broad?"
+        schema: {}                      # optional JSON Schema
+    inputs_optional:                    # user inputs that MAY be collected
+      - id: extra_context
+        label: "Extra context"
+        type: textarea
+    reads:                              # optional data sources (never blocks)
+      - path: "_concept/_grounding/general/domain.md"
+        description: "Domain research"
+    produces:                           # what this skill creates
+      - path: "_concept/2_experience/2_features/"
+        description: "Feature specs"
+```
+
+| Section | Purpose |
+|---|---|
+| `files` | File/directory existence gates. `hard` blocks execution; `soft` warns. |
+| `inputs_required` | User inputs that must be collected before the skill runs. |
+| `inputs_optional` | User inputs that improve output but are not mandatory. |
+| `reads` | Optional data sources the skill checks for additional context. |
+| `produces` | Output paths created by the skill (used for flow dependency hints). |
+
+Collected inputs are stored at `_concept/_grounding/{skillId}/input.json`.
+
+> **Migration:** The older `user_inputs` / `reads_from` / `writes_to` fields are still supported by the parser for backward compatibility, but new skills should use `metadata.prerequisites`.
 
 ## Skill Body Sections
 
