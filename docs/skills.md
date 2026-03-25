@@ -91,7 +91,7 @@ metadata:
 
 ### metadata.prerequisites
 
-Skills can declare their dependencies and outputs in `metadata.prerequisites`. This block is read by `skaile-agent-resolver` to validate requirements before execution.
+Skills can declare their dependencies and outputs in `metadata.prerequisites`. This block is read by `agent-resolver` to validate requirements before execution.
 
 ```yaml
 metadata:

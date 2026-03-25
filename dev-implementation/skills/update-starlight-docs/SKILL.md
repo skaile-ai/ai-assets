@@ -83,13 +83,13 @@ Maps source files and directories to the doc sections they inform:
 title: Page Title
 description: Page description.
 _sources:
-  - path: "skaile-agent-cli/src/commands/run.ts"
+  - path: "agent-framework/cli/src/commands/run.ts"
     sections: ["## Run Command", "## Flags"]
     description: "run command implementation"
-  - path: "skaile-agent-cli/src/commands/flow.ts"
+  - path: "agent-framework/cli/src/commands/flow.ts"
     sections: ["## Flow Commands"]
     description: "flow list/show commands"
-  - path: "skaile-agent-runner/src/runner.ts"
+  - path: "agent-framework/runner/src/runner.ts"
     sections: ["## Architecture"]
     description: "runner core logic"
 _source_hash: "a1b2c3d4"
@@ -113,7 +113,7 @@ _last_synced: "2026-03-25"
 To find which doc pages cover a given source file, grep for the path in `_sources`:
 
 ```bash
-rg -l "path:.*skaile-agent-cli/src/commands/run.ts" docs/ --glob "*.md"
+rg -l "path:.*agent-framework/cli/src/commands/run.ts" docs/ --glob "*.md"
 ```
 
 # ── Workflow ───────────────────────────────────────────────────────────

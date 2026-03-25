@@ -33,7 +33,7 @@ metadata:
         type: "text"
         required: false
         default: "all"
-        hint: "e.g. 'forge-project', 'platform/backend', 'skaile-agent-cli,arm'"
+        hint: "e.g. 'forge/project', 'platform/backend', 'agent-framework/cli,arm'"
       - id: "filter"
         label: "Test name filter (for 'run' mode — runs only matching tests)"
         type: "text"
@@ -56,18 +56,18 @@ Manages the test lifecycle for the skaile-dev monorepo. Works in two modes:
 
 | Package | Framework | Run Command |
 |---------|-----------|-------------|
-| `forge-project` | Vitest | `bun x --bun vitest run --project forge-project` |
-| `forge-concept` | Vitest | `bun x --bun vitest run --project forge-concept` |
-| `forge-common-backend` | Vitest | `bun x --bun vitest run --project forge-common-be` |
-| `forge-common-ui` | Vitest | `bun x --bun vitest run --project forge-common-ui` |
+| `forge/project` | Vitest | `bun x --bun vitest run --project forge-project` |
+| `forge/concept` | Vitest | `bun x --bun vitest run --project forge-concept` |
+| `forge/common-backend` | Vitest | `bun x --bun vitest run --project forge-common-be` |
+| `forge/common-ui` | Vitest | `bun x --bun vitest run --project forge-common-ui` |
 | `platform/backend` | Jest | `bun run test --filter ./platform/backend` |
 | `platform/frontend` | Vitest | `bun run test --filter ./platform/frontend` |
 | `platform/e2e` | Playwright | `bun run e2e --filter ./platform/e2e` |
-| `skaile-agent-cli` | Vitest | `bun x --bun vitest run --project skaile-agent-cli` |
-| `skaile-agent-runner` | Vitest | `bun x --bun vitest run --project skaile-agent-runner` |
-| `skaile-agent-bridge` | Vitest | `bun x --bun vitest run --project skaile-agent-bridge` |
-| `skaile-agent-flow-engine` | Vitest | `bun x --bun vitest run --project skaile-agent-flow-engine` |
-| `skaile-agent-resolver` | Vitest | `bun x --bun vitest run --project skaile-agent-resolver` |
+| `agent-framework/cli` | Vitest | `bun x --bun vitest run --project agent-cli` |
+| `agent-framework/runner` | Vitest | `bun x --bun vitest run --project agent-runner` |
+| `agent-framework/bridge` | Vitest | `bun x --bun vitest run --project agent-bridge` |
+| `agent-framework/flow-engine` | Vitest | `bun x --bun vitest run --project agent-flow-engine` |
+| `agent-framework/resolver` | Vitest | `bun x --bun vitest run --project agent-resolver` |
 | `ai-resource-manager` | Pytest | `cd ai-resource-manager && uv run pytest` |
 | All (JS/TS) | Vitest/Jest | `bun x --bun vitest run` |
 
@@ -140,7 +140,7 @@ IF mode = run
     ### Summary
     | Package | Total | Passed | Failed | Skipped | Duration |
     |---------|-------|--------|--------|---------|----------|
-    | forge-project | 42 | 42 | 0 | 0 | 1.2s |
+    | forge/project | 42 | 42 | 0 | 0 | 1.2s |
     | platform/backend | 156 | 154 | 2 | 0 | 8.4s |
     ...
     | **Total** | **N** | **N** | **N** | **N** | **Ns** |
@@ -229,7 +229,7 @@ IF mode = construct
     ### Generated
     | File | Package | Tests | Units Covered |
     |------|---------|-------|---------------|
-    | src/composables/useWorkspace.test.ts | forge-project | 8 | 2 |
+    | src/composables/useWorkspace.test.ts | forge/project | 8 | 2 |
 
     ### Coverage Added
     | Unit | File | Was Tested | Now Tested |

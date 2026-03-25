@@ -3,7 +3,7 @@ title: Agents
 description: The GitAgent format — agent.yaml spec, SOUL.md, RULES.md, knowledge/, imprint assembly, and how agents are used by the runner.
 ---
 
-An **agent** in ai-resources is a [GitAgent](https://gitagent.sh) — a portable, version-controlled agent definition stored as a plain directory. The GitAgent format defines the structure and schema; the `skaile-agent-runner` assembles the definition into a system prompt (called an **imprint**) before executing a flow.
+An **agent** in ai-resources is a [GitAgent](https://gitagent.sh) — a portable, version-controlled agent definition stored as a plain directory. The GitAgent format defines the structure and schema; the `agent-runner` assembles the definition into a system prompt (called an **imprint**) before executing a flow.
 
 > [GitAgent specification on GitHub](https://github.com/gitagent/spec)
 
@@ -142,7 +142,7 @@ Files not listed in `index.yaml` get a default priority of `99` and are loaded l
 
 ## Imprint Assembly
 
-`buildAgentImprint(agentDir)` in `skaile-agent-runner` assembles the system prompt:
+`buildAgentImprint(agentDir)` in `agent-runner` assembles the system prompt:
 
 ```
 SOUL.md

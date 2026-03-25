@@ -243,7 +243,7 @@ Same as `update-starlight-docs`:
 title: Page Title
 description: One-sentence description.
 _sources:
-  - path: "skaile-agent-cli/src/commands/run.ts"
+  - path: "agent-framework/cli/src/commands/run.ts"
     sections: ["## Run Command", "## Flags"]
     description: "run command implementation"
 _source_hash: "a1b2c3d4"

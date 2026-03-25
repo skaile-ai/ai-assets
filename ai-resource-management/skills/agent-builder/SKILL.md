@@ -274,7 +274,7 @@ GitAgent definitions are framework-agnostic. Export adapters produce target-spec
 | `openai` | OpenAI Agents SDK Python code |
 | `crewai` | CrewAI YAML config |
 
-skaile-agent-runner natively loads GitAgent directories via `buildAgentImprint()`.
+agent-runner natively loads GitAgent directories via `buildAgentImprint()`.
 
 ---
 

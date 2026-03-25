@@ -69,7 +69,7 @@ This allows `update-skaile-docs` to detect stale sections automatically.
 title: Page Title
 description: One-line description.
 _sources:
-  - path: "skaile-agent-cli/src/commands/run.ts"
+  - path: "agent-framework/cli/src/commands/run.ts"
     sections: ["## Run Command"]
     description: "run command implementation"
 _source_hash: "a1b2c3d4"

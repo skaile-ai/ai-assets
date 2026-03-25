@@ -24,7 +24,7 @@ metadata:
         type: text
     inputs_optional:
       - id: target_package
-        label: "Target package(s) if known (e.g., forge-project, platform/backend/libs/session-manager)"
+        label: "Target package(s) if known (e.g., forge/project, platform/backend/libs/session-manager)"
         type: text
       - id: complexity
         label: "Complexity hint"
@@ -128,14 +128,14 @@ STEP 1: Parse task
   - Identify: target package(s) from task_description or target_package input
   IF target_package is not provided
     - Infer from task_description by matching keywords against the monorepo package map:
-      - forge-project / forge-concept → forge apps (Nuxt 4)
+      - forge/project / forge/concept → forge apps (Nuxt 4)
       - platform/backend → NestJS + Fastify + Prisma
       - platform/frontend → React 19 + Vite + TanStack
-      - skaile-agent-* → agent runtime stack
+      - agent-framework/* → agent runtime stack
       - ai-resource-manager / arm → Python CLI
       - ai-resources/<domain> → AI skill/domain
       - docs/ → Starlight docs site
-      - skaile-agent-cli → CLI tool
+      - agent-framework/cli → CLI tool
 
 STEP 2: Load context
   - Read skaile-dev/CLAUDE.md (monorepo overview, conventions)
@@ -145,14 +145,14 @@ STEP 2: Load context
 
   | Package | Stack | Prog Expert |
   |---------|-------|-------------|
-  | forge-project, forge-concept | Nuxt 4, drizzle-orm, SQLite, UnoCSS | prog-expert-nuxt |
+  | forge/project, forge/concept | Nuxt 4, drizzle-orm, SQLite, UnoCSS | prog-expert-nuxt |
   | platform/backend | NestJS, Fastify, Prisma, tRPC, Jest | (read platform/CLAUDE.md) |
   | platform/frontend | React 19, Vite, TanStack, Tailwind CSS 4, Vitest | (read platform/CLAUDE.md) |
-  | skaile-agent-* | TypeScript, Bun, OMP | prog-expert-omp |
+  | agent-framework/* | TypeScript, Bun, OMP | prog-expert-omp |
   | ai-resource-manager | Python, Typer, uv | prog-expert-python |
   | ai-resources/<domain> | Markdown, YAML (skill conventions) | (follow CLAUDE.md skill conventions) |
   | docs/ | Astro, Starlight | (follow skaildev-update-docs) |
-  | skaile-agent-cli | TypeScript, Bun | (read package CLAUDE.md) |
+  | agent-framework/cli | TypeScript, Bun | (read package CLAUDE.md) |
 
 STEP 3: Find relevant expert skills
   - Search dev-implementation-experts-* for skills matching the identified stack

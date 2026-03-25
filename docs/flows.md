@@ -3,7 +3,7 @@ title: Flows
 description: What a flow is, how nodes and edges work, how the runner executes a flow, globals reference, and writing a new flow.
 ---
 
-A **flow** is a `flow.json` file — a directed acyclic graph of skill nodes connected by typed edges. The `skaile-agent-flow-engine` computes which nodes are ready to run; `skaile-agent-runner` executes them sequentially or in parallel groups.
+A **flow** is a `flow.json` file — a directed acyclic graph of skill nodes connected by typed edges. The `agent-flow-engine` computes which nodes are ready to run; `agent-runner` executes them sequentially or in parallel groups.
 
 Flows live at `<domain>/flows/<id>.json`. The `id` field is what you pass to `skaile run <id>`.
 

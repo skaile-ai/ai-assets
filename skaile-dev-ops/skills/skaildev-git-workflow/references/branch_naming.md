@@ -26,19 +26,19 @@
 
 | Package | Abbreviation |
 |---------|--------------|
-| `forge-project` | `forge-project` |
-| `forge-concept` | `forge-concept` |
-| `forge-common-backend` | `forge-common-be` |
-| `forge-common-ui` | `forge-common-ui` |
+| `forge/project` | `forge-project` |
+| `forge/concept` | `forge-concept` |
+| `forge/common-backend` | `forge-common-be` |
+| `forge/common-ui` | `forge-common-ui` |
 | `platform/backend` | `platform-be` |
 | `platform/frontend` | `platform-fe` |
 | `platform` (both) | `platform` |
-| `skaile-agent-cli` | `cli` |
-| `skaile-agent-runner` | `runner` |
-| `skaile-agent-bridge` | `bridge` |
-| `skaile-agent-flow-engine` | `flow-engine` |
-| `skaile-agent-resolver` | `resolver` |
-| `skaile-agent-lab` | `lab` |
+| `agent-framework/cli` | `cli` |
+| `agent-framework/runner` | `runner` |
+| `agent-framework/bridge` | `bridge` |
+| `agent-framework/flow-engine` | `flow-engine` |
+| `agent-framework/resolver` | `resolver` |
+| `agent-framework/lab` | `lab` |
 | `ai-resource-manager` | `arm` |
 | `ai-resources/<domain>` | `ai-<domain-abbrev>` |
 | `docs/` | `docs` |

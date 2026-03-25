@@ -29,4 +29,4 @@ Provides AI skill prompts, flow definitions, and agent configurations for the sk
 
 ## Notes
 
-Infrastructure code lives in `skaile-agent-lab/`. This domain only contains AI content (prompts, flows, agent configs).
+Infrastructure code lives in `agent-framework/lab/`. This domain only contains AI content (prompts, flows, agent configs).

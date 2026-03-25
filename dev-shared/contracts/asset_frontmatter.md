@@ -10,7 +10,7 @@ Skills and prompts follow the [Agent Skills Specification](https://agentskills.i
 
 Agents follow the [GitAgent Specification](https://www.gitagent.sh/) — a git-native standard with its own root-level field structure. The `metadata:` block holds skaile-specific extensions.
 
-Flows use a custom schema optimised for the skaile-agent-flow-engine.
+Flows use a custom schema optimised for the agent-flow-engine.
 
 ---
 
@@ -232,7 +232,7 @@ agent-name/
 
 ### Imprint assembly order
 
-`buildAgentImprint()` in skaile-agent-runner assembles the system prompt:
+`buildAgentImprint()` in agent-runner assembles the system prompt:
 
 1. `SOUL.md` — agent identity and values
 2. `RULES.md` — behavioral constraints
@@ -255,7 +255,7 @@ Parts joined with `\n\n---\n\n`.
 
 ## Flow — *.flow.yaml
 
-Custom schema for skaile-agent-flow-engine. Uses `id` as the machine identifier (distinct from display `name`).
+Custom schema for agent-flow-engine. Uses `id` as the machine identifier (distinct from display `name`).
 
 ```yaml
 id: flow-id                             # machine identifier; used by `skaile run <id>`

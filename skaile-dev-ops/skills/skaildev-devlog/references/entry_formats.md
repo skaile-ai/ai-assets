@@ -23,10 +23,10 @@ Quick reference for writing devlog entries and reports. See `SKILL.md` for the f
 ```
 
 **Good titles:** Action + subject, plain language.
-- "Add workspace rename to forge-project"
+- "Add workspace rename to forge/project"
 - "Fix session token expiry race condition in platform backend"
-- "Move shared auth logic into forge-common-backend"
-- "Add skaile-agent-resources package"
+- "Move shared auth logic into forge/common-backend"
+- "Add agent-framework/resources package"
 
 **Bad titles:** technical jargon, vague, or commit-message style.
 - "feat: add rename command" ← commit style
@@ -105,7 +105,7 @@ When a report exists, add a link line to the short entry:
 
 **Why:** ...
 
-**Affected:** `skaile-agent-bridge`, `skaile-agent-runner`, `dev-shared`
+**Affected:** `agent-framework/bridge`, `agent-framework/runner`, `dev-shared`
 
 **Implications:** Breaking change for all custom agent drivers. See migration guide.
 

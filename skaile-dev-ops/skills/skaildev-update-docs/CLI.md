@@ -18,7 +18,7 @@ skaile skill run skaildev-update-docs \
 
 # Sync docs for a specific package only
 skaile skill run skaildev-update-docs \
-  --input scope="forge-project"
+  --input scope="forge/project"
 
 # Dry run: report what's stale but do not write anything
 skaile skill run skaildev-update-docs \
