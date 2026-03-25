@@ -1,0 +1,16 @@
+name: skaile-dev-ops
+description: "Day-to-day development workflow for the skaile-dev monorepo — implementation, git operations, documentation sync, test management, and development log."
+version: "0.1.0"
+includes:
+  # Domain advisor agent
+  - agent:skaile-workspace-advisor
+  # Implementation
+  - skill:skaildev-implement
+  # Git operations
+  - skill:skaildev-git-workflow
+  # Documentation
+  - skill:skaildev-update-docs
+  # Testing
+  - skill:skaildev-run-tests
+  # Development log
+  - skill:skaildev-devlog
