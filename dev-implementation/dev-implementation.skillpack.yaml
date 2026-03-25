@@ -19,5 +19,7 @@ includes:
   - skill:generate
   - skill:migrate
   - skill:seed
+  # Documentation sync
+  - skill:update-starlight-docs
   # Domain agent
   - agent:impl-orchestrator
