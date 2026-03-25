@@ -2,8 +2,18 @@
   "version": "2.0",
   "phases": {
     "discovery": ["1_discovery/1_overview", "1_discovery/2_research", "1_discovery/3_brand"],
-    "experience": ["2_experience/1_journeys", "2_experience/2_features", "2_experience/3_screens", "2_experience/4_storybook"],
-    "blueprint": ["3_blueprint/1_techstack", "3_blueprint/2_architecture", "3_blueprint/3_datamodel", "3_blueprint/4_storybook_types"]
+    "experience": [
+      "2_experience/1_journeys",
+      "2_experience/2_features",
+      "2_experience/3_screens",
+      "2_experience/4_storybook"
+    ],
+    "blueprint": [
+      "3_blueprint/1_techstack",
+      "3_blueprint/2_architecture",
+      "3_blueprint/3_datamodel",
+      "3_blueprint/4_storybook_types"
+    ]
   },
   "steps": [
     {
@@ -66,7 +76,11 @@
       "skill": "concept-2-experience-3-screens",
       "folder": "2_experience/3_screens",
       "depends_on": ["2_experience/2_features", "1_discovery/3_brand"],
-      "optional_reads": ["3_blueprint/1_techstack", "3_blueprint/2_architecture", "3_blueprint/3_datamodel"],
+      "optional_reads": [
+        "3_blueprint/1_techstack",
+        "3_blueprint/2_architecture",
+        "3_blueprint/3_datamodel"
+      ],
       "outputs": ["00_layout/shell.md", "<group>/<screen>.md"],
       "required": true,
       "description": "Specify screens with component inventories for each feature group."
@@ -82,10 +96,26 @@
       "required": false,
       "description": "Orchestrator: delegates to 4 sub-skills (setup, components, pages, journeys).",
       "sub_skills": [
-        { "id": "4_storybook_1_setup", "skill": "concept-2-experience-4-storybook-1-setup", "description": "Scaffold project, install deps, apply brand tokens" },
-        { "id": "4_storybook_2_components", "skill": "concept-2-experience-4-storybook-2-components", "description": "Build custom components not in @postxl/ui-components" },
-        { "id": "4_storybook_3_pages", "skill": "concept-2-experience-4-storybook-3-pages", "description": "Full-page compositions from screen specs" },
-        { "id": "4_storybook_4_journeys", "skill": "concept-2-experience-4-storybook-4-journeys", "description": "Clickable multi-screen user journey flows" }
+        {
+          "id": "4_storybook_1_setup",
+          "skill": "concept-2-experience-4-storybook-1-setup",
+          "description": "Scaffold project, install deps, apply brand tokens"
+        },
+        {
+          "id": "4_storybook_2_components",
+          "skill": "concept-2-experience-4-storybook-2-components",
+          "description": "Build custom components not in @postxl/ui-components"
+        },
+        {
+          "id": "4_storybook_3_pages",
+          "skill": "concept-2-experience-4-storybook-3-pages",
+          "description": "Full-page compositions from screen specs"
+        },
+        {
+          "id": "4_storybook_4_journeys",
+          "skill": "concept-2-experience-4-storybook-4-journeys",
+          "description": "Clickable multi-screen user journey flows"
+        }
       ]
     },
     {

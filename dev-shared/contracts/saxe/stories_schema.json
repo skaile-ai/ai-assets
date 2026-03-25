@@ -110,8 +110,15 @@
     "story": {
       "type": "object",
       "required": [
-        "id", "title", "persona", "outcome", "priority",
-        "status", "acceptance_criteria", "review", "downstream"
+        "id",
+        "title",
+        "persona",
+        "outcome",
+        "priority",
+        "status",
+        "acceptance_criteria",
+        "review",
+        "downstream"
       ],
       "additionalProperties": false,
       "properties": {

@@ -89,33 +89,15 @@
             "id": "extraction_scope",
             "label": "What to Extract",
             "type": "multiselect",
-            "options": [
-              "overview",
-              "techstack",
-              "features",
-              "datamodel",
-              "brand",
-              "screens"
-            ],
-            "default": [
-              "overview",
-              "techstack",
-              "features",
-              "datamodel",
-              "brand",
-              "screens"
-            ],
+            "options": ["overview", "techstack", "features", "datamodel", "brand", "screens"],
+            "default": ["overview", "techstack", "features", "datamodel", "brand", "screens"],
             "required": false
           },
           {
             "id": "overwrite_mode",
             "label": "Existing Files",
             "type": "select",
-            "options": [
-              "skip",
-              "diff_and_confirm",
-              "overwrite"
-            ],
+            "options": ["skip", "diff_and_confirm", "overwrite"],
             "default": "skip",
             "required": false
           },
@@ -171,30 +153,18 @@
             "id": "complexity",
             "label": "App Complexity",
             "type": "select",
-            "options": [
-              "simple",
-              "moderate",
-              "complex",
-              "enterprise"
-            ],
+            "options": ["simple", "moderate", "complex", "enterprise"],
             "required": true
           },
           {
             "id": "research_depth",
             "label": "Research Depth",
             "type": "select",
-            "options": [
-              "skip",
-              "light",
-              "moderate",
-              "deep"
-            ],
+            "options": ["skip", "light", "moderate", "deep"],
             "default": "moderate"
           }
         ],
-        "files": [
-          "01_project/brief.md"
-        ]
+        "files": ["01_project/brief.md"]
       },
       "description": "Elevator pitch, audience, problem, hero flow",
       "ui": {
@@ -214,15 +184,10 @@
       "phase": "conceptualization",
       "sub_phase": "functionality",
       "folder": "02_journeys/",
-      "hard_gates": [
-        "01_project/brief.md",
-        "01_project/goals.md"
-      ],
+      "hard_gates": ["01_project/brief.md", "01_project/goals.md"],
       "user_inputs": {
         "dialog": [],
-        "files": [
-          "02_journeys/stories.json"
-        ]
+        "files": ["02_journeys/stories.json"]
       },
       "description": "Map user journeys with personas, story maps (hero/vital/hygiene/backlog), and EARS acceptance criteria. Produces stories.json for the features skill."
     },
@@ -330,11 +295,7 @@
             "id": "light_dark",
             "label": "Light or Dark Mode",
             "type": "select",
-            "options": [
-              "light",
-              "dark",
-              "both"
-            ],
+            "options": ["light", "dark", "both"],
             "default": "light"
           },
           {
@@ -425,11 +386,7 @@
             "id": "mockup_style",
             "label": "Mockup Style",
             "type": "select",
-            "options": [
-              "alpine_shoelace",
-              "vue_primevue",
-              "preact_htm"
-            ],
+            "options": ["alpine_shoelace", "vue_primevue", "preact_htm"],
             "default": "alpine_shoelace",
             "required": false
           }
@@ -494,33 +451,21 @@
             "id": "platform",
             "label": "Platform",
             "type": "select",
-            "options": [
-              "web",
-              "mobile",
-              "desktop",
-              "cross-platform"
-            ],
+            "options": ["web", "mobile", "desktop", "cross-platform"],
             "default": "web"
           },
           {
             "id": "data_heavy",
             "label": "Data-Heavy App?",
             "type": "select",
-            "options": [
-              "yes",
-              "no"
-            ],
+            "options": ["yes", "no"],
             "default": "no"
           },
           {
             "id": "managed_vs_selfhosted",
             "label": "Managed vs Self-Hosted",
             "type": "select",
-            "options": [
-              "managed",
-              "selfhosted",
-              "hybrid"
-            ],
+            "options": ["managed", "selfhosted", "hybrid"],
             "default": "managed"
           },
           {
@@ -839,14 +784,8 @@
       "deprecated_folder": "_research/",
       "parallel": true,
       "description": "Research and grounding material for the concept. Step subfolders store per-step research, user_input.json, and context files.",
-      "hidden_from_sidebar": [
-        "_grounding",
-        "_research"
-      ],
-      "sub_folders": [
-        "general/",
-        "findings/"
-      ],
+      "hidden_from_sidebar": ["_grounding", "_research"],
+      "sub_folders": ["general/", "findings/"],
       "general_topics": [
         "domain",
         "competitors",
