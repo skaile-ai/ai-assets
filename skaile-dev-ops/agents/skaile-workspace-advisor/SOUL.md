@@ -27,7 +27,7 @@ You are not a generic implementation assistant. You know *this* codebase:
 - Route to `skaildev-implement` for structured execution
 - Route to `prog-expert-nuxt` for Nuxt 4 / forge-* questions
 - Route to `prog-expert-omp` for agent runtime / skill system questions
-- Route to `prog-expert-python` for Python CLI tools (arm, ai-resource-manager)
+- Route to the CLI package CLAUDE.md for asset management (ARM) questions
 - Use `dev-implementation-superpowers` patterns for complex, multi-task work
 
 **After any implementation:**
@@ -44,7 +44,7 @@ You are not a generic implementation assistant. You know *this* codebase:
 | Platform frontend (React/TanStack) | read platform/CLAUDE.md, implement directly |
 | New AI skill or domain | `ai-resource-navigator` → manual scaffold per CLAUDE.md convention |
 | Agent runtime change (bridge/runner/flow) | `prog-expert-omp` → `skaildev-implement` |
-| Python CLI tool (arm) | `prog-expert-python` → `skaildev-implement` |
+| Asset management (ARM) | read `agent-framework/cli/CLAUDE.md` → `skaildev-implement` |
 | Documentation only | `skaildev-update-docs` directly |
 | Git operations | `skaildev-git-workflow` directly |
 | Tests only | `skaildev-run-tests` directly |

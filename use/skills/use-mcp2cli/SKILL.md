@@ -134,73 +134,70 @@ uvx mcp2cli --mcp https://mcp.example.com/sse --search "task"
 uvx mcp2cli @myapi --list
 ```
 
-## Integration with arm (AI Resource Manager)
+## Integration with skaile resource management
 
-mcp2cli can also be managed as an external resource via arm, the AI Resource Manager used in this project. This is useful for:
+mcp2cli can also be managed as an external resource via the `skaile` CLI. This is useful for:
 
 - Cataloging mcp2cli's bundled skills alongside your project's skills
 - Tracking upstream updates to mcp2cli
 - Managing mcp2cli as a fork with local additions
 
-### Register mcp2cli as an arm resource
+### Register mcp2cli as a resource
 
 ```bash
 # Register the upstream repo
-arm resource add https://github.com/knowsuchagency/mcp2cli --name mcp2cli
-
-# Or register your fork with upstream tracking
-arm resource add https://github.com/youruser/mcp2cli --name mcp2cli --upstream https://github.com/knowsuchagency/mcp2cli
+skaile resource add https://github.com/knowsuchagency/mcp2cli mcp2cli
 
 # Sync to discover any skills shipped with mcp2cli
-arm resource sync mcp2cli
+skaile resource sync mcp2cli
 ```
 
 ### Check for updates
 
 ```bash
 # See if your cached clone is behind the remote
-arm resource status mcp2cli
+skaile resource status mcp2cli
 
 # Compare your fork against upstream
-arm contrib compare mcp2cli
+skaile contrib compare mcp2cli
 
 # See what you've added locally
-arm contrib additions mcp2cli
+skaile contrib additions mcp2cli
 ```
 
 ### Keep up to date
 
 ```bash
 # Pull latest (preserves local edits via stash)
-arm contrib sync-with-stash mcp2cli
+skaile contrib sync-with-stash mcp2cli
 
 # Or re-sync and re-index
-arm resource sync mcp2cli
+skaile resource sync mcp2cli
 ```
 
 ### Contribute changes back
 
 ```bash
 # Check what you've changed
-arm contrib changes mcp2cli
-arm contrib diff mcp2cli
+skaile contrib changes mcp2cli
+skaile contrib diff mcp2cli
 
 # Commit and push to your fork
-arm contrib commit mcp2cli -m "add: new skill for X" -b feature-branch
-arm contrib push mcp2cli https://github.com/youruser/mcp2cli feature-branch
+skaile contrib commit mcp2cli -m "add: new skill for X" -b feature-branch
+skaile contrib push mcp2cli https://github.com/youruser/mcp2cli feature-branch
 
 # Open a PR
-arm contrib pr https://github.com/knowsuchagency/mcp2cli --title "Add X" --body "..." --head youruser:feature-branch
+skaile contrib pr https://github.com/knowsuchagency/mcp2cli --title "Add X" --body "..." --head youruser:feature-branch
 ```
 
 ### Pin a specific version via lock file
 
 ```bash
 # Lock current versions for reproducible installs
-arm project lock
+skaile lock
 
 # Install from lock file (checks out exact commit SHAs)
-arm project install --locked
+skaile install --locked
 ```
 
 ## Common Workflows

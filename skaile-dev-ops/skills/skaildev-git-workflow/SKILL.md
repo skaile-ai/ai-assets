@@ -113,7 +113,7 @@ IF mode = branch
       feature/<pkg>/<slug>    e.g. feature/forge-project/workspace-rename
       fix/<pkg>/<slug>         e.g. fix/platform-backend/session-leak
       refactor/<pkg>/<slug>    e.g. refactor/cli/command-structure
-      docs/<pkg>/<slug>        e.g. docs/arm/add-resource-types
+      docs/<pkg>/<slug>        e.g. docs/cli/add-resource-types
       skill/<domain>/<slug>    e.g. skill/dev-workspace/add-devlog-skill
       chore/<slug>             e.g. chore/bump-bun-version
 
@@ -188,7 +188,7 @@ IF mode = commit
     Examples:
       feat(forge-project): add workspace rename command
       fix(platform-backend): prevent session token expiry race condition
-      refactor(arm): extract domain parser into separate module
+      refactor(cli): extract domain parser into separate module
       docs(agent-cli): document run command flags
       feat(dev-workspace): add devlog skill to skaile-dev-ops domain
 

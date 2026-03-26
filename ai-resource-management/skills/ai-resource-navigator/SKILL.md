@@ -1,9 +1,8 @@
 ---
 name: "ai-resource-navigator"
-description: "Use when you need to browse, search, install, or deploy skills and agents from the ai-resources catalog. Wraps the `arm` CLI (ai-asset-manager) for discovering what is available, resolving dependencies, and deploying assets to agent config directories."
+description: "Use when you need to browse, search, install, or deploy skills and agents from the ai-resources catalog. Wraps the `skaile` CLI for discovering what is available, resolving dependencies, and deploying assets to agent config directories."
 metadata:
   tags:
-    - "arm"
     - "catalog"
     - "install"
     - "deploy"
@@ -21,7 +20,7 @@ metadata:
 
 # AI Resource Navigator
 
-You are an expert navigator of the `ai-resources` skill ecosystem. Your job is to help the user discover, understand, install, and deploy AI assets (skills, agents, prompts, packages) using the `arm` CLI (`ai-asset-manager`).
+You are an expert navigator of the `ai-resources` skill ecosystem. Your job is to help the user discover, understand, install, and deploy AI assets (skills, agents, prompts, packages) using the `skaile` CLI.
 
 ## Core Principle: Catalog First
 
@@ -32,17 +31,17 @@ Never guess what skills exist. Always query the catalog. The catalog is the grou
 Before any catalog operations, ensure `ai-resources` is registered as a source:
 
 ```bash
-arm resource list
+skaile resource list
 ```
 
 If `ai-resources` is not listed, register it:
 ```bash
-arm resource add <path-to-ai-resources> --name ai-resources
+skaile resource add <path-to-ai-resources> ai-resources
 ```
 
 To sync after changes:
 ```bash
-arm resource sync ai-resources
+skaile resource sync ai-resources
 ```
 
 ---
@@ -53,27 +52,22 @@ arm resource sync ai-resources
 
 ```bash
 # Show full catalog
-arm catalog
+skaile catalog
 
 # Filter by kind
-arm catalog --kind skill
-arm catalog --kind agent
-
-# Search by keyword
-arm search <keyword>
-arm search deploy --kind skill
+skaile catalog skill
+skaile catalog agent
 
 # Interactive fuzzy explorer (for humans at a terminal)
-arm explore
-arm explore ai-resources          # scope to this resource only
-arm explore --kind skill
+skaile explore
+skaile explore ai-resources          # scope to this resource only
 ```
 
 ### Goal: Get details on a specific asset
 
 ```bash
-arm info <name>
-arm info <name> --kind skill
+skaile info <name>
+skaile info <name> --kind skill
 ```
 
 Shows: description, version, dependencies, install status, source path.
@@ -82,25 +76,25 @@ Shows: description, version, dependencies, install status, source path.
 
 ```bash
 # Install by name (resolves dependencies automatically)
-arm install <name>
-arm install skill:<name>
+skaile add <name>
+skaile add skill:<name>
 
 # Install a package (installs all included assets)
-arm install <package-name>
+skaile add <package-name>
 
 # Check current dependencies first
-arm check
-arm check --fix          # auto-install all missing deps that are in catalog
+skaile doctor
+skaile doctor --fix          # auto-install all missing deps that are in catalog
 ```
 
 ### Goal: Deploy to agent config directory
 
 ```bash
 # Deploy to Claude Code (default: ~/.claude/skills/)
-arm deploy <name>
+skaile add <name>
 
 # Deploy to Cursor (~/.cursor/rules/)
-arm deploy <name> --target cursor
+skaile add <name> --target cursor
 ```
 
 Deploy targets:
@@ -113,42 +107,24 @@ Deploy targets:
 ### Goal: Keep assets up to date
 
 ```bash
-# Sync all installed assets from their sources
-arm sync
+# Sync all registered resources
+skaile resource sync
 
-# Sync a specific asset
-arm sync <name>
-
-# Re-scan all registered resources for new/changed assets
-arm resource sync
+# Sync a specific resource
+skaile resource sync <name>
 ```
 
 ### Goal: List what's installed
 
 ```bash
-arm list
-arm list --kind skill
-arm skill list
+skaile list
+skaile list --kind skill
 ```
 
 ### Goal: Remove an asset
 
 ```bash
-arm remove <name>
-arm remove <name> --yes     # skip confirmation
-```
-
----
-
-## Type-Scoped Shorthand
-
-Every management command is also available scoped to a type, eliminating `--kind`:
-
-```bash
-arm skill   list|install|remove|info|deploy|sync|check|create
-arm agent   list|install|remove|info|deploy|sync|check|create
-arm prompt  list|install|remove|info|deploy|sync|check|create
-arm package list|install|remove|info|deploy|sync|check|create
+skaile remove <kind> <name>
 ```
 
 ---
@@ -157,26 +133,24 @@ arm package list|install|remove|info|deploy|sync|check|create
 
 ### "What skills are available for research?"
 ```bash
-arm search research
-arm search research --kind skill
+skaile catalog skill research
 ```
 
 ### "Install and deploy a skill for Claude Code"
 ```bash
-arm install <name>
-arm deploy <name>
+skaile add <name>
 # skill is now at ~/.claude/skills/<name>/
 ```
 
 ### "Check if all dependencies are met after a sync"
 ```bash
-arm resource sync ai-resources
-arm check
+skaile resource sync ai-resources
+skaile doctor
 ```
 
 ### "Scaffold a new skill into ai-resources"
 ```bash
-arm create <skill-name> --dir <path-to-domain>/skills/
+skaile create <skill-name> --dir <path-to-domain>/skills/
 ```
 Or delegate to `skill-builder` for a guided workflow.
 
@@ -186,26 +160,21 @@ Or delegate to `skill-builder` for a guided workflow.
 
 ```
 ~/.ai-asset-manager/
-├── catalog.yaml        ← index of all known assets (not installed until explicit install)
-├── resources.yaml      ← registered resource sources
-├── cache/              ← git clones for GitHub resources
-└── assets/             ← installed (copied) assets
-    ├── skills/
-    ├── agents/
-    ├── prompts/
-    └── packages/
+├── catalog.yml         ← index of all known assets (not installed until explicit install)
+├── resources.yml       ← registered resource sources
+└── cache/              ← git clones for GitHub resources
+    └── <resource>/
 ```
 
-Installed assets in `assets/` are never modified by agents — only `arm` manages them.
+Installed assets are deployed to agent config directories (e.g. `~/.claude/skills/`).
 
 ---
 
 ## Constraints
 
-- Do not read or write `~/.ai-asset-manager/` directly — always go through `arm` commands
+- Do not read or write `~/.ai-asset-manager/` directly — always go through `skaile` commands
 - Do not install assets from untrusted sources without user confirmation
-- Always run `arm resource sync` before presenting catalog results if the user is looking for recently added skills
-- If `arm` is not installed: `uv tool install ai-asset-manager` or run ephemerally with `uvx ai-asset-manager`
+- Always run `skaile resource sync` before presenting catalog results if the user is looking for recently added skills
 
 ## Related Skills
 

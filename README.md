@@ -16,20 +16,17 @@ skaile skill list
 skaile skill list dev-conceptualization
 ```
 
-## Quick Start via arm
+## Quick Start via skaile (asset management)
 
 ```bash
 # Register this folder as a resource (once)
-arm resource add <path-to-ai-resources> --name ai-resources
+skaile resource add <path-to-ai-resources> ai-resources
 
 # Browse everything interactively
-arm explore ai-resources
+skaile explore ai-resources
 
 # Install a skill (resolves dependencies automatically)
-arm install <skill-name>
-
-# Deploy to Claude Code
-arm deploy <skill-name>
+skaile add <skill-name>
 ```
 
 ## Domains
@@ -86,11 +83,10 @@ skaile run <flow-id> --project-dir ./my-project
 
 ## Running with Claude Code
 
-Deploy skills to your project's `.claude/skills/` via `arm`:
+Deploy skills to your project's `.claude/skills/` via the skaile CLI:
 
 ```bash
-arm deploy <skill-name>
-arm deploy --domain dev-conceptualization
+skaile add <skill-name>
 ```
 
 Then trigger from Claude Code chat using slash commands (`/concept`, `/implement`, `/audit`, `/ready`).

@@ -86,8 +86,8 @@ skaile skill list
 # Skills in a specific domain
 skaile skill list dev-conceptualization
 
-# Via arm
-arm explore ai-resources
+# Interactive explorer
+skaile explore ai-resources
 ```
 
 Browse per-domain skill tables in the [AI Resource Catalog](/catalog/).

@@ -15,13 +15,12 @@ skaile run cli-concept --project-dir ./my-project  # run a flow
 skaile skill list dev-conceptualization             # browse skills
 ```
 
-### Via [arm](/arm/) (recommended for installing/deploying skills)
+### Via skaile asset management (recommended for installing/deploying skills)
 
 ```bash
-arm resource add <path-to-ai-resources> --name ai-resources
-arm explore ai-resources
-arm install cf_concept_overview
-arm deploy cf_concept_overview
+skaile resource add <path-to-ai-resources> ai-resources
+skaile explore ai-resources
+skaile add cf_concept_overview
 ```
 
 ## Building Blocks

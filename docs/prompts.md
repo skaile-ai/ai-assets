@@ -66,9 +66,6 @@ knowledge-writing/
 Prompts are referenced by skills in their prompt body or in `resources/`. They are not executed as flow nodes — a skill composes them, or an agent loads them as part of its imprint.
 
 ```bash
-# Install a prompt via arm
-arm install speaker-persona-host
-
-# Deploy to your agent setup
-arm deploy speaker-persona-host
+# Install a prompt
+skaile add speaker-persona-host
 ```

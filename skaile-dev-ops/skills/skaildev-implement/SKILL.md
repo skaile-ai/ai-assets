@@ -132,7 +132,7 @@ STEP 1: Parse task
       - platform/backend → NestJS + Fastify + Prisma
       - platform/frontend → React 19 + Vite + TanStack
       - agent-framework/* → agent runtime stack
-      - ai-resource-manager / arm → Python CLI
+      - agent-framework/cli/src/arm → ARM library (asset management)
       - ai-resources/<domain> → AI skill/domain
       - docs/ → Starlight docs site
       - agent-framework/cli → CLI tool
@@ -149,7 +149,7 @@ STEP 2: Load context
   | platform/backend | NestJS, Fastify, Prisma, tRPC, Jest | (read platform/CLAUDE.md) |
   | platform/frontend | React 19, Vite, TanStack, Tailwind CSS 4, Vitest | (read platform/CLAUDE.md) |
   | agent-framework/* | TypeScript, Bun, OMP | prog-expert-omp |
-  | ai-resource-manager | Python, Typer, uv | prog-expert-python |
+  | agent-framework/cli | TypeScript, Bun, Commander | (read package CLAUDE.md) |
   | ai-resources/<domain> | Markdown, YAML (skill conventions) | (follow CLAUDE.md skill conventions) |
   | docs/ | Astro, Starlight | (follow skaildev-update-docs) |
   | agent-framework/cli | TypeScript, Bun | (read package CLAUDE.md) |

@@ -33,7 +33,7 @@ metadata:
         type: "text"
         required: false
         default: "all"
-        hint: "e.g. 'forge/project', 'platform/backend', 'agent-framework/cli,arm'"
+        hint: "e.g. 'forge/project', 'platform/backend', 'agent-framework/cli'"
       - id: "filter"
         label: "Test name filter (for 'run' mode — runs only matching tests)"
         type: "text"
@@ -68,7 +68,6 @@ Manages the test lifecycle for the skaile-dev monorepo. Works in two modes:
 | `agent-framework/bridge` | Vitest | `bun x --bun vitest run --project agent-bridge` |
 | `agent-framework/flow-engine` | Vitest | `bun x --bun vitest run --project agent-flow-engine` |
 | `agent-framework/resolver` | Vitest | `bun x --bun vitest run --project agent-resolver` |
-| `ai-resource-manager` | Pytest | `cd ai-resource-manager && uv run pytest` |
 | All (JS/TS) | Vitest/Jest | `bun x --bun vitest run` |
 
 ## When to Use
@@ -279,9 +278,6 @@ bun run test --filter ./platform/backend
 
 # Run platform E2E (Playwright)
 bun run e2e --filter ./platform/e2e
-
-# Run Python CLI tests
-cd ai-resource-manager && uv run pytest -v
 
 # Run with coverage
 bun x --bun vitest run --coverage

@@ -39,7 +39,6 @@
 | `agent-framework/flow-engine` | `flow-engine` |
 | `agent-framework/resolver` | `resolver` |
 | `agent-framework/lab` | `lab` |
-| `ai-resource-manager` | `arm` |
 | `ai-resources/<domain>` | `ai-<domain-abbrev>` |
 | `docs/` | `docs` |
 | Multiple packages | omit package segment |
@@ -52,8 +51,8 @@ feature/forge-concept/collaborative-cursor
 fix/platform-be/session-token-expiry
 fix/cli/run-command-exit-code
 refactor/bridge/extract-driver-interface
-refactor/arm/separate-domain-parser
-docs/arm/add-resource-type-reference
+refactor/cli/separate-domain-parser
+docs/cli/add-resource-type-reference
 docs/cli/document-flow-commands
 skill/skaile-dev-ops/add-devlog-skill
 skill/ai-dev-quality/merge-cf-saxe-audit
