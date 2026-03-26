@@ -16,7 +16,7 @@ This domain covers the full implementation lifecycle: project scaffolding, featu
 
 - `cf/` variants are stack-agnostic
 - `saxe/` variants are PostXL/NestJS-specific
-- See `MERGE_CANDIDATES.md` for merge roadmap
+
 
 ## Key Patterns
 

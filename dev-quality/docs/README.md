@@ -23,4 +23,4 @@ This domain contains quality assurance skills: static audit, end-to-end testing,
 
 ## CF vs Saxe Variants
 
-`audit/`, `e2e/`, `ready/` each have `cf/` and `saxe/` subdirectories. See `MERGE_CANDIDATES.md` for merge priorities.
+`audit/`, `e2e/`, `ready/` each have `cf/` and `saxe/` subdirectories.

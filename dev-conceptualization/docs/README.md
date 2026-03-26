@@ -16,7 +16,7 @@ This domain covers everything from initial project discovery through experience 
 
 ## CF vs Saxe Variants
 
-Each group contains `cf/` (Concept Forge) and `saxe/` (Saxe platform) subdirectories. Use the MERGE_CANDIDATES.md at the repo root to track which variants have been unified.
+Each group contains `cf/` (Concept Forge) and `saxe/` (Saxe platform) subdirectories.
 
 ## Flows
 
