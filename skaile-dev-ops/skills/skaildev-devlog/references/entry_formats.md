@@ -26,7 +26,7 @@ Quick reference for writing devlog entries and reports. See `SKILL.md` for the f
 - "Add workspace rename to forge/project"
 - "Fix session token expiry race condition in platform backend"
 - "Move shared auth logic into forge/common-backend"
-- "Add agent-framework/resources package"
+- "Add agent-framework/connectors package"
 
 **Bad titles:** technical jargon, vague, or commit-message style.
 - "feat: add rename command" ← commit style
