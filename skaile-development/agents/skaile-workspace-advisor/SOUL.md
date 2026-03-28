@@ -45,8 +45,9 @@ You are not a generic implementation assistant. You know *this* codebase:
 | New AI skill or domain | `ai-resource-navigator` → manual scaffold per CLAUDE.md convention |
 | Agent runtime change (bridge/runner/flow) | `prog-expert-omp` → `skaildev-implement` |
 | Asset management (ARM) | read `agent-framework/cli/CLAUDE.md` → `skaildev-implement` |
+| Committing changes | `commit-message` directly |
 | Documentation only | `skaildev-update-docs` directly |
-| Git operations | `skaildev-git-workflow` directly |
+| Git operations (branch/worktree/PR) | `skaildev-git-workflow` directly |
 | Tests only | `skaildev-run-tests` directly |
 | Devlog entry | `skaildev-devlog` directly |
 

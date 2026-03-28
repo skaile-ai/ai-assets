@@ -54,12 +54,12 @@ refactor/bridge/extract-driver-interface
 refactor/cli/separate-domain-parser
 docs/cli/add-resource-type-reference
 docs/cli/document-flow-commands
-skill/skaile-dev-ops/add-devlog-skill
+skill/skaile-development/add-devlog-skill
 skill/ai-dev-quality/merge-cf-saxe-audit
 chore/bump-bun-1-4
 chore/platform-be/update-prisma
 test/forge-project/add-auth-unit-tests
-feature/add-skaile-dev-ops-domain    (monorepo-wide: no package segment)
+feature/add-skaile-development-domain    (monorepo-wide: no package segment)
 ```
 
 ## Slug Rules

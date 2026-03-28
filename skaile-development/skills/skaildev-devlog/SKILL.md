@@ -10,7 +10,7 @@ metadata:
     - "institutional-memory"
     - "plain-language"
     - "reports"
-    - "skaile-dev"
+    - "skaile-development"
   source: "MERGED"
   stage: "beta"
   produces:

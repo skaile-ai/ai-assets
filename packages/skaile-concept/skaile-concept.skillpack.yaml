@@ -1,6 +1,0 @@
-name: skaile-concept
-description: "Concept-phase only toolkit — shared contracts + full conceptualization pipeline (Discovery → Experience → Blueprint). Minimal install for ideation and spec work."
-version: "0.1.0"
-includes:
-  - package:dev-shared
-  - package:dev-conceptualization

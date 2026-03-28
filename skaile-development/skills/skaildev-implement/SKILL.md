@@ -5,7 +5,7 @@ metadata:
   version: "1.0.0"
   tags:
     - "implement"
-    - "skaile-dev"
+    - "skaile-development"
     - "monorepo"
     - "orchestrator"
     - "plan"
@@ -208,7 +208,7 @@ STEP 7: Execute
     - Read prog-expert skill recipes if applicable
     - Verify implementation compiles / lint passes
     - $ git add -p
-    - $ git commit -m "<conventional commit message>"
+    - RUN commit-message skill to generate structured commit
 
   IF complexity = standard
     FOR EACH task in skaile-plan.md:
@@ -218,7 +218,8 @@ STEP 7: Execute
         IF NON_COMPLIANT → fix and re-review
       - Run code quality check: naming, no debug artifacts, no cross-task bleed
         IF FAIL → fix and re-check
-      - $ git add -p && git commit -m "feat: <task-name>"
+      - $ git add -p
+      - RUN commit-message skill to generate structured commit
       - Update skaile-plan.md: mark task done
       - Run full test suite (quick pass to catch regressions)
         IF tests fail → fix before moving to next task
@@ -324,5 +325,5 @@ CHECKLIST
 ## Integration
 
 - **Routes to:** `prog-expert-nuxt`, `prog-expert-omp`, `prog-expert-python`, `implement-supervised`
-- **Calls:** `skaildev-git-workflow`, `skaildev-run-tests`, `skaildev-update-docs`, `skaildev-devlog`
+- **Calls:** `skaildev-git-workflow`, `commit-message`, `skaildev-run-tests`, `skaildev-update-docs`, `skaildev-devlog`
 - **Called by:** `skaile-workspace-advisor` or user directly

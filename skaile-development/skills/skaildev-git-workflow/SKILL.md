@@ -1,6 +1,6 @@
 ---
 name: "skaildev-git-workflow"
-description: "Git operations for the skaile-dev monorepo. Four modes: branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request with structured description), commit (direct commit with Conventional Commits format). Run before implementing, during feature work, and after completing a change."
+description: "Git operations for the skaile-dev monorepo. Four modes: branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request with structured description), finish (merge/PR/keep/discard branch). For committing, use the commit-message skill directly."
 metadata:
   version: "1.0.0"
   tags:
@@ -10,7 +10,7 @@ metadata:
     - "pull-request"
     - "commit"
     - "monorepo"
-    - "skaile-dev"
+    - "skaile-development"
   source: "MERGED"
   stage: "beta"
   user_inputs:
@@ -22,10 +22,9 @@ metadata:
           - "branch"
           - "worktree"
           - "pr"
-          - "commit"
           - "finish"
         required: true
-        hint: "branch = create/switch to a feature branch | worktree = create isolated checkout | pr = open pull request | commit = direct commit | finish = merge/PR/keep/discard branch"
+        hint: "branch = create/switch to a feature branch | worktree = create isolated checkout | pr = open pull request | finish = merge/PR/keep/discard branch. For commits, use the commit-message skill."
       - id: "description"
         label: "Change description (plain language) — used to derive branch name and commit message"
         type: "text"
@@ -53,27 +52,28 @@ metadata:
 
 ## Overview
 
-Handles all git operations for the skaile-dev monorepo. Works in four modes:
+Handles git operations for the skaile-dev monorepo. Works in four modes:
 
 | Mode | What It Does | When to Use |
 |------|-------------|-------------|
 | `branch` | Create or switch to a feature branch | Before starting any code change |
 | `worktree` | Add an isolated git worktree for parallel work | Multiple unrelated changes simultaneously |
 | `pr` | Open a pull request with structured description | When change needs review before merging |
-| `commit` | Stage and commit with Conventional Commits format | Small, self-contained changes |
 | `finish` | Close a branch: merge, PR, keep, or discard | After implementation is verified |
+
+**For committing:** use the `commit-message` skill directly — it generates structured messages with `---agent---` metadata blocks.
 
 ## When to Use
 
 - Before any code change: `mode=branch` to get on a feature branch
 - Parallel feature work: `mode=worktree` to work in isolation
-- Committing incremental work: `mode=commit`
 - Closing out an implementation: `mode=finish`
 - Team review: `mode=pr`
 
 ## When NOT to Use
 
-- Large multi-package implementations — use `implement-skaile` which calls this skill internally
+- For committing changes — use the `commit-message` skill instead
+- Large multi-package implementations — use `skaildev-implement` which calls this skill internally
 - Resolving merge conflicts that are conceptual design decisions — escalate to user
 
 ---
@@ -162,45 +162,6 @@ IF mode = worktree
     > Work in that directory. Main checkout is unaffected."
 
   EMIT [skaildev-git-workflow] worktree_ready path=.worktrees/<slug>
-
-# ── Mode: commit ──────────────────────────────────────────────────
-
-IF mode = commit
-
-  STEP 1: Check current branch
-    IF on main or a protected branch
-      - STOP: "Direct commits to main are not allowed. Create a feature branch first."
-
-  STEP 2: Stage and review changes
-    $ git diff --stat
-    - Review: are all staged files relevant to this commit?
-    - If mixed concerns detected (unrelated files staged together):
-      > "These changes appear to cover multiple concerns. Recommend splitting into separate commits:"
-      > [list of concerns]
-      > "Proceed with combined commit, or split?"
-
-  STEP 3: Derive commit message
-    - Type: from branch_type (feature→feat, fix→fix, refactor→refactor, docs→docs, skill→feat, chore→chore)
-    - Scope: package abbreviation in parentheses if single-package change
-    - Description: imperative mood, max 72 chars, plain language
-
-    Format: `<type>(<scope>): <description>`
-    Examples:
-      feat(forge-project): add workspace rename command
-      fix(platform-backend): prevent session token expiry race condition
-      refactor(cli): extract domain parser into separate module
-      docs(agent-cli): document run command flags
-      feat(dev-workspace): add devlog skill to skaile-dev-ops domain
-
-    IF description input provided → use it to derive message
-    ELSE → ask: "Commit message? (I'll format it as Conventional Commits)"
-
-  STEP 4: Commit
-    $ git add -p   (interactive staging — review what's committed)
-    $ git commit -m "<message>"
-    > "Committed: <message>"
-
-  EMIT [skaildev-git-workflow] committed message=<msg>
 
 # ── Mode: pr ──────────────────────────────────────────────────────
 
@@ -310,7 +271,7 @@ IF mode = finish
 CHECKLIST
   - [ ] Branch name follows naming convention from references/branch_naming.md
   - [ ] Working tree was clean before branch/worktree creation
-  - [ ] Commit messages follow Conventional Commits format
+  - [ ] Commit messages generated via commit-message skill
   - [ ] Tests pass before merge or PR
   - [ ] Typed confirmation received for merge and discard
   - [ ] Worktree cleaned up after finish (merge, keep, discard)
@@ -327,10 +288,10 @@ CHECKLIST
 | Using worktrees for sequential tasks | Worktrees add overhead; use branch mode for sequential work |
 | Merging without running tests | Full test suite must pass before any merge |
 | Force-pushing after rebase | Never rewrite history on shared branches |
-| Committing mixed concerns | One concern per commit; use `git add -p` to stage selectively |
+| Writing commit messages manually | Use the `commit-message` skill for structured messages with `---agent---` blocks |
 
 ## Integration
 
-- **Called by:** `implement-skaile` (step 6: git setup; step 11: finish branch)
-- **Calls:** none
+- **Called by:** `skaildev-implement` (step 6: git setup; step 11: finish branch)
+- **Delegates to:** `commit-message` for all commit message generation
 - **Reads:** `references/branch_naming.md`, `references/worktree_patterns.md`

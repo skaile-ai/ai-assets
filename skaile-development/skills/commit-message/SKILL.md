@@ -1,17 +1,17 @@
 ---
 name: Structured Commit Message
-description: Generate a structured commit message with agent-readable metadata, migration guides, and architecture decisions per .commit-spec.md
+description: Generate a structured commit message with agent-readable metadata, migration guides, and architecture decisions per commit-spec.md
 source: MERGED
 version: 1.0.0
 keywords: [commit, git, changelog, migration, decisions]
 reads_from:
-  - .commit-spec.md
+  - commit-spec.md
 writes_to: []
 ---
 
 # Structured Commit Message
 
-You are writing a structured commit message for the skaile-dev monorepo. The message must follow the format defined in `.commit-spec.md` at the repo root.
+You are writing a structured commit message for the skaile-dev monorepo. The message must follow the format defined in `commit-spec.md` (co-located in this skill directory).
 
 ## Instructions
 

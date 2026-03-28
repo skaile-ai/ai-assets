@@ -20,14 +20,15 @@ license: "MIT"
 tags:
   - "advisor"
   - "monorepo"
-  - "skaile-dev"
+  - "skaile-development"
   - "routing"
   - "orchestrator"
   - "workspace"
 metadata:
-  domain: "skaile-dev-ops"
+  domain: "skaile-development"
   soul: "agents/skaile-workspace-advisor/SOUL.md"
   orchestrates:
+    - "skill:commit-message"
     - "skill:skaildev-implement"
     - "skill:skaildev-git-workflow"
     - "skill:skaildev-update-docs"

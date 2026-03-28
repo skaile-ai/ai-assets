@@ -10,7 +10,7 @@ metadata:
     - "playwright"
     - "bun"
     - "monorepo"
-    - "skaile-dev"
+    - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
