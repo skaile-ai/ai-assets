@@ -1,0 +1,9 @@
+{
+  "name": "@skaile/ai-assets",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Skaile AI skills, domains, contracts, and shared resources",
+  "scripts": {
+    "lint": "python3 dev-shared/scripts/lint_concept.py"
+  }
+}
