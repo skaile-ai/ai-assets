@@ -26,7 +26,7 @@ stage: alpha | beta | production
 | Manifest | `DOMAIN.md` | `SKILL.md` |
 | Invocable? | No — organizational only | Yes — triggered by user or orchestrator |
 | Contains | Other skills, agents, prompts, tools, contracts | Scripts, examples, resources, references |
-| Contract | `contracts/<domain>-contract/SKILL.md` | Reads from domain contract |
+| Contract | `contracts/<domain>-contract/CONTRACT.md` | Reads from domain contract |
 
 ## Improvement Ideas
 

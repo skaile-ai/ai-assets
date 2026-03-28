@@ -118,12 +118,12 @@ uv run scripts/scaffold_domain.py <domain-name> "<description>" --base-path ./ai
 The script writes a scaffold DOMAIN.md. After it runs:
 - Fill `building_blocks` values if the user provided them
 - Expand the prose section to 2–3 sentences about the domain's purpose
-- Leave the contract SKILL.md as a scaffold — do not fill it in here
+- Leave the contract CONTRACT.md as a scaffold — do not fill it in here
 
 ### 4. Present Result
 
 Show the created file tree to the user. Suggest next steps:
-- Fill out `contracts/<domain>-contract/SKILL.md` (use `skill-builder-contract` as a reference)
+- Fill out `contracts/<domain>-contract/CONTRACT.md` (use `skill-builder-contract` as a reference)
 - Create the first skill using `skill-builder`
 
 ## Auto-Improvement

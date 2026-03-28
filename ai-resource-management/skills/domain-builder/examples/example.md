@@ -44,5 +44,5 @@ data-pipeline/
 ## Next Steps Shown to User
 
 1. Fill in TODO sections in `data-pipeline/DOMAIN.md`
-2. Fill in TODO sections in `contracts/data-pipeline-contract/SKILL.md`
+2. Fill in TODO sections in `contracts/data-pipeline-contract/CONTRACT.md`
 3. Use `skill-builder` to scaffold the first skill in `data-pipeline/skills/`

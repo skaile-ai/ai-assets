@@ -101,7 +101,7 @@ The `{contract_name}` skill in `contracts/` is the shared bridge for this domain
 - Defines naming conventions and frontmatter fields used by all skills
 - Is `do_not_invoke: true` — loaded as context, never triggered directly
 
-All skills in this domain must read `contracts/{contract_name}/SKILL.md` before operating.
+All skills in this domain must read `contracts/{contract_name}/CONTRACT.md` before operating.
 """
 
     # --- Contract SKILL.md ---
@@ -158,7 +158,7 @@ _output/
 
     # --- Write all files ---
     write_file(domain_path / "DOMAIN.md", domain_md)
-    write_file(domain_path / f"contracts/{contract_name}/SKILL.md", contract_md)
+    write_file(domain_path / f"contracts/{contract_name}/CONTRACT.md", contract_md)
     for rel, content in readmes.items():
         write_file(domain_path / rel, content)
 
@@ -170,7 +170,7 @@ _output/
     tree.add("[yellow]DOMAIN.md[/yellow]  ← domain manifest")
     contracts_branch = tree.add("contracts/")
     contract_branch = contracts_branch.add(f"{contract_name}/")
-    contract_branch.add("[yellow]SKILL.md[/yellow]  ← scaffold contract (fill in TODO sections)")
+    contract_branch.add("[yellow]CONTRACT.md[/yellow]  ← scaffold contract (fill in TODO sections)")
     tree.add("docs/    ← domain documentation")
     tree.add("skills/  ← invocable agent skills")
     tree.add("agents/  ← autonomous / subagent workflows")
@@ -180,7 +180,7 @@ _output/
 
     console.print("\n[bold]Next steps:[/bold]")
     console.print(f"  1. Fill in TODO sections in [cyan]{domain_name}/DOMAIN.md[/cyan]")
-    console.print(f"  2. Fill in TODO sections in [cyan]contracts/{contract_name}/SKILL.md[/cyan]")
+    console.print(f"  2. Fill in TODO sections in [cyan]contracts/{contract_name}/CONTRACT.md[/cyan]")
     console.print(f"  3. Use [bold]skill-builder[/bold] to scaffold the first skill in [cyan]{domain_name}/skills/[/cyan]")
 
 
