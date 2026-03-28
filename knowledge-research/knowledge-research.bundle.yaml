@@ -1,0 +1,8 @@
+name: knowledge-research
+description: Knowledge acquisition — deep research, academic paper extraction, and structured synthesis
+version: 0.1.0
+dependencies:
+  - contract:knowledge-research-contract
+  - skill:deep-research
+  - skill:knowledge-paper-extractor
+  - skill:knowledge-paper-research

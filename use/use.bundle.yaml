@@ -1,0 +1,15 @@
+name: use
+description: External service integrations — each skill wraps one service with an agent-friendly interface
+version: 0.1.0
+dependencies:
+  - contract:use-contract
+  - skill:use-exa
+  - skill:use-perplexity
+  - skill:use-searxng
+  - skill:use-outline
+  - skill:use-outline-cli
+  - skill:use-docling
+  - skill:use-elevenlabs
+  - skill:use-context7-api
+  - skill:use-mcp2cli
+  - skill:agent-browser

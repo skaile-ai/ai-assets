@@ -1,0 +1,6 @@
+name: dev-implementation-experts-typst
+description: Typst document composition expertise and expert advisor routing
+version: 0.1.0
+dependencies:
+  - skill:prog-expert-typst
+  - skill:prog-expert-advisor

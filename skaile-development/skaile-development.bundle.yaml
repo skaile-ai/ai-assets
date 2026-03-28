@@ -1,0 +1,12 @@
+name: skaile-development
+description: Day-to-day skaile-dev workflow — implementation, commits, git ops, docs, tests, and devlog
+version: 0.1.0
+dependencies:
+  - skill:Structured Commit Message
+  - skill:skaildev-implement
+  - skill:skaildev-git-workflow
+  - skill:skaildev-run-tests
+  - skill:skaildev-update-docs
+  - skill:skaildev-devlog
+  - skill:skaildev-mattermost
+  - agent:skaile-workspace-advisor
