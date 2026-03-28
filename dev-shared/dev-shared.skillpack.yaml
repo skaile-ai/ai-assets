@@ -1,5 +1,0 @@
-name: dev-shared
-description: "Shared contracts for all CF domain skills — concept structure, frontmatter conventions, feedback loop, and golden principles. Install alongside any CF domain package."
-version: "0.1.0"
-includes:
-  - skill:cf__shared
