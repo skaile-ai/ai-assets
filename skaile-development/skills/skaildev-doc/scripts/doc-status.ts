@@ -230,7 +230,9 @@ function buildMarkdown(audit: AuditOutput): string {
 
 		for (const row of rows) {
 			lines.push(
-				"| " + row.map((cell, i) => padRight(cell, colWidths[i])).join(" | ") + " |",
+				"| " +
+					row.map((cell, i) => padRight(cell, colWidths[i])).join(" | ") +
+					" |",
 			);
 		}
 		lines.push("");
@@ -297,7 +299,9 @@ function buildMarkdown(audit: AuditOutput): string {
 				"| " +
 					row
 						.map((cell, i) =>
-							i === 1 ? padLeft(cell, colWidths[i]) : padRight(cell, colWidths[i]),
+							i === 1
+								? padLeft(cell, colWidths[i])
+								: padRight(cell, colWidths[i]),
 						)
 						.join(" | ") +
 					" |",

@@ -6,7 +6,7 @@ dependencies:
   - skill:skaildev-implement
   - skill:skaildev-git-workflow
   - skill:skaildev-run-tests
-  - skill:skaildev-update-docs
+  - skill:skaildev-doc
   - skill:skaildev-devlog
   - skill:skaildev-mattermost
   - agent:skaile-workspace-advisor

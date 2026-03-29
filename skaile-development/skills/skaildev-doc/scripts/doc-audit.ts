@@ -136,12 +136,7 @@ function getPackagePrefix(filePath: string): string {
 	if (parts.length === 0) return "(root)";
 	if (parts.length === 1) return parts[0];
 
-	const GENERIC_SECOND_SEGMENTS = new Set([
-		"src",
-		"lib",
-		"scripts",
-		"docs",
-	]);
+	const GENERIC_SECOND_SEGMENTS = new Set(["src", "lib", "scripts", "docs"]);
 
 	if (GENERIC_SECOND_SEGMENTS.has(parts[1])) {
 		return parts[0];
@@ -192,8 +187,7 @@ function runTracker(
 			maxBuffer: 32 * 1024 * 1024, // 32 MB
 		});
 	} catch (err: unknown) {
-		const message =
-			err instanceof Error ? err.message : String(err);
+		const message = err instanceof Error ? err.message : String(err);
 		throw new Error(`doc-tracker.ts failed: ${message}`);
 	}
 
@@ -214,9 +208,7 @@ function runTracker(
  * Count source files per directory (one level: the immediate parent dir).
  * Returns a map of dirPath -> list of files in that dir.
  */
-function buildDirFileMap(
-	files: string[],
-): Map<string, string[]> {
+function buildDirFileMap(files: string[]): Map<string, string[]> {
 	const map = new Map<string, string[]>();
 	for (const f of files) {
 		const parts = f.split("/");
@@ -278,11 +270,7 @@ async function main(): Promise<void> {
 
 	// All source files known to tracker
 	const trackedFiles = new Set(Object.keys(sourceMap));
-	const allSourceFiles = [
-		...trackedFiles,
-		...untracked,
-		...skippedFiles,
-	];
+	const allSourceFiles = [...trackedFiles, ...untracked, ...skippedFiles];
 	// Deduplicate (skipped files may also appear in untracked in edge cases)
 	const allSourceFilesSet = new Set(allSourceFiles);
 
@@ -319,7 +307,8 @@ async function main(): Promise<void> {
 		if (isPublicApiFile(file)) {
 			gaps.push({
 				file,
-				reason: "public API file (matches route/controller/api pattern) not covered by any doc page",
+				reason:
+					"public API file (matches route/controller/api pattern) not covered by any doc page",
 				priority: "high",
 			});
 			flaggedFiles.add(file);
@@ -349,16 +338,16 @@ async function main(): Promise<void> {
 	);
 	const dirFileMap = buildDirFileMap(uncoveredFiles);
 	// Also need to know total files per dir (all, including covered ones)
-	const allDirFileMap = buildDirFileMap([...allSourceFilesSet].filter(
-		(f) => !skippedFiles.has(f),
-	));
+	const allDirFileMap = buildDirFileMap(
+		[...allSourceFilesSet].filter((f) => !skippedFiles.has(f)),
+	);
 
 	for (const [dir, filesInDir] of dirFileMap.entries()) {
 		// Total non-skipped files in this dir
 		const totalInDir = allDirFileMap.get(dir)?.length ?? filesInDir.length;
 		// Covered files in this dir (those in sourceMap)
-		const coveredInDir = (allDirFileMap.get(dir) ?? []).filter(
-			(f) => trackedFiles.has(f),
+		const coveredInDir = (allDirFileMap.get(dir) ?? []).filter((f) =>
+			trackedFiles.has(f),
 		).length;
 
 		if (filesInDir.length >= 3 && coveredInDir === 0) {
@@ -396,9 +385,7 @@ async function main(): Promise<void> {
 	}
 
 	// 4. Check @doc:see broken refs
-	const pageTitles = new Set(
-		pages.map((p) => p.title).filter(Boolean),
-	);
+	const pageTitles = new Set(pages.map((p) => p.title).filter(Boolean));
 	const brokenRefs: BrokenRef[] = [];
 
 	for (const { file, line, seeTarget } of seeAnnotations) {
@@ -451,9 +438,7 @@ async function main(): Promise<void> {
 	for (const [pkg, stats] of pkgMap.entries()) {
 		const denom = stats.total - stats.skipped;
 		const pct =
-			denom > 0
-				? Math.round((stats.tracked / denom) * 10000) / 100
-				: 100;
+			denom > 0 ? Math.round((stats.tracked / denom) * 10000) / 100 : 100;
 		coverageByPackage[pkg] = {
 			tracked: stats.tracked,
 			total: stats.total,
