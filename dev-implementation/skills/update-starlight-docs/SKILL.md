@@ -18,6 +18,10 @@ metadata:
     - "docs/"
 ---
 
+<!-- TODO: This skill currently assumes Starlight/Astro. Refactor to support
+     framework-agnostic documentation systems (Docusaurus, VitePress, etc.)
+     by abstracting sidebar registration, frontmatter format, and page scaffolding. -->
+
 # Update Starlight Docs — Post-Implementation Documentation Sync
 
 ## Overview
@@ -58,6 +62,7 @@ WRITES
 REFERENCES
   dev-shared/contracts/concept_structure.md             — canonical paths
   docs/astro.config.mjs                                — sidebar structure and registered packages
+  ai-resources/dev-shared/contracts/doc_tracking.md    — shared tracking conventions (_sources schema, @doc: annotations, staleness protocol)
 
 MUST  preserve existing frontmatter fields (title, description, badge, template, hero)
 MUST  only add/update _sources, _source_hash, _last_synced fields in frontmatter
