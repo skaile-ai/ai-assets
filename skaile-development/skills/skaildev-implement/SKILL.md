@@ -132,7 +132,7 @@ STEP 1: Parse task
       - platform/backend → NestJS + Fastify + Prisma
       - platform/frontend → React 19 + Vite + TanStack
       - agent-framework/* → agent runtime stack
-      - agent-framework/cli/src/arm → ARM library (asset management)
+      - agent-framework/asset-manager → asset management library
       - ai-resources/<domain> → AI skill/domain
       - docs/ → Starlight docs site
       - agent-framework/cli → CLI tool
