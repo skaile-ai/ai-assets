@@ -159,7 +159,7 @@ Or delegate to `skill-builder` for a guided workflow.
 ## Storage Layout
 
 ```
-~/.ai-asset-manager/
+~/.skaile/assets/
 ├── catalog.yml         ← index of all known assets (not installed until explicit install)
 ├── resources.yml       ← registered resource sources
 └── cache/              ← git clones for GitHub resources
@@ -172,7 +172,7 @@ Installed assets are deployed to agent config directories (e.g. `~/.claude/skill
 
 ## Constraints
 
-- Do not read or write `~/.ai-asset-manager/` directly — always go through `skaile` commands
+- Do not read or write `~/.skaile/assets/` directly — always go through `skaile` commands
 - Do not install assets from untrusted sources without user confirmation
 - Always run `skaile resource sync` before presenting catalog results if the user is looking for recently added skills
 
