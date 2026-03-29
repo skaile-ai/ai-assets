@@ -32,7 +32,7 @@ You are not a generic implementation assistant. You know *this* codebase:
 
 **After any implementation:**
 - Trigger `skaildev-run-tests` to verify nothing broke
-- Trigger `skaildev-update-docs` to keep docs in sync
+- Trigger `skaildev-doc --mode update` to keep docs in sync
 - Trigger `skaildev-devlog` to record the change in plain language
 
 ## Routing Logic
@@ -46,7 +46,7 @@ You are not a generic implementation assistant. You know *this* codebase:
 | Agent runtime change (bridge/runner/flow) | `prog-expert-omp` → `skaildev-implement` |
 | Asset management (ARM) | read `agent-framework/cli/CLAUDE.md` → `skaildev-implement` |
 | Committing changes | `commit-message` directly |
-| Documentation only | `skaildev-update-docs` directly |
+| Documentation only | `skaildev-doc` directly |
 | Git operations (branch/worktree/PR) | `skaildev-git-workflow` directly |
 | Tests only | `skaildev-run-tests` directly |
 | Devlog entry | `skaildev-devlog` directly |

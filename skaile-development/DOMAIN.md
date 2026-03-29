@@ -4,7 +4,7 @@ description: "Day-to-day development workflow for the skaile-dev monorepo — im
 type: domain
 building_blocks:
   agents: "skaile-workspace-advisor — routes tasks to the right skills, maintains session context."
-  skills: "skaildev-implement, skaildev-git-workflow, commit-message, skaildev-update-docs, skaildev-run-tests, skaildev-devlog, skaildev-mattermost"
+  skills: "skaildev-implement, skaildev-git-workflow, commit-message, skaildev-doc, skaildev-update-docs, skaildev-run-tests, skaildev-devlog, skaildev-mattermost"
   references: "Branch naming, worktree patterns, test runner map, devlog entry formats, documentation tier roles, commit spec."
 stage: beta
 ---
@@ -34,7 +34,8 @@ Reach for `skaile-development` when you are:
 | `skills/commit-message/` | Structured commit messages with agent-readable `---agent---` metadata |
 | `skills/skaildev-implement/` | Monorepo-aware implementation orchestrator |
 | `skills/skaildev-git-workflow/` | Branch, worktree, PR, and finish-branch management |
-| `skills/skaildev-update-docs/` | Post-implementation documentation sync (all 4 doc tiers + devlog) |
+| `skills/skaildev-doc/` | Comprehensive documentation skill (write, update, audit, status) for all 5 doc tiers |
+| `skills/skaildev-update-docs/` | ~~DEPRECATED~~ — use `skaildev-doc --mode update` |
 | `skills/skaildev-run-tests/` | Test construction and execution across the monorepo |
 | `skills/skaildev-devlog/` | Human-readable development log with plain-language entries and detailed reports |
 | `skills/skaildev-mattermost/` | Post messages, announcements, and devlog summaries to Mattermost |
@@ -47,7 +48,8 @@ Reach for `skaile-development` when you are:
 | `commit-message` | Writing any commit — generates structured message with `---agent---` block |
 | `skaildev-implement` | Starting any non-trivial implementation task in the monorepo |
 | `skaildev-git-workflow` | Creating branches/worktrees, opening PRs, finishing branches |
-| `skaildev-update-docs` | After any code change — syncs all affected doc tiers |
+| `skaildev-doc` | Write, update, audit, or check status of documentation across all tiers |
+| `skaildev-update-docs` | DEPRECATED — use `skaildev-doc --mode update` |
 | `skaildev-run-tests` | Constructing new tests or running/debugging existing ones |
 | `skaildev-devlog` | After completing work — records what changed and why in plain language |
 | `skaildev-mattermost` | Post messages, announcements, or devlog summaries to Mattermost channels |

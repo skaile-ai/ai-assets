@@ -1,6 +1,6 @@
 ---
 name: "skaildev-implement"
-description: "Monorepo-aware implementation orchestrator for the skaile-dev codebase. Reads the affected package CLAUDE.md files, identifies the tech stack, routes to the right prog-experts, produces a plan, executes with supervised dispatch, then triggers skaildev-run-tests, skaildev-update-docs, and skaildev-devlog on completion. Use for any non-trivial change to the skaile-dev monorepo."
+description: "Monorepo-aware implementation orchestrator for the skaile-dev codebase. Reads the affected package CLAUDE.md files, identifies the tech stack, routes to the right prog-experts, produces a plan, executes with supervised dispatch, then triggers skaildev-run-tests, skaildev-doc, and skaildev-devlog on completion. Use for any non-trivial change to the skaile-dev monorepo."
 metadata:
   version: "1.0.0"
   tags:
@@ -83,7 +83,7 @@ to build apps), this skill works on the codebase itself.
 ## When NOT to Use
 
 - Pure git operations (no code changes) — use `skaildev-git-workflow` directly
-- Documentation-only update — use `skaildev-update-docs` directly
+- Documentation-only update — use `skaildev-doc` directly
 - Running existing tests — use `skaildev-run-tests` directly
 - Writing a devlog entry for work already done — use `skaildev-devlog` directly
 
@@ -112,7 +112,7 @@ REFERENCES
 MUST  read the target package(s) CLAUDE.md before writing any code
 MUST  identify the correct prog-expert for the tech stack and note it in the plan
 MUST  run tests after implementation (via skaildev-run-tests skill)
-MUST  run skaildev-update-docs after any public API or structure change
+MUST  run skaildev-doc --mode update after any public API or structure change
 MUST  add a devlog entry after every completed implementation
 MUST  create a git branch before implementing (via skaildev-git-workflow skill)
 NEVER implement across packages without reading each package's CLAUDE.md
@@ -151,7 +151,7 @@ STEP 2: Load context
   | agent-framework/* | TypeScript, Bun, OMP | prog-expert-omp |
   | agent-framework/cli | TypeScript, Bun, Commander | (read package CLAUDE.md) |
   | ai-resources/<domain> | Markdown, YAML (skill conventions) | (follow CLAUDE.md skill conventions) |
-  | docs/ | Astro, Starlight | (follow skaildev-update-docs) |
+  | docs/ | Astro, Starlight | (follow skaildev-doc) |
   | agent-framework/cli | TypeScript, Bun | (read package CLAUDE.md) |
 
 STEP 3: Find relevant expert skills
@@ -247,7 +247,7 @@ CHECKPOINT tests_passed
 # ── Phase 5: Documentation Sync ───────────────────────────────────
 
 STEP 9: Update docs
-  - RUN skaildev-update-docs
+  - RUN skaildev-doc --mode update
   - Scope: files changed since branch was created
   IF docs were updated
     - $ git add docs/ && git commit -m "docs: sync documentation for <task-slug>"
@@ -305,7 +305,7 @@ CHECKLIST
   - [ ] Git branch created (never commit to main)
   - [ ] Spec compliance review run for every task
   - [ ] Full test suite passing before docs sync
-  - [ ] skaildev-update-docs run after any public API change
+  - [ ] skaildev-doc --mode update run after any public API change
   - [ ] Devlog entry written
   - [ ] Branch finished (merge / PR / keep)
 
@@ -319,11 +319,11 @@ CHECKLIST
 | Committing directly to main | Create a feature branch via skaildev-git-workflow before any code change |
 | Skipping spec compliance for "simple" tasks | All tasks get spec compliance review — even small ones |
 | Forgetting skaildev-run-tests after implementation | Tests are the safety net; never skip |
-| Skipping skaildev-update-docs for non-trivial changes | If a public API, command, or structure changed, docs must sync |
+| Skipping skaildev-doc for non-trivial changes | If a public API, command, or structure changed, docs must sync |
 | Skipping the devlog | Every completed change gets a devlog entry — this is the institutional memory |
 
 ## Integration
 
 - **Routes to:** `prog-expert-nuxt`, `prog-expert-omp`, `prog-expert-python`, `implement-supervised`
-- **Calls:** `skaildev-git-workflow`, `commit-message`, `skaildev-run-tests`, `skaildev-update-docs`, `skaildev-devlog`
+- **Calls:** `skaildev-git-workflow`, `commit-message`, `skaildev-run-tests`, `skaildev-doc`, `skaildev-devlog`
 - **Called by:** `skaile-workspace-advisor` or user directly

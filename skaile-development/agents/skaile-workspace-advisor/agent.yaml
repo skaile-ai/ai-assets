@@ -31,7 +31,7 @@ metadata:
     - "skill:commit-message"
     - "skill:skaildev-implement"
     - "skill:skaildev-git-workflow"
-    - "skill:skaildev-update-docs"
+    - "skill:skaildev-doc"
     - "skill:skaildev-run-tests"
     - "skill:skaildev-devlog"
   routes_to:
