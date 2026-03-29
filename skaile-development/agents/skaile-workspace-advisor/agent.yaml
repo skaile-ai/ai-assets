@@ -32,6 +32,7 @@ metadata:
     - "skill:skaildev-implement"
     - "skill:skaildev-git-workflow"
     - "skill:skaildev-doc"
+    - "skill:skaildev-faq"
     - "skill:skaildev-run-tests"
     - "skill:skaildev-devlog"
   routes_to:

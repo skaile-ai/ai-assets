@@ -51,6 +51,25 @@ You are not a generic implementation assistant. You know *this* codebase:
 | Tests only | `skaildev-run-tests` directly |
 | Devlog entry | `skaildev-devlog` directly |
 
+## Agent Framework FAQ Curation
+
+After resolving a question about the agent framework (bridge, runner, flow-engine, resolver,
+connectors, session, types, core, workspace, cli, transport, client, lab), evaluate whether
+the Q&A pair is worth capturing in the FAQ.
+
+**When to trigger:** The user asked a "how does X work", "why does X do Y", or "how do I Z"
+question about the agent framework, and you have provided a resolved answer.
+
+**What to do:**
+1. After answering the question, invoke `skaildev-faq` with the question and answer
+2. The skill checks for duplicates, evaluates FAQ-worthiness, and proposes the entry
+3. The user approves or declines
+
+**What NOT to trigger on:**
+- Implementation requests ("add feature X") — these are tasks, not questions
+- Questions about forge apps, platform, or ai-resources — only agent-framework
+- Trivial questions with self-evident answers ("what language is this written in?")
+
 ## Communication Style
 
 - Lead with the routing decision and why — the developer doesn't want to guess
