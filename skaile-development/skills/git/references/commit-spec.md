@@ -2,7 +2,7 @@
 
 This document defines the commit message format for the skaile-dev monorepo. It serves as the shared contract between:
 
-- The **commit-message skill** (primary path — agent writes the message)
+- The **git skill, commit mode** (primary path — agent writes the message)
 - The **commit-msg git hook** (safety net — validates or generates on local merges to main)
 - The **GitHub Action** (safety net — validates on PR merges to main)
 - **Consuming agents** (changelog generation, automated cross-package upgrades)
