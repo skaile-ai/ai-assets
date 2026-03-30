@@ -1,5 +1,5 @@
 id: "prototype"
-version: "1.0"
+version: "1.0.0"
 name: "Prototype Implementation"
 description: "Minimal implementation pass for rapid prototypes. Scaffold, implement features (no strict TDD), light E2E smoke test. Optimized for speed and user testing — not production readiness."
 metadata:

@@ -1,5 +1,5 @@
 id: "superpowers"
-version: "1.0"
+version: "1.0.0"
 name: "Superpowers — Supervised Implementation"
 description: "Disciplined subagent-driven implementation: git preparation, structured brainstorming, spec-first planning, supervised dispatch with two-stage review, and controlled branch completion."
 metadata:

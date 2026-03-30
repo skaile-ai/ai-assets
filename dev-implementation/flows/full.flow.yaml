@@ -1,5 +1,5 @@
 id: "full"
-version: "1.0"
+version: "1.0.0"
 name: "Full Production"
 description: "Complete implementation pipeline — readiness gate, scaffold, foundation, optional design pass, migrate/seed, feature TDD, full test suite (unit, integration, E2E), verify."
 metadata:

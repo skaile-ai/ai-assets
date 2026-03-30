@@ -1,5 +1,5 @@
 id: "reverse-engineer"
-version: "1.0"
+version: "1.0.0"
 name: "Reverse Engineer"
 description: "Extract a full concept from an existing codebase, then optionally continue with any concept or implementation steps."
 metadata:

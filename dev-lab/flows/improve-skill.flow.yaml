@@ -1,5 +1,5 @@
 id: improve-skill
-version: "1.0"
+version: "1.0.0"
 name: "Improve Skill"
 description: "Iterate: mutate skill, validate, score, keep or revert improvements"
 entry: baseline

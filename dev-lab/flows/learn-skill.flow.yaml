@@ -1,5 +1,5 @@
 id: learn-skill
-version: "1.0"
+version: "1.0.0"
 name: "Learn from Skill Usage"
 description: "Process observations, extract patterns, write learnings and test cases"
 entry: observe

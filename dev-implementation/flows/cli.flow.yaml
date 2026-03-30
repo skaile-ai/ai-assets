@@ -1,5 +1,5 @@
 id: "cli"
-version: "1.0"
+version: "1.0.0"
 name: "CLI Implementation"
 description: "Implementation pipeline for command-line tools. No UI shell, no design pass, no E2E. Scaffold, foundation (headless), optional migrate/seed, feature TDD, unit and integration tests, verify."
 metadata:

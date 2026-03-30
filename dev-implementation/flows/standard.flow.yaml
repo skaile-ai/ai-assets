@@ -1,5 +1,5 @@
 id: "standard"
-version: "1.0"
+version: "1.0.0"
 name: "Standard Implementation"
 description: "Standard full-stack implementation: scaffold, foundation, migrate/seed, feature dev with TDD, unit and integration tests, E2E, verify."
 metadata:

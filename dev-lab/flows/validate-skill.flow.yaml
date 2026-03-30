@@ -1,5 +1,5 @@
 id: validate-skill
-version: "1.0"
+version: "1.0.0"
 name: "Validate Skill"
 description: "Run a skill's test suite in Docker and produce a validation report"
 entry: run-cases

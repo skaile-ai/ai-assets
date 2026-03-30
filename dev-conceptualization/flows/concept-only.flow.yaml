@@ -1,5 +1,5 @@
 id: "concept-only"
-version: "1.0"
+version: "1.0.0"
 name: "Concept Only"
 description: "Produces a complete concept document package without implementation. For planning, documentation, or handing off to a development team."
 metadata:
