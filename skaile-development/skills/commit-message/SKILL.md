@@ -1,5 +1,5 @@
 ---
-name: Structured Commit Message
+name: commit-message
 description: Generate a structured commit message with agent-readable metadata, migration guides, and architecture decisions per commit-spec.md
 source: MERGED
 version: 1.0.0
