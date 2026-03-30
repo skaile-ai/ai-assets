@@ -4,7 +4,7 @@ description: "Day-to-day development workflow for the skaile-dev monorepo — im
 type: domain
 building_blocks:
   agents: "skaile-workspace-advisor — routes tasks to the right skills, maintains session context."
-  skills: "skaildev-implement, skaildev-git-workflow, commit-message, skaildev-doc, skaildev-faq, skaildev-update-docs, skaildev-run-tests, skaildev-devlog, skaildev-mattermost"
+  skills: "git, implement, test, doc, devlog, notify, faq, release"
   references: "Branch naming, worktree patterns, test runner map, devlog entry formats, documentation tier roles, commit spec."
 stage: beta
 ---
@@ -31,44 +31,42 @@ Reach for `skaile-development` when you are:
 | Folder | Purpose |
 |--------|---------|
 | `agents/` | `skaile-workspace-advisor` — routes to skills, orchestrates multi-step work |
-| `skills/commit-message/` | Structured commit messages with agent-readable `---agent---` metadata |
-| `skills/skaildev-implement/` | Monorepo-aware implementation orchestrator |
-| `skills/skaildev-git-workflow/` | Branch, worktree, PR, and finish-branch management |
-| `skills/skaildev-doc/` | Comprehensive documentation skill (write, update, audit, status) for all 5 doc tiers |
-| `skills/skaildev-faq/` | FAQ curation for agent-framework docs — evaluates resolved Q&A pairs |
-| `skills/skaildev-update-docs/` | ~~DEPRECATED~~ — use `skaildev-doc --mode update` |
-| `skills/skaildev-run-tests/` | Test construction and execution across the monorepo |
-| `skills/skaildev-devlog/` | Human-readable development log with plain-language entries and detailed reports |
-| `skills/skaildev-mattermost/` | Post messages, announcements, and devlog summaries to Mattermost |
+| `skills/git/` | Unified git operations: commit, branch, worktree, PR, finish, sync |
+| `skills/implement/` | Monorepo-aware implementation orchestrator |
+| `skills/test/` | Test construction and execution across the monorepo |
+| `skills/doc/` | Comprehensive documentation skill (write, update, audit, status) for all 5 doc tiers |
+| `skills/devlog/` | Human-readable development log with plain-language entries and detailed reports |
+| `skills/notify/` | Team notifications and messaging with structured templates |
+| `skills/faq/` | FAQ curation for all monorepo packages |
+| `skills/release/` | Changelog, semantic versioning, and git tagging |
 | `references/doc_tiers.md` | Clarifies the role of README.md, CLAUDE.md, Starlight docs, and _devlog |
 
 ## Skills
 
 | Skill | When to Use |
 |-------|------------|
-| `commit-message` | Writing any commit — generates structured message with `---agent---` block |
-| `skaildev-implement` | Starting any non-trivial implementation task in the monorepo |
-| `skaildev-git-workflow` | Creating branches/worktrees, opening PRs, finishing branches |
-| `skaildev-doc` | Write, update, audit, or check status of documentation across all tiers |
-| `skaildev-faq` | After resolving an agent-framework question — curates FAQ entries with user approval |
-| `skaildev-update-docs` | DEPRECATED — use `skaildev-doc --mode update` |
-| `skaildev-run-tests` | Constructing new tests or running/debugging existing ones |
-| `skaildev-devlog` | After completing work — records what changed and why in plain language |
-| `skaildev-mattermost` | Post messages, announcements, or devlog summaries to Mattermost channels |
+| `git` | Any git operation — committing, branching, worktrees, opening PRs, finishing branches, syncing |
+| `implement` | Starting any non-trivial implementation task in the monorepo |
+| `test` | Constructing new tests or running/debugging existing ones |
+| `doc` | Write, update, audit, or check status of documentation across all tiers |
+| `devlog` | After completing work — records what changed and why in plain language |
+| `notify` | Post messages, announcements, or devlog summaries to team channels |
+| `faq` | After resolving a question — curates FAQ entries with user approval |
+| `release` | Preparing a release — changelog generation, version bumps, and git tagging |
 
 ## Commit Workflow
 
-The `commit-message` skill is the primary way to commit in skaile-dev. It reads the diff,
+The `git mode=commit` operation is the primary way to commit in skaile-dev. It reads the diff,
 identifies affected packages, and generates a structured message with:
 - Conventional-commits title line
 - Human description (what and why)
 - `---agent---` YAML block with scope, type, breaking, changes, decisions, migrate, exports
 
-The format spec lives in `skills/commit-message/commit-spec.md`. The `.githooks/commit-msg`
+The format spec lives in `skills/git/references/commit-spec.md`. The `.githooks/commit-msg`
 hook validates or generates the block on merges to main. A GitHub Action validates on PRs.
 
-`skaildev-git-workflow` handles branch/worktree/PR/finish operations but delegates commit
-message generation to `commit-message`.
+The `git` skill handles branch/worktree/PR/finish/sync operations and also covers commit
+message generation — all unified under a single skill with mode selection.
 
 ## Documentation Tiers
 
@@ -83,10 +81,12 @@ Every change in skaile-dev may affect up to five documentation surfaces. See
 | AI guide | `DOMAIN.md` / `SKILL.md` | Changes to AI resource structure or skill behavior |
 | Dev log | `_devlog/DEVLOG.md` | After every meaningful change (always) |
 
+The `doc` skill covers tiers 1-4. The `devlog` skill handles the dev log tier.
+
 ## Relationship to Other Domains
 
 - **dev-implementation**: Builds apps *using* skaile (consumes `_concept/`). This domain is for the skaile codebase itself.
-- **dev-quality**: Full QA pipeline (audit, E2E, readiness gates). `run-tests` here is the fast inner-loop equivalent.
+- **dev-quality**: Full QA pipeline (audit, E2E, readiness gates). `test` here is the fast inner-loop equivalent.
 - **dev-shared**: Shared contracts referenced by all domains. Commit spec now lives in this domain.
 
 ## Notes
