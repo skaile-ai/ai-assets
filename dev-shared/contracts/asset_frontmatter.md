@@ -368,3 +368,66 @@ metadata:
 | `version:` (root) | `metadata.version:` | Move into metadata |
 | `tags:` (root) | `metadata.tags:` | Move into metadata |
 | `stage:` (root) | `metadata.stage:` | Move into metadata |
+
+---
+
+## Version Bump Rules
+
+All assets use [semantic versioning](https://semver.org/) (MAJOR.MINOR.PATCH). Developers bump versions manually; tooling validates that bumps happen.
+
+### Skills and Prompts
+
+| Bump | When |
+|------|------|
+| **Major** | Renamed/removed `inputs_required`/`inputs_optional` fields; changed `produces` paths; renamed/removed the asset; behavioral change breaking existing flow pins |
+| **Minor** | Added new inputs; added new `produces` outputs; new behavior not affecting existing consumers; added `references/` or `scripts/` |
+| **Patch** | Fixed typos, improved prompt wording; bug fixes in `validator.py`/`scripts/`; updated `references/` content; changed `tags`/`stage`/metadata |
+
+### Agents
+
+| Bump | When |
+|------|------|
+| **Major** | Changed `requires`/`delegation`/`skills` in a breaking way; removed capabilities |
+| **Minor** | Added new capabilities, new sub-agents, expanded `skills` list |
+| **Patch** | Prompt tuning in SOUL.md/RULES.md; metadata changes |
+
+### Flows
+
+| Bump | When |
+|------|------|
+| **Major** | Removed/reordered required nodes; changed entry point; removed edges |
+| **Minor** | Added optional nodes; added new edges; new modes |
+| **Patch** | Parameter tweaks; label changes; position adjustments |
+
+### Flow Version Pinning
+
+Flow nodes can optionally pin a skill version range:
+
+```yaml
+nodes:
+  - id: "overview"
+    type: skill
+    data:
+      skill: "overview"
+      version: "^1.0.0"    # optional — semver range
+```
+
+When present, the runner validates at flow startup that the installed skill version satisfies the range. If absent, no version check is performed.
+
+### Per-Domain Changelogs
+
+Each domain with versioned assets maintains a `CHANGELOG.md`:
+
+```markdown
+# Changelog — <domain-name>
+
+## [Unreleased]
+
+## YYYY-MM-DD
+
+### <asset-name> <old-version> → <new-version>
+- Description of change
+- BREAKING: Description of breaking change
+```
+
+Update the changelog in the same commit as the version bump.
