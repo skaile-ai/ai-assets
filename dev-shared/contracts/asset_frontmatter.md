@@ -42,7 +42,7 @@ allowed-tools: Bash(git:*) Read Edit    # optional — agentskills.io experiment
 metadata:
   version: "1.0.0"
   author: skaile                        # optional — omit for monorepo-owned assets
-  tags: [keyword1, keyword2]            # searchable; used by skaile catalog and routing
+  tags: [keyword1, keyword2]            # searchable; used by skaile search and routing
   stage: alpha | beta | stable
   source: CF | SAXE | MERGED | MIGRATED # lineage tracking; omit for new skills
   requires:                             # dependency declarations

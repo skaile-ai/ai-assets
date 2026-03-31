@@ -20,7 +20,7 @@ skaile skill list dev-conceptualization
 
 ```bash
 # Register this folder as a resource (once)
-skaile resource add <path-to-ai-resources> ai-resources
+skaile repo add <path-to-ai-resources> ai-resources
 
 # Browse everything interactively
 skaile explore ai-resources

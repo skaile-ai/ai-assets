@@ -31,17 +31,17 @@ Never guess what skills exist. Always query the catalog. The catalog is the grou
 Before any catalog operations, ensure `ai-resources` is registered as a source:
 
 ```bash
-skaile resource list
+skaile repo list
 ```
 
 If `ai-resources` is not listed, register it:
 ```bash
-skaile resource add <path-to-ai-resources> ai-resources
+skaile repo add <path-to-ai-resources> ai-resources
 ```
 
 To sync after changes:
 ```bash
-skaile resource sync ai-resources
+skaile repo sync ai-resources
 ```
 
 ---
@@ -52,11 +52,11 @@ skaile resource sync ai-resources
 
 ```bash
 # Show full catalog
-skaile catalog
+skaile search
 
 # Filter by kind
-skaile catalog skill
-skaile catalog agent
+skaile search skill
+skaile search agent
 
 # Interactive fuzzy explorer (for humans at a terminal)
 skaile explore
@@ -108,10 +108,10 @@ Deploy targets:
 
 ```bash
 # Sync all registered resources
-skaile resource sync
+skaile repo sync
 
 # Sync a specific resource
-skaile resource sync <name>
+skaile repo sync <name>
 ```
 
 ### Goal: List what's installed
@@ -133,7 +133,7 @@ skaile remove <kind> <name>
 
 ### "What skills are available for research?"
 ```bash
-skaile catalog skill research
+skaile search skill research
 ```
 
 ### "Install and deploy a skill for Claude Code"
@@ -144,7 +144,7 @@ skaile add <name>
 
 ### "Check if all dependencies are met after a sync"
 ```bash
-skaile resource sync ai-resources
+skaile repo sync ai-resources
 skaile doctor
 ```
 
@@ -174,7 +174,7 @@ Installed assets are deployed to agent config directories (e.g. `~/.claude/skill
 
 - Do not read or write `~/.skaile/assets/` directly — always go through `skaile` commands
 - Do not install assets from untrusted sources without user confirmation
-- Always run `skaile resource sync` before presenting catalog results if the user is looking for recently added skills
+- Always run `skaile repo sync` before presenting catalog results if the user is looking for recently added skills
 
 ## Related Skills
 

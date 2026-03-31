@@ -134,7 +134,7 @@ uvx mcp2cli --mcp https://mcp.example.com/sse --search "task"
 uvx mcp2cli @myapi --list
 ```
 
-## Integration with skaile resource management
+## Integration with skaile repo management
 
 mcp2cli can also be managed as an external resource via the `skaile` CLI. This is useful for:
 
@@ -146,17 +146,17 @@ mcp2cli can also be managed as an external resource via the `skaile` CLI. This i
 
 ```bash
 # Register the upstream repo
-skaile resource add https://github.com/knowsuchagency/mcp2cli mcp2cli
+skaile repo add https://github.com/knowsuchagency/mcp2cli mcp2cli
 
 # Sync to discover any skills shipped with mcp2cli
-skaile resource sync mcp2cli
+skaile repo sync mcp2cli
 ```
 
 ### Check for updates
 
 ```bash
 # See if your cached clone is behind the remote
-skaile resource status mcp2cli
+skaile repo status mcp2cli
 
 # Compare your fork against upstream
 skaile contrib compare mcp2cli
@@ -172,7 +172,7 @@ skaile contrib additions mcp2cli
 skaile contrib sync-with-stash mcp2cli
 
 # Or re-sync and re-index
-skaile resource sync mcp2cli
+skaile repo sync mcp2cli
 ```
 
 ### Contribute changes back
