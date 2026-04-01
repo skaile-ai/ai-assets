@@ -28,32 +28,20 @@ CF and Saxe variants coexist under `cf/` and `saxe/` subdirectories. Quality ski
 
 ## Skill Groups
 
-### Pipeline Gates (wired into orchestrators)
-
-| Skill | When It Runs | What It Evaluates | Output |
-|-------|-------------|-------------------|--------|
-| `eval-concept/` | After skaileup-conceptualization Blueprint phase | Concept completeness, clarity, traceability | `_concept/eval-concept.json` |
-| `eval-feature/` | After each feature group in skaileup-implementation | Implementation vs. acceptance criteria + screen specs | `_implementation/eval-feature/{group}.json` |
-| `eval-product/` | After all feature groups approved | Whole product vs. goals + graded design (0–10 per dimension) | `_implementation/eval-product.json` |
-| `eval-code/` | scaffold / feature / full checkpoints | Build, tests, logic/security/UI audit (parallel sub-agents) | `_implementation/eval-code.json` |
-
-### Test Generation (TDD support, used by skaileup-implementation)
-
-| Skill | Purpose |
-|-------|---------|
-| `test-plan/` | Generate test plan from concept features before implementation |
-| `test-unit/` | Generate unit test files per feature spec (TDD red phase) |
-| `test-integration/` | Generate integration tests for API endpoints and cross-feature flows |
-
-### Standalone Tools (ad-hoc use outside pipeline)
-
-| Skill | Purpose |
-|-------|---------|
-| `audit/` | Static code analysis on demand (outside pipeline gates) |
-| `e2e/` | Browser-based E2E test suite (CI or manual verification) |
-| `ready/` | Pre-flight readiness check before manual E2E runs |
-| `sync/` | Cross-reference repair in `_concept/` when links break |
-| `compile-validators/` | Compile validator scripts from SKILL.md rule blocks |
+| Group | Purpose | When to Use |
+|-------|---------|-------------|
+| `eval-concept/` | Concept completeness + clarity gate | After skaileup-conceptualization, before build starts |
+| `eval-feature/` | Implementation vs. concept (per feature group) | After each feature group in skaileup-implementation |
+| `eval-product/` | Whole product vs. goals (graded design criteria) | After all feature groups approved, before release |
+| `eval-code/` | Build, test suite, parallel logic/security/UI audit | scaffold/feature/full scope checkpoints |
+| `test-plan/` | Test plan generation from concept features | After concept complete, before implementation |
+| `test-unit/` | Unit test generation from feature specs | During TDD implementation per feature |
+| `test-integration/` | Integration tests (API + DB + cross-feature flows) | After feature groups, before product eval |
+| `audit/` | Ad-hoc static code audit (standalone use) | On-demand outside pipeline gates |
+| `ready/` | Pre-flight readiness check (standalone use) | Before manual E2E testing |
+| `e2e/` | Browser-based E2E test suite (standalone use) | On-demand or CI |
+| `sync/` | Cross-reference repair in _concept/ | When concept cross-refs break |
+| `compile-validators/` | Compile validator scripts from SKILL.md rules | Tooling maintenance |
 
 ## Conventions
 
