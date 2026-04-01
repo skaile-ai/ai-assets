@@ -13,7 +13,7 @@ metadata:
     - "scaffold"
     - "foundation"
     - "features"
-    - "verify"
+    - "evaluate"
     - "journey"
   source: "MERGED"
   prerequisites:
@@ -35,6 +35,9 @@ metadata:
         gate: hard
         description: "Screen specs required for feature page implementation"
         min_entries: 1
+      - path: "_concept/eval-concept.json"
+        gate: hard
+        description: "Concept must pass eval-concept before implementation begins — run skaileup-conceptualization orchestrator first"
     inputs_optional:
       - id: complexity_tier
         label: "Project complexity (controls checkpoint frequency and testing depth)"
@@ -113,6 +116,7 @@ This delivers a working end-to-end flow early and reduces integration surprises.
 - `_concept/3_blueprint/1_techstack/stack.md`
 - `_concept/3_blueprint/3_datamodel/model.json`
 - `_concept/2_experience/3_screens/` (at least one screen)
+- `_concept/eval-concept.json` (concept must pass eval-concept — run skaileup-conceptualization orchestrator first)
 
 ## Context Budget
 
@@ -160,7 +164,6 @@ REFERENCES
   skaileup-shared/contracts/iron_laws.md           — non-negotiable constraints
   skaileup-shared/contracts/golden_principles.md   — entity naming and structure rules
   references/output_templates.md     — plan presentation, completion messages
-  references/auto_review.md          — feature auto-approval criteria
 
 MUST  create or resume PLANS.md before any work
 MUST  follow phase order — no skipping phases
@@ -173,7 +176,7 @@ NEVER skip feature group approval checkpoints
 NEVER implement features out of journey order without user consent
 NEVER modify _concept/ files — concept is read-only
 NEVER force-push or rewrite git history
-NEVER continue after failed verification without fixing issues
+NEVER continue after failed eval-code or eval-product without fixing issues or explicit user acceptance
 
 EMIT [implement] started run_id=<uuid> app=<app-name> features=<count>
 
@@ -350,7 +353,7 @@ STEP 6: Implement feature groups / journeys
       - Single-feature fallback: implement-feature can also receive one feature_id
     - On completion: page tests + all feature tests pass
     - Run ALL E2E tests to catch regressions
-    - DO feature_auto_review per feature
+    - CALL eval_feature_gate(feature_group=<group-name>, app_url=<dev-server-url>)
     - DO update_progress
     EMIT [implement] feature_complete feature=<group>/<feature> tests=<count>
 
@@ -380,7 +383,7 @@ STEP 8: UAT
     > "Try [action] and see if [expected result]."
   - Walk through journeys using browser skill (navigate, screenshot, show user)
   - Record: pass/fail, user comments
-  OUTPUT _implementation/verification/reports/uat-report.json
+  OUTPUT _implementation/uat-report.json
     { journeys: [...], overall: "pass|fail", iteration: 1 }
 
   IF any journey fails or needs changes
@@ -399,22 +402,33 @@ STEP 8: UAT
   DO log_learnings
   EMIT [implement] uat_complete journeys=N passed=P failed=F
 
-# ── Phase 4: Final Verification ────────────────────────────────────
+# ── Phase 4: Product Evaluation ────────────────────────────────────
 
-STEP 9: Verify
-  - RUN verify sub-skill (full-stack verification gate)
-  - DO update_progress
+STEP 9: Run eval-code (full scope) as a fresh sub-agent
+  DISPATCH eval-code, scope=full
+  READ _implementation/eval-code.json after completion
+
+  IF eval-code verdict = "fail"
+    - Show blocking_issues to user
+    - Re-enter Phase 2 for affected features
+    - Re-run eval-code after fixes
+
+STEP 10: Run eval-product as a fresh sub-agent
+  DISPATCH eval-product, app_url=<dev-server-url>
+  READ _implementation/eval-product.json after completion
+
+  IF eval-product verdict = "needs_iteration"
+    - Show improvement_priorities to user (ranked)
+    - User decides which to address
+    - Re-enter Phase 2 for selected items
+    - Re-dispatch eval-product after iteration
+
+  DO update_progress
   EMIT [implement] completed run_id=<uuid> features=<count> e2e_tests=<count>
 
 CHECKPOINT final_verification
-  > "Your app is fully built and verified!
-  > Users can: [list top 3-5 capabilities in plain language]
-  > All N features implemented and tested.
-  >
-  > Technical details (if interested):
-  >   E2E tests: N passing, Build: passed, Verification: PASS
-  >
-  > Approve the final state."
+  Gate: both eval-code and eval-product must pass (or user explicitly accepts warnings)
+  User sees: eval-code verdict + eval-product verdict + all improvement priorities
   DO log_learnings
   - On approval: present completion summary (see references/output_templates.md)
   - Final commit: "chore: mark implementation complete in PLANS.md"
@@ -431,23 +445,30 @@ PROCEDURE update_progress
   - Update progress.json with new status and timestamp
   - Commit: "chore: update implementation progress"
 
-PROCEDURE feature_auto_review
-  - Check the subagent's status code (see skaileup-shared/contracts/agent_patterns.md Implementer Status Report)
-  - IF status is DONE:
-    - Check all criteria in references/auto_review.md
-    - IF all pass → auto-approve, log approval_method: "auto" in progress.json
-    - ELSE → escalate to human with failing checks highlighted
-  - IF status is DONE_WITH_CONCERNS:
-    - Log concerns in _implementation/decisions.md
-    - Check auto_review criteria
-    - IF all pass → auto-approve, log approval_method: "auto_with_concerns"
-    - ELSE → escalate to human with concerns AND failing checks highlighted
-  - IF status is NEEDS_CONTEXT:
-    - Surface the specific question to the user (standalone message)
-    - Resume the feature after answer is received
-  - IF status is BLOCKED:
-    - Route: context → surface question to user; escalate-model → note in decisions.md; decompose → break task and re-dispatch
-    - Log block reason in _implementation/decisions.md
+PROCEDURE eval_feature_gate(feature_group, app_url)
+  DISPATCH eval-feature as a FRESH sub-agent (new context — not this agent)
+    Inputs: feature_group=<group-name>, app_url=<app_url>
+  WAIT for eval-feature to write _implementation/eval-feature/{group}.json
+
+  READ _implementation/eval-feature/{group}.json
+
+  IF verdict = "approved"
+    - Update progress.json: group approved
+    - RETURN approved
+
+  IF verdict = "needs_revision"
+    - Pass revision_instructions to implement-feature sub-agent
+    - Re-run implement-feature for this group with the instructions
+    - revision_cycle += 1
+    - IF revision_cycle >= 3: ESCALATE to user
+    - ELSE: CALL eval_feature_gate again (loop)
+    - RETURN needs_revision
+
+  IF verdict = "escalate"
+    - Show eval-feature findings to user
+    - PAUSE for user guidance
+    - Resume based on user instruction
+    - RETURN escalate
 
 CHECKLIST
   - [ ] PLANS.md created or resumed before any work
@@ -465,7 +486,7 @@ CHECKLIST
 |---|---|
 | Skipping the plan phase | Always create PLANS.md first — it defines the dependency order |
 | Feature-group-number order instead of journey order | Use stories.json hero→vital→hygiene order when available |
-| Running verification before UAT | UAT comes first — user confirms app works, then automated verification |
+| Running eval-code/eval-product before UAT | UAT comes first — user confirms app works, then eval-code and eval-product gates |
 | Not logging learnings | Append to LEARNINGS.md at every checkpoint — institutional knowledge |
 | Mixing feature code with progress-tracking commits | One commit per feature, separate commit for progress updates |
 
@@ -473,5 +494,5 @@ CHECKLIST
 
 - **Reads:** entire `_concept/` pipeline
 - **Writes:** `_implementation/` tracking, `LEARNINGS.md`
-- **Dispatches to:** `scaffold`, `foundation`, `infrastructure`, `implement-feature`, `verify`
+- **Dispatches to:** `scaffold`, `foundation`, `infrastructure`, `implement-feature`, `eval-feature`, `eval-product`, `eval-code`
 - **Called by:** user directly or automated pipeline
