@@ -25,11 +25,12 @@ metadata:
         gate: hard
         description: "Screen specs required for UI fidelity check"
         min_entries: 1
-    inputs_optional:
+    inputs_required:
       - id: feature_group
         label: "Feature group name to evaluate (from stories.json stage name)"
         type: text
         required: true
+    inputs_optional:
       - id: app_url
         label: "Running app URL"
         type: text
@@ -103,7 +104,7 @@ STEP 4: Check screen fidelity.
 
 STEP 5: Walk the user journey end-to-end.
   Follow the full user path from app entry. Do not jump to specific features.
-  Record: journey_completable — true | false | partial
+  Record: journey_completable — "true" | "false" | "partial" (string)
   Evidence: where journey succeeded or broke.
 
 STEP 6: Check regressions.

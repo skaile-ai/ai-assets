@@ -29,7 +29,9 @@ def validate(project_dir: str, group: str = None) -> ValidationResult:
         check_field(result, data, "feature_group", str)
         check_field(result, data, "acceptance_criteria", list)
         check_range(result, data, "screen_fidelity_score", 0, 100)
-        check_enum(result, data, "journey_completable", ["true", "false", "partial"])
+        jc = data.get("journey_completable")
+        if jc not in ["true", "false", "partial", True, False]:
+            result.error(f"journey_completable must be 'true', 'false', or 'partial', got: {jc!r}")
         check_field(result, data, "regression_issues", list)
         check_field(result, data, "deviations", list)
         check_enum(result, data, "verdict", ["approved", "needs_revision", "escalate"])

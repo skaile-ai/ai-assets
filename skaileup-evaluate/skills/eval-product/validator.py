@@ -39,6 +39,9 @@ def validate(project_dir: str) -> ValidationResult:
     if data.get("verdict") == "approved" and design_avg < 7:
         result.warning("verdict is 'approved' but design average is below 7.0")
 
+    if data.get("verdict") == "approved" and data.get("accessibility_score", 100) < 70:
+        result.warning("verdict is 'approved' but accessibility_score is below 70")
+
     return result
 
 if __name__ == "__main__":

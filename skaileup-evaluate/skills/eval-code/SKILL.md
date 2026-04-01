@@ -91,7 +91,9 @@ STEP 3: Run test suite (scope=feature or full).
   IF tests fail:
     Set verdict = "fail"
     Include failing test names in blocking_issues
-    Write and report, STOP.
+    Write _implementation/eval-code.json with partial results
+    Report: "[eval-code] FAIL — {n} tests failing. Fix before re-running."
+    STOP.
 
 STEP 4: Dispatch three parallel sub-agents (scope=full only).
 
