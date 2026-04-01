@@ -293,6 +293,7 @@ STEP: Dispatch eval-concept as a fresh sub-agent (separate context — not this 
 
 CHECKPOINT eval_concept
   Gate: CANNOT proceed to skaileup-implementation until eval-concept verdict = "pass"
+  IF verdict != "pass": STOP — do not display blueprint_complete message
   User sees: eval-concept scores + verdict + any remaining flags
 
 CHECKPOINT blueprint_complete
@@ -333,6 +334,8 @@ CHECKLIST
   - [ ] User approved each phase boundary
   - [ ] _concept/ files not overwritten without approval
   - [ ] LEARNINGS.md updated at checkpoints
+  - [ ] eval-concept dispatched as fresh sub-agent after Blueprint phase
+  - [ ] eval-concept verdict = "pass" before pipeline declared complete
 
 ---
 
