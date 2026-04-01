@@ -1,6 +1,6 @@
 ---
 name: skaileup-evaluate
-description: "Quality assurance pipeline: code audits, test generation (unit, integration, E2E), readiness gates, structure audits, and cross-reference repair for both concept artifacts and implementation code."
+description: "Four-round evaluation pipeline: concept completeness gate (eval-concept), per-feature implementation verification (eval-feature), whole-product goal assessment (eval-product), and code quality audit (eval-code). Also provides standalone test generation and ad-hoc audit tools."
 type: domain
 building_blocks:
   contracts: "Quality criteria, audit checklists, test structure conventions, and acceptance criteria shared across all quality skills."
@@ -28,20 +28,37 @@ CF and Saxe variants coexist under `cf/` and `saxe/` subdirectories. Quality ski
 
 ## Skill Groups
 
-| Group | Purpose |
+### Pipeline Gates (wired into orchestrators)
+
+| Skill | When It Runs | What It Evaluates | Output |
+|-------|-------------|-------------------|--------|
+| `eval-concept/` | After skaileup-conceptualization Blueprint phase | Concept completeness, clarity, traceability | `_concept/eval-concept.json` |
+| `eval-feature/` | After each feature group in skaileup-implementation | Implementation vs. acceptance criteria + screen specs | `_implementation/eval-feature/{group}.json` |
+| `eval-product/` | After all feature groups approved | Whole product vs. goals + graded design (0–10 per dimension) | `_implementation/eval-product.json` |
+| `eval-code/` | scaffold / feature / full checkpoints | Build, tests, logic/security/UI audit (parallel sub-agents) | `_implementation/eval-code.json` |
+
+### Test Generation (TDD support, used by skaileup-implementation)
+
+| Skill | Purpose |
 |-------|---------|
-| `audit/` | Static code analysis, concept structure audit, lint, code quality review |
-| `e2e/` | End-to-end browser test generation and execution |
-| `ready/` | Readiness gate — blocks progression until all criteria are met |
-| `sync/` | Cross-reference repair between concept artifacts (features ↔ screens ↔ data model) |
-| `test-unit/` | Unit test generation |
-| `test-integration/` | Integration test generation |
-| `test-plan/` | Test plan generation from concept features |
-| `compile-validators/` | Compile `_validation.json` files from skill outputs |
+| `test-plan/` | Generate test plan from concept features before implementation |
+| `test-unit/` | Generate unit test files per feature spec (TDD red phase) |
+| `test-integration/` | Generate integration tests for API endpoints and cross-feature flows |
+
+### Standalone Tools (ad-hoc use outside pipeline)
+
+| Skill | Purpose |
+|-------|---------|
+| `audit/` | Static code analysis on demand (outside pipeline gates) |
+| `e2e/` | Browser-based E2E test suite (CI or manual verification) |
+| `ready/` | Pre-flight readiness check before manual E2E runs |
+| `sync/` | Cross-reference repair in `_concept/` when links break |
+| `compile-validators/` | Compile validator scripts from SKILL.md rule blocks |
 
 ## Conventions
 
-- Quality skills are non-destructive: they report issues rather than silently fixing them
-- `sync/` skills show a diff before applying any cross-reference repairs
-- Audit skills produce structured findings with severity levels (error, warn, info)
-- Readiness gates are binary: pass or blocked (with reasons)
+- Evaluation skills are adversarial: they assume failures exist and prove correctness
+- Pipeline gate skills (`eval-*`) MUST run as fresh sub-agents, never in the same context as the generator
+- All eval skills write a JSON output file before reporting — the output file is the source of truth
+- Standalone tools (`audit`, `e2e`, `ready`, `sync`) are non-destructive and safe to run at any time
+- `sync` shows a diff before applying any cross-reference repairs
