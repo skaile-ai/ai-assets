@@ -23,7 +23,7 @@ Run a fast read-only check and display the current state of documentation covera
 Execute the script and capture its markdown output:
 
 ```bash
-bun ai-resources/skaile-development/skills/doc/scripts/doc-status.ts \
+bun ai-assets/skaile-development/skills/doc/scripts/doc-status.ts \
   --root <monorepo-root> \
   [--scope <path-prefix>] \
   --format markdown

@@ -31,7 +31,7 @@ If TARGET is not provided:
 
 ### Step 2 — Determine tiers via doc_tiers.md
 
-Read `ai-resources/skaile-development/references/doc_tiers.md` for the full decision table.
+Read `ai-assets/skaile-development/references/doc_tiers.md` for the full decision table.
 
 Quick-reference for common targets:
 

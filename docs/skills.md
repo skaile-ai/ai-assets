@@ -164,7 +164,7 @@ When executing a flow node, the runner searches for `SKILL.md` in this order:
 
 1. `<projectDir>/.claude/skills/<skillId>/SKILL.md`
 2. `<projectDir>/.omp/skills/<skillId>/SKILL.md`
-3. Walk up from `projectDir` (max 6 levels) to find `ai-resources/`:
+3. Walk up from `projectDir` (max 6 levels) to find `ai-assets/`:
    - For each domain: scan `<domain>/skills/` recursively
    - Match directory named **exactly** `<skillId>` or `cf_<skillId>`
 4. Fallback string — `"Execute skill: <skillId>"` — never hard-fails

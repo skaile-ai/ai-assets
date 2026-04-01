@@ -1,4 +1,4 @@
-# ai-resources
+# ai-assets
 
 The master library of AI agent skills, flows, and agents for the Skaile ecosystem — organized into focused domains covering conceptualization, implementation, quality, research, writing, and more.
 
@@ -20,10 +20,10 @@ skaile skill list skaileup-conceptualization
 
 ```bash
 # Register this folder as a resource (once)
-skaile repo add <path-to-ai-resources> ai-resources
+skaile repo add <path-to-ai-assets> ai-assets
 
 # Browse everything interactively
-skaile explore ai-resources
+skaile explore ai-assets
 
 # Install a skill (resolves dependencies automatically)
 skaile add <skill-name>
@@ -100,4 +100,4 @@ Then trigger from Claude Code chat using slash commands (`/concept`, `/implement
 | Build a CLI tool for a skill | `uv-cli-implementer` |
 | Browse / install from catalog | `ai-resource-navigator` |
 
-→ [Full docs](/ai-resources/)
+→ [Full docs](/ai-assets/)

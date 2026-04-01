@@ -126,7 +126,7 @@ skaile run cli-concept --project-dir ./my-project --dry-run
 skaile-agent start cli-concept --project-dir ./my-project
 ```
 
-1. Flow loaded from `ai-resources/<domain>/flows/<id>.json`
+1. Flow loaded from `ai-assets/<domain>/flows/<id>.json`
 2. `computeFlowState(flow, completedIds)` → `state.available`
 3. Runner groups available nodes by `parallel_group`
 4. Sequential nodes: one driver instance, one at a time

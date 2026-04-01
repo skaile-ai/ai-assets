@@ -85,7 +85,7 @@ Only create new pages when there is enough material (≥ 3 significant topics).
 ### 4. DOMAIN.md / SKILL.md — AI Resource Guides
 
 **Audience:** AI agents browsing the skill catalog, skill authors.
-**Location:** `ai-resources/<domain>/DOMAIN.md` or `ai-resources/<domain>/skills/<skill>/SKILL.md`
+**Location:** `ai-assets/<domain>/DOMAIN.md` or `ai-assets/<domain>/skills/<skill>/SKILL.md`
 **Purpose:** Explain what a domain/skill does, when to use it, what it reads/writes.
 
 **Update when:**

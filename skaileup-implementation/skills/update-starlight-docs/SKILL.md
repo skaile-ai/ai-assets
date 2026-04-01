@@ -62,7 +62,7 @@ WRITES
 REFERENCES
   skaileup-shared/contracts/concept_structure.md             — canonical paths
   docs/astro.config.mjs                                — sidebar structure and registered packages
-  ai-resources/skaileup-shared/contracts/doc_tracking.md    — shared tracking conventions (_sources schema, @doc: annotations, staleness protocol)
+  ai-assets/skaileup-shared/contracts/doc_tracking.md    — shared tracking conventions (_sources schema, @doc: annotations, staleness protocol)
 
 MUST  preserve existing frontmatter fields (title, description, badge, template, hero)
 MUST  only add/update _sources, _source_hash, _last_synced fields in frontmatter

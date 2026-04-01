@@ -12,7 +12,7 @@ scaffold_skill.py — Skill Builder CLI
 
 Subcommands:
   detect          Detect available skill targets from the current directory
-  list-domains    List domains inside an ai-resources folder
+  list-domains    List domains inside an ai-assets folder
   set-default     Save a target as the preferred default
   clear-default   Remove the saved default
   show-default    Print the current saved default
@@ -113,7 +113,7 @@ def _interactive_resolve_target(targets: list[dict], saved: dict | None) -> dict
 
 def _interactive_resolve_domain(ai_resources_path: Path, saved_domain: str | None) -> str | None:
     """
-    Guide the user through domain selection for an ai-resources target.
+    Guide the user through domain selection for an ai-assets target.
     Returns the domain name or None.
     """
     if not _is_tty():
@@ -163,12 +163,12 @@ def save_config(data: dict) -> None:
 # ---------------------------------------------------------------------------
 
 def find_ai_resources(start: Path) -> list[Path]:
-    """Walk up from start and search common locations for ai-resources folders."""
+    """Walk up from start and search common locations for ai-assets folders."""
     candidates: list[Path] = []
     current = start.resolve()
     # Walk upward
     for ancestor in [current, *current.parents]:
-        candidate = ancestor / "ai-resources"
+        candidate = ancestor / "ai-assets"
         if candidate.is_dir() and _looks_like_ai_resources(candidate):
             candidates.append(candidate)
     return candidates
@@ -208,12 +208,12 @@ def detect_targets(cwd: Path) -> list[dict]:
     """Detect all candidate skill targets from cwd."""
     targets = []
 
-    # ai-resources folders (walk up)
+    # ai-assets folders (walk up)
     for ar_path in find_ai_resources(cwd):
         targets.append({
-            "type": "ai-resources",
+            "type": "ai-assets",
             "path": str(ar_path),
-            "label": f"ai-resources  {ar_path}",
+            "label": f"ai-assets  {ar_path}",
             "valid": True,
         })
 
@@ -327,9 +327,9 @@ def detect(
             console.print("[dim]No target selected.[/dim]")
             return
 
-        # If ai-resources, also pick domain
+        # If ai-assets, also pick domain
         domain = selected.get("domain")
-        if selected.get("type") == "ai-resources":
+        if selected.get("type") == "ai-assets":
             domain = _interactive_resolve_domain(Path(selected["path"]), domain)
             if domain:
                 selected["domain"] = domain
@@ -350,10 +350,10 @@ def detect(
 
 @app.command(name="list-domains")
 def list_domains_cmd(
-    base_path: Path = typer.Option(..., "--base-path", "-b", help="Path to an ai-resources folder"),
+    base_path: Path = typer.Option(..., "--base-path", "-b", help="Path to an ai-assets folder"),
     output_json: bool = typer.Option(False, "--json", help="Output as JSON"),
 ) -> None:
-    """List domains available inside an ai-resources folder."""
+    """List domains available inside an ai-assets folder."""
     if not base_path.exists():
         typer.secho(f"Error: path does not exist: {base_path}", err=True, fg=typer.colors.RED)
         raise typer.Exit(1)
@@ -389,15 +389,15 @@ def list_domains_cmd(
 @app.command(name="set-default")
 def set_default(
     target_type: str = typer.Option(..., "--type", "-t",
-        help="Target type: ai-resources | local-claude | local-agents | global-claude | custom"),
+        help="Target type: ai-assets | local-claude | local-agents | global-claude | custom"),
     path: Path = typer.Option(..., "--path", "-p", help="Absolute path to the target folder"),
     domain: Optional[str] = typer.Option(None, "--domain", "-d",
-        help="Domain name (required when type is ai-resources)"),
+        help="Domain name (required when type is ai-assets)"),
 ) -> None:
     """Save a target as the preferred default for future skill scaffolding."""
-    if target_type == "ai-resources" and not domain:
+    if target_type == "ai-assets" and not domain:
         typer.secho(
-            "Error: --domain is required when type is ai-resources",
+            "Error: --domain is required when type is ai-assets",
             err=True, fg=typer.colors.RED,
         )
         raise typer.Exit(1)
@@ -455,29 +455,29 @@ def show_default(
 @app.command()
 def check(
     base_path: Optional[Path] = typer.Option(None, "--base-path", "-b",
-        help="Base path to scan (default: walk upward from cwd to find ai-resources root)"),
+        help="Base path to scan (default: walk upward from cwd to find ai-assets root)"),
     output_json: bool = typer.Option(False, "--json", help="Output as JSON"),
 ) -> None:
     """Scan all SKILL.md files and report duplicates, broken requires, and missing metadata."""
 
-    # Resolve base path: explicit > walk upward for ai-resources
+    # Resolve base path: explicit > walk upward for ai-assets
     if base_path is not None:
         scan_root = base_path.resolve()
     else:
-        # Walk upward from cwd looking for a directory named "ai-resources"
+        # Walk upward from cwd looking for a directory named "ai-assets"
         scan_root = None
         current = Path.cwd().resolve()
         for ancestor in [current, *current.parents]:
-            candidate = ancestor / "ai-resources"
+            candidate = ancestor / "ai-assets"
             if candidate.is_dir():
                 scan_root = candidate
                 break
-            if ancestor.name == "ai-resources" and ancestor.is_dir():
+            if ancestor.name == "ai-assets" and ancestor.is_dir():
                 scan_root = ancestor
                 break
         if scan_root is None:
             typer.secho(
-                "Error: could not find an 'ai-resources' directory by walking up from cwd. "
+                "Error: could not find an 'ai-assets' directory by walking up from cwd. "
                 "Use --base-path to specify one explicitly.",
                 err=True, fg=typer.colors.RED,
             )
@@ -587,12 +587,12 @@ def check(
 def create(
     skill_name: str = typer.Argument(..., help="Skill name in kebab-case"),
     description: str = typer.Argument(..., help="One-line trigger description"),
-    target_type: str = typer.Option("ai-resources", "--target-type", "-t",
-        help="ai-resources | local-claude | local-agents | global-claude | custom"),
+    target_type: str = typer.Option("ai-assets", "--target-type", "-t",
+        help="ai-assets | local-claude | local-agents | global-claude | custom"),
     base_path: Optional[Path] = typer.Option(None, "--base-path", "-b",
         help="Base path for the target (overrides saved default)"),
     domain: Optional[str] = typer.Option(None, "--domain", "-d",
-        help="Domain name (for ai-resources target)"),
+        help="Domain name (for ai-assets target)"),
     force: bool = typer.Option(False, "--force", help="Overwrite existing skill (requires explicit user confirmation)"),
 ) -> None:
     """Scaffold a new skill at the resolved target path."""
@@ -616,7 +616,7 @@ def create(
 
         if saved and not saved.get("_stale"):
             resolved_base = Path(saved["path"])
-            if target_type == "ai-resources" and domain is None:
+            if target_type == "ai-assets" and domain is None:
                 domain = saved.get("domain")
                 target_type = saved.get("type", target_type)
         elif _is_tty():
@@ -629,7 +629,7 @@ def create(
                 raise typer.Exit(1)
             resolved_base = Path(selected["path"])
             target_type = selected["type"]
-            if target_type == "ai-resources" and domain is None:
+            if target_type == "ai-assets" and domain is None:
                 domain = selected.get("domain") or _interactive_resolve_domain(resolved_base, None)
             if _inquire_confirm("Save as default for future skills?", default=True):
                 config["default_target"] = {
@@ -650,10 +650,10 @@ def create(
     resolved_base = resolved_base.resolve()
 
     # Build final skill path depending on target type
-    if target_type == "ai-resources":
+    if target_type == "ai-assets":
         if not domain:
             typer.secho(
-                "Error: --domain is required when target-type is ai-resources",
+                "Error: --domain is required when target-type is ai-assets",
                 err=True, fg=typer.colors.RED,
             )
             raise typer.Exit(1)

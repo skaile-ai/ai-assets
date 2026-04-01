@@ -13,10 +13,10 @@ metadata:
   source: "MERGED"
   prerequisites:
     reads:
-      - path: "ai-resources"
+      - path: "ai-assets"
         description: "SKILL.md files across the skill library (target skill or all skills)"
     produces:
-      - path: "ai-resources"
+      - path: "ai-assets"
         description: "validator.py files alongside each processed SKILL.md"
 ---
 
@@ -56,10 +56,10 @@ REFERENCES
 
 STEP 1: Determine scope
   IF user names a specific skill (e.g. "compile-validators journeys")
-    - Find the SKILL.md in the appropriate ai-resources/<domain>/skills/ directory
+    - Find the SKILL.md in the appropriate ai-assets/<domain>/skills/ directory
     - Compile only that skill
   ELSE IF user says "all" or gives no argument
-    - Find all SKILL.md files with MUST/NEVER/CHECKLIST rules under ai-resources/
+    - Find all SKILL.md files with MUST/NEVER/CHECKLIST rules under ai-assets/
     - Compile each one
 
 STEP 2: For each skill, read the SKILL.md
@@ -97,15 +97,15 @@ STEP 3: Classify each rule
 STEP 4: Generate validator.py
 
   **Determining sys.path depth:**
-  Skill validators live at different nesting depths within ai-resources/:
-  - Flat: `ai-resources/<domain>/skills/<skill>/validator.py` → 3 parents = `ai-resources/`
-  - Grouped: `ai-resources/<domain>/skills/<group>/<skill>/validator.py` → 4 parents = `ai-resources/`
+  Skill validators live at different nesting depths within ai-assets/:
+  - Flat: `ai-assets/<domain>/skills/<skill>/validator.py` → 3 parents = `ai-assets/`
+  - Grouped: `ai-assets/<domain>/skills/<group>/<skill>/validator.py` → 4 parents = `ai-assets/`
 
-  Count the directory depth of the skill relative to `ai-resources/` and use the
+  Count the directory depth of the skill relative to `ai-assets/` and use the
   corresponding number of parents: 3 for flat (`skills/<skill>/`), 4 for grouped
   (`skills/<group>/<skill>/`).
 
-  Read ai-resources/skaileup-shared/scripts/validator_lib.py to understand the full API.
+  Read ai-assets/skaileup-shared/scripts/validator_lib.py to understand the full API.
   Generate a Python script following this exact template:
 
   OUTPUT <skill-dir>/validator.py
@@ -190,7 +190,7 @@ STEP 5: Write checks using the validator_lib API
   v.checklist("stories.json validates against schema", lambda: (
       v.json_schema_validate(
           "_concept/2_experience/1_journeys/stories.json",
-          "ai-resources/skaileup-shared/contracts/stories_schema.json")
+          "ai-assets/skaileup-shared/contracts/stories_schema.json")
   ))
 
   # Cross-reference: every key maps to existing files
@@ -229,7 +229,7 @@ CHECKLIST
   - [ ] validator_lib.py was read for the full API
   - [ ] Every MUST/NEVER rule is either a structural check or explicitly skipped
   - [ ] Every CHECKLIST item is either a structural check or explicitly skipped
-  - [ ] Correct sys.path depth used (count parents to ai-resources/)
+  - [ ] Correct sys.path depth used (count parents to ai-assets/)
   - [ ] Generated validator runs without import or runtime errors
   - [ ] Semantic rules have clear skip reasons
   - [ ] No external dependencies used

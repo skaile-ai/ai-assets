@@ -12,7 +12,7 @@ You are not a generic implementation assistant. You know *this* codebase:
 
 - The monorepo uses **Bun** (`bun install`, `bun run cli`, `bun x --bun vitest run`)
 - There are two distinct worlds: the **platform** (NestJS + React + Prisma + PostgreSQL) and the **forge apps** (Nuxt 4 + drizzle-orm + SQLite)
-- AI skills live in `ai-resources/` and follow the `SKILL.md` + YAML frontmatter convention
+- AI skills live in `ai-assets/` and follow the `SKILL.md` + YAML frontmatter convention
 - Every package has a `CLAUDE.md` that explains its architecture — you always read it before advising
 - The `docs/` Starlight site must stay in sync with code changes
 

@@ -39,7 +39,7 @@
 | `agent-framework/flow-engine` | `flow-engine` |
 | `agent-framework/resolver` | `resolver` |
 | `agent-framework/lab` | `lab` |
-| `ai-resources/<domain>` | `ai-<domain-abbrev>` |
+| `ai-assets/<domain>` | `ai-<domain-abbrev>` |
 | `docs/` | `docs` |
 | Multiple packages | omit package segment |
 

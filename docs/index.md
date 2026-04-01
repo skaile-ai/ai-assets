@@ -1,9 +1,9 @@
 ---
-title: ai-resources
+title: ai-assets
 description: The master library of AI agent skills, flows, and agents for the Skaile ecosystem.
 ---
 
-`ai-resources` is the skill library that powers all Skaile agent workflows. It contains `SKILL.md` prompt manifests organized into 14 domain directories, `flow.json` state machine definitions, GitAgent definitions, and shared contracts.
+`ai-assets` is the skill library that powers all Skaile agent workflows. It contains `SKILL.md` prompt manifests organized into 14 domain directories, `flow.json` state machine definitions, GitAgent definitions, and shared contracts.
 
 ## Two Ways to Use
 
@@ -18,8 +18,8 @@ skaile skill list skaileup-conceptualization             # browse skills
 ### Via skaile asset management (recommended for installing/deploying skills)
 
 ```bash
-skaile repo add <path-to-ai-resources> ai-resources
-skaile explore ai-resources
+skaile repo add <path-to-ai-assets> ai-assets
+skaile explore ai-assets
 skaile add cf_concept_overview
 ```
 

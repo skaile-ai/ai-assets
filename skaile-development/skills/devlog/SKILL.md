@@ -181,7 +181,7 @@ STEP 3: Write entry
   **Why:** Developers and AI agents starting a new session had no quick way to understand
   recent changes and their implications without digging through git log.
 
-  **Affected:** `ai-resources/skaile-dev-ops`
+  **Affected:** `ai-assets/skaile-dev-ops`
 
   **Implications:** The `implement` orchestrator now triggers `devlog` automatically
   after completing work. Existing workflows are unaffected.

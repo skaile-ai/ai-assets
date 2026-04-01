@@ -34,14 +34,14 @@ metadata:
       - docs/
       - "*/README.md"
       - "*/CLAUDE.md"
-      - ai-resources/**/DOMAIN.md
-      - ai-resources/**/SKILL.md
+      - ai-assets/**/DOMAIN.md
+      - ai-assets/**/SKILL.md
     produces:
       - docs/src/content/docs/**/*.md
       - "*/README.md"
       - "*/CLAUDE.md"
-      - ai-resources/**/DOMAIN.md
-      - ai-resources/**/SKILL.md
+      - ai-assets/**/DOMAIN.md
+      - ai-assets/**/SKILL.md
 ---
 
 # doc — Skaile Dev Documentation Skill
@@ -60,7 +60,7 @@ current status without making changes.
 | README.md | `<package>/README.md` | End users | Installation, quick-start, feature overview |
 | CLAUDE.md | `<package>/CLAUDE.md` | Developers + AI agents | Architecture, conventions, environment setup |
 | Starlight docs | `docs/src/content/docs/` | All | In-depth reference (commands, API, config) |
-| DOMAIN.md / SKILL.md | `ai-resources/<domain>/` | AI agents + skill authors | Domain purpose, skill inventory, skill behavior |
+| DOMAIN.md / SKILL.md | `ai-assets/<domain>/` | AI agents + skill authors | Domain purpose, skill inventory, skill behavior |
 | _devlog | `_devlog/DEVLOG.md` | Developers | Historical record of what changed and why |
 
 ### Modes
@@ -95,7 +95,7 @@ ROLE  Documentation specialist for the skaile-dev monorepo. You understand all f
 
 REFERENCES
   skaileup-shared/contracts/doc_tracking.md          — doc tracking contract (MUST read before any operation)
-  ai-resources/skaile-development/references/doc_tiers.md  — five-tier decision table (MUST read before any operation)
+  ai-assets/skaile-development/references/doc_tiers.md  — five-tier decision table (MUST read before any operation)
 
 MUST  read `skaileup-shared/contracts/doc_tracking.md` and `references/doc_tiers.md` before starting any operation
 MUST  run the appropriate helper script first and consume its output before writing anything
@@ -120,7 +120,7 @@ NEVER remove `_sources` entries from Starlight frontmatter without confirming th
 Before any other action, read both reference files:
 
 1. `skaileup-shared/contracts/doc_tracking.md` — defines the tracking frontmatter schema and rules
-2. `ai-resources/skaile-development/references/doc_tiers.md` — the full tier decision table
+2. `ai-assets/skaile-development/references/doc_tiers.md` — the full tier decision table
 
 These govern every decision in the steps that follow.
 
@@ -133,7 +133,7 @@ to that prefix.
 
 ### Step 2: Run Helper Script
 
-Run the appropriate helper script from `ai-resources/skaile-development/skills/doc/scripts/`
+Run the appropriate helper script from `ai-assets/skaile-development/skills/doc/scripts/`
 and consume its JSON output before writing anything.
 
 | Mode | Script | Command |

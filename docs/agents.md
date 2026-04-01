@@ -3,7 +3,7 @@ title: Agents
 description: The GitAgent format — agent.yaml spec, SOUL.md, RULES.md, knowledge/, imprint assembly, and how agents are used by the runner.
 ---
 
-An **agent** in ai-resources is a [GitAgent](https://gitagent.sh) — a portable, version-controlled agent definition stored as a plain directory. The GitAgent format defines the structure and schema; the `agent-runner` assembles the definition into a system prompt (called an **imprint**) before executing a flow.
+An **agent** in ai-assets is a [GitAgent](https://gitagent.sh) — a portable, version-controlled agent definition stored as a plain directory. The GitAgent format defines the structure and schema; the `agent-runner` assembles the definition into a system prompt (called an **imprint**) before executing a flow.
 
 > [GitAgent specification on GitHub](https://github.com/gitagent/spec)
 
@@ -158,7 +158,7 @@ knowledge/doc-2.md   (priority 2)
 
 Parts are joined with `\n\n---\n\n`. Missing files are silently skipped.
 
-## Agents in ai-resources
+## Agents in ai-assets
 
 | Agent | Path | Role |
 |---|---|---|
@@ -177,9 +177,9 @@ skaile run cli-concept --project-dir ./my-project
 
 # With a different agent definition
 skaile run cli-concept --project-dir ./my-project \
-  --agent-dir ./ai-resources/skaileup-conceptualization/agents/orchestrator
+  --agent-dir ./ai-assets/skaileup-conceptualization/agents/orchestrator
 
 # Via GitAgent CLI
-gitagent run ai-resources/skaileup-conceptualization/agents/orchestrator/
-gitagent validate ai-resources/ai-asset-management/agents/skaile/
+gitagent run ai-assets/skaileup-conceptualization/agents/orchestrator/
+gitagent validate ai-assets/ai-asset-management/agents/skaile/
 ```

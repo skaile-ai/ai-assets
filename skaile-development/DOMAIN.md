@@ -19,7 +19,7 @@ the codebase — as opposed to `skaileup-implementation`, which is for building 
 
 Reach for `skaile-development` when you are:
 - Implementing a feature or fix in a skaile-dev package (platform, forge-*, CLI, agent-*)
-- Adding or modifying an AI skill or domain in `ai-resources/`
+- Adding or modifying an AI skill or domain in `ai-assets/`
 - Committing changes with structured metadata for the decision log
 - Managing git branches, worktrees, or opening PRs
 - Keeping documentation accurate after code changes

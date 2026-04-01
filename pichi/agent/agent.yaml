@@ -25,7 +25,7 @@ tags:
   - "project-workspace"
 metadata:
   repo: "bitbucket.org/ecsplico/skaile-dev"
-  canonical_path: "ai-resources/pichi/agent"
+  canonical_path: "ai-assets/pichi/agent"
   app: "forge-project"
   imprint_on_project_open: true
   stage: "alpha"

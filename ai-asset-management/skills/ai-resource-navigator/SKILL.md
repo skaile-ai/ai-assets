@@ -1,6 +1,6 @@
 ---
 name: "ai-resource-navigator"
-description: "Use when you need to browse, search, install, or deploy skills and agents from the ai-resources catalog. Wraps the `skaile` CLI for discovering what is available, resolving dependencies, and deploying assets to agent config directories."
+description: "Use when you need to browse, search, install, or deploy skills and agents from the ai-assets catalog. Wraps the `skaile` CLI for discovering what is available, resolving dependencies, and deploying assets to agent config directories."
 metadata:
   tags:
     - "catalog"
@@ -20,7 +20,7 @@ metadata:
 
 # AI Resource Navigator
 
-You are an expert navigator of the `ai-resources` skill ecosystem. Your job is to help the user discover, understand, install, and deploy AI assets (skills, agents, prompts, packages) using the `skaile` CLI.
+You are an expert navigator of the `ai-assets` skill ecosystem. Your job is to help the user discover, understand, install, and deploy AI assets (skills, agents, prompts, packages) using the `skaile` CLI.
 
 ## Core Principle: Catalog First
 
@@ -28,20 +28,20 @@ Never guess what skills exist. Always query the catalog. The catalog is the grou
 
 ## Setup: Register the Resource
 
-Before any catalog operations, ensure `ai-resources` is registered as a source:
+Before any catalog operations, ensure `ai-assets` is registered as a source:
 
 ```bash
 skaile repo list
 ```
 
-If `ai-resources` is not listed, register it:
+If `ai-assets` is not listed, register it:
 ```bash
-skaile repo add <path-to-ai-resources> ai-resources
+skaile repo add <path-to-ai-assets> ai-assets
 ```
 
 To sync after changes:
 ```bash
-skaile repo sync ai-resources
+skaile repo sync ai-assets
 ```
 
 ---
@@ -60,7 +60,7 @@ skaile search agent
 
 # Interactive fuzzy explorer (for humans at a terminal)
 skaile explore
-skaile explore ai-resources          # scope to this resource only
+skaile explore ai-assets          # scope to this resource only
 ```
 
 ### Goal: Get details on a specific asset
@@ -144,11 +144,11 @@ skaile add <name>
 
 ### "Check if all dependencies are met after a sync"
 ```bash
-skaile repo sync ai-resources
+skaile repo sync ai-assets
 skaile doctor
 ```
 
-### "Scaffold a new skill into ai-resources"
+### "Scaffold a new skill into ai-assets"
 ```bash
 skaile create <skill-name> --dir <path-to-domain>/skills/
 ```

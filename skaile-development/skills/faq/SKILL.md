@@ -79,7 +79,7 @@ Determine the target FAQ file from the context input:
 | agent-framework | `agent-framework/docs/faq.md` |
 | forge | `forge/docs/faq.md` |
 | platform | `platform/docs/faq.md` |
-| ai-resources | `ai-resources/docs/faq.md` |
+| ai-assets | `ai-assets/docs/faq.md` |
 
 If context maps to multiple areas or is ambiguous, ask the user which FAQ file to target.
 

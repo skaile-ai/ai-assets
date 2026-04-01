@@ -76,7 +76,7 @@ to build apps), this skill works on the codebase itself.
 ## When to Use
 
 - Adding a feature, fixing a bug, or refactoring in any skaile-dev package
-- Adding a new AI skill or domain to `ai-resources/`
+- Adding a new AI skill or domain to `ai-assets/`
 - Making changes that span multiple packages
 - Any task where "just do it" risks missing conventions or cross-package effects
 
@@ -133,7 +133,7 @@ STEP 1: Parse task
       - platform/frontend → React 19 + Vite + TanStack
       - agent-framework/* → agent runtime stack
       - agent-framework/asset-manager → asset management library
-      - ai-resources/<domain> → AI skill/domain
+      - ai-assets/<domain> → AI skill/domain
       - docs/ → Starlight docs site
       - agent-framework/cli → CLI tool
 
@@ -150,7 +150,7 @@ STEP 2: Load context
   | platform/frontend | React 19, Vite, TanStack, Tailwind CSS 4, Vitest | (read platform/CLAUDE.md) |
   | agent-framework/* | TypeScript, Bun, OMP | prog-expert-omp |
   | agent-framework/cli | TypeScript, Bun, Commander | (read package CLAUDE.md) |
-  | ai-resources/<domain> | Markdown, YAML (skill conventions) | (follow CLAUDE.md skill conventions) |
+  | ai-assets/<domain> | Markdown, YAML (skill conventions) | (follow CLAUDE.md skill conventions) |
   | docs/ | Astro, Starlight | (follow doc) |
   | agent-framework/cli | TypeScript, Bun | (read package CLAUDE.md) |
 

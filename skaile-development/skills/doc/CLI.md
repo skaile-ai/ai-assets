@@ -98,16 +98,16 @@ Fast read-only report of documentation coverage:
 
 ```bash
 # Check entire monorepo
-bun ai-resources/skaile-development/skills/doc/scripts/doc-status.ts --root .
+bun ai-assets/skaile-development/skills/doc/scripts/doc-status.ts --root .
 
 # Check a specific package with markdown output
-bun ai-resources/skaile-development/skills/doc/scripts/doc-status.ts \
+bun ai-assets/skaile-development/skills/doc/scripts/doc-status.ts \
   --root . \
   --scope agent-framework/cli \
   --format markdown
 
 # Check with JSON output (for programmatic use)
-bun ai-resources/skaile-development/skills/doc/scripts/doc-status.ts \
+bun ai-assets/skaile-development/skills/doc/scripts/doc-status.ts \
   --root . \
   --format json
 ```
@@ -123,15 +123,15 @@ Identify documentation gaps without writing:
 
 ```bash
 # Audit entire monorepo
-bun ai-resources/skaile-development/skills/doc/scripts/doc-audit.ts --root .
+bun ai-assets/skaile-development/skills/doc/scripts/doc-audit.ts --root .
 
 # Audit a specific package
-bun ai-resources/skaile-development/skills/doc/scripts/doc-audit.ts \
+bun ai-assets/skaile-development/skills/doc/scripts/doc-audit.ts \
   --root . \
   --scope agent-framework/core
 
 # Export audit results as JSON
-bun ai-resources/skaile-development/skills/doc/scripts/doc-audit.ts \
+bun ai-assets/skaile-development/skills/doc/scripts/doc-audit.ts \
   --root . \
   --format json
 ```
@@ -147,15 +147,15 @@ Map source files to documentation coverage (used by `write` and `update` modes):
 
 ```bash
 # Track entire monorepo
-bun ai-resources/skaile-development/skills/doc/scripts/doc-tracker.ts --root .
+bun ai-assets/skaile-development/skills/doc/scripts/doc-tracker.ts --root .
 
 # Track a specific package
-bun ai-resources/skaile-development/skills/doc/scripts/doc-tracker.ts \
+bun ai-assets/skaile-development/skills/doc/scripts/doc-tracker.ts \
   --root . \
   --scope forge/common-ui
 
 # Output raw JSON (for scripting)
-bun ai-resources/skaile-development/skills/doc/scripts/doc-tracker.ts \
+bun ai-assets/skaile-development/skills/doc/scripts/doc-tracker.ts \
   --root . \
   --format json
 ```

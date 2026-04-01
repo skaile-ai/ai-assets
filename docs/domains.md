@@ -3,7 +3,7 @@ title: Domains
 description: What a domain is, its folder structure, DOMAIN.md, and how domains relate to each other.
 ---
 
-A **domain** is a top-level folder in `ai-resources/` that groups related skills, agents, flows, prompts, and contracts by concern. Domains are the organizational unit — `arm` discovers assets by scanning within domain directories, and the runner resolves skills by walking across them.
+A **domain** is a top-level folder in `ai-assets/` that groups related skills, agents, flows, prompts, and contracts by concern. Domains are the organizational unit — `arm` discovers assets by scanning within domain directories, and the runner resolves skills by walking across them.
 
 ## Folder Structure
 
@@ -87,7 +87,7 @@ skaile skill list
 skaile skill list skaileup-conceptualization
 
 # Interactive explorer
-skaile explore ai-resources
+skaile explore ai-assets
 ```
 
 Browse per-domain skill tables in the [AI Resource Catalog](/catalog/).

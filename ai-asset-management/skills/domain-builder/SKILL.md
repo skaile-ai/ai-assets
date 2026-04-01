@@ -107,10 +107,10 @@ Run the bundled script:
 uv run scripts/scaffold_domain.py <domain-name> "<description>" [--base-path <path>]
 ```
 
-Default `--base-path` is the current working directory. To target `ai-resources/`:
+Default `--base-path` is the current working directory. To target `ai-assets/`:
 
 ```bash
-uv run scripts/scaffold_domain.py <domain-name> "<description>" --base-path ./ai-resources
+uv run scripts/scaffold_domain.py <domain-name> "<description>" --base-path ./ai-assets
 ```
 
 ### 3. Fill DOMAIN.md

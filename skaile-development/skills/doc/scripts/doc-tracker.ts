@@ -160,7 +160,7 @@ function walkDocFiles(root: string): string[] {
 		join(root, "docs/src/content/docs"),
 		...findMatchingDirs(root, "agent-framework/*/docs"),
 		...findMatchingDirs(root, "forge/*/docs"),
-		join(root, "ai-resources/docs"),
+		join(root, "ai-assets/docs"),
 	];
 
 	for (const baseDir of docGlobs) {

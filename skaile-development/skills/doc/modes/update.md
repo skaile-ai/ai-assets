@@ -75,7 +75,7 @@ For each package whose source files changed:
 
 ### Step 5 — Check AI resource docs (if applicable)
 
-If the changed source files belong to an AI skill or domain under `ai-resources/`:
+If the changed source files belong to an AI skill or domain under `ai-assets/`:
 
 - **DOMAIN.md skills table:** verify the skill name, path, description, and "when to use" are accurate. Update any row that no longer matches reality.
 - **SKILL.md:** verify descriptions, prerequisites (`reads_from`), and outputs (`produces` / `writes_to`) are accurate. Update the workflow body if the skill's behavior changed.

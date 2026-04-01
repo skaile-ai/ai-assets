@@ -20,7 +20,7 @@
 ```bash
 uv run scripts/scaffold_domain.py data-pipeline \
   "Skills for building and running ETL pipelines: ingest, transform, validate, and load structured data." \
-  --base-path ./ai-resources
+  --base-path ./ai-assets
 ```
 
 ## Result

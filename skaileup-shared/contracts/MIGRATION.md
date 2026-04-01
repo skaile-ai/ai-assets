@@ -983,9 +983,9 @@ Source: MERGED — CF + Saxe variants.
 | Skill name | `compile-validators` | **`compile-validators`** — unchanged |
 | Script path | `shared/scripts/validator_lib.py` | **`skaileup-shared/scripts/validator_lib.py`** |
 | Contract path | `shared/contracts/skill_grammar.md` | **`skaileup-shared/contracts/skill_grammar.md`** |
-| Skill paths | `skills/<category>/<skill>/` | **`ai-resources/<domain>/skills/<skill>/`** or `ai-resources/<domain>/skills/<group>/<skill>/` |
+| Skill paths | `skills/<category>/<skill>/` | **`ai-assets/<domain>/skills/<skill>/`** or `ai-assets/<domain>/skills/<group>/<skill>/` |
 | sys.path depth | `parents[3]` (fixed 3-level nesting) | **Variable** — 3 for flat skills, 4 for grouped skills |
-| JSON Schema path | `skills/shared/contracts/stories_schema.json` | **`ai-resources/skaileup-shared/contracts/stories_schema.json`** |
+| JSON Schema path | `skills/shared/contracts/stories_schema.json` | **`ai-assets/skaileup-shared/contracts/stories_schema.json`** |
 
 ---
 

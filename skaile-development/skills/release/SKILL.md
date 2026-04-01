@@ -83,7 +83,7 @@ MUST  read structured commit messages (---agent--- blocks) to auto-generate chan
 MUST  preserve existing CHANGELOG.md content — only prepend new version section
 MUST  ask for user confirmation before writing version bump
 MUST  use Keep Changelog format for CHANGELOG.md
-MUST  determine version source: bundle.yaml for ai-resources domains, package.json for code packages
+MUST  determine version source: bundle.yaml for ai-assets domains, package.json for code packages
 NEVER auto-push tags — let the user push explicitly
 NEVER tag without a clean working tree
 NEVER overwrite or truncate existing changelog entries
@@ -98,7 +98,7 @@ EMIT [release] started mode=<mode>
 IF mode = status
 
   STEP 1: Determine current version
-    - For ai-resources domains: read version from bundle.yaml
+    - For ai-assets domains: read version from bundle.yaml
     - For code packages: read version from package.json
 
   STEP 2: Find last release tag
@@ -177,7 +177,7 @@ IF mode = bump
     ```
 
   STEP 6: Update version file
-    - For ai-resources domains: update version in bundle.yaml
+    - For ai-assets domains: update version in bundle.yaml
     - For code packages: update version in package.json
 
   STEP 7: Commit

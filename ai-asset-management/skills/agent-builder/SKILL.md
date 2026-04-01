@@ -1,6 +1,6 @@
 ---
 name: agent-builder
-description: "Scaffolds and implements GitAgent definitions (agent.yaml + SOUL.md + RULES.md). Use when you need to create a new AI agent identity with model configuration, delegation rules, and composable sub-agents. Supports domain agents (ai-resources), local project agents (.claude/agents, .omp/agents), and global agents."
+description: "Scaffolds and implements GitAgent definitions (agent.yaml + SOUL.md + RULES.md). Use when you need to create a new AI agent identity with model configuration, delegation rules, and composable sub-agents. Supports domain agents (ai-assets), local project agents (.claude/agents, .omp/agents), and global agents."
 license: MIT
 compatibility: "Git required for version-controlled agent definitions"
 metadata:
@@ -38,13 +38,13 @@ Determine where the agent should be placed.
 
 | Type | Description | Agent placed at |
 |------|-------------|-----------------|
-| `ai-resources` | Domain agent in monorepo | `<ai-resources>/<domain>/agents/<agent-name>/` |
+| `ai-assets` | Domain agent in monorepo | `<ai-assets>/<domain>/agents/<agent-name>/` |
 | `local-claude` | Project-local Claude agent | `<project>/.claude/agents/<agent-name>/` |
 | `local-omp` | Project-local omp agent | `<project>/.omp/agents/<agent-name>/` |
 | `global-claude` | User-global Claude agent | `~/.claude/agents/<agent-name>/` |
 | `custom` | Any path provided by user | `<path>/<agent-name>/` |
 
-When targeting `ai-resources`, ask which domain. If no suitable domain exists, suggest creating one with `domain-builder`.
+When targeting `ai-assets`, ask which domain. If no suitable domain exists, suggest creating one with `domain-builder`.
 
 ---
 
@@ -291,4 +291,4 @@ agent-runner natively loads GitAgent directories via `buildAgentImprint()`.
 | Skill | When to invoke |
 |-------|---------------|
 | `skill-builder` | When creating a reusable skill (capability) rather than an agent (identity) |
-| `domain-builder` | When the agent needs a new domain in ai-resources |
+| `domain-builder` | When the agent needs a new domain in ai-assets |

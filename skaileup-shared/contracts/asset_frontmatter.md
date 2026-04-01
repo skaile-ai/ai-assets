@@ -2,7 +2,7 @@
 
 Canonical frontmatter definitions for the four AI asset types: **skill**, **prompt**, **agent**, **flow**.
 
-This document covers the manifest metadata of assets in `ai-resources/`. It is distinct from `frontmatter.md`, which covers YAML fields in `_concept/` output artifacts.
+This document covers the manifest metadata of assets in `ai-assets/`. It is distinct from `frontmatter.md`, which covers YAML fields in `_concept/` output artifacts.
 
 ## Design Principles
 
@@ -307,7 +307,7 @@ Flows keep `id`, `version`, `name`, `description` at root because the flow-engin
 
 ## Domain — DOMAIN.md
 
-Domain manifest for directories under `ai-resources/`. Not managed by arm but read by agents and documentation.
+Domain manifest for directories under `ai-assets/`. Not managed by arm but read by agents and documentation.
 
 ```yaml
 ---

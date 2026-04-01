@@ -6,7 +6,7 @@ description: Repository structure, skill resolution algorithm, contract inherita
 ## Repository Structure
 
 ```
-ai-resources/
+ai-assets/
 ├── ai-asset-management/    ← meta-skills + root orchestrator agent
 │   ├── agents/skaile/         ← root router agent
 │   ├── skills/                ← skill-builder, domain-builder, etc.
@@ -41,8 +41,8 @@ When the runner looks for a skill by ID, it searches:
 
 1. `<projectDir>/.claude/skills/<id>/SKILL.md`
 2. `<projectDir>/.omp/skills/<id>/SKILL.md`
-3. Walk up from `projectDir` (max 6 levels) to find `ai-resources/`
-4. For each domain directory in `ai-resources/`:
+3. Walk up from `projectDir` (max 6 levels) to find `ai-assets/`
+4. For each domain directory in `ai-assets/`:
    - Scan `<domain>/skills/` recursively
    - Match: directory name `=== id` OR `=== 'cf_' + id`
 5. Fallback string (always succeeds)
@@ -76,10 +76,10 @@ CF and SAXE variants **coexist** under the same skill directory until they are m
 
 ## Adding a Domain
 
-1. Create `ai-resources/<domain-name>/`
+1. Create `ai-assets/<domain-name>/`
 2. Add `DOMAIN.md` (name, purpose, key skills)
 3. Add `skills/` subdirectory with at least one skill
 4. Add `package.yaml` for dependency declarations (optional)
 5. If the domain has flows, add `flows/*.json`
 6. If the domain has agents, add `agents/<name>/` with `agent.yaml` + `SOUL.md`
-7. Register the domain in the root `ai-resources/README.md` domains table
+7. Register the domain in the root `ai-assets/README.md` domains table

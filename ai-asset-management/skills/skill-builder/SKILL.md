@@ -1,6 +1,6 @@
 ---
 name: skill-builder
-description: "Analyzes requirements, scaffolds directory structures, and implements new Agent skills. Use when you need to create a new agentic workflow or encapsulate custom tools into a reusable skill. Supports domain folders (ai-resources), local project skill folders (.claude/skills, .agents/skills), and global skill folders (~/.claude/skills)."
+description: "Analyzes requirements, scaffolds directory structures, and implements new Agent skills. Use when you need to create a new agentic workflow or encapsulate custom tools into a reusable skill. Supports domain folders (ai-assets), local project skill folders (.claude/skills, .agents/skills), and global skill folders (~/.claude/skills)."
 license: MIT
 compatibility: "Requires Python 3.12+ and uv for scaffold scripts"
 metadata:
@@ -68,13 +68,13 @@ This outputs JSON with:
 
 | Type | Description | Skill placed at |
 |------|-------------|-----------------|
-| `ai-resources` | Domain folder monorepo | `<ai-resources>/<domain>/skills/<skill-name>/` |
+| `ai-assets` | Domain folder monorepo | `<ai-assets>/<domain>/skills/<skill-name>/` |
 | `local-claude` | Project-local Claude skills | `<project>/.claude/skills/<skill-name>/` |
 | `local-agents` | Project-local agents folder | `<project>/.agents/skills/<skill-name>/` |
 | `global-claude` | User-global Claude skills | `~/.claude/skills/<skill-name>/` |
 | `custom` | Any path provided by user | `<path>/<skill-name>/` |
 
-**When target is `ai-resources`:** also ask which domain:
+**When target is `ai-assets`:** also ask which domain:
 ```bash
 uv run scripts/scaffold_skill.py list-domains --base-path <path>
 ```
@@ -162,4 +162,4 @@ To create a **GitAgent** (agent.yaml + SOUL.md + RULES.md) instead of a skill, u
 | Skill | When to invoke |
 |-------|---------------|
 | `uv-cli-implementer` | When building `scripts/*.py` CLI tools for agent invocation |
-| `domain-builder` | When the user wants to create a new domain in an `ai-resources` folder |
+| `domain-builder` | When the user wants to create a new domain in an `ai-assets` folder |

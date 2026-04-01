@@ -1,6 +1,6 @@
 ---
 title: Prompts
-description: What a prompt is, how it differs from a skill, and how prompts are used in ai-resources.
+description: What a prompt is, how it differs from a skill, and how prompts are used in ai-assets.
 ---
 
 A **prompt** is a reusable, standalone text fragment — a focused instruction or persona that can be injected into a larger context without being a full skill. Prompts are lighter-weight than skills: no `STEPS`, no `CHECKLIST`, no I/O declarations.
