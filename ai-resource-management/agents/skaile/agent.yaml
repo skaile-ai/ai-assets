@@ -73,7 +73,7 @@ requires:
     version: "1.0.0"
     mount: "agents/implementation"
   - name: "quality"
-    source: "../../skaileup-quality/agents/quality"
+    source: "../../skaileup-evaluate/agents/quality"
     version: "1.0.0"
     mount: "agents/quality"
   - name: "architecture"

@@ -1,8 +1,8 @@
-name: skaileup-quality
+name: skaileup-evaluate
 description: Quality assurance — audits, test generation, readiness gates, and cross-reference repair
 version: 0.1.0
 dependencies:
-  - contract:quality-contract
+  - contract:evaluate-contract
   - skill:audit
   - skill:ready
   - skill:sync

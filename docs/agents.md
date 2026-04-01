@@ -165,7 +165,7 @@ Parts are joined with `\n\n---\n\n`. Missing files are silently skipped.
 | `skaile` | `ai-resource-management/agents/skaile/` | Root orchestrator — routes by intent to domain agents |
 | `concept-orchestrator` | `skaileup-conceptualization/agents/orchestrator/` | Concept pipeline (Discovery → Blueprint) |
 | `impl-orchestrator` | `skaileup-implementation/agents/orchestrator/` | Implementation pipeline (Setup → Verify) |
-| `quality` | `skaileup-quality/agents/quality/` | Quality assurance |
+| `quality` | `skaileup-evaluate/agents/quality/` | Quality assurance |
 | `architecture` | `skaileup-architecture/agents/architecture/` | System architecture |
 | `pi` | `pichi/agent/` | Default CLI agent — focused software development assistant |
 

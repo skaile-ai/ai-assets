@@ -22,7 +22,7 @@ tags:
   - "readiness"
   - "cross-reference"
 metadata:
-  domain: "skaileup-quality"
+  domain: "skaileup-evaluate"
   skill_groups: "audit, e2e, ready, sync, test-unit, test-integration, test-plan, compile-validators"
   non_destructive: "true — reports issues and shows diffs before applying any repairs"
   stage: "alpha"

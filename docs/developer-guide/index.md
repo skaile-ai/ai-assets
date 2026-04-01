@@ -20,7 +20,7 @@ ai-resources/
 ├── skaileup-implementation/        ← same structure as skaileup-conceptualization
 ├── dev-implementation-experts-js/
 │   └── prog-expert-*/         ← each is a skill directory (no skills/ subdir)
-├── skaileup-quality/
+├── skaileup-evaluate/
 │   └── skills/
 ├── skaileup-shared/
 │   ├── contracts/             ← shared specs read by all domains

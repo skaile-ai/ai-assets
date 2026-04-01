@@ -116,7 +116,7 @@
           },
           "domain": {
             "type": "string",
-            "enum": ["skaileup-conceptualization", "skaileup-implementation", "skaileup-quality"],
+            "enum": ["skaileup-conceptualization", "skaileup-implementation", "skaileup-evaluate"],
             "description": "Domain folder containing the flow"
           },
           "label": {

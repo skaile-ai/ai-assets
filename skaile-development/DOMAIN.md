@@ -86,7 +86,7 @@ The `doc` skill covers tiers 1-4. The `devlog` skill handles the dev log tier.
 ## Relationship to Other Domains
 
 - **skaileup-implementation**: Builds apps *using* skaile (consumes `_concept/`). This domain is for the skaile codebase itself.
-- **skaileup-quality**: Full QA pipeline (audit, E2E, readiness gates). `test` here is the fast inner-loop equivalent.
+- **skaileup-evaluate**: Full QA pipeline (audit, E2E, readiness gates). `test` here is the fast inner-loop equivalent.
 - **skaileup-shared**: Shared contracts referenced by all domains. Commit spec now lives in this domain.
 
 ## Notes

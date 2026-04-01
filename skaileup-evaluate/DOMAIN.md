@@ -1,5 +1,5 @@
 ---
-name: skaileup-quality
+name: skaileup-evaluate
 description: "Quality assurance pipeline: code audits, test generation (unit, integration, E2E), readiness gates, structure audits, and cross-reference repair for both concept artifacts and implementation code."
 type: domain
 building_blocks:
@@ -12,7 +12,7 @@ building_blocks:
 stage: alpha
 ---
 
-# Dev Quality
+# Dev Evaluate
 
 This domain implements the quality layer of the development pipeline. It covers static code analysis and audits, test generation at all levels (unit, integration, E2E), concept structure validation, cross-reference repair, and readiness gating before deployment.
 

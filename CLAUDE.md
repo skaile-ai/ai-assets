@@ -18,7 +18,7 @@ skaileup-implementation/       ← setup → features → verification pipeline
 dev-implementation-experts-js/    ← JS/TS framework experts
 dev-implementation-experts-python/ ← Python experts
 dev-implementation-experts-typst/  ← Typst expert
-skaileup-quality/              ← audit, E2E, testing, readiness gates
+skaileup-evaluate/              ← audit, E2E, testing, readiness gates
 skaileup-shared/               ← merged contracts (referenced by all skills)
 skaileup-standards/            ← codebase standards discovery/injection/sync
 external/                 ← tracked third-party resources

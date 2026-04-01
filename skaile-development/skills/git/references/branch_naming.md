@@ -55,7 +55,7 @@ refactor/cli/separate-domain-parser
 docs/cli/add-resource-type-reference
 docs/cli/document-flow-commands
 skill/skaile-development/add-devlog-skill
-skill/ai-skaileup-quality/merge-cf-saxe-audit
+skill/ai-skaileup-evaluate/merge-cf-saxe-audit
 chore/bump-bun-1-4
 chore/platform-be/update-prisma
 test/forge-project/add-auth-unit-tests

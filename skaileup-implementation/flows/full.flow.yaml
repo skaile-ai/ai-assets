@@ -230,10 +230,10 @@ edges:
     type: "flow"
 next_flows:
   - id: "audit"
-    domain: "skaileup-quality"
+    domain: "skaileup-evaluate"
     label: "Audit →"
     hint: "Run static analysis and structure audit on the implemented codebase."
   - id: "e2e"
-    domain: "skaileup-quality"
+    domain: "skaileup-evaluate"
     label: "E2E Suite →"
     hint: "Run the full browser-based E2E journey test suite."

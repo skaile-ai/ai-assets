@@ -40,7 +40,7 @@ skaile add <skill-name>
 | [`dev-implementation-experts-js/`](dev-implementation-experts-js/DOMAIN.md) | Deep JS/TS expertise (Nuxt, Directus, TipTap, PrimeVue, etc.) |
 | [`dev-implementation-experts-python/`](dev-implementation-experts-python/DOMAIN.md) | Deep Python expertise (Python, Pydantic AI, Marimo) |
 | [`dev-implementation-experts-typst/`](dev-implementation-experts-typst/DOMAIN.md) | Typst document expertise + expert advisor router |
-| [`skaileup-quality/`](skaileup-quality/DOMAIN.md) | Quality assurance (audit, tests, readiness gates, sync) |
+| [`skaileup-evaluate/`](skaileup-evaluate/DOMAIN.md) | Quality assurance (audit, tests, readiness gates, sync) |
 | [`skaileup-shared/`](skaileup-shared/DOMAIN.md) | Shared contracts and docs read by all domains |
 | [`skaileup-standards/`](skaileup-standards/DOMAIN.md) | Codebase convention discovery, injection, sync |
 | [`external/`](external/DOMAIN.md) | Tracked external/third-party resources |

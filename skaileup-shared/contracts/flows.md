@@ -75,7 +75,7 @@ files at startup and building a name→path registry.
 |---|---|---|
 | Conceptualization | `skaileup-conceptualization/flows/` | `concept-only`, `prototype`, `cli-concept`, `reverse-engineer` |
 | Implementation | `skaileup-implementation/flows/` | `standard`, `full`, `cli`, `prototype` |
-| Quality | `skaileup-quality/flows/` | `audit`, `review`, `readiness` (add as needed) |
+| Quality | `skaileup-evaluate/flows/` | `audit`, `review`, `readiness` (add as needed) |
 | Schema | `skaileup-shared/flow.schema.json` | JSON Schema for all flow files |
 
 Each concept flow ends with a `next_flows` array pointing to the appropriate implementation
@@ -117,7 +117,7 @@ Each concept flow ends with a `next_flows` array pointing to the appropriate imp
   "edges": [ ... ],                  // directed execution graph
   "entry": "scaffold",               // first node to execute
   "next_flows": [                    // suggested follow-on flows shown at completion
-    { "id": "audit", "domain": "skaileup-quality", "label": "Audit →", "hint": "Run static analysis." }
+    { "id": "audit", "domain": "skaileup-evaluate", "label": "Audit →", "hint": "Run static analysis." }
   ]
 }
 ```

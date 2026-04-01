@@ -126,4 +126,4 @@ The implications line is the most important part for future readers. Write it as
 
 **Hard implications (migration required):** "Breaking change. Existing sessions are invalidated. Run `bun run migrate` before deploying. See the detailed report for step-by-step migration."
 
-**Cascading implications:** "This changes how all skills in skaileup-quality domain interpret acceptance criteria. Review the updated contract before writing new skills."
+**Cascading implications:** "This changes how all skills in skaileup-evaluate domain interpret acceptance criteria. Review the updated contract before writing new skills."

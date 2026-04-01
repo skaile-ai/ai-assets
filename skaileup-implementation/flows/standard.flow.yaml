@@ -183,6 +183,6 @@ edges:
     type: "optional"
 next_flows:
   - id: "audit"
-    domain: "skaileup-quality"
+    domain: "skaileup-evaluate"
     label: "Audit →"
     hint: "Run static analysis and structure audit on the implemented codebase."

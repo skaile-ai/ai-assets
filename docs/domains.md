@@ -54,7 +54,7 @@ stage: alpha
 
 | Type | Pattern | Examples |
 |---|---|---|
-| **Pipeline domains** | Numbered skill groups following a workflow order | `skaileup-conceptualization`, `skaileup-implementation`, `skaileup-quality` |
+| **Pipeline domains** | Numbered skill groups following a workflow order | `skaileup-conceptualization`, `skaileup-implementation`, `skaileup-evaluate` |
 | **Expert domains** | One skill per technology, no pipeline order | `dev-implementation-experts-js`, `-python`, `-typst` |
 | **Knowledge domains** | Research and content production | `knowledge-research`, `knowledge-writing` |
 | **Integration domains** | One skill per external service | `use` |
@@ -70,7 +70,7 @@ skaileup-conceptualization  →  writes _concept/
                                ↓
 skaileup-implementation     →  reads _concept/, writes code
                                ↓
-skaileup-quality            →  reads code + _concept/, writes test reports
+skaileup-evaluate            →  reads code + _concept/, writes test reports
 ```
 
 Expert domains (`dev-implementation-experts-*`) are called by `skaileup-implementation` skills via the advisor routing pattern — never invoked directly by a flow.

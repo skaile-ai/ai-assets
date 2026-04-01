@@ -1,6 +1,6 @@
 ---
-name: "quality-contract"
-description: "Shared contract for all skaileup-quality skills. Describes quality report formats, score schema, audit output structure, test file conventions, and cross-reference integrity rules."
+name: "evaluate-contract"
+description: "Shared contract for all skaileup-evaluate skills. Describes quality report formats, score schema, audit output structure, test file conventions, and cross-reference integrity rules."
 metadata:
   stage: "alpha"
   do_not_invoke: true
@@ -8,7 +8,7 @@ metadata:
 
 # Quality Domain — Shared Contract
 
-**Do not invoke directly.** This is a dependency contract — all `skaileup-quality` skills read this before operating.
+**Do not invoke directly.** This is a dependency contract — all `skaileup-evaluate` skills read this before operating.
 
 ## Scope
 
