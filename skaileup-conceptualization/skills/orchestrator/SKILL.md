@@ -34,6 +34,8 @@ metadata:
         description: "Structured concept plan tracking pipeline phases and checkpoints"
       - path: "_concept/decisions.md"
         description: "Key decisions made during the pipeline session"
+      - path: "_concept/eval-concept.json"
+        description: "Written by eval-concept sub-agent after Blueprint phase — verdict must be pass before implementation"
   user_inputs:
     dialog:
       - id: "complexity_tier"
@@ -120,6 +122,8 @@ MUST  update PLANS.md at every checkpoint
 MUST  emit observability events at every transition
 MUST  log significant decisions in _concept/decisions.md
 MUST  get user approval at phase boundaries (or auto-review if enabled)
+MUST  dispatch eval-concept as a SEPARATE sub-agent after Blueprint — never same context as this pipeline
+MUST  block proceeding to skaileup-implementation if eval-concept verdict != "pass"
 NEVER skip phase approval checkpoints
 NEVER run Experience skills before Discovery is approved
 NEVER run Blueprint skills before Experience is approved
@@ -259,6 +263,36 @@ STEP 12: Data Model
   - RUN datamodel sub-skill → _concept/3_blueprint/3_datamodel/
   - Produces: model.dbml, model.json, model.schema.json
   - DO update_progress
+
+# ── Phase 4: Concept Evaluation Gate ──────────────────────────────
+
+STEP: Dispatch eval-concept as a fresh sub-agent (separate context — not this agent)
+  - Sub-agent reads: _concept/ artifacts
+  - Sub-agent writes: _concept/eval-concept.json
+  - WAIT for eval-concept to complete
+
+  READ _concept/eval-concept.json after sub-agent finishes
+
+  IF verdict = "pass"
+    - Update PLANS.md: mark eval-concept DONE
+    - Report to user:
+      ✓ Concept evaluation passed (overall: <score>/100)
+        Ready for skaileup-implementation.
+
+  IF verdict = "needs_resolution"
+    - Display all blocking_flags with their resolutions to user
+    - PAUSE: ask user to resolve each blocking flag
+    - After user confirms fixes: re-dispatch eval-concept
+    - Repeat until verdict = "pass" (or user explicitly overrides with reason)
+
+  IF verdict = "fail"
+    - Display all flags
+    - STOP — concept requires rework
+    - Tell user which phase to re-run (add-feature or specific sub-skills)
+
+CHECKPOINT eval_concept
+  Gate: CANNOT proceed to skaileup-implementation until eval-concept verdict = "pass"
+  User sees: eval-concept scores + verdict + any remaining flags
 
 CHECKPOINT blueprint_complete
   > "Blueprint phase complete:
