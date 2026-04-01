@@ -71,7 +71,7 @@ to build apps), this skill works on the codebase itself.
 **Complexity tiers:**
 - `small` — single-file or contained change; direct implementation without full subagent dispatch
 - `standard` — multi-file change in 1–2 packages; plan + supervised dispatch
-- `large` — cross-package change or architectural work; full `dev-implementation-superpowers` pattern
+- `large` — cross-package change or architectural work; full `skaileup-implementation-superpowers` pattern
 
 ## When to Use
 
@@ -104,9 +104,9 @@ WRITES
   _devlog/DEVLOG.md                                      — devlog entry on completion
 
 REFERENCES
-  dev-shared/contracts/golden_principles.md              — naming and structure rules
-  dev-shared/contracts/iron_laws.md                      — non-negotiable constraints
-  dev-implementation-superpowers/skills/*/SKILL.md       — supervised dispatch patterns
+  skaileup-shared/contracts/golden_principles.md              — naming and structure rules
+  skaileup-shared/contracts/iron_laws.md                      — non-negotiable constraints
+  skaileup-implementation-superpowers/skills/*/SKILL.md       — supervised dispatch patterns
   skills/git/references/branch_naming.md                 — branch naming for this change
 
 MUST  read the target package(s) CLAUDE.md before writing any code
@@ -181,7 +181,7 @@ STEP 5: Build plan
     - Identify git branch name (see git/references/branch_naming.md)
     - Write skaile-plan.md
   IF complexity = large
-    - Use `brainstorm` + `write-plan` from dev-implementation-superpowers
+    - Use `brainstorm` + `write-plan` from skaileup-implementation-superpowers
     - Each task gets model tier assignment (haiku/sonnet/opus)
     - Write skaile-plan.md with full task breakdown
 
@@ -226,7 +226,7 @@ STEP 7: Execute
       EMIT [implement] task_complete task=<id>
 
   IF complexity = large
-    - Use `implement-supervised` from dev-implementation-superpowers
+    - Use `implement-supervised` from skaileup-implementation-superpowers
     - Feed it skaile-plan.md as the superpowers-plan.md equivalent
 
 EMIT [implement] implementation_done tasks=<N>

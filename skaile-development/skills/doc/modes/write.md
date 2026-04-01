@@ -116,7 +116,7 @@ If the target changes architecture, conventions, or environment variables:
 If the target is a new or updated AI skill or domain:
 - Update the `Skills` table in the domain's `DOMAIN.md`.
 - Create or update the skill's `SKILL.md` with accurate `reads_from`, `writes_to`, and workflow body.
-- Follow the SKILL.md frontmatter schema from `dev-shared/contracts/skill_template.md`.
+- Follow the SKILL.md frontmatter schema from `skaileup-shared/contracts/skill_template.md`.
 
 ### Step 9 — Delegate _devlog to devlog
 

@@ -39,7 +39,7 @@ metadata:
   routes_to:
     - "dev-implementation-experts-js (prog-expert-nuxt, prog-expert-omp, prog-expert-tiptap, ...)"
     - "dev-implementation-experts-python (prog-expert-python, prog-expert-pydanticai)"
-    - "dev-implementation-superpowers (implement-supervised, write-plan, brainstorm)"
+    - "skaileup-implementation-superpowers (implement-supervised, write-plan, brainstorm)"
   knows:
     - "skaile-dev monorepo structure (CLAUDE.md, package layout, Bun workspace)"
     - "Platform packages (NestJS + React, Prisma, tRPC, Playwright)"

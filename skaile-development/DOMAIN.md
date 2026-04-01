@@ -13,7 +13,7 @@ stage: beta
 
 Development workflow tools for working **on** the skaile-dev monorepo itself. These skills are
 for contributors implementing new features, fixing bugs, adding AI skills/domains, and maintaining
-the codebase — as opposed to `dev-implementation`, which is for building apps *using* skaile.
+the codebase — as opposed to `skaileup-implementation`, which is for building apps *using* skaile.
 
 ## When to Use This Domain
 
@@ -85,9 +85,9 @@ The `doc` skill covers tiers 1-4. The `devlog` skill handles the dev log tier.
 
 ## Relationship to Other Domains
 
-- **dev-implementation**: Builds apps *using* skaile (consumes `_concept/`). This domain is for the skaile codebase itself.
-- **dev-quality**: Full QA pipeline (audit, E2E, readiness gates). `test` here is the fast inner-loop equivalent.
-- **dev-shared**: Shared contracts referenced by all domains. Commit spec now lives in this domain.
+- **skaileup-implementation**: Builds apps *using* skaile (consumes `_concept/`). This domain is for the skaile codebase itself.
+- **skaileup-quality**: Full QA pipeline (audit, E2E, readiness gates). `test` here is the fast inner-loop equivalent.
+- **skaileup-shared**: Shared contracts referenced by all domains. Commit spec now lives in this domain.
 
 ## Notes
 

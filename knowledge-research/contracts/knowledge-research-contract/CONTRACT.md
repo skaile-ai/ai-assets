@@ -68,6 +68,6 @@ In-line citations use `[^N]` footnote format. Each findings file ends with:
 
 ## Consumption by Downstream Skills
 
-- **dev-conceptualization** reads `_research/findings/` during concept phases
+- **skaileup-conceptualization** reads `_research/findings/` during concept phases
 - **knowledge-writing** reads `_research/synthesis/report.md` as source material
 - Research output should be **self-contained** — no external URLs required to interpret findings

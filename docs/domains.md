@@ -27,7 +27,7 @@ Every domain has a `DOMAIN.md` that describes its purpose and building blocks. T
 
 ```yaml
 ---
-name: dev-conceptualization
+name: skaileup-conceptualization
 description: "Structured project concept pipeline..."
 type: domain
 building_blocks:
@@ -54,28 +54,28 @@ stage: alpha
 
 | Type | Pattern | Examples |
 |---|---|---|
-| **Pipeline domains** | Numbered skill groups following a workflow order | `dev-conceptualization`, `dev-implementation`, `dev-quality` |
+| **Pipeline domains** | Numbered skill groups following a workflow order | `skaileup-conceptualization`, `skaileup-implementation`, `skaileup-quality` |
 | **Expert domains** | One skill per technology, no pipeline order | `dev-implementation-experts-js`, `-python`, `-typst` |
 | **Knowledge domains** | Research and content production | `knowledge-research`, `knowledge-writing` |
 | **Integration domains** | One skill per external service | `use` |
 | **Meta domains** | Manage the ecosystem itself | `ai-resource-management` |
-| **Shared domains** | Reference material only, never invoked | `dev-shared` |
+| **Shared domains** | Reference material only, never invoked | `skaileup-shared` |
 
 ## How Domains Relate
 
 Domains are not isolated — they read each other's output and delegate to each other:
 
 ```
-dev-conceptualization  →  writes _concept/
+skaileup-conceptualization  →  writes _concept/
                                ↓
-dev-implementation     →  reads _concept/, writes code
+skaileup-implementation     →  reads _concept/, writes code
                                ↓
-dev-quality            →  reads code + _concept/, writes test reports
+skaileup-quality            →  reads code + _concept/, writes test reports
 ```
 
-Expert domains (`dev-implementation-experts-*`) are called by `dev-implementation` skills via the advisor routing pattern — never invoked directly by a flow.
+Expert domains (`dev-implementation-experts-*`) are called by `skaileup-implementation` skills via the advisor routing pattern — never invoked directly by a flow.
 
-`dev-shared` sits underneath all domains: its contracts define the vocabulary every other domain must follow.
+`skaileup-shared` sits underneath all domains: its contracts define the vocabulary every other domain must follow.
 
 ## Browsing Domains
 
@@ -84,7 +84,7 @@ Expert domains (`dev-implementation-experts-*`) are called by `dev-implementatio
 skaile skill list
 
 # Skills in a specific domain
-skaile skill list dev-conceptualization
+skaile skill list skaileup-conceptualization
 
 # Interactive explorer
 skaile explore ai-resources

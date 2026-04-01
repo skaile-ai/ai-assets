@@ -13,7 +13,7 @@ skaile run cli-concept --project-dir ./my-project
 
 # Browse available skills
 skaile skill list
-skaile skill list dev-conceptualization
+skaile skill list skaileup-conceptualization
 ```
 
 ## Quick Start via skaile (asset management)
@@ -34,15 +34,15 @@ skaile add <skill-name>
 | Domain | Purpose |
 |---|---|
 | [`ai-resource-management/`](ai-resource-management/DOMAIN.md) | Create skills, domains, CLI tools; navigate the catalog |
-| [`dev-architecture/`](dev-architecture/DOMAIN.md) | System architecture and AI agent integration design |
-| [`dev-conceptualization/`](dev-conceptualization/DOMAIN.md) | Project concept pipeline (brief → features → data model) |
-| [`dev-implementation/`](dev-implementation/DOMAIN.md) | Implementation pipeline (scaffold → features → verify) |
+| [`skaileup-architecture/`](skaileup-architecture/DOMAIN.md) | System architecture and AI agent integration design |
+| [`skaileup-conceptualization/`](skaileup-conceptualization/DOMAIN.md) | Project concept pipeline (brief → features → data model) |
+| [`skaileup-implementation/`](skaileup-implementation/DOMAIN.md) | Implementation pipeline (scaffold → features → verify) |
 | [`dev-implementation-experts-js/`](dev-implementation-experts-js/DOMAIN.md) | Deep JS/TS expertise (Nuxt, Directus, TipTap, PrimeVue, etc.) |
 | [`dev-implementation-experts-python/`](dev-implementation-experts-python/DOMAIN.md) | Deep Python expertise (Python, Pydantic AI, Marimo) |
 | [`dev-implementation-experts-typst/`](dev-implementation-experts-typst/DOMAIN.md) | Typst document expertise + expert advisor router |
-| [`dev-quality/`](dev-quality/DOMAIN.md) | Quality assurance (audit, tests, readiness gates, sync) |
-| [`dev-shared/`](dev-shared/DOMAIN.md) | Shared contracts and docs read by all domains |
-| [`dev-standards/`](dev-standards/DOMAIN.md) | Codebase convention discovery, injection, sync |
+| [`skaileup-quality/`](skaileup-quality/DOMAIN.md) | Quality assurance (audit, tests, readiness gates, sync) |
+| [`skaileup-shared/`](skaileup-shared/DOMAIN.md) | Shared contracts and docs read by all domains |
+| [`skaileup-standards/`](skaileup-standards/DOMAIN.md) | Codebase convention discovery, injection, sync |
 | [`external/`](external/DOMAIN.md) | Tracked external/third-party resources |
 | [`knowledge-research/`](knowledge-research/DOMAIN.md) | Deep research and paper extraction |
 | [`knowledge-writing/`](knowledge-writing/DOMAIN.md) | Content generation from research (podcasts, books) |
@@ -67,14 +67,14 @@ JSON state machine definitions in `<domain>/flows/`:
 
 | Flow ID | Domain | Description |
 |---|---|---|
-| `cli-concept` | dev-conceptualization | Concept phase for CLI tools (brief, features, tech stack, data model) |
-| `prototype` | dev-conceptualization | Full concept pipeline for quick prototypes |
-| `concept-only` | dev-conceptualization | Concept phase only (no implementation) |
-| `reverse-engineer` | dev-conceptualization | Start from an existing codebase |
-| `standard` | dev-implementation | Standard implementation pipeline |
-| `full` | dev-implementation | Full implementation with all optional steps |
-| `cli` | dev-implementation | CLI-focused implementation |
-| `prototype` | dev-implementation | Rapid prototype implementation |
+| `cli-concept` | skaileup-conceptualization | Concept phase for CLI tools (brief, features, tech stack, data model) |
+| `prototype` | skaileup-conceptualization | Full concept pipeline for quick prototypes |
+| `concept-only` | skaileup-conceptualization | Concept phase only (no implementation) |
+| `reverse-engineer` | skaileup-conceptualization | Start from an existing codebase |
+| `standard` | skaileup-implementation | Standard implementation pipeline |
+| `full` | skaileup-implementation | Full implementation with all optional steps |
+| `cli` | skaileup-implementation | CLI-focused implementation |
+| `prototype` | skaileup-implementation | Rapid prototype implementation |
 
 Run flows with:
 ```bash

@@ -213,7 +213,7 @@ EMIT [devlog] entry_written date=<date> title=<title>
 
 STEP 4: Assess if report is needed
   IF report_needed = yes OR any of these conditions:
-    - A shared contract in `dev-shared/contracts/` changed
+    - A shared contract in `skaileup-shared/contracts/` changed
     - A core architectural pattern changed (e.g., how agents dispatch, how sessions work)
     - A breaking API change affects 3+ packages
     - A new development paradigm is introduced to the monorepo

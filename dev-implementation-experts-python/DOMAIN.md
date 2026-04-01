@@ -30,9 +30,9 @@ The same routing protocol applies as in `dev-implementation-experts-js`: feature
 
 | Skill | Technology |
 |-------|-----------|
-| `dev-implementation-expert-python` | Core Python — idiomatic patterns, packaging with uv, type hints, testing |
-| `dev-implementation-expert-python-pydanticai` | Pydantic AI — AI agent framework, tool use, structured outputs |
-| `dev-implementation-expert-marimo` | Marimo — reactive Python notebooks, UI components, deployment |
+| `skaileup-implementation-expert-python` | Core Python — idiomatic patterns, packaging with uv, type hints, testing |
+| `skaileup-implementation-expert-python-pydanticai` | Pydantic AI — AI agent framework, tool use, structured outputs |
+| `skaileup-implementation-expert-marimo` | Marimo — reactive Python notebooks, UI components, deployment |
 
 ## Conventions
 

@@ -12,7 +12,7 @@ description: The master library of AI agent skills, flows, and agents for the Sk
 ```bash
 skaile flow list                                    # see what's available
 skaile run cli-concept --project-dir ./my-project  # run a flow
-skaile skill list dev-conceptualization             # browse skills
+skaile skill list skaileup-conceptualization             # browse skills
 ```
 
 ### Via skaile asset management (recommended for installing/deploying skills)
@@ -35,7 +35,7 @@ skaile add cf_concept_overview
 
 **[Domains](./domains)** — The organizational layer. Folders grouping related skills, agents, flows, and contracts by concern. Browse per-domain details in the [AI Resource Catalog](/catalog/).
 
-**Contracts** — The shared vocabulary. Specification files in `dev-shared/contracts/` that all domains reference. They define file structures, naming rules, cross-reference protocols, and mechanical constraints.
+**Contracts** — The shared vocabulary. Specification files in `skaileup-shared/contracts/` that all domains reference. They define file structures, naming rules, cross-reference protocols, and mechanical constraints.
 
 ## In This Section
 

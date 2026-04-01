@@ -52,7 +52,7 @@ Flows live at `<domain>/flows/<id>.json`. The `id` field is what you pass to `sk
   "entry": "overview",
 
   "next_flows": [
-    { "id": "cli", "domain": "dev-implementation", "label": "Implement CLI →" }
+    { "id": "cli", "domain": "skaileup-implementation", "label": "Implement CLI →" }
   ]
 }
 ```
@@ -106,7 +106,7 @@ Flow-level configuration passed to skills and the orchestrator:
 
 ```json
 "next_flows": [
-  { "id": "cli", "domain": "dev-implementation", "label": "Implement CLI →", "hint": "Scaffold the project." }
+  { "id": "cli", "domain": "skaileup-implementation", "label": "Implement CLI →", "hint": "Scaffold the project." }
 ]
 ```
 
@@ -138,20 +138,20 @@ skaile-agent start cli-concept --project-dir ./my-project
 
 | ID | Domain | Description |
 |---|---|---|
-| `cli-concept` | dev-conceptualization | Concept phase for CLI tools (brief, features, tech stack, data model) |
-| `concept-only` | dev-conceptualization | Concept phase without implementation |
-| `prototype` | dev-conceptualization | Full concept pipeline for quick prototypes |
-| `reverse-engineer` | dev-conceptualization | Start from an existing codebase |
-| `standard` | dev-implementation | Standard implementation pipeline |
-| `full` | dev-implementation | Full implementation with all optional steps |
-| `cli` | dev-implementation | CLI-focused implementation |
-| `prototype` | dev-implementation | Rapid prototype implementation |
+| `cli-concept` | skaileup-conceptualization | Concept phase for CLI tools (brief, features, tech stack, data model) |
+| `concept-only` | skaileup-conceptualization | Concept phase without implementation |
+| `prototype` | skaileup-conceptualization | Full concept pipeline for quick prototypes |
+| `reverse-engineer` | skaileup-conceptualization | Start from an existing codebase |
+| `standard` | skaileup-implementation | Standard implementation pipeline |
+| `full` | skaileup-implementation | Full implementation with all optional steps |
+| `cli` | skaileup-implementation | CLI-focused implementation |
+| `prototype` | skaileup-implementation | Rapid prototype implementation |
 
 ## Writing a New Flow
 
 1. Create `<domain>/flows/<id>.json`
 2. Required fields: `id`, `version`, `name`, `nodes`, `edges`
-3. Point `$schema` at `../../dev-shared/flow.schema.json` for validation
+3. Point `$schema` at `../../skaileup-shared/flow.schema.json` for validation
 4. Key rules:
    - Every node `id` must be unique within the flow
    - `data.skill` must match a real skill ID (or be identical to `node.id`)

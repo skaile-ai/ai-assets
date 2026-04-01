@@ -16,7 +16,7 @@ stage: alpha
 
 This domain provides deep, focused implementation expertise for JavaScript and TypeScript frameworks and libraries used in the Skaile ecosystem. Each skill is a specialist: it knows the idiomatic patterns, common pitfalls, current API surface, and integration recipes for exactly one technology.
 
-Implementation skills in `dev-implementation` route to these experts when tech-stack-specific guidance is needed. The `dev-implementation-expert-advisor` skill acts as a router — it reads the project's tech stack and delegates to the right specialists.
+Implementation skills in `skaileup-implementation` route to these experts when tech-stack-specific guidance is needed. The `skaileup-implementation-expert-advisor` skill acts as a router — it reads the project's tech stack and delegates to the right specialists.
 
 ## Building Blocks
 
@@ -30,19 +30,19 @@ Implementation skills in `dev-implementation` route to these experts when tech-s
 
 | Skill | Technology |
 |-------|-----------|
-| `dev-implementation-expert-advisor` | Router — delegates to the right expert based on tech stack |
-| `dev-implementation-expert-nuxt` | Nuxt 4 (framework, routing, SSR/SSG, modules) |
-| `dev-implementation-expert-directus` | Directus (headless CMS, data model, permissions, API) |
-| `dev-implementation-expert-tiptap` | TipTap (rich text editor, extensions, Yjs collaboration) |
-| `dev-implementation-expert-uno` | UnoCSS (atomic CSS, shortcuts, icons) |
-| `dev-implementation-expert-primevue` | PrimeVue (UI component library, theming) |
-| `dev-implementation-expert-vueuse` | VueUse (composables collection) |
-| `dev-implementation-expert-omp` | oh-my-pi agent core (AI integration, pi-agent-core) |
-| `dev-implementation-expert-una` | Una UI (Nuxt UI layer) |
-| `dev-implementation-expert-scadcn` | Shadcn-vue (component system) |
-| `dev-implementation-expert-tts-stt-integration` | Text-to-speech / speech-to-text integration |
-| `dev-implementation-expert-skill-system` | Skill system design and conventions |
-| `dev-implementation-expert-integration-ai-agents` | AI agent integration patterns |
+| `skaileup-implementation-expert-advisor` | Router — delegates to the right expert based on tech stack |
+| `skaileup-implementation-expert-nuxt` | Nuxt 4 (framework, routing, SSR/SSG, modules) |
+| `skaileup-implementation-expert-directus` | Directus (headless CMS, data model, permissions, API) |
+| `skaileup-implementation-expert-tiptap` | TipTap (rich text editor, extensions, Yjs collaboration) |
+| `skaileup-implementation-expert-uno` | UnoCSS (atomic CSS, shortcuts, icons) |
+| `skaileup-implementation-expert-primevue` | PrimeVue (UI component library, theming) |
+| `skaileup-implementation-expert-vueuse` | VueUse (composables collection) |
+| `skaileup-implementation-expert-omp` | oh-my-pi agent core (AI integration, pi-agent-core) |
+| `skaileup-implementation-expert-una` | Una UI (Nuxt UI layer) |
+| `skaileup-implementation-expert-scadcn` | Shadcn-vue (component system) |
+| `skaileup-implementation-expert-tts-stt-integration` | Text-to-speech / speech-to-text integration |
+| `skaileup-implementation-expert-skill-system` | Skill system design and conventions |
+| `skaileup-implementation-expert-integration-ai-agents` | AI agent integration patterns |
 
 ## Conventions
 

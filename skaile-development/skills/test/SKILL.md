@@ -79,7 +79,7 @@ Manages the test lifecycle for the skaile-dev monorepo. Works in two modes:
 
 ## When NOT to Use
 
-- For E2E tests in the full skaile pipeline — use `dev-quality/e2e`
+- For E2E tests in the full skaile pipeline — use `skaileup-quality/e2e`
 - For acceptance-criteria verification against `_concept/` specs — use `verify`
 
 ---
@@ -297,4 +297,4 @@ bun x --bun vitest run --coverage
 
 - **Called by:** `implement` (after each task and before finish)
 - **Calls:** none
-- **Escalates to:** `dev-quality/e2e` for full E2E suite; `dev-quality/test-unit` for spec-driven test generation
+- **Escalates to:** `skaileup-quality/e2e` for full E2E suite; `skaileup-quality/test-unit` for spec-driven test generation

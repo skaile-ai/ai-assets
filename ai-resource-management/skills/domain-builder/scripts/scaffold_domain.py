@@ -122,7 +122,7 @@ metadata:
 
 ## Scope
 
-<!-- TODO: Describe what this contract covers and what is excluded (point to dev-shared for truly cross-domain conventions). -->
+<!-- TODO: Describe what this contract covers and what is excluded (point to skaileup-shared for truly cross-domain conventions). -->
 
 ## File Structure
 

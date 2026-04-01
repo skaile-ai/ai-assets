@@ -11,21 +11,21 @@ ai-resources/
 │   ├── agents/skaile/         ← root router agent
 │   ├── skills/                ← skill-builder, domain-builder, etc.
 │   └── DOMAIN.md
-├── dev-conceptualization/
+├── skaileup-conceptualization/
 │   ├── agents/orchestrator/   ← concept pipeline agent
 │   ├── contracts/             ← domain-specific contracts
 │   ├── flows/                 ← *.json flow definitions
 │   ├── skills/                ← organized by phase (10_, 20_, 30_)
 │   └── DOMAIN.md
-├── dev-implementation/        ← same structure as dev-conceptualization
+├── skaileup-implementation/        ← same structure as skaileup-conceptualization
 ├── dev-implementation-experts-js/
 │   └── prog-expert-*/         ← each is a skill directory (no skills/ subdir)
-├── dev-quality/
+├── skaileup-quality/
 │   └── skills/
-├── dev-shared/
+├── skaileup-shared/
 │   ├── contracts/             ← shared specs read by all domains
 │   └── flow.schema.json
-├── dev-standards/
+├── skaileup-standards/
 │   └── skills/
 ├── knowledge-research/        ← skills live directly as top-level dirs
 ├── knowledge-writing/
@@ -51,10 +51,10 @@ When the runner looks for a skill by ID, it searches:
 
 ## Contract Inheritance
 
-`dev-shared/contracts/` contains authoritative definitions that all domain skills reference. The reading chain is:
+`skaileup-shared/contracts/` contains authoritative definitions that all domain skills reference. The reading chain is:
 
 ```
-SKILL.md  →  ## REFERENCES  →  dev-shared/contracts/*.md
+SKILL.md  →  ## REFERENCES  →  skaileup-shared/contracts/*.md
 ```
 
 Skills list which contracts they follow in their `REFERENCES:` section. This is a documentation/agent convention, not enforced by tooling at build time.

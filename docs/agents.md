@@ -52,7 +52,7 @@ license: MIT
 tags: [orchestrator, concept-pipeline]
 
 metadata:                        # Freeform — domain, skill paths, pipeline notes
-  domain: dev-conceptualization
+  domain: skaileup-conceptualization
   phases: "Discovery, Experience, Blueprint"
 ```
 
@@ -99,7 +99,7 @@ Declares which other agent definitions this agent depends on:
 ```yaml
 dependencies:
   - name: conceptualization
-    source: ../../dev-conceptualization/agents/orchestrator
+    source: ../../skaileup-conceptualization/agents/orchestrator
     version: 1.0.0
     mount: agents/conceptualization
 ```
@@ -163,10 +163,10 @@ Parts are joined with `\n\n---\n\n`. Missing files are silently skipped.
 | Agent | Path | Role |
 |---|---|---|
 | `skaile` | `ai-resource-management/agents/skaile/` | Root orchestrator — routes by intent to domain agents |
-| `concept-orchestrator` | `dev-conceptualization/agents/orchestrator/` | Concept pipeline (Discovery → Blueprint) |
-| `impl-orchestrator` | `dev-implementation/agents/orchestrator/` | Implementation pipeline (Setup → Verify) |
-| `quality` | `dev-quality/agents/quality/` | Quality assurance |
-| `architecture` | `dev-architecture/agents/architecture/` | System architecture |
+| `concept-orchestrator` | `skaileup-conceptualization/agents/orchestrator/` | Concept pipeline (Discovery → Blueprint) |
+| `impl-orchestrator` | `skaileup-implementation/agents/orchestrator/` | Implementation pipeline (Setup → Verify) |
+| `quality` | `skaileup-quality/agents/quality/` | Quality assurance |
+| `architecture` | `skaileup-architecture/agents/architecture/` | System architecture |
 | `pi` | `pichi/agent/` | Default CLI agent — focused software development assistant |
 
 ## Running an Agent
@@ -177,9 +177,9 @@ skaile run cli-concept --project-dir ./my-project
 
 # With a different agent definition
 skaile run cli-concept --project-dir ./my-project \
-  --agent-dir ./ai-resources/dev-conceptualization/agents/orchestrator
+  --agent-dir ./ai-resources/skaileup-conceptualization/agents/orchestrator
 
 # Via GitAgent CLI
-gitagent run ai-resources/dev-conceptualization/agents/orchestrator/
+gitagent run ai-resources/skaileup-conceptualization/agents/orchestrator/
 gitagent validate ai-resources/ai-resource-management/agents/skaile/
 ```

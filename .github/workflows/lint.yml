@@ -21,7 +21,7 @@ jobs:
           python-version: "3.12"
 
       - name: Lint concepts
-        run: python3 dev-shared/scripts/lint_concept.py
+        run: python3 skaileup-shared/scripts/lint_concept.py
 
       - name: Validate skill rules
-        run: python3 dev-shared/scripts/validate_skill_rules.py
+        run: python3 skaileup-shared/scripts/validate_skill_rules.py

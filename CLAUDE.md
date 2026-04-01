@@ -12,15 +12,15 @@ Skills are organized into domains. Each domain has a `DOMAIN.md` and contains sk
 
 ```
 ai-resource-management/   ← meta: skill/domain scaffolding, catalog navigation
-dev-architecture/         ← system architecture, AI agent design
-dev-conceptualization/    ← discovery → experience → blueprint pipeline
-dev-implementation/       ← setup → features → verification pipeline
+skaileup-architecture/         ← system architecture, AI agent design
+skaileup-conceptualization/    ← discovery → experience → blueprint pipeline
+skaileup-implementation/       ← setup → features → verification pipeline
 dev-implementation-experts-js/    ← JS/TS framework experts
 dev-implementation-experts-python/ ← Python experts
 dev-implementation-experts-typst/  ← Typst expert
-dev-quality/              ← audit, E2E, testing, readiness gates
-dev-shared/               ← merged contracts (referenced by all skills)
-dev-standards/            ← codebase standards discovery/injection/sync
+skaileup-quality/              ← audit, E2E, testing, readiness gates
+skaileup-shared/               ← merged contracts (referenced by all skills)
+skaileup-standards/            ← codebase standards discovery/injection/sync
 external/                 ← tracked third-party resources
 knowledge-research/       ← deep research, paper extraction
 knowledge-writing/        ← book/podcast generation
@@ -41,7 +41,7 @@ my-skill/
 
 ## Contracts
 
-Shared contracts live in `dev-shared/contracts/`. All skills reference these.
+Shared contracts live in `skaileup-shared/contracts/`. All skills reference these.
 
 ## How This Is Consumed
 
@@ -50,5 +50,5 @@ The skaile CLI and platform consume these at **runtime** by reading SKILL.md fil
 ## Linting
 
 ```bash
-python3 dev-shared/scripts/lint_concept.py
+python3 skaileup-shared/scripts/lint_concept.py
 ```

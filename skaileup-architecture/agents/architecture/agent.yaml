@@ -1,0 +1,27 @@
+spec_version: "0.1.0"
+name: "architecture"
+version: "1.0.0"
+description: "Architecture domain agent — produces system design documents, AI agent integration blueprints, and skill system architecture for AI-integrated applications."
+extends: "../../../ai-resource-management/agents/skaile/agent.yaml"
+model:
+  preferred: "claude-opus-4-6"
+  fallback:
+    - "claude-sonnet-4-6"
+  constraints:
+    temperature: 0.2
+    max_tokens: 8192
+delegation:
+  mode: "explicit"
+author: "skaile"
+license: "MIT"
+tags:
+  - "architecture"
+  - "system-design"
+  - "ai-agent-integration"
+  - "skill-system"
+metadata:
+  domain: "skaileup-architecture"
+  skills: "dev-architect-ai-agent-integration, skaileup-implementation-expert-skill-system"
+  produces: "Design documents, ADRs, integration blueprints"
+  feeds_into: "skaileup-implementation, skaileup-conceptualization/30_blueprint/"
+  stage: "alpha"

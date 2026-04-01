@@ -19,7 +19,7 @@ Expert skills are **passive reference libraries** — they are not invoked direc
 Each expert lives in its own directory:
 
 ```
-dev-implementation-expert-<tech>/
+skaileup-implementation-expert-<tech>/
 ├── SKILL.md                      ← Required. Agent prompt + frontmatter
 ├── recipes/                      ← Reusable implementation patterns (markdown)
 │   └── <pattern-name>.md
@@ -38,7 +38,7 @@ dev-implementation-expert-<tech>/
 
 ```yaml
 ---
-name: dev-implementation-expert-<tech>
+name: skaileup-implementation-expert-<tech>
 source: MIGRATED
 description: "Expert guidance for <tech>. Loaded automatically when <tech> is in the project stack."
 metadata:

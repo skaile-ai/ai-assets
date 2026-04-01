@@ -1,3 +1,0 @@
-# Changelog — dev-quality
-
-## [Unreleased]

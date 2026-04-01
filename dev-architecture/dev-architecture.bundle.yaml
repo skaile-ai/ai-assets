@@ -1,8 +1,0 @@
-name: dev-architecture
-description: System architecture and AI agent integration design
-version: 0.1.0
-dependencies:
-  - contract:architecture-contract
-  - skill:prog-expert-integration-ai-agents
-  - skill:prog-expert-skill-system
-  - agent:architecture

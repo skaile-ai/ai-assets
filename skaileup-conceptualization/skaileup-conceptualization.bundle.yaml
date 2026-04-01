@@ -1,0 +1,34 @@
+name: skaileup-conceptualization
+description: Structured project concept pipeline — discovery, experience design, and technical blueprint
+version: 0.1.0
+dependencies:
+  - contract:conceptualization-contract
+  - skill:orchestrator
+  - skill:overview
+  - skill:research
+  - skill:brand-visual
+  - skill:brand-behavioral
+  - skill:features
+  - skill:journeys
+  - skill:behaviors
+  - skill:screens
+  - skill:screens-technical
+  - skill:components
+  - skill:mock
+  - skill:storybook
+  - skill:storybook-setup
+  - skill:storybook-types
+  - skill:storybook-components
+  - skill:storybook-pages
+  - skill:storybook-journeys
+  - skill:techstack
+  - skill:architecture
+  - skill:datamodel
+  - skill:add-feature
+  - skill:reverse-engineer
+  - skill:review
+  - agent:concept-orchestrator
+  - flow:concept-only
+  - flow:prototype
+  - flow:cli-concept
+  - flow:reverse-engineer

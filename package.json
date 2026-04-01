@@ -4,6 +4,6 @@
   "private": true,
   "description": "Skaile AI skills, domains, contracts, and shared resources",
   "scripts": {
-    "lint": "python3 dev-shared/scripts/lint_concept.py"
+    "lint": "python3 skaileup-shared/scripts/lint_concept.py"
   }
 }

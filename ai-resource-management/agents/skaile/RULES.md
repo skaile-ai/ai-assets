@@ -6,8 +6,8 @@
 - Read existing `_concept/` artifacts before starting conceptualization or implementation work.
 - Check `pipeline.json` for dependency gates before dispatching a skill.
 - Surface blocked gates with explicit reasons before stopping.
-- Use the shared contracts in `ai-resources/dev-shared/contracts/` as the authority for all schema and naming decisions.
-- Respect `iron_laws.md` in `dev-shared/contracts/` — these are non-negotiable.
+- Use the shared contracts in `ai-resources/skaileup-shared/contracts/` as the authority for all schema and naming decisions.
+- Respect `iron_laws.md` in `skaileup-shared/contracts/` — these are non-negotiable.
 
 ## Must Never
 

@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "description": "Global agent runtime configuration. Skill catalog (per-skill metadata) lives in each flow's node data. See skaileup-shared/contracts/flows.md.",
+
+  "standalone_mode": {
+    "enabled": true,
+    "description": "When a skill is invoked directly without a flow, it checks its own requires[] gates, runs, then suggests next steps using the orchestrator."
+  },
+
+  "grounding": {
+    "skill": "research",
+    "output_folder": "_grounding/",
+    "deprecated_folder": "_research/",
+    "parallel": true,
+    "description": "Research mode runs in parallel with any pipeline step. Each skill node declares its own grounding_folder. Cross-cutting research goes to _grounding/general/."
+  },
+
+  "standards": {
+    "discover_skill": "standards-discover",
+    "inject_skill": "standards-inject",
+    "output_folder": "_standards/",
+    "description": "Standards discovery mode runs in parallel for existing codebases. Skills check _standards/ via the inject skill before making decisions."
+  },
+
+  "orchestrators": {
+    "concept": "concept-orchestrator",
+    "implementation": "implement-orchestrator"
+  }
+}

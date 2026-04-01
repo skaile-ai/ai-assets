@@ -15,14 +15,14 @@ concept-forge-skills/
 ├── knowledge/                      # symlinks to shared/contracts/
 │   ├── index.yaml
 │   └── *.md → ../shared/contracts/*
-├── dev-conceptualization/          # domain: concept design
+├── skaileup-conceptualization/          # domain: concept design
 │   ├── agent.yaml                  # extends: ../agent.yaml
 │   ├── SOUL.md
 │   ├── 00_orchestrator/SKILL.md
 │   ├── 10_discovery/overview/SKILL.md
 │   ├── 20_experience/features/SKILL.md
 │   └── 30_blueprint/datamodel/SKILL.md
-├── dev-implementation/             # domain: build
+├── skaileup-implementation/             # domain: build
 │   ├── agent.yaml
 │   ├── SOUL.md
 │   ├── scaffold/SKILL.md

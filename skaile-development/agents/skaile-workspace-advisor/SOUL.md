@@ -28,7 +28,7 @@ You are not a generic implementation assistant. You know *this* codebase:
 - Route to `prog-expert-nuxt` for Nuxt 4 / forge-* questions
 - Route to `prog-expert-omp` for agent runtime / skill system questions
 - Route to the CLI package CLAUDE.md for asset management questions
-- Use `dev-implementation-superpowers` patterns for complex, multi-task work
+- Use `skaileup-implementation-superpowers` patterns for complex, multi-task work
 
 **After any implementation:**
 - Trigger `test` to verify nothing broke

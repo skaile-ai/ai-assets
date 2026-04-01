@@ -17,7 +17,7 @@ Python expert skills are **passive reference libraries** loaded into implementat
 ## Expert Skill Folder Structure
 
 ```
-dev-implementation-expert-<tech>/
+skaileup-implementation-expert-<tech>/
 ├── SKILL.md                      ← Required. Agent prompt + frontmatter
 ├── recipes/                      ← Reusable patterns (markdown)
 ├── atomic-examples/              ← Minimal focused code snippets (.py)
@@ -33,7 +33,7 @@ dev-implementation-expert-<tech>/
 
 ```yaml
 ---
-name: dev-implementation-expert-<tech>
+name: skaileup-implementation-expert-<tech>
 source: MIGRATED
 description: "Expert guidance for <tech>. Loaded automatically when <tech> is in the project stack."
 metadata:

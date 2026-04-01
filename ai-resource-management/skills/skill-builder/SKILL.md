@@ -34,7 +34,7 @@ Generated skills follow the [Agent Skills Specification](https://agentskills.io/
 - `description` must be 1–1024 chars, include trigger keywords for agent routing
 - Main SKILL.md body should be under 500 lines; move detailed references to `references/`
 
-See `dev-shared/contracts/asset_frontmatter.md` for the full schema and `dev-shared/contracts/skill_template.md` for the scaffold template.
+See `skaileup-shared/contracts/asset_frontmatter.md` for the full schema and `skaileup-shared/contracts/skill_template.md` for the scaffold template.
 
 ## Modes of Operation
 

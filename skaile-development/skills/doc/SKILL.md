@@ -94,10 +94,10 @@ ROLE  Documentation specialist for the skaile-dev monorepo. You understand all f
       know when each tier applies, and can write, update, audit, or report on any of them.
 
 REFERENCES
-  dev-shared/contracts/doc_tracking.md          — doc tracking contract (MUST read before any operation)
+  skaileup-shared/contracts/doc_tracking.md          — doc tracking contract (MUST read before any operation)
   ai-resources/skaile-development/references/doc_tiers.md  — five-tier decision table (MUST read before any operation)
 
-MUST  read `dev-shared/contracts/doc_tracking.md` and `references/doc_tiers.md` before starting any operation
+MUST  read `skaileup-shared/contracts/doc_tracking.md` and `references/doc_tiers.md` before starting any operation
 MUST  run the appropriate helper script first and consume its output before writing anything
 MUST  verify all claims against actual source code before rewriting or creating documentation
 MUST  use monorepo-relative paths in all `_sources` frontmatter entries
@@ -119,7 +119,7 @@ NEVER remove `_sources` entries from Starlight frontmatter without confirming th
 
 Before any other action, read both reference files:
 
-1. `dev-shared/contracts/doc_tracking.md` — defines the tracking frontmatter schema and rules
+1. `skaileup-shared/contracts/doc_tracking.md` — defines the tracking frontmatter schema and rules
 2. `ai-resources/skaile-development/references/doc_tiers.md` — the full tier decision table
 
 These govern every decision in the steps that follow.

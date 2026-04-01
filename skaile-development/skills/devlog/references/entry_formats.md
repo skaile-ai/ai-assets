@@ -88,7 +88,7 @@ What else needs updating as a consequence.
 ## Related
 
 - Commit: `<hash>`
-- Contract: `dev-shared/contracts/<file>.md`
+- Contract: `skaileup-shared/contracts/<file>.md`
 - CLAUDE.md: `<package>/CLAUDE.md#<section>`
 ```
 
@@ -105,7 +105,7 @@ When a report exists, add a link line to the short entry:
 
 **Why:** ...
 
-**Affected:** `agent-framework/bridge`, `agent-framework/runner`, `dev-shared`
+**Affected:** `agent-framework/bridge`, `agent-framework/runner`, `skaileup-shared`
 
 **Implications:** Breaking change for all custom agent drivers. See migration guide.
 
@@ -126,4 +126,4 @@ The implications line is the most important part for future readers. Write it as
 
 **Hard implications (migration required):** "Breaking change. Existing sessions are invalidated. Run `bun run migrate` before deploying. See the detailed report for step-by-step migration."
 
-**Cascading implications:** "This changes how all skills in dev-quality domain interpret acceptance criteria. Review the updated contract before writing new skills."
+**Cascading implications:** "This changes how all skills in skaileup-quality domain interpret acceptance criteria. Review the updated contract before writing new skills."
