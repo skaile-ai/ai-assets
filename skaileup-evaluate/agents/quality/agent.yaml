@@ -2,7 +2,7 @@ spec_version: "0.1.0"
 name: "quality"
 version: "1.0.0"
 description: "Quality assurance domain agent — audits code and concept artifacts, generates tests at all levels, enforces readiness gates, and repairs cross-reference integrity."
-extends: "../../../ai-resource-management/agents/skaile/agent.yaml"
+extends: "../../../ai-asset-management/agents/skaile/agent.yaml"
 model:
   preferred: "claude-opus-4-6"
   fallback:

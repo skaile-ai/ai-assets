@@ -33,7 +33,7 @@ skaile add <skill-name>
 
 | Domain | Purpose |
 |---|---|
-| [`ai-resource-management/`](ai-resource-management/DOMAIN.md) | Create skills, domains, CLI tools; navigate the catalog |
+| [`ai-asset-management/`](ai-asset-management/DOMAIN.md) | Create skills, domains, CLI tools; navigate the catalog |
 | [`skaileup-architecture/`](skaileup-architecture/DOMAIN.md) | System architecture and AI agent integration design |
 | [`skaileup-conceptualization/`](skaileup-conceptualization/DOMAIN.md) | Project concept pipeline (brief → features → data model) |
 | [`skaileup-implementation/`](skaileup-implementation/DOMAIN.md) | Implementation pipeline (scaffold → features → verify) |

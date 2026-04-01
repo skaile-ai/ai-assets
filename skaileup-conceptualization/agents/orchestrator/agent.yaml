@@ -2,7 +2,7 @@ spec_version: "0.1.0"
 name: "concept-orchestrator"
 version: "1.0.0"
 description: "Concept pipeline orchestrator — runs the full conceptualization pipeline (Discovery → Experience → Blueprint) with checkpoint approvals, PLANS.md tracking, and auto-review mode. Wraps the CF and Saxe orchestrator skill variants."
-extends: "../../../ai-resource-management/agents/skaile/agent.yaml"
+extends: "../../../ai-asset-management/agents/skaile/agent.yaml"
 model:
   preferred: "claude-opus-4-6"
   fallback:

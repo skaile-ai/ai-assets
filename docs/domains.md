@@ -58,7 +58,7 @@ stage: alpha
 | **Expert domains** | One skill per technology, no pipeline order | `dev-implementation-experts-js`, `-python`, `-typst` |
 | **Knowledge domains** | Research and content production | `knowledge-research`, `knowledge-writing` |
 | **Integration domains** | One skill per external service | `use` |
-| **Meta domains** | Manage the ecosystem itself | `ai-resource-management` |
+| **Meta domains** | Manage the ecosystem itself | `ai-asset-management` |
 | **Shared domains** | Reference material only, never invoked | `skaileup-shared` |
 
 ## How Domains Relate

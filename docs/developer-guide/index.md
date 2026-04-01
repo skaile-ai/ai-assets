@@ -7,7 +7,7 @@ description: Repository structure, skill resolution algorithm, contract inherita
 
 ```
 ai-resources/
-├── ai-resource-management/    ← meta-skills + root orchestrator agent
+├── ai-asset-management/    ← meta-skills + root orchestrator agent
 │   ├── agents/skaile/         ← root router agent
 │   ├── skills/                ← skill-builder, domain-builder, etc.
 │   └── DOMAIN.md

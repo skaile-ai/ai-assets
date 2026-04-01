@@ -2,7 +2,7 @@ spec_version: "0.1.0"
 name: "architecture"
 version: "1.0.0"
 description: "Architecture domain agent — produces system design documents, AI agent integration blueprints, and skill system architecture for AI-integrated applications."
-extends: "../../../ai-resource-management/agents/skaile/agent.yaml"
+extends: "../../../ai-asset-management/agents/skaile/agent.yaml"
 model:
   preferred: "claude-opus-4-6"
   fallback:

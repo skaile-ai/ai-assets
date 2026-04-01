@@ -211,7 +211,7 @@ Priority determines load order. Default priority is 99. Keep total knowledge und
 
 ### Extending a parent agent
 ```yaml
-extends: ../../../ai-resource-management/agents/skaile/agent.yaml
+extends: ../../../ai-asset-management/agents/skaile/agent.yaml
 ```
 Child inherits model/delegation/runtime. Override any field locally.
 

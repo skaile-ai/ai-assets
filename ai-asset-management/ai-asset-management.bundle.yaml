@@ -1,4 +1,4 @@
-name: ai-resource-management
+name: ai-asset-management
 description: Meta-management of the skill ecosystem — scaffolding, catalog navigation, and CLI tool building
 version: 0.1.0
 dependencies:

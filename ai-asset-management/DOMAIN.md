@@ -1,5 +1,5 @@
 ---
-name: ai-resource-management
+name: ai-asset-management
 description: "Meta-management of the skill ecosystem: scaffolding new skills, domains, and CLI tools, and navigating the asset catalog."
 type: domain
 building_blocks:

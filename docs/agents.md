@@ -30,7 +30,7 @@ version: 1.0.0                   # Semver
 description: >
   Concept pipeline orchestrator — runs Discovery → Experience → Blueprint.
 
-extends: ../../../ai-resource-management/agents/skaile/agent.yaml  # optional inheritance
+extends: ../../../ai-asset-management/agents/skaile/agent.yaml  # optional inheritance
 
 model:
   preferred: claude-opus-4-6     # Primary model
@@ -162,7 +162,7 @@ Parts are joined with `\n\n---\n\n`. Missing files are silently skipped.
 
 | Agent | Path | Role |
 |---|---|---|
-| `skaile` | `ai-resource-management/agents/skaile/` | Root orchestrator — routes by intent to domain agents |
+| `skaile` | `ai-asset-management/agents/skaile/` | Root orchestrator — routes by intent to domain agents |
 | `concept-orchestrator` | `skaileup-conceptualization/agents/orchestrator/` | Concept pipeline (Discovery → Blueprint) |
 | `impl-orchestrator` | `skaileup-implementation/agents/orchestrator/` | Implementation pipeline (Setup → Verify) |
 | `quality` | `skaileup-evaluate/agents/quality/` | Quality assurance |
@@ -181,5 +181,5 @@ skaile run cli-concept --project-dir ./my-project \
 
 # Via GitAgent CLI
 gitagent run ai-resources/skaileup-conceptualization/agents/orchestrator/
-gitagent validate ai-resources/ai-resource-management/agents/skaile/
+gitagent validate ai-resources/ai-asset-management/agents/skaile/
 ```

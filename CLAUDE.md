@@ -11,7 +11,7 @@ All AI skills, domains, contracts, and shared resources for the Skaile ecosystem
 Skills are organized into domains. Each domain has a `DOMAIN.md` and contains skills, contracts, and docs.
 
 ```
-ai-resource-management/   ← meta: skill/domain scaffolding, catalog navigation
+ai-asset-management/   ← meta: skill/domain scaffolding, catalog navigation
 skaileup-architecture/         ← system architecture, AI agent design
 skaileup-conceptualization/    ← discovery → experience → blueprint pipeline
 skaileup-implementation/       ← setup → features → verification pipeline
