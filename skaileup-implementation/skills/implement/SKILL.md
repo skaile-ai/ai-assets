@@ -413,9 +413,21 @@ STEP 9: Run eval-code (full scope) as a fresh sub-agent
     - Re-enter Phase 2 for affected features
     - Re-run eval-code after fixes
 
+  IF eval-code verdict = "warn"
+    - Show medium findings to user
+    - User decides which (if any) to address before continuing
+
 STEP 10: Run eval-product as a fresh sub-agent
   DISPATCH eval-product, app_url=<dev-server-url>
   READ _implementation/eval-product.json after completion
+
+  IF eval-product verdict = "approved"
+    - Proceed to CHECKPOINT final_verification
+
+  IF eval-product verdict = "fail"
+    - Show blocking issues (goals not achieved, performance blockers) to user
+    - STOP — product requires rework; re-enter Phase 2 for affected features
+    - Re-dispatch eval-product after iteration
 
   IF eval-product verdict = "needs_iteration"
     - Show improvement_priorities to user (ranked)
@@ -427,7 +439,7 @@ STEP 10: Run eval-product as a fresh sub-agent
   EMIT [implement] completed run_id=<uuid> features=<count> e2e_tests=<count>
 
 CHECKPOINT final_verification
-  Gate: both eval-code and eval-product must pass (or user explicitly accepts warnings)
+  Gate: eval-code verdict = pass (or warn with user acceptance) AND eval-product verdict = approved (or user explicitly accepts remaining priorities)
   User sees: eval-code verdict + eval-product verdict + all improvement priorities
   DO log_learnings
   - On approval: present completion summary (see references/output_templates.md)
