@@ -108,6 +108,7 @@ READS
 WRITES
   _concept/PLANS.md                  — durable concept plan (phases + skill checkboxes)
   _concept/decisions.md              — dated concept decisions
+  _concept/eval-concept.json         — verdict written by eval-concept sub-agent
   LEARNINGS.md                       — learnings journal (append)
 
 REFERENCES
