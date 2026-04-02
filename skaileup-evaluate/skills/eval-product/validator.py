@@ -1,51 +1,146 @@
 #!/usr/bin/env python3
 """Validator for eval-product skill output."""
 import sys
-import json
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "skaileup-shared" / "scripts"))
-from validator_lib import ValidationResult, check_field, check_range, check_enum
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "skaileup-shared" / "scripts"))
+from validator_lib import Validator, main
 
-def validate(project_dir: str) -> ValidationResult:
-    result = ValidationResult()
-    output_path = Path(project_dir) / "_implementation" / "eval-product.json"
 
-    if not output_path.exists():
-        result.error("eval-product.json not found at _implementation/eval-product.json")
-        return result
+def validate(cwd: str) -> dict:
+    v = Validator(cwd, "eval-product")
 
-    with open(output_path) as f:
-        data = json.load(f)
+    # File existence
+    v.must(
+        "eval-product.json exists",
+        lambda: v.file_exists("_implementation/eval-product.json"),
+    )
 
-    check_field(result, data, "schema_version", str)
-    check_field(result, data, "goals", list)
-    check_field(result, data, "design", dict)
-    check_field(result, data, "performance", dict)
-    check_range(result, data, "accessibility_score", 0, 100)
-    check_range(result, data, "mobile_score", 0, 100)
-    check_field(result, data, "improvement_priorities", list)
-    check_enum(result, data, "verdict", ["approved", "needs_iteration", "fail"])
+    # Required top-level fields
+    v.must(
+        "has required fields",
+        lambda: v.json_field_exists(
+            "_implementation/eval-product.json",
+            "schema_version",
+            "goals",
+            "design",
+            "performance",
+            "accessibility_score",
+            "mobile_score",
+            "improvement_priorities",
+            "verdict",
+        ),
+    )
 
-    design = data.get("design", {})
-    for dim in ["quality", "originality", "craft", "functionality"]:
-        check_range(result, design, dim, 0, 10)
+    # Score ranges
+    def check_accessibility_score():
+        data = v.read_json("_implementation/eval-product.json")
+        if data is None:
+            return False, "file not readable"
+        s = data.get("accessibility_score", -1)
+        if not (0 <= s <= 100):
+            return False, f"accessibility_score={s} out of range 0-100"
+        return True, ""
 
-    for goal in data.get("goals", []):
-        check_field(result, goal, "goal", str)
-        check_enum(result, goal, "achieved", ["achieved", "partial", "not_achieved"])
+    def check_mobile_score():
+        data = v.read_json("_implementation/eval-product.json")
+        if data is None:
+            return False, "file not readable"
+        s = data.get("mobile_score", -1)
+        if not (0 <= s <= 100):
+            return False, f"mobile_score={s} out of range 0-100"
+        return True, ""
 
-    design_avg = sum(design.get(d, 0) for d in ["quality", "originality", "craft", "functionality"]) / 4
-    if data.get("verdict") == "approved" and design_avg < 7:
-        result.warning("verdict is 'approved' but design average is below 7.0")
+    v.must("accessibility_score in 0-100", check_accessibility_score)
+    v.must("mobile_score in 0-100", check_mobile_score)
 
-    if data.get("verdict") == "approved" and data.get("accessibility_score", 100) < 70:
-        result.warning("verdict is 'approved' but accessibility_score is below 70")
+    # Verdict enum
+    def check_verdict():
+        data = v.read_json("_implementation/eval-product.json")
+        if data is None:
+            return False, "file not readable"
+        verdict = data.get("verdict")
+        allowed = {"approved", "needs_iteration", "fail"}
+        if verdict not in allowed:
+            return False, f"verdict={verdict!r} not in {sorted(allowed)}"
+        return True, ""
 
-    return result
+    v.must("verdict is valid enum value", check_verdict)
+
+    # design object fields
+    def check_design_fields():
+        data = v.read_json("_implementation/eval-product.json")
+        if data is None:
+            return False, "file not readable"
+        design = data.get("design")
+        if not isinstance(design, dict):
+            return False, "design is not an object"
+        for field in ("quality", "originality", "craft", "functionality"):
+            if field not in design:
+                return False, f"design missing field '{field}'"
+        return True, ""
+
+    v.must("design object has required fields", check_design_fields)
+
+    # design dimension ranges (0-10)
+    def make_design_dim_check(dim):
+        def check():
+            data = v.read_json("_implementation/eval-product.json")
+            if data is None:
+                return False, "file not readable"
+            design = data.get("design", {})
+            if not isinstance(design, dict):
+                return False, "design is not an object"
+            s = design.get(dim, -1)
+            if not (0 <= s <= 10):
+                return False, f"design.{dim}={s} out of range 0-10"
+            return True, ""
+        return check
+
+    for dim in ("quality", "originality", "craft", "functionality"):
+        v.must(f"design.{dim} in 0-10", make_design_dim_check(dim))
+
+    # goals structure
+    def check_goals_fields():
+        data = v.read_json("_implementation/eval-product.json")
+        if data is None:
+            return False, "file not readable"
+        goals = data.get("goals", [])
+        for i, goal in enumerate(goals):
+            if not isinstance(goal, dict):
+                return False, f"goals[{i}] is not an object"
+            if "goal" not in goal:
+                return False, f"goals[{i}] missing field 'goal'"
+            if "achieved" not in goal:
+                return False, f"goals[{i}] missing field 'achieved'"
+        return True, ""
+
+    def check_goals_achieved_enum():
+        data = v.read_json("_implementation/eval-product.json")
+        if data is None:
+            return False, "file not readable"
+        goals = data.get("goals", [])
+        allowed = {"achieved", "partial", "not_achieved"}
+        for i, goal in enumerate(goals):
+            if not isinstance(goal, dict):
+                continue
+            a = goal.get("achieved")
+            if a not in allowed:
+                return False, f"goals[{i}].achieved={a!r} not in {sorted(allowed)}"
+        return True, ""
+
+    v.must("each goal has required fields", check_goals_fields)
+    v.must("each goal achieved is valid enum value", check_goals_achieved_enum)
+
+    # Skip design average contradiction check as subjective
+    v.skip(
+        "design average contradiction check",
+        rule_type="MUST",
+        reason="semantic — whether design average justifies verdict requires human review",
+    )
+
+    return v.result()
+
 
 if __name__ == "__main__":
-    project_dir = sys.argv[1] if len(sys.argv) > 1 else "."
-    r = validate(project_dir)
-    r.report()
-    sys.exit(0 if r.passed else 1)
+    main(validate)

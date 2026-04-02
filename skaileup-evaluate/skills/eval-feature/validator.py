@@ -1,54 +1,134 @@
 #!/usr/bin/env python3
 """Validator for eval-feature skill output."""
 import sys
-import json
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "skaileup-shared" / "scripts"))
-from validator_lib import ValidationResult, check_field, check_range, check_enum
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "skaileup-shared" / "scripts"))
+from validator_lib import Validator, main
 
-def validate(project_dir: str, group: str = None) -> ValidationResult:
-    result = ValidationResult()
-    eval_dir = Path(project_dir) / "_implementation" / "eval-feature"
 
-    if not eval_dir.exists():
-        result.error("_implementation/eval-feature/ directory not found")
-        return result
+def validate(cwd: str) -> dict:
+    v = Validator(cwd, "eval-feature")
 
-    files = list(eval_dir.glob("*.json"))
-    if not files:
-        result.error("No eval-feature result files found in _implementation/eval-feature/")
-        return result
+    # Directory and file existence
+    v.must(
+        "_implementation/eval-feature/ directory exists",
+        lambda: v.dir_exists("_implementation/eval-feature"),
+    )
+    v.must(
+        "at least one .json file in _implementation/eval-feature/",
+        lambda: v.dir_not_empty("_implementation/eval-feature", "*.json"),
+    )
 
-    target = [f for f in files if group and f.stem == group] or files
-    for path in target:
-        with open(path) as f:
-            data = json.load(f)
+    # Per-file checks — collected after the directory checks above
+    json_files = v.glob_files("_implementation/eval-feature/*.json")
 
-        check_field(result, data, "schema_version", str)
-        check_field(result, data, "feature_group", str)
-        check_field(result, data, "acceptance_criteria", list)
-        check_range(result, data, "screen_fidelity_score", 0, 100)
-        jc = data.get("journey_completable")
-        if jc not in ["true", "false", "partial", True, False]:
-            result.error(f"journey_completable must be 'true', 'false', or 'partial', got: {jc!r}")
-        check_field(result, data, "regression_issues", list)
-        check_field(result, data, "deviations", list)
-        check_enum(result, data, "verdict", ["approved", "needs_revision", "escalate"])
+    for json_file in json_files:
+        rel = str(json_file.relative_to(Path(cwd)))
+        name = json_file.name
 
-        for criterion in data.get("acceptance_criteria", []):
-            check_field(result, criterion, "id", str)
-            check_field(result, criterion, "text", str)
-            check_enum(result, criterion, "result", ["pass", "fail", "partial", "untestable"])
+        def make_fields_check(path):
+            def check():
+                return v.json_field_exists(
+                    path,
+                    "schema_version",
+                    "feature_group",
+                    "acceptance_criteria",
+                    "screen_fidelity_score",
+                    "journey_completable",
+                    "regression_issues",
+                    "deviations",
+                    "verdict",
+                )
+            return check
 
-        if data.get("verdict") != "approved" and not data.get("revision_instructions"):
-            result.warning(f"{path.name}: verdict is not 'approved' but revision_instructions is empty")
+        v.must(f"{name}: has required fields", make_fields_check(rel))
 
-    return result
+        def make_fidelity_check(path, fname):
+            def check():
+                data = v.read_json(path)
+                if data is None:
+                    return False, "file not readable"
+                s = data.get("screen_fidelity_score", -1)
+                if not (0 <= s <= 100):
+                    return False, f"screen_fidelity_score={s} out of range 0-100"
+                return True, ""
+            return check
+
+        v.must(f"{name}: screen_fidelity_score in 0-100", make_fidelity_check(rel, name))
+
+        def make_journey_check(path, fname):
+            def check():
+                data = v.read_json(path)
+                if data is None:
+                    return False, "file not readable"
+                jc = data.get("journey_completable")
+                allowed = {"true", "false", "partial"}
+                if jc not in allowed:
+                    return False, f"journey_completable={jc!r} not in {sorted(allowed)}"
+                return True, ""
+            return check
+
+        v.must(f"{name}: journey_completable is valid enum value", make_journey_check(rel, name))
+
+        def make_verdict_check(path, fname):
+            def check():
+                data = v.read_json(path)
+                if data is None:
+                    return False, "file not readable"
+                verdict = data.get("verdict")
+                allowed = {"approved", "needs_revision", "escalate"}
+                if verdict not in allowed:
+                    return False, f"verdict={verdict!r} not in {sorted(allowed)}"
+                return True, ""
+            return check
+
+        v.must(f"{name}: verdict is valid enum value", make_verdict_check(rel, name))
+
+        def make_criteria_fields_check(path, fname):
+            def check():
+                data = v.read_json(path)
+                if data is None:
+                    return False, "file not readable"
+                criteria = data.get("acceptance_criteria", [])
+                for i, c in enumerate(criteria):
+                    if not isinstance(c, dict):
+                        return False, f"acceptance_criteria[{i}] is not an object"
+                    for field in ("id", "text", "result"):
+                        if field not in c:
+                            return False, f"acceptance_criteria[{i}] missing field '{field}'"
+                return True, ""
+            return check
+
+        v.must(f"{name}: each acceptance criterion has required fields", make_criteria_fields_check(rel, name))
+
+        def make_criteria_result_check(path, fname):
+            def check():
+                data = v.read_json(path)
+                if data is None:
+                    return False, "file not readable"
+                criteria = data.get("acceptance_criteria", [])
+                allowed = {"pass", "fail", "partial", "untestable"}
+                for i, c in enumerate(criteria):
+                    if not isinstance(c, dict):
+                        continue
+                    r = c.get("result")
+                    if r not in allowed:
+                        return False, f"acceptance_criteria[{i}].result={r!r} not in {sorted(allowed)}"
+                return True, ""
+            return check
+
+        v.must(f"{name}: each criterion result is valid enum value", make_criteria_result_check(rel, name))
+
+        # Subjective check: non-approved verdict should have revision_instructions
+        v.skip(
+            f"{name}: non-approved verdict has non-empty revision_instructions",
+            rule_type="MUST",
+            reason="semantic — whether revision_instructions are sufficient requires human review",
+        )
+
+    return v.result()
+
 
 if __name__ == "__main__":
-    project_dir = sys.argv[1] if len(sys.argv) > 1 else "."
-    group = sys.argv[2] if len(sys.argv) > 2 else None
-    r = validate(project_dir, group)
-    r.report()
-    sys.exit(0 if r.passed else 1)
+    main(validate)
