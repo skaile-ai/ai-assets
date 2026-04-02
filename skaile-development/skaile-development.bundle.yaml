@@ -10,4 +10,4 @@ dependencies:
   - skill:notify
   - skill:faq
   - skill:release
-  - agent:skaile-workspace-advisor
+  - agent:skaile-development

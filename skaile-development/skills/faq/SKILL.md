@@ -51,7 +51,7 @@ metadata:
 ## Overview
 
 Evaluates whether a resolved question belongs in the FAQ documentation for the relevant
-monorepo area. Called by the `skaile-workspace-advisor` after resolving a question during
+monorepo area. Called by the `skaile-development` after resolving a question during
 a normal conversation. Proposes the entry to the user before writing.
 
 ## When to Use
@@ -210,6 +210,6 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** `skaile-workspace-advisor` (after resolving questions about any monorepo area)
+- **Called by:** `skaile-development` (after resolving questions about any monorepo area)
 - **Calls:** none
 - **Related:** `doc` (general documentation), `devlog` (change log)

@@ -3,7 +3,7 @@ name: skaile-development
 description: "Day-to-day development workflow for the skaile-dev monorepo — implementing changes, structured commits, git operations, documentation sync, test management, and development log maintenance."
 type: domain
 building_blocks:
-  agents: "skaile-workspace-advisor — routes tasks to the right skills, maintains session context."
+  agents: "skaile-development — routes tasks to the right skills, maintains session context."
   skills: "git, implement, test, doc, devlog, notify, faq, release"
   references: "Branch naming, worktree patterns, test runner map, devlog entry formats, documentation tier roles, commit spec."
 stage: beta
@@ -30,7 +30,7 @@ Reach for `skaile-development` when you are:
 
 | Folder | Purpose |
 |--------|---------|
-| `agents/` | `skaile-workspace-advisor` — routes to skills, orchestrates multi-step work |
+| `agents/` | `skaile-development` — routes to skills, orchestrates multi-step work |
 | `skills/git/` | Unified git operations: commit, branch, worktree, PR, finish, sync |
 | `skills/implement/` | Monorepo-aware implementation orchestrator |
 | `skills/test/` | Test construction and execution across the monorepo |
@@ -91,6 +91,6 @@ The `doc` skill covers tiers 1-4. The `devlog` skill handles the dev log tier.
 
 ## Notes
 
-- The `skaile-workspace-advisor` agent orchestrates multi-skill workflows. For single-skill operations, call skills directly.
+- The `skaile-development` agent orchestrates multi-skill workflows. For single-skill operations, call skills directly.
 - `devlog` should run after any meaningful change. `implement` triggers it automatically.
 - Skills in this domain read `CLAUDE.md` files from affected packages before acting.

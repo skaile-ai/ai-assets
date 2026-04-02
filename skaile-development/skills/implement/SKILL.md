@@ -336,4 +336,4 @@ CHECKLIST
 
 - **Routes to:** `prog-expert-nuxt`, `prog-expert-omp`, `prog-expert-python`, `implement-supervised`
 - **Calls:** `git`, `test`, `doc`, `devlog`, `notify`
-- **Called by:** `skaile-workspace-advisor` or user directly
+- **Called by:** `skaile-development` or user directly
