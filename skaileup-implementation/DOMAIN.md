@@ -1,11 +1,11 @@
 ---
 name: skaileup-implementation
-description: "Implementation pipeline: project scaffolding, feature implementation (TDD), verification, database migrations, seed data, and utility workflows — consuming _concept/ artifacts produced by skaileup-conceptualization."
+description: "Implementation pipeline: project scaffolding, feature implementation (TDD), database migrations, seed data, and utility workflows — consuming _concept/ artifacts produced by skaileup-conceptualization."
 type: domain
 building_blocks:
   contracts: "CF and Saxe contracts for implementation structure, acceptance criteria, git workflow, and verification protocols."
   docs: "Implementation workflow guides, TDD patterns, and migration conventions."
-  skills: "Numbered skill groups (00–utilities) covering orchestration, project setup, feature implementation, verification, and utilities."
+  skills: "Numbered skill groups (00–utilities) covering orchestration, project setup, feature implementation, and utilities."
   agents: "agents/implementation/ (GitAgent spec v0.1.0)"
   prompts: "TBD"
   tools: "TBD"
@@ -14,7 +14,7 @@ stage: alpha
 
 # Dev Implementation
 
-This domain translates `_concept/` artifacts into running code. It covers the full implementation lifecycle: scaffolding a new project, implementing features test-first, running verification, applying database migrations, and generating seed data.
+This domain translates `_concept/` artifacts into running code. It covers the full implementation lifecycle: scaffolding a new project, implementing features test-first, applying database migrations, and generating seed data. Verification gates (readiness checks, E2E tests, audits) live in `skaileup-evaluate`.
 
 Skills consume the output of `skaileup-conceptualization` and produce committed, tested code. CF and Saxe variants coexist under their respective subdirectories until merged.
 
@@ -34,7 +34,6 @@ Skills consume the output of `skaileup-conceptualization` and produce committed,
 | `00_orchestrator/` | Pipeline controller | Dispatches implementation skills end-to-end |
 | `10_setup/` | Project foundation | Scaffolded project, infrastructure, base configuration |
 | `20_features/` | Feature implementation | TDD-driven feature code committed to the repo |
-| `30_verify/` | Verification | Test results, readiness assessment |
 | `utilities/` | Utility workflows | Database migrations (`cf_migrate`), seed data (`cf_seed`), scaffolding helpers (`cf_scaffold`) |
 
 ## Conventions
