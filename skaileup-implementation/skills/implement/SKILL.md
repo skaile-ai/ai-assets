@@ -249,13 +249,20 @@ CHECKPOINT plan_approval
 
 # ── Phase 1: Setup ────────────────────────────────────────────────
 
-Run the phases dispatched by the active flow.
-Each setup phase runs its sub-skill, verifies the result, and emits a checkpoint.
+Setup phases are defined by the active flow YAML. Each node in the flow maps to
+one sub-skill dispatch. For each phase node in order: RUN the mapped sub-skill,
+verify it completes successfully, then emit a checkpoint before proceeding.
 
-Tier → flow mapping (for standalone invocation without a named flow):
+When invoked standalone (no named flow context), select the flow file by tier:
   complexity_tier = small    → flows/small.flow.yaml   (scaffold+foundation consolidated)
   complexity_tier = standard → flows/standard.flow.yaml (scaffold, foundation, optional infrastructure)
   complexity_tier = complex  → flows/complex.flow.yaml  (scaffold, startup, foundation, infrastructure — all checkpointed)
+
+Read the selected flow YAML, then execute its nodes in sequence:
+  - For each node with type "skill": RUN that sub-skill as a sub-agent
+  - For each node with optional=true: check the skip condition first; if condition is false,
+    record the phase as skipped in progress.json and proceed to the next node
+  - After each node: verify the sub-skill output, update progress.json, emit checkpoint
 
 EMIT [implement] infrastructure_complete modules=<N> processes=<M>
 
