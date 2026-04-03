@@ -41,13 +41,19 @@ metadata:
         description: "Storybook page compositions as UI starting point for each page"
     produces:
       - path: "_implementation/progress.json"
-        description: "Updated feature implementation status after each page completes"
+        description: "Updated feature implementation status after each page completes. Each page entry tracks status: pending | in_progress | complete for resume support."
   user_inputs:
     dialog:
       - id: "feature_id"
         label: "Single feature to implement? (e.g., 01_user_auth/login) — leave blank for journey-first mode"
         type: "text"
         required: false
+      - id: "auto_approve_pages"
+        label: "Auto-approve per-page checkpoints? (for unattended pipeline runs)"
+        type: "boolean"
+        required: false
+        default: false
+        note: "Flow context value takes precedence if set by parent implement skill. Test-green and regression gates are never bypassed regardless of this setting."
     files: []
 ---
 
@@ -56,8 +62,10 @@ metadata:
 ## Overview
 
 Implements features using outside-in TDD at three levels:
-1. **Journey level** — write failing E2E tests for the full multi-page flow
-2. **Page level** — implement each page (delegates to `implement-feature-page`)
+1. **Journey level** — write a failing capstone E2E test for the full multi-page flow
+   (written before pages start as a contract; verified after all pages are individually green)
+2. **Page level** — each page is a vertical slice: write failing tests → implement → green gate
+   → regression gate → checkpoint → commit. Never proceed to the next page until tests pass.
 3. **Feature level** — each page sub-skill implements individual features with TDD Guard
 
 **Journey-first strategy:** features are built in user-journey order (hero →
@@ -140,7 +148,10 @@ REFERENCES
 MUST  implement journeys in stage order: hero → vital → hygiene
 MUST  write failing journey tests BEFORE implementing any pages
 MUST  deduplicate pages across journeys — implement once, verify in each
-MUST  run ALL tests after each page to catch regressions
+MUST  verify page tests are GREEN (5c) before running regression tests
+MUST  verify ALL tests pass (5d) before proceeding to the next page
+MUST  commit after each completed page (5f)
+MUST  resume from last completed page in progress.json on interrupted runs
 MUST  run spec-compliance review before code-quality review after each journey
 MUST  use populated scenario seed data by default
 MUST  use test IDs (data-testid) for element addressing in tests
@@ -214,16 +225,17 @@ STEP 3: Start journey
   $ git checkout -b feat/<journey-slug>
   EMIT [implement-feature] journey_start journey=<id> stage=<stage> pages=<N>
 
-STEP 4: Write journey E2E tests
+STEP 4: Write capstone journey E2E test
   - Create e2e/specs/journeys/<stage>-<journey-slug>.spec.<ext>
-  - Walk the FULL multi-page flow from the story map
+  - Walk the FULL multi-page flow from the story map (contract-first: declares acceptance before any pages exist)
   - Use isolated backend / test fixture for data setup
   - Reset to populated scenario by default
   - One test per story in the journey (serial mode)
   - Each test: navigate, act, assert per story acceptance_criteria
   - Use test IDs (data-testid) for element addressing
-  - All journey tests MUST FAIL at this point
-  $ git commit -m "test: write journey e2e tests for <journey-label>"
+  - All journey tests MUST FAIL at this point — that is expected and correct
+  $ git commit -m "test: write journey capstone e2e for <journey-label>"
+  NOTE: This test is verified at Step 6, NOT here. It declares intent; green gate is after all pages pass.
 
 PATTERNS (adapt to your test framework / language):
   describe('<Journey Label>', () => {
@@ -237,24 +249,59 @@ PATTERNS (adapt to your test framework / language):
     })
   })
 
-STEP 5: Implement pages
-  - For each page in this journey (skip if already implemented):
-    - RUN implement-feature-page sub-skill with:
-      - screen_spec path
-      - feature specs for this page
-      - journey context (seed data scenario)
-    - On completion: page tests + all feature tests pass
-    - Update progress.json: mark page and features as implemented
-  - After all pages: run ALL E2E tests to catch regressions
-  EMIT [implement-feature] all_tests journey=<id> total=N passed=P failed=F
+STEP 5: Implement pages — vertical slice loop
+  - Read progress.json to find last completed page (resume support)
+  - For each page in this journey (skip if progress.json marks it complete):
 
-STEP 6: Fix until journey tests pass
-  - Run journey tests specifically
-  - Diagnose integration issues (navigation, shared state, data flow)
+    STEP 5a: Write failing tests for THIS page only
+      - Write unit and/or integration tests targeting this page's features
+      - If the page is view-only, static, or redirect-only (no meaningful unit tests):
+          add a render/smoke test: it('renders without error', ...) and document
+          the reason as a comment: // no unit tests: <reason>
+      - Run tests — they MUST FAIL at this point
+      $ git commit -m "test: write failing tests for page <page-name>"
+
+    STEP 5b: Implement this page
+      - RUN implement-feature-page sub-skill with:
+          screen_spec path, feature specs for this page, journey context (seed data scenario)
+
+    STEP 5c: Page green gate
+      - Run page tests specifically
+      MUST be GREEN before proceeding to 5d
+      IF any page test is still red: diagnose and fix before continuing
+
+    STEP 5d: Regression gate
+      - Run ALL tests (all prior pages + current page)
+      MUST all pass before proceeding to 5e
+      IF any prior test regressed: diagnose and fix before continuing
+      NEVER proceed to the next page with a failing regression
+
+    STEP 5e: Per-page checkpoint
+      IF auto_approve_pages is false (default):
+        CHECKPOINT page_complete
+          > "Page '<page-name>' complete.
+          > Page tests: N passing. All prior tests: N passing.
+          > Approve to continue to the next page."
+      IF auto_approve_pages is true (flow context or dialog):
+        - Skip human approval; log auto-approval in progress.json
+        NOTE: 5c and 5d gates still apply regardless of auto_approve_pages
+
+    STEP 5f: Commit and update progress
+      - Update progress.json: mark page status = "complete"
+      $ git commit -m "feat: implement page <page-name>"
+      EMIT [implement-feature] page_complete journey=<id> page=<page-name> tests=<N>
+
+  - Repeat for each page
+
+STEP 6: Verify capstone journey E2E test
+  - Run the journey capstone E2E test written in Step 4
+  - All pages are individually green at this point — this step catches multi-page integration issues
+  - Diagnose cross-page issues (navigation, shared state, data flow between pages)
   - Fix integration issues
   - Re-run ALL tests to ensure no regressions
-    UNTIL journey tests pass AND all prior tests still pass
+    UNTIL journey capstone passes AND all prior tests still pass
     $ git commit -m "feat: complete journey <journey-label>"
+  EMIT [implement-feature] all_tests journey=<id> total=N passed=P failed=F
 
 STEP 6a: Spec compliance review (REQUIRED before quality review)
   - Read each feature spec in this journey against the actual code produced, line by line
