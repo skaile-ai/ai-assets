@@ -247,98 +247,15 @@ CHECKPOINT plan_approval
   > Approve the plan, or tell me what to modify."
   DO log_learnings
 
-# ── Phase 1: Setup (complexity-tier based) ────────────────────────
+# ── Phase 1: Setup ────────────────────────────────────────────────
 
-IF complexity_tier is small
-  STEP 3+4+5: Setup (consolidated)
-    - RUN scaffold sub-skill (creates project, initializes git, _implementation/ tracking)
-    - Verify project builds
-    - Start dev server — verify app loads (use browser skill if available)
-    - RUN foundation sub-skill (brand tokens, auth, app shell)
-    - DO update_progress
+Run the phases dispatched by the active flow.
+Each setup phase runs its sub-skill, verifies the result, and emits a checkpoint.
 
-    CHECKPOINT setup
-      > "Your app is set up, running, and branded.
-      > Approve to start building features."
-      DO log_learnings
-
-  STEP 5b: Infrastructure
-    - Skip for small tier — no custom backend by definition
-    - Set infrastructure phase to skipped in progress.json
-
-IF complexity_tier is standard
-  STEP 3+4: Scaffold and Startup (consolidated)
-    - RUN scaffold sub-skill
-    - Verify project builds
-    - Start dev server — verify app loads
-    - DO update_progress
-
-    CHECKPOINT scaffold_startup
-      > "Your project is scaffolded and running.
-      > Approve to continue with foundation."
-
-  STEP 5: Foundation
-    - RUN foundation sub-skill
-    - DO update_progress
-
-    CHECKPOINT foundation
-      > "Your app now has your brand's look and feel — colors, fonts, and layout are applied.
-      > Approve to continue."
-      DO log_learnings
-
-  STEP 5b: Infrastructure (conditional)
-    IF architecture.md exists AND custom_modules or non-standard apps present
-      - RUN infrastructure sub-skill
-      - Verify all custom modules build
-      - Verify additional processes start
-      - DO update_progress
-      CHECKPOINT infrastructure
-        > "The custom backend is ready. Your app can now [list capabilities].
-        > Approve to continue."
-    ELSE
-      - Skip: no custom infrastructure needed
-      - Set infrastructure phase to skipped in progress.json
-
-IF complexity_tier is complex
-  STEP 3: Scaffold
-    - RUN scaffold sub-skill
-    - Verify project builds
-    - DO update_progress
-
-    CHECKPOINT scaffold
-      > "The project foundation is ready — structure set up and building successfully.
-      > Approve to continue."
-
-  STEP 4: Startup
-    - Run environment setup (if .env files missing)
-    - Start all services (database, backend, frontend)
-    - Verify app loads in browser
-    - DO update_progress
-
-    CHECKPOINT startup
-      > "Your app is running and accessible in the browser.
-      > Approve to continue."
-
-  STEP 5: Foundation
-    - RUN foundation sub-skill
-    - DO update_progress
-
-    CHECKPOINT foundation
-      > "Your app now has your brand's look and feel.
-      > Approve to continue."
-      DO log_learnings
-
-  STEP 5b: Infrastructure (conditional)
-    IF architecture.md exists AND custom_modules or non-standard apps present
-      - RUN infrastructure sub-skill
-      - Verify all modules build and processes start
-      - DO update_progress
-      CHECKPOINT infrastructure
-        > "Custom backend ready. Modules: N, Processes: M.
-        > Approve to continue."
-    ELSE
-      - Skip
-      - Set infrastructure phase to skipped in progress.json
+Tier → flow mapping (for standalone invocation without a named flow):
+  complexity_tier = small    → flows/small.flow.yaml   (scaffold+foundation consolidated)
+  complexity_tier = standard → flows/standard.flow.yaml (scaffold, foundation, optional infrastructure)
+  complexity_tier = complex  → flows/complex.flow.yaml  (scaffold, startup, foundation, infrastructure — all checkpointed)
 
 EMIT [implement] infrastructure_complete modules=<N> processes=<M>
 
