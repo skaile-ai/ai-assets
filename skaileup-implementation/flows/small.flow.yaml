@@ -1,0 +1,150 @@
+id: "small"
+version: "1.0.0"
+name: "Small Implementation"
+description: "Consolidated setup for small projects: scaffold and foundation run as a single checkpoint, no infrastructure phase, then features and verify."
+metadata:
+  tags:
+    - "implementation"
+    - "small"
+    - "consolidated"
+  stage: "stable"
+  icon: "i-heroicons-bolt"
+  category: "full-stack"
+globals:
+  research_depth: "skip"
+  approval_mode: "milestone"
+  auto_review: false
+  subagent_mode: true
+  verbosity: "standard"
+modes:
+  research:
+    enabled: false
+  standards:
+    enabled: true
+    skill: "standards-discover"
+    inject_skill: "standards-inject"
+    trigger_after: "scaffold"
+entry: "scaffold"
+nodes:
+  - id: "g-setup"
+    type: "group"
+    position:
+      x: 0
+      y: 0
+    style:
+      width: 560
+      height: 280
+      backgroundColor: "rgba(16,185,129,0.04)"
+      border: "1px solid rgba(16,185,129,0.2)"
+      borderRadius: "12px"
+    data:
+      label: "Setup (consolidated)"
+      phase: "setup"
+      checkpoint: "single"
+  - id: "scaffold"
+    type: "skill"
+    parentNode: "g-setup"
+    position:
+      x: 40
+      y: 120
+    data:
+      skill: "scaffold"
+      label: "Scaffold"
+      optional: false
+      parameters:
+        package_manager: "bun"
+  - id: "foundation"
+    type: "skill"
+    parentNode: "g-setup"
+    position:
+      x: 280
+      y: 120
+    data:
+      skill: "foundation"
+      label: "Foundation"
+      optional: false
+      note: "Consolidated with scaffold — single checkpoint covers both"
+  - id: "g-implement"
+    type: "group"
+    position:
+      x: 600
+      y: 0
+    style:
+      width: 1040
+      height: 280
+      backgroundColor: "rgba(16,185,129,0.04)"
+      border: "1px solid rgba(16,185,129,0.2)"
+      borderRadius: "12px"
+    data:
+      label: "Implementation"
+      phase: "implementation"
+  - id: "migrate"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 40
+      y: 80
+    data:
+      skill: "migrate"
+      label: "Migrate"
+      optional: false
+  - id: "seed"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 40
+      y: 200
+    data:
+      skill: "seed"
+      label: "Seed"
+      optional: false
+  - id: "implement-feature"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 280
+      y: 120
+    data:
+      skill: "implement-feature"
+      label: "Feature"
+      optional: false
+      subagent: true
+      parameters:
+        tdd: true
+  - id: "verify"
+    type: "skill"
+    parentNode: "g-implement"
+    position:
+      x: 760
+      y: 120
+    data:
+      skill: "verify"
+      label: "Verify"
+      optional: false
+      subagent: true
+edges:
+  - id: "e-scaffold-foundation"
+    source: "scaffold"
+    target: "foundation"
+    type: "flow"
+  - id: "e-foundation-migrate"
+    source: "foundation"
+    target: "migrate"
+    type: "flow"
+  - id: "e-foundation-feature"
+    source: "foundation"
+    target: "implement-feature"
+    type: "flow"
+  - id: "e-migrate-seed"
+    source: "migrate"
+    target: "seed"
+    type: "flow"
+  - id: "e-feature-verify"
+    source: "implement-feature"
+    target: "verify"
+    type: "flow"
+next_flows:
+  - id: "standard"
+    domain: "skaileup-implementation"
+    label: "Harden →"
+    hint: "Upgrade from small to standard — add full test suite."

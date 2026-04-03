@@ -1,22 +1,22 @@
-id: "standard"
+id: "complex"
 version: "1.0.0"
-name: "Standard Implementation"
-description: "Standard full-stack implementation: scaffold, foundation, migrate/seed, feature dev with TDD, unit and integration tests, E2E, verify."
+name: "Complex Implementation"
+description: "Full-checkpoint implementation for complex projects: every setup phase (scaffold, foundation, infrastructure) gets its own approval gate before proceeding. Maximum visibility and control."
 metadata:
   tags:
     - "implementation"
-    - "tdd"
-    - "testing"
-    - "standard"
+    - "complex"
+    - "enterprise"
+    - "checkpointed"
   stage: "stable"
-  icon: "i-heroicons-rocket-launch"
+  icon: "i-heroicons-adjustments-horizontal"
   category: "full-stack"
 globals:
   research_depth: "skip"
   approval_mode: "checkpoint"
-  auto_review: false
+  auto_review: true
   subagent_mode: true
-  verbosity: "standard"
+  verbosity: "verbose"
 modes:
   research:
     enabled: false
@@ -27,26 +27,26 @@ modes:
     trigger_after: "scaffold"
 entry: "scaffold"
 nodes:
-  - id: "g-implement"
+  - id: "g-setup"
     type: "group"
     position:
       x: 0
       y: 0
     style:
-      width: 1760
-      height: 360
+      width: 800
+      height: 280
       backgroundColor: "rgba(16,185,129,0.04)"
       border: "1px solid rgba(16,185,129,0.2)"
       borderRadius: "12px"
     data:
-      label: "Implementation"
-      phase: "implementation"
+      label: "Setup (fully checkpointed)"
+      phase: "setup"
   - id: "scaffold"
     type: "skill"
-    parentNode: "g-implement"
+    parentNode: "g-setup"
     position:
       x: 40
-      y: 160
+      y: 120
     data:
       skill: "scaffold"
       label: "Scaffold"
@@ -55,31 +55,45 @@ nodes:
         package_manager: "bun"
   - id: "foundation"
     type: "skill"
-    parentNode: "g-implement"
+    parentNode: "g-setup"
     position:
       x: 280
-      y: 160
+      y: 120
     data:
       skill: "foundation"
       label: "Foundation"
       optional: false
   - id: "infrastructure"
     type: "skill"
-    parentNode: "g-implement"
+    parentNode: "g-setup"
     position:
       x: 520
-      y: 160
+      y: 120
     data:
       skill: "infrastructure"
       label: "Infrastructure"
       optional: true
       condition: "architecture.md exists AND custom_modules is non-empty OR non-standard apps present"
       note: "Agent-evaluated skip: if condition is false, records infrastructure=skipped in progress.json"
+  - id: "g-implement"
+    type: "group"
+    position:
+      x: 840
+      y: 0
+    style:
+      width: 1280
+      height: 360
+      backgroundColor: "rgba(16,185,129,0.04)"
+      border: "1px solid rgba(16,185,129,0.2)"
+      borderRadius: "12px"
+    data:
+      label: "Implementation"
+      phase: "implementation"
   - id: "migrate"
     type: "skill"
     parentNode: "g-implement"
     position:
-      x: 760
+      x: 40
       y: 80
     data:
       skill: "migrate"
@@ -89,7 +103,7 @@ nodes:
     type: "skill"
     parentNode: "g-implement"
     position:
-      x: 760
+      x: 40
       y: 240
     data:
       skill: "seed"
@@ -99,7 +113,7 @@ nodes:
     type: "skill"
     parentNode: "g-implement"
     position:
-      x: 1000
+      x: 280
       y: 160
     data:
       skill: "implement-feature"
@@ -112,7 +126,7 @@ nodes:
     type: "skill"
     parentNode: "g-implement"
     position:
-      x: 1240
+      x: 520
       y: 80
     data:
       skill: "test-unit"
@@ -123,7 +137,7 @@ nodes:
     type: "skill"
     parentNode: "g-implement"
     position:
-      x: 1240
+      x: 520
       y: 240
     data:
       skill: "test-integration"
@@ -134,7 +148,7 @@ nodes:
     type: "skill"
     parentNode: "g-implement"
     position:
-      x: 1480
+      x: 760
       y: 160
     data:
       skill: "e2e"
@@ -145,7 +159,7 @@ nodes:
     type: "skill"
     parentNode: "g-implement"
     position:
-      x: 1720
+      x: 1000
       y: 160
     data:
       skill: "verify"
@@ -161,14 +175,6 @@ edges:
     source: "foundation"
     target: "infrastructure"
     type: "optional"
-  - id: "e-infrastructure-migrate"
-    source: "infrastructure"
-    target: "migrate"
-    type: "optional"
-  - id: "e-infrastructure-feature"
-    source: "infrastructure"
-    target: "implement-feature"
-    type: "optional"
   - id: "e-foundation-migrate"
     source: "foundation"
     target: "migrate"
@@ -177,6 +183,14 @@ edges:
     source: "foundation"
     target: "implement-feature"
     type: "flow"
+  - id: "e-infrastructure-migrate"
+    source: "infrastructure"
+    target: "migrate"
+    type: "optional"
+  - id: "e-infrastructure-feature"
+    source: "infrastructure"
+    target: "implement-feature"
+    type: "optional"
   - id: "e-migrate-seed"
     source: "migrate"
     target: "seed"
