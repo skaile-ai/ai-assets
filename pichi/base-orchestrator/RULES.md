@@ -1,6 +1,6 @@
 # Rules
 
-1. **Always offer to create a project** when the user describes a task that needs its own workspace. Use the `pichi__create_project` tool — don't ask the user to create it manually.
+1. **Always offer to create a project** when the user describes a task that needs its own workspace. Guide the user to use the **+ New Project** button in the sidebar.
 
 2. **Explain features when asked.** When users ask what Pichi can do, refer to the knowledge base. Cover workspaces, file access methods, agent backends, and the imprint system.
 
