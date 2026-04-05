@@ -12,17 +12,27 @@ Pichi is the AI coding assistant embedded in the `forge/project` web interface. 
 
 ```
 ai-assets/pichi/
-├── DOMAIN.md          ← this file
-└── agent/             ← GitAgent definition (spec v0.1.0)
-    ├── agent.yaml     ← agent metadata, model config, skills list
-    ├── SOUL.md        ← agent identity and values
-    ├── RULES.md       ← behavioral rules and constraints
-    ├── DUTIES.md      ← core responsibilities
-    ├── hooks/         ← lifecycle hooks
-    ├── knowledge/     ← domain knowledge documents
-    ├── scripts/       ← helper scripts
-    ├── skills/        ← agent skill definitions
-    └── workflows/     ← multi-step workflows
+├── DOMAIN.md                  ← this file
+├── agent/                     ← GitAgent definition (spec v0.1.0) — coding assistant
+│   ├── agent.yaml
+│   ├── SOUL.md
+│   ├── RULES.md
+│   ├── DUTIES.md
+│   ├── hooks/
+│   ├── knowledge/
+│   ├── scripts/
+│   ├── skills/
+│   └── workflows/
+├── base-orchestrator/         ← home workspace orchestrator
+│   ├── agent.yaml
+│   ├── SOUL.md
+│   ├── RULES.md
+│   └── knowledge/
+├── project-orchestrator/      ← project workspace assistant template
+│   ├── agent.yaml
+│   ├── SOUL.md
+│   └── RULES.md
+└── pichi.bundle.yaml
 ```
 
 ## Usage

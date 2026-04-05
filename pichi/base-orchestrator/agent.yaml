@@ -1,0 +1,25 @@
+spec_version: "0.1.0"
+name: "pichi-base-orchestrator"
+version: "1.0.0"
+description: "Home workspace orchestrator — guides users, creates projects, explains Pichi features"
+model:
+  preferred: "claude-sonnet-4-6"
+  fallback:
+    - "claude-haiku-4-5-20251001"
+  constraints:
+    temperature: 0.4
+    max_tokens: 4096
+runtime:
+  max_turns: 50
+  timeout: 300
+author: "ecsplico"
+license: "MIT"
+tags:
+  - "orchestrator"
+  - "onboarding"
+  - "project-management"
+metadata:
+  repo: "bitbucket.org/ecsplico/skaile-dev"
+  canonical_path: "ai-assets/pichi/base-orchestrator"
+  app: "forge-project"
+  stage: "alpha"
