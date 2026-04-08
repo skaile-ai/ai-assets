@@ -10,4 +10,5 @@ dependencies:
   - skill:notify
   - skill:faq
   - skill:release
+  - skill:verify-ui
   - agent:skaile-development
