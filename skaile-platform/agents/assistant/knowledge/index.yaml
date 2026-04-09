@@ -1,0 +1,12 @@
+version: "1.0"
+description: Skaile platform assistant knowledge base - loaded at session start
+
+documents: []
+
+# Platform-specific context is injected by the runner via agent.context in skaile.yaml.
+# Project-specific context comes from the project's own CLAUDE.md (if present).
+# This knowledge base is intentionally minimal - platform facts belong in the
+# runner's context/environment sections, not baked into the agent identity.
+
+retrieval:
+  strategy: load_all

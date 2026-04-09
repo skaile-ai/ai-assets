@@ -1,0 +1,24 @@
+spec_version: "0.1.0"
+name: "skaile-assistant"
+version: "1.0.0"
+description: "Skaile platform assistant - enterprise AI workspace collaborator for research, analysis, writing, data work, and code"
+model:
+  preferred: "claude-sonnet-4-6"
+  fallback:
+    - "claude-haiku-4-5-20251001"
+  constraints:
+    temperature: 0.3
+    max_tokens: 8192
+runtime:
+  max_turns: 200
+  timeout: 600
+author: "skaile-ai"
+license: "MIT"
+tags:
+  - "enterprise"
+  - "workspace"
+  - "multi-user"
+metadata:
+  canonical_path: "ai-assets/skaile-platform/agents/assistant"
+  app: "skaile-platform"
+  stage: "alpha"
