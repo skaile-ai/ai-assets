@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skaile.ai/schemas/catalog.manifest.schema.json",
+  "title": "Skaile Catalog Manifest",
+  "description": "Defines a catalog package — a curated set of skills and flows compiled into a browsable catalog.json.",
+  "type": "object",
+  "required": ["name", "version", "description", "include"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique catalog package name (kebab-case).",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semver version of this catalog package.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what this catalog contains."
+    },
+    "suggested_taxonomy": {
+      "type": "array",
+      "description": "Default category tree for platforms that haven't defined their own taxonomy.",
+      "items": {
+        "$ref": "#/$defs/TaxonomyNode"
+      }
+    },
+    "include": {
+      "type": "array",
+      "description": "Glob patterns (relative to ai-assets/) matching SKILL.md and *.flow.yaml files to include.",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "exclude": {
+      "type": "array",
+      "description": "Glob patterns to exclude from matched includes.",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "TaxonomyNode": {
+      "type": "object",
+      "required": ["label"],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Display name for this category."
+        },
+        "assets": {
+          "type": "array",
+          "description": "Catalog entry IDs or glob patterns that belong to this category.",
+          "items": { "type": "string" }
+        },
+        "children": {
+          "type": "array",
+          "description": "Nested sub-categories.",
+          "items": { "$ref": "#/$defs/TaxonomyNode" }
+        }
+      }
+    }
+  }
+}

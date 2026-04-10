@@ -1,0 +1,78 @@
+name: "build-pipeline"
+version: "1.0.0"
+description: "Full concept-to-implementation pipeline — discovery, experience design, blueprint, scaffolding, implementation, verification."
+suggested_taxonomy:
+  - label: "Conceptualization"
+    children:
+      - label: "Discovery"
+        assets:
+          - "skaileup-conceptualization/overview"
+          - "skaileup-conceptualization/research"
+          - "skaileup-conceptualization/brand-visual"
+          - "skaileup-conceptualization/brand-behavioral"
+      - label: "Experience"
+        assets:
+          - "skaileup-conceptualization/features"
+          - "skaileup-conceptualization/journeys"
+          - "skaileup-conceptualization/screens"
+          - "skaileup-conceptualization/components"
+          - "skaileup-conceptualization/behaviors"
+          - "skaileup-conceptualization/mock"
+      - label: "Blueprint"
+        assets:
+          - "skaileup-conceptualization/techstack"
+          - "skaileup-conceptualization/architecture"
+          - "skaileup-conceptualization/datamodel"
+      - label: "Utilities"
+        assets:
+          - "skaileup-conceptualization/orchestrator"
+          - "skaileup-conceptualization/add-feature"
+          - "skaileup-conceptualization/reverse-engineer"
+          - "skaileup-conceptualization/review"
+  - label: "Implementation"
+    children:
+      - label: "Setup"
+        assets:
+          - "skaileup-implementation/setup"
+      - label: "Build"
+        assets:
+          - "skaileup-implementation/implement"
+          - "skaileup-implementation/implement-feature"
+      - label: "Utilities"
+        assets:
+          - "skaileup-implementation/utilities/*"
+          - "skaileup-implementation/update-starlight-docs"
+  - label: "Quality"
+    assets:
+      - "skaileup-evaluate/audit"
+      - "skaileup-evaluate/ready"
+      - "skaileup-evaluate/e2e"
+      - "skaileup-evaluate/test-unit"
+      - "skaileup-evaluate/test-integration"
+      - "skaileup-evaluate/test-plan"
+      - "skaileup-evaluate/sync"
+  - label: "Flows"
+    children:
+      - label: "Concept Flows"
+        assets:
+          - "skaileup-conceptualization/cli-concept"
+          - "skaileup-conceptualization/concept-only"
+          - "skaileup-conceptualization/prototype"
+          - "skaileup-conceptualization/reverse-engineer-flow"
+      - label: "Implementation Flows"
+        assets:
+          - "skaileup-implementation/cli"
+          - "skaileup-implementation/small"
+          - "skaileup-implementation/standard"
+          - "skaileup-implementation/complex"
+          - "skaileup-implementation/full"
+          - "skaileup-implementation/prototype"
+include:
+  - "skaileup-conceptualization/skills/*/SKILL.md"
+  - "skaileup-conceptualization/skills/*/*/SKILL.md"
+  - "skaileup-conceptualization/flows/*.flow.yaml"
+  - "skaileup-implementation/skills/*/SKILL.md"
+  - "skaileup-implementation/flows/*.flow.yaml"
+  - "skaileup-evaluate/skills/*/SKILL.md"
+exclude:
+  - "**/storybook*/SKILL.md"

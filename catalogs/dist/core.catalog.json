@@ -1,0 +1,241 @@
+{
+  "name": "core",
+  "version": "1.0.0",
+  "description": "Generic productivity skills — external services, research, and knowledge generation.",
+  "suggested_taxonomy": [
+    {
+      "label": "Search & Research",
+      "assets": [
+        "use/use-exa",
+        "use/use-perplexity",
+        "use/use-searxng",
+        "use/use-context7-api",
+        "knowledge-research/deep-research",
+        "knowledge-research/knowledge-paper-research"
+      ]
+    },
+    {
+      "label": "Documents",
+      "assets": [
+        "use/use-docling",
+        "use/use-outline",
+        "use/use-outline-cli"
+      ]
+    },
+    {
+      "label": "Knowledge Creation",
+      "assets": [
+        "knowledge-research/knowledge-paper-extractor",
+        "knowledge-research/knowledge-writing/*"
+      ]
+    }
+  ],
+  "compiled_at": "2026-04-10T17:02:53.171Z",
+  "entries": [
+    {
+      "id": "use/use-context7-api",
+      "kind": "skill",
+      "name": "use-context7-api",
+      "description": "Use when you need to search for programming library documentation or fetch up-to-date code examples via the Context7 REST API. Provides direct CLI access to Context7 without requiring the MCP server — search libraries by name and retrieve markdown documentation with code examples. Use when the user asks about library APIs, how to use a package, or needs current documentation for a specific library version.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [
+        "context7",
+        "documentation",
+        "libraries",
+        "api",
+        "code-examples"
+      ],
+      "inputs": [],
+      "source_domain": "use",
+      "source_path": "use/skills/use-context7-api"
+    },
+    {
+      "id": "use/use-exa",
+      "kind": "skill",
+      "name": "use-exa",
+      "description": "Use when you need to search the web or find code examples using Exa's AI-powered search. Queries Exa's public MCP endpoint with JSON-RPC — no API key required for basic web search and code search.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "use",
+      "source_path": "use/skills/use-exa"
+    },
+    {
+      "id": "use/use-docling",
+      "kind": "skill",
+      "name": "use-docling",
+      "description": "Use when you need to convert documents (PDF, DOCX, etc.), perform OCR, export images, transcribe audio, or extract structured data using the local docling CLI tool.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "use",
+      "source_path": "use/skills/use-docling"
+    },
+    {
+      "id": "use/use-searxng",
+      "kind": "skill",
+      "name": "use-searxng",
+      "description": "Use when you need to search the internet for current information, research topics, find news, or look up web content. Queries a local SearXNG instance with Google as the primary search engine and returns clean, structured markdown results.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "use",
+      "source_path": "use/skills/use-searxng"
+    },
+    {
+      "id": "use/use-outline-cli",
+      "kind": "skill",
+      "name": "use-outline-cli",
+      "description": "Search, read, and manage Outline wiki documents. Use when: (1) searching wiki for documentation, (2) reading wiki pages or articles, (3) listing wiki collections or documents, (4) creating or updating wiki content, (5) exporting documents as markdown. Works with any Outline wiki instance (self-hosted or cloud).",
+      "version": "1.2",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "use",
+      "source_path": "use/skills/use-outline-cli"
+    },
+    {
+      "id": "use/use-mcp2cli",
+      "kind": "skill",
+      "name": "use-mcp2cli",
+      "description": "Use when you need to interact with MCP (Model Context Protocol) servers, OpenAPI specs, or GraphQL endpoints via CLI. Converts API schemas into token-efficient CLI commands at runtime without code generation.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "use",
+      "source_path": "use/skills/use-mcp2cli"
+    },
+    {
+      "id": "use/use-outline",
+      "kind": "skill",
+      "name": "use-outline",
+      "description": "Search, read, and manage Outline wiki documents. Use when: (1) searching wiki for documentation, (2) reading wiki pages or articles, (3) listing wiki collections or documents, (4) creating or updating wiki content, (5) exporting documents as markdown. Works with any Outline wiki instance (self-hosted or cloud).",
+      "version": "1.1",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "use",
+      "source_path": "use/skills/use-outline"
+    },
+    {
+      "id": "use/use-perplexity",
+      "kind": "skill",
+      "name": "use-perplexity",
+      "description": "Use when you need to research topics or answer complex questions by querying Perplexity via the OpenRouter API.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "use",
+      "source_path": "use/skills/use-perplexity"
+    },
+    {
+      "id": "use/agent-browser",
+      "kind": "skill",
+      "name": "agent-browser",
+      "description": "Browser automation CLI for AI agents. Use when the user needs to interact with websites, including navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, testing web apps, or automating any browser task. Triggers include requests to \"open a website\", \"fill out a form\", \"click a button\", \"take a screenshot\", \"scrape data from a page\", \"test this web app\", \"login to a site\", \"automate browser actions\", or any task requiring programmatic web interaction.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "use",
+      "source_path": "use/skills/agent-browser"
+    },
+    {
+      "id": "use/use-elevenlabs",
+      "kind": "skill",
+      "name": "use-elevenlabs",
+      "description": "Use when you need to convert markdown speaker dialogue and text into audio using the ElevenLabs API. Includes support for single voice TTS and multi-voice conversational dialogues.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "use",
+      "source_path": "use/skills/use-elevenlabs"
+    },
+    {
+      "id": "knowledge-research/knowledge-paper-extractor",
+      "kind": "skill",
+      "name": "knowledge-paper-extractor",
+      "description": "Use when you need to extract metadata (title, authors, abstract) and references from scientific PDF papers or book chapters.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "knowledge-research",
+      "source_path": "knowledge-research/skills/knowledge-paper-extractor"
+    },
+    {
+      "id": "knowledge-research/knowledge-paper-research",
+      "kind": "skill",
+      "name": "knowledge-paper-research",
+      "description": "Given a scientific paper (PDF or Markdown), run a full structured-knowledge extraction and web-research pipeline. Produces one metadata file next to the paper and a dedicated <stem>_research/ folder containing four thematic research files plus one per-author profile file (prefixed author_). Use whenever you need to deeply understand a paper, prepare a research briefing, or enrich a paper's content with external context.\n",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [
+        "research",
+        "paper",
+        "science",
+        "knowledge-extraction",
+        "web-research",
+        "authors"
+      ],
+      "inputs": [],
+      "source_domain": "knowledge-research",
+      "source_path": "knowledge-research/skills/knowledge-paper-research"
+    },
+    {
+      "id": "knowledge-research/deep-research",
+      "kind": "skill",
+      "name": "deep-research",
+      "description": "Integrated deep research skill that collects documents from multiple sources, stores them in organized folders, and synthesizes findings into a comprehensive research report with citations.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "knowledge-research",
+      "source_path": "knowledge-research/skills/deep-research"
+    },
+    {
+      "id": "knowledge-research/book-writer",
+      "kind": "skill",
+      "name": "book-writer",
+      "description": "Autonomous multi-agent skill for writing professional medical textbooks in child and adolescent psychiatry. Simulates a 5-agent team (Architect, Researcher, Pedagogue, Writer, Critic) to produce evidence-based, guideline-grounded content using a layered file architecture. Concept, research, scaffolds, and prose are stored in separate files. Triggers: \"Write a book about...\", \"Start a book...\", \"/start_book\", \"/plan_chapter\", \"/write_chapter\".\n",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "knowledge-research",
+      "source_path": "knowledge-research/skills/knowledge-writing/book-writer"
+    },
+    {
+      "id": "knowledge-research/knowledge-paper-podcast",
+      "kind": "skill",
+      "name": "knowledge-paper-podcast",
+      "description": "Use when you need to create a podcast script from the output of the knowledge-paper-research skill.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "knowledge-research",
+      "source_path": "knowledge-research/skills/knowledge-writing/knowledge-paper-podcast"
+    },
+    {
+      "id": "knowledge-research/knowledge-writer-podcast",
+      "kind": "skill",
+      "name": "knowledge-writer-podcast",
+      "description": "Use when you need to generate long form podcast content from documents using a sophisticated multi-agent orchestration process.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "knowledge-research",
+      "source_path": "knowledge-research/skills/knowledge-writing/knowledge-writer-podcast"
+    }
+  ]
+}

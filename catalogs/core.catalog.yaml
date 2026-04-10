@@ -1,0 +1,25 @@
+name: "core"
+version: "1.0.0"
+description: "Generic productivity skills — external services, research, and knowledge generation."
+suggested_taxonomy:
+  - label: "Search & Research"
+    assets:
+      - "use/use-exa"
+      - "use/use-perplexity"
+      - "use/use-searxng"
+      - "use/use-context7-api"
+      - "knowledge-research/deep-research"
+      - "knowledge-research/knowledge-paper-research"
+  - label: "Documents"
+    assets:
+      - "use/use-docling"
+      - "use/use-outline"
+      - "use/use-outline-cli"
+  - label: "Knowledge Creation"
+    assets:
+      - "knowledge-research/knowledge-paper-extractor"
+      - "knowledge-research/knowledge-writing/*"
+include:
+  - "use/skills/*/SKILL.md"
+  - "knowledge-research/skills/*/SKILL.md"
+  - "knowledge-research/skills/knowledge-writing/*/SKILL.md"

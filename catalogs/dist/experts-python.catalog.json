@@ -1,0 +1,54 @@
+{
+  "name": "experts-python",
+  "version": "1.0.0",
+  "description": "Python framework experts — Python best practices, PydanticAI, Marimo notebooks.",
+  "suggested_taxonomy": [
+    {
+      "label": "Python",
+      "assets": [
+        "dev-implementation-experts-python/prog-expert-python",
+        "dev-implementation-experts-python/prog-expert-python-pydanticai",
+        "dev-implementation-experts-python/prog-expert-marimo"
+      ]
+    }
+  ],
+  "compiled_at": "2026-04-10T17:02:53.182Z",
+  "entries": [
+    {
+      "id": "dev-implementation-experts-python/prog-expert-python-pydanticai",
+      "kind": "skill",
+      "name": "prog-expert-python-pydanticai",
+      "description": "Use when you need to implement pydantic-ai Agent API patterns including structured outputs with result_type, message history, OpenAI/Gemini model backends, async streaming with run_stream(), and multi-provider integration. Expert-level programming and pattern management.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-python",
+      "source_path": "dev-implementation-experts-python/skills/prog-expert-python-pydanticai"
+    },
+    {
+      "id": "dev-implementation-experts-python/prog-expert-python",
+      "kind": "skill",
+      "name": "prog-expert-python",
+      "description": "Use when you need to implement Python 3.12+ patterns, uv workspace monorepo management, async Python, decorator patterns, pytest/mock testing, ruff/mypy configuration, Rich CLI output, pydantic-settings config, and Protocol-based interface design. Expert-level programming and pattern management.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-python",
+      "source_path": "dev-implementation-experts-python/skills/prog-expert-python"
+    },
+    {
+      "id": "dev-implementation-experts-python/prog-expert-marimo",
+      "kind": "skill",
+      "name": "prog-expert-marimo",
+      "description": "Use when you need to create, edit, or debug Marimo reactive Python notebooks, including cell structure, reactivity rules, output display, and the Lint-Export-Assert test protocol. Expert-level programming and pattern management.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-python",
+      "source_path": "dev-implementation-experts-python/skills/prog-expert-marimo"
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "name": "dev-workflow",
+  "version": "1.0.0",
+  "description": "Developer workflow skills — git operations, testing, releases, documentation, notifications.",
+  "suggested_taxonomy": [
+    {
+      "label": "Git & CI",
+      "assets": [
+        "skaile-development/git",
+        "skaile-development/release",
+        "github-ops/gh-create-pr"
+      ]
+    },
+    {
+      "label": "Testing",
+      "assets": [
+        "skaile-development/test",
+        "skaile-development/verify-ui"
+      ]
+    },
+    {
+      "label": "Documentation",
+      "assets": [
+        "skaile-development/doc",
+        "skaile-development/devlog",
+        "skaile-development/faq"
+      ]
+    },
+    {
+      "label": "Communication",
+      "assets": [
+        "skaile-development/notify",
+        "github-ops/mm-post-to-thread"
+      ]
+    },
+    {
+      "label": "Implementation",
+      "assets": [
+        "skaile-development/implement"
+      ]
+    }
+  ],
+  "compiled_at": "2026-04-10T17:02:53.180Z",
+  "entries": [
+    {
+      "id": "skaile-development/git",
+      "kind": "skill",
+      "name": "git",
+      "description": "Git operations for the skaile-dev monorepo. Six modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (submodule synchronization).",
+      "version": "1.0.0",
+      "stage": "beta",
+      "keywords": [
+        "git",
+        "commit",
+        "branch",
+        "worktree",
+        "pull-request",
+        "submodule",
+        "monorepo",
+        "skaile-development"
+      ],
+      "inputs": [],
+      "source_domain": "skaile-development",
+      "source_path": "skaile-development/skills/git"
+    },
+    {
+      "id": "skaile-development/doc",
+      "kind": "skill",
+      "name": "doc",
+      "description": "Use when writing new documentation, updating stale docs, auditing for gaps, or checking documentation status in the skaile-dev monorepo. Covers all five doc tiers: README.md, CLAUDE.md, Starlight docs, DOMAIN.md/SKILL.md, and _devlog.\n",
+      "version": "1.0.0",
+      "stage": "beta",
+      "keywords": [
+        "documentation",
+        "starlight",
+        "readme",
+        "claude-md",
+        "domain-md",
+        "skill-md",
+        "docs-sync",
+        "docs-audit",
+        "docs-coverage"
+      ],
+      "inputs": [
+        {
+          "key": "MODE",
+          "required": true,
+          "prompt": "Which mode? (write | update | audit | status)"
+        },
+        {
+          "key": "SCOPE",
+          "required": false,
+          "prompt": "Scope to a specific package? (e.g., agent-framework/cli)"
+        },
+        {
+          "key": "TARGET",
+          "required": false,
+          "prompt": "Target files or topic for write mode"
+        }
+      ],
+      "source_domain": "skaile-development",
+      "source_path": "skaile-development/skills/doc"
+    },
+    {
+      "id": "skaile-development/implement",
+      "kind": "skill",
+      "name": "implement",
+      "description": "Monorepo-aware implementation orchestrator for the skaile-dev codebase. Reads the affected package CLAUDE.md files, identifies the tech stack, routes to the right prog-experts, produces a plan, executes with supervised dispatch, then triggers test, doc, and devlog on completion. Use for any non-trivial change to the skaile-dev monorepo.",
+      "version": "1.0.0",
+      "stage": "beta",
+      "keywords": [
+        "implement",
+        "skaile-development",
+        "monorepo",
+        "orchestrator",
+        "plan",
+        "supervised",
+        "routing"
+      ],
+      "inputs": [
+        {
+          "key": "task_description",
+          "required": true,
+          "label": "What needs to be implemented? (plain language)",
+          "type": "text"
+        },
+        {
+          "key": "target_package",
+          "required": false,
+          "label": "Target package(s) if known (e.g., forge/project, platform/backend/libs/session-manager)",
+          "type": "text"
+        },
+        {
+          "key": "complexity",
+          "required": false,
+          "label": "Complexity hint",
+          "type": "select"
+        }
+      ],
+      "source_domain": "skaile-development",
+      "source_path": "skaile-development/skills/implement"
+    },
+    {
+      "id": "skaile-development/verify-ui",
+      "kind": "skill",
+      "name": "verify-ui",
+      "description": "Visual verification of Skaile platform UI changes using browser automation. After implementing a UI feature, run this skill to systematically check that pages render correctly, navigation works, and key interactive elements are present. Uses agent-browser CLI and chrome-devtools MCP tools.",
+      "version": "1.0.0",
+      "stage": "beta",
+      "keywords": [
+        "verification",
+        "ui",
+        "browser",
+        "visual",
+        "skaile-development"
+      ],
+      "inputs": [],
+      "source_domain": "skaile-development",
+      "source_path": "skaile-development/skills/verify-ui"
+    },
+    {
+      "id": "skaile-development/release",
+      "kind": "skill",
+      "name": "release",
+      "description": "Changelog management, semantic versioning, and git tagging for skaile-dev domains and packages. Three modes: status (show current version + unreleased changes), bump (update version + CHANGELOG.md), tag (create annotated git tag).",
+      "version": "1.0.0",
+      "stage": "beta",
+      "keywords": [
+        "release",
+        "changelog",
+        "semver",
+        "versioning",
+        "tagging",
+        "skaile-development"
+      ],
+      "inputs": [],
+      "source_domain": "skaile-development",
+      "source_path": "skaile-development/skills/release"
+    },
+    {
+      "id": "skaile-development/faq",
+      "kind": "skill",
+      "name": "faq",
+      "description": "Evaluates resolved questions for FAQ-worthiness and curates entries. Broadened to all monorepo packages.",
+      "version": "1.0.0",
+      "stage": "beta",
+      "keywords": [
+        "faq",
+        "documentation",
+        "curation",
+        "skaile-development"
+      ],
+      "inputs": [
+        {
+          "key": "QUESTION",
+          "required": true,
+          "prompt": "What was the user's question?"
+        },
+        {
+          "key": "ANSWER",
+          "required": true,
+          "prompt": "What was the resolved answer?"
+        },
+        {
+          "key": "CONTEXT",
+          "required": false,
+          "prompt": "Which packages or areas did this question touch?"
+        }
+      ],
+      "source_domain": "skaile-development",
+      "source_path": "skaile-development/skills/faq"
+    },
+    {
+      "id": "skaile-development/test",
+      "kind": "skill",
+      "name": "test",
+      "description": "Test construction and execution for the skaile-dev monorepo. Two modes: 'run' executes the test suite for one or more packages and reports results; 'construct' generates new tests for recently implemented code. Knows the full test stack: vitest (forge apps), Jest (platform backend), Vitest (platform frontend), Playwright (E2E), and how to run each via the Bun workspace.",
+      "version": "1.0.0",
+      "stage": "beta",
+      "keywords": [
+        "testing",
+        "vitest",
+        "jest",
+        "playwright",
+        "bun",
+        "monorepo",
+        "skaile-development"
+      ],
+      "inputs": [],
+      "source_domain": "skaile-development",
+      "source_path": "skaile-development/skills/test"
+    },
+    {
+      "id": "skaile-development/devlog",
+      "kind": "skill",
+      "name": "devlog",
+      "description": "Maintains the human-readable _devlog for the skaile-dev monorepo. Writes short plain-language entries to _devlog/DEVLOG.md after every meaningful change. Generates detailed reports in _devlog/reports/ when architectural concepts, shared contracts, or core patterns change. Run after completing any implementation work.",
+      "version": "1.0.0",
+      "stage": "beta",
+      "keywords": [
+        "devlog",
+        "changelog",
+        "documentation",
+        "institutional-memory",
+        "plain-language",
+        "reports",
+        "skaile-development"
+      ],
+      "inputs": [],
+      "source_domain": "skaile-development",
+      "source_path": "skaile-development/skills/devlog"
+    },
+    {
+      "id": "skaile-development/notify",
+      "kind": "skill",
+      "name": "notify",
+      "description": "Team notifications and messaging for skaile-dev. Supports free-form Mattermost messages plus structured templates for plans, breaking changes, releases, and devlog summaries.",
+      "version": "1.0.0",
+      "stage": "beta",
+      "keywords": [
+        "mattermost",
+        "messaging",
+        "notifications",
+        "team-communication",
+        "skaile-development"
+      ],
+      "inputs": [],
+      "source_domain": "skaile-development",
+      "source_path": "skaile-development/skills/notify"
+    },
+    {
+      "id": "github-ops/gh-create-pr",
+      "kind": "skill",
+      "name": "gh-create-pr",
+      "description": "Use when all changes for a task are committed on a feature branch and you are ready to open a GitHub pull request for human review.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "github",
+        "pr",
+        "pull-request",
+        "git",
+        "review",
+        "gh-cli"
+      ],
+      "inputs": [
+        {
+          "key": "pr_title",
+          "required": false,
+          "label": "PR title",
+          "type": "text"
+        },
+        {
+          "key": "pr_body",
+          "required": false,
+          "label": "PR description (What / Why / Testing)",
+          "type": "textarea"
+        }
+      ],
+      "source_domain": "github-ops",
+      "source_path": "github-ops/skills/gh-create-pr"
+    },
+    {
+      "id": "github-ops/mm-post-to-thread",
+      "kind": "skill",
+      "name": "mm-post-to-thread",
+      "description": "Use when you have completed significant work and need to post a structured progress update or completion summary to the Mattermost thread that initiated this session.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "mattermost",
+        "reporting",
+        "completion",
+        "progress",
+        "thread",
+        "communication"
+      ],
+      "inputs": [
+        {
+          "key": "pr_url",
+          "required": false,
+          "label": "PR URL (if a PR was created)",
+          "type": "text"
+        },
+        {
+          "key": "summary",
+          "required": false,
+          "label": "Summary of what was accomplished",
+          "type": "textarea"
+        }
+      ],
+      "source_domain": "github-ops",
+      "source_path": "github-ops/skills/mm-post-to-thread"
+    }
+  ]
+}

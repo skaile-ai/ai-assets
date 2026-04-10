@@ -1,0 +1,28 @@
+name: "dev-workflow"
+version: "1.0.0"
+description: "Developer workflow skills — git operations, testing, releases, documentation, notifications."
+suggested_taxonomy:
+  - label: "Git & CI"
+    assets:
+      - "skaile-development/git"
+      - "skaile-development/release"
+      - "github-ops/gh-create-pr"
+  - label: "Testing"
+    assets:
+      - "skaile-development/test"
+      - "skaile-development/verify-ui"
+  - label: "Documentation"
+    assets:
+      - "skaile-development/doc"
+      - "skaile-development/devlog"
+      - "skaile-development/faq"
+  - label: "Communication"
+    assets:
+      - "skaile-development/notify"
+      - "github-ops/mm-post-to-thread"
+  - label: "Implementation"
+    assets:
+      - "skaile-development/implement"
+include:
+  - "skaile-development/skills/*/SKILL.md"
+  - "github-ops/skills/*/SKILL.md"
