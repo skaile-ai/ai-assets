@@ -1,0 +1,160 @@
+{
+  "name": "experts-js",
+  "version": "1.0.0",
+  "description": "JavaScript and TypeScript framework experts — Nuxt, Directus, TipTap, PrimeVue, UnoCSS, and more.",
+  "suggested_taxonomy": [
+    {
+      "label": "Frameworks",
+      "assets": [
+        "dev-implementation-experts-js/prog-expert-nuxt",
+        "dev-implementation-experts-js/prog-expert-directus"
+      ]
+    },
+    {
+      "label": "UI Libraries",
+      "assets": [
+        "dev-implementation-experts-js/prog-expert-primevue",
+        "dev-implementation-experts-js/prog-expert-una",
+        "dev-implementation-experts-js/prog-expert-scadcn",
+        "dev-implementation-experts-js/prog-expert-tiptap"
+      ]
+    },
+    {
+      "label": "Styling",
+      "assets": [
+        "dev-implementation-experts-js/prog-expert-uno",
+        "dev-implementation-experts-js/prog-expert-vueuse"
+      ]
+    },
+    {
+      "label": "Integrations",
+      "assets": [
+        "dev-implementation-experts-js/prog-expert-omp",
+        "dev-implementation-experts-js/prog-expert-tts-stt-integration"
+      ]
+    }
+  ],
+  "compiled_at": "2026-04-10T17:02:53.162Z",
+  "entries": [
+    {
+      "id": "dev-implementation-experts-js/prog-expert-tiptap",
+      "kind": "skill",
+      "name": "prog-expert-tiptap",
+      "description": "Use when you need to use when you need to implement advanced tiptap editors in nuxt 3, including collaboration, custom node views, and context menus.. Expert-level programming and pattern management.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-js",
+      "source_path": "dev-implementation-experts-js/skills/prog-expert-tiptap"
+    },
+    {
+      "id": "dev-implementation-experts-js/prog-expert-primevue",
+      "kind": "skill",
+      "name": "prog-expert-primevue",
+      "description": "Use when you need to use when you need to implement advanced primevue 4 features in nuxt 3, including design tokens, forms, and custom theming.. Expert-level programming and pattern management.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-js",
+      "source_path": "dev-implementation-experts-js/skills/prog-expert-primevue"
+    },
+    {
+      "id": "dev-implementation-experts-js/prog-expert-tts-stt-integration",
+      "kind": "skill",
+      "name": "prog-expert-tts-stt-integration",
+      "description": "Use when you need to implement TTS (text-to-speech) or STT (speech-to-text) integrations in Nuxt 3/Nitro applications, including Deepgram streaming STT via WebSocket, ElevenLabs TTS, browser MediaRecorder, and audio settings management. Expert-level programming and pattern management.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-js",
+      "source_path": "dev-implementation-experts-js/skills/prog-expert-tts-stt-integration"
+    },
+    {
+      "id": "dev-implementation-experts-js/prog-expert-nuxt",
+      "kind": "skill",
+      "name": "prog-expert-nuxt",
+      "description": "Use when you need to expert-level nuxt development. Expert-level programming and pattern management.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-js",
+      "source_path": "dev-implementation-experts-js/skills/prog-expert-nuxt"
+    },
+    {
+      "id": "dev-implementation-experts-js/prog-expert-vueuse",
+      "kind": "skill",
+      "name": "prog-expert-vueuse",
+      "description": "Use when you need to implement VueUse composables in Nuxt 3, including auto-import configuration, composable selection, conflict handling with Nuxt built-ins, and reactive browser/state/DOM utilities. Expert-level programming and pattern management.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-js",
+      "source_path": "dev-implementation-experts-js/skills/prog-expert-vueuse"
+    },
+    {
+      "id": "dev-implementation-experts-js/prog-expert-uno",
+      "kind": "skill",
+      "name": "prog-expert-uno",
+      "description": "Use when you need to implement or configure UnoCSS in Nuxt 3/4 projects — presets (wind4, icons, attributify, typography), uno.config.ts theming, dark mode, safelist, layers, and UnoCSS module integration.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-js",
+      "source_path": "dev-implementation-experts-js/skills/prog-expert-uno"
+    },
+    {
+      "id": "dev-implementation-experts-js/prog-expert-una",
+      "kind": "skill",
+      "name": "prog-expert-una",
+      "description": "Use when you need to implement UnaUI (@una-ui/nuxt) in Nuxt 3/4 — N* component usage, color tokens, slot patterns, UnoCSS-driven theming, and UnaUI module configuration.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-js",
+      "source_path": "dev-implementation-experts-js/skills/prog-expert-una"
+    },
+    {
+      "id": "dev-implementation-experts-js/prog-expert-omp",
+      "kind": "skill",
+      "name": "prog-expert-omp",
+      "description": "Use when you need to work with omp (pi-coding-agent), including RPC mode integration, skill authoring, extension development, agent embedding, and CLI configuration. Expert-level programming and pattern management.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-js",
+      "source_path": "dev-implementation-experts-js/skills/prog-expert-omp"
+    },
+    {
+      "id": "dev-implementation-experts-js/prog-expert-scadcn",
+      "kind": "skill",
+      "name": "prog-expert-scadcn",
+      "description": "Use when you need to implement shadcn-vue (shadcn-nuxt) in Nuxt 3/4 — component registry via components.json, Tailwind CSS v4 with @tailwindcss/vite, class-variance-authority, tailwind-merge, and auto-imported shadcn components.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-js",
+      "source_path": "dev-implementation-experts-js/skills/prog-expert-scadcn"
+    },
+    {
+      "id": "dev-implementation-experts-js/prog-expert-directus",
+      "kind": "skill",
+      "name": "prog-expert-directus",
+      "description": "Use when you need to set up, develop, or integrate Directus into your project, especially with Docker and Nuxt 3. Triggers include \"setup directus with docker\", \"configure directus local development\", \"generate directus types\", \"integrate directus with nuxt\", or \"authenticate with directus sdk\".",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "dev-implementation-experts-js",
+      "source_path": "dev-implementation-experts-js/skills/prog-expert-directus"
+    }
+  ]
+}

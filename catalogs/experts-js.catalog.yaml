@@ -1,0 +1,24 @@
+name: "experts-js"
+version: "1.0.0"
+description: "JavaScript and TypeScript framework experts — Nuxt, Directus, TipTap, PrimeVue, UnoCSS, and more."
+suggested_taxonomy:
+  - label: "Frameworks"
+    assets:
+      - "dev-implementation-experts-js/prog-expert-nuxt"
+      - "dev-implementation-experts-js/prog-expert-directus"
+  - label: "UI Libraries"
+    assets:
+      - "dev-implementation-experts-js/prog-expert-primevue"
+      - "dev-implementation-experts-js/prog-expert-una"
+      - "dev-implementation-experts-js/prog-expert-scadcn"
+      - "dev-implementation-experts-js/prog-expert-tiptap"
+  - label: "Styling"
+    assets:
+      - "dev-implementation-experts-js/prog-expert-uno"
+      - "dev-implementation-experts-js/prog-expert-vueuse"
+  - label: "Integrations"
+    assets:
+      - "dev-implementation-experts-js/prog-expert-omp"
+      - "dev-implementation-experts-js/prog-expert-tts-stt-integration"
+include:
+  - "dev-implementation-experts-js/skills/*/SKILL.md"

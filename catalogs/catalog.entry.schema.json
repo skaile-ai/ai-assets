@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skaile.ai/schemas/catalog.entry.schema.json",
+  "title": "Skaile Catalog Entry",
+  "description": "A single skill or flow entry in a compiled catalog.json.",
+  "type": "object",
+  "required": ["id", "kind", "name", "description", "version", "source_domain", "source_path"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique entry ID within a catalog package (domain/skill-name)."
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["skill", "flow"],
+      "description": "Asset class discriminator."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable display name."
+    },
+    "description": {
+      "type": "string",
+      "description": "One-line description of what this asset does."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semver version extracted from frontmatter."
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["alpha", "beta", "stable"],
+      "default": "stable",
+      "description": "Maturity stage."
+    },
+    "keywords": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Searchable keywords extracted from frontmatter tags."
+    },
+    "inputs": {
+      "type": "array",
+      "description": "User-facing input specifications for configuration UI.",
+      "items": {
+        "$ref": "#/$defs/InputSpec"
+      }
+    },
+    "source_domain": {
+      "type": "string",
+      "description": "Originating domain directory name."
+    },
+    "source_path": {
+      "type": "string",
+      "description": "Relative path from ai-assets/ to the skill directory or flow file."
+    },
+    "icon": {
+      "type": "string",
+      "description": "Icon identifier (e.g. i-heroicons-document-text)."
+    },
+    "required_skills": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Flow-only: skill IDs that must be available for the flow to run."
+    },
+    "optional_skills": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Flow-only: skill IDs that enhance the flow but aren't required."
+    }
+  },
+  "$defs": {
+    "InputSpec": {
+      "type": "object",
+      "required": ["key"],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "type": "string" },
+        "required": { "type": "boolean", "default": false },
+        "prompt": { "type": "string" },
+        "label": { "type": "string" },
+        "type": { "type": "string", "enum": ["text", "textarea", "select", "boolean"] },
+        "hint": { "type": "string" }
+      }
+    }
+  }
+}

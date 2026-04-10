@@ -1,0 +1,1359 @@
+{
+  "name": "build-pipeline",
+  "version": "1.0.0",
+  "description": "Full concept-to-implementation pipeline — discovery, experience design, blueprint, scaffolding, implementation, verification.",
+  "suggested_taxonomy": [
+    {
+      "label": "Conceptualization",
+      "children": [
+        {
+          "label": "Discovery",
+          "assets": [
+            "skaileup-conceptualization/overview",
+            "skaileup-conceptualization/research",
+            "skaileup-conceptualization/brand-visual",
+            "skaileup-conceptualization/brand-behavioral"
+          ]
+        },
+        {
+          "label": "Experience",
+          "assets": [
+            "skaileup-conceptualization/features",
+            "skaileup-conceptualization/journeys",
+            "skaileup-conceptualization/screens",
+            "skaileup-conceptualization/components",
+            "skaileup-conceptualization/behaviors",
+            "skaileup-conceptualization/mock"
+          ]
+        },
+        {
+          "label": "Blueprint",
+          "assets": [
+            "skaileup-conceptualization/techstack",
+            "skaileup-conceptualization/architecture",
+            "skaileup-conceptualization/datamodel"
+          ]
+        },
+        {
+          "label": "Utilities",
+          "assets": [
+            "skaileup-conceptualization/orchestrator",
+            "skaileup-conceptualization/add-feature",
+            "skaileup-conceptualization/reverse-engineer",
+            "skaileup-conceptualization/review"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Implementation",
+      "children": [
+        {
+          "label": "Setup",
+          "assets": [
+            "skaileup-implementation/setup"
+          ]
+        },
+        {
+          "label": "Build",
+          "assets": [
+            "skaileup-implementation/implement",
+            "skaileup-implementation/implement-feature"
+          ]
+        },
+        {
+          "label": "Utilities",
+          "assets": [
+            "skaileup-implementation/utilities/*",
+            "skaileup-implementation/update-starlight-docs"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Quality",
+      "assets": [
+        "skaileup-evaluate/audit",
+        "skaileup-evaluate/ready",
+        "skaileup-evaluate/e2e",
+        "skaileup-evaluate/test-unit",
+        "skaileup-evaluate/test-integration",
+        "skaileup-evaluate/test-plan",
+        "skaileup-evaluate/sync"
+      ]
+    },
+    {
+      "label": "Flows",
+      "children": [
+        {
+          "label": "Concept Flows",
+          "assets": [
+            "skaileup-conceptualization/cli-concept",
+            "skaileup-conceptualization/concept-only",
+            "skaileup-conceptualization/prototype",
+            "skaileup-conceptualization/reverse-engineer-flow"
+          ]
+        },
+        {
+          "label": "Implementation Flows",
+          "assets": [
+            "skaileup-implementation/cli",
+            "skaileup-implementation/small",
+            "skaileup-implementation/standard",
+            "skaileup-implementation/complex",
+            "skaileup-implementation/full",
+            "skaileup-implementation/prototype"
+          ]
+        }
+      ]
+    }
+  ],
+  "compiled_at": "2026-04-10T17:02:53.231Z",
+  "entries": [
+    {
+      "id": "skaileup-conceptualization/add-feature",
+      "kind": "skill",
+      "name": "add-feature",
+      "description": "Use when adding a new feature or modifying an existing feature in a live concept. Surgically adds the feature spec, cascades changes through downstream artifacts (journeys, tech stack, architecture, data model, screens), and optionally triggers implementation if the app is already built.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "add-feature",
+        "modify",
+        "extend",
+        "feature",
+        "change",
+        "update",
+        "cascade",
+        "iteration",
+        "incremental"
+      ],
+      "inputs": [
+        {
+          "key": "feature_description",
+          "required": true,
+          "label": "What feature do you want to add or change?",
+          "type": "text",
+          "hint": "Describe it in plain language — what should the user be able to do?"
+        },
+        {
+          "key": "feature_mode",
+          "required": true,
+          "label": "New feature or modification?",
+          "type": "select"
+        }
+      ],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/add-feature"
+    },
+    {
+      "id": "skaileup-conceptualization/orchestrator",
+      "kind": "skill",
+      "name": "orchestrator",
+      "description": "Full concept pipeline orchestrator. Runs the complete conceptualization pipeline (Discovery -> Experience -> Blueprint) with checkpoint approvals, PLANS.md tracking, and auto-review mode. Dispatches sub-skills for each pipeline step and manages user communication.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "orchestrate",
+        "concept",
+        "pipeline",
+        "plan",
+        "discovery",
+        "experience",
+        "blueprint",
+        "checkpoint"
+      ],
+      "inputs": [
+        {
+          "key": "complexity_tier",
+          "required": false,
+          "label": "Project complexity (controls checkpoint frequency)",
+          "type": "select",
+          "hint": "small = consolidated checkpoints, standard = phase-level checkpoints, complex = per-skill checkpoints"
+        }
+      ],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/orchestrator"
+    },
+    {
+      "id": "skaileup-conceptualization/reverse-engineer",
+      "kind": "skill",
+      "name": "reverse-engineer",
+      "description": "Use when the user has an existing project repository and wants to generate or bootstrap a _concept/ folder from it. Triggered by: 'reverse engineer this project', 'generate concept from existing code', 'I have a codebase, extract the concept', 'document this existing app', 'build concept from repo'.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "reverse",
+        "existing",
+        "codebase",
+        "repo",
+        "extract",
+        "import",
+        "bootstrap",
+        "existing-project",
+        "infer",
+        "scan"
+      ],
+      "inputs": [
+        {
+          "key": "repo_path",
+          "required": true,
+          "label": "Repository Path",
+          "type": "text",
+          "hint": "Absolute or relative path to the existing project repository root"
+        },
+        {
+          "key": "concept_path",
+          "required": false,
+          "label": "Concept Output Path",
+          "type": "text",
+          "hint": "Where to write _concept/ (default: <repo_path>/_concept/). Override if the concept lives elsewhere."
+        },
+        {
+          "key": "extraction_scope",
+          "required": false,
+          "label": "What to Extract",
+          "type": "multiselect",
+          "hint": "Which concept artifacts to generate. Omit items you already have or want to write manually."
+        },
+        {
+          "key": "overwrite_mode",
+          "required": false,
+          "label": "If _concept/ Files Already Exist",
+          "type": "select",
+          "hint": "skip = never overwrite, diff_and_confirm = show diff and ask, overwrite = always replace"
+        },
+        {
+          "key": "app_description_hint",
+          "required": false,
+          "label": "What does this app do? (optional hint)",
+          "type": "text",
+          "hint": "Brief description to help the agent when README is sparse or missing."
+        }
+      ],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/reverse-engineer"
+    },
+    {
+      "id": "skaileup-conceptualization/review",
+      "kind": "skill",
+      "name": "review",
+      "description": "Structure audit + entropy check + doc gardening for _concept/. In audit mode: scan completeness, cross-reference integrity, golden principle compliance, and entropy; produce quality.json with score. In gardening mode: auto-fix safe issues and report what changed.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "review",
+        "audit",
+        "status",
+        "entropy",
+        "checklist",
+        "progress",
+        "health",
+        "gardening",
+        "cleanup",
+        "quality"
+      ],
+      "inputs": [
+        {
+          "key": "mode",
+          "required": false,
+          "label": "Audit or garden?",
+          "type": "select",
+          "hint": "audit = report issues; garden = auto-fix safe issues"
+        }
+      ],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/review"
+    },
+    {
+      "id": "skaileup-conceptualization/overview",
+      "kind": "skill",
+      "name": "overview",
+      "description": "Use when starting a new concept and no _concept/1_discovery/1_overview/ exists, or when the user says 'I have an app idea', 'new project', 'start from scratch', or wants to redefine an existing brief.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "brief",
+        "idea",
+        "project",
+        "vision",
+        "start",
+        "new",
+        "pitch",
+        "audience",
+        "problem"
+      ],
+      "inputs": [
+        {
+          "key": "raw_description",
+          "required": false,
+          "label": "Describe your idea",
+          "type": "textarea",
+          "hint": "Free-form description — app name, audience, problem, hero flow can all be inferred from this"
+        },
+        {
+          "key": "app_name",
+          "required": false,
+          "label": "App Name",
+          "type": "text",
+          "hint": "Working name for the app (inferred from raw_description if provided)"
+        },
+        {
+          "key": "elevator_pitch",
+          "required": false,
+          "label": "What does the app do?",
+          "type": "text",
+          "hint": "One sentence: who is it for and what does it do?"
+        },
+        {
+          "key": "target_audience",
+          "required": false,
+          "label": "Who is the primary user?",
+          "type": "text",
+          "hint": "Role, context, skill level"
+        },
+        {
+          "key": "problem_statement",
+          "required": false,
+          "label": "What problem does it solve?",
+          "type": "text",
+          "hint": "The single most important problem"
+        },
+        {
+          "key": "hero_flow",
+          "required": false,
+          "label": "Most important user action",
+          "type": "text",
+          "hint": "The one thing every user must be able to do"
+        },
+        {
+          "key": "comparable_products",
+          "required": false,
+          "label": "Similar apps",
+          "type": "text",
+          "hint": "Apps that do something similar (for reference)"
+        },
+        {
+          "key": "success_criteria",
+          "required": false,
+          "label": "What does success look like?",
+          "type": "text",
+          "hint": "Goals, constraints, deadlines"
+        }
+      ],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/10_discovery/overview"
+    },
+    {
+      "id": "skaileup-conceptualization/brand-visual",
+      "kind": "skill",
+      "name": "brand-visual",
+      "description": "Use when the project brief is approved but no visual brand exists. Discovers aesthetic direction through plain-language questions, extracts palettes from reference URLs, and writes identity.md + tokens.json + brandbook.html to _concept/1_discovery/2_brand/.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "brand",
+        "colors",
+        "fonts",
+        "identity",
+        "tokens",
+        "design",
+        "visual",
+        "palette",
+        "typography",
+        "atmosphere",
+        "brandbook"
+      ],
+      "inputs": [
+        {
+          "key": "mood",
+          "required": true,
+          "label": "Desired feeling",
+          "type": "text",
+          "hint": "What feeling should the app give? calm/bold/professional/playful..."
+        },
+        {
+          "key": "light_dark",
+          "required": true,
+          "label": "Color mode",
+          "type": "select",
+          "hint": "Light mode, dark mode, or both?"
+        },
+        {
+          "key": "reference_urls",
+          "required": false,
+          "label": "Reference websites",
+          "type": "text",
+          "hint": "Show a website you love — I'll extract palette and style"
+        },
+        {
+          "key": "font_preferences",
+          "required": false,
+          "label": "Font preferences",
+          "type": "text",
+          "hint": "Any font preferences or constraints?"
+        }
+      ],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/10_discovery/brand-visual"
+    },
+    {
+      "id": "skaileup-conceptualization/brand-behavioral",
+      "kind": "skill",
+      "name": "brand-behavioral",
+      "description": "Use when the visual brand exists and you need to define communication tone, error message style, empty state messaging, micro-copy guidelines, and notification voice. Produces behavioral.md + copy_guidelines.md in _concept/1_discovery/2_brand/.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "brand",
+        "tone",
+        "voice",
+        "copy",
+        "microcopy",
+        "errors",
+        "empty-states",
+        "notifications",
+        "messaging",
+        "ux-writing"
+      ],
+      "inputs": [
+        {
+          "key": "tone",
+          "required": false,
+          "label": "What tone should your app speak in?",
+          "type": "select"
+        },
+        {
+          "key": "formality_level",
+          "required": false,
+          "label": "How formal should the language be? (1 = casual chat, 5 = corporate)",
+          "type": "select"
+        }
+      ],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/10_discovery/brand-behavioral"
+    },
+    {
+      "id": "skaileup-conceptualization/research",
+      "kind": "skill",
+      "name": "research",
+      "description": "Use when grounding decisions in real-world data — competitor analysis, audience research, design inspiration, behavioral patterns, color/font research. Research is a MODE that runs in parallel with other steps, not a sequential pipeline step.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "research",
+        "competitors",
+        "market",
+        "audience",
+        "personas",
+        "brand",
+        "inspiration",
+        "templates",
+        "layouts",
+        "design",
+        "patterns",
+        "grounding"
+      ],
+      "inputs": [
+        {
+          "key": "research_scope",
+          "required": true,
+          "label": "Research scope",
+          "type": "select",
+          "hint": "What area to research (select 'all' for comprehensive research)"
+        }
+      ],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/10_discovery/research"
+    },
+    {
+      "id": "skaileup-conceptualization/screens-technical",
+      "kind": "skill",
+      "name": "screens-technical",
+      "description": "Technical variant of the screens skill with component inventories. Use when screen specs exist and require precise component-level breakdowns. NOT in pipeline — experimental variant for testing purposes.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "screens",
+        "pages",
+        "ui",
+        "layout",
+        "components",
+        "states",
+        "routes",
+        "navigation"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/20_experience/screens-technical"
+    },
+    {
+      "id": "skaileup-conceptualization/journeys",
+      "kind": "skill",
+      "name": "journeys",
+      "description": "Use after project brief is approved to map user journeys. Reads the approved brief, goals, and optional research to define personas and story maps organized by stage (hero, vital, hygiene, backlog). Writes stories.json with EARS acceptance criteria. Required before features skill.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "journeys",
+        "stories",
+        "personas",
+        "story-map",
+        "user-flow",
+        "acceptance-criteria",
+        "ears",
+        "experience"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/20_experience/journeys"
+    },
+    {
+      "id": "skaileup-conceptualization/behaviors",
+      "kind": "skill",
+      "name": "behaviors",
+      "description": "Use when features are approved and user wants to formalize behavioral rules, state machines, or entity lifecycle. Also when user says 'behavioral specs', 'state machine', 'formalize rules', 'allium specs'.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "behavior",
+        "specification",
+        "allium",
+        "rules",
+        "states",
+        "transitions",
+        "domain",
+        "lifecycle",
+        "state-machine"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/20_experience/behaviors"
+    },
+    {
+      "id": "skaileup-conceptualization/components",
+      "kind": "skill",
+      "name": "components",
+      "description": "Reusable component inventory. Use when screen specs exist and you need to identify shared UI patterns (data tables, forms, cards, navigation) across screens. Maps components to the tech stack's component library. Outputs to _concept/2_experience/3_screens/components/.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "components",
+        "patterns",
+        "reusable",
+        "inventory",
+        "ui",
+        "datatable",
+        "forms",
+        "cards",
+        "navigation"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/20_experience/components"
+    },
+    {
+      "id": "skaileup-conceptualization/screens",
+      "kind": "skill",
+      "name": "screens",
+      "description": "Use after features are approved to write screen specifications. Reads features, optional brand/techstack/datamodel/journeys artifacts, and produces per-screen docs organized in numbered groups. Registers screens back into feature frontmatter via feedback loop.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "screens",
+        "pages",
+        "ui",
+        "layout",
+        "navigation",
+        "ux",
+        "experience",
+        "user-perspective"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/20_experience/screens"
+    },
+    {
+      "id": "skaileup-conceptualization/features",
+      "kind": "skill",
+      "name": "features",
+      "description": "Use after user journeys are approved to plan features. Derives features from stories.json candidate hints and the project brief. Writes feature files organized in numbered groups. Required before screens and datamodel skills.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "features",
+        "requirements",
+        "modules",
+        "functionality",
+        "planning",
+        "story-refs",
+        "must-have",
+        "nice-to-have"
+      ],
+      "inputs": [
+        {
+          "key": "feature_priorities",
+          "required": false,
+          "label": "Feature scope",
+          "type": "select",
+          "hint": "How broad should the feature set be? Story stages set the default — this overrides the scope."
+        }
+      ],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/20_experience/features"
+    },
+    {
+      "id": "skaileup-conceptualization/mock",
+      "kind": "skill",
+      "name": "mock",
+      "description": "Use when screen specs are approved and user wants interactive HTML mockups. Also when user says 'mockup', 'prototype', 'show me what it looks like'. Generates a linked multi-page prototype. Supports 3 stacks: Alpine.js+Shoelace, Vue 3+PrimeVue, Preact+HTM. Auto-selects stack template from tech-stack profile if stack.md exists.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "ui",
+        "ux",
+        "design",
+        "frontend",
+        "mockups",
+        "prototype",
+        "linked",
+        "alpine",
+        "shoelace",
+        "primevue",
+        "vue3",
+        "preact",
+        "htm"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/20_experience/mock"
+    },
+    {
+      "id": "skaileup-conceptualization/datamodel",
+      "kind": "skill",
+      "name": "datamodel",
+      "description": "Use when features are approved but _concept/3_blueprint/3_datamodel/ is empty. Produces model.dbml (DBML), model.json (editor canvas), seed.json (test scenarios), and feature_map.json (model-to-feature cross-reference).",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "data",
+        "schema",
+        "database",
+        "entities",
+        "relationships",
+        "dbml",
+        "model",
+        "seed",
+        "feature-map"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/30_blueprint/datamodel"
+    },
+    {
+      "id": "skaileup-conceptualization/architecture",
+      "kind": "skill",
+      "name": "architecture",
+      "description": "Use after features and techstack are approved to document system architecture. Produces architecture.md with system overview, backend structure, data flow, communication protocols, external integrations, and infrastructure.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "architecture",
+        "modules",
+        "dataflow",
+        "protocols",
+        "backend",
+        "api",
+        "services",
+        "websocket",
+        "agents",
+        "infrastructure"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/30_blueprint/architecture"
+    },
+    {
+      "id": "skaileup-conceptualization/techstack",
+      "kind": "skill",
+      "name": "techstack",
+      "description": "Use when the project brief exists and tech stack hasn't been chosen. Discovers available stacks from skaileup-standards/profiles/, asks plain-language questions, recommends the best match, and writes stack.md.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "techstack",
+        "framework",
+        "database",
+        "hosting",
+        "architecture",
+        "profile",
+        "stack-selection"
+      ],
+      "inputs": [
+        {
+          "key": "platform",
+          "required": true,
+          "label": "Platform",
+          "type": "select",
+          "hint": "What are you building?"
+        },
+        {
+          "key": "framework_experience",
+          "required": false,
+          "label": "Framework experience",
+          "type": "text",
+          "hint": "Vue, React, Python, or starting fresh?"
+        },
+        {
+          "key": "data_heavy",
+          "required": false,
+          "label": "Data-heavy app?",
+          "type": "boolean",
+          "hint": "Lots of tables, lists, sorting, and filtering?"
+        },
+        {
+          "key": "managed_vs_selfhosted",
+          "required": false,
+          "label": "Hosting preference",
+          "type": "select",
+          "hint": "Manage your own server or use hosted services?"
+        }
+      ],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/skills/30_blueprint/techstack"
+    },
+    {
+      "id": "skaileup-conceptualization/cli-concept",
+      "kind": "flow",
+      "name": "CLI Concept",
+      "description": "Concept phase for command-line tools. No UI, no brand, no screens. Covers project brief, commands/features, tech stack, and data model.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "cli",
+        "tool",
+        "no-ui",
+        "concept"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/flows/cli-concept.flow.yaml",
+      "icon": "i-heroicons-command-line",
+      "required_skills": [
+        "overview",
+        "features",
+        "techstack",
+        "datamodel"
+      ],
+      "optional_skills": [
+        "journeys",
+        "architecture"
+      ]
+    },
+    {
+      "id": "skaileup-conceptualization/prototype",
+      "kind": "flow",
+      "name": "Quick Prototype",
+      "description": "Concept + interactive mockups only. No data model, no implementation. Fastest path to a clickable prototype for user validation.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "prototype",
+        "validation",
+        "no-code",
+        "fast"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/flows/prototype.flow.yaml",
+      "icon": "i-heroicons-cursor-arrow-ripple",
+      "required_skills": [
+        "overview",
+        "brand-visual",
+        "techstack",
+        "features",
+        "screens",
+        "mock"
+      ],
+      "optional_skills": [
+        "journeys",
+        "storybook"
+      ]
+    },
+    {
+      "id": "skaileup-conceptualization/concept-only",
+      "kind": "flow",
+      "name": "Concept Only",
+      "description": "Produces a complete concept document package without implementation. For planning, documentation, or handing off to a development team.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "concept",
+        "documentation",
+        "planning",
+        "handoff",
+        "no-code"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-conceptualization",
+      "source_path": "skaileup-conceptualization/flows/concept-only.flow.yaml",
+      "icon": "i-heroicons-document-text",
+      "required_skills": [
+        "overview",
+        "journeys",
+        "brand-visual",
+        "techstack",
+        "features",
+        "architecture",
+        "datamodel",
+        "screens"
+      ],
+      "optional_skills": [
+        "brand-behavioral",
+        "behaviors",
+        "components",
+        "storybook",
+        "mock"
+      ]
+    },
+    {
+      "id": "skaileup-implementation/implement",
+      "kind": "skill",
+      "name": "implement",
+      "description": "Full app implementation orchestrator. Reads the completed _concept/ and drives the entire pipeline from project scaffold through feature implementation to verified, deployable application. Creates the implementation plan, manages checkpoints, git workflow, and progress tracking. Journey-first feature strategy (hero → vital → hygiene from stories.json). Supports resume from any interrupted phase.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "implement",
+        "orchestrate",
+        "build",
+        "app",
+        "pipeline",
+        "plan",
+        "scaffold",
+        "foundation",
+        "features",
+        "evaluate",
+        "journey"
+      ],
+      "inputs": [
+        {
+          "key": "complexity_tier",
+          "required": false,
+          "label": "Project complexity (controls checkpoint frequency and testing depth)",
+          "type": "select",
+          "hint": "small = consolidated setup, standard = separate scaffold+foundation, complex = all checkpoints separate"
+        }
+      ],
+      "source_domain": "skaileup-implementation",
+      "source_path": "skaileup-implementation/skills/implement"
+    },
+    {
+      "id": "skaileup-implementation/update-starlight-docs",
+      "kind": "skill",
+      "name": "update-starlight-docs",
+      "description": "Use after completing an implementation step to verify and update Starlight documentation. Detects git-changed files, resolves which doc pages cover them via _sources frontmatter, checks accuracy, and rewrites stale sections. Run automatically at the end of implement-feature, scaffold, foundation, infrastructure, or any coding step.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [
+        "documentation",
+        "starlight",
+        "docs-sync",
+        "post-implementation",
+        "verification"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-implementation",
+      "source_path": "skaileup-implementation/skills/update-starlight-docs"
+    },
+    {
+      "id": "skaileup-implementation/implement-feature",
+      "kind": "skill",
+      "name": "implement-feature",
+      "description": "Journey-first feature orchestrator with TDD Guard. Builds features by walking user journeys outside-in (hero → vital → hygiene from stories.json), writing failing journey e2e tests first, then delegating page-by-page implementation to the implement-feature-page sub-skill. Can also implement a single feature standalone using the feature_id input.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "implement",
+        "feature",
+        "tdd",
+        "journey",
+        "e2e",
+        "test-first",
+        "code",
+        "build",
+        "engineering"
+      ],
+      "inputs": [
+        {
+          "key": "feature_id",
+          "required": false,
+          "label": "Single feature to implement? (e.g., 01_user_auth/login) — leave blank for journey-first mode",
+          "type": "text"
+        }
+      ],
+      "source_domain": "skaileup-implementation",
+      "source_path": "skaileup-implementation/skills/implement-feature"
+    },
+    {
+      "id": "skaileup-implementation/small",
+      "kind": "flow",
+      "name": "Small Implementation",
+      "description": "Consolidated setup for small projects: scaffold and foundation run as a single checkpoint, no infrastructure phase, then features and verify.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "implementation",
+        "small",
+        "consolidated"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-implementation",
+      "source_path": "skaileup-implementation/flows/small.flow.yaml",
+      "icon": "i-heroicons-bolt",
+      "required_skills": [
+        "scaffold",
+        "foundation",
+        "migrate",
+        "seed",
+        "implement-feature",
+        "verify"
+      ],
+      "optional_skills": []
+    },
+    {
+      "id": "skaileup-implementation/prototype",
+      "kind": "flow",
+      "name": "Prototype Implementation",
+      "description": "Minimal implementation pass for rapid prototypes. Scaffold, implement features (no strict TDD), light E2E smoke test. Optimized for speed and user testing — not production readiness.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "prototype",
+        "fast",
+        "validation",
+        "minimal"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-implementation",
+      "source_path": "skaileup-implementation/flows/prototype.flow.yaml",
+      "icon": "i-heroicons-cursor-arrow-ripple",
+      "required_skills": [
+        "scaffold",
+        "implement-feature"
+      ],
+      "optional_skills": [
+        "e2e"
+      ]
+    },
+    {
+      "id": "skaileup-implementation/standard",
+      "kind": "flow",
+      "name": "Standard Implementation",
+      "description": "Standard full-stack implementation: scaffold, foundation, migrate/seed, feature dev with TDD, unit and integration tests, E2E, verify.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "implementation",
+        "tdd",
+        "testing",
+        "standard"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-implementation",
+      "source_path": "skaileup-implementation/flows/standard.flow.yaml",
+      "icon": "i-heroicons-rocket-launch",
+      "required_skills": [
+        "scaffold",
+        "foundation",
+        "migrate",
+        "seed",
+        "implement-feature",
+        "test-unit",
+        "test-integration",
+        "verify"
+      ],
+      "optional_skills": [
+        "infrastructure",
+        "e2e"
+      ]
+    },
+    {
+      "id": "skaileup-implementation/complex",
+      "kind": "flow",
+      "name": "Complex Implementation",
+      "description": "Full-checkpoint implementation for complex projects: every setup phase (scaffold, foundation, infrastructure) gets its own approval gate before proceeding. Maximum visibility and control.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "implementation",
+        "complex",
+        "enterprise",
+        "checkpointed"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-implementation",
+      "source_path": "skaileup-implementation/flows/complex.flow.yaml",
+      "icon": "i-heroicons-adjustments-horizontal",
+      "required_skills": [
+        "scaffold",
+        "foundation",
+        "migrate",
+        "seed",
+        "implement-feature",
+        "test-unit",
+        "test-integration",
+        "verify"
+      ],
+      "optional_skills": [
+        "infrastructure",
+        "e2e"
+      ]
+    },
+    {
+      "id": "skaileup-implementation/cli",
+      "kind": "flow",
+      "name": "CLI Implementation",
+      "description": "Implementation pipeline for command-line tools. No UI shell, no design pass, no E2E. Scaffold, foundation (headless), optional migrate/seed, feature TDD, unit and integration tests, verify.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "cli",
+        "implementation",
+        "no-ui",
+        "tdd"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-implementation",
+      "source_path": "skaileup-implementation/flows/cli.flow.yaml",
+      "icon": "i-heroicons-command-line",
+      "required_skills": [
+        "scaffold",
+        "implement-feature",
+        "test-unit",
+        "test-integration",
+        "verify"
+      ],
+      "optional_skills": [
+        "foundation",
+        "migrate",
+        "seed"
+      ]
+    },
+    {
+      "id": "skaileup-implementation/full",
+      "kind": "flow",
+      "name": "Full Production",
+      "description": "Complete implementation pipeline — readiness gate, scaffold, foundation, optional design pass, migrate/seed, feature TDD, full test suite (unit, integration, E2E), verify.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "implementation",
+        "production",
+        "tdd",
+        "full-pipeline"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-implementation",
+      "source_path": "skaileup-implementation/flows/full.flow.yaml",
+      "icon": "i-heroicons-building-office-2",
+      "required_skills": [
+        "ready",
+        "scaffold",
+        "foundation",
+        "migrate",
+        "seed",
+        "implement-feature",
+        "test-plan",
+        "test-unit",
+        "test-integration",
+        "e2e",
+        "verify"
+      ],
+      "optional_skills": [
+        "design"
+      ]
+    },
+    {
+      "id": "skaileup-evaluate/test-unit",
+      "kind": "skill",
+      "name": "test-unit",
+      "description": "Use when you need unit test files generated from feature specs. Reads existing source code patterns and feature requirements, then produces one test file per feature with test cases mapped to requirements.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "testing",
+        "unit-tests",
+        "vitest",
+        "jest",
+        "code-generation",
+        "tdd"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-evaluate",
+      "source_path": "skaileup-evaluate/skills/test-unit"
+    },
+    {
+      "id": "skaileup-evaluate/test-integration",
+      "kind": "skill",
+      "name": "test-integration",
+      "description": "Use when you need integration tests that verify API endpoints, data flow, and cross-feature interactions against a real database. Reads feature specs and data model to generate tests covering the full request-response cycle.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "testing",
+        "integration",
+        "api",
+        "database",
+        "endpoints",
+        "data-flow"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-evaluate",
+      "source_path": "skaileup-evaluate/skills/test-integration"
+    },
+    {
+      "id": "skaileup-evaluate/e2e",
+      "kind": "skill",
+      "name": "e2e",
+      "description": "End-to-end browser testing. Reads screen specs, features, and data model from _concept/. Uses agent-browser to test every user journey, take screenshots, and validate database records.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "testing",
+        "e2e",
+        "browser",
+        "screenshots",
+        "validation",
+        "journey",
+        "playwright",
+        "agent-browser"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-evaluate",
+      "source_path": "skaileup-evaluate/skills/e2e"
+    },
+    {
+      "id": "skaileup-evaluate/sync",
+      "kind": "skill",
+      "name": "sync",
+      "description": "Use when cross-references in _concept/ are broken or out of sync. Scans the entire concept folder, finds broken links, missing bidirectional references, and orphaned entities, then shows a diff before applying fixes.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "sync",
+        "cross-references",
+        "repair",
+        "links",
+        "orphans",
+        "consistency",
+        "maintenance"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-evaluate",
+      "source_path": "skaileup-evaluate/skills/sync"
+    },
+    {
+      "id": "skaileup-evaluate/eval-product",
+      "kind": "skill",
+      "name": "eval-product",
+      "description": "Whole-product evaluator. Runs after all feature groups are approved by eval-feature. Evaluates the complete application against the original goals in brief.md. Graded on four design dimensions (quality, originality, craft, functionality 0–10) plus performance, accessibility, and mobile. Produces _implementation/eval-product.json. Final gate before release.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [
+        "evaluate",
+        "product",
+        "goals",
+        "design",
+        "ux",
+        "accessibility",
+        "performance",
+        "graded",
+        "final-gate",
+        "adversarial"
+      ],
+      "inputs": [
+        {
+          "key": "app_url",
+          "required": false,
+          "label": "Running app URL",
+          "type": "text"
+        }
+      ],
+      "source_domain": "skaileup-evaluate",
+      "source_path": "skaileup-evaluate/skills/eval-product"
+    },
+    {
+      "id": "skaileup-evaluate/test-plan",
+      "kind": "skill",
+      "name": "test-plan",
+      "description": "Use when you need a comprehensive test plan derived from concept specs. Generates test scenarios per feature covering happy paths, error states, edge cases, and permissions, mapped to seed data scenarios.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "testing",
+        "test-plan",
+        "qa",
+        "scenarios",
+        "coverage",
+        "acceptance"
+      ],
+      "inputs": [
+        {
+          "key": "test_scope",
+          "required": true,
+          "label": "Test Scope",
+          "type": "select",
+          "hint": "Whether to generate test scenarios for must-have features only or all features"
+        }
+      ],
+      "source_domain": "skaileup-evaluate",
+      "source_path": "skaileup-evaluate/skills/test-plan"
+    },
+    {
+      "id": "skaileup-evaluate/audit",
+      "kind": "skill",
+      "name": "audit",
+      "description": "Static code audit. Launches three parallel sub-agents for logic errors, UI/UX issues, and security concerns. Also checks _concept/ structure integrity. Run before e2e or after significant changes.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "audit",
+        "security",
+        "bugs",
+        "code-review",
+        "static-analysis",
+        "quality",
+        "entropy",
+        "accessibility"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-evaluate",
+      "source_path": "skaileup-evaluate/skills/audit"
+    },
+    {
+      "id": "skaileup-evaluate/compile-validators",
+      "kind": "skill",
+      "name": "compile-validators",
+      "description": "Compiles MUST/NEVER/CHECKLIST rules from SKILL.md files into fast, deterministic Python validators. Run after editing or creating a skill to generate its validator.py. Replaces slow LLM-based validation with sub-second checks.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "validation",
+        "rules",
+        "compilation",
+        "deterministic",
+        "fast",
+        "linting"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-evaluate",
+      "source_path": "skaileup-evaluate/skills/compile-validators"
+    },
+    {
+      "id": "skaileup-evaluate/eval-feature",
+      "kind": "skill",
+      "name": "eval-feature",
+      "description": "Feature implementation evaluator. An independent sub-agent verifies the running app matches the feature spec and acceptance criteria after a feature group is implemented. Browser-based: simulates user journeys from user perspective. Adversarial: assumes something is broken. Produces _implementation/eval-feature/{group}.json. Called by skaileup-implementation/implement after each feature group — replaces feature_auto_review.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [
+        "evaluate",
+        "feature",
+        "acceptance-criteria",
+        "browser",
+        "spec-fidelity",
+        "journey",
+        "playwright",
+        "adversarial",
+        "generator-evaluator"
+      ],
+      "inputs": [
+        {
+          "key": "feature_group",
+          "required": true,
+          "label": "Feature group name to evaluate (from stories.json stage name)",
+          "type": "text"
+        },
+        {
+          "key": "app_url",
+          "required": false,
+          "label": "Running app URL",
+          "type": "text"
+        }
+      ],
+      "source_domain": "skaileup-evaluate",
+      "source_path": "skaileup-evaluate/skills/eval-feature"
+    },
+    {
+      "id": "skaileup-evaluate/eval-code",
+      "kind": "skill",
+      "name": "eval-code",
+      "description": "Code quality evaluator. Verifies build passes, then dispatches three parallel sub-agents for logic errors, security vulnerabilities, and UI/UX code concerns. Three scopes: scaffold (build only), feature (build + unit tests), full (everything). Produces _implementation/eval-code.json. Runs at multiple pipeline checkpoints: after scaffold, after each feature group, and before release.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [
+        "evaluate",
+        "code-quality",
+        "security",
+        "static-analysis",
+        "tests",
+        "build",
+        "parallel",
+        "adversarial"
+      ],
+      "inputs": [
+        {
+          "key": "scope",
+          "required": false,
+          "label": "Evaluation scope",
+          "type": "select",
+          "hint": "scaffold = build+lint+types | feature = +unit tests | full = +logic/security/ui analysis"
+        }
+      ],
+      "source_domain": "skaileup-evaluate",
+      "source_path": "skaileup-evaluate/skills/eval-code"
+    },
+    {
+      "id": "skaileup-evaluate/eval-concept",
+      "kind": "skill",
+      "name": "eval-concept",
+      "description": "Concept completeness and clarity gate. An independent evaluator reviews _concept/ artifacts adversarially — assumes gaps exist and proves completeness. Checks every feature has traceable acceptance criteria, screen specs, data model coverage, and an unambiguous brief. Produces _concept/eval-concept.json. Run at end of skaileup-conceptualization before implementation begins.",
+      "version": "1.0.0",
+      "stage": "alpha",
+      "keywords": [
+        "evaluate",
+        "concept",
+        "completeness",
+        "clarity",
+        "gate",
+        "acceptance-criteria",
+        "traceability",
+        "adversarial"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-evaluate",
+      "source_path": "skaileup-evaluate/skills/eval-concept"
+    },
+    {
+      "id": "skaileup-evaluate/ready",
+      "kind": "skill",
+      "name": "ready",
+      "description": "Pre-flight readiness check before E2E testing. Verifies that each feature has a concept doc, screen spec, data model entry, brand tokens, and tech stack. Surfaces gaps with remediation commands. Blocks testing of incomplete features.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "readiness",
+        "preflight",
+        "checklist",
+        "testing",
+        "validation",
+        "gate",
+        "implementation"
+      ],
+      "inputs": [],
+      "source_domain": "skaileup-evaluate",
+      "source_path": "skaileup-evaluate/skills/ready"
+    }
+  ]
+}

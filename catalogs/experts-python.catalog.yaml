@@ -1,0 +1,11 @@
+name: "experts-python"
+version: "1.0.0"
+description: "Python framework experts — Python best practices, PydanticAI, Marimo notebooks."
+suggested_taxonomy:
+  - label: "Python"
+    assets:
+      - "dev-implementation-experts-python/prog-expert-python"
+      - "dev-implementation-experts-python/prog-expert-python-pydanticai"
+      - "dev-implementation-experts-python/prog-expert-marimo"
+include:
+  - "dev-implementation-experts-python/skills/*/SKILL.md"
