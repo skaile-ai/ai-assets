@@ -4,7 +4,7 @@ description: "Day-to-day development workflow for the skaile-dev monorepo — im
 type: domain
 building_blocks:
   agents: "skaile-development — routes tasks to the right skills, maintains session context."
-  skills: "git, implement, test, doc, devlog, notify, faq, release"
+  skills: "git, implement, proposal, test, doc, devlog, notify, faq, release"
   references: "Branch naming, worktree patterns, test runner map, devlog entry formats, documentation tier roles, commit spec."
 stage: beta
 ---
@@ -32,6 +32,7 @@ Reach for `skaile-development` when you are:
 |--------|---------|
 | `agents/` | `skaile-development` — routes to skills, orchestrates multi-step work |
 | `skills/git/` | Unified git operations: commit, branch, worktree, PR, finish, sync |
+| `skills/proposal/` | Design specs and proposals with structured frontmatter, review tracking, and alternatives analysis |
 | `skills/implement/` | Monorepo-aware implementation orchestrator |
 | `skills/test/` | Test construction and execution across the monorepo |
 | `skills/doc/` | Comprehensive documentation skill (write, update, audit, status) for all 5 doc tiers |
@@ -46,6 +47,7 @@ Reach for `skaile-development` when you are:
 | Skill | When to Use |
 |-------|------------|
 | `git` | Any git operation — committing, branching, worktrees, opening PRs, finishing branches, syncing |
+| `proposal` | Creating, reviewing, or updating design specs for new features or architectural changes |
 | `implement` | Starting any non-trivial implementation task in the monorepo |
 | `test` | Constructing new tests or running/debugging existing ones |
 | `doc` | Write, update, audit, or check status of documentation across all tiers |
