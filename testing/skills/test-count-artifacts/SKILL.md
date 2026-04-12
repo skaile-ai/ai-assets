@@ -1,5 +1,5 @@
 ---
-name: Test - Count Artifacts
+name: test-count-artifacts
 description: Count files in workspace/test/ and write the count to a file. Optional node, used to exercise the skip path. Test fixture - not for production.
 source: TEST
 version: 1.0.0

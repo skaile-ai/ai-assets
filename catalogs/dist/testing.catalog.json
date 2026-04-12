@@ -13,12 +13,12 @@
       ]
     }
   ],
-  "compiled_at": "2026-04-12T20:36:35.251Z",
+  "compiled_at": "2026-04-12T20:59:31.796Z",
   "entries": [
     {
-      "id": "testing/Test - Ask Name",
+      "id": "testing/test-ask-name",
       "kind": "skill",
-      "name": "Test - Ask Name",
+      "name": "test-ask-name",
       "description": "Request a user name via input gate, then write it verbatim to workspace/test/name.txt. Test fixture - not for production.",
       "version": "1.0.0",
       "stage": "stable",
@@ -32,9 +32,9 @@
       "source_path": "testing/skills/test-ask-name"
     },
     {
-      "id": "testing/Test - Write Greeting",
+      "id": "testing/test-write-greeting",
       "kind": "skill",
-      "name": "Test - Write Greeting",
+      "name": "test-write-greeting",
       "description": "Read the name from test-ask-name and write a fixed-format greeting file. Test fixture - not for production.",
       "version": "1.0.0",
       "stage": "stable",
@@ -48,9 +48,9 @@
       "source_path": "testing/skills/test-write-greeting"
     },
     {
-      "id": "testing/Test - Count Artifacts",
+      "id": "testing/test-count-artifacts",
       "kind": "skill",
-      "name": "Test - Count Artifacts",
+      "name": "test-count-artifacts",
       "description": "Count files in workspace/test/ and write the count to a file. Optional node, used to exercise the skip path. Test fixture - not for production.",
       "version": "1.0.0",
       "stage": "stable",

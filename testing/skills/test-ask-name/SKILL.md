@@ -1,5 +1,5 @@
 ---
-name: Test - Ask Name
+name: test-ask-name
 description: Request a user name via input gate, then write it verbatim to workspace/test/name.txt. Test fixture - not for production.
 source: TEST
 version: 1.0.0

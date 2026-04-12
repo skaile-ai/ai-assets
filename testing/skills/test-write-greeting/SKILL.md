@@ -1,5 +1,5 @@
 ---
-name: Test - Write Greeting
+name: test-write-greeting
 description: Read the name from test-ask-name and write a fixed-format greeting file. Test fixture - not for production.
 source: TEST
 version: 1.0.0
