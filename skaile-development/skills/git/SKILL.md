@@ -1,6 +1,6 @@
 ---
 name: "git"
-description: "Git operations for the skaile-dev monorepo. Six modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (submodule synchronization)."
+description: "Git operations for the skaile-dev monorepo. Six modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (two-way sync: pull + push shell repo and all submodules, print per-repo summary of commits pulled and pushed)."
 metadata:
   version: "1.0.0"
   tags:
@@ -360,20 +360,118 @@ IF mode = finish
 
 IF mode = sync
 
-  STEP 1: Fetch all submodules
-    $ git submodule update --remote --merge
+  You are performing a two-way synchronisation of the skaile-dev shell repo and all
+  its submodules: pull all remote changes, reinstall dependencies if needed, push all
+  local unpushed commits, then print a summary of what moved in each direction.
 
-  STEP 2: Report status
-    - Detect submodules dynamically via `git submodule status`
-    FOR EACH submodule:
-      - Show current branch + HEAD SHA
-      - Flag if there are local uncommitted changes
-      - Flag if submodule pointer changed
+  STEP 0: Pre-flight + submodule discovery
+    $ git rev-parse --abbrev-ref HEAD
+    IF result ≠ main
+      STOP: "✗ sync only runs on main — currently on <branch>. Switch to main first."
+    Discover all submodule paths (not names) from .gitmodules:
+    $ git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}'
+    Use these paths for all git -C calls and display labels.
+    Process submodules in the order they appear in .gitmodules.
 
-  STEP 3: Stage submodule pointer updates
-    IF any submodule pointers changed:
-      - Stage only the changed submodule paths
-      > "Submodule pointers updated. Commit with mode=commit or review first."
+  STEP 1: Shell repo — fetch and snapshot
+    $ git fetch origin
+    Record shell_pre_sha: $ git rev-parse HEAD
+    unpushed_shell ← $ git log origin/main..HEAD --oneline
+    incoming_shell ← $ git log HEAD..origin/main --oneline
+
+  STEP 2: Shell repo — pull
+    $ git pull --rebase origin main
+    IF conflict
+      STOP: "✗ conflict in shell repo" + list conflicting files
+            + "Resolve conflicts and re-run sync."
+
+  STEP 3: Per-submodule — fetch, snapshot, pull
+    FOR EACH submodule path (in .gitmodules order):
+      a. Resolve branch:
+         $ git -C <path> rev-parse --abbrev-ref HEAD → branch
+         IF branch = HEAD (detached):
+           WARN: "⚠ <path> is in detached HEAD state — skipping push"
+           SET detached[path] = true
+
+      b. Fetch (skip if detached):
+         $ git -C <path> fetch origin
+
+      c. Record old SHA:
+         $ git -C <path> rev-parse HEAD → old_sha[path]
+
+      d. Snapshot unpushed (skip if detached):
+         $ git -C <path> log origin/<branch>..<branch> --oneline → unpushed[path]
+
+      e. Pull this submodule:
+         $ git submodule update --remote --merge -- <path>
+         IF fails:
+           STOP: "✗ <path>: update failed — <error>"
+                 List which submodules updated vs. which did not.
+                 "Re-run sync after resolving the issue."
+
+      f. Compute incoming:
+         $ git -C <path> log <old_sha[path]>..HEAD --oneline → incoming[path]
+
+  STEP 4: Post-pull dependency install
+    Collect changed files:
+      shell_changed   ← $ git diff <shell_pre_sha>..HEAD --name-only
+      FOR EACH submodule path:
+        sub_changed[path] ← $ git -C <path> diff <old_sha[path]>..HEAD --name-only
+
+    IF any package.json appears in shell_changed or any sub_changed[path]:
+      $ bun install   (run from monorepo root)
+      IF fails: STOP: "✗ bun install failed — <error>"
+      SET ran_bun_install = true
+
+    IF cli/package.json appears in sub_changed[agent-framework]:
+      $ bun install --global   (run from agent-framework/cli/ — NOT the monorepo root)
+      IF fails: STOP: "✗ bun install --global failed — <error>"
+      SET ran_bun_install_global = true
+
+  STEP 5: Push submodules
+    FOR EACH submodule path where unpushed[path] is non-empty AND detached[path] ≠ true:
+      $ git -C <path> push origin <branch>
+      IF rejected:
+        STOP: "✗ push rejected: <path> — <error>"
+              Do NOT push remaining submodules.
+              Do NOT run step 6.
+
+  STEP 6: Push shell repo
+    $ git push origin main
+    IF rejected:
+      STOP: "✗ push rejected: shell repo — <error>. Re-run sync."
+
+  STEP 7: Print sync summary
+
+    Print the following format (fill in actual values):
+
+    ── Sync Summary ──────────────────────────────────────────────
+
+    Shell repo (skaile-dev)
+      [if incoming_shell OR unpushed_shell non-empty: expand to two direction lines]
+      ↓ pulled   N commits
+        [if N > 0: list as • <message> (<short-sha>) per commit]
+        [if N = 0: inline] ✓ up to date
+      ↑ pushed   N commits
+        [if N > 0: list as • <message> (<short-sha>) per commit]
+        [if N = 0: inline] ✓ nothing to push
+      [if both directions zero: single collapsed line]
+      Shell repo (skaile-dev)   ✓ up to date, nothing to push
+
+    [FOR EACH submodule path in .gitmodules order]
+      [if incoming[path] OR unpushed[path] non-empty: expand]
+      <path>
+        ↓ pulled   N commits [list if N > 0]
+        ↑ pushed   N commits [list if N > 0]
+      [if both zero: single collapsed line]
+      <path>          ✓ up to date, nothing to push
+
+    [if ran_bun_install OR ran_bun_install_global: print footer block]
+      [blank line]
+      [if ran_bun_install]      bun install        ✓ workspace deps reinstalled
+      [if ran_bun_install_global]  bun install -g     ✓ CLI reinstalled (agent-framework/cli changed)
+
+    ──────────────────────────────────────────────────────────────
 
   EMIT [git] sync_complete
 
