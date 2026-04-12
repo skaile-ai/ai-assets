@@ -6,7 +6,7 @@ metadata:
   version: "1.0.0"
   tags: [keyword1, keyword2]
   stage: alpha
-  source: MERGED           # CF | SAXE | MERGED | MIGRATED — omit for new skills
+  source: MERGED           # CF | SAXE | MERGED | MIGRATED | TEST — omit for new skills (TEST = deterministic fixture, not for production)
   requires:
     - contract-name        # bare string for same-resource contract dependencies
   user_inputs:

@@ -46,7 +46,7 @@ All skills produced by this domain must use this frontmatter:
 name: <skill-name>
 description: "<Third-person trigger description. Used for routing — be specific about when to use this skill.>"
 keywords: [<keyword>, ...]
-source: MIGRATED | MERGED | CF | SAXE
+source: MIGRATED | MERGED | CF | SAXE | TEST
 stage: alpha | beta | production
 user_inputs:
   - key: VARIABLE_NAME

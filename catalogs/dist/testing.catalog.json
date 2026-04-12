@@ -1,0 +1,86 @@
+{
+  "name": "testing",
+  "version": "1.0.0",
+  "description": "Deterministic test fixtures for the flow execution engine. Not included in user-facing catalog bundles — registered only in E2E test seed-data (see platform/backend/seed-data for the fixture source row).",
+  "suggested_taxonomy": [
+    {
+      "label": "Flow Execution Tests",
+      "assets": [
+        "testing/test-ask-name",
+        "testing/test-write-greeting",
+        "testing/test-count-artifacts",
+        "testing/test-echo"
+      ]
+    }
+  ],
+  "compiled_at": "2026-04-12T20:36:35.251Z",
+  "entries": [
+    {
+      "id": "testing/Test - Ask Name",
+      "kind": "skill",
+      "name": "Test - Ask Name",
+      "description": "Request a user name via input gate, then write it verbatim to workspace/test/name.txt. Test fixture - not for production.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "test",
+        "fixture",
+        "input-gate"
+      ],
+      "inputs": [],
+      "source_domain": "testing",
+      "source_path": "testing/skills/test-ask-name"
+    },
+    {
+      "id": "testing/Test - Write Greeting",
+      "kind": "skill",
+      "name": "Test - Write Greeting",
+      "description": "Read the name from test-ask-name and write a fixed-format greeting file. Test fixture - not for production.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "test",
+        "fixture",
+        "artifact-handoff"
+      ],
+      "inputs": [],
+      "source_domain": "testing",
+      "source_path": "testing/skills/test-write-greeting"
+    },
+    {
+      "id": "testing/Test - Count Artifacts",
+      "kind": "skill",
+      "name": "Test - Count Artifacts",
+      "description": "Count files in workspace/test/ and write the count to a file. Optional node, used to exercise the skip path. Test fixture - not for production.",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [
+        "test",
+        "fixture",
+        "optional-skip"
+      ],
+      "inputs": [],
+      "source_domain": "testing",
+      "source_path": "testing/skills/test-count-artifacts"
+    },
+    {
+      "id": "testing/test-echo",
+      "kind": "flow",
+      "name": "Test Echo Flow",
+      "description": "Deterministic 3-node flow for exercising the flow execution engine in tests.\nCovers input gate, approval gate, artifact handoff, optional skip, and completion.\nNot for production use.\n",
+      "version": "1.0.0",
+      "stage": "stable",
+      "keywords": [],
+      "inputs": [],
+      "source_domain": "testing",
+      "source_path": "testing/flows/test-echo.flow.yaml",
+      "required_skills": [
+        "test-ask-name",
+        "test-write-greeting"
+      ],
+      "optional_skills": [
+        "test-count-artifacts"
+      ]
+    }
+  ]
+}
