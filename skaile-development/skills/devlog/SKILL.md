@@ -14,8 +14,10 @@ metadata:
   source: "MERGED"
   stage: "beta"
   produces:
+    - path: "_devlog/entries/<date>-<slug>.md"
+      description: "Individual devlog entry file (one per change)"
     - path: "_devlog/DEVLOG.md"
-      description: "Running development log with short plain-language entries"
+      description: "Index file linking to all entries (newest first)"
     - path: "_devlog/reports/<date>-<topic>.md"
       description: "Detailed report for conceptual/architectural changes (only when needed)"
   user_inputs:
@@ -54,16 +56,18 @@ Maintains the `_devlog/` directory — the human-readable institutional memory o
 skaile-dev monorepo. Answers "what changed, why, and what are the implications" in plain
 language that any developer (or AI agent in a future session) can quickly scan.
 
-Two output types:
+Three output types:
 
 | Type | When | Location |
 |------|------|---------|
-| Short entry | Every meaningful change | `_devlog/DEVLOG.md` (append) |
+| Entry file | Every meaningful change | `_devlog/entries/<date>-<slug>.md` |
+| Index line | Every entry | `_devlog/DEVLOG.md` (prepend link) |
 | Detailed report | Conceptual/architectural changes | `_devlog/reports/<date>-<topic>.md` |
 
-**Every meaningful change gets a short entry.** Detailed reports are reserved for changes
-that alter how the system fundamentally works — shared contracts, architectural patterns,
-breaking API changes, new development paradigms.
+**Every meaningful change gets its own entry file.** `DEVLOG.md` is an index of links,
+not a monolithic log. Detailed reports are reserved for changes that alter how the system
+fundamentally works - shared contracts, architectural patterns, breaking API changes,
+new development paradigms.
 
 ## When to Use
 
@@ -92,19 +96,22 @@ ROLE  Development log writer — records changes in plain language with implicat
 
 READS
   git log / git diff                         — recent commits and changes for context
-  _devlog/DEVLOG.md                          — existing log (append to it, never overwrite)
+  _devlog/DEVLOG.md                          — index file (read to check for duplicates)
+  _devlog/entries/                           — existing entry files
   _implementation/decisions.md              — decisions and concerns to incorporate
   ? <package>/CLAUDE.md                     — context for architectural change reports
 
 WRITES
-  _devlog/DEVLOG.md                         — new entry appended at top of file
+  _devlog/entries/<date>-<slug>.md          — new entry file (one per change)
+  _devlog/DEVLOG.md                         — prepend link to new entry at top of list
   _devlog/reports/<date>-<topic>.md         — detailed report (when report_needed=yes)
 
-MUST  append to DEVLOG.md — never overwrite it
-MUST  write at the top of the file (newest entries first)
+MUST  create each entry as a separate file in _devlog/entries/
+MUST  prepend a link to DEVLOG.md index (newest entries first)
 MUST  use plain language — no jargon, no implementation detail dumps
 MUST  include: what changed, why, affected packages, implications
 MUST  write reports for architectural/conceptual changes
+NEVER put entry content directly in DEVLOG.md — it is an index only
 NEVER duplicate an entry for the same change
 NEVER write entries that are just git commit messages
 NEVER write entries without a "why" — the reason matters most
@@ -114,7 +121,7 @@ EMIT [devlog] started
 # ── DEVLOG.md Initialization ─────────────────────────────────────
 
 IF _devlog/DEVLOG.md does not exist:
-  - Create _devlog/ directory
+  - Create _devlog/ directory, _devlog/entries/, _devlog/reports/
   - Create _devlog/DEVLOG.md with header:
 
     ```
@@ -125,7 +132,10 @@ IF _devlog/DEVLOG.md does not exist:
 
     For architecture, see CLAUDE.md. For usage, see README.md.
     For in-depth reference, see the Starlight docs.
-    This log is the *why* — not a replacement for any of the above.
+    This log is the *why* - not a replacement for any of the above.
+
+    Each entry is a separate file in `_devlog/entries/`. Detailed architectural
+    reports live in `_devlog/reports/`.
 
     ---
     ```
@@ -150,26 +160,38 @@ STEP 2: Assess implications
       - Does this require migration steps for existing users? → document them
     - Write a concise implications sentence
 
-STEP 3: Write entry
+STEP 3: Write entry file + update index
 
-  Entry format (prepend to DEVLOG.md after the header):
+  3a. Generate filename:
+    - slug = title lowercased, non-alphanumeric replaced with hyphens, max 60 chars
+    - filename = `<YYYY-MM-DD>-<slug>.md`
+    - path = `_devlog/entries/<filename>`
+
+  3b. Write entry to `_devlog/entries/<filename>`:
 
   ```markdown
-  ## YYYY-MM-DD — <Title> (3–6 words, plain language)
+  ## YYYY-MM-DD - <Title> (3-6 words, plain language)
 
-  **What changed:** <1–2 sentences. What is different now that wasn't before. No jargon.>
+  **What changed:** <1-2 sentences. What is different now that wasn't before. No jargon.>
 
-  **Why:** <1–2 sentences. What problem this solves or feature this enables.>
+  **Why:** <1-2 sentences. What problem this solves or feature this enables.>
 
   **Affected:** `<package>`, `<package>` (comma-separated, backtick-wrapped)
 
-  **Implications:** <1–2 sentences. What downstream effects, breaking changes, or follow-up
+  **Implications:** <1-2 sentences. What downstream effects, breaking changes, or follow-up
   actions this creates. Use "None" if truly no implications.>
 
-  ---
   ```
 
-  Examples of good entries:
+  3c. Prepend a link to `_devlog/DEVLOG.md` (after the `---` header separator):
+
+  ```markdown
+  - [YYYY-MM-DD - <Title>](entries/<filename>)
+  ```
+
+  The link must be the FIRST list item (newest first). Do not put entry content in DEVLOG.md.
+
+  Examples of good entry files (in `_devlog/entries/`):
 
   ```markdown
   ## 2026-03-25 — Add devlog skill to skaile-dev-ops domain
@@ -222,7 +244,7 @@ STEP 4: Assess if report is needed
 
 STEP 5: Write detailed report
   - Create: `_devlog/reports/<YYYY-MM-DD>-<topic-slug>.md`
-  - Link from the short DEVLOG.md entry: `See report: [_devlog/reports/<filename>]`
+  - Link from the entry file (not DEVLOG.md): append `See report: [_devlog/reports/<filename>]`
 
   Report structure:
 
