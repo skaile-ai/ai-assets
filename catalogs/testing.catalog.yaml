@@ -1,0 +1,13 @@
+name: "testing"
+version: "1.0.0"
+description: "Deterministic test fixtures for the flow execution engine. Not included in user-facing catalog bundles — registered only in E2E test seed-data (see platform/backend/seed-data for the fixture source row)."
+suggested_taxonomy:
+  - label: "Flow Execution Tests"
+    assets:
+      - "testing/test-ask-name"
+      - "testing/test-write-greeting"
+      - "testing/test-count-artifacts"
+      - "testing/test-echo"
+include:
+  - "testing/skills/*/SKILL.md"
+  - "testing/flows/*.flow.yaml"

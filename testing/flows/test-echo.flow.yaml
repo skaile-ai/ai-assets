@@ -1,0 +1,43 @@
+$schema: "../../skaileup-shared/flow.schema.json"
+id: test-echo
+version: 1.0.0
+name: Test Echo Flow
+description: |
+  Deterministic 3-node flow for exercising the flow execution engine in tests.
+  Covers input gate, approval gate, artifact handoff, optional skip, and completion.
+  Not for production use.
+meta:
+  icon: i-heroicons-beaker
+  category: Testing
+  tags:
+    - test
+    - fixture
+nodes:
+  - id: ask-name
+    type: skill
+    data:
+      skill: test-ask-name
+      label: Ask for a name
+      optional: false
+  - id: write-greeting
+    type: skill
+    data:
+      skill: test-write-greeting
+      label: Write greeting file
+      optional: false
+  - id: count-artifacts
+    type: skill
+    data:
+      skill: test-count-artifacts
+      label: Count workspace files
+      optional: true
+edges:
+  - id: e1
+    source: ask-name
+    target: write-greeting
+    type: flow
+  - id: e2
+    source: write-greeting
+    target: count-artifacts
+    type: flow
+entry: ask-name

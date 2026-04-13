@@ -25,7 +25,7 @@ The **directory name** is the skill's identity — it is what the runner searche
 name: concept_overview
 description: Generate project brief, goals, and comparable analysis
 keywords: [concept, brief, overview, project]
-source: CF                  # CF | SAXE | MERGED | MIGRATED
+source: CF                  # CF | SAXE | MERGED | MIGRATED | TEST
 version: "2.1.0"
 user_inputs:
   - name: project_description
@@ -72,7 +72,7 @@ metadata:
 | `name` | Yes | Unique identifier (matches directory name) |
 | `description` | Yes | One-line description shown by `skaile skill list` |
 | `keywords` | No | Tags for discovery and search |
-| `source` | No | Origin: `CF`, `SAXE`, `MERGED`, or `MIGRATED` |
+| `source` | No | Origin: `CF`, `SAXE`, `MERGED`, `MIGRATED`, or `TEST` (deterministic test fixture) |
 | `version` | No | Semver string |
 | `user_inputs` | No | Inputs the skill collects before starting |
 | `reads_from` | No | `_concept/` or `_grounding/` paths this skill reads |

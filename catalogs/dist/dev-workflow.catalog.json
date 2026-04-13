@@ -40,13 +40,13 @@
       ]
     }
   ],
-  "compiled_at": "2026-04-10T17:02:53.180Z",
+  "compiled_at": "2026-04-12T20:59:31.810Z",
   "entries": [
     {
       "id": "skaile-development/git",
       "kind": "skill",
       "name": "git",
-      "description": "Git operations for the skaile-dev monorepo. Six modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (submodule synchronization).",
+      "description": "Git operations for the skaile-dev monorepo. Six modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (two-way sync: pull + push shell repo and all submodules, print per-repo summary of commits pulled and pushed).",
       "version": "1.0.0",
       "stage": "beta",
       "keywords": [
@@ -139,6 +139,50 @@
       ],
       "source_domain": "skaile-development",
       "source_path": "skaile-development/skills/implement"
+    },
+    {
+      "id": "skaile-development/proposal",
+      "kind": "skill",
+      "name": "proposal",
+      "description": "Create, review, or update a design spec / proposal for new features, architectural changes, or cross-package work in the skaile-dev monorepo. Use when work is too complex to jump straight into code — the spec captures the problem, design, alternatives, and approval status before implementation begins.",
+      "version": "1.0.0",
+      "stage": "beta",
+      "keywords": [
+        "proposal",
+        "spec",
+        "design",
+        "architecture",
+        "rfc",
+        "skaile-development"
+      ],
+      "inputs": [
+        {
+          "key": "topic",
+          "required": true,
+          "label": "What is the proposal about? (plain language)",
+          "type": "text"
+        },
+        {
+          "key": "mode",
+          "required": true,
+          "label": "Mode",
+          "type": "select"
+        },
+        {
+          "key": "spec_path",
+          "required": false,
+          "label": "Path to existing spec (for review/update mode)",
+          "type": "text"
+        },
+        {
+          "key": "affected_packages",
+          "required": false,
+          "label": "Affected packages if known",
+          "type": "text"
+        }
+      ],
+      "source_domain": "skaile-development",
+      "source_path": "skaile-development/skills/proposal"
     },
     {
       "id": "skaile-development/verify-ui",

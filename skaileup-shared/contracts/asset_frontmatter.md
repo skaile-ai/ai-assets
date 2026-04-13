@@ -44,7 +44,7 @@ metadata:
   author: skaile                        # optional — omit for monorepo-owned assets
   tags: [keyword1, keyword2]            # searchable; used by skaile search and routing
   stage: alpha | beta | stable
-  source: CF | SAXE | MERGED | MIGRATED # lineage tracking; omit for new skills
+  source: CF | SAXE | MERGED | MIGRATED | TEST # lineage tracking; omit for new skills
   requires:                             # dependency declarations
     - contract-name                     # bare string for same-resource contracts
   do_not_invoke: false                  # true for system contracts (context-only, never triggered)
@@ -103,7 +103,7 @@ metadata:
 | `metadata.author` | metadata | no | omit for monorepo-owned |
 | `metadata.tags` | metadata | yes | at least 2–3 tags |
 | `metadata.stage` | metadata | yes | alpha / beta / stable |
-| `metadata.source` | metadata | no | CF / SAXE / MERGED / MIGRATED |
+| `metadata.source` | metadata | no | CF / SAXE / MERGED / MIGRATED / TEST |
 | `metadata.requires` | metadata | no | bare strings or `{name, source, version?, optional?}` objects |
 | `metadata.do_not_invoke` | metadata | no | default false; true for shared contracts |
 | `metadata.subagent` | metadata | no | default false |
