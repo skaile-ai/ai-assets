@@ -6,13 +6,13 @@ This domain covers everything from initial project discovery through experience 
 
 | Group | Path | Purpose |
 |---|---|---|
-| **orchestrator** | `skills/00_orchestrator/` | Pipeline controller — dispatches skills, manages user communication |
+| **skailup-orchestrator** | `skills/skailup-orchestrator/` | Pipeline controller — dispatches skills, manages user communication |
 | **discovery** | `skills/10_discovery/` | Project overview, research, brand identity |
 | **experience** | `skills/20_experience/` | Feature specs, user journeys, screen designs, storybook |
 | **blueprint** | `skills/30_blueprint/` | Tech stack, architecture, data model |
-| **add-feature** | `skills/40_add-feature/` | Add a single new feature to an existing concept |
-| **reverse-engineer** | `skills/80_reverse-engineer/` | Ingest an existing codebase and produce a full concept |
-| **review** | `skills/90_review/` | Concept quality audit and cross-reference check |
+| **skailup-add-feature** | `skills/skailup-add-feature/` | Add a single new feature to an existing concept |
+| **skailup-reverse-engineer** | `skills/skailup-reverse-engineer/` | Ingest an existing codebase and produce a full concept |
+| **skailup-review** | `skills/skailup-review/` | Concept quality audit and cross-reference check |
 
 ## CF vs Saxe Variants
 

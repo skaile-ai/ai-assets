@@ -27,11 +27,11 @@ tags:
   - "plans"
 metadata:
   domain: "skaileup-implementation"
-  skill_merged: "skills/implement/SKILL.md"
+  skill_merged: "skills/skailup-implement/SKILL.md"
   phases: "Setup, Features, UAT, Verification"
   complexity_tiers: "small, standard, complex"
   consumes: "_concept/ artifacts (1_discovery, 2_experience, 3_blueprint)"
   produces: "Committed tested code, PLANS.md implementation progress, LEARNINGS.md"
   resume: "reads PLANS.md if present — resumes from last incomplete step"
-  expert_routing: "Searches prog-expert-* skills for tech-stack-specific guidance"
+  expert_routing: "Searches skailup-prog-expert-* skills for tech-stack-specific guidance"
   stage: "alpha"

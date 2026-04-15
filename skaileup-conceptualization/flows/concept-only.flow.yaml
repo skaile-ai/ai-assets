@@ -28,7 +28,7 @@ globals:
 modes:
   research:
     enabled: true
-    skill: "research"
+    skill: "skailup-research"
     triggers:
       - "overview"
       - "features"
@@ -67,7 +67,7 @@ nodes:
       x: 40
       y: 200
     data:
-      skill: "overview"
+      skill: "skailup-overview"
       label: "Project Brief"
       optional: false
   - id: "journeys"
@@ -77,7 +77,7 @@ nodes:
       x: 280
       y: 80
     data:
-      skill: "journeys"
+      skill: "skailup-journeys"
       label: "User Journeys"
       optional: false
       parameters:
@@ -92,7 +92,7 @@ nodes:
       x: 280
       y: 240
     data:
-      skill: "brand-visual"
+      skill: "skailup-brand-visual"
       label: "Brand Visual"
       optional: false
       parallel_group: "identity"
@@ -106,7 +106,7 @@ nodes:
       x: 280
       y: 380
     data:
-      skill: "techstack"
+      skill: "skailup-techstack"
       label: "Tech Stack"
       optional: false
       parallel_group: "identity"
@@ -120,7 +120,7 @@ nodes:
       x: 560
       y: 200
     data:
-      skill: "features"
+      skill: "skailup-features"
       label: "Features"
       optional: false
       subagent: true
@@ -135,7 +135,7 @@ nodes:
       x: 560
       y: 80
     data:
-      skill: "brand-behavioral"
+      skill: "skailup-brand-behavioral"
       label: "Brand Behavioral"
       optional: true
       overrides:
@@ -148,7 +148,7 @@ nodes:
       x: 560
       y: 340
     data:
-      skill: "behaviors"
+      skill: "skailup-behaviors"
       label: "Behaviors"
       optional: true
       overrides:
@@ -161,7 +161,7 @@ nodes:
       x: 840
       y: 80
     data:
-      skill: "architecture"
+      skill: "skailup-architecture"
       label: "Architecture"
       optional: false
       subagent: true
@@ -176,7 +176,7 @@ nodes:
       x: 840
       y: 240
     data:
-      skill: "datamodel"
+      skill: "skailup-datamodel"
       label: "Data Model"
       optional: false
       subagent: true
@@ -190,7 +190,7 @@ nodes:
       x: 1120
       y: 200
     data:
-      skill: "screens"
+      skill: "skailup-screens"
       label: "Screens"
       optional: false
       subagent: true
@@ -204,7 +204,7 @@ nodes:
       x: 1120
       y: 60
     data:
-      skill: "components"
+      skill: "skailup-components"
       label: "Components"
       optional: true
       overrides:
@@ -217,7 +217,7 @@ nodes:
       x: 1120
       y: 340
     data:
-      skill: "storybook"
+      skill: "skailup-storybook"
       label: "Storybook"
       optional: true
       overrides:
@@ -230,7 +230,7 @@ nodes:
       x: 1120
       y: 200
     data:
-      skill: "mock"
+      skill: "skailup-mock"
       label: "Mockups"
       optional: true
       parameters:

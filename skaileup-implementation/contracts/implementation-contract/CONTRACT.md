@@ -69,7 +69,7 @@ _implementation/
 
 ## Expert Skill Discovery
 
-During implementation, skills search for matching `prog-expert-*` skills:
+During implementation, skills search for matching `skailup-prog-expert-*` skills:
 
 1. Read `_concept/3_blueprint/1_techstack/stack.md`
 2. Search paths: `.claude/skills/`, `.agents/skills/`, paths in `pipeline.json` `config.expert_search_paths`

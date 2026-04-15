@@ -24,7 +24,7 @@ globals:
 modes:
   research:
     enabled: true
-    skill: "research"
+    skill: "skailup-research"
     triggers:
       - "overview"
       - "features"
@@ -58,7 +58,7 @@ nodes:
       x: 40
       y: 140
     data:
-      skill: "overview"
+      skill: "skailup-overview"
       label: "Project Brief"
       optional: false
       parameters:
@@ -71,7 +71,7 @@ nodes:
       x: 280
       y: 60
     data:
-      skill: "journeys"
+      skill: "skailup-journeys"
       label: "User Journeys"
       optional: true
       parameters:
@@ -88,7 +88,7 @@ nodes:
       x: 280
       y: 200
     data:
-      skill: "features"
+      skill: "skailup-features"
       label: "Features"
       optional: false
       parameters:
@@ -105,7 +105,7 @@ nodes:
       x: 280
       y: 320
     data:
-      skill: "techstack"
+      skill: "skailup-techstack"
       label: "Tech Stack"
       optional: false
       parallel_group: "identity"
@@ -119,7 +119,7 @@ nodes:
       x: 560
       y: 60
     data:
-      skill: "architecture"
+      skill: "skailup-architecture"
       label: "Architecture"
       optional: true
       overrides:
@@ -133,7 +133,7 @@ nodes:
       x: 560
       y: 200
     data:
-      skill: "datamodel"
+      skill: "skailup-datamodel"
       label: "Data Model"
       optional: false
       parameters:

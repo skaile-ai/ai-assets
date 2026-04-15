@@ -6,9 +6,9 @@ This domain handles codebase convention discovery, injection, and synchronizatio
 
 | Skill | Path | Purpose |
 |---|---|---|
-| **discover** | `skills/discover/` | Scan an existing codebase and extract its conventions into `_standards/` |
-| **inject** | `skills/inject/` | Match discovered standards to a requesting skill's needs |
-| **sync** | `skills/sync/` | Bidirectional sync: update `_standards/` if codebase evolves |
+| **skailup-standards-discover** | `skills/skailup-standards-discover/` | Scan an existing codebase and extract its conventions into `_standards/` |
+| **skailup-standards-inject** | `skills/skailup-standards-inject/` | Match discovered standards to a requesting skill's needs |
+| **skailup-standards-sync** | `skills/skailup-standards-sync/` | Bidirectional sync: update `_standards/` if codebase evolves |
 
 ## Profiles
 
@@ -16,12 +16,12 @@ The `profiles/` directory contains technology-specific presets that configure al
 
 | Profile | Stack |
 |---|---|
-| `nuxt-ui/` | Nuxt 4 + @nuxt/ui (Reka UI + Tailwind 4) |
-| `nuxt-primevue/` | Nuxt + PrimeVue |
-| `nuxt-minimal/` | Nuxt minimal (no UI library) |
-| `nextjs-shadcn/` | Next.js + shadcn/ui |
-| `nextjs-radix/` | Next.js + Radix UI |
-| `postxl/` | PostXL (NestJS + Next.js monorepo) |
+| `skailup-tech-stack-nuxt-ui/` | Nuxt 4 + @nuxt/ui (Reka UI + Tailwind 4) |
+| `skailup-tech-stack-nuxt-primevue/` | Nuxt + PrimeVue |
+| `skailup-tech-stack-nuxt-minimal/` | Nuxt minimal (no UI library) |
+| `skailup-tech-stack-nextjs-shadcn/` | Next.js + shadcn/ui |
+| `skailup-tech-stack-nextjs-radix/` | Next.js + Radix UI |
+| `skailup-tech-stack-postxl/` | PostXL (NestJS + Next.js monorepo) |
 
 ## Standards Output
 

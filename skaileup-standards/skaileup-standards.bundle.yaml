@@ -3,12 +3,12 @@ description: Codebase convention discovery, injection, and synchronization
 version: 0.1.0
 dependencies:
   - contract:standards-contract
-  - skill:standards-discover
-  - skill:standards-inject
-  - skill:standards-sync
-  - skill:tech-stack-nuxt-ui
-  - skill:tech-stack-nuxt-primevue
-  - skill:tech-stack-nuxt-minimal
-  - skill:tech-stack-nextjs-shadcn
-  - skill:tech-stack-nextjs-radix
-  - skill:tech-stack-postxl
+  - skill:skailup-standards-discover
+  - skill:skailup-standards-inject
+  - skill:skailup-standards-sync
+  - skill:skailup-tech-stack-nuxt-ui
+  - skill:skailup-tech-stack-nuxt-primevue
+  - skill:skailup-tech-stack-nuxt-minimal
+  - skill:skailup-tech-stack-nextjs-shadcn
+  - skill:skailup-tech-stack-nextjs-radix
+  - skill:skailup-tech-stack-postxl

@@ -21,8 +21,8 @@ modes:
     enabled: false
   standards:
     enabled: true
-    skill: "standards-discover"
-    inject_skill: "standards-inject"
+    skill: "skailup-standards-discover"
+    inject_skill: "skailup-standards-inject"
     trigger_after: "scaffold"
 entry: "scaffold"
 nodes:
@@ -48,7 +48,7 @@ nodes:
       x: 40
       y: 120
     data:
-      skill: "scaffold"
+      skill: "skailup-scaffold"
       label: "Scaffold"
       optional: false
       parameters:
@@ -60,7 +60,7 @@ nodes:
       x: 280
       y: 120
     data:
-      skill: "foundation"
+      skill: "skailup-foundation"
       label: "Foundation"
       optional: false
       note: "Consolidated with scaffold — single checkpoint covers both"
@@ -85,7 +85,7 @@ nodes:
       x: 40
       y: 80
     data:
-      skill: "migrate"
+      skill: "skailup-migrate"
       label: "Migrate"
       optional: false
   - id: "seed"
@@ -95,7 +95,7 @@ nodes:
       x: 40
       y: 200
     data:
-      skill: "seed"
+      skill: "skailup-seed"
       label: "Seed"
       optional: false
   - id: "implement-feature"
@@ -105,7 +105,7 @@ nodes:
       x: 280
       y: 120
     data:
-      skill: "implement-feature"
+      skill: "skailup-implement-feature"
       label: "Feature"
       optional: false
       subagent: true

@@ -10,7 +10,7 @@ Code-centric and phase-aware. I communicate progress as phases complete, surface
 
 - **Concept gates everything**: I read `_concept/` before writing a single line of code. Missing or incomplete concept artifacts are a blocker, not a workaround.
 - **TDD by default**: Tests exist before implementation. A feature is not complete until tests pass.
-- **Expert routing always**: Before implementing anything tech-stack-specific, I search for a matching `prog-expert-*` skill. I do not substitute my own assumptions for expert guidance.
+- **Expert routing always**: Before implementing anything tech-stack-specific, I search for a matching `skailup-prog-expert-*` skill. I do not substitute my own assumptions for expert guidance.
 - **Reversible steps**: Migrations are always up/down. Scaffolding is idempotent. Seed data is scenario-tagged.
 - **Complexity-aware consolidation**: Checkpoint frequency scales with complexity tier. Small tier consolidates; complex tier separates each phase into its own approval gate.
 - **Learnings as output**: `LEARNINGS.md` is updated at every checkpoint with observations about skill quality, CLI behavior, and generated app quality.
@@ -35,9 +35,9 @@ Gate: UAT approved.
 
 ## Variants
 
-- **Merged** (`skills/00_orchestrator/SKILL.md`): Unified orchestrator combining CF and Saxe approaches. Primary variant.
-- **CF variant** (`skills/00_orchestrator/cf/`): CF-lineage subagent for plan generation and expert skill discovery.
-- **Saxe variant** (`skills/00_orchestrator/saxe/`): PostXL-specific with strict checkpoint/approval protocol, re-generation phase, and UAT journey testing.
+- **Merged** (`skills/skailup-implement/SKILL.md`): Unified orchestrator combining CF and Saxe approaches. Primary variant.
+- **CF variant** (`skills/skailup-implement/cf/`): CF-lineage subagent for plan generation and expert skill discovery.
+- **Saxe variant** (`skills/skailup-implement/saxe/`): PostXL-specific with strict checkpoint/approval protocol, re-generation phase, and UAT journey testing.
 
 ## Feature Auto-Review
 

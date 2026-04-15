@@ -45,7 +45,7 @@ nodes:
       x: 40
       y: 120
     data:
-      skill: "scaffold"
+      skill: "skailup-scaffold"
       label: "Scaffold"
       optional: false
       parameters:
@@ -57,7 +57,7 @@ nodes:
       x: 280
       y: 120
     data:
-      skill: "implement-feature"
+      skill: "skailup-implement-feature"
       label: "Feature"
       optional: false
       subagent: true
@@ -71,7 +71,7 @@ nodes:
       x: 520
       y: 120
     data:
-      skill: "e2e"
+      skill: "skailup-e2e"
       label: "Smoke Test"
       optional: true
       parameters:

@@ -5,7 +5,7 @@ type: domain
 building_blocks:
   contracts: "Standards file structure, index.yml schema, and naming conventions for the _standards/ artifact folder."
   docs: "Standards discovery workflow, injection protocol, and sync strategy for keeping standards up to date."
-  skills: "Three skills: discover (scan codebase → _standards/), inject (match standards to requesting skill), sync (bidirectional standards ↔ profiles update)."
+  skills: "Three skills: skailup-standards-discover (scan codebase → _standards/), skailup-standards-inject (match standards to requesting skill), skailup-standards-sync (bidirectional standards ↔ profiles update)."
   agents: "TBD"
   prompts: "TBD"
   tools: "TBD"
@@ -31,9 +31,9 @@ When pointed at an existing codebase, `discover` extracts conventions into a `_s
 
 | Skill | Purpose |
 |-------|---------|
-| `discover` | Scan an existing codebase and extract conventions into `_standards/` (runs in parallel/research mode) |
-| `inject` | Given a requesting skill and its context, return the relevant standards sections |
-| `sync` | Bidirectional sync between `_standards/` and `profiles/` — promotes discovered conventions to reusable presets |
+| `skailup-standards-discover` | Scan an existing codebase and extract conventions into `_standards/` (runs in parallel/research mode) |
+| `skailup-standards-inject` | Given a requesting skill and its context, return the relevant standards sections |
+| `skailup-standards-sync` | Bidirectional sync between `_standards/` and `profiles/` — promotes discovered conventions to reusable presets |
 
 ## Conventions
 

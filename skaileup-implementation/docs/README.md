@@ -6,10 +6,10 @@ This domain covers the full implementation lifecycle: project scaffolding, featu
 
 | Group | Path | Purpose |
 |---|---|---|
-| **orchestrator** | `skills/00_orchestrator/` | Implementation pipeline controller |
-| **setup** | `skills/10_setup/` | Project scaffold, foundation setup, infrastructure |
-| **features** | `skills/20_features/` | Per-feature implementation (TDD-first) |
-| **verify** | `skills/30_verify/` | Verification: unit tests, E2E, visual regression |
+| **skailup-implement** | `skills/skailup-implement/` | Implementation pipeline controller |
+| **setup** | `skills/setup/` | Project scaffold, foundation setup, infrastructure |
+| **skailup-implement-feature** | `skills/skailup-implement-feature/` | Per-feature implementation (TDD-first) |
+| **skailup-update-starlight-docs** | `skills/skailup-update-starlight-docs/` | Starlight documentation updates |
 | **utilities** | `skills/utilities/` | Migration, seed data, code generation |
 
 ## CF vs Saxe Variants

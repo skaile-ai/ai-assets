@@ -6,14 +6,14 @@ This domain contains quality assurance skills: static audit, end-to-end testing,
 
 | Skill | Path | Sources | Purpose |
 |---|---|---|---|
-| **audit** | `skills/audit/` | CF + Saxe | Static code analysis + concept structure audit |
-| **e2e** | `skills/e2e/` | CF + Saxe | End-to-end browser tests |
-| **ready** | `skills/ready/` | CF + Saxe | Pre-flight readiness gate before next pipeline step |
-| **sync** | `skills/sync/` | CF only | Cross-reference repair (features ↔ screens, model → features) |
-| **test-unit** | `skills/test-unit/` | CF only | Unit test generation |
-| **test-integration** | `skills/test-integration/` | CF only | Integration test generation |
-| **test-plan** | `skills/test-plan/` | CF only | Test plan document → `08_testing/test_plan.md` |
-| **compile-validators** | `skills/compile-validators/` | Saxe only | Compile all `validator.py` files into a unified validation suite |
+| **skailup-audit** | `skills/skailup-audit/` | CF + Saxe | Static code analysis + concept structure audit |
+| **skailup-e2e** | `skills/skailup-e2e/` | CF + Saxe | End-to-end browser tests |
+| **skailup-ready** | `skills/skailup-ready/` | CF + Saxe | Pre-flight readiness gate before next pipeline step |
+| **skailup-sync** | `skills/skailup-sync/` | CF only | Cross-reference repair (features ↔ screens, model → features) |
+| **skailup-test-unit** | `skills/skailup-test-unit/` | CF only | Unit test generation |
+| **skailup-test-integration** | `skills/skailup-test-integration/` | CF only | Integration test generation |
+| **skailup-test-plan** | `skills/skailup-test-plan/` | CF only | Test plan document → `08_testing/test_plan.md` |
+| **skailup-compile-validators** | `skills/skailup-compile-validators/` | Saxe only | Compile all `validator.py` files into a unified validation suite |
 
 ## Notable Patterns
 

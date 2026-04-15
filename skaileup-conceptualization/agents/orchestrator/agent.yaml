@@ -26,7 +26,7 @@ tags:
   - "plans"
 metadata:
   domain: "skaileup-conceptualization"
-  skill_merged: "skills/orchestrator/SKILL.md"
+  skill_merged: "skills/skailup-orchestrator/SKILL.md"
   phases: "Discovery, Experience, Blueprint"
   complexity_tiers: "small, standard, complex"
   produces: "_concept/ artifacts, PLANS.md, approval snapshots, LEARNINGS.md"

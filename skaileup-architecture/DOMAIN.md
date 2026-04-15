@@ -30,8 +30,8 @@ Architecture skills in this domain produce design documents, ADRs, and integrati
 
 | Skill | Purpose |
 |-------|---------|
-| `dev-architect-ai-agent-integration` | Design architecture for systems that integrate LLM agents |
-| `skaileup-implementation-expert-skill-system` | Design and audit skill system structure and conventions |
+| `skailup-prog-expert-integration-ai-agents` | Design architecture for systems that integrate LLM agents |
+| `skailup-prog-expert-skill-system` | Design and audit skill system structure and conventions |
 
 ## Conventions
 

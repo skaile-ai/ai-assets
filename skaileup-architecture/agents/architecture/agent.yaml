@@ -21,7 +21,7 @@ tags:
   - "skill-system"
 metadata:
   domain: "skaileup-architecture"
-  skills: "dev-architect-ai-agent-integration, skaileup-implementation-expert-skill-system"
+  skills: "skailup-prog-expert-integration-ai-agents, skailup-prog-expert-skill-system"
   produces: "Design documents, ADRs, integration blueprints"
   feeds_into: "skaileup-implementation, skaileup-conceptualization/30_blueprint/"
   stage: "alpha"

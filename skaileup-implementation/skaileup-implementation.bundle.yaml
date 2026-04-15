@@ -3,20 +3,20 @@ description: Implementation pipeline — scaffolding, feature implementation, ve
 version: 0.1.0
 dependencies:
   - contract:implementation-contract
-  - skill:foundation
-  - skill:scaffold
-  - skill:infrastructure
-  - skill:implement
-  - skill:implement-feature
-  - skill:implement-feature-page
+  - skill:skailup-foundation
+  - skill:skailup-scaffold
+  - skill:skailup-infrastructure
+  - skill:skailup-implement
+  - skill:skailup-implement-feature
+  - skill:skailup-implement-feature-page
   - skill:verify
-  - skill:test-plan
-  - skill:test-unit
-  - skill:test-integration
-  - skill:generate
-  - skill:migrate
-  - skill:seed
-  - skill:update-starlight-docs
+  - skill:skailup-test-plan
+  - skill:skailup-test-unit
+  - skill:skailup-test-integration
+  - skill:skailup-generate
+  - skill:skailup-migrate
+  - skill:skailup-seed
+  - skill:skailup-update-starlight-docs
   - agent:impl-orchestrator
   - flow:standard
   - flow:full

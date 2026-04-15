@@ -30,18 +30,18 @@ CF and Saxe variants coexist under `cf/` and `saxe/` subdirectories. Quality ski
 
 | Group | Purpose | When to Use |
 |-------|---------|-------------|
-| `eval-concept/` | Concept completeness + clarity gate | After skaileup-conceptualization, before build starts |
-| `eval-feature/` | Implementation vs. concept (per feature group) | After each feature group in skaileup-implementation |
-| `eval-product/` | Whole product vs. goals (graded design criteria) | After all feature groups approved, before release |
-| `eval-code/` | Build, test suite, parallel logic/security/UI audit | scaffold/feature/full scope checkpoints |
-| `test-plan/` | Test plan generation from concept features | After concept complete, before implementation |
-| `test-unit/` | Unit test generation from feature specs | During TDD implementation per feature |
-| `test-integration/` | Integration tests (API + DB + cross-feature flows) | After feature groups, before product eval |
-| `audit/` | Ad-hoc static code audit (standalone use) | On-demand outside pipeline gates |
-| `ready/` | Pre-flight readiness check (standalone use) | Before manual E2E testing |
-| `e2e/` | Browser-based E2E test suite (standalone use) | On-demand or CI |
-| `sync/` | Cross-reference repair in _concept/ | When concept cross-refs break |
-| `compile-validators/` | Compile validator scripts from SKILL.md rules | Tooling maintenance |
+| `skailup-eval-concept/` | Concept completeness + clarity gate | After skaileup-conceptualization, before build starts |
+| `skailup-eval-feature/` | Implementation vs. concept (per feature group) | After each feature group in skaileup-implementation |
+| `skailup-eval-product/` | Whole product vs. goals (graded design criteria) | After all feature groups approved, before release |
+| `skailup-eval-code/` | Build, test suite, parallel logic/security/UI audit | scaffold/feature/full scope checkpoints |
+| `skailup-test-plan/` | Test plan generation from concept features | After concept complete, before implementation |
+| `skailup-test-unit/` | Unit test generation from feature specs | During TDD implementation per feature |
+| `skailup-test-integration/` | Integration tests (API + DB + cross-feature flows) | After feature groups, before product eval |
+| `skailup-audit/` | Ad-hoc static code audit (standalone use) | On-demand outside pipeline gates |
+| `skailup-ready/` | Pre-flight readiness check (standalone use) | Before manual E2E testing |
+| `skailup-e2e/` | Browser-based E2E test suite (standalone use) | On-demand or CI |
+| `skailup-sync/` | Cross-reference repair in _concept/ | When concept cross-refs break |
+| `skailup-compile-validators/` | Compile validator scripts from SKILL.md rules | Tooling maintenance |
 
 ## Conventions
 

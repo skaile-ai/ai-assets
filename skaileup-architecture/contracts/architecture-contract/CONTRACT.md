@@ -40,8 +40,8 @@ prog-expert-<technology>/SKILL.md
 ```
 
 Examples:
-- `prog-expert-integration-ai-agents/`
-- `prog-expert-skill-system/`
+- `skailup-prog-expert-integration-ai-agents/`
+- `skailup-prog-expert-skill-system/`
 
 Expert skills are **discovered at runtime** by implementation skills:
 1. Read `stack.md` for declared technologies

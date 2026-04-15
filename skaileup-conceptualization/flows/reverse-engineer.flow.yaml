@@ -28,8 +28,8 @@ modes:
     enabled: false
   standards:
     enabled: true
-    skill: "standards-discover"
-    inject_skill: "standards-inject"
+    skill: "skailup-standards-discover"
+    inject_skill: "skailup-standards-inject"
     trigger_after: "reverse-engineer"
     parameters:
       note: "Discover conventions from the repo being reverse-engineered"
@@ -70,7 +70,7 @@ nodes:
       x: 40
       y: 100
     data:
-      skill: "reverse-engineer"
+      skill: "skailup-reverse-engineer"
       label: "Reverse Engineer"
       optional: false
       subagent: true
@@ -88,7 +88,7 @@ nodes:
       x: 40
       y: 60
     data:
-      skill: "journeys"
+      skill: "skailup-journeys"
       label: "User Journeys"
       optional: true
       parameters:
@@ -103,7 +103,7 @@ nodes:
       x: 280
       y: 60
     data:
-      skill: "architecture"
+      skill: "skailup-architecture"
       label: "Architecture"
       optional: true
       subagent: true
@@ -118,7 +118,7 @@ nodes:
       x: 280
       y: 160
     data:
-      skill: "datamodel"
+      skill: "skailup-datamodel"
       label: "Data Model"
       optional: true
       subagent: true
@@ -132,7 +132,7 @@ nodes:
       x: 560
       y: 100
     data:
-      skill: "screens"
+      skill: "skailup-screens"
       label: "Screens"
       optional: true
       subagent: true
@@ -146,7 +146,7 @@ nodes:
       x: 560
       y: 160
     data:
-      skill: "storybook"
+      skill: "skailup-storybook"
       label: "Storybook"
       optional: true
       overrides:

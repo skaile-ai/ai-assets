@@ -46,7 +46,7 @@ nodes:
       x: 40
       y: 140
     data:
-      skill: "scaffold"
+      skill: "skailup-scaffold"
       label: "Scaffold"
       optional: false
       parameters:
@@ -59,7 +59,7 @@ nodes:
       x: 280
       y: 140
     data:
-      skill: "foundation"
+      skill: "skailup-foundation"
       label: "Foundation"
       optional: true
       parameters:
@@ -71,7 +71,7 @@ nodes:
       x: 520
       y: 60
     data:
-      skill: "migrate"
+      skill: "skailup-migrate"
       label: "Migrate"
       optional: true
   - id: "seed"
@@ -81,7 +81,7 @@ nodes:
       x: 520
       y: 220
     data:
-      skill: "seed"
+      skill: "skailup-seed"
       label: "Seed"
       optional: true
   - id: "implement-feature"
@@ -91,7 +91,7 @@ nodes:
       x: 760
       y: 140
     data:
-      skill: "implement-feature"
+      skill: "skailup-implement-feature"
       label: "Feature"
       optional: false
       subagent: true
@@ -104,7 +104,7 @@ nodes:
       x: 1000
       y: 60
     data:
-      skill: "test-unit"
+      skill: "skailup-test-unit"
       label: "Unit Tests"
       optional: false
       subagent: true
@@ -115,7 +115,7 @@ nodes:
       x: 1000
       y: 200
     data:
-      skill: "test-integration"
+      skill: "skailup-test-integration"
       label: "Integration Tests"
       optional: false
       subagent: true

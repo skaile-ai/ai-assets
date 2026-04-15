@@ -22,8 +22,8 @@ modes:
     enabled: false
   standards:
     enabled: true
-    skill: "standards-discover"
-    inject_skill: "standards-inject"
+    skill: "skailup-standards-discover"
+    inject_skill: "skailup-standards-inject"
     trigger_after: "scaffold"
 entry: "scaffold"
 nodes:
@@ -48,7 +48,7 @@ nodes:
       x: 40
       y: 160
     data:
-      skill: "scaffold"
+      skill: "skailup-scaffold"
       label: "Scaffold"
       optional: false
       parameters:
@@ -60,7 +60,7 @@ nodes:
       x: 280
       y: 160
     data:
-      skill: "foundation"
+      skill: "skailup-foundation"
       label: "Foundation"
       optional: false
   - id: "infrastructure"
@@ -70,7 +70,7 @@ nodes:
       x: 520
       y: 160
     data:
-      skill: "infrastructure"
+      skill: "skailup-infrastructure"
       label: "Infrastructure"
       optional: true
       condition: "architecture.md exists AND custom_modules is non-empty OR non-standard apps present"
@@ -82,7 +82,7 @@ nodes:
       x: 760
       y: 80
     data:
-      skill: "migrate"
+      skill: "skailup-migrate"
       label: "Migrate"
       optional: false
   - id: "seed"
@@ -92,7 +92,7 @@ nodes:
       x: 760
       y: 240
     data:
-      skill: "seed"
+      skill: "skailup-seed"
       label: "Seed"
       optional: false
   - id: "implement-feature"
@@ -102,7 +102,7 @@ nodes:
       x: 1000
       y: 160
     data:
-      skill: "implement-feature"
+      skill: "skailup-implement-feature"
       label: "Feature"
       optional: false
       subagent: true
@@ -115,7 +115,7 @@ nodes:
       x: 1240
       y: 80
     data:
-      skill: "test-unit"
+      skill: "skailup-test-unit"
       label: "Unit Tests"
       optional: false
       subagent: true
@@ -126,7 +126,7 @@ nodes:
       x: 1240
       y: 240
     data:
-      skill: "test-integration"
+      skill: "skailup-test-integration"
       label: "Integration Tests"
       optional: false
       subagent: true
@@ -137,7 +137,7 @@ nodes:
       x: 1480
       y: 160
     data:
-      skill: "e2e"
+      skill: "skailup-e2e"
       label: "E2E Tests"
       optional: true
       subagent: true

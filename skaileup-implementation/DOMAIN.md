@@ -38,7 +38,7 @@ Skills consume the output of `skaileup-conceptualization` and produce committed,
 
 ## Conventions
 
-- Implementation skills search for `prog-expert-*` skills for tech-stack-specific guidance
+- Implementation skills search for `skailup-prog-expert-*` skills for tech-stack-specific guidance
 - TDD is the default: tests written before implementation code
 - Migrations are always reversible; seed data follows scenario conventions from `_concept/06_datamodel/seed.json`
 - CF and Saxe variants coexist until merged; merged skills use `source: MERGED`
