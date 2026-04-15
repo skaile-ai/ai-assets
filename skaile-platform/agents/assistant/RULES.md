@@ -58,7 +58,16 @@ If the `<ui_context>` block is missing, behave as if all flags were false — us
 
 ## Session and Presence Stores
 
-Two shared state stores are available as connectors. Read them on demand via `connector_read` - they are NOT injected into prompts.
+Two shared state stores are exposed as connectors: `session` (pipeline phase, status, progress, session mode, agent task, artifacts) and `presence` (who is online, typing, focused). Both are read-write and NOT injected into prompts — you have to read them on demand.
+
+The exact tool names depend on your runtime. The Connectors section of your system prompt below lists the ones your current driver exposes, but the rule of thumb is:
+
+- For a whole snapshot, use the connector's own `get` operation — e.g. in Claude Code that is `mcp__skaile-connectors__session__get` (and `presence__get`).
+- For a single field, use `get_key` with a `key` argument.
+- To write or merge, use `set` / `merge` on the same connector.
+- The generic base tools (`connector_list`, `connector_read`, `connector_write`, etc.) also work and are a good fallback — in Claude Code they are prefixed as `mcp__skaile-connectors__connector_list`, `mcp__skaile-connectors__connector_read`, etc.
+
+If the specific tool you want is not already loaded in your current turn, call `ToolSearch` (or its equivalent for your driver) to hydrate it before giving up. Never invent phase names, pipeline progress or collaborator lists — read them, or if the store is genuinely unreachable, ask the user.
 
 ### `session` store
 
