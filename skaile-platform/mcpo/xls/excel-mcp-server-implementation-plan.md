@@ -163,7 +163,7 @@ excel-mcp/
 ├── Dockerfile
 ├── README.md
 ├── excel-mcp-server-future-work.md          # created by impl agent (§1.6)
-├── src/main/java/com/portfolex/excelmcp/
+├── src/main/java/com/skaile/excelmcp/
 │   ├── McpServerMain.java                   # entry point: parse env, init server, start stdio loop
 │   │
 │   ├── server/                              # LAYER 1 + 2: transport + dispatch (no Excel logic)
@@ -244,7 +244,7 @@ excel-mcp/
 │       └── LoggingSetup.java                # routes Logback to stderr only
 │
 └── src/test/
-    ├── java/com/portfolex/excelmcp/...      # mirrors main/, smoke tests only (§11.2)
+    ├── java/com/skaile/excelmcp/...      # mirrors main/, smoke tests only (§11.2)
     └── resources/fixtures/
         ├── simple.xlsx
         ├── formulas.xlsx

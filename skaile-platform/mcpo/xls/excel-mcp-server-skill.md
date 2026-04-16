@@ -156,7 +156,7 @@ excel-mcp/
 ├── pom.xml (or build.gradle)
 ├── Dockerfile
 ├── src/main/java/
-│   └── com/portfolex/excelmcp/
+│   └── com/skaile/excelmcp/
 │       ├── McpServer.java          # protocol entry point
 │       ├── tools/                  # one file per tool (open, range_get, …)
 │       ├── handles/                # HandleRegistry, idle-TTL eviction
