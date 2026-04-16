@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  MCP stdio transport: stdout is reserved for protocol messages. All log output
+  MUST go to stderr. System.out is also redirected to stderr at startup as a
+  belt-and-braces measure (see LoggingSetup).
+-->
+<configuration>
+  <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+    <target>System.err</target>
+    <encoder>
+      <pattern>%date{yyyy-MM-dd'T'HH:mm:ss.SSSXXX, UTC} %-5level [%thread] %logger{36} %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- LOG_LEVEL env var controls root level; defaults to INFO. -->
+  <root level="${LOG_LEVEL:-INFO}">
+    <appender-ref ref="STDERR"/>
+  </root>
+</configuration>
