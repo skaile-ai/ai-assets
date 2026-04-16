@@ -231,7 +231,9 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
       for (int c = 0; c < cols; c++) {
         int row0 = addr.startRow() + r;
         int col0 = addr.startCol() + c;
-        rowOut.add(PoiCellReader.read(row == null ? null : row.getCell(col0), row0, col0));
+        rowOut.add(
+            PoiCellReader.read(
+                row == null ? null : row.getCell(col0), row0, col0, includeFormatting));
       }
       cells.add(rowOut);
     }

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Map;
 import org.apache.poi.ss.formula.eval.ErrorEval;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -27,7 +28,23 @@ public final class PoiCellReader {
   private PoiCellReader() {}
 
   public static CellShape read(Cell cell, int row0, int col0) {
+    return read(cell, row0, col0, false);
+  }
+
+  public static CellShape read(Cell cell, int row0, int col0, boolean includeFormatting) {
     String a1 = new CellReference(row0, col0).formatAsString(false);
+    CellShape base = readBase(cell, a1);
+    if (!includeFormatting || cell == null) {
+      return base;
+    }
+    Map<String, Object> fmt = PoiFormattingReader.read(cell);
+    if (fmt == null) {
+      return base;
+    }
+    return new CellShape(base.a1(), base.type(), base.value(), base.formula(), fmt);
+  }
+
+  private static CellShape readBase(Cell cell, String a1) {
     if (cell == null) {
       return CellShape.blank(a1);
     }
