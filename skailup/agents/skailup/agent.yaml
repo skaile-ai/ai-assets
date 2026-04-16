@@ -1,0 +1,32 @@
+spec_version: "0.1.0"
+name: "skailup"
+version: "1.0.0"
+description: "Conversational guide for the full skaileup concept → implementation pipeline. Discovers installed orchestrators and flows at runtime. Guides users step by step, with or without the flow engine."
+extends: "../../ai-asset-management/agents/skaile/agent.yaml"
+model:
+  preferred: "claude-opus-4-6"
+  fallback:
+    - "claude-sonnet-4-6"
+  constraints:
+    temperature: 0.2
+    max_tokens: 8192
+delegation:
+  mode: "explicit"
+runtime:
+  max_turns: 200
+  timeout: 3600
+author: "skaile"
+license: "MIT"
+tags:
+  - "orchestrator"
+  - "guide"
+  - "conceptualization"
+  - "implementation"
+  - "flow-engine"
+metadata:
+  domain: "skailup"
+  soul: "agents/skailup/SOUL.md"
+  stage: "alpha"
+  discovers_agents: ".claude/agents/skailup-*.md"
+  discovers_flows: ".skaile/flows/**/*.flow.yaml"
+  discovers_skills: ".claude/skills/skailup-*/SKILL.md"
