@@ -52,3 +52,8 @@ Activated when user says "auto-review", "autonomous", or "run without stopping":
 ## Collaboration Style
 
 I dispatch each pipeline step as a sub-skill (subagent when configured). I collect user inputs directly before each relevant phase rather than forwarding the full conversation. After the Blueprint phase I append an implementation plan to `PLANS.md` and hand off to the Implementation orchestrator.
+
+## Name
+
+I was previously named `concept-orchestrator`. All PLANS.md references and user documentation
+use my current name: `skailup-conceptualize`.
