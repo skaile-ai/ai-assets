@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
@@ -214,6 +215,7 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
     Workbook wb = requireOpen(id);
     Sheet sheet = requireSheet(wb, sheetName);
     RangeAddress addr = RangeAddress.parse(rangeA1);
+    assertWithinFormatBounds(sheet, addr);
     int total = addr.cellCount();
     int rows = addr.rowCount();
     int cols = addr.colCount();
@@ -254,6 +256,10 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
       throws McpException {
     Workbook wb = requireOpen(id);
     Sheet sheet = requireSheet(wb, sheetName);
+    int endRow = startRow + Math.max(0, values.size() - 1);
+    int maxCols = values.stream().mapToInt(List::size).max().orElse(0);
+    int endCol = startCol + Math.max(0, maxCols - 1);
+    assertWithinFormatBounds(sheet, new RangeAddress(startRow, startCol, endRow, endCol));
     int written = 0;
     for (int r = 0; r < values.size(); r++) {
       List<Object> row = values.get(r);
@@ -285,6 +291,7 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
     Workbook wb = requireOpen(id);
     Sheet sheet = requireSheet(wb, sheetName);
     RangeAddress addr = RangeAddress.parse(rangeA1);
+    assertWithinFormatBounds(sheet, addr);
     int cleared = 0;
     for (int r = addr.startRow(); r <= addr.endRow(); r++) {
       Row row = sheet.getRow(r);
@@ -337,6 +344,46 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
     }
     throw new McpException(
         ErrorCode.SHEET_NOT_FOUND, "sheet not found: " + name, Map.of("sheet", name));
+  }
+
+  /**
+   * Reject ranges that exceed the workbook's hard format limits — xlsx/xlsm is capped at column XFD
+   * × 1,048,576 rows, xls at IV × 65,536. Data-extent bounds (rejecting a read that asks for rows
+   * past the last populated row) is intentionally NOT enforced in v1 — it's noisy for legitimate
+   * "show me A1:Z100 on this small sheet" calls and interacts poorly with cleared cells. See
+   * excel-mcp-server-future-work.md for the data-extent bound deferral.
+   */
+  private static void assertWithinFormatBounds(Sheet sheet, RangeAddress addr) throws McpException {
+    SpreadsheetVersion v = sheet.getWorkbook().getSpreadsheetVersion();
+    int maxRow = v.getLastRowIndex();
+    int maxCol = v.getLastColumnIndex();
+    if (addr.startRow() < 0 || addr.startCol() < 0) {
+      throw new McpException(
+          ErrorCode.RANGE_OUT_OF_BOUNDS,
+          "Range " + addr.toA1() + " has negative start coordinate",
+          Map.of("range", addr.toA1()));
+    }
+    if (addr.endRow() > maxRow || addr.endCol() > maxCol) {
+      String maxColLetter = RangeAddress.colLetter(maxCol);
+      throw new McpException(
+          ErrorCode.RANGE_OUT_OF_BOUNDS,
+          "Range "
+              + addr.toA1()
+              + " exceeds workbook format limits (max column "
+              + maxColLetter
+              + ", max row "
+              + (maxRow + 1)
+              + ")",
+          Map.of(
+              "range",
+              addr.toA1(),
+              "sheet",
+              sheet.getSheetName(),
+              "format_max_col",
+              maxColLetter,
+              "format_max_row",
+              maxRow + 1));
+    }
   }
 
   private static void safeClose(Workbook wb) {
