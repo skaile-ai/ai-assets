@@ -1,6 +1,13 @@
 ---
 title: Agents
 description: The GitAgent format — agent.yaml spec, SOUL.md, RULES.md, knowledge/, imprint assembly, and how agents are used by the runner.
+_sources:
+  - path: ai-assets/ai-asset-management/agents/skaile/agent.yaml
+  - path: ai-assets/skailup/agents/skailup/agent.yaml
+  - path: ai-assets/skaileup-conceptualization/agents/skailup-conceptualize/agent.yaml
+  - path: ai-assets/skaileup-implementation/agents/skailup-implement/agent.yaml
+_based_on_commit: 0083cc0d1cd7892ac8fa3bb57c55c73af6852558
+_last_synced: "2026-04-16"
 ---
 
 An **agent** in ai-assets is a [GitAgent](https://gitagent.sh) — a portable, version-controlled agent definition stored as a plain directory. The GitAgent format defines the structure and schema; the `agent-runner` assembles the definition into a system prompt (called an **imprint**) before executing a flow.
@@ -25,12 +32,12 @@ An agent definition is valid when `agent.yaml` is present. All other files are o
 
 ```yaml
 spec_version: "0.1.0"           # GitAgent spec version — always "0.1.0"
-name: concept-orchestrator       # Unique agent ID
+name: skailup-conceptualize      # Unique agent ID
 version: 1.0.0                   # Semver
 description: >
   Concept pipeline orchestrator — runs Discovery → Experience → Blueprint.
 
-extends: ../../../ai-asset-management/agents/skaile/agent.yaml  # optional inheritance
+extends: ../../ai-asset-management/agents/skaile/agent.yaml  # optional inheritance
 
 model:
   preferred: claude-opus-4-6     # Primary model
@@ -99,7 +106,7 @@ Declares which other agent definitions this agent depends on:
 ```yaml
 dependencies:
   - name: conceptualization
-    source: ../../skaileup-conceptualization/agents/orchestrator
+    source: ../../skaileup-conceptualization/agents/skailup-conceptualize
     version: 1.0.0
     mount: agents/conceptualization
 ```
@@ -163,11 +170,14 @@ Parts are joined with `\n\n---\n\n`. Missing files are silently skipped.
 | Agent | Path | Role |
 |---|---|---|
 | `skaile` | `ai-asset-management/agents/skaile/` | Root orchestrator — routes by intent to domain agents |
-| `concept-orchestrator` | `skaileup-conceptualization/agents/orchestrator/` | Concept pipeline (Discovery → Blueprint) |
-| `impl-orchestrator` | `skaileup-implementation/agents/orchestrator/` | Implementation pipeline (Setup → Verify) |
+| `skailup` | `skailup/agents/skailup/` | Conversational guide — discovers installed orchestrators, guides through flows |
+| `skailup-conceptualize` | `skaileup-conceptualization/agents/skailup-conceptualize/` | Concept pipeline (Discovery → Blueprint) |
+| `skailup-implement` | `skaileup-implementation/agents/skailup-implement/` | Implementation pipeline (Setup → Verify) |
 | `quality` | `skaileup-evaluate/agents/quality/` | Quality assurance |
 | `architecture` | `skaileup-architecture/agents/architecture/` | System architecture |
 | `pi` | `pichi/agent/` | Default CLI agent — focused software development assistant |
+
+The `skailup-*` naming convention is significant: any agent installed to `.claude/agents/` whose name starts with `skailup-` is automatically discovered by the `skailup` guide agent at session start. New orchestrators (e.g. `skailup-implement-supabase`) are discovered without any change to `skailup` itself.
 
 ## Running an Agent
 
@@ -177,9 +187,14 @@ skaile run cli-concept --project-dir ./my-project
 
 # With a different agent definition
 skaile run cli-concept --project-dir ./my-project \
-  --agent-dir ./ai-assets/skaileup-conceptualization/agents/orchestrator
+  --agent-dir ./ai-assets/skaileup-conceptualization/agents/skailup-conceptualize
+
+# Via Claude Code --agent flag (after skaile install)
+claude --agent skailup                  # interactive guide — start here
+claude --agent skailup-conceptualize    # concept pipeline directly
+claude --agent skailup-implement        # implementation pipeline directly
 
 # Via GitAgent CLI
-gitagent run ai-assets/skaileup-conceptualization/agents/orchestrator/
+gitagent run ai-assets/skaileup-conceptualization/agents/skailup-conceptualize/
 gitagent validate ai-assets/ai-asset-management/agents/skaile/
 ```
