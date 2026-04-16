@@ -65,11 +65,11 @@ metadata:
   stage: "alpha"
 requires:
   - name: "conceptualization"
-    source: "../../skaileup-conceptualization/agents/orchestrator"
+    source: "../../skaileup-conceptualization/agents/skailup-conceptualize"
     version: "1.0.0"
     mount: "agents/conceptualization"
   - name: "implementation"
-    source: "../../skaileup-implementation/agents/orchestrator"
+    source: "../../skaileup-implementation/agents/skailup-implement"
     version: "1.0.0"
     mount: "agents/implementation"
   - name: "quality"
