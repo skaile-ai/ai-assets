@@ -93,10 +93,56 @@ v1 strategy: **detect via `workbook.capabilities_report` and warn**. Don't attem
 
 ---
 
+## Authoring conventions (standing directives)
+
+These apply to every phase from this point forward, across sessions. Follow them when writing new code; if you inherit code that violates them, fix it.
+
+### Tool description template — required for every new tool from Phase 5 onward
+
+The `ToolDefinition.description()` returned by each tool must be a single block of text with **three parts, in this order**:
+
+1. **Effect statement** — one sentence describing what changes in the world when the tool runs (e.g. "Loads an Excel workbook into memory and returns an opaque handle for subsequent calls.").
+2. **Prerequisite / lifecycle note** — what must have run before and/or what this tool enables after (e.g. "Requires a handle previously returned by `workbook.open` or `workbook.create`; the returned handle stays valid until `workbook.close` or process exit.").
+3. **One important gotcha or constraint** the LLM needs in order to use the tool correctly (e.g. "Changes are in-memory until `workbook.save`.", "Empty cells return `type:blank`, not an error.", "Formula cells do not auto-evaluate — call `workbook.recalculate` to refresh cached values.").
+
+Keep each part one sentence. The whole description should read in under ~60 words.
+
+### Parameter description rules
+
+Every `properties.<name>.description` in a tool's input schema must state:
+
+- **Valid value forms** with at least one concrete example (e.g. `"A1 range like \"A1:C10\" or a single-cell form like \"C5\""`).
+- **Constraints** (length, domain, allowed enum values).
+- **Units** where applicable (bytes, row indices 1-based vs 0-based, UTC vs naive datetime).
+
+Do **not** duplicate what the JSON Schema already encodes (`type`, `required`, `default`). Do **not** mention POI, XSSF, or any engine-layer concept — agents see the tool surface only.
+
+---
+
 ## Plan deferrals during implementation
 
 Appended as decisions are made. Each entry: what was chosen, why, and a one-line sketch of the future-better option if one came to mind. Look for matching `// PLAN-DEFER:` comments in code.
 
+> 🛑 **STOP-GATES for future implementation sessions.** Before acting on any of these, pause and ask the human to choose. Do NOT decide unilaterally — these interact with constraints outside the plan.
+>
+> - **Phase 10, Dockerfile user:** pick one of the three options in "Container UID vs. bind-mount ownership" below before touching the Dockerfile.
+> - **Phase 10, tool-description audit:** review all 25 tool `description()` strings and their parameter descriptions in a single editorial pass against the "Tool description template" and "Parameter description rules" above. Fix any that don't conform (Phases 0–4 tools predate the template). Roughly a 30-minute pass over ~250 lines total. Do this as polish, not ad-hoc during earlier phases.
+
+### Open items to discuss at the end of v1
+
+- **`PATH_OUTSIDE_ROOT` fix: reproducibility disagreement between implementer and operator.** After the §6.1 reorder landed (see "Fixed: `PATH_OUTSIDE_ROOT` was unreachable…" below), end-to-end verification inside a fresh `docker build --no-cache -t excel-mcp:dev .` image returned the expected `PATH_OUTSIDE_ROOT` for `/tmp/foo.xlsx`, `/data/../etc/passwd`, and `/etc/os-release` — and `FILE_NOT_FOUND` for `/data/doesntexist.xlsx` — with server startup confirming `EXCEL_MCP_ROOT=/data (path sandboxing enabled)`. The human still reported seeing `FILE_NOT_FOUND` for `/tmp/foo.xlsx` under the MCP Inspector against what they believed was a fresh image. Most likely: stale docker layer, inspector UI caching a prior response, or a dual docker daemon (WSL/Desktop) showing different images to different shells. **To revisit at end of v1:** reproduce together, capture the exact inspector response payload + server stderr, confirm which daemon / image hash is actually serving the MCP call, and close out one way or the other. No code change to attempt until that diagnosis.
+
 - **Jackson version: 2.20.1 instead of the plan's 2.18.x.** (Phase 0, pom.xml) The MCP Java SDK `mcp-json-jackson2:1.1.1` transitively pulls `jackson-databind:2.20.1`; pinning 2.18.x would force a dual-version shade and surprise null/date handling. Chose SDK alignment. Future better: watch for an SDK drop that realigns and re-pin to whatever the team standardises on.
+- **Container UID vs. bind-mount ownership — decision deferred to Phase 10.** (Observed Phase 4, WSL dev host) The `Dockerfile` currently runs the app as `USER 10001`. When the operator bind-mounts a host directory (`-v ./data:/data`), UID 10001 inside the container cannot write to files owned by the host user (typically UID 1000), so `workbook.save` fails with `SAVE_FAILED` unless the operator overrides with `--user 1000:1000` or a Kubernetes `securityContext.runAsUser`. Confirmed reproducible in local WSL dev.
+
+  **Three candidate resolutions — recorded here, not chosen. When Phase 10 begins, STOP before touching the Dockerfile and ask the human to pick one.** This decision interacts with production deployment policies (K8s `runAsNonRoot`, enterprise security baselines) that are outside the plan's scope.
+
+  1. **Documentation only.** Keep `USER 10001`; add a README section explaining the operator must pass `--user $(id -u):$(id -g)` (or `securityContext.runAsUser`) when bind-mounting host directories. Zero Dockerfile change; pushes responsibility to the operator, which is arguably where it belongs for production. Developer ergonomics suffer on first run.
+  2. **Change Dockerfile default to UID 1000.** Most Linux/WSL dev hosts have UID 1000 as the primary user, so most users of the image will not need `--user` at all. Operators can still override. Small one-line Dockerfile change; no new dependencies. Trade-off: it's a heuristic that happens to be usually right, not truly automatic; on hosts where UID 1000 maps to a different user, the original problem recurs.
+  3. **Entrypoint script with runtime UID detection.** Install `gosu` (or `su-exec`), remove the static `USER` from the Dockerfile, ship an `entrypoint.sh` that stats the mounted directory, rewrites the app user's UID with `usermod -u <owner-uid> appuser`, then `exec gosu appuser java -jar …`. The container "just works" regardless of mount ownership. Trade-offs: the container starts briefly as root (breaks K8s `runAsNonRoot: true` and many enterprise baselines); adds an installed-binary dependency and a shell script to maintain.
+
+- **Fixed: `A1:XFE1` returned blanks instead of `RANGE_OUT_OF_BOUNDS`.** (Phase 4 manual testing) `readRange`/`writeRange`/`clearRange` iterated the requested address blindly, so any range whose end column or row exceeded the workbook's hard format limits (xlsx: XFD / 1,048,576; xls: IV / 65,536) silently returned empty cells. Fixed by asserting against `SpreadsheetVersion.getLastRowIndex()` / `getLastColumnIndex()` in all three range ops before iteration. Regression suite: `RangeBoundsTest` (5 cases, incl. XFE1 on reads/writes/clears and the accept-at-XFD boundary). **Chose to NOT enforce the §9.2 "data-extent" variant** ("Range D1:D10 is outside sheet 'Sheet1' (max column C, max row 5)") — it's noisy for legitimate "show me A1:Z100 on this small sheet" calls, interacts poorly with cleared cells (after `range.clear`, `getLastCellNum()` may return -1 and honest reads like A1:B2 would then fail), and is O(rows) to compute the max column. Format bounds alone address the reported bug. Future better: an opt-in `strict_bounds=true` parameter on `range.get` for callers who do want the data-extent check.
+- **Fixed: `PATH_OUTSIDE_ROOT` was unreachable (security — must-fix class, caught pre-production).** (Phase 4 manual testing) In the original `PathValidator`, file-existence and (elsewhere) the format-whitelist ran before the `EXCEL_MCP_ROOT` containment check, so every path outside the sandbox surfaced as `FILE_NOT_FOUND` or `FORMAT_UNSUPPORTED` and the sandbox signal was dead code. Reproduced with `EXCEL_MCP_ROOT=/data`: `/tmp/foo.xlsx → FILE_NOT_FOUND`, `/data/../etc/passwd → FORMAT_UNSUPPORTED`, `/etc/os-release → FORMAT_UNSUPPORTED` — all should have been `PATH_OUTSIDE_ROOT`. Fixed by reordering to §6.1: parse → containment → format → existence, and replacing `allowParent` with a single best-effort canonicaliser that uses `parent.toRealPath()` when the target is missing so symlink escapes (`/data/link -> /etc/passwd`) are caught even for destination paths. Added 8 regression tests in `PathValidatorTest`. Severity: **security — must fix before production.** Impact for local dev was low (no sandboxing without `EXCEL_MCP_ROOT`).
+- **`workbook.create` seeds a default "Sheet1".** (Phase 4 manual testing) A brand-new `XSSFWorkbook` has zero sheets and Excel rejects the saved file as corrupt. Since `sheet.create` isn't available until Phase 6, `workbook.create` + `workbook.save` would have been unusable end-to-end. Fixed by calling `workbook.createSheet("Sheet1")` immediately after `new XSSFWorkbook()` in `XssfInMemoryEngine.create`, matching Excel's "New Workbook" default. Plan §9.1 updated inline. Future consideration: once `sheet.create` exists (Phase 6), an optional `initial_sheet` arg on `workbook.create` could let the caller pick the seed sheet's name.
 - **Case-insensitive sheet-name lookup.** (Phase 2, `XssfInMemoryEngine.requireSheet`) The plan does not specify whether sheet lookups are case-sensitive. Excel itself treats sheet names as case-insensitive in practice. Chose: exact match first, case-insensitive fallback. Future better: if a user reports ambiguous-match surprises, add a strict-mode toggle via env var.
 - **§5.2 `OpenWorkbook` record shape.** (Phase 1, `handles/OpenWorkbook.java`) The plan's example had `OpenWorkbook` hold an `XSSFWorkbook` + `FormulaEvaluator` directly. That leaks POI types into `handles/` and transitively into `tools/`, violating §4.1 layer rules and §11b.5 "POI types leaking into the tool layer or response shapes". Chose: `OpenWorkbook` carries metadata only (id, path, format, openedAt); the engine layer owns POI workbook state internally, keyed by `HandleId`. Future better: once engine layer is in place, document this contract explicitly in the README "Architecture" section and add ArchUnit tests enforcing it (already listed under §14.6).

@@ -77,6 +77,8 @@ Out of scope for v1: charts, pivots, formatting (font/colors/borders/conditional
 
 Build in **phases**, in this order. Each phase has a "verify" gate the agent must satisfy before moving to the next. This keeps the system runnable end-to-end at every step instead of accumulating a large unconnected mass of code.
 
+> **From Phase 5 onward, every new tool's `description()` and parameter descriptions must follow the authoring conventions in `excel-mcp-server-future-work.md` → "Authoring conventions (standing directives)"** (three-part effect / prerequisite / gotcha body; concrete example + constraints + units on every parameter; no engine-layer leakage). Earlier-phase tools predate the directive and are swept in the Phase 10 audit.
+
 **Phase 0 — Project bootstrap.** `pom.xml` with all pinned dependencies (§3.2), `Dockerfile` (§12.1), Spotless + Logback config, package skeleton matching §4. *Verify:* `mvn package` succeeds; `java -jar` runs the entry point and exits cleanly.
 
 **Phase 1 — Server skeleton with empty tool registry.** `McpServerMain`, `McpServer`, `ToolRegistry`, `ToolDefinition`, plus the leaf packages with no business logic: `error/`, `shape/` (the records, no values yet), `handles/`, `path/`, `config/`, `log/`. *Verify:* an MCP client can connect over stdio; `tools/list` returns an empty array; logs go to stderr only.
@@ -97,7 +99,7 @@ Build in **phases**, in this order. Each phase has a "verify" gate the agent mus
 
 **Phase 9 — VBA.** `PoiVbaExtractor`, `VbaListModulesTool`, `VbaGetModuleTool`. Test against an `.xlsm` fixture with a known module.
 
-**Phase 10 — Acceptance + polish.** Walk every §13 acceptance criterion; fix gaps. Write the README. Confirm `excel-mcp-server-future-work.md` was created and seeded per §1.6. Final `mvn verify` clean; Docker image builds and starts under 5 seconds.
+**Phase 10 — Acceptance + polish.** Walk every §13 acceptance criterion; fix gaps. Write the README. Confirm `excel-mcp-server-future-work.md` was created and seeded per §1.6. Audit all 25 tool descriptions and parameter descriptions against the authoring template documented in `excel-mcp-server-future-work.md` §"Authoring conventions" (three-part effect / prerequisite / gotcha body; example + constraints + units on every parameter; no engine-layer leakage). Resolve any Phase 10 stop-gate items listed in the future-work doc. Final `mvn verify` clean; Docker image builds and starts under 5 seconds.
 
 ### 2.3 When stuck or when the plan is silent
 
@@ -520,7 +522,7 @@ Each tool below specifies: input shape, success output shape, the error codes it
 **Input:** `{ "path": "/data/new.xlsx" }` (path optional; if omitted, workbook has no source path until `save(handle, path)`)
 **Output:** `{ "handle": "wb-7b2e9c11" }`
 **Errors:** `PATH_INVALID`, `PATH_OUTSIDE_ROOT`, `FORMAT_UNSUPPORTED`
-**POI:** `new XSSFWorkbook()`. If a path is given, validate it but don't write the file yet.
+**POI:** `new XSSFWorkbook()` immediately followed by `workbook.createSheet("Sheet1")`. A default sheet named "Sheet1" is created automatically so the resulting file is valid OOXML — a sheet-less `XSSFWorkbook` saves to a file Excel reports as corrupt. If a path is given, validate it but don't write the file yet.
 
 #### `workbook.save`
 

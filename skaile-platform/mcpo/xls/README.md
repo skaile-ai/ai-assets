@@ -9,16 +9,20 @@ See:
 
 ## Build
 
+**If you only want to test via Docker / MCP Inspector: skip this section.** `docker build -t excel-mcp:dev .` compiles the fat jar inside the build stage of the `Dockerfile`, so the image always contains freshly-compiled code regardless of what's in your host `target/`. See "Manual testing with the MCP Inspector" below.
+
+The commands below are for host-side development only — running the server as `java -jar …` without Docker, running tests, and pre-commit formatting. They are independent alternatives, not a sequence.
+
 The repo ships with the Maven Wrapper pinned to **Maven 3.9.9**. A global `mvn` is not required — and is not what this project uses. **Always invoke the build through `./mvnw` (`mvnw.cmd` on Windows).** CI and local dev must use the same pinned Maven to avoid build-reproducibility drift.
 
-```bash
-./mvnw -DskipTests package          # build the shaded fat jar (target/excel-mcp-<version>.jar)
-./mvnw spotless:apply               # auto-format sources to Google Java Format
-./mvnw verify                       # Spotless check + tests (the pre-commit gate)
-./mvnw clean                        # wipe target/
-```
+| Command | When to run it |
+|---|---|
+| `./mvnw verify` | Before declaring a change done. Runs compile + tests + Spotless check; also produces the fat jar. |
+| `./mvnw -DskipTests package` | Only when you want the fat jar but want to skip tests. |
+| `./mvnw spotless:apply` | When `./mvnw verify` fails on formatting. Auto-rewrites sources to Google Java Format. |
+| `./mvnw clean` | For a truly from-scratch host rebuild. Rarely needed. |
 
-The output of `package` is a single fat jar at `target/excel-mcp-<version>.jar` runnable with `java -jar`.
+The output is a single fat jar at `target/excel-mcp-<version>.jar`, runnable with `java -jar`.
 
 ## Run
 
@@ -61,6 +65,48 @@ docker run --rm -i excel-mcp:dev
   }
 }
 ```
+
+## Manual testing with the MCP Inspector
+
+Run the server under [`@modelcontextprotocol/inspector`](https://github.com/modelcontextprotocol/inspector) to click tools by hand and watch raw request/response frames. Useful when verifying a new tool before wiring it into an agent.
+
+1. **Rebuild the image** after any source change — `docker build` caches layers aggressively on WSL, so if behaviour looks stale, force a rebuild:
+
+   ```bash
+   cd skaile-platform/mcpo/xls/
+   docker build -t excel-mcp:dev .
+   # or, if you suspect a cache issue:
+   docker build --no-cache -t excel-mcp:dev .
+   ```
+
+2. **Smoke-run the image standalone** (no inspector, no mounts) to confirm it starts and exits cleanly on EOF. Should log `EXCEL_MCP_ROOT not set; path sandboxing disabled` and `mcp server started … tools=<N>`:
+
+   ```bash
+   docker run --rm -i --user 1000:1000 --name excel-mcp-dev excel-mcp:dev
+   ```
+
+3. **Launch the inspector pointed at the image**, mounting a host directory as the sandbox root:
+
+   ```bash
+   # Run from skaile-platform/mcpo/xls/
+   pwd && npx @modelcontextprotocol/inspector \
+     docker run --rm -i --user 1000:1000 --name excel-mcp-dev \
+       -v "$PWD/test-data:/data" \
+       -e EXCEL_MCP_ROOT=/data \
+       excel-mcp:dev
+   ```
+
+   `--user 1000:1000` makes the container write as the host user so `workbook.save` can atomically replace files in the bind-mounted directory. Adjust the UID/GID if your host account differs (see the Phase 10 stop-gate in `excel-mcp-server-future-work.md`).
+
+4. **Open the inspector URL** printed to the terminal — typically `http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=<token>`.
+
+5. **Connect** (the inspector picks up the docker command automatically), then browse the tool list.
+
+### Paths and handles when clicking tools
+
+- **File paths are container-local.** The inspector is outside the container; tool arguments are evaluated inside. Host path `./test-data/file1.xlsx` is mounted at `/data/file1.xlsx` (per the `-v` above), so in `workbook.open` you pass `/data/file1.xlsx`, not a host path.
+- **Workbook handles** returned by `workbook.open` / `workbook.create` look like `wb-50f0d1e7`. Copy the value verbatim into the `handle` argument of subsequent tools (`range.get`, `workbook.save`, `workbook.close`, …). Handles live for the container's lifetime — a second `docker run` starts fresh.
+- Any path outside the sandbox root returns `PATH_OUTSIDE_ROOT`; missing files inside the sandbox return `FILE_NOT_FOUND`. If you see something different, the image is probably stale — rebuild with `--no-cache`.
 
 ## Environment variables
 
