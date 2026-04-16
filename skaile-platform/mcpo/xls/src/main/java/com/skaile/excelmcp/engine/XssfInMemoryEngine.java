@@ -86,6 +86,11 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
       format = FormatWhitelist.format(sourcePath.get());
     }
     Workbook wb = new XSSFWorkbook();
+    // A brand-new XSSFWorkbook with zero sheets is invalid OOXML and Excel refuses to open the
+    // saved file. Match Excel's own "New Workbook" default and seed "Sheet1" so workbook.create +
+    // workbook.save produces a valid file without the caller needing sheet.create (which isn't
+    // available until Phase 6 anyway).
+    wb.createSheet("Sheet1");
     HandleId id = HandleId.newRandom();
     workbooks.put(id, wb);
     registry.register(new OpenWorkbook(id, sourcePath.orElse(null), format, Instant.now()));

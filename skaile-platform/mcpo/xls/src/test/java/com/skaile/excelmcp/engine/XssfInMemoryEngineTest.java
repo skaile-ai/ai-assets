@@ -51,6 +51,23 @@ class XssfInMemoryEngineTest {
   }
 
   @Test
+  void createSeedsDefaultSheetSoSavedFileIsValid(@TempDir Path tmp) throws Exception {
+    Path dest = tmp.resolve("new.xlsx");
+    HandleRegistry registry = new HandleRegistry();
+    try (WorkbookEngine engine = new XssfInMemoryEngine(CFG, registry)) {
+      HandleId id = engine.create(Optional.of(dest));
+      assertThat(engine.listSheets(id)).extracting("name").containsExactly("Sheet1");
+      engine.save(id, Optional.empty());
+      engine.close(id);
+
+      // Reopen to prove the saved file is valid OOXML (a sheet-less XSSFWorkbook would fail here).
+      HandleId reopened = engine.open(dest);
+      assertThat(engine.listSheets(reopened)).extracting("name").containsExactly("Sheet1");
+      engine.close(reopened);
+    }
+  }
+
+  @Test
   void rejectsXlsb(@TempDir Path tmp) throws Exception {
     Path xlsb = tmp.resolve("bad.xlsb");
     Files.write(xlsb, new byte[] {0x50, 0x4B}); // fake ZIP magic, won't be parsed
