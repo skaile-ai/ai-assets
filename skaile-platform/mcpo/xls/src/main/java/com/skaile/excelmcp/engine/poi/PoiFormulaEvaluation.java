@@ -39,6 +39,11 @@ public final class PoiFormulaEvaluation {
    * refreshed successfully (cells skipped due to {@link NotImplementedException} are not counted).
    */
   public static int evaluateAll(Workbook wb, FormulaEvaluator evaluator) throws McpException {
+    // POI's FormulaEvaluator keeps an internal cell-address-keyed result cache that survives
+    // sheet.shiftRows / sheet.shiftColumns and in-place setCellFormula rewrites; without this
+    // invalidation, a recalc after any structural mutation returns the pre-mutation cached value
+    // at the shifted address. wb.setForceFormulaRecalculation(true) is an Excel-side hint only.
+    evaluator.clearAllCachedResultValues();
     wb.setForceFormulaRecalculation(true);
     int count = 0;
     for (Sheet sheet : wb) {
