@@ -82,7 +82,7 @@ Run the server under [`@modelcontextprotocol/inspector`](https://github.com/mode
 2. **Smoke-run the image standalone** (no inspector, no mounts) to confirm it starts and exits cleanly on EOF. Should log `EXCEL_MCP_ROOT not set; path sandboxing disabled` and `mcp server started … tools=<N>`:
 
    ```bash
-   docker run --rm -i --user 1000:1000 --name excel-mcp-dev excel-mcp:dev
+   docker run --rm -i --user 1000:1000 excel-mcp:dev
    ```
 
 3. **Launch the inspector pointed at the image**, mounting a host directory as the sandbox root:
@@ -90,7 +90,7 @@ Run the server under [`@modelcontextprotocol/inspector`](https://github.com/mode
    ```bash
    # Run from skaile-platform/mcpo/xls/
    pwd && npx @modelcontextprotocol/inspector \
-     docker run --rm -i --user 1000:1000 --name excel-mcp-dev \
+     docker run --rm -i --user 1000:1000 \
        -v "$PWD/test-data:/data" \
        -e EXCEL_MCP_ROOT=/data \
        excel-mcp:dev

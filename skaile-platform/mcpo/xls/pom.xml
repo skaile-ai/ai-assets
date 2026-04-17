@@ -142,7 +142,7 @@
               <shadedArtifactAttached>false</shadedArtifactAttached>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.portfolex.excelmcp.McpServerMain</mainClass>
+                  <mainClass>com.skaile.excelmcp.McpServerMain</mainClass>
                 </transformer>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
               </transformers>
