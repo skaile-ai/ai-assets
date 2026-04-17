@@ -7,6 +7,7 @@ import com.skaile.excelmcp.engine.poi.PoiCellReader;
 import com.skaile.excelmcp.engine.poi.PoiCellWriter;
 import com.skaile.excelmcp.engine.poi.PoiFormulaEvaluation;
 import com.skaile.excelmcp.engine.poi.PoiSizeGuard;
+import com.skaile.excelmcp.engine.poi.PoiVbaExtractor;
 import com.skaile.excelmcp.error.ErrorCode;
 import com.skaile.excelmcp.error.McpException;
 import com.skaile.excelmcp.handles.HandleId;
@@ -15,11 +16,15 @@ import com.skaile.excelmcp.handles.OpenWorkbook;
 import com.skaile.excelmcp.path.FormatWhitelist;
 import com.skaile.excelmcp.shape.CapabilitiesReportShape;
 import com.skaile.excelmcp.shape.CellShape;
+import com.skaile.excelmcp.shape.NamedRangeGetShape;
 import com.skaile.excelmcp.shape.NamedRangeRef;
 import com.skaile.excelmcp.shape.RangeAddress;
 import com.skaile.excelmcp.shape.RangeShape;
 import com.skaile.excelmcp.shape.SheetShape;
+import com.skaile.excelmcp.shape.TableGetShape;
 import com.skaile.excelmcp.shape.TableRef;
+import com.skaile.excelmcp.shape.VbaModuleShape;
+import com.skaile.excelmcp.shape.VbaModuleSourceShape;
 import com.skaile.excelmcp.shape.WorkbookMetadataShape;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +46,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFTable;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -201,6 +208,105 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
       }
     }
     return out;
+  }
+
+  @Override
+  public TableGetShape readTable(HandleId id, String name, boolean includeFormatting, int maxCells)
+      throws McpException {
+    Workbook wb = requireOpen(id);
+    if (!(wb instanceof XSSFWorkbook xwb)) {
+      // HSSF (.xls) has no ListObject API — report the lookup miss rather than crashing on a cast.
+      throw new McpException(
+          ErrorCode.TABLE_NOT_FOUND,
+          "tables are not available on .xls (HSSF) workbooks; open an .xlsx/.xlsm instead",
+          Map.of("name", name));
+    }
+    XSSFTable target = null;
+    String lc = name.toLowerCase(Locale.ROOT);
+    for (int i = 0; i < xwb.getNumberOfSheets() && target == null; i++) {
+      for (XSSFTable t : xwb.getSheetAt(i).getTables()) {
+        if (t.getName() != null && t.getName().toLowerCase(Locale.ROOT).equals(lc)) {
+          target = t;
+          break;
+        }
+      }
+    }
+    if (target == null) {
+      throw new McpException(
+          ErrorCode.TABLE_NOT_FOUND, "table not found: " + name, Map.of("name", name));
+    }
+    AreaReference area;
+    try {
+      area = target.getArea();
+    } catch (RuntimeException ex) {
+      throw new McpException(
+          ErrorCode.TABLE_NOT_FOUND,
+          "table area could not be resolved: " + name + " (" + ex.getMessage() + ")",
+          Map.of("name", name, "exception", ex.getClass().getSimpleName()),
+          ex);
+    }
+    if (area == null) {
+      throw new McpException(
+          ErrorCode.TABLE_NOT_FOUND, "table has no resolvable area: " + name, Map.of("name", name));
+    }
+    String sheetName = target.getSheetName();
+    String a1 = formatAreaA1(area);
+    RangeShape rs = readRange(id, sheetName, a1, includeFormatting, maxCells);
+    return TableGetShape.of(target.getName(), rs);
+  }
+
+  @Override
+  public NamedRangeGetShape readNamedRange(
+      HandleId id, String name, boolean includeFormatting, int maxCells) throws McpException {
+    Workbook wb = requireOpen(id);
+    Name defined = wb.getName(name);
+    if (defined == null) {
+      throw new McpException(
+          ErrorCode.NAMED_RANGE_NOT_FOUND, "named range not found: " + name, Map.of("name", name));
+    }
+    String refersTo;
+    try {
+      refersTo = defined.getRefersToFormula();
+    } catch (RuntimeException ex) {
+      // PLAN-DEFER: named ranges whose refersTo expression POI can't stringify surface as
+      // NAMED_RANGE_NOT_FOUND with a reason — the v1 error enum has no dedicated
+      // NAMED_RANGE_INVALID code. Appended to excel-mcp-server-future-work.md.
+      throw new McpException(
+          ErrorCode.NAMED_RANGE_NOT_FOUND,
+          "named range has an unreadable reference: " + name + " (" + ex.getMessage() + ")",
+          Map.of("name", name, "exception", ex.getClass().getSimpleName()),
+          ex);
+    }
+    if (refersTo == null || refersTo.isBlank()) {
+      throw new McpException(
+          ErrorCode.NAMED_RANGE_NOT_FOUND,
+          "named range has an empty reference: " + name,
+          Map.of("name", name));
+    }
+    AreaReference area;
+    try {
+      area = new AreaReference(refersTo, wb.getSpreadsheetVersion());
+    } catch (RuntimeException ex) {
+      // PLAN-DEFER: defined names that resolve to a formula expression (=SUM(A1:A10)), a
+      // multi-sheet 3D reference, or anything more complex than a simple rectangular area are
+      // surfaced as NAMED_RANGE_NOT_FOUND with the original refersTo in details. Full expression
+      // evaluation is out of v1 scope. Appended to excel-mcp-server-future-work.md.
+      throw new McpException(
+          ErrorCode.NAMED_RANGE_NOT_FOUND,
+          "named range does not resolve to a simple rectangular range: " + name + " -> " + refersTo,
+          Map.of("name", name, "refers_to", refersTo, "exception", ex.getClass().getSimpleName()),
+          ex);
+    }
+    String sheetName = area.getFirstCell().getSheetName();
+    if (sheetName == null) {
+      throw new McpException(
+          ErrorCode.NAMED_RANGE_NOT_FOUND,
+          "named range reference has no sheet qualifier: " + name + " -> " + refersTo,
+          Map.of("name", name, "refers_to", refersTo));
+    }
+    String a1 = formatAreaA1(area);
+    RangeShape rs = readRange(id, sheetName, a1, includeFormatting, maxCells);
+    return NamedRangeGetShape.of(defined.getNameName(), rs);
   }
 
   @Override
@@ -513,6 +619,20 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
   }
 
   @Override
+  public List<VbaModuleShape> listVbaModules(HandleId id) throws McpException {
+    requireOpen(id);
+    OpenWorkbook meta = registry.require(id);
+    return PoiVbaExtractor.listModules(meta.sourcePath());
+  }
+
+  @Override
+  public VbaModuleSourceShape getVbaModule(HandleId id, String name) throws McpException {
+    requireOpen(id);
+    OpenWorkbook meta = registry.require(id);
+    return PoiVbaExtractor.getModule(meta.sourcePath(), name);
+  }
+
+  @Override
   public void close() {
     for (Workbook wb : workbooks.values()) {
       safeClose(wb);
@@ -617,6 +737,21 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
               "format_max_row",
               maxRow + 1));
     }
+  }
+
+  /**
+   * Strip sheet prefix and absolute markers from a POI {@link AreaReference} so it can be handed to
+   * {@link #readRange(HandleId, String, String, boolean, int)}, which expects a bare A1 range on a
+   * known sheet. The sheet name is carried separately by callers.
+   */
+  private static String formatAreaA1(AreaReference area) {
+    CellReference first = area.getFirstCell();
+    CellReference last = area.getLastCell();
+    String start = RangeAddress.colLetter(first.getCol()) + (first.getRow() + 1);
+    if (first.getRow() == last.getRow() && first.getCol() == last.getCol()) {
+      return start;
+    }
+    return start + ":" + RangeAddress.colLetter(last.getCol()) + (last.getRow() + 1);
   }
 
   private static int computeLastFilledColumn(Sheet sheet) {

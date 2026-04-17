@@ -4,10 +4,14 @@ import com.skaile.excelmcp.error.McpException;
 import com.skaile.excelmcp.handles.HandleId;
 import com.skaile.excelmcp.handles.OpenWorkbook;
 import com.skaile.excelmcp.shape.CapabilitiesReportShape;
+import com.skaile.excelmcp.shape.NamedRangeGetShape;
 import com.skaile.excelmcp.shape.NamedRangeRef;
 import com.skaile.excelmcp.shape.RangeShape;
 import com.skaile.excelmcp.shape.SheetShape;
+import com.skaile.excelmcp.shape.TableGetShape;
 import com.skaile.excelmcp.shape.TableRef;
+import com.skaile.excelmcp.shape.VbaModuleShape;
+import com.skaile.excelmcp.shape.VbaModuleSourceShape;
 import com.skaile.excelmcp.shape.WorkbookMetadataShape;
 import java.nio.file.Path;
 import java.util.List;
@@ -56,6 +60,22 @@ public interface WorkbookEngine extends AutoCloseable {
 
   /** List tables ({@code ListObject}s) across every sheet. */
   List<TableRef> listTables(HandleId id) throws McpException;
+
+  /**
+   * Read the cell contents of the named table (ListObject), augmented with the resolved table name.
+   * Delegates to {@link #readRange(HandleId, String, String, boolean, int)} after resolving the
+   * table's area, so the same pagination, bounds, and cell-shape rules apply.
+   */
+  TableGetShape readTable(HandleId id, String name, boolean includeFormatting, int maxCells)
+      throws McpException;
+
+  /**
+   * Read the cell contents of the named range (defined name), augmented with the resolved name.
+   * Delegates to {@link #readRange(HandleId, String, String, boolean, int)} after resolving the
+   * name's reference.
+   */
+  NamedRangeGetShape readNamedRange(
+      HandleId id, String name, boolean includeFormatting, int maxCells) throws McpException;
 
   /** Aggregate workbook metadata for the {@code workbook.metadata} tool. */
   WorkbookMetadataShape describeMetadata(
@@ -144,6 +164,18 @@ public interface WorkbookEngine extends AutoCloseable {
    * pulled left by {@code count}. XSSF only.
    */
   void deleteCols(HandleId id, String sheet, int startCol1Based, int count) throws McpException;
+
+  /**
+   * List every VBA module (Document / Module / Class) in the workbook. Raises {@code
+   * VBA_NOT_PRESENT} when the workbook has no macros or no source file on disk.
+   */
+  List<VbaModuleShape> listVbaModules(HandleId id) throws McpException;
+
+  /**
+   * Return the named VBA module's source text along with its type. Case-insensitive name lookup.
+   * Raises {@code VBA_MODULE_NOT_FOUND} when no module matches.
+   */
+  VbaModuleSourceShape getVbaModule(HandleId id, String name) throws McpException;
 
   @Override
   void close();
