@@ -2,8 +2,10 @@ package com.skaile.excelmcp.engine;
 
 import com.skaile.excelmcp.config.ServerConfig;
 import com.skaile.excelmcp.engine.poi.PoiAtomicSaver;
+import com.skaile.excelmcp.engine.poi.PoiCapabilityScanner;
 import com.skaile.excelmcp.engine.poi.PoiCellReader;
 import com.skaile.excelmcp.engine.poi.PoiCellWriter;
+import com.skaile.excelmcp.engine.poi.PoiFormulaEvaluation;
 import com.skaile.excelmcp.engine.poi.PoiSizeGuard;
 import com.skaile.excelmcp.error.ErrorCode;
 import com.skaile.excelmcp.error.McpException;
@@ -11,6 +13,7 @@ import com.skaile.excelmcp.handles.HandleId;
 import com.skaile.excelmcp.handles.HandleRegistry;
 import com.skaile.excelmcp.handles.OpenWorkbook;
 import com.skaile.excelmcp.path.FormatWhitelist;
+import com.skaile.excelmcp.shape.CapabilitiesReportShape;
 import com.skaile.excelmcp.shape.CellShape;
 import com.skaile.excelmcp.shape.NamedRangeRef;
 import com.skaile.excelmcp.shape.RangeAddress;
@@ -28,13 +31,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFTable;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -48,6 +54,7 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
   private final ServerConfig config;
   private final HandleRegistry registry;
   private final Map<HandleId, Workbook> workbooks = new HashMap<>();
+  private final Map<HandleId, FormulaEvaluator> evaluators = new HashMap<>();
 
   public XssfInMemoryEngine(ServerConfig config, HandleRegistry registry) {
     this.config = config;
@@ -121,6 +128,7 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
           "handle already closed or unknown: " + id,
           Map.of("handle", id.value()));
     }
+    evaluators.remove(id);
     registry.remove(id);
     safeClose(wb);
   }
@@ -287,6 +295,193 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
   }
 
   @Override
+  public int recalculate(HandleId id) throws McpException {
+    Workbook wb = requireOpen(id);
+    FormulaEvaluator evaluator =
+        evaluators.computeIfAbsent(id, k -> PoiFormulaEvaluation.newEvaluator(wb));
+    return PoiFormulaEvaluation.evaluateAll(wb, evaluator);
+  }
+
+  @Override
+  public CapabilitiesReportShape capabilitiesReport(HandleId id) throws McpException {
+    Workbook wb = requireOpen(id);
+    return PoiCapabilityScanner.scan(wb);
+  }
+
+  @Override
+  public SheetShape createSheet(HandleId id, String name, OptionalInt index) throws McpException {
+    Workbook wb = requireOpen(id);
+    assertSheetNameAvailable(wb, name);
+    Sheet created;
+    try {
+      created = wb.createSheet(name);
+    } catch (IllegalArgumentException ex) {
+      // POI validates length (<=31), forbidden chars (: \ / ? * [ ]), leading/trailing apostrophes.
+      // PLAN-DEFER: no dedicated SHEET_NAME_INVALID code in the v1 enum yet — surface as
+      // INTERNAL_ERROR with POI's message until the enum is extended.
+      throw new McpException(
+          ErrorCode.INTERNAL_ERROR,
+          "invalid sheet name: " + ex.getMessage(),
+          Map.of("name", name, "exception", ex.getClass().getSimpleName()),
+          ex);
+    }
+    int finalIndex = wb.getSheetIndex(created);
+    if (index.isPresent()) {
+      int target = Math.max(0, Math.min(index.getAsInt(), wb.getNumberOfSheets() - 1));
+      wb.setSheetOrder(name, target);
+      finalIndex = target;
+    }
+    return new SheetShape(name, finalIndex, wb.isSheetHidden(finalIndex));
+  }
+
+  @Override
+  public void deleteSheet(HandleId id, String name) throws McpException {
+    Workbook wb = requireOpen(id);
+    int idx = resolveSheetIndex(wb, name);
+    wb.removeSheetAt(idx);
+  }
+
+  @Override
+  public void renameSheet(HandleId id, String oldName, String newName) throws McpException {
+    Workbook wb = requireOpen(id);
+    int idx = resolveSheetIndex(wb, oldName);
+    String canonicalOld = wb.getSheetName(idx);
+    if (!canonicalOld.equalsIgnoreCase(newName)) {
+      assertSheetNameAvailable(wb, newName);
+    }
+    try {
+      wb.setSheetName(idx, newName);
+    } catch (IllegalArgumentException ex) {
+      // Same rationale as createSheet's catch — invalid sheet name.
+      throw new McpException(
+          ErrorCode.INTERNAL_ERROR,
+          "invalid sheet name: " + ex.getMessage(),
+          Map.of("name", newName, "exception", ex.getClass().getSimpleName()),
+          ex);
+    }
+  }
+
+  @Override
+  public void insertRows(HandleId id, String sheetName, int startRow1Based, int count)
+      throws McpException {
+    assertPositive(count, "count", ErrorCode.ROW_INDEX_INVALID);
+    assertPositive(startRow1Based, "start_row", ErrorCode.ROW_INDEX_INVALID);
+    Workbook wb = requireOpen(id);
+    Sheet sheet = requireSheet(wb, sheetName);
+    int startRow = startRow1Based - 1;
+    int maxRow = wb.getSpreadsheetVersion().getLastRowIndex();
+    if (startRow > maxRow) {
+      throw rowIndexInvalid(
+          startRow1Based, "start_row " + startRow1Based + " exceeds format bounds");
+    }
+    if (startRow + count - 1 > maxRow) {
+      throw rowIndexInvalid(
+          startRow1Based,
+          "inserting " + count + " rows at " + startRow1Based + " overflows format bounds");
+    }
+    int lastRow = sheet.getLastRowNum();
+    if (lastRow >= startRow) {
+      sheet.shiftRows(startRow, lastRow, count);
+    }
+  }
+
+  @Override
+  public void deleteRows(HandleId id, String sheetName, int startRow1Based, int count)
+      throws McpException {
+    assertPositive(count, "count", ErrorCode.ROW_INDEX_INVALID);
+    assertPositive(startRow1Based, "start_row", ErrorCode.ROW_INDEX_INVALID);
+    Workbook wb = requireOpen(id);
+    Sheet sheet = requireSheet(wb, sheetName);
+    int startRow = startRow1Based - 1;
+    int maxRow = wb.getSpreadsheetVersion().getLastRowIndex();
+    if (startRow > maxRow) {
+      throw rowIndexInvalid(
+          startRow1Based, "start_row " + startRow1Based + " exceeds format bounds");
+    }
+    int lastRow = sheet.getLastRowNum();
+    int endRowExcl = startRow + count;
+    for (int r = startRow; r < endRowExcl && r <= lastRow; r++) {
+      Row row = sheet.getRow(r);
+      if (row != null) {
+        sheet.removeRow(row);
+      }
+    }
+    // Only shift if there are rows below the deleted range. Avoids the §9.4 footgun pattern of
+    // asking POI to shift an empty range.
+    if (endRowExcl <= lastRow) {
+      sheet.shiftRows(endRowExcl, lastRow, -count);
+    }
+  }
+
+  @Override
+  public void insertCols(HandleId id, String sheetName, int startCol1Based, int count)
+      throws McpException {
+    assertPositive(count, "count", ErrorCode.COLUMN_INDEX_INVALID);
+    assertPositive(startCol1Based, "start_col", ErrorCode.COLUMN_INDEX_INVALID);
+    Workbook wb = requireOpen(id);
+    Sheet sheet = requireSheet(wb, sheetName);
+    int startCol = startCol1Based - 1;
+    int maxCol = wb.getSpreadsheetVersion().getLastColumnIndex();
+    if (startCol > maxCol) {
+      throw colIndexInvalid(
+          startCol1Based, "start_col " + startCol1Based + " exceeds format bounds");
+    }
+    if (startCol + count - 1 > maxCol) {
+      throw colIndexInvalid(
+          startCol1Based,
+          "inserting " + count + " cols at " + startCol1Based + " overflows format bounds");
+    }
+    int lastCol = computeLastFilledColumn(sheet);
+    // §9.4 footgun: XSSFSheet.shiftColumns throws "firstMovedIndex, lastMovedIndex out of order"
+    // when asked to shift from a position that has nothing to shift. Only call shiftColumns when
+    // the sheet has data at or to the right of startCol.
+    if (lastCol >= startCol) {
+      sheet.shiftColumns(startCol, lastCol, count);
+    }
+  }
+
+  @Override
+  public void deleteCols(HandleId id, String sheetName, int startCol1Based, int count)
+      throws McpException {
+    assertPositive(count, "count", ErrorCode.COLUMN_INDEX_INVALID);
+    assertPositive(startCol1Based, "start_col", ErrorCode.COLUMN_INDEX_INVALID);
+    Workbook wb = requireOpen(id);
+    Sheet sheet = requireSheet(wb, sheetName);
+    int startCol = startCol1Based - 1;
+    int maxCol = wb.getSpreadsheetVersion().getLastColumnIndex();
+    if (startCol > maxCol) {
+      throw colIndexInvalid(
+          startCol1Based, "start_col " + startCol1Based + " exceeds format bounds");
+    }
+    int endColExcl = startCol + count;
+    for (Row row : sheet) {
+      for (int c = startCol; c < endColExcl; c++) {
+        Cell cell = row.getCell(c);
+        if (cell != null) {
+          row.removeCell(cell);
+        }
+      }
+    }
+    int lastCol = computeLastFilledColumn(sheet);
+    // Same §9.4 footgun guard as insertCols: skip the shift when there's nothing to the right.
+    if (endColExcl <= lastCol) {
+      sheet.shiftColumns(endColExcl, lastCol, -count);
+    }
+  }
+
+  @Override
+  public List<String> mergedRegions(HandleId id, String sheetName) throws McpException {
+    Workbook wb = requireOpen(id);
+    Sheet sheet = requireSheet(wb, sheetName);
+    List<CellRangeAddress> regions = sheet.getMergedRegions();
+    List<String> out = new ArrayList<>(regions.size());
+    for (CellRangeAddress r : regions) {
+      out.add(r.formatAsString());
+    }
+    return out;
+  }
+
+  @Override
   public int clearRange(HandleId id, String sheetName, String rangeA1) throws McpException {
     Workbook wb = requireOpen(id);
     Sheet sheet = requireSheet(wb, sheetName);
@@ -313,6 +508,7 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
       safeClose(wb);
     }
     workbooks.clear();
+    evaluators.clear();
   }
 
   private Workbook requireOpen(HandleId id) throws McpException {
@@ -327,6 +523,33 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
           ErrorCode.HANDLE_CLOSED, "handle is closed: " + id, Map.of("handle", id.value()));
     }
     return wb;
+  }
+
+  private int resolveSheetIndex(Workbook wb, String name) throws McpException {
+    int exact = wb.getSheetIndex(name);
+    if (exact >= 0) {
+      return exact;
+    }
+    String lc = name.toLowerCase(Locale.ROOT);
+    for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+      if (wb.getSheetName(i).toLowerCase(Locale.ROOT).equals(lc)) {
+        return i;
+      }
+    }
+    throw new McpException(
+        ErrorCode.SHEET_NOT_FOUND, "sheet not found: " + name, Map.of("sheet", name));
+  }
+
+  private static void assertSheetNameAvailable(Workbook wb, String name) throws McpException {
+    String lc = name.toLowerCase(Locale.ROOT);
+    for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+      if (wb.getSheetName(i).toLowerCase(Locale.ROOT).equals(lc)) {
+        throw new McpException(
+            ErrorCode.SHEET_ALREADY_EXISTS,
+            "sheet already exists (case-insensitive): " + name,
+            Map.of("name", name, "existing", wb.getSheetName(i)));
+      }
+    }
   }
 
   private Sheet requireSheet(Workbook wb, String name) throws McpException {
@@ -384,6 +607,34 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
               "format_max_row",
               maxRow + 1));
     }
+  }
+
+  private static int computeLastFilledColumn(Sheet sheet) {
+    int max = -1;
+    for (Row row : sheet) {
+      short last = row.getLastCellNum();
+      if (last > 0 && (last - 1) > max) {
+        max = last - 1;
+      }
+    }
+    return max;
+  }
+
+  private static void assertPositive(int value, String field, ErrorCode code) throws McpException {
+    if (value < 1) {
+      throw new McpException(
+          code, field + " must be >= 1 (got " + value + ")", Map.of(field, value));
+    }
+  }
+
+  private static McpException rowIndexInvalid(int startRow1Based, String message) {
+    return new McpException(
+        ErrorCode.ROW_INDEX_INVALID, message, Map.of("start_row", startRow1Based));
+  }
+
+  private static McpException colIndexInvalid(int startCol1Based, String message) {
+    return new McpException(
+        ErrorCode.COLUMN_INDEX_INVALID, message, Map.of("start_col", startCol1Based));
   }
 
   private static void safeClose(Workbook wb) {

@@ -3,6 +3,7 @@ package com.skaile.excelmcp.engine;
 import com.skaile.excelmcp.error.McpException;
 import com.skaile.excelmcp.handles.HandleId;
 import com.skaile.excelmcp.handles.OpenWorkbook;
+import com.skaile.excelmcp.shape.CapabilitiesReportShape;
 import com.skaile.excelmcp.shape.NamedRangeRef;
 import com.skaile.excelmcp.shape.RangeShape;
 import com.skaile.excelmcp.shape.SheetShape;
@@ -11,6 +12,7 @@ import com.skaile.excelmcp.shape.WorkbookMetadataShape;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * Contract between {@code tools/} and POI. Tools never import POI directly; they go through this
@@ -87,6 +89,61 @@ public interface WorkbookEngine extends AutoCloseable {
 
   /** Remove every non-null cell in the given range. Styling and merged regions are untouched. */
   int clearRange(HandleId id, String sheet, String rangeA1) throws McpException;
+
+  /**
+   * Walk every formula cell and refresh its cached result via POI's evaluator. Returns the number
+   * of cells whose cache was successfully refreshed. Cells that hit a POI {@code
+   * NotImplementedException} (FILTER, LAMBDA, etc.) are skipped without failure — use {@link
+   * #capabilitiesReport(HandleId)} to see the coverage gaps ahead of time.
+   */
+  int recalculate(HandleId id) throws McpException;
+
+  /**
+   * Inventory of which Excel features the POI engine can and cannot recalculate in the loaded
+   * workbook. Read-only — does not touch cell state.
+   */
+  CapabilitiesReportShape capabilitiesReport(HandleId id) throws McpException;
+
+  /**
+   * Add a new empty sheet. {@code index} (0-based) positions the sheet; empty = end of the
+   * workbook. Returns the created sheet's {@link SheetShape} with the resolved final index.
+   */
+  SheetShape createSheet(HandleId id, String name, OptionalInt index) throws McpException;
+
+  /** Remove the named sheet and all of its cell data. */
+  void deleteSheet(HandleId id, String name) throws McpException;
+
+  /** Rename a sheet in place; POI rewrites references to the old name in formulas. */
+  void renameSheet(HandleId id, String oldName, String newName) throws McpException;
+
+  /** Return the merged-cell regions on the given sheet as A1 range strings. */
+  List<String> mergedRegions(HandleId id, String sheet) throws McpException;
+
+  /**
+   * Insert {@code count} empty rows at {@code startRow1Based}. Rows at or below that index are
+   * pushed down by {@code count}. No-op (apart from index validation) when the sheet has no data at
+   * or below the insertion point.
+   */
+  void insertRows(HandleId id, String sheet, int startRow1Based, int count) throws McpException;
+
+  /**
+   * Delete {@code count} rows starting at {@code startRow1Based}. Rows below are pulled up by
+   * {@code count}.
+   */
+  void deleteRows(HandleId id, String sheet, int startRow1Based, int count) throws McpException;
+
+  /**
+   * Insert {@code count} empty columns at {@code startCol1Based} (A=1). Columns at or to the right
+   * are pushed right by {@code count}. XSSF only — HSSF (.xls) does not implement column shifting
+   * and the call will surface as INTERNAL_ERROR.
+   */
+  void insertCols(HandleId id, String sheet, int startCol1Based, int count) throws McpException;
+
+  /**
+   * Delete {@code count} columns starting at {@code startCol1Based}. Columns to the right are
+   * pulled left by {@code count}. XSSF only.
+   */
+  void deleteCols(HandleId id, String sheet, int startCol1Based, int count) throws McpException;
 
   @Override
   void close();
