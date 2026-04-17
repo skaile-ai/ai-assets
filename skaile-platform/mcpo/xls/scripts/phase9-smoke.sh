@@ -69,9 +69,10 @@ else
 fi
 
 python3 - "$JAR" "$FIXTURE" <<'PY'
-import json, os, subprocess, sys
+import json, os, subprocess, sys, tempfile
 jar = sys.argv[1]
 fixture = sys.argv[2] or None
+tmp = tempfile.mkdtemp()
 
 def start():
     return subprocess.Popen(["java", "-jar", jar],
@@ -107,9 +108,9 @@ def call_err(p, i, name, args, expected_code):
     assert r["result"].get("isError"), f"expected error, got {body}"
     assert body.get("code") == expected_code, f"expected {expected_code}, got {body}"
 
-def list_tools(p):
-    send(p, {"jsonrpc":"2.0","id":2,"method":"tools/list"})
-    r = recv(p); assert r.get("id") == 2, r
+def list_tools(p, i=2):
+    send(p, {"jsonrpc":"2.0","id":i,"method":"tools/list"})
+    r = recv(p); assert r.get("id") == i, r
     return {t["name"] for t in r["result"]["tools"]}
 
 p = start()
@@ -121,12 +122,29 @@ try:
     assert "vba.list_modules" in names, names
     assert "vba.get_module" in names, names
 
-    # --- VBA_NOT_PRESENT: fresh .xlsx with no source on disk ---
+    # --- VBA_NOT_PRESENT (tier A): fresh .xlsx with no source on disk ---
     fresh = call(p, 10, "workbook.create", {})
     h = fresh["handle"]
     call_err(p, 11, "vba.list_modules", {"handle": h}, "VBA_NOT_PRESENT")
     call_err(p, 12, "vba.get_module", {"handle": h, "name": "Module1"}, "VBA_NOT_PRESENT")
     call(p, 13, "workbook.close", {"handle": h})
+
+    # --- VBA_NOT_PRESENT (tier B, regression for Bug 3 found post-Phase-9): a plain .xlsx
+    # saved to disk and reopened exercises the path where VBAMacroReader.readMacroModules()
+    # actually executes (sourcePath is non-null, file exists, but contains no vbaProject.bin).
+    # Before the fix, POI's IllegalArgumentException("No VBA project found") bubbled past the
+    # IOException-only catch in PoiVbaExtractor and surfaced as INTERNAL_ERROR instead of the
+    # documented VBA_NOT_PRESENT. Must return the documented code here.
+    plain = os.path.join(tmp, "phase9-plain.xlsx")
+    fresh2 = call(p, 30, "workbook.create", {})
+    h2 = fresh2["handle"]
+    call(p, 31, "workbook.save", {"handle": h2, "path": plain})
+    call(p, 32, "workbook.close", {"handle": h2})
+    opened_plain = call(p, 33, "workbook.open", {"path": plain})
+    h2 = opened_plain["handle"]
+    call_err(p, 34, "vba.list_modules", {"handle": h2}, "VBA_NOT_PRESENT")
+    call_err(p, 35, "vba.get_module", {"handle": h2, "name": "Module1"}, "VBA_NOT_PRESENT")
+    call(p, 36, "workbook.close", {"handle": h2})
 
     if fixture:
         # --- Opportunistic: real .xlsm with actual VBA modules ---
@@ -158,14 +176,24 @@ try:
         call_err(p, 24, "vba.get_module",
                  {"handle": h, "name": "__does_not_exist__"}, "VBA_MODULE_NOT_FOUND")
 
+        # Regression for Bug 2 (post-Phase-9 manual testing): a VBA_MODULE_NOT_FOUND response
+        # must not kill the stdio transport. Before the fix, MCP Inspector's connection dropped
+        # right after this error. Prove the transport survived by issuing a follow-up tools/list
+        # request — if stdout got corrupted or the Java thread died, this would hang or EOF.
+        survived = list_tools(p, i=241)
+        assert "vba.get_module" in survived, survived
+
         call(p, 25, "workbook.close", {"handle": h})
 finally:
     p.terminate()
     try: p.wait(timeout=3)
     except subprocess.TimeoutExpired: p.kill()
+    for f in os.listdir(tmp):
+        os.unlink(os.path.join(tmp, f))
+    os.rmdir(tmp)
 
 if fixture:
-    print("Phase 9 smoke OK: registration + VBA_NOT_PRESENT + full module list/get against fixture.")
+    print("Phase 9 smoke OK: registration + VBA_NOT_PRESENT (both tiers) + full module list/get + transport-survives-error regression.")
 else:
-    print("Phase 9 smoke OK (partial): registration + VBA_NOT_PRESENT only (no .xlsm fixture available).")
+    print("Phase 9 smoke OK (partial): registration + VBA_NOT_PRESENT (both tiers); full module list/get skipped (no .xlsm fixture available).")
 PY

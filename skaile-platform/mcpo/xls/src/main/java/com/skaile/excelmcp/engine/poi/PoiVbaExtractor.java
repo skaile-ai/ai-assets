@@ -71,7 +71,7 @@ public final class PoiVbaExtractor {
     throw new McpException(
         ErrorCode.VBA_MODULE_NOT_FOUND,
         "VBA module not found: " + name,
-        Map.of("name", name, "available_modules", new ArrayList<>(modules.keySet())));
+        Map.of("name", name, "available_modules", List.copyOf(modules.keySet())));
   }
 
   private static Map<String, Module> readModulesOrFail(Path sourcePath) throws McpException {
@@ -90,9 +90,10 @@ public final class PoiVbaExtractor {
     }
     try (VBAMacroReader reader = new VBAMacroReader(file)) {
       Map<String, Module> modules = reader.readMacroModules();
-      // VBAMacroReader returns an empty map (not null) when the file has no vbaProject.bin OR
-      // when the package is present but holds zero modules. Either way, "no modules to show" is
-      // the VBA_NOT_PRESENT contract per plan §9.7.
+      // Defensive: historical POI versions returned an empty map in edge cases, but on 5.5.x
+      // the no-VBA path actually throws IllegalArgumentException("No VBA project found") — see
+      // the widened catch below. Keep this branch as forward-compatibility against a future POI
+      // that switches back to empty-map semantics.
       if (modules == null || modules.isEmpty()) {
         throw new McpException(
             ErrorCode.VBA_NOT_PRESENT,
@@ -100,9 +101,11 @@ public final class PoiVbaExtractor {
             Map.of("path", sourcePath.toString()));
       }
       return new LinkedHashMap<>(modules);
-    } catch (IOException ex) {
-      // Missing vbaProject.bin part or malformed binary — both surface as VBA_NOT_PRESENT rather
-      // than INTERNAL_ERROR, so the agent can handle the common case uniformly.
+    } catch (IOException | IllegalArgumentException ex) {
+      // IOException: OPC I/O / malformed binary. IllegalArgumentException: POI's actual
+      // signal for "this file has no vbaProject.bin" (5.5.x raises "No VBA project found"
+      // from VBAMacroReader.findMacros). Both surface as VBA_NOT_PRESENT rather than
+      // INTERNAL_ERROR so the agent can handle the common case uniformly.
       throw new McpException(
           ErrorCode.VBA_NOT_PRESENT,
           "workbook does not expose readable VBA: "

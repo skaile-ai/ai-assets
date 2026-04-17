@@ -105,10 +105,25 @@ public final class ToolRegistry {
           .isError(true)
           .build();
     } catch (Exception serializationFailure) {
+      // Keep the stdio transport alive even when the error envelope itself is unserialisable:
+      // a minimal well-formed response beats letting the exception bubble past the SDK. The
+      // fallback envelope still includes details={} and echoes the same fields into
+      // structuredContent so clients that key off either channel see a consistent shape.
+      log.error("error-envelope serialisation failed", serializationFailure);
       return CallToolResult.builder()
           .addContent(
               new TextContent(
-                  "{\"code\":\"INTERNAL_ERROR\",\"message\":\"error-envelope serialisation failed\"}"))
+                  "{\"code\":\"INTERNAL_ERROR\","
+                      + "\"message\":\"error-response serialization failed\","
+                      + "\"details\":{}}"))
+          .structuredContent(
+              Map.of(
+                  "code",
+                  "INTERNAL_ERROR",
+                  "message",
+                  "error-response serialization failed",
+                  "details",
+                  Map.of()))
           .isError(true)
           .build();
     }

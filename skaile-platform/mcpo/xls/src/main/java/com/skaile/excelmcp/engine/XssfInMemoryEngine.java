@@ -175,15 +175,28 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
     Workbook wb = requireOpen(id);
     List<NamedRangeRef> out = new ArrayList<>();
     for (Name n : wb.getAllNames()) {
-      String sheet = n.getSheetIndex() < 0 ? null : wb.getSheetName(n.getSheetIndex());
       String scope = n.getSheetIndex() < 0 ? "workbook" : "sheet";
-      String refers = null;
+      String sheet = null;
+      String range = null;
+      String refersTo = null;
       try {
-        refers = n.getRefersToFormula();
+        refersTo = n.getRefersToFormula();
       } catch (RuntimeException ignored) {
-        // some malformed names throw; skip the range info rather than failing the whole list
+        // Some malformed names throw on refersTo access; leave sheet+range null.
       }
-      out.add(new NamedRangeRef(n.getNameName(), sheet, refers, scope));
+      if (refersTo != null && !refersTo.isBlank()) {
+        try {
+          AreaReference area = new AreaReference(refersTo, wb.getSpreadsheetVersion());
+          sheet = area.getFirstCell().getSheetName();
+          range = formatAreaA1(area);
+        } catch (RuntimeException ignored) {
+          // Non-rectangular reference (formula expression, 3D ref, bare A1 without sheet). Per
+          // plan §7.3 the wire shape is {name, sheet, range, scope} with clean fields — there's
+          // no slot for a raw refers-to expression, and callers that need it can open the file
+          // in Excel. Leave sheet+range null so the entry still surfaces in the inventory.
+        }
+      }
+      out.add(new NamedRangeRef(n.getNameName(), sheet, range, scope));
     }
     return out;
   }
@@ -198,13 +211,18 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
     for (int i = 0; i < xwb.getNumberOfSheets(); i++) {
       XSSFSheet sheet = xwb.getSheetAt(i);
       for (XSSFTable t : sheet.getTables()) {
-        String area;
+        // AreaReference.formatAsString() includes the sheet prefix and absolute markers
+        // (e.g. "Sheet1!$A$1:$C$4"), but the wire shape keeps sheet + range separate per
+        // plan §7.3. Use formatAreaA1 so the range field is a bare A1 body ("A1:C4") and the
+        // sheet name comes through the dedicated field.
+        String range;
         try {
-          area = t.getArea() == null ? null : t.getArea().formatAsString();
+          AreaReference area = t.getArea();
+          range = area == null ? null : formatAreaA1(area);
         } catch (RuntimeException ignored) {
-          area = null;
+          range = null;
         }
-        out.add(new TableRef(t.getName(), sheet.getSheetName(), area));
+        out.add(new TableRef(t.getName(), sheet.getSheetName(), range));
       }
     }
     return out;

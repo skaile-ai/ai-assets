@@ -126,9 +126,11 @@ try:
     assert tables["tables"], tables
     t_entry = next(t for t in tables["tables"] if t["name"] == "tblSales")
     assert t_entry["sheet"] == "Data", t_entry
-    # POI returns the range with absolute markers? We don't pin the exact string — just confirm
-    # it starts with "A1" and ends with "C4".
-    assert "A1" in t_entry["range"] and "C4" in t_entry["range"], t_entry
+    # Regression for Bug 1 (post-Phase-9 manual testing): table.list must return a bare A1 body
+    # in "range", not POI's raw formatAsString output. Before fix: "Data!$A$1:$C$4". After fix:
+    # "A1:C4". The sheet name belongs in the "sheet" field only.
+    assert t_entry["range"] == "A1:C4", t_entry
+    assert "!" not in t_entry["range"] and "$" not in t_entry["range"], t_entry
 
     # --- table.get (case-insensitive) ---
     t_body = call(p, 12, "table.get", {"handle": h, "name": "TBLSALES"})
@@ -155,6 +157,29 @@ try:
     assert names_by_name["Total"]["scope"] == "workbook", names_by_name["Total"]
     assert names_by_name["SummaryBlock"]["scope"] == "sheet", names_by_name["SummaryBlock"]
     assert names_by_name["SummaryBlock"]["sheet"] == "Summary", names_by_name["SummaryBlock"]
+    # Regression for Bug 1 (post-Phase-9 manual testing): named_range.list must split the
+    # reference into {sheet, range} cleanly, not pass through POI's raw getRefersToFormula()
+    # which returns strings like "Data!$C$6". After the fix, sheet carries the sheet name alone
+    # and range is a bare A1 body. Assert all three fixture entries.
+    for nm, expected_sheet, expected_range in (
+        ("Total",        "Data",    "C6"),
+        ("HeaderRow",    "Data",    "A1:C1"),
+        ("SummaryBlock", "Summary", "A1:B2"),
+    ):
+        entry = names_by_name[nm]
+        assert entry["sheet"] == expected_sheet, (nm, entry)
+        assert entry["range"] == expected_range, (nm, entry)
+        assert "!" not in entry["range"] and "$" not in entry["range"], (nm, entry)
+
+    # Regression for Bug 1 (same root cause): workbook.metadata.named_ranges and .tables must
+    # use the same clean split shape — they both funnel through listNamedRanges / listTables.
+    meta = call(p, 140, "workbook.metadata", {"handle": h})
+    meta_names = {n["name"]: n for n in meta["named_ranges"]}
+    assert meta_names["Total"]["range"] == "C6" and meta_names["Total"]["sheet"] == "Data", meta_names["Total"]
+    assert meta_names["SummaryBlock"]["range"] == "A1:B2", meta_names["SummaryBlock"]
+    meta_tables = {t["name"]: t for t in meta["tables"]}
+    assert meta_tables["tblSales"]["range"] == "A1:C4", meta_tables["tblSales"]
+    assert meta_tables["tblSales"]["sheet"] == "Data", meta_tables["tblSales"]
 
     # --- named_range.get: workbook-scoped single cell ---
     total = call(p, 15, "named_range.get", {"handle": h, "name": "Total"})
