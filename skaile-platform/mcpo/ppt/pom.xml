@@ -16,6 +16,7 @@
     <jackson.version>2.21.2</jackson.version>
     <poi.version>5.5.1</poi.version>
     <batik.version>1.19</batik.version>
+    <log4j.version>2.25.2</log4j.version>
     <commons.codec.version>1.20.0</commons.codec.version>
     <commons.io.version>2.21.0</commons.io.version>
   </properties>
@@ -58,6 +59,12 @@
       <groupId>org.apache.xmlgraphics</groupId>
       <artifactId>batik-dom</artifactId>
       <version>${batik.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
     </dependency>
 
     <dependency>

@@ -18,7 +18,7 @@ This module is not yet fully enterprise-hardened (see "Known Gaps").
 ## Architecture at a Glance
 
 - `McpServer`: JSON-RPC request handling (`initialize`, `tools/list`, `tools/call`).
-- `JsonRpcIO`: `Content-Length` framed stdio transport.
+- `JsonRpcIO`: newline-delimited stdio transport (with legacy framed-input compatibility).
 - `PptToolService`: tool registry, validation, and implementation logic.
 - `SessionStore`: in-memory document sessions (`doc_<uuid>` handles).
 - `PptDocumentSession`: session metadata (`openedAt`, `updatedAt`, `dirty`, `sourcePath`).
@@ -74,8 +74,8 @@ Tool payloads include:
 Build/test:
 
 ```bash
-mvn -q test
-mvn -q package
+mvn test
+mvn package
 ```
 
 Run:
@@ -88,19 +88,28 @@ Artifact:
 
 - `target/ppt-mcp-server-all.jar`
 
-## Runtime Configuration
+## Test With MCP Inspector (Docker)
 
-- `SOFFICE_PATH`: optional path to LibreOffice `soffice` binary (PDF export).
-- `MCPO_MAX_OPEN_DOCS`: max in-memory open docs (default `100`).
-- `MCPO_ALLOWED_ROOT`: optional file sandbox root for all read/write paths.
-- `MCPO_TEMPLATE_DIR`: template storage path.
-- `MCPO_DEFAULT_TEMPLATE_CONFIG`: default-template config JSON path.
+Run this from the `ai-assets` repository root:
+
+```bash
+npx @modelcontextprotocol/inspector \
+  docker run --rm -i \
+  -v "$PWD/skaile-platform/mcpo/ppt/resources:/workspace/resources" \
+  ppt-mcp-server:local
+```
+
+Document storage behavior:
+
+- `ppt.create_document` creates a presentation in memory only.
+- New documents are written to disk only when you call `ppt.save_document` with `output_path`.
+- If a document was opened from disk (`ppt.open_document`), `ppt.save_document` without `output_path` overwrites the original file path.
 
 ## External Dependencies
 
 - Apache POI: PPTX manipulation.
 - Apache Batik: SVG rendering.
-- LibreOffice (`soffice`): PDF conversion.
+- LibreOffice (`soffice`): PDF conversion. The Docker image installs it and sets `SOFFICE_PATH=/usr/bin/soffice`.
 
 If `soffice` is missing, PDF export fails with a tool error.
 

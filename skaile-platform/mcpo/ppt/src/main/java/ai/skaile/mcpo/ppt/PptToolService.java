@@ -1899,6 +1899,9 @@ public final class PptToolService {
         if (normalized.isBlank()) {
             throw new IllegalArgumentException("template_name cannot be blank");
         }
+        if (normalized.contains("/") || normalized.contains("\\")) {
+            throw new IllegalArgumentException("template_name must be a file name, not a path");
+        }
 
         Path fileNamePath = Path.of(normalized).getFileName();
         if (fileNamePath == null) {

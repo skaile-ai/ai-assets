@@ -7,22 +7,48 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 public final class JsonRpcIO {
+    private static final boolean LEGACY_FRAMED_STDIO = Boolean.parseBoolean(
+            System.getenv().getOrDefault("MCPO_STDIO_FRAMED", "false"));
+
     private JsonRpcIO() {
     }
 
     public static byte[] readMessage(InputStream in) throws IOException {
-        String line;
-        int contentLength = -1;
-
-        while (true) {
+        String line = readLine(in);
+        while (line != null && line.isBlank()) {
             line = readLine(in);
-            if (line == null) {
-                return null;
-            }
-            if (!line.isBlank()) {
-                break;
-            }
         }
+
+        if (line == null) {
+            return null;
+        }
+
+        String trimmed = line.trim();
+        if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            return line.getBytes(StandardCharsets.UTF_8);
+        }
+
+        return readFramedBody(in, line);
+    }
+
+    public static void writeMessage(OutputStream out, byte[] body) throws IOException {
+        if (LEGACY_FRAMED_STDIO) {
+            String headers = "Content-Length: " + body.length + "\r\n"
+                    + "Content-Type: application/json\r\n\r\n";
+            out.write(headers.getBytes(StandardCharsets.US_ASCII));
+            out.write(body);
+            out.flush();
+            return;
+        }
+
+        out.write(body);
+        out.write('\n');
+        out.flush();
+    }
+
+    private static byte[] readFramedBody(InputStream in, String firstHeaderLine) throws IOException {
+        String line = firstHeaderLine;
+        int contentLength = -1;
 
         while (line != null && !line.isEmpty()) {
             int separator = line.indexOf(':');
@@ -45,14 +71,6 @@ public final class JsonRpcIO {
             throw new IOException("Unexpected EOF while reading message body");
         }
         return body;
-    }
-
-    public static void writeMessage(OutputStream out, byte[] body) throws IOException {
-        String headers = "Content-Length: " + body.length + "\r\n"
-                + "Content-Type: application/json\r\n\r\n";
-        out.write(headers.getBytes(StandardCharsets.US_ASCII));
-        out.write(body);
-        out.flush();
     }
 
     private static String readLine(InputStream in) throws IOException {
