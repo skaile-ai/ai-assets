@@ -78,6 +78,8 @@ Out of scope for v1: charts, pivots, formatting (font/colors/borders/conditional
 Build in **phases**, in this order. Each phase has a "verify" gate the agent must satisfy before moving to the next. This keeps the system runnable end-to-end at every step instead of accumulating a large unconnected mass of code.
 
 > **From Phase 5 onward, every new tool's `description()` and parameter descriptions must follow the authoring conventions in `excel-mcp-server-future-work.md` → "Authoring conventions (standing directives)"** (three-part effect / prerequisite / gotcha body; concrete example + constraints + units on every parameter; no engine-layer leakage). Earlier-phase tools predate the directive and are swept in the Phase 10 audit.
+>
+> **When a tool ships** (or its `description()` is edited during the Phase 10 audit), also update the tool table in `README.md` — replace the `*(planned — description TBD)*` placeholder with the verbatim `description()` string and fill in the parameter column. The README table is the human-facing index of the tool surface; keep it in lockstep with the code.
 
 **Phase 0 — Project bootstrap.** `pom.xml` with all pinned dependencies (§3.2), `Dockerfile` (§12.1), Spotless + Logback config, package skeleton matching §4. *Verify:* `mvn package` succeeds; `java -jar` runs the entry point and exits cleanly.
 
