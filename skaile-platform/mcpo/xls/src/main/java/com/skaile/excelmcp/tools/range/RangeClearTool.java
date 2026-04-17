@@ -29,15 +29,32 @@ public final class RangeClearTool implements ToolDefinition {
 
   @Override
   public String description() {
-    return "Remove the contents of every non-empty cell in the given A1 range. Styling is preserved.";
+    return "Removes the contents of every non-empty cell inside the given A1 range, leaving the"
+        + " surrounding cells unchanged. Requires an open handle and an existing sheet; the"
+        + " change is in-memory until workbook.save. Styling, merged regions, and column widths"
+        + " are preserved — only cell values and formulas are cleared. Formulas elsewhere that"
+        + " reference a cleared cell will carry stale cached results until workbook.recalculate"
+        + " runs.";
   }
 
   @Override
   public JsonNode inputSchema() {
     ObjectNode props = object();
-    props.set("handle", stringProp("Workbook handle."));
-    props.set("sheet", stringProp("Sheet name."));
-    props.set("range", stringProp("A1 range to clear, e.g. \"A1:C10\"."));
+    props.set(
+        "handle",
+        stringProp(
+            "Workbook handle previously returned by workbook.open or workbook.create; opaque"
+                + " \"wb-\" prefixed string, e.g. \"wb-3f9a1c4d\"."));
+    props.set(
+        "sheet",
+        stringProp(
+            "Sheet name matched case-insensitively (e.g. \"Sheet1\"); fails with SHEET_NOT_FOUND"
+                + " if no match."));
+    props.set(
+        "range",
+        stringProp(
+            "A1 range to clear (e.g. \"A1:C10\" for a block or \"C5\" for a single cell); must"
+                + " be a bounded rectangle within the sheet's format limits."));
     ObjectNode schema = object();
     schema.put("type", "object");
     schema.set("properties", props);

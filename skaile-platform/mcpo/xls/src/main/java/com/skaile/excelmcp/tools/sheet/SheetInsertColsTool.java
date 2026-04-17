@@ -37,8 +37,9 @@ public final class SheetInsertColsTool implements ToolDefinition {
     return "Inserts count empty columns starting at start_col; columns at or to the right are"
         + " shifted right by count. Requires an open workbook handle and an existing sheet; the"
         + " structural change is in-memory until workbook.save. start_col is 1-based (A=1,"
-        + " B=2, …); column shifting is XSSF-only — invoking this tool on a .xls (HSSF) workbook"
-        + " returns INTERNAL_ERROR because POI does not implement shiftColumns for that format.";
+        + " B=2, …); column structural edits are not available on legacy .xls workbooks — the"
+        + " call fails with INTERNAL_ERROR on that format, so convert to .xlsx/.xlsm first when"
+        + " columns need to shift.";
   }
 
   @Override

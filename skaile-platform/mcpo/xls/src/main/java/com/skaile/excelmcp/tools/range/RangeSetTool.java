@@ -38,25 +38,49 @@ public final class RangeSetTool implements ToolDefinition {
 
   @Override
   public String description() {
-    return "Write a 2D block of values and/or formulas. Does NOT auto-recalc — call workbook.recalculate to refresh cached formula results.";
+    return "Writes a 2D block of values and (optionally) formulas into a sheet starting at a"
+        + " given A1 position; cells outside the block are untouched. Requires an open handle"
+        + " and an existing sheet; the change is in-memory until workbook.save and does NOT"
+        + " auto-recalculate — call workbook.recalculate after setting formulas to refresh"
+        + " cached results. If formulas is supplied it must be the same 2D shape as values;"
+        + " non-null formula entries override the matching value, and unlinked external"
+        + " references are rejected at write time with FORMULA_INVALID.";
   }
 
   @Override
   public JsonNode inputSchema() {
     ObjectNode props = object();
-    props.set("handle", stringProp("Workbook handle."));
-    props.set("sheet", stringProp("Sheet name."));
+    props.set(
+        "handle",
+        stringProp(
+            "Workbook handle previously returned by workbook.open or workbook.create; opaque"
+                + " \"wb-\" prefixed string, e.g. \"wb-3f9a1c4d\"."));
+    props.set(
+        "sheet",
+        stringProp(
+            "Sheet name matched case-insensitively (e.g. \"Sheet1\"); fails with SHEET_NOT_FOUND"
+                + " if no match."));
     props.set(
         "range",
         stringProp(
-            "Optional A1 range. If omitted, 'start' is required and the extent is inferred from values."));
-    props.set("start", stringProp("Optional A1 start cell. If omitted, the range start is used."));
+            "Optional A1 range that explicitly bounds the write, e.g. \"A1:B2\". When omitted,"
+                + " start is required and the extent is inferred from the values array's"
+                + " dimensions. If provided, its shape must match the values dimensions."));
+    props.set(
+        "start",
+        stringProp(
+            "Alternative to range — A1 address of the top-left cell where writing begins (e.g."
+                + " \"A1\"). Extent is inferred from the values array's shape."));
 
     ObjectNode values = object();
     values.put("type", "array");
     values.put(
         "description",
-        "2D row-major array of cell values. Strings, numbers, booleans, or ISO date strings. Required even for pure-formula writes: use null at any position where only the matching 'formulas' entry should apply.");
+        "Required 2D row-major array of cell values. Each inner array is one row; entries may"
+            + " be JSON strings, numbers (integer or float), booleans, ISO-8601 date strings"
+            + " (\"2026-04-17T00:00:00\", naive — no timezone), or null. Null entries paired"
+            + " with a non-null formulas entry at the same position write a formula-only cell;"
+            + " null entries with no formula leave that cell unchanged.");
     ObjectNode inner = object();
     inner.put("type", "array");
     values.set("items", inner);
@@ -66,7 +90,12 @@ public final class RangeSetTool implements ToolDefinition {
     formulas.put("type", "array");
     formulas.put(
         "description",
-        "Optional 2D array of formulas (same shape as values). Non-null entries override the value.");
+        "Optional 2D array with the same shape as values. Non-null entries (e.g."
+            + " \"=B2*1.5\" — the leading equals sign is optional, both \"=B2*1.5\" and"
+            + " \"B2*1.5\" are accepted) are stored as cell formulas and override the"
+            + " corresponding value at that position. Omit entirely for pure-value writes."
+            + " Formulas referencing an unopened external workbook are rejected up front with"
+            + " FORMULA_INVALID.");
     ObjectNode innerF = object();
     innerF.put("type", "array");
     formulas.set("items", innerF);

@@ -2,7 +2,10 @@ package com.skaile.excelmcp.handles;
 
 import com.skaile.excelmcp.error.ErrorCode;
 import com.skaile.excelmcp.error.McpException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -38,5 +41,14 @@ public final class HandleRegistry {
 
   public synchronized int size() {
     return entries.size();
+  }
+
+  /**
+   * Snapshot of every currently-registered workbook entry, in insertion order (LinkedHashMap).
+   * Returned as an immutable copy so callers can iterate without tripping on concurrent opens or
+   * closes even though the registry itself is single-threaded.
+   */
+  public synchronized Collection<OpenWorkbook> all() {
+    return List.copyOf(new ArrayList<>(entries.values()));
   }
 }

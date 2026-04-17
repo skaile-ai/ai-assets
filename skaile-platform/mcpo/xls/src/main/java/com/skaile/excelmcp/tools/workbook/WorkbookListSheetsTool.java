@@ -28,13 +28,20 @@ public final class WorkbookListSheetsTool implements ToolDefinition {
 
   @Override
   public String description() {
-    return "List all sheets with their name, zero-based index, and hidden flag.";
+    return "Returns the ordered list of sheets in the workbook, each with its name, zero-based"
+        + " index, and hidden flag. Requires an open handle; read-only. Sheet indices reflect the"
+        + " current sheet order which is mutated by sheet.create / sheet.delete / sheet.rename —"
+        + " don't cache them across structural edits.";
   }
 
   @Override
   public JsonNode inputSchema() {
     ObjectNode props = object();
-    props.set("handle", stringProp("Workbook handle."));
+    props.set(
+        "handle",
+        stringProp(
+            "Workbook handle previously returned by workbook.open or workbook.create; opaque"
+                + " \"wb-\" prefixed string, e.g. \"wb-3f9a1c4d\"."));
     ObjectNode schema = object();
     schema.put("type", "object");
     schema.set("properties", props);

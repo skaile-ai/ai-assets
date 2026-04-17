@@ -42,23 +42,57 @@ public final class RangeGetTool implements ToolDefinition {
 
   @Override
   public String description() {
-    return "Read a rectangular range. Each cell carries type, value, and (if any) the typed formula. Set include_formatting=true to include styling.";
+    return "Reads the cells of a rectangular range and returns them as a row-major 2D grid where"
+        + " every cell carries its type, value, and (if any) typed formula. Requires an open"
+        + " handle and an existing sheet; read-only. Empty cells appear as type:\"blank\" (not"
+        + " omitted), formula cells with no cached result read as type:\"formula_uncomputed\""
+        + " until workbook.recalculate runs, and responses beyond max_cells are truncated"
+        + " row-major with truncated=true and total_cells set.";
   }
 
   @Override
   public JsonNode inputSchema() {
     ObjectNode props = object();
-    props.set("handle", stringProp("Workbook handle."));
-    props.set("sheet", stringProp("Sheet name."));
-    props.set("range", stringProp("A1 range, e.g. \"A1:C10\" or \"C5\"; OR set start+end."));
-    props.set("start", stringProp("Optional — alternative to range. Paired with end."));
-    props.set("end", stringProp("Optional — alternative to range. Paired with start."));
     props.set(
-        "include_formatting", boolProp("Include font/fill/alignment where available.", false));
+        "handle",
+        stringProp(
+            "Workbook handle previously returned by workbook.open or workbook.create; opaque"
+                + " \"wb-\" prefixed string, e.g. \"wb-3f9a1c4d\"."));
+    props.set(
+        "sheet",
+        stringProp(
+            "Sheet name matched case-insensitively (e.g. \"Sheet1\"); fails with SHEET_NOT_FOUND"
+                + " if no match."));
+    props.set(
+        "range",
+        stringProp(
+            "A1 range string defining a bounded rectangle, e.g. \"A1:C10\" or \"C5\" (single"
+                + " cell). Either range or both start+end must be provided. Whole-column (\"A:A\")"
+                + " and whole-row (\"1:1\") forms are not supported — supply explicit bounds."));
+    props.set(
+        "start",
+        stringProp(
+            "Alternative to range — A1 address of the top-left cell (e.g. \"A1\"); must be"
+                + " paired with end."));
+    props.set(
+        "end",
+        stringProp(
+            "Alternative to range — A1 address of the bottom-right cell (e.g. \"C10\"); must be"
+                + " paired with start."));
+    props.set(
+        "include_formatting",
+        boolProp(
+            "When true, each returned cell carries a formatting sub-object (number_format, font,"
+                + " fill_color, horizontal_alignment, wrap_text). Default false.",
+            false));
     props.set(
         "max_cells",
         intProp(
-            "Truncate output beyond this count; default " + DEFAULT_MAX_CELLS + ".",
+            "Hard cap on the number of cells returned; responses larger than this are row-major"
+                + " truncated and marked truncated=true with total_cells set. Units: cell count."
+                + " Minimum 1; default "
+                + DEFAULT_MAX_CELLS
+                + ".",
             DEFAULT_MAX_CELLS));
     ObjectNode schema = object();
     schema.put("type", "object");

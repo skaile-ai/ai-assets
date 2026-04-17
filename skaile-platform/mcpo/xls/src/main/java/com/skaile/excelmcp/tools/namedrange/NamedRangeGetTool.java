@@ -56,8 +56,9 @@ public final class NamedRangeGetTool implements ToolDefinition {
         "name",
         stringProp(
             "Defined-name identifier as authored in Excel's Name Manager, e.g. \"Total\" or"
-                + " \"HeaderRow\"; matched case-sensitively by POI (Excel itself is"
-                + " case-insensitive — prefer the exact name if you have it)."));
+                + " \"HeaderRow\". Matched case-sensitively in v1 — Excel treats names as"
+                + " case-insensitive, so prefer the canonical spelling reported by"
+                + " named_range.list when you aren't sure of the exact casing."));
     props.set(
         "include_formatting",
         boolProp(

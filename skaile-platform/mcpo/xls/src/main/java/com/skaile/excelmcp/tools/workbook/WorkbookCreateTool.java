@@ -37,13 +37,23 @@ public final class WorkbookCreateTool implements ToolDefinition {
 
   @Override
   public String description() {
-    return "Create a new empty .xlsx workbook. If a path is provided, it is remembered for workbook.save.";
+    return "Creates a new empty .xlsx workbook in memory with a single default \"Sheet1\" and"
+        + " returns an opaque handle. If a path is provided it is validated now and remembered so"
+        + " a later workbook.save can omit its destination argument; otherwise the first"
+        + " workbook.save must pass an explicit path. Nothing is written to disk until save —"
+        + " closing without saving silently discards the workbook.";
   }
 
   @Override
   public JsonNode inputSchema() {
     ObjectNode props = object();
-    props.set("path", stringProp("Optional destination path (must end in .xlsx/.xlsm/.xls)."));
+    props.set(
+        "path",
+        stringProp(
+            "Optional absolute destination path for later save, e.g. \"/data/new.xlsx\". Must end"
+                + " in .xlsx/.xlsm/.xls (case-insensitive); .xlsb is rejected. When"
+                + " EXCEL_MCP_ROOT is set, the path must resolve inside that subtree. Validated"
+                + " now, written only by workbook.save — omit to defer path selection."));
     ObjectNode schema = object();
     schema.put("type", "object");
     schema.set("properties", props);

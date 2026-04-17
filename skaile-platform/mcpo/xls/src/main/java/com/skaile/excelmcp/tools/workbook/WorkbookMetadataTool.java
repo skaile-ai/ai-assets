@@ -31,16 +31,35 @@ public final class WorkbookMetadataTool implements ToolDefinition {
 
   @Override
   public String description() {
-    return "Aggregate workbook metadata: filename, size, modified time, format, sheets, and (optionally) named ranges and tables.";
+    return "Returns aggregate workbook metadata — filename, on-disk size in bytes, last-modified"
+        + " timestamp, format, sheet summaries, and (optionally) the named-range and table"
+        + " inventories. Requires an open handle; read-only. The on-disk size and modified fields"
+        + " reflect the source file as it was last loaded or saved — in-memory edits since then"
+        + " are not visible here until the next workbook.save rewrites the file.";
   }
 
   @Override
   public JsonNode inputSchema() {
     ObjectNode props = object();
-    props.set("handle", stringProp("Workbook handle."));
     props.set(
-        "include_named_ranges", boolProp("Include workbook-wide and sheet-scoped names.", true));
-    props.set("include_tables", boolProp("Include XSSFTable (ListObject) entries.", true));
+        "handle",
+        stringProp(
+            "Workbook handle previously returned by workbook.open or workbook.create; opaque"
+                + " \"wb-\" prefixed string, e.g. \"wb-3f9a1c4d\"."));
+    props.set(
+        "include_named_ranges",
+        boolProp(
+            "When true (default), the response carries the full workbook-wide and sheet-scoped"
+                + " defined-name inventory. Set false to omit the named_ranges field on large"
+                + " workbooks where only top-level metadata is needed.",
+            true));
+    props.set(
+        "include_tables",
+        boolProp(
+            "When true (default), the response carries every Excel table (a.k.a. ListObject)"
+                + " defined across every sheet. Set false to omit the tables field — useful on"
+                + " large workbooks where the table inventory is expensive and not needed.",
+            true));
     ObjectNode schema = object();
     schema.put("type", "object");
     schema.set("properties", props);

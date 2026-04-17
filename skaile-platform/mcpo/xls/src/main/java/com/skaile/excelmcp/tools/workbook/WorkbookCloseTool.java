@@ -32,13 +32,21 @@ public final class WorkbookCloseTool implements ToolDefinition {
 
   @Override
   public String description() {
-    return "Close a workbook handle. Any unsaved changes are discarded.";
+    return "Releases the in-memory workbook and drops its handle from the server's registry."
+        + " Requires an open handle; subsequent tool calls on the same handle fail with"
+        + " HANDLE_UNKNOWN. This does not save — any in-memory edits since the last workbook.save"
+        + " are discarded, so call workbook.save first if you want to persist changes.";
   }
 
   @Override
   public JsonNode inputSchema() {
     ObjectNode props = object();
-    props.set("handle", stringProp("Workbook handle to close."));
+    props.set(
+        "handle",
+        stringProp(
+            "Workbook handle previously returned by workbook.open or workbook.create; opaque"
+                + " \"wb-\" prefixed string, e.g. \"wb-3f9a1c4d\". Fails with HANDLE_UNKNOWN if"
+                + " the id isn't currently registered."));
     ObjectNode schema = object();
     schema.put("type", "object");
     schema.set("properties", props);

@@ -32,6 +32,7 @@ import com.skaile.excelmcp.tools.vba.VbaListModulesTool;
 import com.skaile.excelmcp.tools.workbook.WorkbookCapabilitiesReportTool;
 import com.skaile.excelmcp.tools.workbook.WorkbookCloseTool;
 import com.skaile.excelmcp.tools.workbook.WorkbookCreateTool;
+import com.skaile.excelmcp.tools.workbook.WorkbookListHandlesTool;
 import com.skaile.excelmcp.tools.workbook.WorkbookListSheetsTool;
 import com.skaile.excelmcp.tools.workbook.WorkbookMetadataTool;
 import com.skaile.excelmcp.tools.workbook.WorkbookOpenTool;
@@ -85,6 +86,7 @@ public final class McpServerMain {
     tools.register(new WorkbookMetadataTool(engine));
     tools.register(new WorkbookRecalculateTool(engine));
     tools.register(new WorkbookCapabilitiesReportTool(engine));
+    tools.register(new WorkbookListHandlesTool(registry));
     tools.register(new RangeGetTool(engine));
     tools.register(new RangeSetTool(engine));
     tools.register(new RangeClearTool(engine));

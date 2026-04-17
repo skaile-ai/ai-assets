@@ -37,7 +37,12 @@ public final class WorkbookOpenTool implements ToolDefinition {
 
   @Override
   public String description() {
-    return "Open a .xlsx/.xlsm/.xls workbook from disk and return an opaque handle.";
+    return "Loads an Excel workbook from disk into memory and returns an opaque handle for"
+        + " subsequent tool calls. The handle stays valid until workbook.close or process exit;"
+        + " call workbook.save to flush in-memory edits back to disk. Only .xlsx, .xlsm, and .xls"
+        + " are accepted — .xlsb is rejected with FORMAT_UNSUPPORTED, and workbooks exceeding the"
+        + " configured size or cell limits (EXCEL_MCP_MAX_FILE_BYTES / EXCEL_MCP_MAX_CELLS) fail"
+        + " at load.";
   }
 
   @Override
@@ -45,7 +50,11 @@ public final class WorkbookOpenTool implements ToolDefinition {
     ObjectNode props = object();
     props.set(
         "path",
-        stringProp("Absolute path to the workbook (must resolve inside EXCEL_MCP_ROOT if set)."));
+        stringProp(
+            "Absolute filesystem path to the workbook file, e.g. \"/data/report.xlsx\". Must"
+                + " already exist and end in .xlsx/.xlsm/.xls (case-insensitive); .xlsb is"
+                + " rejected. When EXCEL_MCP_ROOT is set, the path must resolve inside that"
+                + " subtree or the call fails with PATH_OUTSIDE_ROOT."));
     ObjectNode schema = object();
     schema.put("type", "object");
     schema.set("properties", props);

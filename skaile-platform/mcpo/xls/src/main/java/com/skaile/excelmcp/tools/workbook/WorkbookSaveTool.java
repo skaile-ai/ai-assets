@@ -39,14 +39,29 @@ public final class WorkbookSaveTool implements ToolDefinition {
 
   @Override
   public String description() {
-    return "Save the workbook. Atomic write via temp+rename. Workbook stays open afterwards.";
+    return "Writes the workbook's current in-memory state to disk via an atomic temp-file +"
+        + " rename, replacing the destination if it exists. Requires an open handle; defaults to"
+        + " the path the workbook was opened or created with, and the handle stays valid (and"
+        + " editable) after the save. If the workbook was created via workbook.create without a"
+        + " path, path is required here or the call fails with SAVE_REQUIRES_PATH; the atomic"
+        + " pattern means a crash mid-save leaves the prior file intact.";
   }
 
   @Override
   public JsonNode inputSchema() {
     ObjectNode props = object();
-    props.set("handle", stringProp("Workbook handle returned from workbook.open/workbook.create."));
-    props.set("path", stringProp("Optional explicit destination; defaults to the source path."));
+    props.set(
+        "handle",
+        stringProp(
+            "Workbook handle previously returned by workbook.open or workbook.create; opaque"
+                + " \"wb-\" prefixed string, e.g. \"wb-3f9a1c4d\"."));
+    props.set(
+        "path",
+        stringProp(
+            "Optional absolute destination path for this save, e.g. \"/data/out.xlsx\"; must end"
+                + " in .xlsx/.xlsm/.xls. When EXCEL_MCP_ROOT is set, the path must resolve inside"
+                + " that subtree. Overrides the workbook's remembered source path for this call"
+                + " only — subsequent saves still default to the original source path."));
     ObjectNode schema = object();
     schema.put("type", "object");
     schema.set("properties", props);

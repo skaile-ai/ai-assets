@@ -32,10 +32,11 @@ public final class VbaListModulesTool implements ToolDefinition {
   public String description() {
     return "Lists every VBA module embedded in the workbook's macro project: Document modules"
         + " (per-sheet ThisWorkbook / Sheet1), standard Module entries, and Class modules."
-        + " Requires an open workbook handle whose source file on disk contains a vbaProject.bin"
-        + " — workbooks created via workbook.create() or saved as .xlsx (not .xlsm) raise"
-        + " VBA_NOT_PRESENT. UserForms are not exposed in v1 because POI's extractor is"
-        + " incomplete for them.";
+        + " Requires an open workbook handle whose source file on disk actually contains a VBA"
+        + " project — workbooks created via workbook.create() or saved as plain .xlsx (not"
+        + " .xlsm) raise VBA_NOT_PRESENT. UserForms are not exposed in v1 (extraction is"
+        + " known-incomplete across Java and Python tooling) — only the three listed module"
+        + " types appear.";
   }
 
   @Override
