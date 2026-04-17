@@ -96,11 +96,14 @@ try:
                               "values": [[1], [2], [3]]})
     call(p, 12, "range.set", {"handle": h, "sheet": "Data", "start": "A4",
                               "values": [[None]], "formulas": [["=SUM(A1:A3)"]]})
-    # Before recalc, A4 is a formula with no cached value.
+    # Before recalc, A4 must surface as formula_uncomputed with value=null per plan §7.1 — NOT
+    # as {type:"number", value:0} (the POI-default cached result setCellFormula would otherwise
+    # leave behind). Regression guard: PoiCellWriter must unset the <v> element on write.
     pre = call(p, 13, "range.get", {"handle": h, "sheet": "Data", "range": "A4"})
     pre_cell = pre["cells"][0][0]
     assert pre_cell["formula"] == "SUM(A1:A3)", pre_cell
-    assert pre_cell["type"] in ("formula_uncomputed", "number"), pre_cell
+    assert pre_cell["type"] == "formula_uncomputed", pre_cell
+    assert pre_cell.get("value") is None, pre_cell
 
     ev = call(p, 14, "workbook.recalculate", {"handle": h})
     assert ev["evaluated_cells"] >= 1, ev

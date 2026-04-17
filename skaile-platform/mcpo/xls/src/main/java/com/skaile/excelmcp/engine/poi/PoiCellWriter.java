@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Map;
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 
 /**
  * Writes a (value, formula?) pair to a POI cell. Formulas take precedence over values when both are
@@ -26,6 +27,14 @@ public final class PoiCellWriter {
       try {
         String trimmed = formula.startsWith("=") ? formula.substring(1) : formula;
         cell.setCellFormula(trimmed);
+        // POI's setCellFormula leaves the cached result as NUMERIC 0.0, which would surface via
+        // PoiCellReader as {type:"number", value:0} even though the formula has never been
+        // evaluated. Plan §7.1 requires a freshly-written formula to read as
+        // {type:"formula_uncomputed", value:null} until workbook.recalculate runs. Unset the <v>
+        // element on XSSF cells so getCachedFormulaResultType() returns BLANK.
+        if (cell instanceof XSSFCell xc && xc.getCTCell().isSetV()) {
+          xc.getCTCell().unsetV();
+        }
       } catch (FormulaParseException e) {
         throw new McpException(
             ErrorCode.FORMULA_INVALID,

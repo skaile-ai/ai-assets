@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 
 /**
  * Translates a POI {@link Cell} into a {@link CellShape}. Always exposes the typed formula string
@@ -51,6 +52,15 @@ public final class PoiCellReader {
     CellType type = cell.getCellType();
     if (type == CellType.FORMULA) {
       String formula = cell.getCellFormula();
+      // Plan §7.1: a freshly-written formula with no cached value must surface as
+      // formula_uncomputed. POI's getCachedFormulaResultType() returns NUMERIC whenever the
+      // cell's t attribute is absent or "n" (the default for setCellFormula on a fresh cell),
+      // and getNumericCellValue() then returns 0.0 — so the cached-type hint cannot be trusted
+      // on its own. The authoritative "has a cached value" signal on XSSF is the presence of
+      // the <v> element; if it's absent the cell has never been evaluated.
+      if (cell instanceof XSSFCell xc && !xc.getCTCell().isSetV()) {
+        return CellShape.uncomputedFormula(a1, formula);
+      }
       CellType cached = cell.getCachedFormulaResultType();
       return switch (cached) {
         case NUMERIC -> CellShape.formula(a1, numericType(cell), numericValue(cell), formula);
