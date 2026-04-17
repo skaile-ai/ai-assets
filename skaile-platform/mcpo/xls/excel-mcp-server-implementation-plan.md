@@ -59,11 +59,11 @@ This is lower priority than working code but is the single artifact that lets th
 
 ### 2.1 Tools
 
-v1 ships **25 tools** in 7 categories. All read-only or "structure-aware edit" — no chart/pivot/format manipulation.
+v1 ships **26 tools** in 7 categories. All read-only or "structure-aware edit" — no chart/pivot/format manipulation.
 
 | Category | Tools |
 |---|---|
-| Workbook lifecycle | `workbook.open`, `workbook.create`, `workbook.save`, `workbook.close`, `workbook.recalculate`, `workbook.list_sheets`, `workbook.metadata`, `workbook.capabilities_report` |
+| Workbook lifecycle | `workbook.open`, `workbook.create`, `workbook.save`, `workbook.close`, `workbook.recalculate`, `workbook.list_sheets`, `workbook.metadata`, `workbook.capabilities_report`, `workbook.list_handles` |
 | Range I/O | `range.get`, `range.set`, `range.clear` |
 | Sheet management | `sheet.create`, `sheet.delete`, `sheet.rename`, `sheet.merged_regions` |
 | Row/col mutation | `sheet.insert_rows`, `sheet.delete_rows`, `sheet.insert_cols`, `sheet.delete_cols` |
@@ -101,7 +101,7 @@ Build in **phases**, in this order. Each phase has a "verify" gate the agent mus
 
 **Phase 9 — VBA.** `PoiVbaExtractor`, `VbaListModulesTool`, `VbaGetModuleTool`. Test against an `.xlsm` fixture with a known module.
 
-**Phase 10 — Acceptance + polish.** Walk every §13 acceptance criterion; fix gaps. Write the README. Confirm `excel-mcp-server-future-work.md` was created and seeded per §1.6. Audit all 25 tool descriptions and parameter descriptions against the authoring template documented in `excel-mcp-server-future-work.md` §"Authoring conventions" (three-part effect / prerequisite / gotcha body; example + constraints + units on every parameter; no engine-layer leakage). Resolve any Phase 10 stop-gate items listed in the future-work doc. Final `mvn verify` clean; Docker image builds and starts under 5 seconds.
+**Phase 10 — Acceptance + polish.** Walk every §13 acceptance criterion; fix gaps. Write the README. Confirm `excel-mcp-server-future-work.md` was created and seeded per §1.6. Add `WorkbookListHandlesTool` (see §9.1 for the contract) — a diagnostic tool that returns all currently open workbook handles so an agent can self-audit after error-recovery paths where a prior handle may have been lost; this tool is registry-only and imports no POI. Audit all 26 tool descriptions and parameter descriptions against the authoring template documented in `excel-mcp-server-future-work.md` §"Authoring conventions" (three-part effect / prerequisite / gotcha body; example + constraints + units on every parameter; no engine-layer leakage). Resolve any Phase 10 stop-gate items listed in the future-work doc. Final `mvn verify` clean; Docker image builds and starts under 5 seconds.
 
 ### 2.3 When stuck or when the plan is silent
 
@@ -604,6 +604,32 @@ The agent calls this **before editing** to learn what POI can and cannot evaluat
 - `warnings`: derived from the booleans above and the unsupported-functions list. Keep messages short and actionable.
 
 **Performance**: this tool is O(cells with formulas), not O(all cells). On a 10k-formula workbook it should complete in well under a second. If it ever becomes a hot path, cache the result against workbook hash.
+
+#### `workbook.list_handles`
+
+Diagnostic tool. Returns every workbook handle currently held by the server, with its source path (if any), format, and open timestamp. Intended for agent self-audit during error recovery (e.g. after a retry path where a prior `workbook.open` may have produced a handle the agent lost track of) and for operator debugging of suspected handle leaks in long sessions.
+
+**Input:** `{}` (no parameters)
+**Output:**
+```jsonc
+{
+  "handles": [
+    {
+      "handle": "wb-3f9a1c4d",
+      "source_path": "/data/report.xlsx",    // null if workbook was created via workbook.create without a path
+      "format": "xlsx",                       // xlsx | xlsm | xls
+      "opened_at": "2026-04-17T14:32:11.123Z"
+    }
+  ]
+}
+```
+If no workbooks are open, `handles` is an empty array. Order is not guaranteed.
+
+**Errors:** none — empty handle registry is a successful empty response, not an error.
+
+**Implementation:** reads from `HandleRegistry` directly. Maps each `OpenWorkbook` record to the output shape via `ShapeMapper`. **No POI import** — this tool lives purely in the registry layer and does not touch `engine/`. A new `HandleRegistry.all()` method (returning `Collection<OpenWorkbook>`) is the only registry-layer addition needed.
+
+**Why it's a diagnostic, not a lifecycle primitive:** the agent already knows the handles it opened during normal operation. This tool matters when that invariant breaks — the agent hit an error path and is unsure whether a `workbook.open` succeeded before the failure, or when the operator wants to inspect a long-running container's state. It is explicitly **not** paired with a `workbook.close_all` tool: mass-closing handles is what process restart is for.
 
 ### 9.2 Range I/O
 

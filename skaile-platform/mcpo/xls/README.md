@@ -34,7 +34,7 @@ config/, log/ — env-var parsing and Logback setup (stderr routing).
 
 ## Tools
 
-v1 ships 25 tools across workbook lifecycle, range I/O, sheet management, row/col mutation, tables, named ranges, and read-only VBA — no charts, pivots, formatting writes, Power Query, or DAX (see future-work doc).
+v1 ships 26 tools across workbook lifecycle, range I/O, sheet management, row/col mutation, tables, named ranges, and read-only VBA — no charts, pivots, formatting writes, Power Query, or DAX (see future-work doc).
 
 Column **LLM-optimized description** is the string returned by `ToolDefinition.description()` — what the calling LLM sees when deciding whether and how to use the tool. Unimplemented tools are marked *(planned)*; a later agent will fill in the description when the tool ships, following the three-part effect / prerequisite / gotcha template in `excel-mcp-server-future-work.md` → "Authoring conventions". Some of the earliest tools predate that template and read more like plain summaries; they'll be rewritten when the full description audit runs.
 
@@ -48,6 +48,7 @@ Column **LLM-optimized description** is the string returned by `ToolDefinition.d
 | Workbook lifecycle | `workbook.metadata` | `handle`; `include_named_ranges?` (default true); `include_tables?` (default true) | Aggregate workbook metadata: filename, size, modified time, format, sheets, and (optionally) named ranges and tables. |
 | Workbook lifecycle | `workbook.recalculate` | `handle` — workbook handle previously returned by `workbook.open` or `workbook.create` (opaque `wb-` prefixed string, e.g. `"wb-3f9a1c4d"`) | Recomputes every formula in the workbook and refreshes the cached result stored on each cell. Requires an open workbook handle; the refreshed values are in-memory only until workbook.save. Functions added to Excel after 2019 (FILTER, SORT, LAMBDA, dynamic-array spill, etc.) are not implemented by the engine and keep their existing cached values — call workbook.capabilities_report first to see which formulas will be skipped. |
 | Workbook lifecycle | `workbook.capabilities_report` | `handle` — workbook handle previously returned by `workbook.open` or `workbook.create` (opaque `wb-` prefixed string, e.g. `"wb-3f9a1c4d"`) | Scans the loaded workbook and returns an inventory of which Excel functions and structural features the recalculation engine can and cannot handle. Requires an open workbook handle; makes no changes. Call this before writing or editing formulas so you know which cells workbook.recalculate will leave with stale cached values (FILTER, LAMBDA, dynamic-array spill, Linked Data Types, and similar post-2019 features are unsupported). |
+| Workbook lifecycle | `workbook.list_handles` | *(none)* | *(planned — description TBD)* |
 | Range I/O | `range.get` | `handle`; `sheet`; `range` (A1, e.g. `"A1:C10"` or `"C5"`) or `start`+`end`; `include_formatting?` (default false); `max_cells?` (default 10000) | Read a rectangular range. Each cell carries type, value, and (if any) the typed formula. Set include_formatting=true to include styling. |
 | Range I/O | `range.set` | `handle`; `sheet`; `range` or `start`; `values` (2D row-major array); `formulas?` (optional 2D array, same shape as values; non-null entries override the value) | Write a 2D block of values and/or formulas. Does NOT auto-recalc — call workbook.recalculate to refresh cached formula results. |
 | Range I/O | `range.clear` | `handle`; `sheet`; `range` (A1, e.g. `"A1:C10"`) | Remove the contents of every non-empty cell in the given A1 range. Styling is preserved. |
@@ -179,7 +180,7 @@ Run the server under [`@modelcontextprotocol/inspector`](https://github.com/mode
 ## v1 limits (by design)
 
 - Formats: `.xlsx`, `.xlsm`, `.xls` are supported. `.xlsb` is **rejected at open** — see `excel-mcp-server-future-work.md` for the calamine / LibreOffice future options.
-- Tool surface: 25 tools across workbook lifecycle, range I/O, sheet management, row/col mutation, tables, named ranges, and read-only VBA. No charts, no pivots, no formatting writes, no Power Query / DAX.
+- Tool surface: 26 tools across workbook lifecycle, range I/O, sheet management, row/col mutation, tables, named ranges, and read-only VBA. No charts, no pivots, no formatting writes, no Power Query / DAX.
 - Transport: stdio only. No HTTP / SSE.
 - Tenancy: one process per agent session; no per-handle locking or idle-handle eviction (process death is the eviction).
 - Formula recalc: POI evaluates ~280 of Excel's ~500+ functions. Post-2019 additions (FILTER, SORT, LAMBDA family, dynamic-array spill, etc.) are not evaluated — use `workbook.capabilities_report` to see what's safe before editing. Detection-and-warn is v1's strategy; a HyperFormula/LibreOffice sidecar is the v1.1 direction.

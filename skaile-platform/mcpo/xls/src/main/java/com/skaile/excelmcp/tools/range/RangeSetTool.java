@@ -56,7 +56,7 @@ public final class RangeSetTool implements ToolDefinition {
     values.put("type", "array");
     values.put(
         "description",
-        "2D row-major array of cell values. Strings, numbers, booleans, or ISO date strings.");
+        "2D row-major array of cell values. Strings, numbers, booleans, or ISO date strings. Required even for pure-formula writes: use null at any position where only the matching 'formulas' entry should apply.");
     ObjectNode inner = object();
     inner.put("type", "array");
     values.set("items", inner);
