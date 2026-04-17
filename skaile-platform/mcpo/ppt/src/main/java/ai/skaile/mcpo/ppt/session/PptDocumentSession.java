@@ -1,4 +1,4 @@
-package ai.skaile.mcpo.ppt;
+package ai.skaile.mcpo.ppt.session;
 
 import java.nio.file.Path;
 import java.time.Instant;

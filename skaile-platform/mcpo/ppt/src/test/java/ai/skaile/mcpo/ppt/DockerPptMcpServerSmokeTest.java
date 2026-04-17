@@ -44,28 +44,58 @@ class DockerPptMcpServerSmokeTest {
             "ppt.open_document",
             "ppt.close_document",
             "ppt.get_document_info",
+            "ppt.set_page_setup",
             "ppt.list_slides",
+            "ppt.reorder_slides",
             "ppt.get_slide_content",
             "ppt.add_slide",
+            "ppt.duplicate_slide",
+            "ppt.delete_slides",
+            "ppt.merge_presentations",
             "ppt.update_text",
+            "ppt.replace_text_globally",
             "ppt.add_textbox",
+            "ppt.add_shape",
             "ppt.insert_image",
+            "ppt.replace_image",
             "ppt.get_slide_notes",
             "ppt.set_slide_notes",
             "ppt.add_table",
             "ppt.get_table_cell",
             "ppt.set_table_cell",
+            "ppt.modify_table_structure",
+            "ppt.set_table_row_height",
+            "ppt.set_table_column_width",
+            "ppt.set_table_header_style",
             "ppt.set_text_style",
+            "ppt.set_text_run_style",
+            "ppt.set_list_formatting",
+            "ppt.move_shape",
+            "ppt.clone_shape",
+            "ppt.resize_shape",
+            "ppt.add_hyperlink",
+            "ppt.set_slide_background",
+            "ppt.import_markdown_outline",
+            "ppt.transaction_begin",
+            "ppt.transaction_commit",
+            "ppt.transaction_rollback",
+            "ppt.get_slide_metrics",
             "ppt.save_document",
             "ppt.render_slide_image",
+            "ppt.render_all_slides_image",
             "ppt.render_slide_svg",
-            "ppt.render_selection_image",
-            "ppt.render_selection_svg",
             "ppt.find_text",
             "ppt.upload_template",
             "ppt.set_default_template",
             "ppt.get_default_template",
-            "ppt.generate_presentation");
+            "ppt.generate_presentation",
+            "ppt.delete_shape",
+            "ppt.get_shape_properties",
+            "ppt.set_shape_style",
+            "ppt.set_document_metadata",
+            "ppt.set_slide_layout",
+            "ppt.set_text_formatting",
+            "ppt.set_shape_z_order");
 
     @BeforeAll
     static void buildDockerImage() throws Exception {
@@ -243,32 +273,6 @@ class DockerPptMcpServerSmokeTest {
                 assertTrue(Files.exists(slideSvg));
             } else {
                 assertEquals("error", slideVector.path("status").asText());
-            }
-
-            Path selectionPng = workspace.resolve("output/selection.png");
-            JsonNode selectionImage = callTool(session, "ppt.render_selection_image", objectNode(
-                    "document_id", documentId,
-                    "slide_index", 0,
-                    "shape_indices", arrayNode(textboxShapeIndex, tableShapeIndex, imageShapeIndex),
-                    "output_path", containerPath("output/selection.png"),
-                    "width", 1280,
-                    "height", 720));
-            assertEquals("png", selectionImage.path("format").asText());
-            assertTrue(Files.exists(selectionPng));
-
-            Path selectionSvg = workspace.resolve("output/selection.svg");
-            JsonNode selectionVector = callToolMaybeError(session, "ppt.render_selection_svg", objectNode(
-                    "document_id", documentId,
-                    "slide_index", 0,
-                    "shape_indices", arrayNode(textboxShapeIndex, tableShapeIndex, imageShapeIndex),
-                    "output_path", containerPath("output/selection.svg"),
-                    "width", 1280,
-                    "height", 720));
-            if ("success".equals(selectionVector.path("status").asText())) {
-                assertEquals("svg", selectionVector.path("format").asText());
-                assertTrue(Files.exists(selectionSvg));
-            } else {
-                assertEquals("error", selectionVector.path("status").asText());
             }
 
             JsonNode templateUpload = callTool(session, "ppt.upload_template", objectNode(

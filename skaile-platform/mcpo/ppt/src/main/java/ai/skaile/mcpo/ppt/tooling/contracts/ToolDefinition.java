@@ -1,4 +1,4 @@
-package ai.skaile.mcpo.ppt;
+package ai.skaile.mcpo.ppt.tooling.contracts;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

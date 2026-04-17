@@ -1,4 +1,4 @@
-package ai.skaile.mcpo.ppt;
+package ai.skaile.mcpo.ppt.session;
 
 import java.io.IOException;
 import java.util.List;

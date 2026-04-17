@@ -33,57 +33,128 @@ For interactive testing with the MCP Inspector, see "Manual testing with the MCP
 
 ## How it's structured
 
-Three-layer separation enforced by package boundaries:
+The module is now organized by responsibility instead of a single flat package:
 
 ```
-server/    — MCP SDK glue, JSON-RPC dispatch, ToolRegistry. No PPT logic.
-tools/     — One file per tool (e.g. CreateDocumentTool). Business logic; never imports POI directly.
-engine/    — PptDocumentSession, SessionStore, and POI integration layer.
-  engine/poi/ — PoiPresentationAdapter, PoiSlideRenderer, PoiTableEditor, …
-shape/     — JSON DTOs (records) shared across tools: SlideShape, TextBoxShape, TableShape.
-error/     — ErrorCode enum, McpException, ErrorEnvelope with `status`, `code`, `error`, `retriable` fields.
-config/, log/ — env-var parsing and Logback setup (stderr routing).
+src/main/java/ai/skaile/mcpo/ppt/
+  McpServerMain.java            # executable entrypoint
+  server/                       # MCP protocol loop and JSON-RPC framing
+    McpServer.java
+    JsonRpcIO.java
+  tooling/                      # tool registry, schemas, and execution logic
+    PptToolService.java
+    PptDocumentOperations.java
+    PptSlideOperations.java
+    PptRenderService.java
+    PptTemplateService.java
+    ToolHandler.java
+    ToolDefinition.java
+    ToolCallResult.java
+    ToolArgumentValidator.java
+    ToolResponseFactory.java
+    PptPathResolver.java
+  session/                      # in-memory document lifecycle and handle store
+    PptDocumentSession.java
+    SessionStore.java
 ```
 
-Design choices:
+Testing follows the same structure:
 
-- Tools are registered with JSON schema and validated at runtime before execution.
-- All mutating operations mark the document session dirty (`PptDocumentSession.dirty`).
-- Stateful in-memory document sessions live in `SessionStore` with opaque `doc_<uuid>` handles.
-- Server shutdown attempts best-effort cleanup of all open sessions.
+```
+src/test/java/ai/skaile/mcpo/ppt/
+  DockerPptMcpServerSmokeTest.java
+  server/JsonRpcIOTest.java
+  tooling/PptToolServiceTest.java
+```
+
+Maintenance conventions:
+
+- Keep protocol concerns inside `server` only.
+- Keep tool schemas and execution behavior inside `tooling`.
+- Keep document state and store behavior inside `session`.
+- Use `ToolArgumentValidator`, `PptPathResolver`, and `ToolResponseFactory` for shared concerns instead of adding more utility logic directly into `PptToolService`.
+- When adding a new tool, update `PptToolService` and add/extend tests in `tooling/PptToolServiceTest`.
 
 ## Tools
 
-v1 ships 26 tools across document lifecycle, slide management, text and content mutation, rendering, templating, and metadata — no charts, animation, slide layouts, or embedded media (see Known Gaps).
+Current build ships 56 tools across document lifecycle, slide management, shape/text mutation, rendering, metadata, layout control, templating, markdown import, and transaction workflows. All tools are supported by Apache POI 5.5.x and/or LibreOffice.
+
+Supported tool families include:
+- Document lifecycle: `ppt.create_document`, `ppt.open_document`, `ppt.close_document`, `ppt.save_document`, `ppt.get_document_info`
+- Page setup: `ppt.set_page_setup`
+- Slide management: `ppt.list_slides`, `ppt.add_slide`, `ppt.duplicate_slide`, `ppt.delete_slides`, `ppt.reorder_slides`, `ppt.merge_presentations`
+- Slide content: `ppt.get_slide_content`, `ppt.update_text`, `ppt.replace_text_globally`, `ppt.add_textbox`, `ppt.set_text_style`, `ppt.get_slide_notes`, `ppt.set_slide_notes`
+- Media & tables: `ppt.insert_image`, `ppt.replace_image`, `ppt.add_table`, `ppt.get_table_cell`, `ppt.set_table_cell`, `ppt.modify_table_structure`, `ppt.set_table_row_height`, `ppt.set_table_column_width`, `ppt.set_table_header_style`
+- Search: `ppt.find_text`
+- Shapes & styling: `ppt.add_shape`, `ppt.move_shape`, `ppt.clone_shape`, `ppt.resize_shape`, `ppt.delete_shape`, `ppt.get_shape_properties`, `ppt.set_shape_style`, `ppt.set_shape_z_order`, `ppt.add_hyperlink`, `ppt.set_slide_background`
+- Layout & metadata: `ppt.set_slide_layout`, `ppt.set_document_metadata`
+- Text formatting: `ppt.set_text_style`, `ppt.set_text_run_style`, `ppt.set_text_formatting`, `ppt.set_list_formatting`
+- Rendering: `ppt.render_slide_image`, `ppt.render_all_slides_image`, `ppt.render_slide_svg`
+- Metrics: `ppt.get_slide_metrics`
+- Templates: `ppt.upload_template`, `ppt.set_default_template`, `ppt.get_default_template`, `ppt.import_markdown_outline`
+- Presentation generation: `ppt.generate_presentation`
+- Transactions: `ppt.transaction_begin`, `ppt.transaction_commit`, `ppt.transaction_rollback`
+
+For exact argument schemas, rely on `tools/list` output at runtime or the tool definitions in `src/main/java/ai/skaile/mcpo/ppt/tooling/PptToolService.java`.
 
 | Category | Tool | Parameters | Description |
 |---|---|---|---|
-| Document lifecycle | `ppt.create_document` | `template_path?` — optional template to clone from | Create a new empty or template-based presentation and return an opaque handle. |
-| Document lifecycle | `ppt.open_document` | `path` — absolute path to .pptx file | Open a .pptx presentation from disk and return an opaque handle. |
-| Document lifecycle | `ppt.close_document` | `document_id` | Close a document handle. Unsaved changes are discarded. |
-| Document lifecycle | `ppt.save_document` | `document_id`; `output_path?` — optional explicit destination | Save the presentation to disk. If opened from file, defaults to source path. |
-| Document lifecycle | `ppt.get_document_info` | `document_id` | Retrieve metadata: filename, slide count, modification time, modified flag. |
-| Slide management | `ppt.list_slides` | `document_id` | List all slides with zero-based index and title. |
-| Slide management | `ppt.add_slide` | `document_id`; `index?` (default end); `layout?` | Add a new slide at the specified position with optional layout. |
-| Slide content | `ppt.get_slide_content` | `document_id`; `slide_index` | Retrieve all shapes, text boxes, images, tables, and notes on a slide. |
-| Slide content | `ppt.update_text` | `document_id`; `slide_index`; `shape_index`; `text` | Update the text content of a text box or shape. |
-| Slide content | `ppt.add_textbox` | `document_id`; `slide_index`; `x`; `y`; `width`; `height`; `text` | Add a new text box to a slide at the specified position. |
-| Slide content | `ppt.set_text_style` | `document_id`; `slide_index`; `shape_index`; `font_size?`; `bold?`; `italic?`; `color?` | Apply font styling (size, weight, style, color) to text in a shape. |
-| Slide content | `ppt.get_slide_notes` | `document_id`; `slide_index` | Retrieve speaker notes for a slide. |
-| Slide content | `ppt.set_slide_notes` | `document_id`; `slide_index`; `notes` | Set speaker notes for a slide. |
-| Media | `ppt.insert_image` | `document_id`; `slide_index`; `image_path`; `x`; `y`; `width`; `height` | Insert an image at the specified position and size. |
-| Tables | `ppt.add_table` | `document_id`; `slide_index`; `rows`; `cols`; `x`; `y`; `width`; `height` | Create a table with the specified dimensions. |
-| Tables | `ppt.get_table_cell` | `document_id`; `slide_index`; `table_index`; `row`; `col` | Read the text content of a table cell. |
-| Tables | `ppt.set_table_cell` | `document_id`; `slide_index`; `table_index`; `row`; `col`; `text` | Set the text content of a table cell. |
-| Search | `ppt.find_text` | `document_id`; `search_term` | Find all occurrences of text across all slides. Returns slide and shape indices. |
-| Rendering | `ppt.render_slide_image` | `document_id`; `slide_index`; `output_path`; `format` (png/jpg); `width?`; `height?` | Export a slide to PNG or JPEG image. |
-| Rendering | `ppt.render_slide_svg` | `document_id`; `slide_index`; `output_path`; `width?`; `height?` | Export a slide to SVG vector format for scalability. |
-| Rendering | `ppt.render_selection_image` | `document_id`; `slide_index`; `shape_indices`; `output_path`; `format`; `width?`; `height?` | Export selected shapes to PNG or JPEG. |
-| Rendering | `ppt.render_selection_svg` | `document_id`; `slide_index`; `shape_indices`; `output_path`; `width?`; `height?` | Export selected shapes to SVG. |
-| Templates | `ppt.upload_template` | `template_path` — path to .pptx to use as a template | Register a .pptx file as a reusable template. |
-| Templates | `ppt.set_default_template` | `template_path` | Set the default template for `ppt.create_document` and `ppt.generate_presentation`. |
-| Templates | `ppt.get_default_template` | (none) | Retrieve the path to the currently active default template, or null if none set. |
-| Presentation generation | `ppt.generate_presentation` | `title`; `slides` (array of slide specs); `output_path?` — optional explicit destination; `template_path?` | Generate a complete presentation from a structured specification. Uses default or explicit template. |
+| Document lifecycle | `ppt.create_document` | `title?`; `template_path?` | Create a new in-memory presentation and return a document handle. |
+| Document lifecycle | `ppt.open_document` | `path` | Open an existing presentation into memory and return a document handle. |
+| Document lifecycle | `ppt.close_document` | `document_id` | Close a document handle and release resources. |
+| Document lifecycle | `ppt.get_document_info` | `document_id` | Return document metadata, dirty state, page size, and timestamps. |
+| Page setup | `ppt.set_page_setup` | `document_id`; `preset`; `width?`; `height?` | Set page size using a preset or custom dimensions. |
+| Slide management | `ppt.list_slides` | `document_id` | List slides with index, text preview, and shape count. |
+| Slide management | `ppt.reorder_slides` | `document_id`; `new_order` | Reorder all slides using a full index permutation. |
+| Slide management | `ppt.add_slide` | `document_id`; `title?` | Add a slide, optionally initializing title text. |
+| Slide management | `ppt.duplicate_slide` | `document_id`; `source_slide_index`; `target_index?` | Duplicate a slide and optionally place it at a target index. |
+| Slide management | `ppt.delete_slides` | `document_id`; `slide_indices`; `keep_at_least_one?` | Delete one or more slides by index. |
+| Slide management | `ppt.merge_presentations` | `document_id`; `merge_path`; `insert_at_index?` | Merge slides from another presentation into an open document. |
+| Slide content | `ppt.get_slide_content` | `document_id`; `slide_index` | Return text and shape metadata for a single slide. |
+| Slide content | `ppt.update_text` | `document_id`; `slide_index`; `old_text`; `new_text`; `occurrence?` | Replace a specific text occurrence on a slide. |
+| Slide content | `ppt.replace_text_globally` | `document_id`; `old_text`; `new_text`; `case_sensitive?`; `max_replacements?` | Replace text occurrences across all slides. |
+| Slide content | `ppt.add_textbox` | `document_id`; `slide_index`; `text`; `x`; `y`; `width`; `height`; `font_size?` | Add a textbox to a slide at a specific position. |
+| Shapes | `ppt.add_shape` | `document_id`; `slide_index`; `shape_type`; `x`; `y`; `width`; `height`; `text?`; `fill_color?`; `border_color?`; `border_width?` | Add a primitive shape (rectangle/ellipse/line/arrow). |
+| Media | `ppt.insert_image` | `document_id`; `slide_index`; `image_path`; `x`; `y`; `width`; `height` | Insert an image into a slide. |
+| Media | `ppt.replace_image` | `document_id`; `slide_index`; `shape_index`; `image_path`; `keep_size?` | Replace a picture shape while preserving placement/size. |
+| Notes | `ppt.get_slide_notes` | `document_id`; `slide_index` | Get speaker notes text for a slide. |
+| Notes | `ppt.set_slide_notes` | `document_id`; `slide_index`; `notes_text` | Set speaker notes text for a slide. |
+| Tables | `ppt.add_table` | `document_id`; `slide_index`; `rows`; `cols`; `x`; `y`; `width`; `height` | Add a table to a slide. |
+| Tables | `ppt.get_table_cell` | `document_id`; `slide_index`; `shape_index`; `row_index`; `col_index` | Read text from a table cell. |
+| Tables | `ppt.set_table_cell` | `document_id`; `slide_index`; `shape_index`; `row_index`; `col_index`; `text` | Set text in a table cell. |
+| Tables | `ppt.modify_table_structure` | `document_id`; `slide_index`; `shape_index`; `operation`; `index?` | Insert/delete table rows or columns. |
+| Tables | `ppt.set_table_row_height` | `document_id`; `slide_index`; `shape_index`; `row_index`; `height` | Set height for one table row. |
+| Tables | `ppt.set_table_column_width` | `document_id`; `slide_index`; `shape_index`; `col_index`; `width` | Set width for one table column. |
+| Tables | `ppt.set_table_header_style` | `document_id`; `slide_index`; `shape_index`; `row_index?`; `fill_color?`; `font_color?`; `bold?` | Apply style to a table header row. |
+| Text formatting | `ppt.set_text_style` | `document_id`; `slide_index`; `shape_index`; `bold?`; `italic?`; `underline?`; `font_size?`; `font_color?` | Apply style updates to all runs in a text shape. |
+| Text formatting | `ppt.set_text_run_style` | `document_id`; `slide_index`; `shape_index`; `target_text`; `occurrence?`; `case_sensitive?`; `bold?`; `italic?`; `underline?`; `font_size?`; `font_color?` | Style one matched text segment via rich text runs. |
+| Text formatting | `ppt.set_list_formatting` | `document_id`; `slide_index`; `shape_index`; `bullet_enabled?`; `numbered?`; `bullet_character?`; `bullet_level?`; `line_spacing?`; `space_before?`; `space_after?` | Apply bullet/numbering and paragraph spacing semantics. |
+| Shapes | `ppt.move_shape` | `document_id`; `slide_index`; `shape_index`; `x`; `y` | Move a shape to new coordinates. |
+| Shapes | `ppt.clone_shape` | `document_id`; `slide_index`; `shape_index`; `offset_x?`; `offset_y?` | Clone a text-capable shape on the same slide. |
+| Shapes | `ppt.resize_shape` | `document_id`; `slide_index`; `shape_index`; `width`; `height` | Resize a shape to a new width and height. |
+| Shapes | `ppt.add_hyperlink` | `document_id`; `slide_index`; `shape_index`; `url` | Attach hyperlink to all text runs in a text shape. |
+| Slide styling | `ppt.set_slide_background` | `document_id`; `slide_index`; `color` | Set a solid slide background color. |
+| Markdown import | `ppt.import_markdown_outline` | `markdown_text`; `output_path?` | Create a presentation from markdown headings and bullets. |
+| Transactions | `ppt.transaction_begin` | `document_id` | Create a transaction snapshot for rollback. |
+| Transactions | `ppt.transaction_commit` | `document_id` | Commit changes and discard transaction snapshot. |
+| Transactions | `ppt.transaction_rollback` | `document_id` | Roll back document state to transaction snapshot. |
+| Metrics | `ppt.get_slide_metrics` | `document_id`; `slide_index` | Analyze slide composition and text density. |
+| Document lifecycle | `ppt.save_document` | `document_id`; `output_path?`; `format?` | Save to disk in PPTX or PDF format. |
+| Rendering | `ppt.render_slide_image` | `document_id`; `slide_index`; `output_path`; `width?`; `height?` | Render one slide as PNG/JPG image. |
+| Rendering | `ppt.render_all_slides_image` | `document_id`; `output_dir`; `format?`; `file_name_pattern?`; `width?`; `height?` | Render all slides as PNG/JPG images. |
+| Rendering | `ppt.render_slide_svg` | `document_id`; `slide_index`; `output_path`; `width?`; `height?` | Render one slide to SVG. |
+| Search | `ppt.find_text` | `document_id`; `query`; `case_sensitive?` | Find text occurrences across all slides. |
+| Templates | `ppt.upload_template` | `source_path`; `template_name?`; `make_default?` | Copy/upload a template into the template store. |
+| Templates | `ppt.set_default_template` | `template_path` | Set default template used by create/generate operations. |
+| Templates | `ppt.get_default_template` | (none) | Return current default template configuration. |
+| Presentation generation | `ppt.generate_presentation` | `title?`; `slide_titles?`; `template_path?`; `output_path?` | Generate a presentation from titles and optional template. |
+| Shapes | `ppt.delete_shape` | `document_id`; `slide_index`; `shape_index` | Remove a shape from a slide by index. |
+| Shapes | `ppt.get_shape_properties` | `document_id`; `slide_index`; `shape_index` | Return detailed shape properties (type, anchor, text). |
+| Shapes | `ppt.set_shape_style` | `document_id`; `slide_index`; `shape_index`; `fill_color?`; `border_color?`; `border_width?`; `text_align?` | Set fill, border, and text alignment style on a shape. |
+| Metadata | `ppt.set_document_metadata` | `document_id`; `title?`; `author?`; `subject?`; `keywords?` | Set core document metadata fields. |
+| Layout | `ppt.set_slide_layout` | `document_id`; `slide_index`; `layout_type` | Apply a layout type to a slide. |
+| Text formatting | `ppt.set_text_formatting` | `document_id`; `slide_index`; `shape_index`; `text_align?`; `line_spacing?`; `left_margin?`; `indent?` | Apply paragraph-level text formatting. |
+| Shapes | `ppt.set_shape_z_order` | `document_id`; `slide_index`; `shape_index`; `position` | Move shape in z-order (front/back/forward/backward). |
 
 ## Error/Response Model
 
@@ -201,6 +272,42 @@ Run the server under [`@modelcontextprotocol/inspector`](https://github.com/mode
 
 5. **Connect** (the inspector picks up the docker command automatically), then browse the tool list.
 
+## Testing with GitHub Copilot
+
+If your VS Code build supports MCP servers for Copilot Chat, add the server to your workspace MCP config and point it at the Docker image you already validated above.
+
+```json
+{
+  "servers": {
+    "ppt-mcp": {
+      "type": "stdio",
+      "command": "docker",
+      "cwd": "${workspaceFolder}/skaile-platform/mcpo/ppt",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--user",
+        "1000:1000",
+        "-v",
+        "${workspaceFolder}/skaile-platform/mcpo/ppt/resources:/workspace/resources:rw",
+        "ppt-mcp:dev"
+      ]
+    }
+  }
+}
+```
+
+Use these prompts in Copilot Chat after the server is connected:
+
+1. Create a new presentation called `Copilot Smoke Deck` with four slides named `Intro`, `Problem`, `Solution`, and `Next Steps`, then save it to `/workspace/resources/generated/copilot-smoke-deck.pptx`.
+2. Open `/workspace/resources/generated/copilot-smoke-deck.pptx`, add a textbox to slide 0, set the text to `Hello from Copilot`, and then render that slide as PNG.
+3. Reorder the slides so `Solution` comes first, then return the updated slide order and slide metrics for slide 0.
+4. Insert an image from `/workspace/resources/logo.png` onto slide 0, then export the presentation to PDF.
+5. Import a short markdown outline from a file in `/workspace/resources`, generate slides from it, and confirm the new slide count.
+
+Keep the `/workspace/resources` mount in place so Copilot can work against the same files the Docker smoke tests use.
+
 ## Document paths and handles when clicking tools
 
 - **File paths are container-local.** The inspector is outside the container; tool arguments are evaluated inside. Host path `./resources/file1.pptx` is mounted at `/workspace/resources/file1.pptx` (per the `-v` above), so in `ppt.open_document` you pass `/workspace/resources/file1.pptx`, not a host path.
@@ -226,7 +333,7 @@ Run the server under [`@modelcontextprotocol/inspector`](https://github.com/mode
 ## v1 limits (by design)
 
 - Formats: `.pptx` and `.pptm` (macro-enabled) are fully supported. Older `.ppt` files (ODP) are not yet supported.
-- Tool surface: 26 tools across document lifecycle, slide and content management, rendering (PNG/JPEG/SVG), templating, and search. No charts, pivots, animations, slide layouts, embedded media, or VBA source inspection.
+- Tool surface: 56 tools across document lifecycle, slide/content management, shape/text formatting, rendering (PNG/JPEG/SVG), metadata, layout updates, templating, search, markdown import, and transaction workflows. No native animation, transitions, embedded media timelines, or VBA source inspection.
 - Transport: stdio only. No HTTP / SSE.
 - Tenancy: one process per agent session; no per-handle locking or idle-handle eviction (process death is the eviction).
 - Rendering: slides render via POI native → image/SVG. LibreOffice used only for PDF export; if unavailable, PDF export fails gracefully with a tool error.

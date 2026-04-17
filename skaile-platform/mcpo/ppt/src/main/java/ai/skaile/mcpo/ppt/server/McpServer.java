@@ -1,4 +1,8 @@
-package ai.skaile.mcpo.ppt;
+package ai.skaile.mcpo.ppt.server;
+
+import ai.skaile.mcpo.ppt.tooling.PptToolService;
+import ai.skaile.mcpo.ppt.tooling.contracts.ToolCallResult;
+import ai.skaile.mcpo.ppt.tooling.contracts.ToolDefinition;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

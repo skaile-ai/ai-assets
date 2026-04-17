@@ -1,4 +1,4 @@
-package ai.skaile.mcpo.ppt;
+package ai.skaile.mcpo.ppt.server;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
