@@ -35,11 +35,20 @@ public final class PoiCellWriter {
         if (cell instanceof XSSFCell xc && xc.getCTCell().isSetV()) {
           xc.getCTCell().unsetV();
         }
-      } catch (FormulaParseException e) {
+      } catch (FormulaParseException | IllegalStateException e) {
+        // FormulaParseException covers syntax errors. IllegalStateException covers the
+        // unlinked-external-reference case ("Book not linked for filename Foo.xlsx") that POI
+        // raises when setCellFormula sees a reference like [Foo.xlsx]Sheet1!A1 without a
+        // matching entry in the workbook's external-links table. Both are parser-stage
+        // rejections per plan §8.2 (FORMULA_INVALID = "cannot be parsed by POI's formula
+        // parser") — map both to the same code. NB: evaluator.setIgnoreMissingWorkbooks(true)
+        // only helps on the recalc path for formulas already stored in the workbook; it does
+        // nothing for fresh setCellFormula calls on unlinked external refs, which must be
+        // rejected up front.
         throw new McpException(
             ErrorCode.FORMULA_INVALID,
             "POI rejected formula: " + e.getMessage(),
-            Map.of("formula", formula));
+            Map.of("formula", formula, "exception", e.getClass().getSimpleName()));
       }
       return;
     }
