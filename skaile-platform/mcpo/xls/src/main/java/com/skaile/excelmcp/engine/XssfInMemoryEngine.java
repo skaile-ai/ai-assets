@@ -22,6 +22,7 @@ import com.skaile.excelmcp.shape.SheetShape;
 import com.skaile.excelmcp.shape.TableRef;
 import com.skaile.excelmcp.shape.WorkbookMetadataShape;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -66,8 +67,17 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
     String format = FormatWhitelist.format(path);
     PoiSizeGuard.assertFileSize(path, config.maxFileBytes());
     Workbook wb;
-    try {
-      wb = WorkbookFactory.create(path.toFile(), null, /* readOnly= */ false);
+    // Load via InputStream rather than File to disconnect POI from the on-disk file. When POI
+    // holds a read/write OPCPackage handle on the source file, closing the workbook silently
+    // flushes in-memory state back to disk — overwriting any external edits made between open
+    // and close (data-loss bug fixed post-Phase-7). The file-based constructor with
+    // readOnly=true would avoid the writeback but then blocks wb.write(OutputStream) via
+    // OPCPackage.save(OutputStream) too, so save can't work. Loading from InputStream reads the
+    // bytes into memory at open time; POI has no file to flush back to on close; PoiAtomicSaver
+    // still saves via wb.write(OutputStream) + temp/rename. Trade-off: peak memory is roughly
+    // 2x file size during load; acceptable within the 100 MB file cap.
+    try (InputStream in = Files.newInputStream(path)) {
+      wb = WorkbookFactory.create(in);
     } catch (IOException ex) {
       throw new McpException(
           ErrorCode.INTERNAL_ERROR,
