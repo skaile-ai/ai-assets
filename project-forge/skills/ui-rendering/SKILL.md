@@ -43,7 +43,7 @@ parse it and broadcast it to the client as a `UIRenderEvent`.
     "name": "<component-name>",
     "props": { ... }
   },
-  "on_interact": {
+  "on_interact": {    // optional — omit for display-only components
     "action": "reply",
     "template": "User selected: {{value}}"
   }
@@ -53,9 +53,11 @@ parse it and broadcast it to the client as a `UIRenderEvent`.
 - `id` must be a UUID v4 (generate a unique string like `550e8400-e29b-41d4-a716-446655440000`)
 - `manifest_version` must match the version in `<system-context name="UI_MANIFEST">`
 - `name` must be a key from `manifest.components` — check the manifest first
+- `on_interact` is optional — omit it entirely for display-only components (e.g. `markdown`, `code`, `image`, `file-link`)
 - `on_interact.action`:
   - `"reply"` — when the user interacts, the interaction result is automatically sent back to you as a new user message using the `template` string
   - `"none"` — interaction is logged but does not trigger a new agent turn
+  - `"state_action"` — interaction triggers a state mutation on the client store without creating a new agent turn; used for purely client-side UI state changes (e.g. toggling a filter, expanding a section)
 
 ## Component Prop Reference
 
@@ -216,7 +218,7 @@ Parse the `value` based on the component:
 
 - Always check `<system-context name="UI_MANIFEST">` before rendering a component
 - Only use components listed in `manifest.components` — others will silently fail
-- Always include `on_interact` if you expect to receive the result
-- Use `"action": "none"` for display-only components (markdown, image, code, file-link)
+- Include `on_interact` when you expect to receive the result; omit it entirely for display-only components (e.g. `markdown`, `code`, `image`, `file-link`)
+- Use `"action": "none"` when you want interaction logged but no new agent turn
 - Generate a new UUID for each `id` — never reuse IDs within a session
 - For `slug` props: use the project's slug (it is in your context / system prompt)
