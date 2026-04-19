@@ -39,6 +39,7 @@ This separation means service-specific knowledge (API quirks, rate limits, auth 
 | `use-outline` | Outline | Wiki management via REST API |
 | `use-outline-cli` | Outline | Wiki management via CLI |
 | `use-slidev` | Slidev (sli.dev) | Build slide decks in Skaile brand design |
+| `use-skills-sh` | skills.sh | Discover and install agent skills from the open ecosystem |
 
 ## Conventions
 
