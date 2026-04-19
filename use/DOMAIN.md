@@ -5,7 +5,7 @@ type: domain
 building_blocks:
   contracts: "Integration skill conventions: output format (always JSON-compatible), error handling protocol, authentication patterns, and when to use CLI vs API variant."
   docs: "Service capability matrix, authentication setup guides, and rate-limit notes."
-  skills: "One skill per service: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), docling (document conversion), elevenlabs (TTS), outline (wiki API), outline-cli (wiki CLI)."
+  skills: "One skill per service: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), docling (document conversion), elevenlabs (TTS), outline (wiki API), outline-cli (wiki CLI), slidev (presentation decks)."
   agents: "TBD"
   prompts: "TBD"
   tools: "TBD"
@@ -38,6 +38,7 @@ This separation means service-specific knowledge (API quirks, rate limits, auth 
 | `use-elevenlabs` | ElevenLabs | Text-to-speech audio generation |
 | `use-outline` | Outline | Wiki management via REST API |
 | `use-outline-cli` | Outline | Wiki management via CLI |
+| `use-slidev` | Slidev (sli.dev) | Build slide decks in Skaile brand design |
 
 ## Conventions
 
