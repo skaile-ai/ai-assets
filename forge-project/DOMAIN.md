@@ -1,13 +1,49 @@
 ---
-name: Project-Forge Agent Skills
-description: Skills for the Pichi personal AI assistant (forge/project)
+name: Forge-Project Agent Skills
+description: Agent definitions and skills for the Forge-Project (forge/project) application
+app: forge/project
 ---
 
-## Purpose
+# Forge Project Agent
 
-Agent skills specific to the Project-Forge (Pichi) application. These skills
-are injected into the system prompt of the project-forge-project-orchestrator
-agent to teach it application-specific capabilities.
+The AI coding assistant and orchestrators embedded in the `forge/project` web interface. Drives software development sessions within developer project workspaces — reading, writing, and explaining code.
+
+## Contents
+
+```
+ai-assets/forge-project/
+├── DOMAIN.md                      ← this file
+├── agent/                         ← GitAgent definition (spec v0.1.0) — coding assistant
+│   ├── agent.yaml
+│   ├── SOUL.md
+│   ├── RULES.md
+│   ├── DUTIES.md
+│   ├── hooks/
+│   ├── knowledge/
+│   ├── scripts/
+│   ├── skills/
+│   └── workflows/
+├── base-orchestrator/             ← home workspace orchestrator
+│   ├── agent.yaml
+│   ├── SOUL.md
+│   ├── RULES.md
+│   └── knowledge/
+├── project-orchestrator/          ← project workspace assistant template
+│   ├── agent.yaml
+│   ├── SOUL.md
+│   └── RULES.md
+├── skills/                        ← application-specific skills
+│   └── ui-rendering/
+└── forge-project.bundle.yaml
+```
+
+## Agents
+
+| Agent | Path | Description |
+|-------|------|-------------|
+| forge-project-assistant | `agent/` | The AI assistant persona (identity, rules, capabilities) |
+| forge-project-base-orchestrator | `base-orchestrator/` | Onboarding orchestrator for the base workspace |
+| forge-project-orchestrator | `project-orchestrator/` | Per-project workspace orchestrator |
 
 ## Skills
 
@@ -15,8 +51,14 @@ agent to teach it application-specific capabilities.
 |-------|------|-------------|
 | ui-rendering | `skills/ui-rendering/` | Emit catalog UI components in response to user requests |
 
+## Usage
+
+The agent definition is loaded at runtime by `forge/project/server/utils/agent-definition.ts` and injected as the system prompt for each coding session. The canonical path is `ai-assets/forge-project/agent` relative to the skaile-dev monorepo root.
+
+`agent.yaml` sets `imprint_on_project_open: true` — the imprint is rebuilt whenever a project is opened in the forge/project UI.
+
 ## Notes
 
-These skills depend on the UI manifest injected by the dispatcher
-(`<system-context name="UI_MANIFEST">`). Always check the manifest before
-attempting to render a component.
+The `forge-project-orchestrator` and `forge-project-base-orchestrator` are referenced by `forge/project/server/utils/agent-manager.ts` via `agent:` lookup names.
+
+The UI rendering skill depends on the manifest injected by the SessionDispatcher (`<system-context name="UI_MANIFEST">`). Check the manifest before rendering any component.

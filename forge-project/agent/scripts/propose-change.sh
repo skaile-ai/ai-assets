@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# propose-change.sh — create a PR branch for a Pichi agent definition change
+# propose-change.sh — create a PR branch for a forge-project agent definition change
 #
 # Usage:
 #   ./agent/scripts/propose-change.sh persona  "add warmth to tone"
@@ -19,7 +19,7 @@ set -euo pipefail
 CHANGE_TYPE="${1:-}"
 CHANGE_SUMMARY="${2:-}"
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-BITBUCKET_REPO="ecsplico/pichi"
+BITBUCKET_REPO="ecsplico/forge-project"
 
 if [[ -z "$CHANGE_TYPE" || -z "$CHANGE_SUMMARY" ]]; then
   echo "Usage: $0 <persona|rules|duties|skill> <\"change summary\">" >&2

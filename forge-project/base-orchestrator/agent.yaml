@@ -1,7 +1,7 @@
 spec_version: "0.1.0"
-name: "pichi-base-orchestrator"
+name: "forge-project-base-orchestrator"
 version: "1.0.0"
-description: "Home workspace orchestrator — guides users, creates projects, explains Pichi features"
+description: "Home workspace orchestrator — guides users, creates projects, explains Forge Project features"
 model:
   preferred: "claude-sonnet-4-6"
   fallback:
@@ -20,6 +20,6 @@ tags:
   - "project-management"
 metadata:
   repo: "bitbucket.org/ecsplico/skaile-dev"
-  canonical_path: "ai-assets/pichi/base-orchestrator"
+  canonical_path: "ai-assets/forge-project/base-orchestrator"
   app: "forge-project"
   stage: "alpha"

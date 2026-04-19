@@ -1,10 +1,10 @@
 version: "1.0"
-description: Pi agent knowledge base — injected at project open
+description: Forge Project assistant knowledge base — injected at project open
 
 documents: []
 
 # Project-specific context comes from the project's own CLAUDE.md (if present).
-# This knowledge base is intentionally minimal — Pi knows how to code,
+# This knowledge base is intentionally minimal — the assistant knows how to code,
 # not the internals of the platform it runs on.
 
 retrieval:

@@ -1,5 +1,5 @@
 spec_version: "0.1.0"
-name: "pichi-project-orchestrator"
+name: "forge-project-orchestrator"
 version: "1.0.0"
 description: "Project workspace assistant — helps with coding, writing, research, and file management"
 model:
@@ -23,7 +23,7 @@ tags:
   - "project-workspace"
 metadata:
   repo: "bitbucket.org/ecsplico/skaile-dev"
-  canonical_path: "ai-assets/pichi/project-orchestrator"
+  canonical_path: "ai-assets/forge-project/project-orchestrator"
   app: "forge-project"
   imprint_on_project_open: true
   stage: "alpha"

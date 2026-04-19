@@ -1,7 +1,7 @@
 name: imprint-project
 version: "1.0"
 description: >-
-  Injects Pichi agent context into an agent session when a project is opened.
+  Injects forge-project agent context into an agent session when a project is opened.
   Reads the GitAgent definition and builds a structured system prompt that includes
   the agent's identity, architectural knowledge, and project-specific CLAUDE.md.
 

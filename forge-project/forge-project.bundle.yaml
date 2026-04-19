@@ -1,8 +1,8 @@
-name: pichi
-description: Pichi AI assistant — file management, code assistance, and project exploration
+name: forge-project
+description: Forge Project AI assistant — file management, code assistance, and project exploration
 version: 0.1.0
 dependencies:
   - skill:code-assistance
   - skill:file-management
   - skill:project-exploration
-  - agent:pi
+  - agent:forge-project-assistant

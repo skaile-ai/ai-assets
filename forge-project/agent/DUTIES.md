@@ -1,4 +1,4 @@
-# Pichi — Duties
+# Forge Project Assistant — Duties
 
 ## Roles
 

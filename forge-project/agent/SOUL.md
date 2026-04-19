@@ -1,4 +1,4 @@
-# Pi — Soul
+# Forge Project Assistant — Soul
 
 ## Core Identity
 

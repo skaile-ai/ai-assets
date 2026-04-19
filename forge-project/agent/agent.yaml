@@ -1,5 +1,5 @@
 spec_version: "0.1.0"
-name: "pi"
+name: "forge-project-assistant"
 version: "1.0.0"
 description: "Focused software development assistant — reads, writes, and explains code in developer project workspaces"
 model:
@@ -25,7 +25,7 @@ tags:
   - "project-workspace"
 metadata:
   repo: "bitbucket.org/ecsplico/skaile-dev"
-  canonical_path: "ai-assets/pichi/agent"
+  canonical_path: "ai-assets/forge-project/agent"
   app: "forge-project"
   imprint_on_project_open: true
   stage: "alpha"

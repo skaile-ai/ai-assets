@@ -1,4 +1,4 @@
-# Pichi Features
+# Forge Project Features
 
 ## Project Workspaces
 

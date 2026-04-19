@@ -83,7 +83,7 @@ steps:
       {inputs.change_impact}
 
       ---
-      *Proposed by Pichi agent — review before merging.*
+      *Proposed by forge-project agent — review before merging.*
     source_branch: "agent/{change_type}/{slugify(change_summary)}"
     target_branch: main
     store_as: pr_url
@@ -95,7 +95,7 @@ steps:
       PR opened: {pr_url}
 
       Review the proposed {change_type} change and merge when satisfied.
-      Pichi will not merge this automatically.
+      The agent will not merge this automatically.
 
 output:
   pr_url: "{pr_url}"
