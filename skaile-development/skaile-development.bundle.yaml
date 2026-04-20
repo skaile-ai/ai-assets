@@ -3,6 +3,7 @@ description: Day-to-day skaile-dev workflow — git ops, implementation, tests, 
 version: 0.2.0
 dependencies:
   - skill:git
+  - skill:review
   - skill:implement
   - skill:test
   - skill:doc
