@@ -54,6 +54,25 @@ Performs a comprehensive code review on local changes without requiring CI or a 
 
 - PR is already open with CI review enabled - let CI handle it
 - Reviewing someone else's code - use the GitHub PR review workflow instead
+- Diff is very large, high-risk, or cross-package — escalate to `audit scope=package` instead of running review
+
+## When to Escalate
+
+Automatic escalation to `audit` (the deeper skill) is recommended when:
+
+- The diff is larger than 300 LOC or touches more than 10 files
+- The diff touches any of these high-risk areas:
+  - `platform/backend/libs/session-manager/**`
+  - `platform/backend/libs/agent-gateway/**`
+  - `platform/backend/libs/vm-agent-*/**` (auth/session boundary)
+  - `agent-framework/bridge/**` (adapter boundary)
+  - `agent-framework/runner/**` (lifecycle + data isolation)
+  - `agent-framework/workspace/**` (multi-tenant state)
+  - `.github/**` (CI pipeline)
+  - `**/prisma/schema.prisma` or `**/drizzle/**` (schema drift potential)
+
+When these conditions are met, `review` should print a one-line notice and suggest the exact
+`audit` invocation rather than producing a shallow diff-only review.
 
 ---
 
@@ -94,7 +113,7 @@ STEP 1: Gather the Diff
     $ git diff main...HEAD
     IF empty -> STOP: "No changes relative to main."
 
-STEP 2: Identify Affected Packages
+STEP 2: Identify Affected Packages and Assess Risk
 
   Map changed file paths to their package roots:
   - platform/backend/libs/foo/bar.ts -> platform/
@@ -104,6 +123,19 @@ STEP 2: Identify Affected Packages
   For each affected package root:
   - Read REVIEW.md if present (repo-specific review rules)
   - Read CLAUDE.md if present (conventions, architecture)
+
+  Assess size and risk:
+  - Count changed lines across the diff
+  - Count changed files
+  - Check if any path matches the high-risk list in "When to Escalate" above
+
+  IF lines > 300 OR files > 10 OR any high-risk path touched:
+    - Print:
+      > "This diff crosses the threshold for a full audit.
+      >  Recommend: audit scope=package target=<first-affected-package>
+      >  Continue with shallow review anyway? (yes/no)"
+    IF user says no → STOP, user will run audit
+    IF user says yes → continue, but also print "⚠ diff exceeds review scope — audit recommended before merge"
 
 STEP 3: Analyze Changes
 

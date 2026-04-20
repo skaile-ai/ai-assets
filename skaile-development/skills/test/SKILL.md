@@ -38,6 +38,17 @@ metadata:
         label: "Test name filter (for 'run' mode — runs only matching tests)"
         type: "text"
         required: false
+      - id: "level"
+        label: "Level (for 'construct' mode)"
+        type: "select"
+        options:
+          - "unit"
+          - "integration"
+          - "e2e"
+          - "auto"
+        required: false
+        default: "auto"
+        hint: "auto = infer from changed files; else delegates to test-unit / test-integration / test-e2e"
     files: []
 ---
 
@@ -50,7 +61,18 @@ Manages the test lifecycle for the skaile-dev monorepo. Works in two modes:
 | Mode | What It Does |
 |------|-------------|
 | `run` | Execute the test suite for specified packages, report results, triage failures |
-| `construct` | Generate new tests for recently implemented code based on source analysis |
+| `construct` | Generate new tests for recently implemented code — thin wrapper that delegates to `test-unit`, `test-integration`, or `test-e2e` based on the `level` input |
+
+For any non-trivial test authoring (setting up infra from scratch, generating a full plan,
+adding a new Playwright suite), prefer the dedicated skills:
+
+- **`test-plan`** — generate a per-package `TEST_PLAN.md` from CLAUDE.md + source
+- **`test-unit`** — scaffold unit infra + generate unit tests
+- **`test-integration`** — scaffold integration infra (DB / temp-dir) + generate tests
+- **`test-e2e`** — scaffold Playwright (web) or CLI harness + generate journeys
+
+`test construct` is retained for quick, already-configured packages where the user just
+wants a few tests for recently changed files.
 
 ## Test Stack by Package
 
@@ -79,7 +101,10 @@ Manages the test lifecycle for the skaile-dev monorepo. Works in two modes:
 
 ## When NOT to Use
 
-- For E2E tests in the full skaile pipeline — use `skaileup-evaluate/e2e`
+- For E2E test setup or generation — use `test-e2e`
+- For integration test setup or generation — use `test-integration`
+- For unit test setup or generation — use `test-unit`
+- For generating a per-package test plan — use `test-plan`
 - For acceptance-criteria verification against `_concept/` specs — use `verify`
 
 ---
@@ -166,6 +191,17 @@ IF mode = run
 # ── Mode: construct ───────────────────────────────────────────────
 
 IF mode = construct
+
+  STEP 0: Resolve level + delegation
+    IF level = unit or level = auto + changed files look like pure logic (no I/O imports):
+      → Delegate to test-unit with target=<scope> and STOP
+    IF level = integration or level = auto + changed files include API routes / DB handlers:
+      → Delegate to test-integration with target=<scope> and STOP
+    IF level = e2e or level = auto + changed files include pages/ or CLI bins:
+      → Delegate to test-e2e with target=<scope> and STOP
+
+    Only fall through to the legacy in-place construction below when the user explicitly
+    wants a quick one-file addition in an already-configured package.
 
   STEP 1: Identify what needs tests
     IF scope is provided → look for untested code in those packages
@@ -295,6 +331,6 @@ bun x --bun vitest run --coverage
 
 ## Integration
 
-- **Called by:** `implement` (after each task and before finish)
-- **Calls:** none
-- **Escalates to:** `skaileup-evaluate/e2e` for full E2E suite; `skaileup-evaluate/test-unit` for spec-driven test generation
+- **Called by:** `implement` (after each task and before finish), `audit` (as a pre-analysis gate), `quality`
+- **Calls:** `test-unit`, `test-integration`, `test-e2e` (from construct mode when level is specific)
+- **Delegates to:** `test-unit`, `test-integration`, or `test-e2e` in construct mode — all in the skaile-development domain, no external dependencies

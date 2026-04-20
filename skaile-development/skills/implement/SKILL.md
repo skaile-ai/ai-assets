@@ -112,6 +112,7 @@ REFERENCES
 MUST  read the target package(s) CLAUDE.md before writing any code
 MUST  identify the correct prog-expert for the tech stack and note it in the plan
 MUST  run tests after implementation (via test skill)
+MUST  run audit scope=diff after tests pass (gate Phase 5 on audit ≠ fail)
 MUST  run doc --mode update after any public API or structure change
 MUST  add a devlog entry after every completed implementation
 MUST  create a git branch before implementing (via git skill)
@@ -242,7 +243,22 @@ STEP 8: Run tests
   UNTIL all tests pass
 
 CHECKPOINT tests_passed
-  > "All tests passing. Ready to update docs and log the change."
+  > "All tests passing. Running diff-scoped audit before doc sync."
+
+# ── Phase 4b: Audit (scope=diff) ──────────────────────────────────
+
+STEP 8b: Run audit on the diff
+  - RUN audit with scope=diff, diff_source=branch
+  - Read _devlog/reports/audit-<stamp>.json
+  IF verdict = fail
+    - Report blockers to user
+    - Ask: "fix now or abort?"
+    - IF fix: apply fixes, re-run audit; UNTIL verdict ≠ fail
+    - IF abort: stop here (branch is preserved)
+  IF verdict = warn
+    - Show findings summary; proceed (warnings do not block implementation)
+
+EMIT [implement] audit_done verdict=<verdict>
 
 # ── Phase 5: Documentation Sync ───────────────────────────────────
 
@@ -314,7 +330,8 @@ CHECKLIST
   - [ ] Plan approved before implementation starts
   - [ ] Git branch created (never commit to main)
   - [ ] Spec compliance review run for every task
-  - [ ] Full test suite passing before docs sync
+  - [ ] Full test suite passing before audit
+  - [ ] audit scope=diff run and verdict ≠ fail before docs sync
   - [ ] doc --mode update run after any public API change
   - [ ] Devlog entry written
   - [ ] Branch finished (merge / PR / keep)
@@ -335,5 +352,5 @@ CHECKLIST
 ## Integration
 
 - **Routes to:** `prog-expert-nuxt`, `prog-expert-omp`, `prog-expert-python`, `implement-supervised`
-- **Calls:** `git`, `test`, `doc`, `devlog`, `notify`
+- **Calls:** `git`, `test`, `audit`, `doc`, `devlog`, `notify`
 - **Called by:** `skaile-development` or user directly
