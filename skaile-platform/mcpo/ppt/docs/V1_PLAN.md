@@ -16,10 +16,11 @@ Execution plan for taking the PPT MCP server from its current state to a v1 prod
 - **No `ppt.batch_operations`.**
 - **Safety limits (sensible defaults)**: 100 open docs, 2000 slides/deck, 500 shapes/slide, 50 MB/image, 10000×10000 px render, 1 concurrent soffice invocation per container.
 - **Per-tool timeouts**: not for v1.
-- **Coverage**: formal, enforced via jacoco in `mvn verify`. Gates: 70% after Phase 0, 80% after Phase 1, 85% after Phase 5.
-- **Docker smoke**: must exercise every tool family end-to-end by Phase 5.
+- **Coverage**: formal, enforced via jacoco in `mvn verify`. Gates: 70% after Phase 0, 80% after Phase 1 (held through the refactor in Phase 2), 85% after Phase 6.
+- **Docker smoke**: must exercise every tool family end-to-end by Phase 6.
 - **Observability**: logs-only.
 - **Release / CI**: no changes to `.github/`, no image publishing. Image is company-internal, dev-built (`docker build -t ppt-mcp:dev .`). Enforcement is local `mvn verify` + the Docker smoke test.
+- **Architectural refactor**: after consolidating the tool surface in Phase 1, a dedicated phase splits the ~1790-line `PptToolService`, replaces the 3-step lambda-injection registration pattern with a one-place handler map per operations class, and extracts shared utilities (color parsing, unit conversion, shape lookup). No functional changes — existing tests remain the acceptance gate.
 - **Process**: single executor agent, sequential. One PR per phase, merged to `main` before the next phase starts.
 
 ## Current-state summary (audit baseline)
@@ -53,7 +54,7 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
    - `SessionStore.closeAll`: aggregate per-session failures into a returned count + log each via SLF4J.
    - `PptToolService.exportPdfWithSoffice`: capture stderr (currently only stdout is redirected) and include it verbatim in the error payload's `error` field.
 
-4. **`soffice` availability probe**. New `tooling/infra/SofficeAvailability.java` singleton. On `McpServer` startup, run `soffice --headless --version` with 5s timeout, cache `{available: boolean, version: String}`. Called from `saveDocument` PDF branch (Phase 0) and high-fidelity render / non-PPTX export paths (Phase 2). When unavailable, return `{status:"error", code:"SOFFICE_UNAVAILABLE", retriable:false}`.
+4. **`soffice` availability probe**. New `tooling/infra/SofficeAvailability.java` singleton. On `McpServer` startup, run `soffice --headless --version` with 5s timeout, cache `{available: boolean, version: String}`. Called from `saveDocument` PDF branch (Phase 0) and high-fidelity render / non-PPTX export paths (Phase 3). When unavailable, return `{status:"error", code:"SOFFICE_UNAVAILABLE", retriable:false}`.
 
 5. **Dockerfile fonts**: add `fonts-noto fonts-noto-cjk fonts-noto-color-emoji fonts-liberation` to the `apt-get install` line, followed by `fc-cache -fv` in the same RUN layer.
 
@@ -72,7 +73,7 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
 **Acceptance**:
 - `./mvnw verify` runs and enforces the 70% gate.
 - New unit test demonstrates concurrent `update_text` on the same `document_id` serializes without corruption.
-- Deck containing CJK + emoji text renders without tofu (rendering path tested in Phase 2, but fonts must be in place now so soffice finds them).
+- Deck containing CJK + emoji text renders without tofu (rendering path tested in Phase 3, but fonts must be in place now so soffice finds them).
 - With soffice missing, `ppt.save_document format=pdf` returns `code=SOFFICE_UNAVAILABLE, retriable=false`.
 - All `Files.createTempFile` call sites now route through `PptPathResolver.createSandboxTempFile`.
 - README drift resolved; `./mvnw verify` works from a clean checkout.
@@ -90,17 +91,17 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
   - Selector: `scope: "shape"` (default) | `"run"` | `"paragraph"`. For `run`: `target_text`, optional `occurrence`, optional `case_sensitive`. For `paragraph`: `paragraph_index`.
   - Run-style block: `bold?, italic?, underline?, strikethrough?, font_size?, font_color?, font_family?, rotation?, auto_fit?`.
   - Paragraph-style block (ignored when scope="run"): `text_align?, line_spacing?, space_before?, space_after?, left_margin?, indent?, bullet_enabled?, numbered?, bullet_character?, bullet_level?`.
-  - `rotation`, `auto_fit`, `strikethrough` accept the schema in Phase 1 but implementation lands in Phase 3.
+  - `rotation`, `auto_fit`, `strikethrough` accept the schema in Phase 1 but implementation lands in Phase 4.
 
 - **Tables (6 → 2)**. Drop `ppt.get_table_cell`, `ppt.set_table_cell`, `ppt.modify_table_structure`, `ppt.set_table_row_height`, `ppt.set_table_column_width`, `ppt.set_table_header_style`. Add:
   - `ppt.get_table` → returns `{rows, cols, cells: [[{text, row_span, col_span, is_merge_anchor}]], row_heights, col_widths, merged_regions}`.
-  - `ppt.edit_table` with `operation: "set_cell" | "insert_row" | "delete_row" | "insert_col" | "delete_col" | "set_row_height" | "set_col_width" | "set_header_style" | "merge_cells" | "set_cell_border"`. Each operation only requires its own args. (`merge_cells` + `set_cell_border` implementation lands in Phase 3; schema is defined now.)
+  - `ppt.edit_table` with `operation: "set_cell" | "insert_row" | "delete_row" | "insert_col" | "delete_col" | "set_row_height" | "set_col_width" | "set_header_style" | "merge_cells" | "set_cell_border"`. Each operation only requires its own args. (`merge_cells` + `set_cell_border` implementation lands in Phase 4; schema is defined now.)
 
 - **Render (3 → 2)**. Drop `ppt.render_slide_svg`. Extend `ppt.render_slide` and `ppt.render_all_slides` with:
   - `format: "png" | "jpg" | "svg"` (default `png`).
-  - `fidelity: "low" | "high"` (default `low`). High-fidelity implementation lands in Phase 2; schema is defined now.
+  - `fidelity: "low" | "high"` (default `low`). High-fidelity implementation lands in Phase 3; schema is defined now.
 
-- **Save (renamed & extended)**. Rename `ppt.save_document` → `ppt.export_document`. Add `format: "pptx" | "pdf" | "html" | "png_batch" | "jpg_batch" | "svg_batch" | "outline_text"`. In Phase 1, only `pptx` and `pdf` are implemented (unchanged behavior); other formats return `{code:"FORMAT_NOT_YET_IMPLEMENTED", retriable:false}` until Phase 2 lands them.
+- **Save (renamed & extended)**. Rename `ppt.save_document` → `ppt.export_document`. Add `format: "pptx" | "pdf" | "html" | "png_batch" | "jpg_batch" | "svg_batch" | "outline_text"`. In Phase 1, only `pptx` and `pdf` are implemented (unchanged behavior); other formats return `{code:"FORMAT_NOT_YET_IMPLEMENTED", retriable:false}` until Phase 3 lands them.
 
 **Adds**:
 
@@ -114,12 +115,12 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
     supported_render_formats: [...],
     installed_fonts: [string, ...]  // first 50 via `fc-list :family`, cached at startup
     feature_flags: {
-      charts_update: false,           // true after Phase 4
-      high_fidelity_render: false,    // true after Phase 2
-      gradients: false,               // true after Phase 3
-      picture_effects: false,         // true after Phase 3
-      table_borders: false,           // true after Phase 3
-      table_merge: false              // true after Phase 3
+      charts_update: false,           // true after Phase 5
+      high_fidelity_render: false,    // true after Phase 3
+      gradients: false,               // true after Phase 4
+      picture_effects: false,         // true after Phase 4
+      table_borders: false,           // true after Phase 4
+      table_merge: false              // true after Phase 4
     },
     limits: {
       max_open_docs: 100,
@@ -145,7 +146,66 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
 
 ---
 
-# Phase 2 — Dual-fidelity rendering + full export format set
+# Phase 2 — Architectural refactor (readability + maintainability)
+
+**Goal**: shrink `PptToolService`, replace the 3-place handler-wiring pattern with a one-place map per operations class, and extract the utility duplication the audit flagged. No tool behavior changes; existing tests are the acceptance gate.
+
+**Why now**: Phase 1 just deleted 14 handlers and renamed others, so the surface is at its smallest of the entire plan. Phases 3, 4, and 5 add substantial new handlers. Refactoring between the two avoids reshaping code that's about to be deleted *and* avoids piling new features onto a mega-class.
+
+**Scope**:
+
+1. **Split `PptToolService`** (currently ~1790 lines) into:
+   - `PptToolService` — thin dispatch facade: tool registry, per-session lock decorator, `call(name, args)` entry point. Target: under 300 lines.
+   - `PptSessionFacade` (new) — session creation/lookup, `MCPO_MAX_OPEN_DOCS` enforcement, owns `SessionStore`.
+   - `PptTransactionManager` (new) — owns the `Map<String, TransactionSnapshot>` currently living on `PptToolService` (line 85 in audit). Exposes `begin(docId)`, `commit(docId)`, `rollback(docId)`.
+   - Every concrete handler method (`createDocument`, `openDocument`, `setPageSetup`, `modifyTableStructure`, `setTableRowHeight`, `setTableColumnWidth`, `setTableHeaderStyle`, `setTextRunStyle`, `setListFormatting`, `addShape`, `replaceImage`, `deleteShape`, `getShapeProperties`, `setShapeStyle`, `setDocumentMetadata`, `setSlideLayout`, `setTextFormatting`, `setShapeZOrder`, `renderAllSlidesImage`, all currently inline on `PptToolService`) moves into the appropriate `operations/` class. Nothing of substance stays on the facade.
+
+2. **Replace lambda-injection pattern** in operations classes. Today each operations class takes 5–18 method references in its constructor and exposes thin public methods that forward to them — adding a tool requires editing (a) `createToolHandlers`, (b) the operations-class constructor, (c) a new forwarding method on the operations class. After: each operations class is self-contained, constructed from real dependencies (`SessionStore` or `PptSessionFacade`, `PptPathResolver`, `ToolResponseFactory`, `ToolArgumentValidator`), and owns its handlers directly.
+
+3. **One-place handler registration**. Each operations class exposes:
+   ```java
+   public Map<String, ToolHandler> handlers();
+   ```
+   returning its own `Map.of("ppt.foo", this::foo, ...)`. `PptToolService` builds the global registry by merging all operations classes' maps at construction. Adding a tool becomes: write the handler method in the right operations class, add one line to its `handlers()` map, add the definition in `PptToolDefinitions`. No more triple-edit boilerplate.
+
+4. **Centralize color parsing** — new `tooling/infra/ColorParser.java` with `parseHex(String)` returning `java.awt.Color`, plus `toHex(Color)`. Replace every hex-color parse site (`setSlideBackground`, `setShapeStyle`, `setTextRunStyle`, gradient stops in Phase 4, table borders in Phase 4, etc.). Uniform error code `INVALID_COLOR` on malformed input.
+
+5. **Centralize unit conversion** — new `tooling/infra/PptUnits.java` with `pointsToEmu`, `emuToPoints`, `pixelsToPoints(double, double dpi)`, `pointsToPixels`. Audit flagged "freely mixes pixel/point units without explicit documentation". Standardize: **tool schemas accept points** (POI's native unit); `PptUnits` is the only place raw EMU (`914400 per inch`) appears. Rename ambiguous parameters in any helpers accordingly.
+
+6. **Extract `PptShapeFinder`** — new `tooling/infra/PptShapeFinder.java` wrapping the repeated "resolve (document_id, slide_index, shape_index) → XSLFShape with validation" pattern. Returns typed errors: `DOCUMENT_NOT_FOUND`, `SLIDE_INDEX_OUT_OF_RANGE`, `SHAPE_INDEX_OUT_OF_RANGE`. Every handler that takes those three args uses this.
+
+7. **Injection cleanup**. The audit flagged `PptAdvancedMutationOperations` reading `allowedRoot` via its own `pathResolver.allowedRoot()` getter, and several sites calling `System.getenv()` directly from deep inside handlers (`parseAllowedRoot`, `parseTemplatesDir`, `parseDefaultTemplateConfigPath`, `parseMaxOpenDocs`). Centralize environment parsing into a new `tooling/infra/PptServerConfig.java` record built once at `PptToolService` construction, injected into every operations class. No handler touches `System.getenv` directly.
+
+8. **Kill the "operations vs service" naming inconsistency**. `PptRenderService` and `PptTemplateService` end in `Service`; their peers (`PptDocumentOperations`, `PptSlideOperations`, `PptAdvancedMutationOperations`) end in `Operations`. Rename `PptRenderService` → `PptRenderOperations` and `PptTemplateService` → `PptTemplateOperations`. Update the `tooling/README.md` accordingly.
+
+9. **Split `PptAdvancedMutationOperations`** if it exceeds 600 lines after step 2 (currently ~1700 lines, absorbs most of the inline handlers from step 1). Suggested split:
+   - `PptShapeMutationOperations` — add/move/resize/clone/delete/style/z-order shape handlers.
+   - `PptTableOperations` — all `edit_table` operations (set_cell, insert/delete row/col, set_row_height, set_col_width, set_header_style, merge_cells, set_cell_border).
+   - `PptPageMutationOperations` — `set_page_setup`, `set_slide_background`, `set_slide_layout`, `set_document_metadata`.
+   - `PptAdvancedMutationOperations` retires entirely; its contents redistribute.
+
+10. **Update `CLAUDE.md`** to reflect the new package shape after the refactor lands.
+
+**Guardrails**:
+- **No public tool-surface changes.** All 42 tools behave identically before and after. Existing unit + smoke tests are the contract.
+- **No feature additions.** Anything feature-shaped gets deferred to its intended phase.
+- **Commit discipline.** The phase should land as a series of small, independently-compiling commits in one PR — one commit per refactor step (split facade, move handlers, replace injection pattern, extract ColorParser, extract PptUnits, extract PptShapeFinder, extract PptServerConfig, rename Services, split AdvancedMutation). This keeps the review navigable.
+
+**Files touched**: most of `tooling/`. New files: `tooling/infra/ColorParser.java`, `tooling/infra/PptUnits.java`, `tooling/infra/PptShapeFinder.java`, `tooling/infra/PptServerConfig.java`, `tooling/operations/PptTransactionManager.java`, `tooling/PptSessionFacade.java`, possibly `tooling/operations/PptShapeMutationOperations.java` / `PptTableOperations.java` / `PptPageMutationOperations.java`. Major shrinkage in `PptToolService.java`. Renames: `PptRenderService.java` → `PptRenderOperations.java`, `PptTemplateService.java` → `PptTemplateOperations.java`. `tooling/README.md` updated. `CLAUDE.md` updated.
+
+**Acceptance**:
+- `PptToolService` under 300 lines.
+- No operations class exceeds 800 lines; target 400–600.
+- Each operations class is self-contained — no lambda-reference constructor injection from `PptToolService`.
+- Adding a tool requires editing exactly **two** files: the relevant operations class (handler method + map entry) and `PptToolDefinitions`. Document this rule in `tooling/README.md`.
+- Zero `System.getenv` calls outside `PptServerConfig`.
+- Zero ad-hoc hex-color parsing outside `ColorParser`.
+- Every existing unit and smoke test passes unchanged.
+- jacoco 80% gate still met.
+
+---
+
+# Phase 3 — Dual-fidelity rendering + full export format set
 
 **Goal**: fast-crude render stays; slow-accurate becomes available; every chat-useful export format is wired up.
 
@@ -160,7 +220,7 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
    - Checks `SofficeAvailability` first; returns `SOFFICE_UNAVAILABLE` if not available.
 
 2. **`ppt.export_document` completed** for all formats:
-   - `pptx` — existing POI atomic write (temp-then-move) stays.
+   - `pptx` — existing POI atomic write (temp-then-move) stays, now living on `PptDocumentOperations` after Phase 2 refactor.
    - `pdf` — existing soffice path, now routed through `SofficeRenderer`.
    - `html` — `soffice --convert-to html` (produces single `.html` with embedded base64 images).
    - `png_batch` / `jpg_batch` / `svg_batch` — `soffice --convert-to png` (etc.) into `output_dir` (one file per slide, soffice handles batching natively). If `output_path` is a file path instead of a dir, reject with `VALIDATION_ERROR`.
@@ -186,7 +246,7 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
 
 ---
 
-# Phase 3 — Authoring expansion
+# Phase 4 — Authoring expansion
 
 **Goal**: land everything on the "moderate effort, high value" row of the feature matrix.
 
@@ -217,7 +277,7 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
    - `rotation` (degrees, −90 to 90 typical) → `a:bodyPr/@rot` where units are 60000 per degree.
    - `auto_fit: "none" | "normal" | "shrink"` → `XSLFTextShape.setTextAutofit(TextAutofit.NONE | NORMAL | SHRINK)`.
 
-5. **Fix `clone_shape` PARTIAL → FULL**: generalize to any `XSLFShape` by cloning the underlying `XmlObject` (deep XML copy), regenerating shape id, applying offset to anchor. Remove the text-shape-only restriction at `PptAdvancedMutationOperations.java:940-941`.
+5. **Fix `clone_shape` PARTIAL → FULL**: generalize to any `XSLFShape` by cloning the underlying `XmlObject` (deep XML copy), regenerating shape id, applying offset to anchor. Remove the text-shape-only restriction (originally at `PptAdvancedMutationOperations.java:940-941` pre-refactor; relocated to `PptShapeMutationOperations` after Phase 2).
 
 6. **Feature flag flips**: `gradients`, `picture_effects`, `table_borders`, `table_merge` all → `true`.
 
@@ -225,7 +285,7 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
 
 8. **Docker smoke** exercises each new path.
 
-**Files touched**: `tooling/operations/PptAdvancedMutationOperations.java` (main surface), `tooling/PptToolDefinitions.java`, `tooling/PptToolService.java`.
+**Files touched**: `tooling/operations/PptShapeMutationOperations.java`, `tooling/operations/PptTableOperations.java` (both introduced in Phase 2), `tooling/PptToolDefinitions.java`. `PptToolService` unchanged — new tools slot in via the Phase 2 `handlers()` map pattern.
 
 **Acceptance**:
 - PPTX written with new effects opens in desktop PowerPoint showing effects correctly (visual check by the executor; no automated PowerPoint test).
@@ -233,7 +293,7 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
 
 ---
 
-# Phase 4 — Charts (data update only)
+# Phase 5 — Charts (data update only)
 
 **Goal**: agents can re-data existing charts (authored in PowerPoint or shipped in templates).
 
@@ -257,7 +317,7 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
 
 6. **Feature flag flip**: `charts_update = true`.
 
-**Files touched**: new `tooling/operations/PptChartOperations.java`, `tooling/PptToolDefinitions.java`, `tooling/PptToolService.java`, new `src/test/resources/fixtures/chart-sample.pptx`, new unit tests.
+**Files touched**: new `tooling/operations/PptChartOperations.java` (exposes its own `handlers()` map per the Phase 2 pattern), `tooling/PptToolDefinitions.java`, new `src/test/resources/fixtures/chart-sample.pptx`, new unit tests. `PptToolService` unchanged.
 
 **Explicitly out of scope (future v2)**: chart creation from scratch, new chart types, 3D charts, chart formatting (colors / legends / axes).
 
@@ -268,7 +328,7 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
 
 ---
 
-# Phase 5 — Ironclad Docker smoke + v1 release
+# Phase 6 — Ironclad Docker smoke + v1 release
 
 **Goal**: every tool exercised end-to-end in a Docker smoke; final README; v1 declared done.
 
@@ -300,11 +360,13 @@ All 56 registered tools have real handlers — no STUB/MISSING. Only `clone_shap
 
 ```
 Phase 0 ── prerequisite for all others (locking, sandbox, fonts, soffice probe, test infra)
-Phase 1 ── prerequisite for 2, 3, 4 (renames the surface they extend)
-Phase 2 ── independent of 3
-Phase 3 ── independent of 2
-Phase 4 ── depends on 2 (high-fidelity render is the chart-update assertion)
-Phase 5 ── last
+Phase 1 ── prerequisite for 2 (refactor works on the consolidated surface, not the 56-tool one)
+Phase 2 ── prerequisite for 3, 4, 5 (feature phases rely on the handlers() registration pattern
+            and split operations classes; adding features to the old mega-class is the anti-goal)
+Phase 3 ── independent of 4
+Phase 4 ── independent of 3
+Phase 5 ── depends on 3 (high-fidelity render is the chart-update visual assertion)
+Phase 6 ── last
 ```
 
-Sequential execution order: **0 → 1 → 2 → 3 → 4 → 5**. One PR per phase, merged to `main` before starting the next.
+Sequential execution order: **0 → 1 → 2 → 3 → 4 → 5 → 6**. One PR per phase, merged to `main` before starting the next.

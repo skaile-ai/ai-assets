@@ -78,25 +78,26 @@ Maintenance conventions:
 
 ## Tools
 
-Current build ships 56 tools across document lifecycle, slide management, shape/text mutation, rendering, metadata, layout control, templating, markdown import, and transaction workflows. All tools are supported by Apache POI 5.5.x and/or LibreOffice.
+Current build ships **49 tools** across document lifecycle, slide management, shape/text mutation, rendering, metadata, layout control, templating, markdown import, and transaction workflows. All tools are supported by Apache POI 5.5.x and/or LibreOffice. Call `ppt.capabilities` at runtime for the authoritative list of versions, feature flags, and safety limits.
 
-Supported tool families include:
-- Document lifecycle: `ppt.create_document`, `ppt.open_document`, `ppt.close_document`, `ppt.save_document`, `ppt.get_document_info`
+Supported tool families:
+- Document lifecycle: `ppt.create_document`, `ppt.open_document`, `ppt.close_document`, `ppt.export_document`, `ppt.get_document_info`
 - Page setup: `ppt.set_page_setup`
 - Slide management: `ppt.list_slides`, `ppt.add_slide`, `ppt.duplicate_slide`, `ppt.delete_slides`, `ppt.reorder_slides`, `ppt.merge_presentations`
-- Slide content: `ppt.get_slide_content`, `ppt.update_text`, `ppt.replace_text_globally`, `ppt.add_textbox`, `ppt.set_text_style`, `ppt.get_slide_notes`, `ppt.set_slide_notes`
-- Media & tables: `ppt.insert_image`, `ppt.replace_image`, `ppt.add_table`, `ppt.get_table_cell`, `ppt.set_table_cell`, `ppt.modify_table_structure`, `ppt.set_table_row_height`, `ppt.set_table_column_width`, `ppt.set_table_header_style`
+- Slide content: `ppt.get_slide_content`, `ppt.update_text`, `ppt.replace_text_globally`, `ppt.add_textbox`, `ppt.set_text`, `ppt.get_slide_notes`, `ppt.set_slide_notes`
+- Media: `ppt.insert_image`, `ppt.replace_image`
+- Tables: `ppt.add_table`, `ppt.get_table`, `ppt.edit_table`
 - Search: `ppt.find_text`
 - Shapes & styling: `ppt.add_shape`, `ppt.move_shape`, `ppt.clone_shape`, `ppt.resize_shape`, `ppt.delete_shape`, `ppt.get_shape_properties`, `ppt.set_shape_style`, `ppt.set_shape_z_order`, `ppt.add_hyperlink`, `ppt.set_slide_background`
 - Layout & metadata: `ppt.set_slide_layout`, `ppt.set_document_metadata`
-- Text formatting: `ppt.set_text_style`, `ppt.set_text_run_style`, `ppt.set_text_formatting`, `ppt.set_list_formatting`
-- Rendering: `ppt.render_slide_image`, `ppt.render_all_slides_image`, `ppt.render_slide_svg`
+- Rendering: `ppt.render_slide`, `ppt.render_all_slides`
 - Metrics: `ppt.get_slide_metrics`
 - Templates: `ppt.upload_template`, `ppt.set_default_template`, `ppt.get_default_template`, `ppt.import_markdown_outline`
 - Presentation generation: `ppt.generate_presentation`
 - Transactions: `ppt.transaction_begin`, `ppt.transaction_commit`, `ppt.transaction_rollback`
+- Capabilities / self-describe: `ppt.capabilities`
 
-For exact argument schemas, rely on `tools/list` output at runtime or the tool definitions in `src/main/java/ai/skaile/mcpo/ppt/tooling/PptToolService.java`.
+For exact argument schemas, rely on `tools/list` output at runtime or the tool definitions in `src/main/java/ai/skaile/mcpo/ppt/tooling/PptToolDefinitions.java`.
 
 | Category | Tool | Parameters | Description |
 |---|---|---|---|
@@ -104,6 +105,7 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Document lifecycle | `ppt.open_document` | `path` | Open an existing presentation into memory and return a document handle. |
 | Document lifecycle | `ppt.close_document` | `document_id` | Close a document handle and release resources. |
 | Document lifecycle | `ppt.get_document_info` | `document_id` | Return document metadata, dirty state, page size, and timestamps. |
+| Document lifecycle | `ppt.export_document` | `document_id`; `output_path?`; `format?` | Export to disk. `format` = `pptx` \| `pdf` (implemented) \| `html` \| `png_batch` \| `jpg_batch` \| `svg_batch` \| `outline_text` (reserved for Phase 2; return `FORMAT_NOT_YET_IMPLEMENTED`). |
 | Page setup | `ppt.set_page_setup` | `document_id`; `preset`; `width?`; `height?` | Set page size using a preset or custom dimensions. |
 | Slide management | `ppt.list_slides` | `document_id` | List slides with index, text preview, and shape count. |
 | Slide management | `ppt.reorder_slides` | `document_id`; `new_order` | Reorder all slides using a full index permutation. |
@@ -115,23 +117,17 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Slide content | `ppt.update_text` | `document_id`; `slide_index`; `old_text`; `new_text`; `occurrence?` | Replace a specific text occurrence on a slide. |
 | Slide content | `ppt.replace_text_globally` | `document_id`; `old_text`; `new_text`; `case_sensitive?`; `max_replacements?` | Replace text occurrences across all slides. |
 | Slide content | `ppt.add_textbox` | `document_id`; `slide_index`; `text`; `x`; `y`; `width`; `height`; `font_size?` | Add a textbox to a slide at a specific position. |
+| Slide content | `ppt.set_text` | `document_id`; `slide_index`; `shape_index`; `scope?` (`shape`\|`run`\|`paragraph`); `target_text?`; `occurrence?`; `case_sensitive?`; `paragraph_index?`; run-style: `bold?`, `italic?`, `underline?`, `strikethrough?`, `font_size?`, `font_color?`, `font_family?`, `rotation?`, `auto_fit?`; paragraph-style: `text_align?`, `line_spacing?`, `space_before?`, `space_after?`, `left_margin?`, `indent?`, `bullet_enabled?`, `numbered?`, `bullet_character?`, `bullet_level?`. | Unified text mutation (replaces `ppt.set_text_style`, `ppt.set_text_run_style`, `ppt.set_text_formatting`, `ppt.set_list_formatting`). `strikethrough`/`rotation`/`auto_fit` accept the schema but land in Phase 3. |
 | Shapes | `ppt.add_shape` | `document_id`; `slide_index`; `shape_type`; `x`; `y`; `width`; `height`; `text?`; `fill_color?`; `border_color?`; `border_width?` | Add a primitive shape (rectangle/ellipse/line/arrow). |
 | Media | `ppt.insert_image` | `document_id`; `slide_index`; `image_path`; `x`; `y`; `width`; `height` | Insert an image into a slide. |
 | Media | `ppt.replace_image` | `document_id`; `slide_index`; `shape_index`; `image_path`; `keep_size?` | Replace a picture shape while preserving placement/size. |
 | Notes | `ppt.get_slide_notes` | `document_id`; `slide_index` | Get speaker notes text for a slide. |
 | Notes | `ppt.set_slide_notes` | `document_id`; `slide_index`; `notes_text` | Set speaker notes text for a slide. |
 | Tables | `ppt.add_table` | `document_id`; `slide_index`; `rows`; `cols`; `x`; `y`; `width`; `height` | Add a table to a slide. |
-| Tables | `ppt.get_table_cell` | `document_id`; `slide_index`; `shape_index`; `row_index`; `col_index` | Read text from a table cell. |
-| Tables | `ppt.set_table_cell` | `document_id`; `slide_index`; `shape_index`; `row_index`; `col_index`; `text` | Set text in a table cell. |
-| Tables | `ppt.modify_table_structure` | `document_id`; `slide_index`; `shape_index`; `operation`; `index?` | Insert/delete table rows or columns. |
-| Tables | `ppt.set_table_row_height` | `document_id`; `slide_index`; `shape_index`; `row_index`; `height` | Set height for one table row. |
-| Tables | `ppt.set_table_column_width` | `document_id`; `slide_index`; `shape_index`; `col_index`; `width` | Set width for one table column. |
-| Tables | `ppt.set_table_header_style` | `document_id`; `slide_index`; `shape_index`; `row_index?`; `fill_color?`; `font_color?`; `bold?` | Apply style to a table header row. |
-| Text formatting | `ppt.set_text_style` | `document_id`; `slide_index`; `shape_index`; `bold?`; `italic?`; `underline?`; `font_size?`; `font_color?` | Apply style updates to all runs in a text shape. |
-| Text formatting | `ppt.set_text_run_style` | `document_id`; `slide_index`; `shape_index`; `target_text`; `occurrence?`; `case_sensitive?`; `bold?`; `italic?`; `underline?`; `font_size?`; `font_color?` | Style one matched text segment via rich text runs. |
-| Text formatting | `ppt.set_list_formatting` | `document_id`; `slide_index`; `shape_index`; `bullet_enabled?`; `numbered?`; `bullet_character?`; `bullet_level?`; `line_spacing?`; `space_before?`; `space_after?` | Apply bullet/numbering and paragraph spacing semantics. |
+| Tables | `ppt.get_table` | `document_id`; `slide_index`; `shape_index` | Return `{rows, cols, cells, row_heights, col_widths, merged_regions}`. Merge data lands in Phase 3. |
+| Tables | `ppt.edit_table` | `document_id`; `slide_index`; `shape_index`; `operation`; op-specific fields. | Single operation per call. Implemented: `set_cell` (`row`/`col`/`text`), `insert_row`/`delete_row` (`index`), `insert_col`/`delete_col` (`index`), `set_row_height` (`row_index`/`height`), `set_col_width` (`col_index`/`width`), `set_header_style` (`row_index?`/`fill_color?`/`font_color?`/`bold?`). Reserved for Phase 3 (`FEATURE_NOT_IMPLEMENTED`): `merge_cells` (`start_row`/`start_col`/`end_row`/`end_col`), `set_cell_border` (`row`/`col`/`sides`/`color`/`width`/`dash_style?`). |
 | Shapes | `ppt.move_shape` | `document_id`; `slide_index`; `shape_index`; `x`; `y` | Move a shape to new coordinates. |
-| Shapes | `ppt.clone_shape` | `document_id`; `slide_index`; `shape_index`; `offset_x?`; `offset_y?` | Clone a text-capable shape on the same slide. |
+| Shapes | `ppt.clone_shape` | `document_id`; `slide_index`; `shape_index`; `offset_x?`; `offset_y?` | Clone a text-capable shape on the same slide. Full shape support lands in Phase 3. |
 | Shapes | `ppt.resize_shape` | `document_id`; `slide_index`; `shape_index`; `width`; `height` | Resize a shape to a new width and height. |
 | Shapes | `ppt.add_hyperlink` | `document_id`; `slide_index`; `shape_index`; `url` | Attach hyperlink to all text runs in a text shape. |
 | Slide styling | `ppt.set_slide_background` | `document_id`; `slide_index`; `color` | Set a solid slide background color. |
@@ -140,10 +136,8 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Transactions | `ppt.transaction_commit` | `document_id` | Commit changes and discard transaction snapshot. |
 | Transactions | `ppt.transaction_rollback` | `document_id` | Roll back document state to transaction snapshot. |
 | Metrics | `ppt.get_slide_metrics` | `document_id`; `slide_index` | Analyze slide composition and text density. |
-| Document lifecycle | `ppt.save_document` | `document_id`; `output_path?`; `format?` | Save to disk in PPTX or PDF format. |
-| Rendering | `ppt.render_slide_image` | `document_id`; `slide_index`; `output_path`; `width?`; `height?` | Render one slide as PNG/JPG image. |
-| Rendering | `ppt.render_all_slides_image` | `document_id`; `output_dir`; `format?`; `file_name_pattern?`; `width?`; `height?` | Render all slides as PNG/JPG images. |
-| Rendering | `ppt.render_slide_svg` | `document_id`; `slide_index`; `output_path`; `width?`; `height?` | Render one slide to SVG. |
+| Rendering | `ppt.render_slide` | `document_id`; `slide_index`; `output_path`; `format?` (`png`\|`jpg`\|`svg`, default `png`); `fidelity?` (`low`\|`high`, default `low`); `width?`; `height?` | Render one slide. High fidelity is reserved for Phase 2 (returns `FORMAT_NOT_YET_IMPLEMENTED`). |
+| Rendering | `ppt.render_all_slides` | `document_id`; `output_dir`; `format?`; `fidelity?`; `file_name_pattern?`; `width?`; `height?` | Render every slide as PNG/JPG/SVG files in `output_dir`. |
 | Search | `ppt.find_text` | `document_id`; `query`; `case_sensitive?` | Find text occurrences across all slides. |
 | Templates | `ppt.upload_template` | `source_path`; `template_name?`; `make_default?` | Copy/upload a template into the template store. |
 | Templates | `ppt.set_default_template` | `template_path` | Set default template used by create/generate operations. |
@@ -151,11 +145,36 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Presentation generation | `ppt.generate_presentation` | `title?`; `slide_titles?`; `template_path?`; `output_path?` | Generate a presentation from titles and optional template. |
 | Shapes | `ppt.delete_shape` | `document_id`; `slide_index`; `shape_index` | Remove a shape from a slide by index. |
 | Shapes | `ppt.get_shape_properties` | `document_id`; `slide_index`; `shape_index` | Return detailed shape properties (type, anchor, text). |
-| Shapes | `ppt.set_shape_style` | `document_id`; `slide_index`; `shape_index`; `fill_color?`; `border_color?`; `border_width?`; `text_align?` | Set fill, border, and text alignment style on a shape. |
+| Shapes | `ppt.set_shape_style` | `document_id`; `slide_index`; `shape_index`; `fill_color?`; `border_color?`; `border_width?`; `text_align?` | Set fill, border, and text alignment style on a shape. Gradients/patterns land in Phase 3. |
 | Metadata | `ppt.set_document_metadata` | `document_id`; `title?`; `author?`; `subject?`; `keywords?` | Set core document metadata fields. |
 | Layout | `ppt.set_slide_layout` | `document_id`; `slide_index`; `layout_type` | Apply a layout type to a slide. |
-| Text formatting | `ppt.set_text_formatting` | `document_id`; `slide_index`; `shape_index`; `text_align?`; `line_spacing?`; `left_margin?`; `indent?` | Apply paragraph-level text formatting. |
 | Shapes | `ppt.set_shape_z_order` | `document_id`; `slide_index`; `shape_index`; `position` | Move shape in z-order (front/back/forward/backward). |
+| Capabilities | `ppt.capabilities` | (none) | Return server / POI / soffice versions, supported formats, installed fonts, feature flags, and safety limits. |
+
+### Feature flags
+
+`ppt.capabilities` reports six flags that gate advanced authoring features. All are `false` after Phase 1; later phases flip them:
+
+| Flag | Phase | Gates |
+|---|---|---|
+| `high_fidelity_render` | 2 | `ppt.render_slide`/`ppt.render_all_slides` with `fidelity=high`, and non-PPTX `ppt.export_document` formats. |
+| `gradients` | 3 | `fill_type=gradient` / `pattern` on `ppt.set_shape_style`. |
+| `picture_effects` | 3 | `ppt.set_picture_effects` (new tool) — crop, alpha, recolor. |
+| `table_borders` | 3 | `ppt.edit_table` `operation=set_cell_border`. |
+| `table_merge` | 3 | `ppt.edit_table` `operation=merge_cells` plus merge metadata in `ppt.get_table`. |
+| `charts_update` | 4 | `ppt.list_charts` / `ppt.update_chart_data` (new tools). |
+
+### Safety limits
+
+Enforced server-side and surfaced via `ppt.capabilities.limits`:
+
+| Limit | Default | Error code |
+|---|---|---|
+| `max_open_docs` | 100 | `LIMIT_MAX_OPEN_DOCS` |
+| `max_slides_per_deck` | 2000 | `LIMIT_MAX_SLIDES` |
+| `max_shapes_per_slide` | 500 | `LIMIT_MAX_SHAPES` |
+| `max_image_bytes` | 52 428 800 (50 MiB) | `LIMIT_MAX_IMAGE_BYTES` |
+| `max_render_dimension` | 10 000 px | `LIMIT_MAX_RENDER_DIMENSION` |
 
 ## Error/Response Model
 

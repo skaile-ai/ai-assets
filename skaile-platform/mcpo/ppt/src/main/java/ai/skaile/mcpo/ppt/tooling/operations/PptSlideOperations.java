@@ -15,9 +15,9 @@ public final class PptSlideOperations {
     private final ToolHandler getSlideNotesHandler;
     private final ToolHandler setSlideNotesHandler;
     private final ToolHandler addTableHandler;
-    private final ToolHandler getTableCellHandler;
-    private final ToolHandler setTableCellHandler;
-    private final ToolHandler setTextStyleHandler;
+    private final ToolHandler getTableHandler;
+    private final ToolHandler editTableHandler;
+    private final ToolHandler setTextHandler;
     private final ToolHandler moveShapeHandler;
     private final ToolHandler cloneShapeHandler;
     private final ToolHandler resizeShapeHandler;
@@ -35,9 +35,9 @@ public final class PptSlideOperations {
             ToolHandler getSlideNotesHandler,
             ToolHandler setSlideNotesHandler,
             ToolHandler addTableHandler,
-            ToolHandler getTableCellHandler,
-            ToolHandler setTableCellHandler,
-            ToolHandler setTextStyleHandler,
+            ToolHandler getTableHandler,
+            ToolHandler editTableHandler,
+            ToolHandler setTextHandler,
             ToolHandler moveShapeHandler,
             ToolHandler cloneShapeHandler,
             ToolHandler resizeShapeHandler,
@@ -53,9 +53,9 @@ public final class PptSlideOperations {
         this.getSlideNotesHandler = getSlideNotesHandler;
         this.setSlideNotesHandler = setSlideNotesHandler;
         this.addTableHandler = addTableHandler;
-        this.getTableCellHandler = getTableCellHandler;
-        this.setTableCellHandler = setTableCellHandler;
-        this.setTextStyleHandler = setTextStyleHandler;
+        this.getTableHandler = getTableHandler;
+        this.editTableHandler = editTableHandler;
+        this.setTextHandler = setTextHandler;
         this.moveShapeHandler = moveShapeHandler;
         this.cloneShapeHandler = cloneShapeHandler;
         this.resizeShapeHandler = resizeShapeHandler;
@@ -103,16 +103,16 @@ public final class PptSlideOperations {
         return addTableHandler.handle(args);
     }
 
-    public ToolCallResult getTableCell(JsonNode args) throws Exception {
-        return getTableCellHandler.handle(args);
+    public ToolCallResult getTable(JsonNode args) throws Exception {
+        return getTableHandler.handle(args);
     }
 
-    public ToolCallResult setTableCell(JsonNode args) throws Exception {
-        return setTableCellHandler.handle(args);
+    public ToolCallResult editTable(JsonNode args) throws Exception {
+        return editTableHandler.handle(args);
     }
 
-    public ToolCallResult setTextStyle(JsonNode args) throws Exception {
-        return setTextStyleHandler.handle(args);
+    public ToolCallResult setText(JsonNode args) throws Exception {
+        return setTextHandler.handle(args);
     }
 
     public ToolCallResult moveShape(JsonNode args) throws Exception {

@@ -5,28 +5,28 @@ import ai.skaile.mcpo.ppt.tooling.contracts.ToolCallResult;
 import ai.skaile.mcpo.ppt.tooling.contracts.ToolHandler;
 
 public final class PptRenderService {
-    private final ToolHandler renderSlideImageHandler;
-    private final ToolHandler renderSlideSvgHandler;
+    private final ToolHandler renderSlideHandler;
+    private final ToolHandler renderAllSlidesHandler;
     private final ToolHandler findTextHandler;
     private final ToolHandler getSlideMetricsHandler;
 
     public PptRenderService(
-            ToolHandler renderSlideImageHandler,
-            ToolHandler renderSlideSvgHandler,
+            ToolHandler renderSlideHandler,
+            ToolHandler renderAllSlidesHandler,
             ToolHandler findTextHandler,
             ToolHandler getSlideMetricsHandler) {
-        this.renderSlideImageHandler = renderSlideImageHandler;
-        this.renderSlideSvgHandler = renderSlideSvgHandler;
+        this.renderSlideHandler = renderSlideHandler;
+        this.renderAllSlidesHandler = renderAllSlidesHandler;
         this.findTextHandler = findTextHandler;
         this.getSlideMetricsHandler = getSlideMetricsHandler;
     }
 
-    public ToolCallResult renderSlideImage(JsonNode args) throws Exception {
-        return renderSlideImageHandler.handle(args);
+    public ToolCallResult renderSlide(JsonNode args) throws Exception {
+        return renderSlideHandler.handle(args);
     }
 
-    public ToolCallResult renderSlideSvg(JsonNode args) throws Exception {
-        return renderSlideSvgHandler.handle(args);
+    public ToolCallResult renderAllSlides(JsonNode args) throws Exception {
+        return renderAllSlidesHandler.handle(args);
     }
 
     public ToolCallResult findText(JsonNode args) throws Exception {

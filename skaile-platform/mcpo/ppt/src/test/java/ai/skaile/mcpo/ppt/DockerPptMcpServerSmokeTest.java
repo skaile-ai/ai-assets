@@ -61,15 +61,9 @@ class DockerPptMcpServerSmokeTest {
             "ppt.get_slide_notes",
             "ppt.set_slide_notes",
             "ppt.add_table",
-            "ppt.get_table_cell",
-            "ppt.set_table_cell",
-            "ppt.modify_table_structure",
-            "ppt.set_table_row_height",
-            "ppt.set_table_column_width",
-            "ppt.set_table_header_style",
-            "ppt.set_text_style",
-            "ppt.set_text_run_style",
-            "ppt.set_list_formatting",
+            "ppt.get_table",
+            "ppt.edit_table",
+            "ppt.set_text",
             "ppt.move_shape",
             "ppt.clone_shape",
             "ppt.resize_shape",
@@ -80,10 +74,9 @@ class DockerPptMcpServerSmokeTest {
             "ppt.transaction_commit",
             "ppt.transaction_rollback",
             "ppt.get_slide_metrics",
-            "ppt.save_document",
-            "ppt.render_slide_image",
-            "ppt.render_all_slides_image",
-            "ppt.render_slide_svg",
+            "ppt.export_document",
+            "ppt.render_slide",
+            "ppt.render_all_slides",
             "ppt.find_text",
             "ppt.upload_template",
             "ppt.set_default_template",
@@ -94,8 +87,8 @@ class DockerPptMcpServerSmokeTest {
             "ppt.set_shape_style",
             "ppt.set_document_metadata",
             "ppt.set_slide_layout",
-            "ppt.set_text_formatting",
-            "ppt.set_shape_z_order");
+            "ppt.set_shape_z_order",
+            "ppt.capabilities");
 
     @BeforeAll
     static void buildDockerImage() throws Exception {
@@ -189,23 +182,23 @@ class DockerPptMcpServerSmokeTest {
             int tableShapeIndex = table.path("shape_index").asInt(-1);
             assertTrue(tableShapeIndex >= 0);
 
-            callTool(session, "ppt.set_table_cell", objectNode(
+            callTool(session, "ppt.edit_table", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
                     "shape_index", tableShapeIndex,
-                    "row_index", 1,
-                    "col_index", 1,
+                    "operation", "set_cell",
+                    "row", 1,
+                    "col", 1,
                     "text", "Target met"));
 
-            JsonNode tableCell = callTool(session, "ppt.get_table_cell", objectNode(
+            JsonNode tableSnapshot = callTool(session, "ppt.get_table", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
-                    "shape_index", tableShapeIndex,
-                    "row_index", 1,
-                    "col_index", 1));
-            assertEquals("Target met", tableCell.path("text").asText());
+                    "shape_index", tableShapeIndex));
+            assertEquals("Target met",
+                    tableSnapshot.path("cells").path(1).path(1).path("text").asText());
 
-            JsonNode style = callTool(session, "ppt.set_text_style", objectNode(
+            JsonNode style = callTool(session, "ppt.set_text", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
                     "shape_index", textboxShapeIndex,
@@ -232,7 +225,7 @@ class DockerPptMcpServerSmokeTest {
             assertTrue(imageShapeIndex >= 0);
 
                 Path pptxPath = workspace.resolve("output/report.pptx");
-            JsonNode savedPptx = callTool(session, "ppt.save_document", objectNode(
+            JsonNode savedPptx = callTool(session, "ppt.export_document", objectNode(
                     "document_id", documentId,
                     "output_path", containerPath("output/report.pptx")));
             assertEquals("pptx", savedPptx.path("format").asText());
@@ -243,7 +236,7 @@ class DockerPptMcpServerSmokeTest {
             assertFalse(reopenedDocumentId.isBlank());
 
             Path pdfPath = workspace.resolve("output/report.pdf");
-            JsonNode savedPdf = callTool(session, "ppt.save_document", objectNode(
+            JsonNode savedPdf = callTool(session, "ppt.export_document", objectNode(
                     "document_id", documentId,
                     "output_path", containerPath("output/report.pdf"),
                     "format", "pdf"));
@@ -252,7 +245,7 @@ class DockerPptMcpServerSmokeTest {
             assertTrue(Files.size(pdfPath) > 0);
 
             Path slidePng = workspace.resolve("output/slide.png");
-            JsonNode slideImage = callTool(session, "ppt.render_slide_image", objectNode(
+            JsonNode slideImage = callTool(session, "ppt.render_slide", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
                     "output_path", containerPath("output/slide.png"),
@@ -262,10 +255,11 @@ class DockerPptMcpServerSmokeTest {
             assertTrue(Files.exists(slidePng));
 
             Path slideSvg = workspace.resolve("output/slide.svg");
-            JsonNode slideVector = callToolMaybeError(session, "ppt.render_slide_svg", objectNode(
+            JsonNode slideVector = callToolMaybeError(session, "ppt.render_slide", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
                     "output_path", containerPath("output/slide.svg"),
+                    "format", "svg",
                     "width", 1280,
                     "height", 720));
             if ("success".equals(slideVector.path("status").asText())) {

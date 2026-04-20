@@ -68,10 +68,17 @@ import org.w3c.dom.Document;
 
 public final class PptToolService {
     private static final Logger LOG = LoggerFactory.getLogger(PptToolService.class);
+    private static final String SERVER_VERSION = "0.1.0";
     private static final String SVG_NS = "http://www.w3.org/2000/svg";
     private static final int DEFAULT_MAX_OPEN_DOCS = 100;
     private static final long SOFFICE_TIMEOUT_SECONDS = 90;
     private static final String DEFAULT_TEMPLATE_CONFIG = ".mcpo-ppt-default-template.json";
+
+    // Safety limits surfaced via ppt.capabilities and enforced in Phase 1.6.
+    static final int LIMIT_MAX_SLIDES = 2000;
+    static final int LIMIT_MAX_SHAPES_PER_SLIDE = 500;
+    static final long LIMIT_MAX_IMAGE_BYTES = 50L * 1024 * 1024;
+    static final int LIMIT_MAX_RENDER_DIMENSION = 10_000;
     private final ObjectMapper mapper = new ObjectMapper();
     private final SessionStore store = new SessionStore();
     private final List<ToolDefinition> tools;
@@ -113,7 +120,7 @@ public final class PptToolService {
             this::getDocumentInfo,
             this::listSlides,
             this::reorderSlides,
-            this::saveDocument,
+            this::exportDocument,
             this::generatePresentation,
             this::mergePresentations,
             this::transactionBegin,
@@ -130,9 +137,9 @@ public final class PptToolService {
             this::getSlideNotes,
             this::setSlideNotes,
             this::addTable,
-            this::getTableCell,
-            this::setTableCell,
-            this::setTextStyle,
+            this::getTable,
+            this::editTable,
+            this::setText,
             this::moveShape,
             this::cloneShape,
             this::resizeShape,
@@ -145,8 +152,8 @@ public final class PptToolService {
             responseFactory,
             pathResolver);
         this.renderService = new PptRenderService(
-            this::renderSlideImage,
-            this::renderSlideSvg,
+            this::renderSlide,
+            this::renderAllSlides,
             this::findText,
             this::getSlideMetrics);
         this.templateService = new PptTemplateService(
@@ -228,7 +235,7 @@ public final class PptToolService {
         handlers.put("ppt.set_page_setup", this::setPageSetup);
         handlers.put("ppt.list_slides", documentOperations::listSlides);
         handlers.put("ppt.reorder_slides", documentOperations::reorderSlides);
-        handlers.put("ppt.save_document", documentOperations::saveDocument);
+        handlers.put("ppt.export_document", documentOperations::exportDocument);
         handlers.put("ppt.generate_presentation", documentOperations::generatePresentation);
         handlers.put("ppt.merge_presentations", documentOperations::mergePresentations);
         handlers.put("ppt.transaction_begin", documentOperations::transactionBegin);
@@ -246,24 +253,17 @@ public final class PptToolService {
         handlers.put("ppt.get_slide_notes", slideOperations::getSlideNotes);
         handlers.put("ppt.set_slide_notes", slideOperations::setSlideNotes);
         handlers.put("ppt.add_table", slideOperations::addTable);
-        handlers.put("ppt.get_table_cell", slideOperations::getTableCell);
-        handlers.put("ppt.set_table_cell", slideOperations::setTableCell);
-        handlers.put("ppt.modify_table_structure", this::modifyTableStructure);
-        handlers.put("ppt.set_table_row_height", this::setTableRowHeight);
-        handlers.put("ppt.set_table_column_width", this::setTableColumnWidth);
-        handlers.put("ppt.set_table_header_style", this::setTableHeaderStyle);
-        handlers.put("ppt.set_text_style", slideOperations::setTextStyle);
-        handlers.put("ppt.set_text_run_style", this::setTextRunStyle);
-        handlers.put("ppt.set_list_formatting", this::setListFormatting);
+        handlers.put("ppt.get_table", slideOperations::getTable);
+        handlers.put("ppt.edit_table", slideOperations::editTable);
+        handlers.put("ppt.set_text", slideOperations::setText);
         handlers.put("ppt.move_shape", slideOperations::moveShape);
         handlers.put("ppt.clone_shape", slideOperations::cloneShape);
         handlers.put("ppt.resize_shape", slideOperations::resizeShape);
         handlers.put("ppt.add_hyperlink", slideOperations::addHyperlink);
         handlers.put("ppt.set_slide_background", slideOperations::setSlideBackground);
 
-        handlers.put("ppt.render_slide_image", renderService::renderSlideImage);
-        handlers.put("ppt.render_all_slides_image", this::renderAllSlidesImage);
-        handlers.put("ppt.render_slide_svg", renderService::renderSlideSvg);
+        handlers.put("ppt.render_slide", renderService::renderSlide);
+        handlers.put("ppt.render_all_slides", renderService::renderAllSlides);
         handlers.put("ppt.find_text", renderService::findText);
         handlers.put("ppt.get_slide_metrics", renderService::getSlideMetrics);
 
@@ -279,14 +279,15 @@ public final class PptToolService {
         handlers.put("ppt.set_shape_style", this::setShapeStyle);
         handlers.put("ppt.set_document_metadata", this::setDocumentMetadata);
         handlers.put("ppt.set_slide_layout", this::setSlideLayout);
-        handlers.put("ppt.set_text_formatting", this::setTextFormatting);
         handlers.put("ppt.set_shape_z_order", this::setShapeZOrder);
+        handlers.put("ppt.capabilities", this::capabilities);
         return handlers;
     }
 
     private ToolCallResult createDocument(JsonNode args) {
         if (store.size() >= maxOpenDocs) {
-            return error("Open document limit reached (" + maxOpenDocs + ")");
+            return error("LIMIT_MAX_OPEN_DOCS",
+                    "Open document limit reached (" + maxOpenDocs + ")", false);
         }
 
         String title = args.path("title").asText("");
@@ -307,7 +308,8 @@ public final class PptToolService {
 
     private ToolCallResult openDocument(JsonNode args) throws IOException {
         if (store.size() >= maxOpenDocs) {
-            return error("Open document limit reached (" + maxOpenDocs + ")");
+            return error("LIMIT_MAX_OPEN_DOCS",
+                    "Open document limit reached (" + maxOpenDocs + ")", false);
         }
 
         String pathRaw = requiredString(args, "path");
@@ -481,6 +483,11 @@ public final class PptToolService {
             return error("Unknown document_id");
         }
 
+        ToolCallResult limit = enforceSlideLimit(session);
+        if (limit != null) {
+            return limit;
+        }
+
         String title = args.path("title").asText("");
         XSLFSlide slide = createDefaultSlide(session.getSlideShow());
         if (!title.isBlank()) {
@@ -502,6 +509,11 @@ public final class PptToolService {
         PptDocumentSession session = requireSession(args);
         if (session == null) {
             return error("Unknown document_id");
+        }
+
+        ToolCallResult limit = enforceSlideLimit(session);
+        if (limit != null) {
+            return limit;
         }
 
         XMLSlideShow show = session.getSlideShow();
@@ -729,10 +741,18 @@ public final class PptToolService {
     }
 
     private ToolCallResult addTextBox(JsonNode args) {
+        ToolCallResult limit = enforceShapeLimit(args);
+        if (limit != null) {
+            return limit;
+        }
         return advancedMutationOperations.addTextBox(args);
     }
 
     private ToolCallResult addShape(JsonNode args) {
+        ToolCallResult limit = enforceShapeLimit(args);
+        if (limit != null) {
+            return limit;
+        }
         return advancedMutationOperations.addShape(args);
     }
 
@@ -748,6 +768,11 @@ public final class PptToolService {
             return error("Invalid slide_index: " + slideIndex);
         }
 
+        ToolCallResult shapeLimit = enforceShapeLimitForSlide(slide);
+        if (shapeLimit != null) {
+            return shapeLimit;
+        }
+
         Path imagePath = resolvePath(requiredString(args, "image_path"), false);
         double x = args.path("x").asDouble(Double.NaN);
         double y = args.path("y").asDouble(Double.NaN);
@@ -755,6 +780,12 @@ public final class PptToolService {
         double height = args.path("height").asDouble(Double.NaN);
         if (!isValidRect(x, y, width, height)) {
             return error("x, y, width, height must be valid positive numbers");
+        }
+
+        long imageSize = Files.size(imagePath);
+        ToolCallResult imageLimit = enforceImageBytesLimit(imageSize);
+        if (imageLimit != null) {
+            return imageLimit;
         }
 
         PictureData.PictureType pictureType = inferPictureType(imagePath);
@@ -775,6 +806,16 @@ public final class PptToolService {
     }
 
     private ToolCallResult replaceImage(JsonNode args) throws IOException {
+        // replace_image swaps an existing picture without changing shape count, so no shape
+        // limit check. Image-byte limit still applies.
+        JsonNode raw = args.path("image_path");
+        if (raw.isTextual() && !raw.asText().isBlank()) {
+            Path imagePath = resolvePath(raw.asText(), false);
+            ToolCallResult imageLimit = enforceImageBytesLimit(Files.size(imagePath));
+            if (imageLimit != null) {
+                return imageLimit;
+            }
+        }
         return advancedMutationOperations.replaceImage(args);
     }
 
@@ -843,43 +884,23 @@ public final class PptToolService {
     }
 
     private ToolCallResult addTable(JsonNode args) {
+        ToolCallResult limit = enforceShapeLimit(args);
+        if (limit != null) {
+            return limit;
+        }
         return advancedMutationOperations.addTable(args);
     }
 
-    private ToolCallResult getTableCell(JsonNode args) {
-        return advancedMutationOperations.getTableCell(args);
+    private ToolCallResult getTable(JsonNode args) {
+        return advancedMutationOperations.getTable(args);
     }
 
-    private ToolCallResult setTableCell(JsonNode args) {
-        return advancedMutationOperations.setTableCell(args);
+    private ToolCallResult editTable(JsonNode args) {
+        return advancedMutationOperations.editTable(args);
     }
 
-    private ToolCallResult modifyTableStructure(JsonNode args) {
-        return advancedMutationOperations.modifyTableStructure(args);
-    }
-
-    private ToolCallResult setTableRowHeight(JsonNode args) {
-        return advancedMutationOperations.setTableRowHeight(args);
-    }
-
-    private ToolCallResult setTableColumnWidth(JsonNode args) {
-        return advancedMutationOperations.setTableColumnWidth(args);
-    }
-
-    private ToolCallResult setTableHeaderStyle(JsonNode args) {
-        return advancedMutationOperations.setTableHeaderStyle(args);
-    }
-
-    private ToolCallResult setTextStyle(JsonNode args) {
-        return advancedMutationOperations.setTextStyle(args);
-    }
-
-    private ToolCallResult setTextRunStyle(JsonNode args) {
-        return advancedMutationOperations.setTextRunStyle(args);
-    }
-
-    private ToolCallResult setListFormatting(JsonNode args) {
-        return advancedMutationOperations.setListFormatting(args);
+    private ToolCallResult setText(JsonNode args) {
+        return advancedMutationOperations.setText(args);
     }
 
     private ToolCallResult moveShape(JsonNode args) {
@@ -887,6 +908,10 @@ public final class PptToolService {
     }
 
     private ToolCallResult cloneShape(JsonNode args) {
+        ToolCallResult limit = enforceShapeLimit(args);
+        if (limit != null) {
+            return limit;
+        }
         return advancedMutationOperations.cloneShape(args);
     }
 
@@ -909,7 +934,8 @@ public final class PptToolService {
         }
 
         if (store.size() >= maxOpenDocs) {
-            return error("Open document limit reached (" + maxOpenDocs + ")");
+            return error("LIMIT_MAX_OPEN_DOCS",
+                    "Open document limit reached (" + maxOpenDocs + ")", false);
         }
 
         XMLSlideShow show = loadTemplateOrBlank("");
@@ -1084,21 +1110,35 @@ public final class PptToolService {
         return success(payload);
     }
 
-    private ToolCallResult saveDocument(JsonNode args) throws IOException {
+    private ToolCallResult exportDocument(JsonNode args) throws IOException {
         PptDocumentSession session = requireSession(args);
         if (session == null) {
             return error("Unknown document_id");
         }
 
         String format = args.path("format").asText("pptx").toLowerCase(Locale.ROOT);
-        if (!"pptx".equals(format) && !"pdf".equals(format)) {
-            return error("format must be one of: pptx, pdf");
+        switch (format) {
+            case "pptx":
+            case "pdf":
+                break;
+            case "html":
+            case "png_batch":
+            case "jpg_batch":
+            case "svg_batch":
+            case "outline_text":
+                return error("FORMAT_NOT_YET_IMPLEMENTED",
+                        "Export format '" + format + "' lands in Phase 2.",
+                        false);
+            default:
+                return error("VALIDATION_ERROR",
+                        "format must be one of: pptx, pdf, html, png_batch, jpg_batch, svg_batch, outline_text",
+                        false);
         }
 
         Path outputPath;
         if (args.has("output_path") && !args.path("output_path").asText().isBlank()) {
             outputPath = resolvePath(args.path("output_path").asText(), true);
-        } else if (session.getSourcePath() != null) {
+        } else if (session.getSourcePath() != null && "pptx".equals(format)) {
             outputPath = session.getSourcePath();
         } else {
             return error("output_path is required for unsaved documents");
@@ -1134,11 +1174,11 @@ public final class PptToolService {
         payload.put("document_id", session.getId());
         payload.put("output_path", outputPath.toString());
         payload.put("format", format);
-        payload.put("message", "Document saved");
+        payload.put("message", "Document exported");
         return success(payload);
     }
 
-    private ToolCallResult renderSlideImage(JsonNode args) throws IOException {
+    private ToolCallResult renderSlide(JsonNode args) throws IOException {
         PptDocumentSession session = requireSession(args);
         if (session == null) {
             return error("Unknown document_id");
@@ -1150,6 +1190,19 @@ public final class PptToolService {
             return error("Invalid slide_index: " + slideIndex);
         }
 
+        String format = normalizeRenderFormat(args.path("format").asText("png"));
+        if (format == null) {
+            return error("VALIDATION_ERROR", "format must be one of: png, jpg, svg", false);
+        }
+        String fidelity = args.path("fidelity").asText("low").toLowerCase(Locale.ROOT);
+        if (!"low".equals(fidelity) && !"high".equals(fidelity)) {
+            return error("VALIDATION_ERROR", "fidelity must be one of: low, high", false);
+        }
+        if ("high".equals(fidelity)) {
+            return error("FORMAT_NOT_YET_IMPLEMENTED",
+                    "High-fidelity render lands in Phase 2.", false);
+        }
+
         Path outputPath = resolvePath(requiredString(args, "output_path"), true);
         createParentDirectories(outputPath);
 
@@ -1159,79 +1212,128 @@ public final class PptToolService {
         if (width < 1 || height < 1) {
             return error("width and height must be >= 1");
         }
+        ToolCallResult renderLimit = enforceRenderDimensionLimit(width, height);
+        if (renderLimit != null) {
+            return renderLimit;
+        }
 
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        var graphics = image.createGraphics();
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        graphics.setColor(Color.WHITE);
-        graphics.fillRect(0, 0, width, height);
-        double scaleX = width / (double) pageSize.width;
-        double scaleY = height / (double) pageSize.height;
-        graphics.scale(scaleX, scaleY);
-        slide.draw(graphics);
-        graphics.dispose();
-
-        String format = inferImageFormat(outputPath);
-        javax.imageio.ImageIO.write(image, format, outputPath.toFile());
+        if ("svg".equals(format)) {
+            renderSlideToSvg(slide, outputPath, width, height, pageSize);
+        } else {
+            renderSlideToRaster(slide, outputPath, width, height, pageSize, format);
+        }
 
         ObjectNode payload = okPayload();
         payload.put("document_id", session.getId());
         payload.put("slide_index", slideIndex);
         payload.put("output_path", outputPath.toString());
         payload.put("format", format);
-        payload.put("message", "Slide rendered as image");
+        payload.put("fidelity", fidelity);
+        payload.put("message", "Slide rendered");
         return success(payload);
     }
 
-    private ToolCallResult renderAllSlidesImage(JsonNode args) throws IOException {
-        return advancedMutationOperations.renderAllSlidesImage(args);
-    }
-
-    private ToolCallResult renderSlideSvg(JsonNode args) throws IOException {
+    private ToolCallResult renderAllSlides(JsonNode args) throws IOException {
         PptDocumentSession session = requireSession(args);
         if (session == null) {
             return error("Unknown document_id");
         }
 
-        int slideIndex = args.path("slide_index").asInt(-1);
-        XSLFSlide slide = getSlideByIndex(session.getSlideShow(), slideIndex);
-        if (slide == null) {
-            return error("Invalid slide_index: " + slideIndex);
+        String format = normalizeRenderFormat(args.path("format").asText("png"));
+        if (format == null) {
+            return error("VALIDATION_ERROR", "format must be one of: png, jpg, svg", false);
+        }
+        String fidelity = args.path("fidelity").asText("low").toLowerCase(Locale.ROOT);
+        if (!"low".equals(fidelity) && !"high".equals(fidelity)) {
+            return error("VALIDATION_ERROR", "fidelity must be one of: low, high", false);
+        }
+        if ("high".equals(fidelity)) {
+            return error("FORMAT_NOT_YET_IMPLEMENTED",
+                    "High-fidelity render lands in Phase 2.", false);
         }
 
-        Path outputPath = resolvePath(requiredString(args, "output_path"), true);
-        createParentDirectories(outputPath);
+        Path outputDir = resolvePath(requiredString(args, "output_dir"), true);
+        Files.createDirectories(outputDir);
 
+        String pattern = args.path("file_name_pattern").asText("slide-%03d");
         Dimension pageSize = session.getSlideShow().getPageSize();
         int width = args.path("width").asInt(pageSize.width);
         int height = args.path("height").asInt(pageSize.height);
         if (width < 1 || height < 1) {
             return error("width and height must be >= 1");
         }
+        ToolCallResult renderLimit = enforceRenderDimensionLimit(width, height);
+        if (renderLimit != null) {
+            return renderLimit;
+        }
 
-        DOMImplementation domImplementation = GenericDOMImplementation.getDOMImplementation();
-        Document document = domImplementation.createDocument(SVG_NS, "svg", null);
-        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-        svgGenerator.setSVGCanvasSize(new Dimension(width, height));
-
-        double scaleX = width / (double) pageSize.width;
-        double scaleY = height / (double) pageSize.height;
-        svgGenerator.scale(scaleX, scaleY);
-        slide.draw(svgGenerator);
-
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(outputPath.toFile()),
-                StandardCharsets.UTF_8)) {
-            svgGenerator.stream(writer, true);
+        ArrayNode files = mapper.createArrayNode();
+        List<XSLFSlide> slides = session.getSlideShow().getSlides();
+        for (int i = 0; i < slides.size(); i++) {
+            XSLFSlide slide = slides.get(i);
+            String fileName = String.format(Locale.ROOT, pattern, i + 1);
+            if (!fileName.toLowerCase(Locale.ROOT).endsWith("." + format)) {
+                fileName = fileName + "." + format;
+            }
+            Path outputPath = outputDir.resolve(fileName).toAbsolutePath().normalize();
+            if (allowedRoot != null && !outputPath.startsWith(allowedRoot)) {
+                return error("Output path is outside allowed root: " + outputPath);
+            }
+            if ("svg".equals(format)) {
+                renderSlideToSvg(slide, outputPath, width, height, pageSize);
+            } else {
+                renderSlideToRaster(slide, outputPath, width, height, pageSize, format);
+            }
+            files.add(outputPath.toString());
         }
 
         ObjectNode payload = okPayload();
         payload.put("document_id", session.getId());
-        payload.put("slide_index", slideIndex);
-        payload.put("output_path", outputPath.toString());
-        payload.put("format", "svg");
-        payload.put("message", "Slide rendered as SVG");
+        payload.put("slide_count", slides.size());
+        payload.put("format", format);
+        payload.put("fidelity", fidelity);
+        payload.set("files", files);
+        payload.put("message", "All slides rendered");
         return success(payload);
+    }
+
+    private String normalizeRenderFormat(String raw) {
+        String lower = raw == null ? "" : raw.toLowerCase(Locale.ROOT);
+        if ("jpeg".equals(lower)) {
+            return "jpg";
+        }
+        if ("png".equals(lower) || "jpg".equals(lower) || "svg".equals(lower)) {
+            return lower;
+        }
+        return null;
+    }
+
+    private void renderSlideToRaster(XSLFSlide slide, Path outputPath, int width, int height,
+            Dimension pageSize, String format) throws IOException {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        var graphics = image.createGraphics();
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, width, height);
+        graphics.scale(width / (double) pageSize.width, height / (double) pageSize.height);
+        slide.draw(graphics);
+        graphics.dispose();
+        javax.imageio.ImageIO.write(image, format, outputPath.toFile());
+    }
+
+    private void renderSlideToSvg(XSLFSlide slide, Path outputPath, int width, int height,
+            Dimension pageSize) throws IOException {
+        DOMImplementation domImplementation = GenericDOMImplementation.getDOMImplementation();
+        Document document = domImplementation.createDocument(SVG_NS, "svg", null);
+        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+        svgGenerator.setSVGCanvasSize(new Dimension(width, height));
+        svgGenerator.scale(width / (double) pageSize.width, height / (double) pageSize.height);
+        slide.draw(svgGenerator);
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(outputPath.toFile()),
+                StandardCharsets.UTF_8)) {
+            svgGenerator.stream(writer, true);
+        }
     }
 
     private ToolCallResult findText(JsonNode args) {
@@ -1344,7 +1446,8 @@ public final class PptToolService {
 
     private ToolCallResult generatePresentation(JsonNode args) throws IOException {
         if (store.size() >= maxOpenDocs) {
-            return error("Open document limit reached (" + maxOpenDocs + ")");
+            return error("LIMIT_MAX_OPEN_DOCS",
+                    "Open document limit reached (" + maxOpenDocs + ")", false);
         }
 
         String templateArg = args.path("template_path").asText("");
@@ -1358,6 +1461,11 @@ public final class PptToolService {
 
         List<String> slideTitles = parseSlideTitles(args.path("slide_titles"));
         if (!slideTitles.isEmpty()) {
+            if (slideTitles.size() > LIMIT_MAX_SLIDES) {
+                return error("LIMIT_MAX_SLIDES",
+                        "slide_titles exceeds the " + LIMIT_MAX_SLIDES + "-slide limit",
+                        false);
+            }
             setSlideTitle(firstSlide, slideTitles.get(0));
             for (int i = 1; i < slideTitles.size(); i++) {
                 XSLFSlide slide = createDefaultSlide(show);
@@ -1826,12 +1934,173 @@ public final class PptToolService {
         return advancedMutationOperations.setSlideLayout(args);
     }
 
-    private ToolCallResult setTextFormatting(JsonNode args) {
-        return advancedMutationOperations.setTextFormatting(args);
-    }
-
     private ToolCallResult setShapeZOrder(JsonNode args) {
         return advancedMutationOperations.setShapeZOrder(args);
+    }
+
+    private ToolCallResult capabilities(JsonNode args) {
+        SofficeAvailability soffice = SofficeAvailability.get();
+        ObjectNode payload = okPayload();
+        payload.put("server_version", SERVER_VERSION);
+        payload.put("poi_version", resolvePoiVersion());
+        payload.put("soffice_available", soffice.available());
+        if (soffice.available() && soffice.version() != null && !soffice.version().isBlank()) {
+            payload.put("soffice_version", soffice.version());
+        }
+        payload.put("java_version", System.getProperty("java.version", "unknown"));
+
+        ArrayNode inputFormats = payload.putArray("supported_input_formats");
+        inputFormats.add("pptx");
+        inputFormats.add("pptm");
+
+        ArrayNode exportFormats = payload.putArray("supported_export_formats");
+        for (String fmt : new String[] {
+                "pptx", "pdf", "html", "png_batch", "jpg_batch", "svg_batch", "outline_text"}) {
+            exportFormats.add(fmt);
+        }
+
+        ArrayNode renderFormats = payload.putArray("supported_render_formats");
+        renderFormats.add("png");
+        renderFormats.add("jpg");
+        renderFormats.add("svg");
+
+        ArrayNode fonts = payload.putArray("installed_fonts");
+        for (String family : getInstalledFontFamilies()) {
+            fonts.add(family);
+        }
+
+        ObjectNode flags = payload.putObject("feature_flags");
+        // Phase 1: every advanced feature flag is still false. They flip in Phases 2–4.
+        flags.put("charts_update", false);
+        flags.put("high_fidelity_render", false);
+        flags.put("gradients", false);
+        flags.put("picture_effects", false);
+        flags.put("table_borders", false);
+        flags.put("table_merge", false);
+
+        ObjectNode limits = payload.putObject("limits");
+        limits.put("max_open_docs", maxOpenDocs);
+        limits.put("max_slides_per_deck", LIMIT_MAX_SLIDES);
+        limits.put("max_shapes_per_slide", LIMIT_MAX_SHAPES_PER_SLIDE);
+        limits.put("max_image_bytes", LIMIT_MAX_IMAGE_BYTES);
+        limits.put("max_render_dimension", LIMIT_MAX_RENDER_DIMENSION);
+
+        return success(payload);
+    }
+
+    private ToolCallResult enforceSlideLimit(PptDocumentSession session) {
+        int current = session.getSlideShow().getSlides().size();
+        if (current >= LIMIT_MAX_SLIDES) {
+            return error("LIMIT_MAX_SLIDES",
+                    "Slide count limit reached (" + LIMIT_MAX_SLIDES + ")", false);
+        }
+        return null;
+    }
+
+    private ToolCallResult enforceShapeLimit(JsonNode args) {
+        PptDocumentSession session = requireSession(args);
+        if (session == null) {
+            return null;
+        }
+        int slideIndex = args.path("slide_index").asInt(-1);
+        XSLFSlide slide = getSlideByIndex(session.getSlideShow(), slideIndex);
+        if (slide == null) {
+            return null;
+        }
+        return enforceShapeLimitForSlide(slide);
+    }
+
+    private ToolCallResult enforceShapeLimitForSlide(XSLFSlide slide) {
+        if (slide.getShapes().size() >= LIMIT_MAX_SHAPES_PER_SLIDE) {
+            return error("LIMIT_MAX_SHAPES",
+                    "Slide has reached the shape limit (" + LIMIT_MAX_SHAPES_PER_SLIDE + ")",
+                    false);
+        }
+        return null;
+    }
+
+    private ToolCallResult enforceImageBytesLimit(long imageBytes) {
+        if (imageBytes > LIMIT_MAX_IMAGE_BYTES) {
+            return error("LIMIT_MAX_IMAGE_BYTES",
+                    "Image exceeds the " + LIMIT_MAX_IMAGE_BYTES + "-byte limit: " + imageBytes,
+                    false);
+        }
+        return null;
+    }
+
+    private ToolCallResult enforceRenderDimensionLimit(int width, int height) {
+        if (width > LIMIT_MAX_RENDER_DIMENSION || height > LIMIT_MAX_RENDER_DIMENSION) {
+            return error("LIMIT_MAX_RENDER_DIMENSION",
+                    "Render dimensions exceed " + LIMIT_MAX_RENDER_DIMENSION + "px: "
+                            + width + "x" + height,
+                    false);
+        }
+        return null;
+    }
+
+    private String resolvePoiVersion() {
+        String v = org.apache.poi.Version.getVersion();
+        return v == null || v.isBlank() ? "unknown" : v;
+    }
+
+    private static volatile List<String> cachedFontFamilies;
+
+    private List<String> getInstalledFontFamilies() {
+        List<String> snapshot = cachedFontFamilies;
+        if (snapshot != null) {
+            return snapshot;
+        }
+        synchronized (PptToolService.class) {
+            if (cachedFontFamilies != null) {
+                return cachedFontFamilies;
+            }
+            cachedFontFamilies = probeFontFamilies();
+            return cachedFontFamilies;
+        }
+    }
+
+    private List<String> probeFontFamilies() {
+        // fc-list is the lowest-dependency way to learn what fonts the runtime has available.
+        // On hosts without fontconfig (macOS dev machines that didn't install it) we fall
+        // back to the JDK's local graphics environment — less accurate but never throws.
+        try {
+            Process process = new ProcessBuilder("fc-list", ":family")
+                    .redirectErrorStream(true)
+                    .start();
+            List<String> families = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null && families.size() < 50) {
+                    String first = line.split(",", 2)[0].strip();
+                    if (!first.isBlank() && !families.contains(first)) {
+                        families.add(first);
+                    }
+                }
+            }
+            boolean finished = process.waitFor(3, TimeUnit.SECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+            } else if (process.exitValue() == 0 && !families.isEmpty()) {
+                return List.copyOf(families);
+            }
+        } catch (IOException | InterruptedException ex) {
+            if (ex instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            LOG.debug("fc-list probe failed, falling back to AWT: {}", ex.toString());
+        }
+        try {
+            String[] awt = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
+                    .getAvailableFontFamilyNames();
+            List<String> families = new ArrayList<>();
+            for (int i = 0; i < awt.length && families.size() < 50; i++) {
+                families.add(awt[i]);
+            }
+            return List.copyOf(families);
+        } catch (Exception ex) {
+            return List.of();
+        }
     }
 
     private void restoreShow(XMLSlideShow target, XMLSlideShow source) {

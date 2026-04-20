@@ -336,7 +336,23 @@ public final class PptAdvancedMutationOperations {
         return success(payload);
     }
 
-    public ToolCallResult setTextStyle(JsonNode args) {
+    /**
+     * Consolidated text mutation for the v1 tool surface.
+     *
+     * <p>Selects runs based on {@code scope}:
+     * <ul>
+     *   <li>{@code shape} (default): every run in the shape.</li>
+     *   <li>{@code run}: only the run(s) covering one matched occurrence of {@code target_text}.
+     *       Existing runs are rewritten so the matched slice becomes its own run.</li>
+     *   <li>{@code paragraph}: every run inside the paragraph at {@code paragraph_index}.</li>
+     * </ul>
+     *
+     * <p>Paragraph-level properties (alignment, bullets, spacing) are applied to every paragraph
+     * for {@code scope=shape}, the matched paragraph for {@code scope=paragraph}, and ignored for
+     * {@code scope=run}. Run-level {@code strikethrough}/{@code rotation}/{@code auto_fit} are
+     * accepted by the schema in Phase 1 but their implementations land in Phase 3.
+     */
+    public ToolCallResult setText(JsonNode args) {
         PptDocumentSession session = requireSession(args);
         if (session == null) {
             return error("Unknown document_id");
@@ -357,12 +373,9 @@ public final class PptAdvancedMutationOperations {
             return error("shape_index does not point to a text-capable shape");
         }
 
-        List<XSLFTextRun> runs = collectTextRuns(textShape);
-        if (runs.isEmpty()) {
-            var paragraph = textShape.addNewTextParagraph();
-            XSLFTextRun run = paragraph.addNewTextRun();
-            run.setText("");
-            runs.add(run);
+        String scope = args.path("scope").asText("shape").toLowerCase(Locale.ROOT);
+        if (!("shape".equals(scope) || "run".equals(scope) || "paragraph".equals(scope))) {
+            return error("VALIDATION_ERROR", "scope must be one of: shape, run, paragraph", false);
         }
 
         Double fontSize = args.has("font_size") ? args.path("font_size").asDouble() : null;
@@ -371,6 +384,64 @@ public final class PptAdvancedMutationOperations {
         }
         Color fontColor = args.has("font_color") ? parseColorHex(args.path("font_color").asText("")) : null;
 
+        ObjectNode payload = okPayload();
+        payload.put("document_id", session.getId());
+        payload.put("slide_index", slideIndex);
+        payload.put("shape_index", shapeIndex);
+        payload.put("scope", scope);
+
+        List<XSLFTextRun> targetRuns;
+        List<org.apache.poi.xslf.usermodel.XSLFTextParagraph> targetParagraphs;
+
+        if ("run".equals(scope)) {
+            RunSelection selection = selectRunByTargetText(textShape, args);
+            if (selection.error != null) {
+                return selection.error;
+            }
+            targetRuns = List.of(selection.styledRun);
+            targetParagraphs = List.of();
+            payload.put("start", selection.start);
+            payload.put("end", selection.end);
+        } else if ("paragraph".equals(scope)) {
+            int paragraphIndex = args.path("paragraph_index").asInt(-1);
+            if (paragraphIndex < 0 || paragraphIndex >= textShape.getTextParagraphs().size()) {
+                return error("Invalid paragraph_index: " + paragraphIndex);
+            }
+            var paragraph = textShape.getTextParagraphs().get(paragraphIndex);
+            targetRuns = new ArrayList<>(paragraph.getTextRuns());
+            if (targetRuns.isEmpty()) {
+                XSLFTextRun run = paragraph.addNewTextRun();
+                run.setText("");
+                targetRuns.add(run);
+            }
+            targetParagraphs = List.of(paragraph);
+            payload.put("paragraph_index", paragraphIndex);
+        } else {
+            targetRuns = collectTextRuns(textShape);
+            if (targetRuns.isEmpty()) {
+                var paragraph = textShape.addNewTextParagraph();
+                XSLFTextRun run = paragraph.addNewTextRun();
+                run.setText("");
+                targetRuns.add(run);
+            }
+            targetParagraphs = new ArrayList<>(textShape.getTextParagraphs());
+        }
+
+        applyRunStyle(targetRuns, args, fontSize, fontColor);
+        if (!targetParagraphs.isEmpty()) {
+            ToolCallResult paragraphError = applyParagraphStyle(targetParagraphs, args);
+            if (paragraphError != null) {
+                return paragraphError;
+            }
+        }
+
+        session.touch(true);
+        payload.put("message", "Text updated");
+        return success(payload);
+    }
+
+    private void applyRunStyle(List<XSLFTextRun> runs, JsonNode args, Double fontSize,
+            Color fontColor) {
         for (XSLFTextRun run : runs) {
             if (args.has("bold")) {
                 run.setBold(args.path("bold").asBoolean());
@@ -387,16 +458,138 @@ public final class PptAdvancedMutationOperations {
             if (fontColor != null) {
                 run.setFontColor(fontColor);
             }
+            if (args.has("font_family") && !args.path("font_family").asText("").isBlank()) {
+                run.setFontFamily(args.path("font_family").asText());
+            }
+            // strikethrough, rotation, and auto_fit accept the schema in Phase 1; their
+            // implementations land in Phase 3.
         }
+    }
 
-        session.touch(true);
+    private ToolCallResult applyParagraphStyle(
+            List<org.apache.poi.xslf.usermodel.XSLFTextParagraph> paragraphs, JsonNode args) {
+        TextParagraph.TextAlign align = null;
+        if (args.has("text_align")) {
+            try {
+                align = parseTextAlign(args.path("text_align").asText(""));
+            } catch (IllegalArgumentException ex) {
+                return error("VALIDATION_ERROR", ex.getMessage(), false);
+            }
+        }
+        Double lineSpacing = args.has("line_spacing") ? args.path("line_spacing").asDouble() : null;
+        Double spaceBefore = args.has("space_before") ? args.path("space_before").asDouble() : null;
+        Double spaceAfter = args.has("space_after") ? args.path("space_after").asDouble() : null;
+        Double leftMargin = args.has("left_margin") ? args.path("left_margin").asDouble() : null;
+        Double indent = args.has("indent") ? args.path("indent").asDouble() : null;
+        boolean setBullet = args.has("bullet_enabled");
+        boolean bulletEnabled = args.path("bullet_enabled").asBoolean(false);
+        boolean numbered = args.path("numbered").asBoolean(false);
+        String bulletChar = args.path("bullet_character").asText("");
+        Integer bulletLevel = args.has("bullet_level") ? args.path("bullet_level").asInt() : null;
 
-        ObjectNode payload = okPayload();
-        payload.put("document_id", session.getId());
-        payload.put("slide_index", slideIndex);
-        payload.put("shape_index", shapeIndex);
-        payload.put("message", "Text style updated");
-        return success(payload);
+        for (var paragraph : paragraphs) {
+            if (align != null) {
+                paragraph.setTextAlign(align);
+            }
+            if (numbered) {
+                paragraph.setBulletAutoNumber(AutoNumberingScheme.arabicPeriod, 1);
+            } else if (setBullet) {
+                paragraph.setBullet(bulletEnabled);
+            }
+            if (!bulletChar.isBlank()) {
+                paragraph.setBulletCharacter(bulletChar);
+            }
+            if (bulletLevel != null) {
+                double margin = Math.max(0, bulletLevel) * 18.0;
+                paragraph.setLeftMargin(margin);
+                paragraph.setIndent(Math.max(0, margin - 12.0));
+            }
+            if (leftMargin != null) {
+                paragraph.setLeftMargin(leftMargin);
+            }
+            if (indent != null) {
+                paragraph.setIndent(indent);
+            }
+            if (lineSpacing != null) {
+                paragraph.setLineSpacing(lineSpacing);
+            }
+            if (spaceBefore != null) {
+                paragraph.setSpaceBefore(spaceBefore);
+            }
+            if (spaceAfter != null) {
+                paragraph.setSpaceAfter(spaceAfter);
+            }
+        }
+        return null;
+    }
+
+    private static final class RunSelection {
+        final XSLFTextRun styledRun;
+        final int start;
+        final int end;
+        final ToolCallResult error;
+
+        private RunSelection(XSLFTextRun styledRun, int start, int end, ToolCallResult error) {
+            this.styledRun = styledRun;
+            this.start = start;
+            this.end = end;
+            this.error = error;
+        }
+    }
+
+    private RunSelection selectRunByTargetText(XSLFTextShape textShape, JsonNode args) {
+        String targetText = args.path("target_text").asText("");
+        if (targetText.isEmpty()) {
+            return new RunSelection(null, 0, 0,
+                    error("VALIDATION_ERROR", "scope=run requires non-empty target_text", false));
+        }
+        int occurrence = args.path("occurrence").asInt(1);
+        boolean caseSensitive = args.path("case_sensitive").asBoolean(true);
+        if (occurrence < 1) {
+            return new RunSelection(null, 0, 0,
+                    error("VALIDATION_ERROR", "occurrence must be >= 1", false));
+        }
+        String sourceText = textShape.getText();
+        if (sourceText == null || sourceText.isBlank()) {
+            return new RunSelection(null, 0, 0, error("Selected text shape is empty"));
+        }
+        String haystack = caseSensitive ? sourceText : sourceText.toLowerCase(Locale.ROOT);
+        String needle = caseSensitive ? targetText : targetText.toLowerCase(Locale.ROOT);
+        int start = -1;
+        int from = 0;
+        int seen = 0;
+        while (true) {
+            int idx = haystack.indexOf(needle, from);
+            if (idx < 0) {
+                break;
+            }
+            seen++;
+            if (seen == occurrence) {
+                start = idx;
+                break;
+            }
+            from = idx + Math.max(1, needle.length());
+        }
+        if (start < 0) {
+            return new RunSelection(null, 0, 0,
+                    error("Could not find target_text occurrence in shape text"));
+        }
+        int end = start + targetText.length();
+        String before = sourceText.substring(0, start);
+        String target = sourceText.substring(start, end);
+        String after = sourceText.substring(end);
+
+        textShape.clearText();
+        var paragraph = textShape.addNewTextParagraph();
+        if (!before.isEmpty()) {
+            paragraph.addNewTextRun().setText(before);
+        }
+        XSLFTextRun styledRun = paragraph.addNewTextRun();
+        styledRun.setText(target);
+        if (!after.isEmpty()) {
+            paragraph.addNewTextRun().setText(after);
+        }
+        return new RunSelection(styledRun, start, end, null);
     }
 
     public ToolCallResult replaceImage(JsonNode args) throws java.io.IOException {
@@ -710,169 +903,137 @@ public final class PptAdvancedMutationOperations {
         return success(payload);
     }
 
-    public ToolCallResult setTextRunStyle(JsonNode args) {
+    public ToolCallResult getTable(JsonNode args) {
         PptDocumentSession session = requireSession(args);
         if (session == null) {
             return error("Unknown document_id");
         }
-
         int slideIndex = args.path("slide_index").asInt(-1);
         int shapeIndex = args.path("shape_index").asInt(-1);
-        String targetText = requiredString(args, "target_text");
-        int occurrence = args.path("occurrence").asInt(1);
-        boolean caseSensitive = args.path("case_sensitive").asBoolean(true);
-        if (occurrence < 1) {
-            return error("occurrence must be >= 1");
+        XSLFTable table = resolveTableShape(session.getSlideShow(), slideIndex, shapeIndex);
+        if (table == null) {
+            return error("shape_index does not point to a table on the selected slide");
         }
 
-        XSLFSlide slide = getSlideByIndex(session.getSlideShow(), slideIndex);
-        if (slide == null) {
-            return error("Invalid slide_index: " + slideIndex);
-        }
-        if (shapeIndex < 0 || shapeIndex >= slide.getShapes().size()) {
-            return error("Invalid shape_index: " + shapeIndex);
-        }
+        int rows = table.getNumberOfRows();
+        int cols = table.getNumberOfColumns();
 
-        XSLFShape shape = slide.getShapes().get(shapeIndex);
-        if (!(shape instanceof XSLFTextShape textShape)) {
-            return error("shape_index does not point to a text-capable shape");
-        }
-
-        String sourceText = textShape.getText();
-        if (sourceText == null || sourceText.isBlank()) {
-            return error("Selected text shape is empty");
-        }
-
-        String haystack = caseSensitive ? sourceText : sourceText.toLowerCase(Locale.ROOT);
-        String needle = caseSensitive ? targetText : targetText.toLowerCase(Locale.ROOT);
-
-        int start = -1;
-        int from = 0;
-        int seen = 0;
-        while (true) {
-            int idx = haystack.indexOf(needle, from);
-            if (idx < 0) {
-                break;
-            }
-            seen++;
-            if (seen == occurrence) {
-                start = idx;
-                break;
-            }
-            from = idx + Math.max(1, needle.length());
-        }
-
-        if (start < 0) {
-            return error("Could not find target_text occurrence in shape text");
-        }
-
-        int end = start + targetText.length();
-        String before = sourceText.substring(0, start);
-        String target = sourceText.substring(start, end);
-        String after = sourceText.substring(end);
-
-        textShape.clearText();
-        var paragraph = textShape.addNewTextParagraph();
-        if (!before.isEmpty()) {
-            paragraph.addNewTextRun().setText(before);
-        }
-        XSLFTextRun styledRun = paragraph.addNewTextRun();
-        styledRun.setText(target);
-        if (!after.isEmpty()) {
-            paragraph.addNewTextRun().setText(after);
-        }
-
-        if (args.has("bold")) {
-            styledRun.setBold(args.path("bold").asBoolean());
-        }
-        if (args.has("italic")) {
-            styledRun.setItalic(args.path("italic").asBoolean());
-        }
-        if (args.has("underline")) {
-            styledRun.setUnderlined(args.path("underline").asBoolean());
-        }
-        if (args.has("font_size")) {
-            styledRun.setFontSize(args.path("font_size").asDouble());
-        }
-        if (args.has("font_color")) {
-            styledRun.setFontColor(parseColorHex(args.path("font_color").asText("")));
-        }
-
-        session.touch(true);
         ObjectNode payload = okPayload();
         payload.put("document_id", session.getId());
         payload.put("slide_index", slideIndex);
         payload.put("shape_index", shapeIndex);
-        payload.put("start", start);
-        payload.put("end", end);
-        payload.put("message", "Text run style updated");
+        payload.put("rows", rows);
+        payload.put("cols", cols);
+
+        ArrayNode cellRows = payload.putArray("cells");
+        for (int r = 0; r < rows; r++) {
+            ArrayNode row = cellRows.addArray();
+            XSLFTableRow tableRow = table.getRows().get(r);
+            for (int c = 0; c < cols && c < tableRow.getCells().size(); c++) {
+                XSLFTableCell cell = tableRow.getCells().get(c);
+                ObjectNode cellNode = row.addObject();
+                cellNode.put("text", cell.getText() == null ? "" : cell.getText());
+                // row_span / col_span / is_merge_anchor surface once merge_cells ships in
+                // Phase 3. Phase 1 always reports a 1x1 unmerged cell.
+                cellNode.put("row_span", 1);
+                cellNode.put("col_span", 1);
+                cellNode.put("is_merge_anchor", false);
+            }
+        }
+
+        ArrayNode rowHeights = payload.putArray("row_heights");
+        for (int r = 0; r < rows; r++) {
+            rowHeights.add(table.getRows().get(r).getHeight());
+        }
+        ArrayNode colWidths = payload.putArray("col_widths");
+        for (int c = 0; c < cols; c++) {
+            colWidths.add(table.getColumnWidth(c));
+        }
+        // Phase 1 has no merge support, so merged_regions is always empty. Phase 3 will populate.
+        payload.putArray("merged_regions");
         return success(payload);
     }
 
-    public ToolCallResult setListFormatting(JsonNode args) {
-        PptDocumentSession session = requireSession(args);
-        if (session == null) {
-            return error("Unknown document_id");
+    public ToolCallResult editTable(JsonNode args) {
+        String operation = args.path("operation").asText("").toLowerCase(Locale.ROOT);
+        if (operation.isBlank()) {
+            return error("VALIDATION_ERROR", "operation is required", false);
         }
-
-        int slideIndex = args.path("slide_index").asInt(-1);
-        int shapeIndex = args.path("shape_index").asInt(-1);
-        XSLFSlide slide = getSlideByIndex(session.getSlideShow(), slideIndex);
-        if (slide == null) {
-            return error("Invalid slide_index: " + slideIndex);
+        switch (operation) {
+            case "set_cell":
+                return editTableSetCell(args);
+            case "insert_row":
+            case "delete_row":
+                return editTableRowStructure(args, operation);
+            case "insert_col":
+            case "delete_col":
+                return editTableColStructure(args, operation);
+            case "set_row_height":
+                return setTableRowHeight(args);
+            case "set_col_width":
+                return setTableColumnWidth(args);
+            case "set_header_style":
+                return setTableHeaderStyle(args);
+            case "merge_cells":
+            case "set_cell_border":
+                return error("FEATURE_NOT_IMPLEMENTED",
+                        "operation=" + operation + " lands in Phase 3.", false);
+            default:
+                return error("VALIDATION_ERROR",
+                        "operation must be one of: set_cell, insert_row, delete_row, insert_col, delete_col, set_row_height, set_col_width, set_header_style, merge_cells, set_cell_border",
+                        false);
         }
-        if (shapeIndex < 0 || shapeIndex >= slide.getShapes().size()) {
-            return error("Invalid shape_index: " + shapeIndex);
+    }
+
+    private ToolCallResult editTableSetCell(JsonNode args) {
+        // Re-shape into the schema setTableCell expects.
+        ObjectNode mapped = mapper.createObjectNode();
+        copyField(args, mapped, "document_id");
+        copyField(args, mapped, "slide_index");
+        copyField(args, mapped, "shape_index");
+        renameField(args, mapped, "row", "row_index");
+        renameField(args, mapped, "col", "col_index");
+        copyField(args, mapped, "text");
+        return setTableCell(mapped);
+    }
+
+    private ToolCallResult editTableRowStructure(JsonNode args, String operation) {
+        // modify_table_structure expects "insert_row"/"delete_row" + index, which matches.
+        ObjectNode mapped = mapper.createObjectNode();
+        copyField(args, mapped, "document_id");
+        copyField(args, mapped, "slide_index");
+        copyField(args, mapped, "shape_index");
+        mapped.put("operation", operation);
+        if (args.has("index")) {
+            mapped.put("index", args.path("index").asInt());
         }
+        return modifyTableStructure(mapped);
+    }
 
-        XSLFShape shape = slide.getShapes().get(shapeIndex);
-        if (!(shape instanceof XSLFTextShape textShape)) {
-            return error("shape_index does not point to a text-capable shape");
+    private ToolCallResult editTableColStructure(JsonNode args, String operation) {
+        ObjectNode mapped = mapper.createObjectNode();
+        copyField(args, mapped, "document_id");
+        copyField(args, mapped, "slide_index");
+        copyField(args, mapped, "shape_index");
+        // edit_table speaks in "insert_col"/"delete_col"; modify_table_structure uses the
+        // verbose forms "insert_column"/"delete_column".
+        mapped.put("operation", "insert_col".equals(operation) ? "insert_column" : "delete_column");
+        if (args.has("index")) {
+            mapped.put("index", args.path("index").asInt());
         }
+        return modifyTableStructure(mapped);
+    }
 
-        boolean setBullet = args.has("bullet_enabled");
-        boolean bulletEnabled = args.path("bullet_enabled").asBoolean(false);
-        boolean numbered = args.path("numbered").asBoolean(false);
-        String bulletChar = args.path("bullet_character").asText("");
-        Integer bulletLevel = args.has("bullet_level") ? args.path("bullet_level").asInt() : null;
-        Double lineSpacing = args.has("line_spacing") ? args.path("line_spacing").asDouble() : null;
-        Double spaceBefore = args.has("space_before") ? args.path("space_before").asDouble() : null;
-        Double spaceAfter = args.has("space_after") ? args.path("space_after").asDouble() : null;
-
-        for (var paragraph : textShape.getTextParagraphs()) {
-            if (numbered) {
-                paragraph.setBulletAutoNumber(AutoNumberingScheme.arabicPeriod, 1);
-            } else if (setBullet) {
-                paragraph.setBullet(bulletEnabled);
-            }
-
-            if (!bulletChar.isBlank()) {
-                paragraph.setBulletCharacter(bulletChar);
-            }
-
-            if (bulletLevel != null) {
-                double margin = Math.max(0, bulletLevel) * 18.0;
-                paragraph.setLeftMargin(margin);
-                paragraph.setIndent(Math.max(0, margin - 12.0));
-            }
-            if (lineSpacing != null) {
-                paragraph.setLineSpacing(lineSpacing);
-            }
-            if (spaceBefore != null) {
-                paragraph.setSpaceBefore(spaceBefore);
-            }
-            if (spaceAfter != null) {
-                paragraph.setSpaceAfter(spaceAfter);
-            }
+    private void copyField(JsonNode src, ObjectNode dst, String name) {
+        if (src.has(name)) {
+            dst.set(name, src.get(name));
         }
+    }
 
-        session.touch(true);
-        ObjectNode payload = okPayload();
-        payload.put("document_id", session.getId());
-        payload.put("slide_index", slideIndex);
-        payload.put("shape_index", shapeIndex);
-        payload.put("message", "List formatting updated");
-        return success(payload);
+    private void renameField(JsonNode src, ObjectNode dst, String from, String to) {
+        if (src.has(from)) {
+            dst.set(to, src.get(from));
+        }
     }
 
     public ToolCallResult moveShape(JsonNode args) {
@@ -1073,66 +1234,6 @@ public final class PptAdvancedMutationOperations {
         payload.put("slide_index", slideIndex);
         payload.put("color", requiredString(args, "color"));
         payload.put("message", "Slide background updated");
-        return success(payload);
-    }
-
-    public ToolCallResult renderAllSlidesImage(JsonNode args) throws java.io.IOException {
-        PptDocumentSession session = requireSession(args);
-        if (session == null) {
-            return error("Unknown document_id");
-        }
-
-        Path outputDir = resolvePath(requiredString(args, "output_dir"), true);
-        Files.createDirectories(outputDir);
-
-        String requestedFormat = args.path("format").asText("png").toLowerCase(Locale.ROOT);
-        String format = "jpeg".equals(requestedFormat) ? "jpg" : requestedFormat;
-        if (!("png".equals(format) || "jpg".equals(format))) {
-            return error("format must be one of: png, jpg, jpeg");
-        }
-
-        String pattern = args.path("file_name_pattern").asText("slide-%03d");
-        Dimension pageSize = session.getSlideShow().getPageSize();
-        int width = args.path("width").asInt(pageSize.width);
-        int height = args.path("height").asInt(pageSize.height);
-        if (width < 1 || height < 1) {
-            return error("width and height must be >= 1");
-        }
-
-        ArrayNode files = mapper.createArrayNode();
-        List<XSLFSlide> slides = session.getSlideShow().getSlides();
-        for (int i = 0; i < slides.size(); i++) {
-            XSLFSlide slide = slides.get(i);
-
-            String fileName = String.format(Locale.ROOT, pattern, i + 1);
-            if (!fileName.toLowerCase(Locale.ROOT).endsWith("." + format)) {
-                fileName = fileName + "." + format;
-            }
-            Path outputPath = outputDir.resolve(fileName).toAbsolutePath().normalize();
-            if (allowedRoot != null && !outputPath.startsWith(allowedRoot)) {
-                return error("Output path is outside allowed root: " + outputPath);
-            }
-
-            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-            var graphics = image.createGraphics();
-            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            graphics.setColor(Color.WHITE);
-            graphics.fillRect(0, 0, width, height);
-            graphics.scale(width / (double) pageSize.width, height / (double) pageSize.height);
-            slide.draw(graphics);
-            graphics.dispose();
-
-            javax.imageio.ImageIO.write(image, format, outputPath.toFile());
-            files.add(outputPath.toString());
-        }
-
-        ObjectNode payload = okPayload();
-        payload.put("document_id", session.getId());
-        payload.put("slide_count", slides.size());
-        payload.put("format", format);
-        payload.set("files", files);
-        payload.put("message", "All slides rendered as images");
         return success(payload);
     }
 
@@ -1352,63 +1453,6 @@ public final class PptAdvancedMutationOperations {
         payload.put("slide_index", slideIndex);
         payload.put("layout_type", layoutType);
         payload.put("message", "Slide layout updated");
-        return success(payload);
-    }
-
-    public ToolCallResult setTextFormatting(JsonNode args) {
-        PptDocumentSession session = requireSession(args);
-        if (session == null) {
-            return error("Unknown document_id");
-        }
-
-        int slideIndex = args.path("slide_index").asInt(-1);
-        int shapeIndex = args.path("shape_index").asInt(-1);
-        XSLFSlide slide = getSlideByIndex(session.getSlideShow(), slideIndex);
-        if (slide == null) {
-            return error("Invalid slide_index: " + slideIndex);
-        }
-        if (shapeIndex < 0 || shapeIndex >= slide.getShapes().size()) {
-            return error("Invalid shape_index: " + shapeIndex);
-        }
-
-        XSLFShape shape = slide.getShapes().get(shapeIndex);
-        if (!(shape instanceof XSLFTextShape textShape)) {
-            return error("shape_index does not point to a text-capable shape");
-        }
-
-        if (textShape.getTextParagraphs().isEmpty()) {
-            textShape.addNewTextParagraph();
-        }
-
-        TextParagraph.TextAlign align = null;
-        if (args.has("text_align")) {
-            align = parseTextAlign(args.path("text_align").asText(""));
-        }
-        Double lineSpacing = args.has("line_spacing") ? args.path("line_spacing").asDouble() : null;
-        Double leftMargin = args.has("left_margin") ? args.path("left_margin").asDouble() : null;
-        Double indent = args.has("indent") ? args.path("indent").asDouble() : null;
-
-        for (var paragraph : textShape.getTextParagraphs()) {
-            if (align != null) {
-                paragraph.setTextAlign(align);
-            }
-            if (lineSpacing != null) {
-                paragraph.setLineSpacing(lineSpacing);
-            }
-            if (leftMargin != null) {
-                paragraph.setLeftMargin(leftMargin);
-            }
-            if (indent != null) {
-                paragraph.setIndent(indent);
-            }
-        }
-
-        session.touch(true);
-        ObjectNode payload = okPayload();
-        payload.put("document_id", session.getId());
-        payload.put("slide_index", slideIndex);
-        payload.put("shape_index", shapeIndex);
-        payload.put("message", "Text formatting updated");
         return success(payload);
     }
 
@@ -1637,5 +1681,9 @@ public final class PptAdvancedMutationOperations {
 
     private ToolCallResult error(String message) {
         return responseFactory.error(message);
+    }
+
+    private ToolCallResult error(String code, String message, boolean retriable) {
+        return responseFactory.error(code, message, retriable);
     }
 }

@@ -306,22 +306,22 @@ final class PptToolDefinitions {
                                     "additionalProperties": false
                                 }
                                 """),
-                tool(mapper, "ppt.get_table_cell", "Get text from a table cell.",
+                tool(mapper, "ppt.get_table",
+                        "Return the full structure and text of a table shape.",
                         """
                                 {
                                     "type": "object",
                                     "properties": {
                                         "document_id": {"type": "string"},
                                         "slide_index": {"type": "integer", "minimum": 0},
-                                        "shape_index": {"type": "integer", "minimum": 0},
-                                        "row_index": {"type": "integer", "minimum": 0},
-                                        "col_index": {"type": "integer", "minimum": 0}
+                                        "shape_index": {"type": "integer", "minimum": 0}
                                     },
-                                    "required": ["document_id", "slide_index", "shape_index", "row_index", "col_index"],
+                                    "required": ["document_id", "slide_index", "shape_index"],
                                     "additionalProperties": false
                                 }
                                 """),
-                tool(mapper, "ppt.set_table_cell", "Set text in a table cell.",
+                tool(mapper, "ppt.edit_table",
+                        "Edit a table via a single operation. Implemented: set_cell, insert_row, delete_row, insert_col, delete_col, set_row_height, set_col_width, set_header_style. Reserved for Phase 3: merge_cells, set_cell_border.",
                         """
                                 {
                                     "type": "object",
@@ -329,30 +329,44 @@ final class PptToolDefinitions {
                                         "document_id": {"type": "string"},
                                         "slide_index": {"type": "integer", "minimum": 0},
                                         "shape_index": {"type": "integer", "minimum": 0},
+                                        "operation": {
+                                            "type": "string",
+                                            "enum": [
+                                                "set_cell", "insert_row", "delete_row",
+                                                "insert_col", "delete_col",
+                                                "set_row_height", "set_col_width",
+                                                "set_header_style",
+                                                "merge_cells", "set_cell_border"
+                                            ]
+                                        },
+                                        "row": {"type": "integer", "minimum": 0},
+                                        "col": {"type": "integer", "minimum": 0},
+                                        "text": {"type": "string"},
+                                        "index": {"type": "integer", "minimum": 0},
                                         "row_index": {"type": "integer", "minimum": 0},
                                         "col_index": {"type": "integer", "minimum": 0},
-                                        "text": {"type": "string"}
-                                    },
-                                    "required": ["document_id", "slide_index", "shape_index", "row_index", "col_index", "text"],
-                                    "additionalProperties": false
-                                }
-                                """),
-                tool(mapper, "ppt.modify_table_structure", "Insert/delete rows or columns in a table.",
-                        """
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "document_id": {"type": "string"},
-                                        "slide_index": {"type": "integer", "minimum": 0},
-                                        "shape_index": {"type": "integer", "minimum": 0},
-                                        "operation": {"type": "string", "enum": ["insert_row", "delete_row", "insert_column", "delete_column"]},
-                                        "index": {"type": "integer", "minimum": 0}
+                                        "height": {"type": "number", "minimum": 1},
+                                        "width": {"type": "number", "minimum": 1},
+                                        "fill_color": {"type": "string"},
+                                        "font_color": {"type": "string"},
+                                        "bold": {"type": "boolean"},
+                                        "start_row": {"type": "integer", "minimum": 0},
+                                        "start_col": {"type": "integer", "minimum": 0},
+                                        "end_row": {"type": "integer", "minimum": 0},
+                                        "end_col": {"type": "integer", "minimum": 0},
+                                        "sides": {
+                                            "type": "array",
+                                            "items": {"type": "string", "enum": ["top", "bottom", "left", "right", "all"]}
+                                        },
+                                        "color": {"type": "string"},
+                                        "dash_style": {"type": "string", "enum": ["solid", "dash", "dot", "dashdot"]}
                                     },
                                     "required": ["document_id", "slide_index", "shape_index", "operation"],
                                     "additionalProperties": false
                                 }
                                 """),
-                tool(mapper, "ppt.set_table_row_height", "Set row height for one table row.",
+                tool(mapper, "ppt.set_text",
+                        "Unified text mutation. scope=shape|run|paragraph selects the target; run-style fields (bold/italic/underline/font_*) apply to the selected runs, paragraph-style fields (text_align/line_spacing/bullet_*) apply to the matching paragraphs. strikethrough, rotation, auto_fit accept the schema but implementation lands in Phase 3.",
                         """
                                 {
                                     "type": "object",
@@ -360,99 +374,30 @@ final class PptToolDefinitions {
                                         "document_id": {"type": "string"},
                                         "slide_index": {"type": "integer", "minimum": 0},
                                         "shape_index": {"type": "integer", "minimum": 0},
-                                        "row_index": {"type": "integer", "minimum": 0},
-                                        "height": {"type": "number", "minimum": 1}
-                                    },
-                                    "required": ["document_id", "slide_index", "shape_index", "row_index", "height"],
-                                    "additionalProperties": false
-                                }
-                                """),
-                tool(mapper, "ppt.set_table_column_width", "Set width for one table column.",
-                        """
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "document_id": {"type": "string"},
-                                        "slide_index": {"type": "integer", "minimum": 0},
-                                        "shape_index": {"type": "integer", "minimum": 0},
-                                        "col_index": {"type": "integer", "minimum": 0},
-                                        "width": {"type": "number", "minimum": 1}
-                                    },
-                                    "required": ["document_id", "slide_index", "shape_index", "col_index", "width"],
-                                    "additionalProperties": false
-                                }
-                                """),
-                tool(mapper, "ppt.set_table_header_style", "Apply style to a table header row.",
-                        """
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "document_id": {"type": "string"},
-                                        "slide_index": {"type": "integer", "minimum": 0},
-                                        "shape_index": {"type": "integer", "minimum": 0},
-                                        "row_index": {"type": "integer", "minimum": 0, "default": 0},
-                                        "fill_color": {"type": "string"},
-                                        "font_color": {"type": "string"},
-                                        "bold": {"type": "boolean", "default": true}
-                                    },
-                                    "required": ["document_id", "slide_index", "shape_index"],
-                                    "additionalProperties": false
-                                }
-                                """),
-                tool(mapper, "ppt.set_text_style", "Apply style updates to text in a shape.",
-                        """
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "document_id": {"type": "string"},
-                                        "slide_index": {"type": "integer", "minimum": 0},
-                                        "shape_index": {"type": "integer", "minimum": 0},
-                                        "bold": {"type": "boolean"},
-                                        "italic": {"type": "boolean"},
-                                        "underline": {"type": "boolean"},
-                                        "font_size": {"type": "number", "minimum": 1},
-                                        "font_color": {"type": "string"}
-                                    },
-                                    "required": ["document_id", "slide_index", "shape_index"],
-                                    "additionalProperties": false
-                                }
-                                """),
-                tool(mapper, "ppt.set_text_run_style", "Apply style to one matched text segment by creating rich text runs.",
-                        """
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "document_id": {"type": "string"},
-                                        "slide_index": {"type": "integer", "minimum": 0},
-                                        "shape_index": {"type": "integer", "minimum": 0},
+                                        "scope": {"type": "string", "enum": ["shape", "run", "paragraph"], "default": "shape"},
                                         "target_text": {"type": "string"},
                                         "occurrence": {"type": "integer", "minimum": 1, "default": 1},
                                         "case_sensitive": {"type": "boolean", "default": true},
+                                        "paragraph_index": {"type": "integer", "minimum": 0},
                                         "bold": {"type": "boolean"},
                                         "italic": {"type": "boolean"},
                                         "underline": {"type": "boolean"},
+                                        "strikethrough": {"type": "boolean"},
                                         "font_size": {"type": "number", "minimum": 1},
-                                        "font_color": {"type": "string"}
-                                    },
-                                    "required": ["document_id", "slide_index", "shape_index", "target_text"],
-                                    "additionalProperties": false
-                                }
-                                """),
-                tool(mapper, "ppt.set_list_formatting", "Apply list and spacing semantics to all paragraphs in a text shape.",
-                        """
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "document_id": {"type": "string"},
-                                        "slide_index": {"type": "integer", "minimum": 0},
-                                        "shape_index": {"type": "integer", "minimum": 0},
+                                        "font_color": {"type": "string"},
+                                        "font_family": {"type": "string"},
+                                        "rotation": {"type": "number"},
+                                        "auto_fit": {"type": "string", "enum": ["none", "normal", "shrink"]},
+                                        "text_align": {"type": "string", "enum": ["left", "center", "right", "justify"]},
+                                        "line_spacing": {"type": "number", "minimum": 0},
+                                        "space_before": {"type": "number"},
+                                        "space_after": {"type": "number"},
+                                        "left_margin": {"type": "number"},
+                                        "indent": {"type": "number"},
                                         "bullet_enabled": {"type": "boolean"},
                                         "numbered": {"type": "boolean"},
                                         "bullet_character": {"type": "string"},
-                                        "bullet_level": {"type": "integer", "minimum": 0},
-                                        "line_spacing": {"type": "number", "minimum": 0},
-                                        "space_before": {"type": "number"},
-                                        "space_after": {"type": "number"}
+                                        "bullet_level": {"type": "integer", "minimum": 0}
                                     },
                                     "required": ["document_id", "slide_index", "shape_index"],
                                     "additionalProperties": false
@@ -599,20 +544,26 @@ final class PptToolDefinitions {
 
 
 
-                tool(mapper, "ppt.save_document", "Write an open in-memory document to disk.",
+                tool(mapper, "ppt.export_document",
+                        "Export an open in-memory document to disk. format=pptx|pdf are implemented; html|png_batch|jpg_batch|svg_batch|outline_text are reserved for Phase 2.",
                         """
                                 {
                                   "type": "object",
                                   "properties": {
                                     "document_id": {"type": "string"},
                                     "output_path": {"type": "string"},
-                                                                        "format": {"type": "string", "enum": ["pptx", "pdf"], "default": "pptx"}
+                                    "format": {
+                                      "type": "string",
+                                      "enum": ["pptx", "pdf", "html", "png_batch", "jpg_batch", "svg_batch", "outline_text"],
+                                      "default": "pptx"
+                                    }
                                   },
                                   "required": ["document_id"],
                                   "additionalProperties": false
                                 }
                                 """),
-                tool(mapper, "ppt.render_slide_image", "Render a slide to an image file (PNG/JPG).",
+                tool(mapper, "ppt.render_slide",
+                        "Render one slide to an image. format=png|jpg|svg (default png). fidelity=low|high; high fidelity lands in Phase 2.",
                         """
                                 {
                                   "type": "object",
@@ -620,6 +571,8 @@ final class PptToolDefinitions {
                                     "document_id": {"type": "string"},
                                     "slide_index": {"type": "integer", "minimum": 0},
                                     "output_path": {"type": "string"},
+                                    "format": {"type": "string", "enum": ["png", "jpg", "svg"], "default": "png"},
+                                    "fidelity": {"type": "string", "enum": ["low", "high"], "default": "low"},
                                     "width": {"type": "integer", "minimum": 1},
                                     "height": {"type": "integer", "minimum": 1}
                                   },
@@ -627,37 +580,24 @@ final class PptToolDefinitions {
                                   "additionalProperties": false
                                 }
                                 """),
-                                tool(mapper, "ppt.render_all_slides_image", "Render all slides to PNG/JPG files in an output directory.",
-                                                """
-                                                                {
-                                                                    "type": "object",
-                                                                    "properties": {
-                                                                        "document_id": {"type": "string"},
-                                                                        "output_dir": {"type": "string"},
-                                                                        "format": {"type": "string", "enum": ["png", "jpg", "jpeg"], "default": "png"},
-                                                                        "file_name_pattern": {"type": "string", "default": "slide-%03d"},
-                                                                        "width": {"type": "integer", "minimum": 1},
-                                                                        "height": {"type": "integer", "minimum": 1}
-                                                                    },
-                                                                    "required": ["document_id", "output_dir"],
-                                                                    "additionalProperties": false
-                                                                }
-                                                                """),
-                tool(mapper, "ppt.render_slide_svg", "Render a slide to an SVG file.",
+                tool(mapper, "ppt.render_all_slides",
+                        "Render every slide to an image file in output_dir. format=png|jpg|svg (default png). fidelity=low|high; high fidelity lands in Phase 2.",
                         """
                                 {
                                   "type": "object",
                                   "properties": {
                                     "document_id": {"type": "string"},
-                                    "slide_index": {"type": "integer", "minimum": 0},
-                                    "output_path": {"type": "string"},
+                                    "output_dir": {"type": "string"},
+                                    "format": {"type": "string", "enum": ["png", "jpg", "svg"], "default": "png"},
+                                    "fidelity": {"type": "string", "enum": ["low", "high"], "default": "low"},
+                                    "file_name_pattern": {"type": "string", "default": "slide-%03d"},
                                     "width": {"type": "integer", "minimum": 1},
                                     "height": {"type": "integer", "minimum": 1}
                                   },
-                                  "required": ["document_id", "slide_index", "output_path"],
+                                  "required": ["document_id", "output_dir"],
                                   "additionalProperties": false
                                 }
-                                                                """),
+                                """),
                 tool(mapper, "ppt.find_text", "Find text occurrences across all slides in an open presentation.",
                         """
                                 {
@@ -795,23 +735,6 @@ final class PptToolDefinitions {
                                     "additionalProperties": false
                                 }
                                 """),
-                tool(mapper, "ppt.set_text_formatting", "Apply paragraph-level formatting to a text shape.",
-                        """
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "document_id": {"type": "string"},
-                                        "slide_index": {"type": "integer", "minimum": 0},
-                                        "shape_index": {"type": "integer", "minimum": 0},
-                                        "text_align": {"type": "string", "enum": ["left", "center", "right", "justify"]},
-                                        "line_spacing": {"type": "number", "minimum": 0},
-                                        "left_margin": {"type": "number"},
-                                        "indent": {"type": "number"}
-                                    },
-                                    "required": ["document_id", "slide_index", "shape_index"],
-                                    "additionalProperties": false
-                                }
-                                """),
                 tool(mapper, "ppt.set_shape_z_order", "Move a shape in z-order (front/back/forward/backward).",
                         """
                                 {
@@ -823,6 +746,15 @@ final class PptToolDefinitions {
                                         "position": {"type": "string", "enum": ["front", "back", "forward", "backward"]}
                                     },
                                     "required": ["document_id", "slide_index", "shape_index", "position"],
+                                    "additionalProperties": false
+                                }
+                                """),
+                tool(mapper, "ppt.capabilities",
+                        "Return server version, Apache POI / LibreOffice availability, supported input/export/render formats, installed fonts, feature flags, and safety limits.",
+                        """
+                                {
+                                    "type": "object",
+                                    "properties": {},
                                     "additionalProperties": false
                                 }
                                 """));

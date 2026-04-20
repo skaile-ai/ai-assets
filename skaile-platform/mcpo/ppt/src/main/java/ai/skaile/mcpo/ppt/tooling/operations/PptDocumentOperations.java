@@ -11,7 +11,7 @@ public final class PptDocumentOperations {
     private final ToolHandler getDocumentInfoHandler;
     private final ToolHandler listSlidesHandler;
     private final ToolHandler reorderSlidesHandler;
-    private final ToolHandler saveDocumentHandler;
+    private final ToolHandler exportDocumentHandler;
     private final ToolHandler generatePresentationHandler;
     private final ToolHandler mergePresentationsHandler;
     private final ToolHandler transactionBeginHandler;
@@ -25,7 +25,7 @@ public final class PptDocumentOperations {
             ToolHandler getDocumentInfoHandler,
             ToolHandler listSlidesHandler,
             ToolHandler reorderSlidesHandler,
-            ToolHandler saveDocumentHandler,
+            ToolHandler exportDocumentHandler,
             ToolHandler generatePresentationHandler,
             ToolHandler mergePresentationsHandler,
             ToolHandler transactionBeginHandler,
@@ -37,7 +37,7 @@ public final class PptDocumentOperations {
         this.getDocumentInfoHandler = getDocumentInfoHandler;
         this.listSlidesHandler = listSlidesHandler;
         this.reorderSlidesHandler = reorderSlidesHandler;
-        this.saveDocumentHandler = saveDocumentHandler;
+        this.exportDocumentHandler = exportDocumentHandler;
         this.generatePresentationHandler = generatePresentationHandler;
         this.mergePresentationsHandler = mergePresentationsHandler;
         this.transactionBeginHandler = transactionBeginHandler;
@@ -69,8 +69,8 @@ public final class PptDocumentOperations {
         return reorderSlidesHandler.handle(args);
     }
 
-    public ToolCallResult saveDocument(JsonNode args) throws Exception {
-        return saveDocumentHandler.handle(args);
+    public ToolCallResult exportDocument(JsonNode args) throws Exception {
+        return exportDocumentHandler.handle(args);
     }
 
     public ToolCallResult generatePresentation(JsonNode args) throws Exception {
