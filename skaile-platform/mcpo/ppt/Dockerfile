@@ -16,7 +16,12 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       libreoffice-core \
       libreoffice-impress \
-      fonts-dejavu-core \
+      fontconfig \
+      fonts-liberation \
+      fonts-noto \
+      fonts-noto-cjk \
+      fonts-noto-color-emoji \
+ && fc-cache -fv \
  && rm -rf /var/lib/apt/lists/*
 
 RUN useradd --uid 10001 --create-home --shell /sbin/nologin appuser

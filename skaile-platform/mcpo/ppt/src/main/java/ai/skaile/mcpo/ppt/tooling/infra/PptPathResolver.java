@@ -7,6 +7,9 @@ import java.util.Locale;
 import org.apache.poi.sl.usermodel.PictureData;
 
 public final class PptPathResolver {
+    /** Subdirectory under the allowed root used for short-lived temp files. */
+    public static final String SANDBOX_TMP_SUBDIR = ".mcpo-ppt/tmp";
+
     private final Path allowedRoot;
 
     public PptPathResolver(Path allowedRoot) {
@@ -15,6 +18,41 @@ public final class PptPathResolver {
 
     public Path allowedRoot() {
         return allowedRoot;
+    }
+
+    /**
+     * Creates a temporary file under {@code ${MCPO_ALLOWED_ROOT}/.mcpo-ppt/tmp/} when a sandbox
+     * root is configured, falling back to the system temp directory when it is not. Using the
+     * sandbox keeps exporter workspaces (e.g. LibreOffice PDF staging) inside the mount that the
+     * server is authorized to read and write.
+     */
+    public Path createSandboxTempFile(String prefix, String suffix) throws IOException {
+        if (allowedRoot == null) {
+            return Files.createTempFile(prefix, suffix);
+        }
+        Path tmpDir = allowedRoot.resolve(SANDBOX_TMP_SUBDIR);
+        Files.createDirectories(tmpDir);
+        return Files.createTempFile(tmpDir, prefix, suffix);
+    }
+
+    /** Removes the sandbox temp directory and everything under it. Best-effort. */
+    public void cleanSandboxTmpDir() throws IOException {
+        if (allowedRoot == null) {
+            return;
+        }
+        Path tmpDir = allowedRoot.resolve(SANDBOX_TMP_SUBDIR);
+        if (!Files.exists(tmpDir)) {
+            return;
+        }
+        try (var stream = Files.walk(tmpDir)) {
+            stream.sorted(java.util.Comparator.reverseOrder()).forEach(p -> {
+                try {
+                    Files.deleteIfExists(p);
+                } catch (IOException ignored) {
+                    // Leave behind rather than blocking shutdown.
+                }
+            });
+        }
     }
 
     public Path resolvePath(String rawPath, boolean forWrite) {

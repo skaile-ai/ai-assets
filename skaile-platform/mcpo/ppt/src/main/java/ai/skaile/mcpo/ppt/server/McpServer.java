@@ -3,6 +3,7 @@ package ai.skaile.mcpo.ppt.server;
 import ai.skaile.mcpo.ppt.tooling.PptToolService;
 import ai.skaile.mcpo.ppt.tooling.contracts.ToolCallResult;
 import ai.skaile.mcpo.ppt.tooling.contracts.ToolDefinition;
+import ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,14 +11,19 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class McpServer {
+    private static final Logger LOG = LoggerFactory.getLogger(McpServer.class);
     private static final String SERVER_NAME = "skaile-ppt-poi-mcp";
     private static final String SERVER_VERSION = "0.1.0";
     private final ObjectMapper mapper = new ObjectMapper();
     private final PptToolService toolService = new PptToolService();
 
     public void run() {
+        SofficeAvailability soffice = SofficeAvailability.get();
+        LOG.info("soffice probe: available={} version={}", soffice.available(), soffice.version());
         try {
             while (true) {
                 byte[] raw = JsonRpcIO.readMessage(System.in);

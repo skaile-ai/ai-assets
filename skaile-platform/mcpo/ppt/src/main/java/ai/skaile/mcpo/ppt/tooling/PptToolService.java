@@ -6,6 +6,7 @@ import ai.skaile.mcpo.ppt.tooling.contracts.ToolCallResult;
 import ai.skaile.mcpo.ppt.tooling.contracts.ToolDefinition;
 import ai.skaile.mcpo.ppt.tooling.contracts.ToolHandler;
 import ai.skaile.mcpo.ppt.tooling.infra.PptPathResolver;
+import ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability;
 import ai.skaile.mcpo.ppt.tooling.infra.ToolArgumentValidator;
 import ai.skaile.mcpo.ppt.tooling.infra.ToolResponseFactory;
 import ai.skaile.mcpo.ppt.tooling.operations.PptDocumentOperations;
@@ -23,11 +24,13 @@ import java.awt.Dimension;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.StandardCopyOption;
@@ -43,6 +46,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.poi.sl.usermodel.PictureData;
@@ -57,10 +61,13 @@ import org.apache.poi.xslf.usermodel.XSLFTable;
 import org.apache.poi.xslf.usermodel.XSLFTableRow;
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 public final class PptToolService {
+    private static final Logger LOG = LoggerFactory.getLogger(PptToolService.class);
     private static final String SVG_NS = "http://www.w3.org/2000/svg";
     private static final int DEFAULT_MAX_OPEN_DOCS = 100;
     private static final long SOFFICE_TIMEOUT_SECONDS = 90;
@@ -156,7 +163,13 @@ public final class PptToolService {
     }
 
     public int closeAllSessions() {
-        return store.closeAll();
+        int closed = store.closeAll();
+        try {
+            pathResolver.cleanSandboxTmpDir();
+        } catch (IOException ex) {
+            LOG.warn("Failed to clean sandbox tmp dir on shutdown: {}", ex.toString(), ex);
+        }
+        return closed;
     }
 
     public ToolCallResult call(String name, JsonNode arguments) {
@@ -171,11 +184,38 @@ public final class PptToolService {
             if (handler == null) {
                 return error("Unknown tool: " + name);
             }
-            return handler.handle(safeArguments);
+            return invokeWithSessionLock(safeArguments, handler);
         } catch (IllegalArgumentException e) {
             return error("VALIDATION_ERROR", e.getMessage(), false);
         } catch (Exception e) {
             return error("TOOL_EXECUTION_ERROR", "Tool execution failed: " + e.getMessage(), false);
+        }
+    }
+
+    /**
+     * POI's {@code XMLSlideShow} DOM is not thread-safe even for read-only traversal, so every
+     * tool invocation that targets an existing session must serialize against that session's
+     * lock. Tools without a {@code document_id} argument (document creation, templating, etc.)
+     * bypass the lock — they either create a new session (already serialized inside the store)
+     * or touch only process-wide template state.
+     */
+    private ToolCallResult invokeWithSessionLock(JsonNode arguments, ToolHandler handler)
+            throws Exception {
+        JsonNode idNode = arguments.path("document_id");
+        if (!idNode.isTextual() || idNode.asText().isBlank()) {
+            return handler.handle(arguments);
+        }
+        Optional<PptDocumentSession> maybe = store.get(idNode.asText());
+        if (maybe.isEmpty()) {
+            // Let the handler surface the "unknown document_id" error in its own format.
+            return handler.handle(arguments);
+        }
+        ReentrantLock lock = maybe.get().getLock();
+        lock.lock();
+        try {
+            return handler.handle(arguments);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -1073,7 +1113,13 @@ public final class PptToolService {
             session.setSourcePath(outputPath);
             session.setDirty(false);
         } else {
-            Path tempPptx = Files.createTempFile("mcpo-export-", ".pptx");
+            SofficeAvailability soffice = SofficeAvailability.get();
+            if (!soffice.available()) {
+                return error("SOFFICE_UNAVAILABLE",
+                        "LibreOffice (soffice) is not available on this host: " + soffice.error(),
+                        false);
+            }
+            Path tempPptx = pathResolver.createSandboxTempFile("mcpo-export-", ".pptx");
             try {
                 try (FileOutputStream out = new FileOutputStream(tempPptx.toFile())) {
                     session.getSlideShow().write(out);
@@ -1558,13 +1604,18 @@ public final class PptToolService {
             }
             Path template = Path.of(value).toAbsolutePath().normalize();
             if (!Files.exists(template)) {
+                LOG.warn("Default template config at {} points to missing file {}",
+                        defaultTemplateConfigPath, template);
                 return null;
             }
             if (allowedRoot != null && !template.startsWith(allowedRoot)) {
+                LOG.warn("Default template {} lies outside allowed root {}", template, allowedRoot);
                 return null;
             }
             return template;
-        } catch (Exception ignored) {
+        } catch (Exception ex) {
+            LOG.warn("Failed to load default template config at {}: {}",
+                    defaultTemplateConfigPath, ex.toString(), ex);
             return null;
         }
     }
@@ -1627,25 +1678,64 @@ public final class PptToolService {
                         "--outdir",
                         outputDir.toString(),
                         inputPptx.toString()));
+        // Capture both streams so stderr is surfaced on failure instead of being discarded.
         processBuilder.redirectErrorStream(true);
-        processBuilder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
 
         Process process = processBuilder.start();
+
+        // Drain combined stdout+stderr concurrently so the child never blocks on a full pipe
+        // buffer, and so we can include the tail in an error message if the conversion fails.
+        StringBuilder capturedOutput = new StringBuilder();
+        Thread drain = new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    synchronized (capturedOutput) {
+                        if (capturedOutput.length() < 8192) {
+                            if (capturedOutput.length() > 0) {
+                                capturedOutput.append('\n');
+                            }
+                            capturedOutput.append(line);
+                        }
+                    }
+                }
+            } catch (IOException ignored) {
+                // Process exit races with stream close; ignore.
+            }
+        }, "soffice-output-drain");
+        drain.setDaemon(true);
+        drain.start();
+
         boolean finished;
         try {
             finished = process.waitFor(SOFFICE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            process.destroyForcibly();
             throw new IOException("PDF export interrupted", e);
         }
 
         if (!finished) {
             process.destroyForcibly();
-            throw new IOException("PDF export timed out waiting for LibreOffice");
+            throw new IOException("PDF export timed out waiting for LibreOffice after "
+                    + SOFFICE_TIMEOUT_SECONDS + "s");
+        }
+
+        try {
+            drain.join(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
 
         if (process.exitValue() != 0) {
-            throw new IOException("LibreOffice PDF export failed with exit code " + process.exitValue());
+            String output;
+            synchronized (capturedOutput) {
+                output = capturedOutput.toString().strip();
+            }
+            throw new IOException("LibreOffice PDF export failed with exit code "
+                    + process.exitValue()
+                    + (output.isEmpty() ? "" : ": " + output));
         }
 
         String baseName = inputPptx.getFileName().toString();

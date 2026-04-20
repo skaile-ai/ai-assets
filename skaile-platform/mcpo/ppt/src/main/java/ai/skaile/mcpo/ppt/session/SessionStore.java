@@ -7,8 +7,11 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class SessionStore {
+    private static final Logger LOG = LoggerFactory.getLogger(SessionStore.class);
     private final Map<String, PptDocumentSession> sessions = new ConcurrentHashMap<>();
 
     public PptDocumentSession create(XMLSlideShow show) {
@@ -41,14 +44,19 @@ public final class SessionStore {
 
     public int closeAll() {
         int closed = 0;
+        int failed = 0;
         for (String id : List.copyOf(sessions.keySet())) {
             try {
                 if (close(id)) {
                     closed++;
                 }
-            } catch (IOException ignored) {
-                // Best-effort shutdown path.
+            } catch (IOException ex) {
+                failed++;
+                LOG.warn("Failed to close session {} during shutdown: {}", id, ex.toString(), ex);
             }
+        }
+        if (failed > 0) {
+            LOG.warn("closeAll() completed with {} closed and {} failures", closed, failed);
         }
         return closed;
     }

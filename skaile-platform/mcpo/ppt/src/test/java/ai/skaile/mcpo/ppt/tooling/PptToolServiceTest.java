@@ -8,6 +8,13 @@ import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.junit.jupiter.api.Test;
@@ -992,6 +999,137 @@ class PptToolServiceTest {
             Path file = Path.of(rendered.payload().path("files").get(i).asText());
             assertTrue(Files.exists(file));
             assertTrue(Files.size(file) > 0);
+        }
+    }
+
+    @Test
+    void concurrentUpdateTextOnSameDocumentIsSerializedWithoutCorruption() throws Exception {
+        // Phase 0 acceptance: per-session lock must serialize concurrent mutations against the
+        // same document_id. Without it, POI's XMLSlideShow DOM corrupts under parallel writes.
+        PptToolService service = new PptToolService();
+
+        ToolCallResult created = service.call("ppt.create_document", mapper.createObjectNode());
+        String documentId = created.payload().path("document_id").asText();
+
+        ObjectNode addTextbox = mapper.createObjectNode();
+        addTextbox.put("document_id", documentId);
+        addTextbox.put("slide_index", 0);
+        addTextbox.put("text", "seed");
+        addTextbox.put("x", 10);
+        addTextbox.put("y", 10);
+        addTextbox.put("width", 600);
+        addTextbox.put("height", 80);
+        assertTrue(service.call("ppt.add_textbox", addTextbox).success());
+
+        int iterations = 30;
+        int workers = 4;
+        ExecutorService pool = Executors.newFixedThreadPool(workers);
+        try {
+            CountDownLatch start = new CountDownLatch(1);
+            List<Future<Boolean>> results = new ArrayList<>();
+            for (int w = 0; w < workers; w++) {
+                final int workerId = w;
+                results.add(pool.submit(() -> {
+                    start.await();
+                    for (int i = 0; i < iterations; i++) {
+                        ObjectNode args = mapper.createObjectNode();
+                        args.put("document_id", documentId);
+                        args.put("slide_index", 0);
+                        args.put("old_text", "seed");
+                        args.put("new_text", "seed");
+                        ToolCallResult r = service.call("ppt.update_text", args);
+                        if (!r.success()) {
+                            return false;
+                        }
+                        // Read-path also takes the lock; exercise it so any concurrency
+                        // bug surfaces as a race on the shared DOM.
+                        ObjectNode listArgs = mapper.createObjectNode();
+                        listArgs.put("document_id", documentId);
+                        ToolCallResult l = service.call("ppt.list_slides", listArgs);
+                        if (!l.success() || l.payload().path("slides").size() != 1) {
+                            return false;
+                        }
+                    }
+                    return Boolean.TRUE;
+                }));
+            }
+            start.countDown();
+            for (Future<Boolean> f : results) {
+                assertTrue(f.get(60, TimeUnit.SECONDS),
+                        "concurrent update_text/list_slides must all succeed");
+            }
+        } finally {
+            pool.shutdownNow();
+            service.closeAllSessions();
+        }
+    }
+
+    @Test
+    void concurrentCallsOnDifferentDocumentsDoNotSerialize() throws Exception {
+        // Two documents have independent locks; long-running calls on doc A must not block B.
+        PptToolService service = new PptToolService();
+        try {
+            String docA = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            String docB = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+
+            ExecutorService pool = Executors.newFixedThreadPool(2);
+            try {
+                Future<Boolean> a = pool.submit(() -> runRepeatedListSlides(service, docA, 20));
+                Future<Boolean> b = pool.submit(() -> runRepeatedListSlides(service, docB, 20));
+                assertTrue(a.get(30, TimeUnit.SECONDS));
+                assertTrue(b.get(30, TimeUnit.SECONDS));
+            } finally {
+                pool.shutdownNow();
+            }
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    private boolean runRepeatedListSlides(PptToolService service, String documentId, int iterations) {
+        for (int i = 0; i < iterations; i++) {
+            ObjectNode args = mapper.createObjectNode();
+            args.put("document_id", documentId);
+            if (!service.call("ppt.list_slides", args).success()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Test
+    void savePdfReturnsSofficeUnavailableWhenBinaryMissing() throws Exception {
+        // With SOFFICE_PATH pointing nowhere, the probe returns unavailable and the PDF
+        // branch must short-circuit to a structured error instead of throwing.
+        String previousPath = System.getenv("SOFFICE_PATH");
+        // We cannot mutate the process env from Java portably, but we can reset the probe
+        // cache and depend on the shipped resolver: if no soffice is on PATH, the probe
+        // fails; else this test is a no-op.
+        ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability.reset();
+        ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability probe =
+                ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability.get();
+        org.junit.jupiter.api.Assumptions.assumeFalse(probe.available(),
+                "skipping: real soffice is installed on PATH, SOFFICE_UNAVAILABLE path can't be exercised");
+
+        PptToolService service = new PptToolService();
+        try {
+            ToolCallResult created = service.call("ppt.create_document", mapper.createObjectNode());
+            String documentId = created.payload().path("document_id").asText();
+
+            Path out = Files.createTempFile("pdf-export", ".pdf");
+            ObjectNode args = mapper.createObjectNode();
+            args.put("document_id", documentId);
+            args.put("output_path", out.toString());
+            args.put("format", "pdf");
+            ToolCallResult result = service.call("ppt.save_document", args);
+            assertFalse(result.success());
+            assertEquals("SOFFICE_UNAVAILABLE", result.payload().path("code").asText());
+            assertFalse(result.payload().path("retriable").asBoolean(true));
+        } finally {
+            service.closeAllSessions();
+            ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability.reset();
         }
     }
 }

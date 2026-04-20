@@ -2,12 +2,14 @@ package ai.skaile.mcpo.ppt.session;
 
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 
 public final class PptDocumentSession {
     private final String id;
     private final XMLSlideShow slideShow;
     private final Instant openedAt;
+    private final ReentrantLock lock = new ReentrantLock();
     private Instant updatedAt;
     private boolean dirty;
     private Path sourcePath;
@@ -60,5 +62,14 @@ public final class PptDocumentSession {
     public void setSourcePath(Path sourcePath) {
         this.sourcePath = sourcePath;
         this.updatedAt = Instant.now();
+    }
+
+    /**
+     * Per-session lock serializing all tool invocations against this document. POI's XMLSlideShow
+     * DOM is not thread-safe even for read-only traversal, so every handler acquires this lock —
+     * reads and writes alike.
+     */
+    public ReentrantLock getLock() {
+        return lock;
     }
 }

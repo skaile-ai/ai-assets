@@ -16,7 +16,9 @@
     <jackson.version>2.21.2</jackson.version>
     <poi.version>5.5.1</poi.version>
     <batik.version>1.19</batik.version>
-    <log4j.version>2.25.2</log4j.version>
+    <slf4j.version>2.0.16</slf4j.version>
+    <logback.version>1.5.12</logback.version>
+    <jacoco.version>0.8.13</jacoco.version>
     <commons.codec.version>1.20.0</commons.codec.version>
     <commons.io.version>2.21.0</commons.io.version>
   </properties>
@@ -62,9 +64,22 @@
     </dependency>
 
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${logback.version}</version>
+    </dependency>
+
+    <!-- Apache POI uses the Log4j 2 API; this bridge forwards those log calls to SLF4J/Logback. -->
+    <dependency>
       <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <version>${log4j.version}</version>
+      <artifactId>log4j-to-slf4j</artifactId>
+      <version>2.24.3</version>
     </dependency>
 
     <dependency>
@@ -87,7 +102,8 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.5.5</version>
         <configuration>
-          <argLine>-Djava.awt.headless=true</argLine>
+          <!-- @{argLine} lets jacoco's prepare-agent inject its javaagent at runtime. -->
+          <argLine>@{argLine} -Djava.awt.headless=true</argLine>
         </configuration>
       </plugin>
       <plugin>
@@ -115,6 +131,65 @@
             <configuration>
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <finalName>ppt-mcp-server-all</finalName>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+            <configuration>
+              <!--
+                Scope the report + gate to tooling + session. McpServerMain and the server
+                package are thin wrappers over POI / stdio and would skew the gate.
+              -->
+              <excludes>
+                <exclude>ai/skaile/mcpo/ppt/McpServerMain.class</exclude>
+                <exclude>ai/skaile/mcpo/ppt/server/**</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>check-coverage</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <excludes>
+                <exclude>ai/skaile/mcpo/ppt/McpServerMain.class</exclude>
+                <exclude>ai/skaile/mcpo/ppt/server/**</exclude>
+              </excludes>
+              <!--
+                Phase 0 gate: 70% aggregate line coverage across tooling + session.
+                Phase 1 raises to 80%, Phase 5 to 85%.
+              -->
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.70</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
             </configuration>
           </execution>
         </executions>

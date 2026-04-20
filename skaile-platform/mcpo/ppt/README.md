@@ -7,8 +7,8 @@ MCP server (stdio) that gives an AI agent first-class ability to **create, modif
 Build and run locally:
 
 ```bash
-./mvnw verify                              # Compile, test, format check, produces fat jar
-java -jar target/ppt-mcp-server-*.jar      # Run the server
+./mvnw verify                              # Compile, test, coverage gate, produces fat jar
+java -jar target/ppt-mcp-server-all.jar    # Run the server
 ```
 
 Or test via Docker:
@@ -22,13 +22,14 @@ For interactive testing with the MCP Inspector, see "Manual testing with the MCP
 
 ## Tech stack
 
-- **Java 21 LTS** (Eclipse Temurin), **Maven** with the wrapper pinned to 3.9.9, **Spotless** for Google Java Format.
+- **Java 17 bytecode, Java 21 runtime** (Eclipse Temurin). `maven.compiler.release=17` in `pom.xml`; the Docker runtime stage uses `eclipse-temurin:21-jre-jammy`.
+- **Maven** with the wrapper (`./mvnw`) pinned to 3.9.9 via `.mvn/wrapper/maven-wrapper.properties`.
 - **Apache POI 5.5.x** (`poi`, `poi-ooxml`) — in-process, Apache-2.0 licensed, for PPTX manipulation.
 - **Apache Batik** — SVG rendering and PDF conversion fallback.
 - **LibreOffice** (`soffice`) — high-fidelity PDF export. The Docker image installs it and sets `SOFFICE_PATH=/usr/bin/soffice`.
 - **Official MCP Java SDK** over stdio. No HTTP / SSE in v1.
-- **Jackson** for JSON, **SLF4J + Logback** for logging (stderr-only — stdout is reserved for the MCP protocol).
-- **JUnit 5 + AssertJ** for tests; smoke and regression tests included.
+- **Jackson** for JSON; logging writes to stderr only — stdout is reserved for the MCP protocol.
+- **JUnit 5** for tests; smoke and regression tests included.
 - Packaged as a single fat jar via `maven-shade-plugin`, shipped in a `eclipse-temurin:21-jre-jammy` Docker image.
 
 ## How it's structured
@@ -191,19 +192,18 @@ The repo ships with the Maven Wrapper pinned to **Maven 3.9.9**. A global `mvn` 
 
 | Command | When to run it |
 |---|---|
-| `./mvnw verify` | Before declaring a change done. Runs compile + tests + Spotless check; also produces the fat jar. |
+| `./mvnw verify` | Before declaring a change done. Runs compile + tests + the jacoco coverage gate; also produces the fat jar. |
 | `./mvnw -DskipTests package` | Only when you want the fat jar but want to skip tests. |
-| `./mvnw spotless:apply` | When `./mvnw verify` fails on formatting. Auto-rewrites sources to Google Java Format. |
 | `./mvnw clean` | For a truly from-scratch host rebuild. Rarely needed. |
 
-The output is a single fat jar at `target/ppt-mcp-server-<version>.jar`, runnable with `java -jar`.
+The output is a single fat jar at `target/ppt-mcp-server-all.jar`, runnable with `java -jar`.
 
 ## Run
 
 The server speaks MCP over **stdio only** in v1. No HTTP. Launched via the shaded jar:
 
 ```bash
-java -jar target/ppt-mcp-server-0.1.0-SNAPSHOT.jar
+java -jar target/ppt-mcp-server-all.jar
 ```
 
 Or via Docker:
