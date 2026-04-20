@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.poi.Version;
 import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.formula.eval.FunctionEval;
+import org.apache.poi.ss.formula.WorkbookEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -52,7 +52,7 @@ public final class PoiCapabilityScanner {
   private PoiCapabilityScanner() {}
 
   public static CapabilitiesReportShape scan(Workbook wb) {
-    Set<String> supported = normalise(FunctionEval.getSupportedFunctionNames());
+    Set<String> supported = normalise(WorkbookEvaluator.getSupportedFunctionNames());
     int supportedCount = supported.size();
 
     Set<String> usedNames = new HashSet<>();
