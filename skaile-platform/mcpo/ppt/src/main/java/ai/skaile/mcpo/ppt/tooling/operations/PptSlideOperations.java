@@ -1,137 +1,442 @@
 package ai.skaile.mcpo.ppt.tooling.operations;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import ai.skaile.mcpo.ppt.session.PptDocumentSession;
 import ai.skaile.mcpo.ppt.tooling.contracts.ToolCallResult;
 import ai.skaile.mcpo.ppt.tooling.contracts.ToolHandler;
+import ai.skaile.mcpo.ppt.tooling.infra.PptLimits;
+import ai.skaile.mcpo.ppt.tooling.infra.PptShapeFinder;
+import ai.skaile.mcpo.ppt.tooling.infra.PptSlideBuilder;
+import ai.skaile.mcpo.ppt.tooling.infra.ToolArgumentValidator;
+import ai.skaile.mcpo.ppt.tooling.infra.ToolResponseFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFNotes;
+import org.apache.poi.xslf.usermodel.XSLFShape;
+import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.apache.poi.xslf.usermodel.XSLFTable;
+import org.apache.poi.xslf.usermodel.XSLFTextRun;
+import org.apache.poi.xslf.usermodel.XSLFTextShape;
 
+/**
+ * Slide-content tool handlers: {@code ppt.get_slide_content}, slide add/duplicate/delete,
+ * text search-and-replace, textbox creation, and slide notes.
+ */
 public final class PptSlideOperations {
-    private final ToolHandler getSlideContentHandler;
-    private final ToolHandler addSlideHandler;
-    private final ToolHandler duplicateSlideHandler;
-    private final ToolHandler deleteSlidesHandler;
-    private final ToolHandler updateTextHandler;
-    private final ToolHandler replaceTextGloballyHandler;
-    private final ToolHandler addTextBoxHandler;
-    private final ToolHandler getSlideNotesHandler;
-    private final ToolHandler setSlideNotesHandler;
-    private final ToolHandler addTableHandler;
-    private final ToolHandler getTableHandler;
-    private final ToolHandler editTableHandler;
-    private final ToolHandler setTextHandler;
-    private final ToolHandler moveShapeHandler;
-    private final ToolHandler cloneShapeHandler;
-    private final ToolHandler resizeShapeHandler;
-    private final ToolHandler addHyperlinkHandler;
-    private final ToolHandler setSlideBackgroundHandler;
+
+    private final ToolArgumentValidator argumentValidator;
+    private final ToolResponseFactory responseFactory;
+    private final PptShapeFinder shapeFinder;
+    private final PptLimits limits;
 
     public PptSlideOperations(
-            ToolHandler getSlideContentHandler,
-            ToolHandler addSlideHandler,
-            ToolHandler duplicateSlideHandler,
-            ToolHandler deleteSlidesHandler,
-            ToolHandler updateTextHandler,
-            ToolHandler replaceTextGloballyHandler,
-            ToolHandler addTextBoxHandler,
-            ToolHandler getSlideNotesHandler,
-            ToolHandler setSlideNotesHandler,
-            ToolHandler addTableHandler,
-            ToolHandler getTableHandler,
-            ToolHandler editTableHandler,
-            ToolHandler setTextHandler,
-            ToolHandler moveShapeHandler,
-            ToolHandler cloneShapeHandler,
-            ToolHandler resizeShapeHandler,
-            ToolHandler addHyperlinkHandler,
-            ToolHandler setSlideBackgroundHandler) {
-        this.getSlideContentHandler = getSlideContentHandler;
-        this.addSlideHandler = addSlideHandler;
-        this.duplicateSlideHandler = duplicateSlideHandler;
-        this.deleteSlidesHandler = deleteSlidesHandler;
-        this.updateTextHandler = updateTextHandler;
-        this.replaceTextGloballyHandler = replaceTextGloballyHandler;
-        this.addTextBoxHandler = addTextBoxHandler;
-        this.getSlideNotesHandler = getSlideNotesHandler;
-        this.setSlideNotesHandler = setSlideNotesHandler;
-        this.addTableHandler = addTableHandler;
-        this.getTableHandler = getTableHandler;
-        this.editTableHandler = editTableHandler;
-        this.setTextHandler = setTextHandler;
-        this.moveShapeHandler = moveShapeHandler;
-        this.cloneShapeHandler = cloneShapeHandler;
-        this.resizeShapeHandler = resizeShapeHandler;
-        this.addHyperlinkHandler = addHyperlinkHandler;
-        this.setSlideBackgroundHandler = setSlideBackgroundHandler;
+            ToolArgumentValidator argumentValidator,
+            ToolResponseFactory responseFactory,
+            PptShapeFinder shapeFinder,
+            PptLimits limits) {
+        this.argumentValidator = argumentValidator;
+        this.responseFactory = responseFactory;
+        this.shapeFinder = shapeFinder;
+        this.limits = limits;
     }
 
-    public ToolCallResult getSlideContent(JsonNode args) throws Exception {
-        return getSlideContentHandler.handle(args);
+    public Map<String, ToolHandler> handlers() {
+        return Map.of(
+                "ppt.get_slide_content", this::getSlideContent,
+                "ppt.add_slide", this::addSlide,
+                "ppt.duplicate_slide", this::duplicateSlide,
+                "ppt.delete_slides", this::deleteSlides,
+                "ppt.update_text", this::updateText,
+                "ppt.replace_text_globally", this::replaceTextGlobally,
+                "ppt.add_textbox", this::addTextBox,
+                "ppt.get_slide_notes", this::getSlideNotes,
+                "ppt.set_slide_notes", this::setSlideNotes);
     }
 
-    public ToolCallResult addSlide(JsonNode args) throws Exception {
-        return addSlideHandler.handle(args);
+    public ToolCallResult getSlideContent(JsonNode args) {
+        PptDocumentSession session = shapeFinder.requireSession(args);
+        int slideIndex = args.path("slide_index").asInt(-1);
+        XSLFSlide slide = shapeFinder.requireSlide(session, slideIndex);
+
+        ObjectNode payload = okPayload();
+        payload.put("document_id", session.getId());
+        payload.put("slide_index", slideIndex);
+        payload.put("text", PptSlideBuilder.collectSlideText(slide));
+
+        ArrayNode shapes = payload.putArray("shapes");
+        int i = 0;
+        for (XSLFShape shape : slide.getShapes()) {
+            ObjectNode shapeNode = shapes.addObject();
+            shapeNode.put("shape_index", i++);
+            shapeNode.put("shape_type", shape.getClass().getSimpleName());
+            if (shape instanceof XSLFTextShape textShape) {
+                shapeNode.put("text", textShape.getText());
+            }
+            if (shape instanceof XSLFTable table) {
+                shapeNode.put("rows", table.getNumberOfRows());
+                shapeNode.put("cols", table.getNumberOfColumns());
+            }
+        }
+
+        return success(payload);
     }
 
-    public ToolCallResult duplicateSlide(JsonNode args) throws Exception {
-        return duplicateSlideHandler.handle(args);
+    public ToolCallResult addSlide(JsonNode args) {
+        PptDocumentSession session = shapeFinder.requireSession(args);
+
+        ToolCallResult limit = limits.enforceSlideLimit(session);
+        if (limit != null) {
+            return limit;
+        }
+
+        String title = args.path("title").asText("");
+        XSLFSlide slide = PptSlideBuilder.createDefaultSlide(session.getSlideShow());
+        if (!title.isBlank()) {
+            XSLFTextShape titleShape = slide.createTextBox();
+            titleShape.setAnchor(new Rectangle2D.Double(40, 30, 840, 80));
+            titleShape.setText(title);
+        }
+
+        session.touch(true);
+
+        ObjectNode payload = okPayload();
+        payload.put("document_id", session.getId());
+        payload.put("slide_index", session.getSlideShow().getSlides().size() - 1);
+        payload.put("slide_count", session.getSlideShow().getSlides().size());
+        return success(payload);
     }
 
-    public ToolCallResult deleteSlides(JsonNode args) throws Exception {
-        return deleteSlidesHandler.handle(args);
+    public ToolCallResult duplicateSlide(JsonNode args) {
+        PptDocumentSession session = shapeFinder.requireSession(args);
+
+        ToolCallResult limit = limits.enforceSlideLimit(session);
+        if (limit != null) {
+            return limit;
+        }
+
+        XMLSlideShow show = session.getSlideShow();
+        int sourceSlideIndex = args.path("source_slide_index").asInt(-1);
+        XSLFSlide source = shapeFinder.requireSlide(session, sourceSlideIndex);
+
+        int targetIndex = args.has("target_index")
+                ? args.path("target_index").asInt(show.getSlides().size())
+                : Math.min(sourceSlideIndex + 1, show.getSlides().size());
+        if (targetIndex < 0 || targetIndex > show.getSlides().size()) {
+            return error("Invalid target_index: " + targetIndex);
+        }
+
+        XSLFSlide copy = show.createSlide();
+        copy.importContent(source);
+        show.setSlideOrder(copy, targetIndex);
+        session.touch(true);
+
+        ObjectNode payload = okPayload();
+        payload.put("document_id", session.getId());
+        payload.put("source_slide_index", sourceSlideIndex);
+        payload.put("slide_index", targetIndex);
+        payload.put("slide_count", show.getSlides().size());
+        payload.put("message", "Slide duplicated");
+        return success(payload);
     }
 
-    public ToolCallResult updateText(JsonNode args) throws Exception {
-        return updateTextHandler.handle(args);
+    public ToolCallResult deleteSlides(JsonNode args) {
+        PptDocumentSession session = shapeFinder.requireSession(args);
+
+        XMLSlideShow show = session.getSlideShow();
+        List<XSLFSlide> slides = show.getSlides();
+        List<Integer> indices = argumentValidator.parseShapeIndices(args.path("slide_indices"));
+        if (indices.isEmpty()) {
+            return error("slide_indices must contain at least one index");
+        }
+
+        int slideCount = slides.size();
+        for (int idx : indices) {
+            if (idx < 0 || idx >= slideCount) {
+                return error("Invalid slide index in slide_indices: " + idx);
+            }
+        }
+
+        boolean keepAtLeastOne = args.path("keep_at_least_one").asBoolean(true);
+        int uniqueCount = new HashSet<>(indices).size();
+        if (keepAtLeastOne && slideCount - uniqueCount < 1) {
+            return error("Cannot delete all slides when keep_at_least_one is true");
+        }
+
+        List<Integer> sorted = new ArrayList<>(new HashSet<>(indices));
+        sorted.sort((a, b) -> Integer.compare(b, a));
+        for (int idx : sorted) {
+            show.removeSlide(idx);
+        }
+
+        session.touch(true);
+
+        ObjectNode payload = okPayload();
+        payload.put("document_id", session.getId());
+        payload.put("deleted_count", sorted.size());
+        payload.put("remaining_slide_count", show.getSlides().size());
+        payload.put("message", "Slides deleted");
+        return success(payload);
     }
 
-    public ToolCallResult replaceTextGlobally(JsonNode args) throws Exception {
-        return replaceTextGloballyHandler.handle(args);
+    public ToolCallResult updateText(JsonNode args) {
+        PptDocumentSession session = shapeFinder.requireSession(args);
+
+        int slideIndex = args.path("slide_index").asInt(-1);
+        String oldText = requiredString(args, "old_text");
+        String newText = requiredString(args, "new_text");
+        int occurrence = args.path("occurrence").asInt(1);
+        if (occurrence < 1) {
+            return error("occurrence must be >= 1");
+        }
+
+        XSLFSlide slide = shapeFinder.requireSlide(session, slideIndex);
+
+        int seen = 0;
+        for (XSLFShape shape : slide.getShapes()) {
+            if (!(shape instanceof XSLFTextShape textShape)) {
+                continue;
+            }
+            String current = textShape.getText();
+            if (current == null || current.isEmpty()) {
+                continue;
+            }
+            int idx = current.indexOf(oldText);
+            while (idx >= 0) {
+                seen++;
+                if (seen == occurrence) {
+                    String replaced = current.substring(0, idx) + newText + current.substring(idx + oldText.length());
+                    textShape.clearText();
+                    textShape.setText(replaced);
+                    session.touch(true);
+
+                    ObjectNode payload = okPayload();
+                    payload.put("document_id", session.getId());
+                    payload.put("slide_index", slideIndex);
+                    payload.put("message", "Text updated");
+                    payload.put("replaced_occurrence", occurrence);
+                    return success(payload);
+                }
+                idx = current.indexOf(oldText, idx + oldText.length());
+            }
+        }
+
+        return error("Could not find the requested text occurrence");
     }
 
-    public ToolCallResult addTextBox(JsonNode args) throws Exception {
-        return addTextBoxHandler.handle(args);
+    public ToolCallResult replaceTextGlobally(JsonNode args) {
+        PptDocumentSession session = shapeFinder.requireSession(args);
+
+        String oldText = requiredString(args, "old_text");
+        if (oldText.isEmpty()) {
+            return error("old_text must not be empty");
+        }
+        String newText = requiredString(args, "new_text");
+        boolean caseSensitive = args.path("case_sensitive").asBoolean(false);
+        int maxReplacements = args.path("max_replacements").asInt(Integer.MAX_VALUE);
+
+        int replacementsCount = 0;
+        int slidesAffected = 0;
+        for (XSLFSlide slide : session.getSlideShow().getSlides()) {
+            boolean slideModified = false;
+            for (XSLFShape shape : slide.getShapes()) {
+                if (!(shape instanceof XSLFTextShape textShape)) {
+                    continue;
+                }
+                String text = textShape.getText();
+                if (text == null || text.isEmpty()) {
+                    continue;
+                }
+                int remaining = maxReplacements - replacementsCount;
+                if (remaining <= 0) {
+                    break;
+                }
+
+                ReplacementResult result = replaceOccurrences(text, oldText, newText, caseSensitive, remaining);
+                if (result.count > 0) {
+                    textShape.clearText();
+                    textShape.setText(result.value);
+                    replacementsCount += result.count;
+                    slideModified = true;
+                }
+            }
+
+            if (slideModified) {
+                slidesAffected++;
+            }
+            if (replacementsCount >= maxReplacements) {
+                break;
+            }
+        }
+
+        if (replacementsCount > 0) {
+            session.touch(true);
+        }
+
+        ObjectNode payload = okPayload();
+        payload.put("document_id", session.getId());
+        payload.put("replacements_count", replacementsCount);
+        payload.put("slides_affected", slidesAffected);
+        payload.put("case_sensitive", caseSensitive);
+        payload.put("max_replacements", maxReplacements == Integer.MAX_VALUE ? -1 : maxReplacements);
+        return success(payload);
     }
 
-    public ToolCallResult getSlideNotes(JsonNode args) throws Exception {
-        return getSlideNotesHandler.handle(args);
+    public ToolCallResult addTextBox(JsonNode args) {
+        ToolCallResult limit = limits.enforceShapeLimit(args);
+        if (limit != null) {
+            return limit;
+        }
+        PptDocumentSession session = shapeFinder.requireSession(args);
+
+        int slideIndex = args.path("slide_index").asInt(-1);
+        XSLFSlide slide = shapeFinder.requireSlide(session, slideIndex);
+
+        String text = requiredString(args, "text");
+        double x = args.path("x").asDouble(Double.NaN);
+        double y = args.path("y").asDouble(Double.NaN);
+        double width = args.path("width").asDouble(Double.NaN);
+        double height = args.path("height").asDouble(Double.NaN);
+        if (!argumentValidator.isValidRect(x, y, width, height)) {
+            return error("x, y, width, height must be valid positive numbers");
+        }
+
+        XSLFTextShape box = slide.createTextBox();
+        box.setAnchor(new Rectangle2D.Double(x, y, width, height));
+        var paragraph = box.addNewTextParagraph();
+        XSLFTextRun run = paragraph.addNewTextRun();
+        run.setText(text);
+        if (args.has("font_size")) {
+            run.setFontSize(args.path("font_size").asDouble());
+        }
+
+        session.touch(true);
+
+        ObjectNode payload = okPayload();
+        payload.put("document_id", session.getId());
+        payload.put("slide_index", slideIndex);
+        payload.put("message", "Text box added");
+        return success(payload);
     }
 
-    public ToolCallResult setSlideNotes(JsonNode args) throws Exception {
-        return setSlideNotesHandler.handle(args);
+    public ToolCallResult getSlideNotes(JsonNode args) {
+        PptDocumentSession session = shapeFinder.requireSession(args);
+
+        int slideIndex = args.path("slide_index").asInt(-1);
+        XSLFSlide slide = shapeFinder.requireSlide(session, slideIndex);
+
+        XSLFNotes notes = slide.getNotes();
+        String notesText = notes == null ? "" : PptSlideBuilder.collectNotesText(notes);
+
+        ObjectNode payload = okPayload();
+        payload.put("document_id", session.getId());
+        payload.put("slide_index", slideIndex);
+        payload.put("notes_text", notesText);
+        return success(payload);
     }
 
-    public ToolCallResult addTable(JsonNode args) throws Exception {
-        return addTableHandler.handle(args);
+    public ToolCallResult setSlideNotes(JsonNode args) {
+        PptDocumentSession session = shapeFinder.requireSession(args);
+
+        int slideIndex = args.path("slide_index").asInt(-1);
+        XSLFSlide slide = shapeFinder.requireSlide(session, slideIndex);
+
+        String notesText = requiredString(args, "notes_text");
+        XSLFNotes notes = slide.getNotes();
+        if (notes == null) {
+            return error("Slide does not have a notes section");
+        }
+
+        XSLFTextShape targetShape = null;
+        for (XSLFShape shape : notes.getShapes()) {
+            if (shape instanceof XSLFTextShape textShape) {
+                targetShape = textShape;
+                break;
+            }
+        }
+        if (targetShape == null) {
+            targetShape = notes.createTextBox();
+            targetShape.setAnchor(new Rectangle2D.Double(30, 30, 900, 120));
+        }
+        targetShape.clearText();
+        targetShape.setText(notesText);
+
+        session.touch(true);
+
+        ObjectNode payload = okPayload();
+        payload.put("document_id", session.getId());
+        payload.put("slide_index", slideIndex);
+        payload.put("notes_text", notesText);
+        payload.put("message", "Slide notes updated");
+        return success(payload);
     }
 
-    public ToolCallResult getTable(JsonNode args) throws Exception {
-        return getTableHandler.handle(args);
+    private ReplacementResult replaceOccurrences(
+            String source,
+            String target,
+            String replacement,
+            boolean caseSensitive,
+            int maxReplacements) {
+        if (source.isEmpty() || target.isEmpty() || maxReplacements <= 0) {
+            return new ReplacementResult(source, 0);
+        }
+
+        String haystack = caseSensitive ? source : source.toLowerCase(Locale.ROOT);
+        String needle = caseSensitive ? target : target.toLowerCase(Locale.ROOT);
+
+        int from = 0;
+        int count = 0;
+        StringBuilder out = new StringBuilder(source.length());
+
+        while (count < maxReplacements) {
+            int idx = haystack.indexOf(needle, from);
+            if (idx < 0) {
+                break;
+            }
+
+            out.append(source, from, idx);
+            out.append(replacement);
+            from = idx + target.length();
+            count++;
+        }
+
+        if (count == 0) {
+            return new ReplacementResult(source, 0);
+        }
+
+        out.append(source.substring(from));
+        return new ReplacementResult(out.toString(), count);
     }
 
-    public ToolCallResult editTable(JsonNode args) throws Exception {
-        return editTableHandler.handle(args);
+    private static final class ReplacementResult {
+        private final String value;
+        private final int count;
+
+        private ReplacementResult(String value, int count) {
+            this.value = value;
+            this.count = count;
+        }
     }
 
-    public ToolCallResult setText(JsonNode args) throws Exception {
-        return setTextHandler.handle(args);
+    private String requiredString(JsonNode args, String key) {
+        return argumentValidator.requiredString(args, key);
     }
 
-    public ToolCallResult moveShape(JsonNode args) throws Exception {
-        return moveShapeHandler.handle(args);
+    private ObjectNode okPayload() {
+        return responseFactory.okPayload();
     }
 
-    public ToolCallResult cloneShape(JsonNode args) throws Exception {
-        return cloneShapeHandler.handle(args);
+    private ToolCallResult success(ObjectNode payload) {
+        return responseFactory.success(payload);
     }
 
-    public ToolCallResult resizeShape(JsonNode args) throws Exception {
-        return resizeShapeHandler.handle(args);
-    }
-
-    public ToolCallResult addHyperlink(JsonNode args) throws Exception {
-        return addHyperlinkHandler.handle(args);
-    }
-
-    public ToolCallResult setSlideBackground(JsonNode args) throws Exception {
-        return setSlideBackgroundHandler.handle(args);
+    private ToolCallResult error(String message) {
+        return responseFactory.error(message);
     }
 }

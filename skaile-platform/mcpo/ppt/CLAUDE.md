@@ -37,10 +37,28 @@ Three packages under `src/main/java/ai/skaile/mcpo/ppt/`. Keep concerns inside t
   - `SessionStore` is the in-memory handle table. Handles (`doc_xxxxxxxx`) live for the life of the JVM; there is no persistence, no idle eviction, and no per-handle locking.
 - **`tooling/`** — everything about tool contracts and execution.
   - `PptToolDefinitions` declares the tool list + JSON schemas consumed by `tools/list`.
-  - `PptToolService` is the dispatch facade: it owns the `SessionStore`, wires the operation classes via method references, and routes `tools/call` by name through `toolHandlers`. When adding a tool: add the definition in `PptToolDefinitions`, pick the right operations subclass (or add an inline handler on `PptToolService`), then register in `createToolHandlers()`.
+  - `PptToolService` is the dispatch facade (~200 lines). It owns the `SessionStore`, builds the tool registry by merging every operations class's `handlers()` map, wraps every `document_id`-scoped invocation in a `ReentrantLock`, and translates the typed exceptions from `PptShapeFinder` / `ColorParser` into structured error codes. It holds **no** tool business logic. Adding a tool is a two-file edit — see `tooling/README.md`.
   - `tooling/contracts/` — `ToolHandler` (functional interface), `ToolDefinition`, `ToolCallResult`. Do not put implementation detail here.
-  - `tooling/infra/` — shared plumbing: `ToolArgumentValidator` (schema check + coerce), `ToolResponseFactory` (success/error envelope builder), `PptPathResolver` (sandbox-aware path resolution and image/format inference). Reuse these instead of re-rolling validation or response construction.
-  - `tooling/operations/` — behavior organized by tool family: `PptDocumentOperations`, `PptSlideOperations`, `PptAdvancedMutationOperations`, `PptRenderService`, `PptTemplateService`. Each class is plain delegation — it receives method-reference callbacks from `PptToolService` so the POI-heavy implementations stay centralized.
+  - `tooling/infra/` — shared primitives, none of which know about tool semantics:
+    - `PptServerConfig` (record; **the only file that reads `System.getenv`**): `MCPO_ALLOWED_ROOT`, `MCPO_TEMPLATE_DIR`, `MCPO_DEFAULT_TEMPLATE_CONFIG`, `MCPO_MAX_OPEN_DOCS`, `SOFFICE_PATH`, plus the cached `java.version`.
+    - `PptPathResolver` — allowed-root-aware path resolution, sandbox temp files, image-format inference.
+    - `PptShapeFinder` — resolves `(document_id, slide_index, shape_index)` to typed objects; throws `DocumentNotFoundException` / `SlideIndexOutOfRangeException` / `ShapeIndexOutOfRangeException` which the dispatcher translates to uniform error codes.
+    - `PptLimits` — safety-limit constants (`MAX_SLIDES`, `MAX_SHAPES_PER_SLIDE`, `MAX_IMAGE_BYTES`, `MAX_RENDER_DIMENSION`) and the `enforce*` helpers that return `LIMIT_*` error payloads.
+    - `PptSlideBuilder` — shared slide-construction helpers (title placement, body text, best-effort layout).
+    - `ColorParser` — the only hex-color parser. Malformed input → `INVALID_COLOR`.
+    - `PptUnits` — EMU ↔ points ↔ pixels; the only place `914400 EMU/inch` appears.
+    - `SofficeAvailability` — one-shot LibreOffice probe, cached process-wide.
+    - `ToolArgumentValidator`, `ToolResponseFactory` — unchanged.
+  - `tooling/operations/` — behavior organized by tool family. Each class is **self-contained**: real dependencies via constructor (no lambda-reference pass-through from `PptToolService`), owns its handler methods, and exposes `public Map<String, ToolHandler> handlers()`.
+    - `PptDocumentOperations` — doc lifecycle, export, transactions, merge, generate.
+    - `PptSlideOperations` — slide content + text (add/duplicate/delete, update/replace/find, notes, get_slide_content).
+    - `PptShapeMutationOperations` — shape add/move/resize/clone/delete, style, z-order, hyperlink, replace_image.
+    - `PptTableOperations` — table add/get/edit + `set_text` styling.
+    - `PptPageOperations` — `set_page_setup`, `set_slide_background`, `set_slide_layout`, `set_document_metadata`.
+    - `PptRenderOperations` — `render_slide`, `render_all_slides`, `find_text`, `get_slide_metrics`.
+    - `PptTemplateOperations` — `insert_image`, template upload/default, `import_markdown_outline`. Owns the mutable default-template pointer consulted by `PptDocumentOperations` when creating sessions.
+    - `PptCapabilitiesOperations` — `ppt.capabilities` self-describe handler.
+    - `PptTransactionManager` — per-session transaction snapshots (begin/commit/rollback).
 
 ### Response envelope
 
@@ -56,7 +74,7 @@ Every tool — success or failure — returns the envelope documented in README 
 
 ### Transactions
 
-`ppt.transaction_begin/commit/rollback` are implemented via `TransactionSnapshot` stored in a `HashMap` on `PptToolService`. Snapshots are per-document, in-memory only, and single-level (no nesting). They serialize the full `XMLSlideShow` to bytes, so begin/rollback is expensive on large decks.
+`ppt.transaction_begin/commit/rollback` live in `PptTransactionManager`. Snapshots are per-document, in-memory only, and single-level (no nesting). They serialize the full `XMLSlideShow` to bytes, so begin/rollback is expensive on large decks.
 
 ## Environment variables
 
@@ -66,9 +84,10 @@ Every tool — success or failure — returns the envelope documented in README 
 | `MCPO_TEMPLATE_DIR` | `/workspace/resources/.mcpo-ppt/templates` | Template store location for `ppt.upload_template`. |
 | `MCPO_DEFAULT_TEMPLATE_CONFIG` | `/workspace/resources/.mcpo-ppt/default-template.json` | Persisted default-template pointer. |
 | `SOFFICE_PATH` | `/usr/bin/soffice` | LibreOffice binary used for PDF export. If missing, PDF export fails gracefully. |
+| `MCPO_STDIO_FRAMED` | `false` | Opt-in `Content-Length`-framed stdio mode for legacy clients. Read directly by `server/JsonRpcIO` at class load — the one documented exception to the "only `PptServerConfig` reads env" rule, because it is a protocol-framing debug flag rather than tooling config. |
 | `LOG_LEVEL` | `INFO` | Logback root level. |
 
 ## Known doc/source drift
 
-- `README.md` mentions `./mvnw` and Java 21; there is no Maven Wrapper checked in and `pom.xml` sets `maven.compiler.release=17`. Use system `mvn`; the Docker build stage uses `maven:3.9-eclipse-temurin-21` and the runtime uses `eclipse-temurin:21-jre-jammy`, so the produced jar is Java-17 bytecode running on a Java 21 JVM.
-- `README.md` lists Spotless and AssertJ in the tech stack; neither is in `pom.xml`. Only `junit-jupiter` is declared as a test dep. Don't rely on Spotless formatting gates.
+- The Maven Wrapper is pinned to 3.9.9 — use `./mvnw` as the README says. `pom.xml` sets `maven.compiler.release=17`; the Docker build stage uses `maven:3.9-eclipse-temurin-21` and the runtime uses `eclipse-temurin:21-jre-jammy`, so the produced jar is Java-17 bytecode running on a Java 21 JVM.
+- `README.md` may still list Spotless and AssertJ in the tech stack; neither is in `pom.xml`. Only `junit-jupiter` is declared as a test dep. Don't rely on Spotless formatting gates.

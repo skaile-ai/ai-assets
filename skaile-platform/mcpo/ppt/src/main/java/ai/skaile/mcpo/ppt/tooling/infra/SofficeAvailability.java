@@ -113,10 +113,7 @@ public final class SofficeAvailability {
     }
 
     private static String resolveExecutable() {
-        String raw = System.getenv("SOFFICE_PATH");
-        if (raw == null || raw.isBlank()) {
-            return "soffice";
-        }
-        return raw;
+        // Delegate env parsing to PptServerConfig — this file must not read env directly.
+        return PptServerConfig.fromEnvironment().sofficePath();
     }
 }
