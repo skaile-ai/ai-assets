@@ -8,17 +8,20 @@ Used by: `test`, `test-plan`, `test-unit`, `test-integration`, `test-e2e`, `audi
 
 ## Forge Apps (Nuxt 4 + drizzle-orm + SQLite)
 
-| Package | Framework | Test Dir | Pattern | Run Command |
+All forge packages share a single root `vitest.config.ts` at `forge/` that picks up
+`**/tests/**/*.test.ts`. Run the whole suite with `bun x --bun vitest run` from `forge/`.
+
+| Package | Framework | Test Dir | Pattern | Status |
 |---|---|---|---|---|
-| `forge/project` | Vitest (unit) + Playwright (e2e) | `tests/` + `tests/e2e/` | `*.test.ts`, `*.spec.ts` | `bun x --bun vitest run --project forge-project` |
-| `forge/concept` | Vitest (unit) + Playwright (e2e) | `test/unit/` + `test/e2e/` | `*.test.ts`, `*.spec.ts` | `bun x --bun vitest run --project forge-concept` |
-| `forge/assistant` | Vitest | `test/` or `tests/` | `*.test.ts` | `bun x --bun vitest run --project forge-assistant` |
-| `forge/chat` | Vitest | `test/` or `tests/` | `*.test.ts` | `bun x --bun vitest run --project forge-chat` |
-| `forge/mattermost` | Vitest | `test/` or `tests/` | `*.test.ts` | `bun x --bun vitest run --project forge-mattermost` |
-| `forge/tui` | Vitest | `test/` or `tests/` | `*.test.ts` | `bun x --bun vitest run --project forge-tui` |
-| `forge/common-backend` | Vitest | `test/` | `*.test.ts` | `bun x --bun vitest run --project forge-common-be` |
-| `forge/common-ui` | Vitest | `test/` | `*.test.ts` | `bun x --bun vitest run --project forge-common-ui` |
-| `forge/common-tui` | Vitest | `test/` | `*.test.ts` | `bun x --bun vitest run --project forge-common-tui` |
+| `forge/project` | Vitest (unit) + Playwright (e2e) | `tests/` + `tests/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
+| `forge/concept` | Vitest (unit) + Playwright (e2e) | `test/unit/` + `test/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
+| `forge/assistant` | Playwright (e2e only) | `tests/e2e/` | `*.spec.ts` | e2e ✓, unit planned |
+| `forge/chat` | — | — | — | no tests yet |
+| `forge/mattermost` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
+| `forge/tui` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
+| `forge/common-backend` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
+| `forge/common-ui` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
+| `forge/common-tui` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
 
 Forge E2E runs Playwright against `bun run dev` on a dedicated port. Fixtures in `test/e2e/fixtures.ts`, sandbox in `test/e2e/sandbox.ts`. Use `bun x playwright test` inside the package.
 
