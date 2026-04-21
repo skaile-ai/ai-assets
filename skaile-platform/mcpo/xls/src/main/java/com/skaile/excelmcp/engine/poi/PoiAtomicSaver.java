@@ -10,12 +10,16 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Writes a POI {@link Workbook} to a sibling temp file and atomically renames it into place (§1.3).
  * Mid-write crashes cannot corrupt the original file. Returns the size written.
  */
 public final class PoiAtomicSaver {
+
+  private static final Logger log = LoggerFactory.getLogger(PoiAtomicSaver.class);
 
   private PoiAtomicSaver() {}
 
@@ -33,6 +37,13 @@ public final class PoiAtomicSaver {
       } catch (IOException atomicFailure) {
         // Filesystem does not support ATOMIC_MOVE (rare — e.g. cross-filesystem). Fall back to a
         // plain replace so the operation still completes; callers see a consistent post-state.
+        // Operators need to know the atomicity guarantee was lost: if the JVM dies between the
+        // delete and the rename of a non-atomic move, the destination can end up missing.
+        log.warn(
+            "atomic rename not supported on target filesystem; falling back to non-atomic replace"
+                + " (a crash during rename may leave the destination missing). destination={}",
+            destination.getFileName(),
+            atomicFailure);
         Files.move(tmp, destination, StandardCopyOption.REPLACE_EXISTING);
       }
       return Files.size(destination);
