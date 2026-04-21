@@ -179,7 +179,7 @@ public final class PptTableOperations {
             case "merge_cells":
             case "set_cell_border":
                 return responseFactory.error("FEATURE_NOT_IMPLEMENTED",
-                        "operation=" + operation + " lands in Phase 3.", false);
+                        "operation=" + operation + " lands in Phase 4.", false);
             default:
                 return responseFactory.error("VALIDATION_ERROR",
                         "operation must be one of: set_cell, insert_row, delete_row, insert_col, delete_col, set_row_height, set_col_width, set_header_style, merge_cells, set_cell_border",

@@ -38,7 +38,8 @@ import org.w3c.dom.Document;
 
 /**
  * Slide rendering, text search, and deck-metric tools. Rasterizes via Java2D +
- * Batik SVG; high-fidelity rendering lands in a later phase.
+ * Batik SVG for {@code fidelity=low}; delegates to {@link SofficeRenderer} for
+ * {@code fidelity=high}.
  */
 public final class PptRenderOperations {
 
@@ -50,6 +51,7 @@ public final class PptRenderOperations {
     private final PptPathResolver pathResolver;
     private final PptShapeFinder shapeFinder;
     private final PptLimits limits;
+    private final SofficeRenderer sofficeRenderer;
     private final Path allowedRoot;
 
     public PptRenderOperations(
@@ -58,13 +60,15 @@ public final class PptRenderOperations {
             ToolResponseFactory responseFactory,
             PptPathResolver pathResolver,
             PptShapeFinder shapeFinder,
-            PptLimits limits) {
+            PptLimits limits,
+            SofficeRenderer sofficeRenderer) {
         this.mapper = mapper;
         this.argumentValidator = argumentValidator;
         this.responseFactory = responseFactory;
         this.pathResolver = pathResolver;
         this.shapeFinder = shapeFinder;
         this.limits = limits;
+        this.sofficeRenderer = sofficeRenderer;
         this.allowedRoot = pathResolver.allowedRoot();
     }
 
@@ -90,10 +94,6 @@ public final class PptRenderOperations {
         if (!"low".equals(fidelity) && !"high".equals(fidelity)) {
             return error("VALIDATION_ERROR", "fidelity must be one of: low, high", false);
         }
-        if ("high".equals(fidelity)) {
-            return error("FORMAT_NOT_YET_IMPLEMENTED",
-                    "High-fidelity render lands in Phase 2.", false);
-        }
 
         Path outputPath = pathResolver.resolvePath(requiredString(args, "output_path"), true);
         pathResolver.createParentDirectories(outputPath);
@@ -109,7 +109,14 @@ public final class PptRenderOperations {
             return renderLimit;
         }
 
-        if ("svg".equals(format)) {
+        if ("high".equals(fidelity)) {
+            try {
+                sofficeRenderer.renderSingleSlide(
+                        session.getSlideShow(), slideIndex, outputPath, format, format);
+            } catch (SofficeRenderer.SofficeUnavailableException ex) {
+                return error("SOFFICE_UNAVAILABLE", ex.getMessage(), false);
+            }
+        } else if ("svg".equals(format)) {
             renderSlideToSvg(slide, outputPath, width, height, pageSize);
         } else {
             renderSlideToRaster(slide, outputPath, width, height, pageSize, format);
@@ -136,10 +143,6 @@ public final class PptRenderOperations {
         if (!"low".equals(fidelity) && !"high".equals(fidelity)) {
             return error("VALIDATION_ERROR", "fidelity must be one of: low, high", false);
         }
-        if ("high".equals(fidelity)) {
-            return error("FORMAT_NOT_YET_IMPLEMENTED",
-                    "High-fidelity render lands in Phase 2.", false);
-        }
 
         Path outputDir = pathResolver.resolvePath(requiredString(args, "output_dir"), true);
         java.nio.file.Files.createDirectories(outputDir);
@@ -156,24 +159,40 @@ public final class PptRenderOperations {
             return renderLimit;
         }
 
-        ArrayNode files = mapper.createArrayNode();
         List<XSLFSlide> slides = session.getSlideShow().getSlides();
-        for (int i = 0; i < slides.size(); i++) {
-            XSLFSlide slide = slides.get(i);
-            String fileName = String.format(Locale.ROOT, pattern, i + 1);
-            if (!fileName.toLowerCase(Locale.ROOT).endsWith("." + format)) {
-                fileName = fileName + "." + format;
+        ArrayNode files = mapper.createArrayNode();
+
+        if ("high".equals(fidelity)) {
+            try {
+                List<Path> produced = sofficeRenderer.renderAllSlides(
+                        session.getSlideShow(), outputDir, format, format, pattern);
+                for (Path p : produced) {
+                    if (allowedRoot != null && !p.startsWith(allowedRoot)) {
+                        return error("Output path is outside allowed root: " + p);
+                    }
+                    files.add(p.toString());
+                }
+            } catch (SofficeRenderer.SofficeUnavailableException ex) {
+                return error("SOFFICE_UNAVAILABLE", ex.getMessage(), false);
             }
-            Path outputPath = outputDir.resolve(fileName).toAbsolutePath().normalize();
-            if (allowedRoot != null && !outputPath.startsWith(allowedRoot)) {
-                return error("Output path is outside allowed root: " + outputPath);
+        } else {
+            for (int i = 0; i < slides.size(); i++) {
+                XSLFSlide slide = slides.get(i);
+                String fileName = String.format(Locale.ROOT, pattern, i + 1);
+                if (!fileName.toLowerCase(Locale.ROOT).endsWith("." + format)) {
+                    fileName = fileName + "." + format;
+                }
+                Path outputPath = outputDir.resolve(fileName).toAbsolutePath().normalize();
+                if (allowedRoot != null && !outputPath.startsWith(allowedRoot)) {
+                    return error("Output path is outside allowed root: " + outputPath);
+                }
+                if ("svg".equals(format)) {
+                    renderSlideToSvg(slide, outputPath, width, height, pageSize);
+                } else {
+                    renderSlideToRaster(slide, outputPath, width, height, pageSize, format);
+                }
+                files.add(outputPath.toString());
             }
-            if ("svg".equals(format)) {
-                renderSlideToSvg(slide, outputPath, width, height, pageSize);
-            } else {
-                renderSlideToRaster(slide, outputPath, width, height, pageSize, format);
-            }
-            files.add(outputPath.toString());
         }
 
         ObjectNode payload = okPayload();

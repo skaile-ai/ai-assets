@@ -1157,8 +1157,12 @@ class PptToolServiceTest {
             assertEquals(500, payload.path("limits").path("max_shapes_per_slide").asInt());
             assertEquals(52428800L, payload.path("limits").path("max_image_bytes").asLong());
             assertEquals(10000, payload.path("limits").path("max_render_dimension").asInt());
-            // Phase 1: every advanced feature flag is still false.
-            assertFalse(payload.path("feature_flags").path("high_fidelity_render").asBoolean());
+            // Phase 3 wired high_fidelity_render end-to-end; the flag now reflects whether the
+            // host has soffice on PATH (true in the Docker image, false on most dev machines).
+            var sofficeAvailable = ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability.get()
+                    .available();
+            assertEquals(sofficeAvailable,
+                    payload.path("feature_flags").path("high_fidelity_render").asBoolean());
             assertFalse(payload.path("feature_flags").path("gradients").asBoolean());
             assertFalse(payload.path("feature_flags").path("charts_update").asBoolean());
         } finally {
@@ -1318,7 +1322,16 @@ class PptToolServiceTest {
     }
 
     @Test
-    void renderSlideHighFidelityReturnsNotYetImplemented() throws Exception {
+    void renderSlideHighFidelityReturnsSofficeUnavailableWhenBinaryMissing() throws Exception {
+        // Phase 3: fidelity=high is wired through SofficeRenderer. Without soffice on the
+        // host, the call short-circuits to SOFFICE_UNAVAILABLE. With soffice installed, we
+        // skip — the Docker smoke test exercises the happy path end-to-end.
+        ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability.reset();
+        ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability probe =
+                ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability.get();
+        org.junit.jupiter.api.Assumptions.assumeFalse(probe.available(),
+                "skipping: soffice is installed, SOFFICE_UNAVAILABLE path can't be exercised");
+
         PptToolService service = new PptToolService();
         try {
             String docId = service.call("ppt.create_document", mapper.createObjectNode())
@@ -1331,9 +1344,11 @@ class PptToolServiceTest {
             r.put("fidelity", "high");
             ToolCallResult result = service.call("ppt.render_slide", r);
             assertFalse(result.success());
-            assertEquals("FORMAT_NOT_YET_IMPLEMENTED", result.payload().path("code").asText());
+            assertEquals("SOFFICE_UNAVAILABLE", result.payload().path("code").asText());
+            assertFalse(result.payload().path("retriable").asBoolean(true));
         } finally {
             service.closeAllSessions();
+            ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability.reset();
         }
     }
 
@@ -1359,22 +1374,89 @@ class PptToolServiceTest {
     }
 
     @Test
-    void exportDocumentReservedFormatsReturnNotYetImplemented() {
+    void exportDocumentSofficeFormatsReturnSofficeUnavailableWhenBinaryMissing() throws Exception {
+        // Phase 3: html/png_batch/jpg_batch/svg_batch are now wired through SofficeRenderer.
+        // Without soffice on the host, they short-circuit to SOFFICE_UNAVAILABLE.
+        ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability.reset();
+        ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability probe =
+                ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability.get();
+        org.junit.jupiter.api.Assumptions.assumeFalse(probe.available(),
+                "skipping: soffice is installed, SOFFICE_UNAVAILABLE path can't be exercised");
+
         PptToolService service = new PptToolService();
         try {
             String docId = service.call("ppt.create_document", mapper.createObjectNode())
                     .payload().path("document_id").asText();
-            for (String fmt : new String[] {"html", "png_batch", "jpg_batch", "svg_batch", "outline_text"}) {
+            for (String fmt : new String[] {"html", "png_batch", "jpg_batch", "svg_batch"}) {
                 ObjectNode args = mapper.createObjectNode();
                 args.put("document_id", docId);
                 args.put("format", fmt);
-                args.put("output_path", "/tmp/unused-" + fmt);
+                args.put("output_path", Files.createTempDirectory("mcpo-export-" + fmt).toString());
                 ToolCallResult result = service.call("ppt.export_document", args);
-                assertFalse(result.success());
-                assertEquals("FORMAT_NOT_YET_IMPLEMENTED",
+                assertFalse(result.success(), "format=" + fmt);
+                assertEquals("SOFFICE_UNAVAILABLE",
                         result.payload().path("code").asText(),
                         "format=" + fmt);
+                assertFalse(result.payload().path("retriable").asBoolean(true),
+                        "format=" + fmt);
             }
+        } finally {
+            service.closeAllSessions();
+            ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability.reset();
+        }
+    }
+
+    @Test
+    void exportDocumentOutlineTextProducesMarkdownFile() throws Exception {
+        // outline_text is deterministic POI traversal; no soffice required.
+        PptToolService service = new PptToolService();
+        try {
+            ObjectNode create = mapper.createObjectNode();
+            create.put("title", "Q2 Review");
+            String docId = service.call("ppt.create_document", create)
+                    .payload().path("document_id").asText();
+
+            ObjectNode addSlide = mapper.createObjectNode();
+            addSlide.put("document_id", docId);
+            addSlide.put("title", "Revenue");
+            service.call("ppt.add_slide", addSlide);
+
+            Path out = Files.createTempFile("outline-", ".md");
+            ObjectNode args = mapper.createObjectNode();
+            args.put("document_id", docId);
+            args.put("format", "outline_text");
+            args.put("output_path", out.toString());
+            ToolCallResult result = service.call("ppt.export_document", args);
+            assertTrue(result.success(), "payload=" + result.payload().toString());
+            assertEquals("outline_text", result.payload().path("format").asText());
+            assertEquals(out.toString(), result.payload().path("output_path").asText());
+            String contents = Files.readString(out);
+            assertTrue(contents.contains("# Q2 Review"),
+                    "expected title heading in: " + contents);
+            assertTrue(contents.contains("# Revenue"),
+                    "expected second slide heading in: " + contents);
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    @Test
+    void exportDocumentBatchRejectsFileOutputPath() throws Exception {
+        // png_batch / jpg_batch / svg_batch must write to a directory. Passing an existing
+        // file must produce VALIDATION_ERROR before we even try to shell out to soffice.
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            Path existingFile = Files.createTempFile("not-a-dir-", ".txt");
+            Files.writeString(existingFile, "sentinel");
+            ObjectNode args = mapper.createObjectNode();
+            args.put("document_id", docId);
+            args.put("format", "png_batch");
+            args.put("output_path", existingFile.toString());
+            ToolCallResult result = service.call("ppt.export_document", args);
+            assertFalse(result.success());
+            assertEquals("VALIDATION_ERROR", result.payload().path("code").asText());
         } finally {
             service.closeAllSessions();
         }

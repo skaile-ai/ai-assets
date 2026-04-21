@@ -34,7 +34,7 @@ For interactive testing with the MCP Inspector, see "Manual testing with the MCP
 
 ## How it's structured
 
-The module is now organized by responsibility instead of a single flat package:
+The module is organized by responsibility. `PptToolService` is a thin dispatch facade; every tool lives in an operations class and registers itself via a `handlers()` map:
 
 ```
 src/main/java/ai/skaile/mcpo/ppt/
@@ -42,18 +42,31 @@ src/main/java/ai/skaile/mcpo/ppt/
   server/                       # MCP protocol loop and JSON-RPC framing
     McpServer.java
     JsonRpcIO.java
-  tooling/                      # tool registry, schemas, and execution logic
-    PptToolService.java
-    PptDocumentOperations.java
-    PptSlideOperations.java
-    PptRenderService.java
-    PptTemplateService.java
-    ToolHandler.java
-    ToolDefinition.java
-    ToolCallResult.java
-    ToolArgumentValidator.java
-    ToolResponseFactory.java
-    PptPathResolver.java
+  tooling/                      # tool registry, schemas, dispatch
+    PptToolService.java         # dispatch facade (~200 lines); no business logic
+    PptToolDefinitions.java     # JSON-schema tool catalog
+    contracts/                  # ToolHandler, ToolDefinition, ToolCallResult
+    infra/                      # shared primitives
+      PptServerConfig.java      # the only file reading System.getenv
+      PptPathResolver.java      # sandbox-aware path resolution, temp files
+      PptShapeFinder.java       # (doc, slide, shape) resolver with typed exceptions
+      PptLimits.java            # safety-limit constants + enforce* helpers
+      PptSlideBuilder.java      # shared slide-construction helpers
+      ColorParser.java          # the single hex-color parser
+      PptUnits.java             # EMU <-> points <-> pixels conversions
+      SofficeAvailability.java  # cached LibreOffice probe
+      ToolArgumentValidator.java
+      ToolResponseFactory.java
+    operations/                 # tool implementations, grouped by family
+      PptDocumentOperations.java       # lifecycle, export, merge, generate
+      PptSlideOperations.java          # slide content + text
+      PptShapeMutationOperations.java  # shape add/move/resize/clone/delete/style
+      PptTableOperations.java          # add/get/edit_table + set_text
+      PptPageOperations.java           # page setup, background, layout, metadata
+      PptRenderOperations.java         # render, find_text, metrics
+      PptTemplateOperations.java       # insert_image, templates, markdown import
+      PptCapabilitiesOperations.java   # ppt.capabilities self-describe
+      PptTransactionManager.java       # per-session transaction snapshots
   session/                      # in-memory document lifecycle and handle store
     PptDocumentSession.java
     SessionStore.java
@@ -65,16 +78,17 @@ Testing follows the same structure:
 src/test/java/ai/skaile/mcpo/ppt/
   DockerPptMcpServerSmokeTest.java
   server/JsonRpcIOTest.java
+  session/SessionStoreTest.java
   tooling/PptToolServiceTest.java
 ```
 
 Maintenance conventions:
 
 - Keep protocol concerns inside `server` only.
-- Keep tool schemas and execution behavior inside `tooling`.
+- Keep tool schemas inside `PptToolDefinitions` and execution behavior inside `operations/`.
 - Keep document state and store behavior inside `session`.
-- Use `ToolArgumentValidator`, `PptPathResolver`, and `ToolResponseFactory` for shared concerns instead of adding more utility logic directly into `PptToolService`.
-- When adding a new tool, update `PptToolService` and add/extend tests in `tooling/PptToolServiceTest`.
+- Route all hex-color parsing through `ColorParser`, all EMU/point/pixel math through `PptUnits`, all (doc, slide, shape) resolution through `PptShapeFinder`, and all path resolution through `PptPathResolver`. Never touch `Files.createTempFile` directly — use `pathResolver.createSandboxTempFile`.
+- **Adding a new tool is a two-file edit**: declare the schema in `PptToolDefinitions`, then add a handler method + a `Map.of("ppt.your_tool", this::yourTool)` entry in the relevant operations class's `handlers()` map. Do not edit `PptToolService` — it is a pure dispatch facade.
 
 ## Tools
 
@@ -105,7 +119,7 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Document lifecycle | `ppt.open_document` | `path` | Open an existing presentation into memory and return a document handle. |
 | Document lifecycle | `ppt.close_document` | `document_id` | Close a document handle and release resources. |
 | Document lifecycle | `ppt.get_document_info` | `document_id` | Return document metadata, dirty state, page size, and timestamps. |
-| Document lifecycle | `ppt.export_document` | `document_id`; `output_path?`; `format?` | Export to disk. `format` = `pptx` \| `pdf` (implemented) \| `html` \| `png_batch` \| `jpg_batch` \| `svg_batch` \| `outline_text` (reserved for Phase 2; return `FORMAT_NOT_YET_IMPLEMENTED`). |
+| Document lifecycle | `ppt.export_document` | `document_id`; `output_path?`; `format?` | Export to disk. `format` = `pptx` \| `pdf` (implemented) \| `html` \| `png_batch` \| `jpg_batch` \| `svg_batch` \| `outline_text` (reserved for Phase 3; return `FORMAT_NOT_YET_IMPLEMENTED`). |
 | Page setup | `ppt.set_page_setup` | `document_id`; `preset`; `width?`; `height?` | Set page size using a preset or custom dimensions. |
 | Slide management | `ppt.list_slides` | `document_id` | List slides with index, text preview, and shape count. |
 | Slide management | `ppt.reorder_slides` | `document_id`; `new_order` | Reorder all slides using a full index permutation. |
@@ -117,17 +131,17 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Slide content | `ppt.update_text` | `document_id`; `slide_index`; `old_text`; `new_text`; `occurrence?` | Replace a specific text occurrence on a slide. |
 | Slide content | `ppt.replace_text_globally` | `document_id`; `old_text`; `new_text`; `case_sensitive?`; `max_replacements?` | Replace text occurrences across all slides. |
 | Slide content | `ppt.add_textbox` | `document_id`; `slide_index`; `text`; `x`; `y`; `width`; `height`; `font_size?` | Add a textbox to a slide at a specific position. |
-| Slide content | `ppt.set_text` | `document_id`; `slide_index`; `shape_index`; `scope?` (`shape`\|`run`\|`paragraph`); `target_text?`; `occurrence?`; `case_sensitive?`; `paragraph_index?`; run-style: `bold?`, `italic?`, `underline?`, `strikethrough?`, `font_size?`, `font_color?`, `font_family?`, `rotation?`, `auto_fit?`; paragraph-style: `text_align?`, `line_spacing?`, `space_before?`, `space_after?`, `left_margin?`, `indent?`, `bullet_enabled?`, `numbered?`, `bullet_character?`, `bullet_level?`. | Unified text mutation (replaces `ppt.set_text_style`, `ppt.set_text_run_style`, `ppt.set_text_formatting`, `ppt.set_list_formatting`). `strikethrough`/`rotation`/`auto_fit` accept the schema but land in Phase 3. |
+| Slide content | `ppt.set_text` | `document_id`; `slide_index`; `shape_index`; `scope?` (`shape`\|`run`\|`paragraph`); `target_text?`; `occurrence?`; `case_sensitive?`; `paragraph_index?`; run-style: `bold?`, `italic?`, `underline?`, `strikethrough?`, `font_size?`, `font_color?`, `font_family?`, `rotation?`, `auto_fit?`; paragraph-style: `text_align?`, `line_spacing?`, `space_before?`, `space_after?`, `left_margin?`, `indent?`, `bullet_enabled?`, `numbered?`, `bullet_character?`, `bullet_level?`. | Unified text mutation (replaces `ppt.set_text_style`, `ppt.set_text_run_style`, `ppt.set_text_formatting`, `ppt.set_list_formatting`). `strikethrough`/`rotation`/`auto_fit` accept the schema but land in Phase 4. |
 | Shapes | `ppt.add_shape` | `document_id`; `slide_index`; `shape_type`; `x`; `y`; `width`; `height`; `text?`; `fill_color?`; `border_color?`; `border_width?` | Add a primitive shape (rectangle/ellipse/line/arrow). |
 | Media | `ppt.insert_image` | `document_id`; `slide_index`; `image_path`; `x`; `y`; `width`; `height` | Insert an image into a slide. |
 | Media | `ppt.replace_image` | `document_id`; `slide_index`; `shape_index`; `image_path`; `keep_size?` | Replace a picture shape while preserving placement/size. |
 | Notes | `ppt.get_slide_notes` | `document_id`; `slide_index` | Get speaker notes text for a slide. |
 | Notes | `ppt.set_slide_notes` | `document_id`; `slide_index`; `notes_text` | Set speaker notes text for a slide. |
 | Tables | `ppt.add_table` | `document_id`; `slide_index`; `rows`; `cols`; `x`; `y`; `width`; `height` | Add a table to a slide. |
-| Tables | `ppt.get_table` | `document_id`; `slide_index`; `shape_index` | Return `{rows, cols, cells, row_heights, col_widths, merged_regions}`. Merge data lands in Phase 3. |
-| Tables | `ppt.edit_table` | `document_id`; `slide_index`; `shape_index`; `operation`; op-specific fields. | Single operation per call. Implemented: `set_cell` (`row`/`col`/`text`), `insert_row`/`delete_row` (`index`), `insert_col`/`delete_col` (`index`), `set_row_height` (`row_index`/`height`), `set_col_width` (`col_index`/`width`), `set_header_style` (`row_index?`/`fill_color?`/`font_color?`/`bold?`). Reserved for Phase 3 (`FEATURE_NOT_IMPLEMENTED`): `merge_cells` (`start_row`/`start_col`/`end_row`/`end_col`), `set_cell_border` (`row`/`col`/`sides`/`color`/`width`/`dash_style?`). |
+| Tables | `ppt.get_table` | `document_id`; `slide_index`; `shape_index` | Return `{rows, cols, cells, row_heights, col_widths, merged_regions}`. Merge-edit operations land in Phase 4. |
+| Tables | `ppt.edit_table` | `document_id`; `slide_index`; `shape_index`; `operation`; op-specific fields. | Single operation per call. Implemented: `set_cell` (`row`/`col`/`text`), `insert_row`/`delete_row` (`index`), `insert_col`/`delete_col` (`index`), `set_row_height` (`row_index`/`height`), `set_col_width` (`col_index`/`width`), `set_header_style` (`row_index?`/`fill_color?`/`font_color?`/`bold?`). Reserved for Phase 4 (`FEATURE_NOT_IMPLEMENTED`): `merge_cells` (`start_row`/`start_col`/`end_row`/`end_col`), `set_cell_border` (`row`/`col`/`sides`/`color`/`width`/`dash_style?`). |
 | Shapes | `ppt.move_shape` | `document_id`; `slide_index`; `shape_index`; `x`; `y` | Move a shape to new coordinates. |
-| Shapes | `ppt.clone_shape` | `document_id`; `slide_index`; `shape_index`; `offset_x?`; `offset_y?` | Clone a text-capable shape on the same slide. Full shape support lands in Phase 3. |
+| Shapes | `ppt.clone_shape` | `document_id`; `slide_index`; `shape_index`; `offset_x?`; `offset_y?` | Clone a text-capable shape on the same slide. Full shape support lands in Phase 4. |
 | Shapes | `ppt.resize_shape` | `document_id`; `slide_index`; `shape_index`; `width`; `height` | Resize a shape to a new width and height. |
 | Shapes | `ppt.add_hyperlink` | `document_id`; `slide_index`; `shape_index`; `url` | Attach hyperlink to all text runs in a text shape. |
 | Slide styling | `ppt.set_slide_background` | `document_id`; `slide_index`; `color` | Set a solid slide background color. |
@@ -136,7 +150,7 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Transactions | `ppt.transaction_commit` | `document_id` | Commit changes and discard transaction snapshot. |
 | Transactions | `ppt.transaction_rollback` | `document_id` | Roll back document state to transaction snapshot. |
 | Metrics | `ppt.get_slide_metrics` | `document_id`; `slide_index` | Analyze slide composition and text density. |
-| Rendering | `ppt.render_slide` | `document_id`; `slide_index`; `output_path`; `format?` (`png`\|`jpg`\|`svg`, default `png`); `fidelity?` (`low`\|`high`, default `low`); `width?`; `height?` | Render one slide. High fidelity is reserved for Phase 2 (returns `FORMAT_NOT_YET_IMPLEMENTED`). |
+| Rendering | `ppt.render_slide` | `document_id`; `slide_index`; `output_path`; `format?` (`png`\|`jpg`\|`svg`, default `png`); `fidelity?` (`low`\|`high`, default `low`); `width?`; `height?` | Render one slide. High fidelity is reserved for Phase 3 (returns `FORMAT_NOT_YET_IMPLEMENTED`). |
 | Rendering | `ppt.render_all_slides` | `document_id`; `output_dir`; `format?`; `fidelity?`; `file_name_pattern?`; `width?`; `height?` | Render every slide as PNG/JPG/SVG files in `output_dir`. |
 | Search | `ppt.find_text` | `document_id`; `query`; `case_sensitive?` | Find text occurrences across all slides. |
 | Templates | `ppt.upload_template` | `source_path`; `template_name?`; `make_default?` | Copy/upload a template into the template store. |
@@ -145,7 +159,7 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Presentation generation | `ppt.generate_presentation` | `title?`; `slide_titles?`; `template_path?`; `output_path?` | Generate a presentation from titles and optional template. |
 | Shapes | `ppt.delete_shape` | `document_id`; `slide_index`; `shape_index` | Remove a shape from a slide by index. |
 | Shapes | `ppt.get_shape_properties` | `document_id`; `slide_index`; `shape_index` | Return detailed shape properties (type, anchor, text). |
-| Shapes | `ppt.set_shape_style` | `document_id`; `slide_index`; `shape_index`; `fill_color?`; `border_color?`; `border_width?`; `text_align?` | Set fill, border, and text alignment style on a shape. Gradients/patterns land in Phase 3. |
+| Shapes | `ppt.set_shape_style` | `document_id`; `slide_index`; `shape_index`; `fill_color?`; `border_color?`; `border_width?`; `text_align?` | Set fill, border, and text alignment style on a shape. Gradients/patterns land in Phase 4. |
 | Metadata | `ppt.set_document_metadata` | `document_id`; `title?`; `author?`; `subject?`; `keywords?` | Set core document metadata fields. |
 | Layout | `ppt.set_slide_layout` | `document_id`; `slide_index`; `layout_type` | Apply a layout type to a slide. |
 | Shapes | `ppt.set_shape_z_order` | `document_id`; `slide_index`; `shape_index`; `position` | Move shape in z-order (front/back/forward/backward). |
@@ -153,16 +167,16 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 
 ### Feature flags
 
-`ppt.capabilities` reports six flags that gate advanced authoring features. All are `false` after Phase 1; later phases flip them:
+`ppt.capabilities` reports six flags that gate advanced authoring features. All are `false` after Phase 2; later phases flip them:
 
 | Flag | Phase | Gates |
 |---|---|---|
-| `high_fidelity_render` | 2 | `ppt.render_slide`/`ppt.render_all_slides` with `fidelity=high`, and non-PPTX `ppt.export_document` formats. |
-| `gradients` | 3 | `fill_type=gradient` / `pattern` on `ppt.set_shape_style`. |
-| `picture_effects` | 3 | `ppt.set_picture_effects` (new tool) — crop, alpha, recolor. |
-| `table_borders` | 3 | `ppt.edit_table` `operation=set_cell_border`. |
-| `table_merge` | 3 | `ppt.edit_table` `operation=merge_cells` plus merge metadata in `ppt.get_table`. |
-| `charts_update` | 4 | `ppt.list_charts` / `ppt.update_chart_data` (new tools). |
+| `high_fidelity_render` | 3 | `ppt.render_slide`/`ppt.render_all_slides` with `fidelity=high`, and non-PPTX `ppt.export_document` formats. |
+| `gradients` | 4 | `fill_type=gradient` / `pattern` on `ppt.set_shape_style`. |
+| `picture_effects` | 4 | `ppt.set_picture_effects` (new tool) — crop, alpha, recolor. |
+| `table_borders` | 4 | `ppt.edit_table` `operation=set_cell_border`. |
+| `table_merge` | 4 | `ppt.edit_table` `operation=merge_cells` plus merge metadata in `ppt.get_table`. |
+| `charts_update` | 5 | `ppt.list_charts` / `ppt.update_chart_data` (new tools). |
 
 ### Safety limits
 
@@ -352,7 +366,7 @@ Keep the `/workspace/resources` mount in place so Copilot can work against the s
 ## v1 limits (by design)
 
 - Formats: `.pptx` and `.pptm` (macro-enabled) are fully supported. Older `.ppt` files (ODP) are not yet supported.
-- Tool surface: 56 tools across document lifecycle, slide/content management, shape/text formatting, rendering (PNG/JPEG/SVG), metadata, layout updates, templating, search, markdown import, and transaction workflows. No native animation, transitions, embedded media timelines, or VBA source inspection.
+- Tool surface: 49 tools across document lifecycle, slide/content management, shape/text formatting, rendering (PNG/JPEG/SVG), metadata, layout updates, templating, search, markdown import, and transaction workflows. No native animation, transitions, embedded media timelines, or VBA source inspection.
 - Transport: stdio only. No HTTP / SSE.
 - Tenancy: one process per agent session; no per-handle locking or idle-handle eviction (process death is the eviction).
 - Rendering: slides render via POI native → image/SVG. LibreOffice used only for PDF export; if unavailable, PDF export fails gracefully with a tool error.

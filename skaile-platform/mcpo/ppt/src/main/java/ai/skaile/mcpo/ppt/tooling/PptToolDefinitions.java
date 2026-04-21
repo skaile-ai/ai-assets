@@ -321,7 +321,7 @@ final class PptToolDefinitions {
                                 }
                                 """),
                 tool(mapper, "ppt.edit_table",
-                        "Edit a table via a single operation. Implemented: set_cell, insert_row, delete_row, insert_col, delete_col, set_row_height, set_col_width, set_header_style. Reserved for Phase 3: merge_cells, set_cell_border.",
+                        "Edit a table via a single operation. Implemented: set_cell, insert_row, delete_row, insert_col, delete_col, set_row_height, set_col_width, set_header_style. Reserved for Phase 4: merge_cells, set_cell_border.",
                         """
                                 {
                                     "type": "object",
@@ -366,7 +366,7 @@ final class PptToolDefinitions {
                                 }
                                 """),
                 tool(mapper, "ppt.set_text",
-                        "Unified text mutation. scope=shape|run|paragraph selects the target; run-style fields (bold/italic/underline/font_*) apply to the selected runs, paragraph-style fields (text_align/line_spacing/bullet_*) apply to the matching paragraphs. strikethrough, rotation, auto_fit accept the schema but implementation lands in Phase 3.",
+                        "Unified text mutation. scope=shape|run|paragraph selects the target; run-style fields (bold/italic/underline/font_*) apply to the selected runs, paragraph-style fields (text_align/line_spacing/bullet_*) apply to the matching paragraphs. strikethrough, rotation, auto_fit accept the schema but implementation lands in Phase 4.",
                         """
                                 {
                                     "type": "object",
@@ -545,7 +545,7 @@ final class PptToolDefinitions {
 
 
                 tool(mapper, "ppt.export_document",
-                        "Export an open in-memory document to disk. format=pptx|pdf are implemented; html|png_batch|jpg_batch|svg_batch|outline_text are reserved for Phase 2.",
+                        "Export an open in-memory document to disk. format=pptx|pdf are implemented; html|png_batch|jpg_batch|svg_batch|outline_text are reserved for Phase 3.",
                         """
                                 {
                                   "type": "object",
@@ -563,7 +563,7 @@ final class PptToolDefinitions {
                                 }
                                 """),
                 tool(mapper, "ppt.render_slide",
-                        "Render one slide to an image. format=png|jpg|svg (default png). fidelity=low|high; high fidelity lands in Phase 2.",
+                        "Render one slide to an image. format=png|jpg|svg (default png). fidelity=low|high; high fidelity lands in Phase 3.",
                         """
                                 {
                                   "type": "object",
@@ -581,7 +581,7 @@ final class PptToolDefinitions {
                                 }
                                 """),
                 tool(mapper, "ppt.render_all_slides",
-                        "Render every slide to an image file in output_dir. format=png|jpg|svg (default png). fidelity=low|high; high fidelity lands in Phase 2.",
+                        "Render every slide to an image file in output_dir. format=png|jpg|svg (default png). fidelity=low|high; high fidelity lands in Phase 3.",
                         """
                                 {
                                   "type": "object",

@@ -21,6 +21,7 @@ import ai.skaile.mcpo.ppt.tooling.operations.PptSlideOperations;
 import ai.skaile.mcpo.ppt.tooling.operations.PptTableOperations;
 import ai.skaile.mcpo.ppt.tooling.operations.PptTemplateOperations;
 import ai.skaile.mcpo.ppt.tooling.operations.PptTransactionManager;
+import ai.skaile.mcpo.ppt.tooling.operations.SofficeRenderer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -90,12 +91,14 @@ public final class PptToolService {
         this.shapeFinder = new PptShapeFinder(store);
         this.limits = new PptLimits(responseFactory, shapeFinder);
 
+        SofficeRenderer sofficeRenderer = new SofficeRenderer(pathResolver, config);
+
         this.templateOperations = new PptTemplateOperations(
                 store, mapper, argumentValidator, responseFactory,
                 pathResolver, shapeFinder, config, limits);
         this.documentOperations = new PptDocumentOperations(
                 store, argumentValidator, responseFactory, pathResolver,
-                shapeFinder, limits, transactions, templateOperations, config);
+                shapeFinder, limits, transactions, templateOperations, sofficeRenderer, config);
         this.slideOperations = new PptSlideOperations(
                 argumentValidator, responseFactory, shapeFinder, limits);
         this.shapeOperations = new PptShapeMutationOperations(
@@ -106,7 +109,7 @@ public final class PptToolService {
                 argumentValidator, responseFactory, shapeFinder);
         this.renderOperations = new PptRenderOperations(
                 mapper, argumentValidator, responseFactory, pathResolver,
-                shapeFinder, limits);
+                shapeFinder, limits, sofficeRenderer);
         this.capabilitiesOperations = new PptCapabilitiesOperations(responseFactory, config);
 
         this.tools = PptToolDefinitions.create(mapper);

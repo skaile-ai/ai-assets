@@ -244,6 +244,79 @@ class DockerPptMcpServerSmokeTest {
             assertTrue(Files.exists(pdfPath));
             assertTrue(Files.size(pdfPath) > 0);
 
+            // Phase 3: html export routes through the same soffice renderer.
+            Path htmlPath = workspace.resolve("output/report.html");
+            JsonNode savedHtml = callTool(session, "ppt.export_document", objectNode(
+                    "document_id", documentId,
+                    "output_path", containerPath("output/report.html"),
+                    "format", "html"));
+            assertEquals("html", savedHtml.path("format").asText());
+            assertTrue(Files.exists(htmlPath));
+            assertTrue(Files.size(htmlPath) > 0);
+
+            // Phase 3: outline_text is pure POI traversal, no soffice needed.
+            Path outlinePath = workspace.resolve("output/report.md");
+            JsonNode savedOutline = callTool(session, "ppt.export_document", objectNode(
+                    "document_id", documentId,
+                    "output_path", containerPath("output/report.md"),
+                    "format", "outline_text"));
+            assertEquals("outline_text", savedOutline.path("format").asText());
+            assertTrue(Files.exists(outlinePath));
+            String outlineContent = Files.readString(outlinePath);
+            assertTrue(outlineContent.contains("#"),
+                    "outline must emit at least one markdown heading");
+
+            // Phase 3: png_batch writes one image per slide into a directory.
+            Path batchDir = workspace.resolve("output/png-batch");
+            Files.createDirectories(batchDir);
+            makeWorldWritable(batchDir);
+            JsonNode savedBatch = callTool(session, "ppt.export_document", objectNode(
+                    "document_id", documentId,
+                    "output_path", containerPath("output/png-batch"),
+                    "format", "png_batch"));
+            assertEquals("png_batch", savedBatch.path("format").asText());
+            assertTrue(savedBatch.path("slide_count").asInt() >= 2);
+            try (var stream = Files.list(batchDir)) {
+                long produced = stream
+                        .filter(p -> p.getFileName().toString().toLowerCase().endsWith(".png"))
+                        .count();
+                assertTrue(produced >= 2,
+                        "png_batch must produce one png per slide; got " + produced);
+            }
+
+            // Phase 3: high-fidelity render through soffice. Build a CJK+emoji slide,
+            // render it high-fidelity, then sample pixels to confirm the image isn't blank.
+            JsonNode cjkSlide = callTool(session, "ppt.add_slide", objectNode(
+                    "document_id", documentId,
+                    "title", "こんにちは 世界 \uD83D\uDCCA"));
+            int cjkIndex = cjkSlide.path("slide_count").asInt() - 1;
+            Path hiFidelityPng = workspace.resolve("output/slide-cjk-hi.png");
+            JsonNode hiFidelity = callTool(session, "ppt.render_slide", objectNode(
+                    "document_id", documentId,
+                    "slide_index", cjkIndex,
+                    "output_path", containerPath("output/slide-cjk-hi.png"),
+                    "format", "png",
+                    "fidelity", "high"));
+            assertEquals("high", hiFidelity.path("fidelity").asText());
+            assertTrue(Files.exists(hiFidelityPng));
+            assertTrue(Files.size(hiFidelityPng) > 0);
+            java.awt.image.BufferedImage hiFidelityImage =
+                    javax.imageio.ImageIO.read(hiFidelityPng.toFile());
+            assertTrue(hiFidelityImage != null && hiFidelityImage.getWidth() > 0);
+            boolean hasNonWhitePixel = false;
+            int w = hiFidelityImage.getWidth();
+            int h = hiFidelityImage.getHeight();
+            for (int y = 0; y < h && !hasNonWhitePixel; y += Math.max(1, h / 20)) {
+                for (int x = 0; x < w && !hasNonWhitePixel; x += Math.max(1, w / 20)) {
+                    int rgb = hiFidelityImage.getRGB(x, y) & 0xFFFFFF;
+                    if (rgb != 0xFFFFFF) {
+                        hasNonWhitePixel = true;
+                    }
+                }
+            }
+            assertTrue(hasNonWhitePixel,
+                    "high-fidelity CJK render must contain non-white pixels (tofu indicates missing fonts)");
+
             Path slidePng = workspace.resolve("output/slide.png");
             JsonNode slideImage = callTool(session, "ppt.render_slide", objectNode(
                     "document_id", documentId,

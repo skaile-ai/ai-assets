@@ -9,30 +9,31 @@ import ai.skaile.mcpo.ppt.tooling.infra.PptPathResolver;
 import ai.skaile.mcpo.ppt.tooling.infra.PptServerConfig;
 import ai.skaile.mcpo.ppt.tooling.infra.PptShapeFinder;
 import ai.skaile.mcpo.ppt.tooling.infra.PptSlideBuilder;
-import ai.skaile.mcpo.ppt.tooling.infra.SofficeAvailability;
 import ai.skaile.mcpo.ppt.tooling.infra.ToolArgumentValidator;
 import ai.skaile.mcpo.ppt.tooling.infra.ToolResponseFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.awt.Dimension;
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
+import org.apache.poi.xslf.usermodel.XSLFTextShape;
 
 /**
  * Document-lifecycle tool handlers: open / close / create / list_slides / reorder,
@@ -40,7 +41,14 @@ import org.apache.poi.xslf.usermodel.XSLFSlide;
  * Template resolution is delegated to {@link PptTemplateOperations}.
  */
 public final class PptDocumentOperations {
-    private static final long SOFFICE_TIMEOUT_SECONDS = 90;
+
+    /**
+     * POI surfaces layout/master prompt text ("Click to edit Master title style",
+     * "Click to add text", etc.) when a placeholder has no user content. The
+     * outline export filters these so chat agents see slide content only.
+     */
+    private static final Pattern PLACEHOLDER_PROMPT =
+            Pattern.compile("^Click to (edit|add) [^\\n]+$");
 
     private final SessionStore store;
     private final ToolArgumentValidator argumentValidator;
@@ -50,7 +58,7 @@ public final class PptDocumentOperations {
     private final PptLimits limits;
     private final PptTransactionManager transactions;
     private final PptTemplateOperations templates;
-    private final PptServerConfig config;
+    private final SofficeRenderer sofficeRenderer;
     private final int maxOpenDocs;
 
     public PptDocumentOperations(
@@ -62,6 +70,7 @@ public final class PptDocumentOperations {
             PptLimits limits,
             PptTransactionManager transactions,
             PptTemplateOperations templates,
+            SofficeRenderer sofficeRenderer,
             PptServerConfig config) {
         this.store = store;
         this.argumentValidator = argumentValidator;
@@ -71,7 +80,7 @@ public final class PptDocumentOperations {
         this.limits = limits;
         this.transactions = transactions;
         this.templates = templates;
-        this.config = config;
+        this.sofficeRenderer = sofficeRenderer;
         this.maxOpenDocs = config.maxOpenDocs();
     }
 
@@ -281,65 +290,156 @@ public final class PptDocumentOperations {
         PptDocumentSession session = shapeFinder.requireSession(args);
 
         String format = args.path("format").asText("pptx").toLowerCase(Locale.ROOT);
+        boolean isBatch = "png_batch".equals(format) || "jpg_batch".equals(format)
+                || "svg_batch".equals(format);
+
         switch (format) {
             case "pptx":
             case "pdf":
-                break;
             case "html":
             case "png_batch":
             case "jpg_batch":
             case "svg_batch":
             case "outline_text":
-                return error("FORMAT_NOT_YET_IMPLEMENTED",
-                        "Export format '" + format + "' lands in Phase 2.",
-                        false);
+                break;
             default:
                 return error("VALIDATION_ERROR",
                         "format must be one of: pptx, pdf, html, png_batch, jpg_batch, svg_batch, outline_text",
                         false);
         }
 
-        Path outputPath;
-        if (args.has("output_path") && !args.path("output_path").asText().isBlank()) {
-            outputPath = pathResolver.resolvePath(args.path("output_path").asText(), true);
-        } else if (session.getSourcePath() != null && "pptx".equals(format)) {
-            outputPath = session.getSourcePath();
-        } else {
+        Path outputPath = resolveExportOutputPath(args, session, format, isBatch);
+        if (outputPath == null) {
             return error("output_path is required for unsaved documents");
-        }
-
-        pathResolver.createParentDirectories(outputPath);
-
-        if ("pptx".equals(format)) {
-            try (FileOutputStream out = new FileOutputStream(outputPath.toFile())) {
-                session.getSlideShow().write(out);
-            }
-            session.setSourcePath(outputPath);
-            session.setDirty(false);
-        } else {
-            SofficeAvailability soffice = SofficeAvailability.get();
-            if (!soffice.available()) {
-                return error("SOFFICE_UNAVAILABLE",
-                        "LibreOffice (soffice) is not available on this host: " + soffice.error(),
-                        false);
-            }
-            Path tempPptx = pathResolver.createSandboxTempFile("mcpo-export-", ".pptx");
-            try {
-                try (FileOutputStream out = new FileOutputStream(tempPptx.toFile())) {
-                    session.getSlideShow().write(out);
-                }
-                exportPdfWithSoffice(tempPptx, outputPath);
-            } finally {
-                Files.deleteIfExists(tempPptx);
-            }
         }
 
         ObjectNode payload = okPayload();
         payload.put("document_id", session.getId());
-        payload.put("output_path", outputPath.toString());
         payload.put("format", format);
+
+        try {
+            switch (format) {
+                case "pptx" -> exportPptx(session, outputPath);
+                case "pdf" -> sofficeRenderer.exportWholeDeck(
+                        session.getSlideShow(), outputPath, "pdf", "pdf");
+                case "html" -> sofficeRenderer.exportWholeDeck(
+                        session.getSlideShow(), outputPath, "html", "html");
+                case "png_batch" -> exportBatch(session, payload, outputPath, "png", "png");
+                case "jpg_batch" -> exportBatch(session, payload, outputPath, "jpg", "jpg");
+                case "svg_batch" -> exportBatch(session, payload, outputPath, "svg", "svg");
+                case "outline_text" -> exportOutlineText(session, outputPath);
+                default -> throw new IllegalStateException("unreachable format=" + format);
+            }
+        } catch (SofficeRenderer.SofficeUnavailableException ex) {
+            return error("SOFFICE_UNAVAILABLE", ex.getMessage(), false);
+        }
+
+        if (isBatch) {
+            payload.put("output_dir", outputPath.toString());
+        } else {
+            payload.put("output_path", outputPath.toString());
+        }
         payload.put("message", "Document exported");
         return success(payload);
+    }
+
+    private Path resolveExportOutputPath(JsonNode args, PptDocumentSession session,
+            String format, boolean isBatch) {
+        boolean hasOutputPath = args.has("output_path")
+                && !args.path("output_path").asText().isBlank();
+        if (hasOutputPath) {
+            Path resolved = pathResolver.resolvePath(args.path("output_path").asText(), true);
+            if (isBatch && Files.exists(resolved) && !Files.isDirectory(resolved)) {
+                throw new IllegalArgumentException(
+                        "For " + format + " output_path must be a directory, not a file: "
+                                + resolved);
+            }
+            return resolved;
+        }
+        if ("pptx".equals(format) && session.getSourcePath() != null) {
+            return session.getSourcePath();
+        }
+        return null;
+    }
+
+    private void exportPptx(PptDocumentSession session, Path outputPath) throws IOException {
+        pathResolver.createParentDirectories(outputPath);
+        try (FileOutputStream out = new FileOutputStream(outputPath.toFile())) {
+            session.getSlideShow().write(out);
+        }
+        session.setSourcePath(outputPath);
+        session.setDirty(false);
+    }
+
+    private void exportBatch(PptDocumentSession session, ObjectNode payload, Path outputDir,
+            String sofficeFormat, String extension) throws IOException {
+        List<Path> files = sofficeRenderer.renderAllSlides(
+                session.getSlideShow(), outputDir, sofficeFormat, extension, "slide-%03d");
+        ArrayNode filesNode = payload.putArray("files");
+        for (Path file : files) {
+            filesNode.add(file.toString());
+        }
+        payload.put("slide_count", files.size());
+    }
+
+    private void exportOutlineText(PptDocumentSession session, Path outputPath) throws IOException {
+        pathResolver.createParentDirectories(outputPath);
+        String content = buildOutlineText(session.getSlideShow());
+        try (FileOutputStream fos = new FileOutputStream(outputPath.toFile());
+                Writer writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+            writer.write(content);
+        }
+    }
+
+    /**
+     * Deterministic markdown-style outline: first text run of each slide becomes a
+     * top-level heading; subsequent paragraphs become bullets. Designed for
+     * chat-agent consumption, not round-tripping.
+     *
+     * <p>POI returns inherited layout/master prompt text ("Click to edit Master title
+     * style", etc.) from empty placeholders via {@code paragraph.getText()}. We
+     * filter those by requiring each emitted paragraph to carry at least one
+     * direct text run — inherited-only paragraphs have empty {@code getTextRuns()}.
+     */
+    static String buildOutlineText(XMLSlideShow show) {
+        StringBuilder buf = new StringBuilder();
+        List<XSLFSlide> slides = show.getSlides();
+        for (int i = 0; i < slides.size(); i++) {
+            XSLFSlide slide = slides.get(i);
+            String title = null;
+            List<String> bullets = new ArrayList<>();
+            for (XSLFShape shape : slide.getShapes()) {
+                if (!(shape instanceof XSLFTextShape textShape)) {
+                    continue;
+                }
+                for (XSLFTextParagraph paragraph : textShape.getTextParagraphs()) {
+                    String text = paragraph.getText();
+                    if (text == null) {
+                        continue;
+                    }
+                    String trimmed = text.strip();
+                    if (trimmed.isEmpty() || PLACEHOLDER_PROMPT.matcher(trimmed).matches()) {
+                        continue;
+                    }
+                    if (title == null) {
+                        title = trimmed;
+                    } else {
+                        bullets.add(trimmed);
+                    }
+                }
+            }
+            if (title == null && bullets.isEmpty()) {
+                buf.append("# Slide ").append(i + 1).append('\n').append('\n');
+                continue;
+            }
+            buf.append("# ").append(title == null ? "Slide " + (i + 1) : title).append('\n');
+            buf.append('\n');
+            for (String bullet : bullets) {
+                buf.append("- ").append(bullet).append('\n');
+            }
+            buf.append('\n');
+        }
+        return buf.toString();
     }
 
     public ToolCallResult generatePresentation(JsonNode args) throws IOException {
@@ -425,93 +525,6 @@ public final class PptDocumentOperations {
         payload.put("slide_count", session.getSlideShow().getSlides().size());
         payload.put("message", "Transaction rolled back");
         return success(payload);
-    }
-
-    private void exportPdfWithSoffice(Path inputPptx, Path outputPdf) throws IOException {
-        String sofficeExecutable = config.sofficePath();
-
-        Path outputDir = outputPdf.getParent();
-        if (outputDir == null) {
-            outputDir = Path.of(".").toAbsolutePath().normalize();
-        }
-
-        ProcessBuilder processBuilder = new ProcessBuilder(
-                Arrays.asList(
-                        sofficeExecutable,
-                        "--headless",
-                        "--convert-to",
-                        "pdf",
-                        "--outdir",
-                        outputDir.toString(),
-                        inputPptx.toString()));
-        processBuilder.redirectErrorStream(true);
-
-        Process process = processBuilder.start();
-
-        StringBuilder capturedOutput = new StringBuilder();
-        Thread drain = new Thread(() -> {
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    synchronized (capturedOutput) {
-                        if (capturedOutput.length() < 8192) {
-                            if (capturedOutput.length() > 0) {
-                                capturedOutput.append('\n');
-                            }
-                            capturedOutput.append(line);
-                        }
-                    }
-                }
-            } catch (IOException ignored) {
-                // Process exit races with stream close; ignore.
-            }
-        }, "soffice-output-drain");
-        drain.setDaemon(true);
-        drain.start();
-
-        boolean finished;
-        try {
-            finished = process.waitFor(SOFFICE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            process.destroyForcibly();
-            throw new IOException("PDF export interrupted", e);
-        }
-
-        if (!finished) {
-            process.destroyForcibly();
-            throw new IOException("PDF export timed out waiting for LibreOffice after "
-                    + SOFFICE_TIMEOUT_SECONDS + "s");
-        }
-
-        try {
-            drain.join(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        if (process.exitValue() != 0) {
-            String output;
-            synchronized (capturedOutput) {
-                output = capturedOutput.toString().strip();
-            }
-            throw new IOException("LibreOffice PDF export failed with exit code "
-                    + process.exitValue()
-                    + (output.isEmpty() ? "" : ": " + output));
-        }
-
-        String baseName = inputPptx.getFileName().toString();
-        int dot = baseName.lastIndexOf('.');
-        String pdfName = (dot > 0 ? baseName.substring(0, dot) : baseName) + ".pdf";
-        Path generatedPdf = outputDir.resolve(pdfName).toAbsolutePath().normalize();
-        if (!Files.exists(generatedPdf)) {
-            throw new IOException("Expected PDF output was not created: " + generatedPdf);
-        }
-
-        if (!generatedPdf.equals(outputPdf)) {
-            Files.move(generatedPdf, outputPdf, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-        }
     }
 
     private String requiredString(JsonNode args, String key) {
