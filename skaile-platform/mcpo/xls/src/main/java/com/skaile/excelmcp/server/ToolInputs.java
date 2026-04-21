@@ -49,6 +49,35 @@ public final class ToolInputs {
     return v.intValue();
   }
 
+  /**
+   * Required-integer reader. Distinct from {@link #intOrDefault(JsonNode, String, int)} because
+   * silently substituting the default for a missing required field led to confusing downstream
+   * "must be &gt;= 1" errors that hid the real (validation-stage) cause.
+   */
+  public static int requireInt(JsonNode node, String field) throws McpException {
+    JsonNode v = node == null ? null : node.get(field);
+    if (v == null || v.isNull()) {
+      throw new McpException(
+          ErrorCode.VALIDATION_ERROR,
+          "required integer field missing: " + field,
+          Map.of("field", field));
+    }
+    if (!v.canConvertToInt()) {
+      throw new McpException(
+          ErrorCode.VALIDATION_ERROR, "field is not an integer: " + field, Map.of("field", field));
+    }
+    return v.intValue();
+  }
+
+  /** Optional-integer reader for genuinely-optional fields (no default value). */
+  public static java.util.OptionalInt optionalInt(JsonNode node, String field) {
+    JsonNode v = node == null ? null : node.get(field);
+    if (v == null || v.isNull() || !v.canConvertToInt()) {
+      return java.util.OptionalInt.empty();
+    }
+    return java.util.OptionalInt.of(v.intValue());
+  }
+
   public static HandleId requireHandle(JsonNode input) throws McpException {
     JsonNode v = input == null ? null : input.get("handle");
     if (v == null || v.isNull() || !v.isTextual()) {

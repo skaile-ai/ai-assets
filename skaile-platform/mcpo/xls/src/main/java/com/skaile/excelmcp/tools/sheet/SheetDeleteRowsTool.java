@@ -3,6 +3,7 @@ package com.skaile.excelmcp.tools.sheet;
 import static com.skaile.excelmcp.server.ToolInputs.intOrDefault;
 import static com.skaile.excelmcp.server.ToolInputs.object;
 import static com.skaile.excelmcp.server.ToolInputs.requireHandle;
+import static com.skaile.excelmcp.server.ToolInputs.requireInt;
 import static com.skaile.excelmcp.server.ToolInputs.requireString;
 import static com.skaile.excelmcp.server.ToolInputs.stringProp;
 
@@ -72,7 +73,7 @@ public final class SheetDeleteRowsTool implements ToolDefinition {
   public Object execute(JsonNode input) throws McpException {
     HandleId id = requireHandle(input);
     String sheet = requireString(input, "sheet");
-    int startRow = intOrDefault(input, "start_row", 0);
+    int startRow = requireInt(input, "start_row");
     int count = intOrDefault(input, "count", 1);
     engine.deleteRows(id, sheet, startRow, count);
     log.info(

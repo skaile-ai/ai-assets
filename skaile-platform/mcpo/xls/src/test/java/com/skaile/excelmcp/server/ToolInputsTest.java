@@ -59,4 +59,28 @@ class ToolInputsTest {
         .extracting(ex -> ((McpException) ex).code())
         .isEqualTo(ErrorCode.HANDLE_UNKNOWN);
   }
+
+  @Test
+  void requireIntThrowsValidationErrorWhenMissing() throws Exception {
+    JsonNode in = parse("{}");
+    assertThatThrownBy(() -> ToolInputs.requireInt(in, "start_row"))
+        .isInstanceOf(McpException.class)
+        .extracting(ex -> ((McpException) ex).code())
+        .isEqualTo(ErrorCode.VALIDATION_ERROR);
+  }
+
+  @Test
+  void requireIntThrowsValidationErrorWhenWrongType() throws Exception {
+    JsonNode in = parse("{\"start_row\": \"five\"}");
+    assertThatThrownBy(() -> ToolInputs.requireInt(in, "start_row"))
+        .isInstanceOf(McpException.class)
+        .extracting(ex -> ((McpException) ex).code())
+        .isEqualTo(ErrorCode.VALIDATION_ERROR);
+  }
+
+  @Test
+  void requireIntReturnsValueWhenPresent() throws Exception {
+    JsonNode in = parse("{\"start_row\": 5}");
+    assertThat(ToolInputs.requireInt(in, "start_row")).isEqualTo(5);
+  }
 }
