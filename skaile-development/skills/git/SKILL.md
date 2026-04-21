@@ -1,8 +1,8 @@
 ---
 name: "git"
-description: "Git operations for the skaile-dev monorepo. Six modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (two-way sync: pull + push shell repo and all submodules, print per-repo summary of commits pulled and pushed)."
+description: "Git operations for the skaile-dev monorepo. Seven modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (two-way sync: pull + push shell repo and all submodules, print per-repo summary of commits pulled and pushed), deploy (merge main into deploy branch and push)."
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   tags:
     - "git"
     - "commit"
@@ -12,6 +12,7 @@ metadata:
     - "submodule"
     - "monorepo"
     - "skaile-development"
+    - "deploy"
   source: "MERGED"
   stage: "beta"
   user_inputs:
@@ -26,8 +27,9 @@ metadata:
           - "pr"
           - "finish"
           - "sync"
+          - "deploy"
         required: true
-        hint: "commit = structured commit message | branch = create/switch feature branch | worktree = isolated checkout | pr = open pull request | finish = merge/PR/keep/discard | sync = update submodules"
+        hint: "commit = structured commit message | branch = create/switch feature branch | worktree = isolated checkout | pr = open pull request | finish = merge/PR/keep/discard | sync = update submodules | deploy = merge main into deploy branch and push"
       - id: "description"
         label: "Change description (plain language) — used to derive branch name and commit message"
         type: "text"
@@ -65,6 +67,7 @@ Handles all git operations for the skaile-dev monorepo. Works in six modes:
 | `pr` | Open a pull request with structured description | When change needs review before merging |
 | `finish` | Close a branch: merge, PR, keep, or discard | After implementation is verified |
 | `sync` | Fetch and update all submodules | After pulling, or to align submodule pointers |
+| `deploy` | Merge main into the `deploy` branch and push | When ready to ship current main to the deploy target |
 
 ## When to Use
 
@@ -74,6 +77,7 @@ Handles all git operations for the skaile-dev monorepo. Works in six modes:
 - Closing out an implementation: `mode=finish`
 - Team review: `mode=pr`
 - Submodule alignment: `mode=sync`
+- Shipping to deploy target: `mode=deploy`
 
 ## When NOT to Use
 
@@ -495,6 +499,69 @@ IF mode = sync
 
   EMIT [git] sync_complete
 
+# ── Mode: deploy ─────────────────────────────────────────────────
+
+IF mode = deploy
+
+  You are merging main into the `deploy` branch and pushing it.
+  This is the standard way to ship the current state of main to the deploy target.
+
+  STEP 1: Pre-flight — verify current branch
+    $ git rev-parse --abbrev-ref HEAD → current_branch
+
+    IF current_branch ≠ main
+      ASK:
+        > "You are on '<current_branch>', not main. What would you like to do?
+        >
+        > 1. merge-to-main — finish this branch and merge it to main first (runs mode=finish)
+        > 2. cancel — abort the deploy"
+
+      IF user chooses merge-to-main:
+        RUN mode=finish → let user complete the merge flow
+        THEN continue from STEP 2 (now on main)
+      IF user chooses cancel:
+        STOP: "Deploy cancelled."
+
+  STEP 2: Stash working tree changes if needed
+    $ git status --short → status
+    IF any tracked files are modified (M lines):
+      $ git stash push -m "pre-deploy stash"
+      SET stashed = true
+    ELSE
+      SET stashed = false
+
+  STEP 3: Checkout and update deploy branch
+    $ git checkout deploy
+    $ git pull origin deploy
+    IF pull fails:
+      IF stashed: $ git stash pop
+      $ git checkout main
+      STOP: "✗ Failed to pull deploy branch — <error>. Returned to main."
+
+  STEP 4: Merge main into deploy
+    $ git merge main --no-edit
+    IF merge conflict:
+      $ git merge --abort
+      $ git checkout main
+      IF stashed: $ git stash pop
+      STOP: "✗ Merge conflict between main and deploy. Resolve on deploy branch manually."
+
+  STEP 5: Push deploy
+    $ git push origin deploy
+    IF push fails:
+      $ git checkout main
+      IF stashed: $ git stash pop
+      STOP: "✗ Push to deploy failed — <error>. Returned to main."
+
+  STEP 6: Return to main
+    $ git checkout main
+    IF stashed: $ git stash pop
+
+  EMIT [git] deploy_complete
+  REPORT:
+    > "Deployed: main merged into deploy and pushed.
+    > deploy is now at: <git rev-parse --short deploy>"
+
 # ── End Modes ────────────────────────────────────────────────────
 
 CHECKLIST
@@ -505,6 +572,8 @@ CHECKLIST
   - [ ] Typed confirmation received for merge and discard
   - [ ] Worktree cleaned up after finish (merge, keep, discard)
   - [ ] git-state.json written/updated
+  - [ ] deploy mode only runs from main (or after explicit merge-to-main)
+  - [ ] stash popped after deploy (even on failure)
 
 ---
 
