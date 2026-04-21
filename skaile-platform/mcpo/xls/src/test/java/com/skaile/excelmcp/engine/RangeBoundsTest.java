@@ -85,4 +85,16 @@ class RangeBoundsTest {
       assertThat(engine.readRange(id, "Sheet1", "XFD1:XFD1", false, 10).cols()).isEqualTo(1);
     }
   }
+
+  @Test
+  void fullColumnReadOnXlsxClampsToFormatRowBound() throws Exception {
+    try (WorkbookEngine engine = new XssfInMemoryEngine(CFG, new HandleRegistry())) {
+      HandleId id = engine.create(Optional.empty());
+      // A:A is treated as the entire column; on xlsx the engine truncates at max_cells but never
+      // fails the format-bound check.
+      var range = engine.readRange(id, "Sheet1", "A:A", false, 5);
+      assertThat(range.cols()).isEqualTo(1);
+      assertThat(range.truncated()).isTrue();
+    }
+  }
 }

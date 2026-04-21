@@ -47,7 +47,10 @@ public final class RangeGetTool implements ToolDefinition {
         + " handle and an existing sheet; read-only. Empty cells appear as type:\"blank\" (not"
         + " omitted), formula cells with no cached result read as type:\"formula_uncomputed\""
         + " until workbook.recalculate runs, and responses beyond max_cells are truncated"
-        + " row-major with truncated=true and total_cells set.";
+        + " row-major with truncated=true and total_cells set. The range string accepts"
+        + " sheet-prefixed (\"Sheet1!A1:B2\", \"'Sheet Name'!A1:B2\") and full-column /"
+        + " full-row (\"A:A\", \"1:5\") forms; if the prefix names a different sheet than the"
+        + " sheet argument the call fails with RANGE_INVALID.";
   }
 
   @Override
@@ -66,9 +69,12 @@ public final class RangeGetTool implements ToolDefinition {
     props.set(
         "range",
         stringProp(
-            "A1 range string defining a bounded rectangle, e.g. \"A1:C10\" or \"C5\" (single"
-                + " cell). Either range or both start+end must be provided. Whole-column (\"A:A\")"
-                + " and whole-row (\"1:1\") forms are not supported — supply explicit bounds."));
+            "A1 range string, e.g. \"A1:C10\", \"C5\" (single cell), \"A:A\" or \"A:C\""
+                + " (full-column), \"1:1\" or \"1:5\" (full-row). Sheet-prefixed forms"
+                + " (\"Sheet1!A1:B2\", \"'Sheet Name'!A1:B2\" — embedded apostrophes escaped"
+                + " as \"''\") are accepted but if the prefix and the sheet argument disagree"
+                + " the call fails with RANGE_INVALID. 3D refs (\"Sheet1:Sheet3!A1\") are not"
+                + " supported. Either range or both start+end must be provided."));
     props.set(
         "start",
         stringProp(
@@ -113,7 +119,9 @@ public final class RangeGetTool implements ToolDefinition {
     Optional<String> end = optionalString(input, "end");
     String a1;
     if (rangeStr.isPresent()) {
-      a1 = rangeStr.get();
+      RangeAddress.ParsedRange pr = RangeAddress.parseWithSheet(rangeStr.get());
+      RangeReferences.assertSheetMatches(pr.sheet(), sheet, rangeStr.get());
+      a1 = pr.address().toA1();
     } else if (start.isPresent() && end.isPresent()) {
       a1 = RangeAddress.of(start.get(), end.get()).toA1();
     } else {

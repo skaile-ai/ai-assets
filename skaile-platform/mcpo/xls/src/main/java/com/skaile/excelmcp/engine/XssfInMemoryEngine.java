@@ -356,7 +356,7 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
       throws McpException {
     Workbook wb = requireOpen(id);
     Sheet sheet = requireSheet(wb, sheetName);
-    RangeAddress addr = RangeAddress.parse(rangeA1);
+    RangeAddress addr = clampToFormat(sheet, RangeAddress.parse(rangeA1));
     assertWithinFormatBounds(sheet, addr);
     int total = addr.cellCount();
     int rows = addr.rowCount();
@@ -619,7 +619,7 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
   public int clearRange(HandleId id, String sheetName, String rangeA1) throws McpException {
     Workbook wb = requireOpen(id);
     Sheet sheet = requireSheet(wb, sheetName);
-    RangeAddress addr = RangeAddress.parse(rangeA1);
+    RangeAddress addr = clampToFormat(sheet, RangeAddress.parse(rangeA1));
     assertWithinFormatBounds(sheet, addr);
     int cleared = 0;
     for (int r = addr.startRow(); r <= addr.endRow(); r++) {
@@ -724,6 +724,33 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
    * "show me A1:Z100 on this small sheet" calls and interacts poorly with cleared cells. See
    * excel-mcp-server-future-work.md for the data-extent bound deferral.
    */
+  /**
+   * Clamp full-column / full-row sentinels (encoded by {@link RangeAddress#parse} as EXCEL2007's
+   * last index) to the actual workbook format's limit. xlsx is identity; .xls binds full-column
+   * reads to ~64K rows instead of failing the bounds check below. Explicit out-of-bound inputs that
+   * happen to land exactly on the EXCEL2007 sentinel get silently clamped on .xls too — acceptable
+   * for v1, since the agent's intent there is unambiguous.
+   */
+  private static RangeAddress clampToFormat(Sheet sheet, RangeAddress addr) {
+    SpreadsheetVersion v = sheet.getWorkbook().getSpreadsheetVersion();
+    int maxRow = v.getLastRowIndex();
+    int maxCol = v.getLastColumnIndex();
+    int xlsxMaxRow = SpreadsheetVersion.EXCEL2007.getLastRowIndex();
+    int xlsxMaxCol = SpreadsheetVersion.EXCEL2007.getLastColumnIndex();
+    int endRow = addr.endRow();
+    int endCol = addr.endCol();
+    if (endRow == xlsxMaxRow && endRow > maxRow) {
+      endRow = maxRow;
+    }
+    if (endCol == xlsxMaxCol && endCol > maxCol) {
+      endCol = maxCol;
+    }
+    if (endRow == addr.endRow() && endCol == addr.endCol()) {
+      return addr;
+    }
+    return new RangeAddress(addr.startRow(), addr.startCol(), endRow, endCol);
+  }
+
   private static void assertWithinFormatBounds(Sheet sheet, RangeAddress addr) throws McpException {
     SpreadsheetVersion v = sheet.getWorkbook().getSpreadsheetVersion();
     int maxRow = v.getLastRowIndex();

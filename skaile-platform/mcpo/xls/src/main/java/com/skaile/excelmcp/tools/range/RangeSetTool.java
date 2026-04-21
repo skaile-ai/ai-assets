@@ -42,9 +42,12 @@ public final class RangeSetTool implements ToolDefinition {
         + " given A1 position; cells outside the block are untouched. Requires an open handle"
         + " and an existing sheet; the change is in-memory until workbook.save and does NOT"
         + " auto-recalculate — call workbook.recalculate after setting formulas to refresh"
-        + " cached results. If formulas is supplied it must be the same 2D shape as values;"
-        + " non-null formula entries override the matching value, and unlinked external"
-        + " references are rejected at write time with FORMULA_INVALID.";
+        + " cached results. If formulas is supplied it must be the same 2D shape as values"
+        + " (mismatched shapes fail with RANGE_INVALID); non-null formula entries override the"
+        + " matching value, and unlinked external references are rejected at write time with"
+        + " FORMULA_INVALID. Sheet-prefixed range/start strings (\"Sheet1!A1\") are accepted"
+        + " but if the prefix and the sheet argument disagree the call fails with"
+        + " RANGE_INVALID.";
   }
 
   @Override
@@ -65,12 +68,16 @@ public final class RangeSetTool implements ToolDefinition {
         stringProp(
             "Optional A1 range that explicitly bounds the write, e.g. \"A1:B2\". When omitted,"
                 + " start is required and the extent is inferred from the values array's"
-                + " dimensions. If provided, its shape must match the values dimensions."));
+                + " dimensions. If provided, its shape must match the values dimensions."
+                + " Sheet-prefixed forms (\"Sheet1!A1:B2\") are accepted but conflict with the"
+                + " sheet argument if they disagree."));
     props.set(
         "start",
         stringProp(
             "Alternative to range — A1 address of the top-left cell where writing begins (e.g."
-                + " \"A1\"). Extent is inferred from the values array's shape."));
+                + " \"A1\"). Extent is inferred from the values array's shape. Sheet-prefixed"
+                + " forms (\"Sheet1!A1\") are accepted but conflict with the sheet argument if"
+                + " they disagree."));
 
     ObjectNode values = object();
     values.put("type", "array");
@@ -129,13 +136,15 @@ public final class RangeSetTool implements ToolDefinition {
     int startRow;
     int startCol;
     if (startStr.isPresent()) {
-      RangeAddress s = RangeAddress.parse(startStr.get());
-      startRow = s.startRow();
-      startCol = s.startCol();
+      RangeAddress.ParsedRange ps = RangeAddress.parseWithSheet(startStr.get());
+      RangeReferences.assertSheetMatches(ps.sheet(), sheet, startStr.get());
+      startRow = ps.address().startRow();
+      startCol = ps.address().startCol();
     } else if (rangeStr.isPresent()) {
-      RangeAddress r = RangeAddress.parse(rangeStr.get());
-      startRow = r.startRow();
-      startCol = r.startCol();
+      RangeAddress.ParsedRange pr = RangeAddress.parseWithSheet(rangeStr.get());
+      RangeReferences.assertSheetMatches(pr.sheet(), sheet, rangeStr.get());
+      startRow = pr.address().startRow();
+      startCol = pr.address().startCol();
     } else {
       throw new McpException(
           ErrorCode.RANGE_INVALID, "either 'range' or 'start' must be provided", Map.of());
