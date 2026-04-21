@@ -86,6 +86,35 @@ The repo ships with the Maven Wrapper pinned to **Maven 3.9.9**. A global `mvn` 
 
 The output is a single fat jar at `target/excel-mcp-<version>.jar`, runnable with `java -jar`.
 
+## Tests
+
+Three layers, run via the Maven wrapper:
+
+| Command | What it runs |
+|---|---|
+| `./mvnw verify` | Full gate: compile + all JUnit tests + Spotless check + shade jar. Use before declaring a change done. |
+| `./mvnw test` | Just the JUnit tests (skips Spotless + shade). Faster loop while iterating. |
+| `./mvnw test -Dtest=TestSuiteRegressionTest` | Only the deterministic regression suites (see below). Substitute any other test class name to target a single file. |
+| `./mvnw test -Dtest=TestSuiteRegressionTest#everySuiteInTheRegressionFolder\\(\\)` | Only the `@TestFactory`-generated dynamic cases (one per suite folder), without the explicit `@Test` for the extension-backed suite. |
+
+Smoke scripts in `smoke/` (`phase*-smoke.sh`, `phase-regression-*.sh`) are **not** run by `mvnw verify` — they're end-to-end replays against the built jar and have to be invoked by hand (`./mvnw -DskipTests package && smoke/phaseN-smoke.sh`). Use them only when verifying a stdio-framing change; everything else is covered by the JUnit layer.
+
+### Deterministic regression suites
+
+Folder-per-case harness patterned after xlport. Each subdirectory of `src/test/resources/test-suites/` is one suite containing:
+
+```
+<suite-name>/
+  template.xlsx   — starting workbook
+  request.json    — { "description": "...", "operations": [ { "tool": "...", "arguments": {...} }, ... ] }
+  expected.xlsx   — the workbook that should result after replaying operations against the template
+  README.md       — 3-line note on what this suite covers (ported suites name the xlport source; fresh suites inline the generating jshell snippet)
+```
+
+`TestSuiteRegressionTest` discovers every directory under `test-suites/` and emits one JUnit `DynamicTest` per suite. The runner copies the template to a temp file, replays each operation against `WorkbookEngine` in-process (all mutating tools from the tools table above are dispatchable; `handle` is injected by the runner, never spelled out in the JSON), saves, reopens, and diffs against `expected.xlsx` via `WorkbookDiff` — a port of xlport's `diffTwoWorkbooksAndReturnErrors` covering sheet count/names, cell values rendered through `DataFormatter(Locale.GERMAN)`, and tables by name + row count.
+
+**Adding a new suite.** Drop a new folder with the four files above — no Java changes needed. Full conventions and the xlport-portability criterion are in [`deterministic-test-suites-plan.md`](deterministic-test-suites-plan.md).
+
 ## Run
 
 The server speaks MCP over **stdio only** in v1. No HTTP. Launched via the shaded jar:
