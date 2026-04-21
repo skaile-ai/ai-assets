@@ -58,12 +58,27 @@ public final class PptPathResolver {
     public Path resolvePath(String rawPath, boolean forWrite) {
         Path path = Path.of(rawPath).toAbsolutePath().normalize();
         if (allowedRoot != null && !path.startsWith(allowedRoot)) {
-            throw new IllegalArgumentException("Path is outside allowed root: " + path);
+            throw new PathNotAllowedException(path, allowedRoot);
         }
         if (!forWrite && !Files.exists(path)) {
             throw new IllegalArgumentException("Path does not exist: " + path);
         }
         return path;
+    }
+
+    /**
+     * Thrown when a path argument falls outside {@code MCPO_ALLOWED_ROOT}. The
+     * central dispatcher translates this into a {@code PATH_NOT_ALLOWED} error
+     * code so sandbox-escape attempts are distinguishable in logs from generic
+     * input-validation failures.
+     */
+    public static final class PathNotAllowedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        public PathNotAllowedException(Path attempted, Path allowedRoot) {
+            super("Path is outside allowed root (root=" + allowedRoot
+                    + ", attempted=" + attempted + ")");
+        }
     }
 
     public void createParentDirectories(Path path) throws IOException {

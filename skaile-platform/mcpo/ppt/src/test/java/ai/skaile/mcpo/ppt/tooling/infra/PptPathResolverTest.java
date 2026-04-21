@@ -52,8 +52,8 @@ class PptPathResolverTest {
     @Test
     void resolvePathRejectsPathsOutsideAllowedRoot(@TempDir Path root) {
         PptPathResolver resolver = new PptPathResolver(root);
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        PptPathResolver.PathNotAllowedException ex = assertThrows(
+                PptPathResolver.PathNotAllowedException.class,
                 () -> resolver.resolvePath("/etc/hosts", false));
         assertTrue(ex.getMessage().contains("outside allowed root"));
     }

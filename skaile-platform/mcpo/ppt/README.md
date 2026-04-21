@@ -58,15 +58,18 @@ src/main/java/ai/skaile/mcpo/ppt/
       ToolArgumentValidator.java
       ToolResponseFactory.java
     operations/                 # tool implementations, grouped by family
-      PptDocumentOperations.java       # lifecycle, export, merge, generate
-      PptSlideOperations.java          # slide content + text
-      PptShapeMutationOperations.java  # shape add/move/resize/clone/delete/style
-      PptTableOperations.java          # add/get/edit_table + set_text
+      PptDocumentOperations.java       # lifecycle, export, merge, generate, transaction wrappers
+      PptSlideOperations.java          # slide content (add/duplicate/delete, update/replace/find, notes)
+      PptShapeMutationOperations.java  # shape add/move/resize/clone/delete/style/z-order/hyperlink/replace_image/set_picture_effects
+      PptTableOperations.java          # add/get/edit_table (incl. merge_cells, set_cell_border)
+      PptTextOperations.java           # ppt.set_text
       PptPageOperations.java           # page setup, background, layout, metadata
       PptRenderOperations.java         # render, find_text, metrics
       PptTemplateOperations.java       # insert_image, templates, markdown import
+      PptChartOperations.java          # list_charts, update_chart_data
       PptCapabilitiesOperations.java   # ppt.capabilities self-describe
-      PptTransactionManager.java       # per-session transaction snapshots
+      PptTransactionManager.java       # per-session transaction snapshots (no tools)
+      SofficeRenderer.java             # shared soffice shell-out (no tools)
   session/                      # in-memory document lifecycle and handle store
     PptDocumentSession.java
     SessionStore.java
@@ -92,7 +95,7 @@ Maintenance conventions:
 
 ## Tools
 
-Current build ships **50 tools** across document lifecycle, slide management, shape/text mutation, rendering, metadata, layout control, templating, markdown import, and transaction workflows. All tools are supported by Apache POI 5.5.x and/or LibreOffice. Call `ppt.capabilities` at runtime for the authoritative list of versions, feature flags, and safety limits.
+Current build ships **52 tools** across document lifecycle, slide management, shape/text mutation, rendering, charts (data update), metadata, layout control, templating, markdown import, and transaction workflows. All tools are backed by Apache POI 5.5.x and/or LibreOffice. Call `ppt.capabilities` at runtime for the authoritative list of versions, feature flags, and safety limits.
 
 Supported tool families:
 - Document lifecycle: `ppt.create_document`, `ppt.open_document`, `ppt.close_document`, `ppt.export_document`, `ppt.get_document_info`
@@ -101,6 +104,7 @@ Supported tool families:
 - Slide content: `ppt.get_slide_content`, `ppt.update_text`, `ppt.replace_text_globally`, `ppt.add_textbox`, `ppt.set_text`, `ppt.get_slide_notes`, `ppt.set_slide_notes`
 - Media: `ppt.insert_image`, `ppt.replace_image`, `ppt.set_picture_effects`
 - Tables: `ppt.add_table`, `ppt.get_table`, `ppt.edit_table`
+- Charts: `ppt.list_charts`, `ppt.update_chart_data`
 - Search: `ppt.find_text`
 - Shapes & styling: `ppt.add_shape`, `ppt.move_shape`, `ppt.clone_shape`, `ppt.resize_shape`, `ppt.delete_shape`, `ppt.get_shape_properties`, `ppt.set_shape_style`, `ppt.set_shape_z_order`, `ppt.add_hyperlink`, `ppt.set_slide_background`
 - Layout & metadata: `ppt.set_slide_layout`, `ppt.set_document_metadata`
@@ -131,7 +135,7 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Slide content | `ppt.update_text` | `document_id`; `slide_index`; `old_text`; `new_text`; `occurrence?` | Replace a specific text occurrence on a slide. |
 | Slide content | `ppt.replace_text_globally` | `document_id`; `old_text`; `new_text`; `case_sensitive?`; `max_replacements?` | Replace text occurrences across all slides. |
 | Slide content | `ppt.add_textbox` | `document_id`; `slide_index`; `text`; `x`; `y`; `width`; `height`; `font_size?` | Add a textbox to a slide at a specific position. |
-| Slide content | `ppt.set_text` | `document_id`; `slide_index`; `shape_index`; `scope?` (`shape`\|`run`\|`paragraph`); `target_text?`; `occurrence?`; `case_sensitive?`; `paragraph_index?`; run-style: `bold?`, `italic?`, `underline?`, `strikethrough?`, `font_size?`, `font_color?`, `font_family?`; shape-body: `rotation?`, `auto_fit?` (`none`\|`normal`\|`shrink`); paragraph-style: `text_align?`, `line_spacing?`, `space_before?`, `space_after?`, `left_margin?`, `indent?`, `bullet_enabled?`, `numbered?`, `bullet_character?`, `bullet_level?`. | Unified text mutation (replaces `ppt.set_text_style`, `ppt.set_text_run_style`, `ppt.set_text_formatting`, `ppt.set_list_formatting`). |
+| Slide content | `ppt.set_text` | `document_id`; `slide_index`; `shape_index`; `scope?` (`shape`\|`run`\|`paragraph`); `target_text?`; `occurrence?`; `case_sensitive?`; `paragraph_index?`; run-style: `bold?`, `italic?`, `underline?`, `strikethrough?`, `font_size?`, `font_color?`, `font_family?`; shape-body: `rotation?`, `auto_fit?` (`none`\|`normal`\|`shrink`); paragraph-style: `text_align?`, `line_spacing?`, `space_before?`, `space_after?`, `left_margin?`, `indent?`, `bullet_enabled?`, `numbered?`, `bullet_character?`, `bullet_level?`. | Unified text mutation — single entry point for all run / paragraph / shape-body styling. |
 | Shapes | `ppt.add_shape` | `document_id`; `slide_index`; `shape_type`; `x`; `y`; `width`; `height`; `text?`; `fill_color?`; `border_color?`; `border_width?` | Add a primitive shape (rectangle/ellipse/line/arrow). |
 | Media | `ppt.insert_image` | `document_id`; `slide_index`; `image_path`; `x`; `y`; `width`; `height` | Insert an image into a slide. |
 | Media | `ppt.replace_image` | `document_id`; `slide_index`; `shape_index`; `image_path`; `keep_size?` | Replace a picture shape while preserving placement/size. |
@@ -164,6 +168,8 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Metadata | `ppt.set_document_metadata` | `document_id`; `title?`; `author?`; `subject?`; `keywords?` | Set core document metadata fields. |
 | Layout | `ppt.set_slide_layout` | `document_id`; `slide_index`; `layout_type` | Apply a layout type to a slide. |
 | Shapes | `ppt.set_shape_z_order` | `document_id`; `slide_index`; `shape_index`; `position` | Move shape in z-order (front/back/forward/backward). |
+| Charts | `ppt.list_charts` | `document_id`; `slide_index?` | Enumerate charts in a document (or a single slide). Returns per-chart `{slide_index, shape_index, chart_type, series[{name, category_count, value_count}], categories[], has_embedded_workbook}`. |
+| Charts | `ppt.update_chart_data` | `document_id`; `slide_index`; `shape_index`; `series[{name?, values[]}]`; `categories[]?` | Replace numeric values and/or category labels on an existing chart. Updates both the chart's cached XML and the embedded XLSX so PowerPoint's "Edit Data" dialog stays consistent. Error codes: `SHAPE_NOT_CHART`, `SERIES_COUNT_MISMATCH`, `CATEGORY_COUNT_MISMATCH`, `EMBEDDED_WORKBOOK_MISSING`. Chart creation is out of scope in v1. |
 | Capabilities | `ppt.capabilities` | (none) | Return server / POI / soffice versions, supported formats, installed fonts, feature flags, and safety limits. |
 
 ### Feature flags
@@ -177,7 +183,7 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | `picture_effects` | `true` | `ppt.set_picture_effects` — crop, alpha, recolor. |
 | `table_borders` | `true` | `ppt.edit_table` `operation=set_cell_border`. |
 | `table_merge` | `true` | `ppt.edit_table` `operation=merge_cells`. |
-| `charts_update` | `false` | `ppt.list_charts` / `ppt.update_chart_data` (Phase 5). |
+| `charts_update` | `true` | `ppt.list_charts` / `ppt.update_chart_data`. |
 
 ### Safety limits
 
@@ -198,7 +204,7 @@ All tool responses follow a structured envelope:
 ```json
 {
   "status": "success" | "error",
-  "code": "VALIDATION_ERROR" | "FILE_NOT_FOUND" | "IO_ERROR" | "...",
+  "code": "VALIDATION_ERROR" | "PATH_NOT_ALLOWED" | "...",
   "error": "Human-readable error message (only when status=error)",
   "retriable": true | false,
   "correlation_id": "<json-rpc-request-id>",
@@ -210,11 +216,38 @@ All tool responses follow a structured envelope:
 Key fields:
 
 - `status`: `success` on normal completion; `error` if the tool failed.
-- `code`: Structured error code for programmatic handling (e.g., `VALIDATION_ERROR`, `FILE_NOT_FOUND`, `IO_ERROR`, `UNSUPPORTED_FORMAT`).
+- `code`: Structured error code for programmatic handling. See the table below for the full list.
 - `error`: Message describing what went wrong (only present when status is `error`).
-- `retriable`: Whether retry is expected to help (e.g., `true` for transient I/O; `false` for invalid arguments).
+- `retriable`: Whether retry is expected to help. All current codes in v1 are `retriable=false`.
 - `correlation_id`: Echo of the JSON-RPC request id for tracing.
+- `tool_name`: Echo of the invoked tool name for tracing.
 - `data`: Tool-specific response payload (e.g., document handle, slide list, rendered image path).
+
+### Error codes
+
+Every code emitted by the v1 server, grouped by source:
+
+| Code | When |
+|---|---|
+| `VALIDATION_ERROR` | Argument fails JSON-schema validation or a handler-level input check (missing required field, bad value, unknown argument). |
+| `PATH_NOT_ALLOWED` | Path argument resolves outside `MCPO_ALLOWED_ROOT`. Distinct from `VALIDATION_ERROR` so sandbox-escape attempts are auditable. |
+| `INVALID_COLOR` | A `#RRGGBB` or `RRGGBB` field couldn't be parsed. |
+| `DOCUMENT_NOT_FOUND` | `document_id` doesn't refer to an open session. |
+| `SLIDE_INDEX_OUT_OF_RANGE` | `slide_index` is negative or ≥ slide count. |
+| `SHAPE_INDEX_OUT_OF_RANGE` | `shape_index` is negative or ≥ shape count. |
+| `SHAPE_NOT_PICTURE` | `set_picture_effects` target is not a picture shape. |
+| `SHAPE_NOT_CHART` | `update_chart_data` target is not a chart graphic frame. |
+| `SERIES_COUNT_MISMATCH` | `update_chart_data` series count ≠ chart's existing series count. |
+| `CATEGORY_COUNT_MISMATCH` | `update_chart_data` values array or categories array length ≠ chart's. |
+| `EMBEDDED_WORKBOOK_MISSING` | Target chart has no embedded XLSX (legacy chart format). |
+| `MERGE_CONFLICT` | `edit_table merge_cells` range overlaps existing merge anchor or `hMerge`/`vMerge` cell. |
+| `SOFFICE_UNAVAILABLE` | `soffice` not found on PATH. Surfaced by high-fidelity render + non-`pptx` export formats. |
+| `LIMIT_MAX_OPEN_DOCS` | Would exceed `MCPO_MAX_OPEN_DOCS` concurrent sessions. |
+| `LIMIT_MAX_SLIDES` | Would exceed `max_slides_per_deck` in `capabilities.limits`. |
+| `LIMIT_MAX_SHAPES` | Would exceed `max_shapes_per_slide`. |
+| `LIMIT_MAX_IMAGE_BYTES` | Image larger than `max_image_bytes`. |
+| `LIMIT_MAX_RENDER_DIMENSION` | Render width or height above `max_render_dimension`. |
+| `TOOL_EXECUTION_ERROR` | Catch-all for unexpected handler failure. The single-arg `responseFactory.error(message)` shortcut also emits this code, so handler-level fallbacks and uncaught-exception fallbacks share one code. |
 
 ## Build
 
@@ -300,7 +333,7 @@ Run the server under [`@modelcontextprotocol/inspector`](https://github.com/mode
        ppt-mcp:dev
    ```
 
-   `--user 1000:1000` makes the container write as the host user so `ppt.save_document` can atomically replace files in the bind-mounted directory. Adjust the UID/GID if your host account differs.
+   `--user 1000:1000` makes the container write as the host user so `ppt.export_document` can atomically replace files in the bind-mounted directory. Adjust the UID/GID if your host account differs.
 
 4. **Open the inspector URL** printed to the terminal — typically `http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=<token>`.
 
@@ -348,15 +381,21 @@ Keep the `/workspace/resources` mount in place so Copilot can work against the s
 - **Document handles** returned by `ppt.create_document` / `ppt.open_document` look like `doc_50f0d1e7`. Copy the value verbatim into the `document_id` argument of subsequent tools. Handles live for the container's lifetime — a second `docker run` starts fresh.
 - **Document storage behavior:**
   - `ppt.create_document` creates a presentation in memory only.
-  - New documents are written to disk only when you call `ppt.save_document` with `output_path`.
-  - If a document was opened from disk (`ppt.open_document`), `ppt.save_document` without `output_path` overwrites the original file path.
+  - New documents are written to disk only when you call `ppt.export_document` with `output_path` and a target format.
+  - If a document was opened from disk (`ppt.open_document`), `ppt.export_document` without `output_path` and with `format=pptx` (the default) overwrites the original file path atomically (temp-then-move).
+  - Non-`pptx` formats (`pdf`, `html`, `png_batch`, `jpg_batch`, `svg_batch`, `outline_text`) require `output_path`. Batch formats require a directory; single-file formats a file.
 
 ## Environment variables
 
 | Variable | Default | Purpose |
 |---|---|---|
 | `LOG_LEVEL` | `INFO` | Logback root level. Accepts `ERROR` / `WARN` / `INFO` / `DEBUG`. |
-| `SOFFICE_PATH` | `/usr/bin/soffice` | Path to LibreOffice executable for PDF export. Container sets this; override if needed. |
+| `SOFFICE_PATH` | `/usr/bin/soffice` | Path to LibreOffice executable. Container sets this; override if needed. If missing, soffice-dependent tools return `SOFFICE_UNAVAILABLE`. |
+| `MCPO_ALLOWED_ROOT` | `/workspace/resources` (Docker); unset (host) | Sandboxing root. When set, every path argument to every tool must resolve inside this directory; otherwise the tool returns `PATH_NOT_ALLOWED`. When unset, any absolute path is accepted (dev/test only). |
+| `MCPO_TEMPLATE_DIR` | `/workspace/resources/.mcpo-ppt/templates` | Template store used by `ppt.upload_template`. |
+| `MCPO_DEFAULT_TEMPLATE_CONFIG` | `/workspace/resources/.mcpo-ppt/default-template.json` | Persisted pointer for the default template across process restarts. |
+| `MCPO_MAX_OPEN_DOCS` | `100` | Maximum concurrent open documents before `LIMIT_MAX_OPEN_DOCS`. |
+| `MCPO_STDIO_FRAMED` | `false` | Opt-in `Content-Length` stdio framing for legacy clients. |
 
 ## External Dependencies
 
@@ -366,11 +405,11 @@ Keep the `/workspace/resources` mount in place so Copilot can work against the s
 
 ## v1 limits (by design)
 
-- Formats: `.pptx` and `.pptm` (macro-enabled) are fully supported. Older `.ppt` files (ODP) are not yet supported.
-- Tool surface: 50 tools across document lifecycle, slide/content management, shape/text formatting (incl. gradient/pattern fills, picture effects, table merge/borders), rendering (PNG/JPEG/SVG, dual-fidelity), metadata, layout updates, templating, search, markdown import, and transaction workflows. No native animation, transitions, embedded media timelines, or VBA source inspection.
+- Formats: `.pptx` and `.pptm` (macro-enabled) are fully supported on input. Older binary `.ppt` and ODP (`.odp`) are not supported.
+- Tool surface: 52 tools across document lifecycle, slide/content management, shape/text formatting (incl. gradient/pattern fills, picture effects, table merge/borders), rendering (PNG/JPEG/SVG, dual-fidelity), charts (data update only), metadata, layout updates, templating, search, markdown import, and transaction workflows. No native animation, transitions, embedded media timelines, SmartArt, slide master/theme editing, group-shape authoring, comments, video/audio embed, or VBA source inspection. Chart **creation** is out of scope for v1.
 - Transport: stdio only. No HTTP / SSE.
-- Tenancy: one process per agent session; no per-handle locking or idle-handle eviction (process death is the eviction).
-- Rendering: slides render via POI native → image/SVG. LibreOffice used only for PDF export; if unavailable, PDF export fails gracefully with a tool error.
+- Tenancy: one process per agent session. A per-session lock serializes concurrent tool calls on the same `document_id`; calls on different documents run in parallel. No idle-handle eviction (process death is the eviction).
+- Rendering: `fidelity=low` is POI + Batik (fast/crude). `fidelity=high` and all non-`pptx` export formats (`pdf`, `html`, `png_batch`, `jpg_batch`, `svg_batch`) go through LibreOffice — if `soffice` is unavailable those tools return `SOFFICE_UNAVAILABLE, retriable=false`. `outline_text` is pure POI.
 
 ## Logging
 
@@ -448,7 +487,7 @@ Insert an image into a slide:
 }
 ```
 
-Render a slide to SVG:
+Render a slide to SVG (low-fidelity POI path):
 
 ```json
 {
@@ -456,11 +495,13 @@ Render a slide to SVG:
   "id": "req-3",
   "method": "tools/call",
   "params": {
-    "name": "ppt.render_slide_svg",
+    "name": "ppt.render_slide",
     "arguments": {
       "document_id": "doc_50f0d1e7",
       "slide_index": 0,
       "output_path": "/workspace/resources/slide-0.svg",
+      "format": "svg",
+      "fidelity": "low",
       "width": 1920,
       "height": 1080
     }
@@ -468,7 +509,7 @@ Render a slide to SVG:
 }
 ```
 
-Save and close the document:
+Export the document to PDF (goes through LibreOffice):
 
 ```json
 {
@@ -476,7 +517,25 @@ Save and close the document:
   "id": "req-4",
   "method": "tools/call",
   "params": {
-    "name": "ppt.save_document",
+    "name": "ppt.export_document",
+    "arguments": {
+      "document_id": "doc_50f0d1e7",
+      "output_path": "/workspace/resources/demo.pdf",
+      "format": "pdf"
+    }
+  }
+}
+```
+
+Close the document and release its handle:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "req-5",
+  "method": "tools/call",
+  "params": {
+    "name": "ppt.close_document",
     "arguments": {
       "document_id": "doc_50f0d1e7"
     }

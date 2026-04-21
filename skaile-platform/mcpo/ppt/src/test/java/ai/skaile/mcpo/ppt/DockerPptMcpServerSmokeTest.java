@@ -29,11 +29,19 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.ClassOrderer;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestClassOrder;
+import org.junit.jupiter.api.TestMethodOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@TestClassOrder(ClassOrderer.OrderAnnotation.class)
 class DockerPptMcpServerSmokeTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String IMAGE_TAG = "ppt-mcp-server:itest";
@@ -93,51 +101,117 @@ class DockerPptMcpServerSmokeTest {
             "ppt.update_chart_data",
             "ppt.capabilities");
 
+    // Shared across all @Nested classes. Populated by @BeforeAll.
+    private static DockerSession SESSION;
+    private static Path WORKSPACE;
+
+    // Cross-family state. Each field documents who sets it and who reads it.
+    private static String documentId;           // set by Document.createAndInfo, read by Slides/Text/Tables/Shapes/Images/Render/Export/Charts/Templates
+    private static String reopenedDocumentId;   // set by Export.exportPptxAndReopen, read by Transactions
+    private static int textboxShapeIndex = -1;  // set by Text.addTextbox, read by Text.styleText
+    private static int tableShapeIndex = -1;    // set by Tables.addAndGetTable, read by Tables.mergeCells/setCellBorder + Shapes.cloneShape
+    private static int imageShapeIndex = -1;    // set by Images.insertImage, read by Images.setPictureEffects
+    private static int cjkSlideIndex = -1;      // set by Render.highFidelityCjkRender
+    private static String chartDocId;           // set by Charts.openAndListCharts, read by Charts.updateAndRenderChart
+
     @BeforeAll
-    static void buildDockerImage() throws Exception {
+    static void setUp() throws Exception {
         Assumptions.assumeTrue(isDockerAvailable(), "Docker is not available in this environment");
         runCommand(List.of("docker", "build", "-t", IMAGE_TAG, "."), MODULE_DIR);
+        WORKSPACE = Files.createTempDirectory("ppt-docker-smoke");
+        makeWorldWritable(WORKSPACE);
+        SESSION = DockerSession.start(IMAGE_TAG, WORKSPACE);
+
+        // MCP initialize handshake happens once for the whole suite.
+        JsonNode initializeResponse = SESSION.request(request("1", "initialize", emptyObject()));
+        assertEquals("2.0", initializeResponse.path("jsonrpc").asText());
+        assertEquals("1", initializeResponse.path("id").asText());
+        assertEquals("2024-11-05", initializeResponse.path("result").path("protocolVersion").asText());
     }
 
     @AfterAll
-    static void cleanupImage() throws Exception {
-        if (!isDockerAvailable()) {
-            return;
+    static void tearDown() throws Exception {
+        try {
+            if (SESSION != null) {
+                SESSION.close();
+            }
+        } finally {
+            try {
+                if (WORKSPACE != null) {
+                    deleteRecursively(WORKSPACE);
+                }
+            } finally {
+                if (isDockerAvailable()) {
+                    runCommand(List.of("docker", "image", "rm", "-f", IMAGE_TAG), MODULE_DIR, true);
+                }
+            }
         }
-        runCommand(List.of("docker", "image", "rm", "-f", IMAGE_TAG), MODULE_DIR, true);
     }
 
-    @Test
-    void dockerImageRespondsAndExposesCorePptWorkflows() throws Exception {
-        Path workspace = Files.createTempDirectory("ppt-docker-smoke");
-        makeWorldWritable(workspace);
+    // ----------------------------------------------------------------------
+    // @Nested families, run in strict @Order so later families can depend on
+    // earlier ones via the cross-family static fields above.
+    // ----------------------------------------------------------------------
 
-        try (DockerSession session = DockerSession.start(IMAGE_TAG, workspace)) {
-            JsonNode initializeResponse = session.request(request("1", "initialize", emptyObject()));
-            assertEquals("2.0", initializeResponse.path("jsonrpc").asText());
-            assertEquals("1", initializeResponse.path("id").asText());
-            assertEquals("2024-11-05", initializeResponse.path("result").path("protocolVersion").asText());
-
-            JsonNode toolsResponse = session.request(request("2", "tools/list", emptyObject()));
+    @Nested
+    @Order(10)
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    class Capabilities {
+        @Test
+        void toolsListMatchesExpectedCatalog() throws Exception {
+            JsonNode toolsResponse = SESSION.request(request("2", "tools/list", emptyObject()));
             assertEquals("2", toolsResponse.path("id").asText());
             Set<String> toolNames = new HashSet<>();
             for (JsonNode tool : toolsResponse.path("result").path("tools")) {
                 toolNames.add(tool.path("name").asText());
             }
             assertEquals(Set.copyOf(EXPECTED_TOOLS), toolNames);
+        }
 
-            JsonNode created = callTool(session, "ppt.create_document", objectNode("title", "Docker smoke test"));
-            String documentId = created.path("document_id").asText();
+        @Test
+        void capabilitiesHandlerResponds() throws Exception {
+            JsonNode capabilities = callTool(SESSION, "ppt.capabilities", emptyObject());
+            assertEquals("success", capabilities.path("status").asText());
+            // The capability payload must include at least the feature_flags object + java_version.
+            assertNotNull(capabilities.path("feature_flags"));
+            assertFalse(capabilities.path("feature_flags").isMissingNode());
+        }
+    }
+
+    @Nested
+    @Order(20)
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    class Document {
+        @Test
+        void createAndInfo() throws Exception {
+            JsonNode created = callTool(SESSION, "ppt.create_document", objectNode("title", "Docker smoke test"));
+            documentId = created.path("document_id").asText();
             assertFalse(documentId.isBlank());
 
-            JsonNode info = callTool(session, "ppt.get_document_info", objectNode("document_id", documentId));
+            JsonNode info = callTool(SESSION, "ppt.get_document_info", objectNode("document_id", documentId));
             assertEquals(documentId, info.path("document_id").asText());
             assertEquals(1, info.path("slide_count").asInt());
+        }
+    }
 
-            JsonNode addedSlide = callTool(session, "ppt.add_slide", objectNode("document_id", documentId, "title", "Agenda"));
+    @Nested
+    @Order(30)
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    class Slides {
+        @Test
+        void addSlide() throws Exception {
+            JsonNode addedSlide = callTool(SESSION, "ppt.add_slide", objectNode("document_id", documentId, "title", "Agenda"));
             assertEquals(2, addedSlide.path("slide_count").asInt());
+        }
+    }
 
-            JsonNode textbox = callTool(session, "ppt.add_textbox", objectNode(
+    @Nested
+    @Order(40)
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    class Text {
+        @Test
+        void addTextboxAndUpdateText() throws Exception {
+            JsonNode textbox = callTool(SESSION, "ppt.add_textbox", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
                     "text", "Quarterly growth is strong",
@@ -145,35 +219,60 @@ class DockerPptMcpServerSmokeTest {
                     "y", 50,
                     "width", 340,
                     "height", 80));
-                assertEquals("Text box added", textbox.path("message").asText());
-                JsonNode slideContent = callTool(session, "ppt.get_slide_content", objectNode(
+            assertEquals("Text box added", textbox.path("message").asText());
+            JsonNode slideContent = callTool(SESSION, "ppt.get_slide_content", objectNode(
                     "document_id", documentId,
                     "slide_index", 0));
-                int textboxShapeIndex = slideContent.path("shapes").size() - 1;
+            textboxShapeIndex = slideContent.path("shapes").size() - 1;
             assertTrue(textboxShapeIndex >= 0);
 
-            JsonNode updated = callTool(session, "ppt.update_text", objectNode(
+            JsonNode updated = callTool(SESSION, "ppt.update_text", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
                     "old_text", "growth",
                     "new_text", "revenue"));
             assertEquals("success", updated.path("status").asText());
 
-            JsonNode found = callTool(session, "ppt.find_text", objectNode("document_id", documentId, "query", "revenue"));
+            JsonNode found = callTool(SESSION, "ppt.find_text", objectNode("document_id", documentId, "query", "revenue"));
             assertTrue(found.path("count").asInt() > 0);
+        }
 
-            JsonNode notesUpdated = callToolMaybeError(session, "ppt.set_slide_notes", objectNode(
+        @Test
+        void slideNotesRoundTrip() throws Exception {
+            JsonNode notesUpdated = callToolMaybeError(SESSION, "ppt.set_slide_notes", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
                     "notes_text", "Presenter note from Docker test."));
             if ("success".equals(notesUpdated.path("status").asText())) {
-                JsonNode notes = callTool(session, "ppt.get_slide_notes", objectNode("document_id", documentId, "slide_index", 0));
+                JsonNode notes = callTool(SESSION, "ppt.get_slide_notes", objectNode("document_id", documentId, "slide_index", 0));
                 assertEquals("Presenter note from Docker test.", notes.path("notes_text").asText());
             } else {
                 assertEquals("error", notesUpdated.path("status").asText());
             }
+        }
 
-            JsonNode table = callTool(session, "ppt.add_table", objectNode(
+        @Test
+        void styleText() throws Exception {
+            JsonNode style = callTool(SESSION, "ppt.set_text", objectNode(
+                    "document_id", documentId,
+                    "slide_index", 0,
+                    "shape_index", textboxShapeIndex,
+                    "bold", true,
+                    "italic", true,
+                    "underline", false,
+                    "font_size", 24,
+                    "font_color", "#003366"));
+            assertEquals("success", style.path("status").asText());
+        }
+    }
+
+    @Nested
+    @Order(50)
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    class Tables {
+        @Test
+        void addAndGetTable() throws Exception {
+            JsonNode table = callTool(SESSION, "ppt.add_table", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
                     "rows", 2,
@@ -182,10 +281,10 @@ class DockerPptMcpServerSmokeTest {
                     "y", 160,
                     "width", 360,
                     "height", 120));
-            int tableShapeIndex = table.path("shape_index").asInt(-1);
+            tableShapeIndex = table.path("shape_index").asInt(-1);
             assertTrue(tableShapeIndex >= 0);
 
-            callTool(session, "ppt.edit_table", objectNode(
+            callTool(SESSION, "ppt.edit_table", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
                     "shape_index", tableShapeIndex,
@@ -194,15 +293,18 @@ class DockerPptMcpServerSmokeTest {
                     "col", 1,
                     "text", "Target met"));
 
-            JsonNode tableSnapshot = callTool(session, "ppt.get_table", objectNode(
+            JsonNode tableSnapshot = callTool(SESSION, "ppt.get_table", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
                     "shape_index", tableShapeIndex));
             assertEquals("Target met",
                     tableSnapshot.path("cells").path(1).path(1).path("text").asText());
+        }
 
-            // Phase 4: merge a 2x2 anchored block + apply a per-cell border with dash style.
-            JsonNode merged = callTool(session, "ppt.edit_table", objectNode(
+        @Test
+        void mergeCells() throws Exception {
+            // Phase 4: merge a 2x2 anchored block.
+            JsonNode merged = callTool(SESSION, "ppt.edit_table", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
                     "shape_index", tableShapeIndex,
@@ -213,7 +315,11 @@ class DockerPptMcpServerSmokeTest {
                     "end_col", 1));
             assertEquals(2, merged.path("row_span").asInt());
             assertEquals(2, merged.path("col_span").asInt());
+        }
 
+        @Test
+        void setCellBorder() throws Exception {
+            // Phase 4: per-cell border with dash style.
             ObjectNode borderArgs = objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
@@ -225,37 +331,19 @@ class DockerPptMcpServerSmokeTest {
                     "width", 2.0,
                     "dash_style", "dashdot");
             borderArgs.putArray("sides").add("all");
-            JsonNode bordered = callTool(session, "ppt.edit_table", borderArgs);
+            JsonNode bordered = callTool(SESSION, "ppt.edit_table", borderArgs);
             assertEquals(4, bordered.path("sides_applied").asInt());
+        }
+    }
 
-            JsonNode style = callTool(session, "ppt.set_text", objectNode(
-                    "document_id", documentId,
-                    "slide_index", 0,
-                    "shape_index", textboxShapeIndex,
-                    "bold", true,
-                    "italic", true,
-                    "underline", false,
-                    "font_size", 24,
-                    "font_color", "#003366"));
-            assertEquals("success", style.path("status").asText());
-
-                Path imagePath = workspace.resolve("input/logo.png");
-            Files.createDirectories(imagePath.getParent());
-            writeSampleImage(imagePath);
-
-            JsonNode insertedImage = callTool(session, "ppt.insert_image", objectNode(
-                    "document_id", documentId,
-                    "slide_index", 0,
-                    "image_path", containerPath("input/logo.png"),
-                    "x", 420,
-                    "y", 50,
-                    "width", 120,
-                    "height", 90));
-            int imageShapeIndex = insertedImage.path("shape_index").asInt(-1);
-            assertTrue(imageShapeIndex >= 0);
-
-            // Phase 4: gradient fill on a primitive shape and picture effects on the inserted image.
-            JsonNode rect = callTool(session, "ppt.add_shape", objectNode(
+    @Nested
+    @Order(60)
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    class Shapes {
+        @Test
+        void gradientFillOnRectangle() throws Exception {
+            // Phase 4: gradient fill on a primitive shape.
+            JsonNode rect = callTool(SESSION, "ppt.add_shape", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
                     "shape_type", "rectangle",
@@ -276,9 +364,48 @@ class DockerPptMcpServerSmokeTest {
             ObjectNode stop2 = stops.addObject();
             stop2.put("color", "#003366"); stop2.put("position", 1.0);
             gradientStyle.set("fill_gradient", gradient);
-            JsonNode gradientResult = callTool(session, "ppt.set_shape_style", gradientStyle);
+            JsonNode gradientResult = callTool(SESSION, "ppt.set_shape_style", gradientStyle);
             assertEquals("success", gradientResult.path("status").asText());
+        }
 
+        @Test
+        void cloneShape() throws Exception {
+            // Phase 4: clone_shape now works on any shape, e.g. the table built earlier.
+            JsonNode cloned = callTool(SESSION, "ppt.clone_shape", objectNode(
+                    "document_id", documentId,
+                    "slide_index", 0,
+                    "shape_index", tableShapeIndex,
+                    "offset_x", 30.0,
+                    "offset_y", 30.0));
+            assertTrue(cloned.path("shape_index").asInt(-1) >= 0);
+        }
+    }
+
+    @Nested
+    @Order(70)
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    class Images {
+        @Test
+        void insertImage() throws Exception {
+            Path imagePath = WORKSPACE.resolve("input/logo.png");
+            Files.createDirectories(imagePath.getParent());
+            writeSampleImage(imagePath);
+
+            JsonNode insertedImage = callTool(SESSION, "ppt.insert_image", objectNode(
+                    "document_id", documentId,
+                    "slide_index", 0,
+                    "image_path", containerPath("input/logo.png"),
+                    "x", 420,
+                    "y", 50,
+                    "width", 120,
+                    "height", 90));
+            imageShapeIndex = insertedImage.path("shape_index").asInt(-1);
+            assertTrue(imageShapeIndex >= 0);
+        }
+
+        @Test
+        void setPictureEffects() throws Exception {
+            // Phase 4: picture effects on the inserted image.
             ObjectNode pictureFx = objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
@@ -291,161 +418,50 @@ class DockerPptMcpServerSmokeTest {
             ObjectNode recolor = MAPPER.createObjectNode();
             recolor.put("mode", "grayscale");
             pictureFx.set("recolor", recolor);
-            JsonNode pictureFxResult = callTool(session, "ppt.set_picture_effects", pictureFx);
+            JsonNode pictureFxResult = callTool(SESSION, "ppt.set_picture_effects", pictureFx);
             assertTrue(pictureFxResult.path("crop_applied").asBoolean());
             assertTrue(pictureFxResult.path("alpha_applied").asBoolean());
             assertTrue(pictureFxResult.path("recolor_applied").asBoolean());
+        }
+    }
 
-            // Phase 4: clone_shape now works on any shape, e.g. the table built earlier.
-            JsonNode cloned = callTool(session, "ppt.clone_shape", objectNode(
-                    "document_id", documentId,
-                    "slide_index", 0,
-                    "shape_index", tableShapeIndex,
-                    "offset_x", 30.0,
-                    "offset_y", 30.0));
-            assertTrue(cloned.path("shape_index").asInt(-1) >= 0);
-
-                Path pptxPath = workspace.resolve("output/report.pptx");
-            JsonNode savedPptx = callTool(session, "ppt.export_document", objectNode(
-                    "document_id", documentId,
-                    "output_path", containerPath("output/report.pptx")));
-            assertEquals("pptx", savedPptx.path("format").asText());
-            assertTrue(Files.exists(pptxPath));
-
-                JsonNode reopened = callTool(session, "ppt.open_document", objectNode("path", containerPath("output/report.pptx")));
-            String reopenedDocumentId = reopened.path("document_id").asText();
-            assertFalse(reopenedDocumentId.isBlank());
-
-            Path pdfPath = workspace.resolve("output/report.pdf");
-            JsonNode savedPdf = callTool(session, "ppt.export_document", objectNode(
-                    "document_id", documentId,
-                    "output_path", containerPath("output/report.pdf"),
-                    "format", "pdf"));
-            assertEquals("pdf", savedPdf.path("format").asText());
-            assertTrue(Files.exists(pdfPath));
-            assertTrue(Files.size(pdfPath) > 0);
-
-            // Phase 3: html export routes through the same soffice renderer.
-            Path htmlPath = workspace.resolve("output/report.html");
-            JsonNode savedHtml = callTool(session, "ppt.export_document", objectNode(
-                    "document_id", documentId,
-                    "output_path", containerPath("output/report.html"),
-                    "format", "html"));
-            assertEquals("html", savedHtml.path("format").asText());
-            assertTrue(Files.exists(htmlPath));
-            assertTrue(Files.size(htmlPath) > 0);
-
-            // Phase 3: outline_text is pure POI traversal, no soffice needed.
-            Path outlinePath = workspace.resolve("output/report.md");
-            JsonNode savedOutline = callTool(session, "ppt.export_document", objectNode(
-                    "document_id", documentId,
-                    "output_path", containerPath("output/report.md"),
-                    "format", "outline_text"));
-            assertEquals("outline_text", savedOutline.path("format").asText());
-            assertTrue(Files.exists(outlinePath));
-            String outlineContent = Files.readString(outlinePath);
-            assertTrue(outlineContent.contains("#"),
-                    "outline must emit at least one markdown heading");
-
-            // Phase 3: png_batch writes one image per slide into a directory.
-            Path batchDir = workspace.resolve("output/png-batch");
-            Files.createDirectories(batchDir);
-            makeWorldWritable(batchDir);
-            JsonNode savedBatch = callTool(session, "ppt.export_document", objectNode(
-                    "document_id", documentId,
-                    "output_path", containerPath("output/png-batch"),
-                    "format", "png_batch"));
-            assertEquals("png_batch", savedBatch.path("format").asText());
-            assertTrue(savedBatch.path("slide_count").asInt() >= 2);
-            try (var stream = Files.list(batchDir)) {
-                long produced = stream
-                        .filter(p -> p.getFileName().toString().toLowerCase().endsWith(".png"))
-                        .count();
-                assertTrue(produced >= 2,
-                        "png_batch must produce one png per slide; got " + produced);
-            }
-
-            // Phase 3: high-fidelity render through soffice. Build a CJK+emoji slide,
-            // render it high-fidelity, then sample pixels to confirm the image isn't blank.
-            JsonNode cjkSlide = callTool(session, "ppt.add_slide", objectNode(
-                    "document_id", documentId,
-                    "title", "こんにちは 世界 \uD83D\uDCCA"));
-            int cjkIndex = cjkSlide.path("slide_count").asInt() - 1;
-            Path hiFidelityPng = workspace.resolve("output/slide-cjk-hi.png");
-            JsonNode hiFidelity = callTool(session, "ppt.render_slide", objectNode(
-                    "document_id", documentId,
-                    "slide_index", cjkIndex,
-                    "output_path", containerPath("output/slide-cjk-hi.png"),
-                    "format", "png",
-                    "fidelity", "high"));
-            assertEquals("high", hiFidelity.path("fidelity").asText());
-            assertTrue(Files.exists(hiFidelityPng));
-            assertTrue(Files.size(hiFidelityPng) > 0);
-            java.awt.image.BufferedImage hiFidelityImage =
-                    javax.imageio.ImageIO.read(hiFidelityPng.toFile());
-            assertTrue(hiFidelityImage != null && hiFidelityImage.getWidth() > 0);
-            boolean hasNonWhitePixel = false;
-            int w = hiFidelityImage.getWidth();
-            int h = hiFidelityImage.getHeight();
-            for (int y = 0; y < h && !hasNonWhitePixel; y += Math.max(1, h / 20)) {
-                for (int x = 0; x < w && !hasNonWhitePixel; x += Math.max(1, w / 20)) {
-                    int rgb = hiFidelityImage.getRGB(x, y) & 0xFFFFFF;
-                    if (rgb != 0xFFFFFF) {
-                        hasNonWhitePixel = true;
-                    }
-                }
-            }
-            assertTrue(hasNonWhitePixel,
-                    "high-fidelity CJK render must contain non-white pixels (tofu indicates missing fonts)");
-
-            Path slidePng = workspace.resolve("output/slide.png");
-            JsonNode slideImage = callTool(session, "ppt.render_slide", objectNode(
-                    "document_id", documentId,
-                    "slide_index", 0,
-                    "output_path", containerPath("output/slide.png"),
-                    "width", 1280,
-                    "height", 720));
-            assertEquals("png", slideImage.path("format").asText());
-            assertTrue(Files.exists(slidePng));
-
-            Path slideSvg = workspace.resolve("output/slide.svg");
-            JsonNode slideVector = callToolMaybeError(session, "ppt.render_slide", objectNode(
-                    "document_id", documentId,
-                    "slide_index", 0,
-                    "output_path", containerPath("output/slide.svg"),
-                    "format", "svg",
-                    "width", 1280,
-                    "height", 720));
-            if ("success".equals(slideVector.path("status").asText())) {
-                assertEquals("svg", slideVector.path("format").asText());
-                assertTrue(Files.exists(slideSvg));
-            } else {
-                assertEquals("error", slideVector.path("status").asText());
-            }
-
+    @Nested
+    @Order(80)
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    class Charts {
+        @Test
+        void openAndListCharts() throws Exception {
             // Phase 5: list_charts + update_chart_data. Build a chart-bearing fixture on the
             // host via ChartFixtureBuilder, drop it in the bind-mount, then open + list +
             // update + high-fidelity render. Compare pre-/post-update PNGs to confirm the
             // rendered chart actually changed.
-            Path chartFixture = workspace.resolve("output/chart-sample.pptx");
+            Path chartFixture = WORKSPACE.resolve("output/chart-sample.pptx");
+            Files.createDirectories(chartFixture.getParent());
             ai.skaile.mcpo.ppt.tooling.operations.ChartFixtureBuilder
                     .writeClusteredColumn(chartFixture);
-            JsonNode chartOpened = callTool(session, "ppt.open_document", objectNode(
+            JsonNode chartOpened = callTool(SESSION, "ppt.open_document", objectNode(
                     "path", containerPath("output/chart-sample.pptx")));
-            String chartDocId = chartOpened.path("document_id").asText();
+            chartDocId = chartOpened.path("document_id").asText();
             assertFalse(chartDocId.isBlank());
 
-            JsonNode listed = callTool(session, "ppt.list_charts", objectNode(
+            JsonNode listed = callTool(SESSION, "ppt.list_charts", objectNode(
                     "document_id", chartDocId));
             assertEquals(1, listed.path("charts").size());
             JsonNode chartInfo = listed.path("charts").get(0);
             assertEquals("column", chartInfo.path("chart_type").asText());
             assertTrue(chartInfo.path("has_embedded_workbook").asBoolean());
+        }
+
+        @Test
+        void updateAndRenderChart() throws Exception {
+            JsonNode listed = callTool(SESSION, "ppt.list_charts", objectNode(
+                    "document_id", chartDocId));
+            JsonNode chartInfo = listed.path("charts").get(0);
             int chartSlide = chartInfo.path("slide_index").asInt();
             int chartShape = chartInfo.path("shape_index").asInt();
 
-            Path beforePng = workspace.resolve("output/chart-before.png");
-            JsonNode beforeRender = callTool(session, "ppt.render_slide", objectNode(
+            Path beforePng = WORKSPACE.resolve("output/chart-before.png");
+            JsonNode beforeRender = callTool(SESSION, "ppt.render_slide", objectNode(
                     "document_id", chartDocId,
                     "slide_index", chartSlide,
                     "output_path", containerPath("output/chart-before.png"),
@@ -469,12 +485,12 @@ class DockerPptMcpServerSmokeTest {
                     vals.add(1000.0 * (s + 1) + i * 100.0);
                 }
             }
-            JsonNode chartUpdated = callTool(session, "ppt.update_chart_data", updateArgs);
+            JsonNode chartUpdated = callTool(SESSION, "ppt.update_chart_data", updateArgs);
             assertEquals("success", chartUpdated.path("status").asText());
             assertEquals(3, chartUpdated.path("updated_series").asInt());
 
-            Path afterPng = workspace.resolve("output/chart-after.png");
-            JsonNode afterRender = callTool(session, "ppt.render_slide", objectNode(
+            Path afterPng = WORKSPACE.resolve("output/chart-after.png");
+            JsonNode afterRender = callTool(SESSION, "ppt.render_slide", objectNode(
                     "document_id", chartDocId,
                     "slide_index", chartSlide,
                     "output_path", containerPath("output/chart-after.png"),
@@ -491,37 +507,211 @@ class DockerPptMcpServerSmokeTest {
             assertTrue(bytesDiffer || afterSize != beforeSize,
                     "chart render before/after must differ after update_chart_data");
 
-            JsonNode chartClosed = callTool(session, "ppt.close_document",
+            JsonNode chartClosed = callTool(SESSION, "ppt.close_document",
                     objectNode("document_id", chartDocId));
             assertEquals("success", chartClosed.path("status").asText());
+        }
+    }
 
-            JsonNode templateUpload = callTool(session, "ppt.upload_template", objectNode(
+    @Nested
+    @Order(90)
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    class Render {
+        @Test
+        void highFidelityCjkRender() throws Exception {
+            // Phase 3: high-fidelity render through soffice. Build a CJK+emoji slide,
+            // render it high-fidelity, then sample pixels to confirm the image isn't blank.
+            JsonNode cjkSlide = callTool(SESSION, "ppt.add_slide", objectNode(
+                    "document_id", documentId,
+                    "title", "こんにちは 世界 📊"));
+            cjkSlideIndex = cjkSlide.path("slide_count").asInt() - 1;
+            Path hiFidelityPng = WORKSPACE.resolve("output/slide-cjk-hi.png");
+            Files.createDirectories(hiFidelityPng.getParent());
+            JsonNode hiFidelity = callTool(SESSION, "ppt.render_slide", objectNode(
+                    "document_id", documentId,
+                    "slide_index", cjkSlideIndex,
+                    "output_path", containerPath("output/slide-cjk-hi.png"),
+                    "format", "png",
+                    "fidelity", "high"));
+            assertEquals("high", hiFidelity.path("fidelity").asText());
+            assertTrue(Files.exists(hiFidelityPng));
+            assertTrue(Files.size(hiFidelityPng) > 0);
+            java.awt.image.BufferedImage hiFidelityImage =
+                    javax.imageio.ImageIO.read(hiFidelityPng.toFile());
+            assertTrue(hiFidelityImage != null && hiFidelityImage.getWidth() > 0);
+            boolean hasNonWhitePixel = false;
+            int w = hiFidelityImage.getWidth();
+            int h = hiFidelityImage.getHeight();
+            for (int y = 0; y < h && !hasNonWhitePixel; y += Math.max(1, h / 20)) {
+                for (int x = 0; x < w && !hasNonWhitePixel; x += Math.max(1, w / 20)) {
+                    int rgb = hiFidelityImage.getRGB(x, y) & 0xFFFFFF;
+                    if (rgb != 0xFFFFFF) {
+                        hasNonWhitePixel = true;
+                    }
+                }
+            }
+            assertTrue(hasNonWhitePixel,
+                    "high-fidelity CJK render must contain non-white pixels (tofu indicates missing fonts)");
+        }
+
+        @Test
+        void pngAndSvgRenders() throws Exception {
+            Path slidePng = WORKSPACE.resolve("output/slide.png");
+            Files.createDirectories(slidePng.getParent());
+            JsonNode slideImage = callTool(SESSION, "ppt.render_slide", objectNode(
+                    "document_id", documentId,
+                    "slide_index", 0,
+                    "output_path", containerPath("output/slide.png"),
+                    "width", 1280,
+                    "height", 720));
+            assertEquals("png", slideImage.path("format").asText());
+            assertTrue(Files.exists(slidePng));
+
+            Path slideSvg = WORKSPACE.resolve("output/slide.svg");
+            JsonNode slideVector = callToolMaybeError(SESSION, "ppt.render_slide", objectNode(
+                    "document_id", documentId,
+                    "slide_index", 0,
+                    "output_path", containerPath("output/slide.svg"),
+                    "format", "svg",
+                    "width", 1280,
+                    "height", 720));
+            if ("success".equals(slideVector.path("status").asText())) {
+                assertEquals("svg", slideVector.path("format").asText());
+                assertTrue(Files.exists(slideSvg));
+            } else {
+                assertEquals("error", slideVector.path("status").asText());
+            }
+        }
+    }
+
+    @Nested
+    @Order(100)
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    class Export {
+        @Test
+        void exportPptxAndReopen() throws Exception {
+            Path pptxPath = WORKSPACE.resolve("output/report.pptx");
+            Files.createDirectories(pptxPath.getParent());
+            JsonNode savedPptx = callTool(SESSION, "ppt.export_document", objectNode(
+                    "document_id", documentId,
+                    "output_path", containerPath("output/report.pptx")));
+            assertEquals("pptx", savedPptx.path("format").asText());
+            assertTrue(Files.exists(pptxPath));
+
+            JsonNode reopened = callTool(SESSION, "ppt.open_document", objectNode("path", containerPath("output/report.pptx")));
+            reopenedDocumentId = reopened.path("document_id").asText();
+            assertFalse(reopenedDocumentId.isBlank());
+        }
+
+        @Test
+        void exportPdf() throws Exception {
+            Path pdfPath = WORKSPACE.resolve("output/report.pdf");
+            JsonNode savedPdf = callTool(SESSION, "ppt.export_document", objectNode(
+                    "document_id", documentId,
+                    "output_path", containerPath("output/report.pdf"),
+                    "format", "pdf"));
+            assertEquals("pdf", savedPdf.path("format").asText());
+            assertTrue(Files.exists(pdfPath));
+            assertTrue(Files.size(pdfPath) > 0);
+        }
+
+        @Test
+        void exportHtml() throws Exception {
+            // Phase 3: html export routes through the same soffice renderer.
+            Path htmlPath = WORKSPACE.resolve("output/report.html");
+            JsonNode savedHtml = callTool(SESSION, "ppt.export_document", objectNode(
+                    "document_id", documentId,
+                    "output_path", containerPath("output/report.html"),
+                    "format", "html"));
+            assertEquals("html", savedHtml.path("format").asText());
+            assertTrue(Files.exists(htmlPath));
+            assertTrue(Files.size(htmlPath) > 0);
+        }
+
+        @Test
+        void exportOutlineText() throws Exception {
+            // Phase 3: outline_text is pure POI traversal, no soffice needed.
+            Path outlinePath = WORKSPACE.resolve("output/report.md");
+            JsonNode savedOutline = callTool(SESSION, "ppt.export_document", objectNode(
+                    "document_id", documentId,
+                    "output_path", containerPath("output/report.md"),
+                    "format", "outline_text"));
+            assertEquals("outline_text", savedOutline.path("format").asText());
+            assertTrue(Files.exists(outlinePath));
+            String outlineContent = Files.readString(outlinePath);
+            assertTrue(outlineContent.contains("#"),
+                    "outline must emit at least one markdown heading");
+        }
+
+        @Test
+        void exportPngBatch() throws Exception {
+            // Phase 3: png_batch writes one image per slide into a directory.
+            Path batchDir = WORKSPACE.resolve("output/png-batch");
+            Files.createDirectories(batchDir);
+            makeWorldWritable(batchDir);
+            JsonNode savedBatch = callTool(SESSION, "ppt.export_document", objectNode(
+                    "document_id", documentId,
+                    "output_path", containerPath("output/png-batch"),
+                    "format", "png_batch"));
+            assertEquals("png_batch", savedBatch.path("format").asText());
+            assertTrue(savedBatch.path("slide_count").asInt() >= 2);
+            try (var stream = Files.list(batchDir)) {
+                long produced = stream
+                        .filter(p -> p.getFileName().toString().toLowerCase().endsWith(".png"))
+                        .count();
+                assertTrue(produced >= 2,
+                        "png_batch must produce one png per slide; got " + produced);
+            }
+        }
+    }
+
+    @Nested
+    @Order(110)
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    class Templates {
+        @Test
+        void uploadTemplate() throws Exception {
+            JsonNode templateUpload = callTool(SESSION, "ppt.upload_template", objectNode(
                     "source_path", containerPath("output/report.pptx"),
                     "template_name", "docker-default-template.pptx",
                     "make_default", true));
             String templatePath = templateUpload.path("template_path").asText();
             assertFalse(templatePath.isBlank());
 
-            JsonNode defaultTemplate = callTool(session, "ppt.get_default_template", emptyObject());
+            JsonNode defaultTemplate = callTool(SESSION, "ppt.get_default_template", emptyObject());
             assertTrue(defaultTemplate.path("has_default_template").asBoolean());
             assertEquals(templatePath, defaultTemplate.path("default_template_path").asText());
 
-            JsonNode setDefaultTemplate = callTool(session, "ppt.set_default_template", objectNode("template_path", templatePath));
+            JsonNode setDefaultTemplate = callTool(SESSION, "ppt.set_default_template", objectNode("template_path", templatePath));
             assertEquals(templatePath, setDefaultTemplate.path("default_template_path").asText());
+        }
 
-            JsonNode generated = callTool(session, "ppt.generate_presentation", objectNode(
+        @Test
+        void generatePresentation() throws Exception {
+            JsonNode generated = callTool(SESSION, "ppt.generate_presentation", objectNode(
                     "title", "Generated from Docker test",
                     "slide_titles", arrayNode("Intro", "Plan", "Summary"),
                     "output_path", containerPath("output/generated.pptx")));
-                assertTrue(generated.path("slide_count").asInt() >= 3);
-            assertTrue(Files.exists(workspace.resolve("output/generated.pptx")));
-
-            JsonNode closed = callTool(session, "ppt.close_document", objectNode("document_id", reopenedDocumentId));
-            assertEquals("success", closed.path("status").asText());
-        } finally {
-            deleteRecursively(workspace);
+            assertTrue(generated.path("slide_count").asInt() >= 3);
+            assertTrue(Files.exists(WORKSPACE.resolve("output/generated.pptx")));
         }
     }
+
+    @Nested
+    @Order(120)
+    @TestMethodOrder(MethodOrderer.MethodName.class)
+    class Transactions {
+        @Test
+        void closeReopenedDocument() throws Exception {
+            JsonNode closed = callTool(SESSION, "ppt.close_document", objectNode("document_id", reopenedDocumentId));
+            assertEquals("success", closed.path("status").asText());
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // Helpers (unchanged from the pre-Phase-6 test). Kept static so every
+    // @Nested class can reach them without holding an outer-instance ref.
+    // ----------------------------------------------------------------------
 
     private static JsonNode callTool(DockerSession session, String toolName, ObjectNode arguments) throws Exception {
         ObjectNode params = MAPPER.createObjectNode();

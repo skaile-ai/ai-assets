@@ -176,7 +176,7 @@
               </excludes>
               <!--
                 Phase 1 gate: 80% aggregate line coverage across tooling + session.
-                Phase 5 raises to 85%.
+                Phase 6 raises to 85%.
               -->
               <rules>
                 <rule>
@@ -185,7 +185,7 @@
                     <limit>
                       <counter>LINE</counter>
                       <value>COVEREDRATIO</value>
-                      <minimum>0.80</minimum>
+                      <minimum>0.85</minimum>
                     </limit>
                   </limits>
                 </rule>

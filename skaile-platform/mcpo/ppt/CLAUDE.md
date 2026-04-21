@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Stateful MCP server (`ai.skaile.mcpo:ppt-mcp-server`) that exposes PowerPoint manipulation as JSON-RPC tools over stdio. An agent opens a `.pptx`, receives a `document_id` handle, and drives subsequent mutations through that handle until it calls `ppt.save_document` / `ppt.close_document`. Backed by Apache POI 5.5.x; LibreOffice (`soffice`) is only invoked for PDF export.
+Stateful MCP server (`ai.skaile.mcpo:ppt-mcp-server`) that exposes PowerPoint manipulation as JSON-RPC tools over stdio. An agent opens a `.pptx`, receives a `document_id` handle, and drives subsequent mutations through that handle until it calls `ppt.export_document` / `ppt.close_document`. Backed by Apache POI 5.5.x; LibreOffice (`soffice`) is invoked for PDF, HTML, and image-batch export plus `fidelity=high` rendering.
 
 `README.md` contains the authoritative tool catalog (currently 52 tools after Phase 1 consolidation, Phase 4 addition of `ppt.set_picture_effects`, and Phase 5 addition of `ppt.list_charts` + `ppt.update_chart_data`), response envelope schema, and example JSON-RPC frames — read it before adding or modifying a tool. Note that README sometimes drifts ahead of the pom (see "Known doc/source drift" below).
 
@@ -21,9 +21,9 @@ Maven Wrapper is pinned to **3.9.9** in `.mvn/wrapper/maven-wrapper.properties` 
 | `java -jar target/ppt-mcp-server-all.jar` | Run the server on stdio. |
 | `docker build -t ppt-mcp:dev .` | Build the runtime image (includes LibreOffice). |
 
-`DockerPptMcpServerSmokeTest` shells out to `docker build` + `docker run`, so it is slow and skips itself via JUnit `Assumptions` when Docker is unavailable. When iterating on non-Docker logic, target `PptToolServiceTest` / `JsonRpcIOTest` directly.
+`DockerPptMcpServerSmokeTest` shells out to `docker build` + `docker run`, so it is slow and skips itself via JUnit `Assumptions` when Docker is unavailable. It is now split into 12 `@Nested` families (`Capabilities`, `Document`, `Slides`, `Text`, `Tables`, `Shapes`, `Images`, `Charts`, `Render`, `Export`, `Templates`, `Transactions`) ordered via `@TestClassOrder(OrderAnnotation.class)`; each nested class gets `@TestMethodOrder(MethodOrderer.MethodName.class)` because intra-family tests share state through outer-class `static` fields. When iterating on non-Docker logic, target `PptToolServiceTest` / `JsonRpcIOTest` directly and **use the wildcard exclude pattern** `-Dtest='!DockerPptMcpServerSmokeTest*'` — without the trailing `*`, surefire still matches `DockerPptMcpServerSmokeTest$Capabilities` etc. and the smoke test runs.
 
-For interactive tool inspection: `npx @modelcontextprotocol/inspector docker run --rm -i --user 1000:1000 -v "$PWD/resources:/workspace/resources:rw" ppt-mcp:dev` (run from this module directory). The `--user 1000:1000` is required so `ppt.save_document` can atomically replace files in the bind mount.
+For interactive tool inspection: `npx @modelcontextprotocol/inspector docker run --rm -i --user 1000:1000 -v "$PWD/resources:/workspace/resources:rw" ppt-mcp:dev` (run from this module directory). The `--user 1000:1000` is required so `ppt.export_document` can atomically replace files in the bind mount.
 
 ## Architecture
 
@@ -91,7 +91,25 @@ Every tool — success or failure — returns the envelope documented in README 
 | `MCPO_STDIO_FRAMED` | `false` | Opt-in `Content-Length`-framed stdio mode for legacy clients. Read directly by `server/JsonRpcIO` at class load — the one documented exception to the "only `PptServerConfig` reads env" rule, because it is a protocol-framing debug flag rather than tooling config. |
 | `LOG_LEVEL` | `INFO` | Logback root level. |
 
-## Known doc/source drift
+## Build details worth knowing
 
 - The Maven Wrapper is pinned to 3.9.9 — use `./mvnw` as the README says. `pom.xml` sets `maven.compiler.release=17`; the Docker build stage uses `maven:3.9-eclipse-temurin-21` and the runtime uses `eclipse-temurin:21-jre-jammy`, so the produced jar is Java-17 bytecode running on a Java 21 JVM.
-- `README.md` may still list Spotless and AssertJ in the tech stack; neither is in `pom.xml`. Only `junit-jupiter` is declared as a test dep. Don't rely on Spotless formatting gates.
+- Only `junit-jupiter` is declared as a test dep — no Spotless, no AssertJ. Don't reach for them when adding tests.
+- Jacoco line-coverage gate is **85%** on `ai.skaile.mcpo.ppt.tooling.*` + `ai.skaile.mcpo.ppt.session.*`, enforced in the `verify` phase via `jacoco-maven-plugin`. `McpServerMain` and `ai.skaile.mcpo.ppt.server.**` are excluded from the gate because they're thin stdio wrappers.
+
+## POI / LibreOffice idiosyncrasies to remember
+
+A concentrated list of traps the v1 implementation hit. Each one cost time to discover; make the next agent's life easier by reading before you touch the relevant code.
+
+- **`poi-ooxml-lite` doesn't ship `CTPatternFillProperties`.** Any attempt to call `spPr.addNewPattFill()` and cast the return silently breaks at runtime. Pattern fills have to be authored via `XmlCursor.beginElement` with raw `a:pattFill / a:fgClr / a:bgClr` QNames. Don't swap to the heavier `poi-ooxml-full` without a specific reason — the lite schema is load-bearing for the Docker image size budget.
+- **POI's `XSLFSheet._shapes` cache is sticky.** Every XML-level shape mutation that bypasses the `XSLFShape` facade (`clone_shape` is the canonical one) must invalidate that cache or `getShapes()` will return the pre-mutation list. The reflection workaround in `PptShapeMutationOperations.invalidateShapeCache` is the single place that handles this — reuse it from any future handler that reaches into `spTree` directly.
+- **`TextAutofit.SHAPE` vs `TextAutofit.NORMAL` are not interchangeable.** POI exposes only NONE / NORMAL (shrink text on overflow) / SHAPE (resize shape to fit text). The `auto_fit` schema accepts `"shrink"` and maps it to SHAPE because that's what PowerPoint's UI labels "Resize shape to fit text"; `"normal"` routes to NORMAL.
+- **Merge-overlap detection must run before any mutation.** `edit_table merge_cells` scans every cell in the requested range for existing `gridSpan > 1`, `rowSpan > 1`, or set `hMerge`/`vMerge` attributes and returns `MERGE_CONFLICT` before writing anything. This keeps failed merges idempotent — no half-merged state on reject.
+- **Chart data sources are usually reference-backed.** `XDDFDataSource.isReference()` is the branch that matters. Charts built in PowerPoint/LibreOffice store values in the embedded XLSX (e.g. `Sheet1!$B$2:$B$5`); PowerPoint's "Edit Data" dialog reads the workbook, not the cached XML. Rewriting only the numCache leaves the dialog showing stale values. The correct pattern: resolve the sheet/range, write new values into the workbook cells, rebuild the data source with `fromNumericCellRange`, call `series.replaceData(...).plot()`. Then `plot()` refreshes the numCache from the updated cells.
+- **`poi-ooxml-lite` does ship the full XDDF surface.** Unlike pattern fills, chart code can use the typed API (`XDDFBarChartData`, `XDDFNumericalDataSource`, `XDDFDataSourcesFactory`). No need to drop to raw XML for chart mutations.
+- **`XDDFChartData.Series.getSeriesText()` is `protected`.** `PptChartOperations.extractSeriesName` reflectively invokes it to read the cached title; the lookup is guarded with try/catch that falls through to an empty name so a future POI rename doesn't hard-fail the handler.
+- **`XSLFChart.prototype()` is package-private.** The chart-fixture test builder in `ChartFixtureBuilder` hand-authors the `<p:graphicFrame>` with an `XmlCursor` using the same element sequence POI uses internally. Key detail: `insertAttributeWithValue` must use the 3-arg form (localName, namespaceURI, value) on the cursor, not the 2-arg form — and `setUri(CHART_URI)` must come AFTER the cursor block, not before, or `beginElement` fails with "Can only insert attributes before other attributes or after containers".
+- **POI leaks placeholder prompts through `paragraph.getText()`.** An empty title/subtitle placeholder still returns the layout's "Click to edit Master title style" prompt via `getText()`, even though `getTextRuns()` looks non-empty. The `outline_text` export in `PptDocumentOperations` filters with a `Click to (edit|add) .+` regex. The cleaner fix — detecting the title via `XSLFTextShape.getTextType() == Placeholder.TITLE` — is tracked as a v2 follow-up and would belong in `PptSlideBuilder`.
+- **`soffice --convert-to <image>` only emits slide 1.** `SofficeRenderer.renderAllSlides` therefore serializes N single-slide decks and shells out N times. A faster alternative is to convert the full deck to PDF once and split with `pdftoppm`, trading an extra binary dependency for ~N× speedup. Not urgent — the current code is correct and the Docker smoke tolerates several seconds per slide.
+- **Headless LibreOffice is not safe for concurrent invocations in one user profile.** `SofficeRenderer` serializes every call through a process-wide `Semaphore(1)`. Do not parallelize around it.
+- **Temp-file cleanup on the happy path is easy; cleanup on the throwing path is where bugs hide.** `SofficeRenderer.writeSingleSlideDeckToSandbox` originally created the temp pptx before the bounds check, so throwing from the check leaked the temp file. Reordered to bounds-check first, then allocate. Covered by `SofficeRendererTest.assertNoStaleTempFiles`.

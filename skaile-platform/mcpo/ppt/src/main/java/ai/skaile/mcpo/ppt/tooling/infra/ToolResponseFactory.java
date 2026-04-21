@@ -21,8 +21,14 @@ public final class ToolResponseFactory {
         return new ToolCallResult(true, payload);
     }
 
+    /**
+     * Short form for handler-level errors that don't fit a more specific code.
+     * Emits the same {@code TOOL_EXECUTION_ERROR} code the central dispatcher
+     * uses for uncaught exceptions, so external callers see exactly one
+     * "unexpected handler failure" code regardless of path.
+     */
     public ToolCallResult error(String message) {
-        return error("TOOL_ERROR", message, false);
+        return error("TOOL_EXECUTION_ERROR", message, false);
     }
 
     public ToolCallResult error(String code, String message, boolean retriable) {

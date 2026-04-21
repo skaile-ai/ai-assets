@@ -168,6 +168,8 @@ public final class PptToolService {
                 return responseFactory.error("Unknown tool: " + name);
             }
             return invokeWithSessionLock(safeArguments, handler);
+        } catch (PptPathResolver.PathNotAllowedException e) {
+            return responseFactory.error("PATH_NOT_ALLOWED", e.getMessage(), false);
         } catch (ColorParser.InvalidColorException e) {
             return responseFactory.error("INVALID_COLOR", e.getMessage(), false);
         } catch (PptShapeFinder.DocumentNotFoundException e) {
