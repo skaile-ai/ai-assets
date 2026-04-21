@@ -18,47 +18,17 @@
 #   4. workbook.recalculate → assert B5 equals sum of the NEW B2:B4 (i.e. fresh eval),
 #      NOT the pre-shift B1:B3 sum that the evaluator had cached at the old address.
 set -euo pipefail
-
-export EXCEL_MCP_ALLOW_UNSANDBOXED=true
-
-ROOT="$(cd "$(dirname "$0")"/.. && pwd)"
-JAR="$ROOT/target/excel-mcp-0.1.0-SNAPSHOT.jar"
-[[ -f "$JAR" ]] || { echo "jar not found: $JAR" >&2; exit 2; }
+source "$(dirname "$0")/_common.sh"
 
 python3 - "$JAR" <<'PY'
-import json, subprocess, sys
+import os, sys
+sys.path.insert(0, os.environ["SMOKE_DIR"])
+from _smoke_common import start, handshake, call
+
 jar = sys.argv[1]
-
-def start():
-    return subprocess.Popen(["java", "-jar", jar],
-                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-def send(p, obj):
-    p.stdin.write((json.dumps(obj) + "\n").encode()); p.stdin.flush()
-
-def recv(p):
-    line = p.stdout.readline()
-    if not line:
-        err = p.stderr.read(2048).decode("utf-8", "replace")
-        raise EOFError("server closed stdout; stderr=" + err)
-    return json.loads(line.decode())
-
-def handshake(p):
-    send(p, {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"recalc-regression","version":"0.0.1"}}})
-    init = recv(p); assert init.get("id") == 1, init
-    send(p, {"jsonrpc":"2.0","method":"notifications/initialized"})
-
-def call(p, i, name, args):
-    send(p, {"jsonrpc":"2.0","id":i,"method":"tools/call","params":{"name":name,"arguments":args}})
-    r = recv(p); assert r.get("id") == i, r
-    body = json.loads(r["result"]["content"][0]["text"])
-    if r["result"].get("isError"):
-        raise AssertionError(f"tool error id={i}: {body}")
-    return body
-
-p = start()
+p = start(jar)
 try:
-    handshake(p)
+    handshake(p, "recalc-regression")
 
     created = call(p, 10, "workbook.create", {})
     h = created["handle"]
@@ -111,7 +81,7 @@ try:
 finally:
     p.terminate()
     try: p.wait(timeout=3)
-    except subprocess.TimeoutExpired: p.kill()
+    except Exception: p.kill()
 
 print("Regression smoke OK: workbook.recalculate returns fresh values after sheet.insert_rows.")
 PY

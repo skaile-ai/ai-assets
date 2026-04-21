@@ -11,12 +11,7 @@
 # With the prior readOnly=false WorkbookFactory.create, step 3 silently overwrote the external
 # edit because POI held a read/write OPCPackage handle on the source file.
 set -euo pipefail
-
-export EXCEL_MCP_ALLOW_UNSANDBOXED=true
-
-ROOT="$(cd "$(dirname "$0")"/.. && pwd)"
-JAR="$ROOT/target/excel-mcp-0.1.0-SNAPSHOT.jar"
-[[ -f "$JAR" ]] || { echo "jar not found: $JAR" >&2; exit 2; }
+source "$(dirname "$0")/_common.sh"
 
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
@@ -63,7 +58,9 @@ EOF
     && java -cp "$JAR:$TMP" MakeInitial "$FIXTURE" )
 
 python3 - "$JAR" "$FIXTURE" "$TMP" <<'PY'
-import hashlib, json, os, subprocess, sys
+import hashlib, os, subprocess, sys
+sys.path.insert(0, os.environ["SMOKE_DIR"])
+from _smoke_common import start, handshake, call
 
 jar, fixture, tmp = sys.argv[1], sys.argv[2], sys.argv[3]
 
@@ -74,36 +71,9 @@ def md5(path):
             h.update(chunk)
     return h.hexdigest()
 
-def start():
-    return subprocess.Popen(["java", "-jar", jar],
-                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-def send(p, obj):
-    p.stdin.write((json.dumps(obj) + "\n").encode()); p.stdin.flush()
-
-def recv(p):
-    line = p.stdout.readline()
-    if not line:
-        err = p.stderr.read(2048).decode("utf-8", "replace")
-        raise EOFError("server closed stdout; stderr=" + err)
-    return json.loads(line.decode())
-
-def handshake(p):
-    send(p, {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"close-regression","version":"0.0.1"}}})
-    init = recv(p); assert init.get("id") == 1, init
-    send(p, {"jsonrpc":"2.0","method":"notifications/initialized"})
-
-def call(p, i, name, args):
-    send(p, {"jsonrpc":"2.0","id":i,"method":"tools/call","params":{"name":name,"arguments":args}})
-    r = recv(p); assert r.get("id") == i, r
-    body = json.loads(r["result"]["content"][0]["text"])
-    if r["result"].get("isError"):
-        raise AssertionError(f"tool error id={i}: {body}")
-    return body
-
-p = start()
+p = start(jar)
 try:
-    handshake(p)
+    handshake(p, "close-regression")
 
     # Step 1: MCP opens the shared file.
     opened = call(p, 10, "workbook.open", {"path": fixture})
@@ -126,7 +96,7 @@ try:
 finally:
     p.terminate()
     try: p.wait(timeout=3)
-    except subprocess.TimeoutExpired: p.kill()
+    except Exception: p.kill()
 
 # Step 4a: md5 on disk after MCP close must equal the md5 captured right after the external edit.
 post_close_md5 = md5(fixture)

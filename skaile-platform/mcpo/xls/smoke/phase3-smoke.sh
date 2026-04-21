@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 # Phase 3 verify: open → list_sheets → metadata → close over the MCP stdio transport.
 set -euo pipefail
-
-export EXCEL_MCP_ALLOW_UNSANDBOXED=true
-
-ROOT="$(cd "$(dirname "$0")"/.. && pwd)"
-JAR="$ROOT/target/excel-mcp-0.1.0-SNAPSHOT.jar"
-[[ -f "$JAR" ]] || { echo "jar not found: $JAR" >&2; exit 2; }
+source "$(dirname "$0")/_common.sh"
 
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
@@ -31,50 +26,34 @@ EOF
 ( cd "$TMP" && javac -cp "$JAR" MakeFixture.java && java -cp "$JAR:$TMP" MakeFixture "$FIXTURE" )
 
 python3 - "$JAR" "$FIXTURE" <<'PY'
-import json, subprocess, sys
+import os, sys
+sys.path.insert(0, os.environ["SMOKE_DIR"])
+from _smoke_common import start, handshake, call
+
 jar, fixture = sys.argv[1], sys.argv[2]
-p = subprocess.Popen(["java", "-jar", jar], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+p = start(jar)
+try:
+    handshake(p, "phase3")
 
-def send(obj):
-    p.stdin.write((json.dumps(obj) + "\n").encode("utf-8"))
-    p.stdin.flush()
+    opened = call(p, 2, "workbook.open", {"path": fixture})
+    handle = opened["handle"]
+    assert opened["format"] == "xlsx" and opened["sheet_count"] == 2, opened
 
-def recv():
-    line = p.stdout.readline()
-    if not line:
-        raise EOFError("server closed stdout")
-    return json.loads(line.decode("utf-8"))
+    ls = call(p, 3, "workbook.list_sheets", {"handle": handle})
+    names = [s["name"] for s in ls["sheets"]]
+    assert names == ["Sheet1", "Hidden"], ls
+    assert ls["sheets"][1]["is_hidden"] is True, ls
 
-def call(call_id, name, args):
-    send({"jsonrpc":"2.0","id":call_id,"method":"tools/call","params":{"name":name,"arguments":args}})
-    resp = recv()
-    assert resp.get("id") == call_id, resp
-    return json.loads(resp["result"]["content"][0]["text"])
+    meta = call(p, 4, "workbook.metadata", {"handle": handle})
+    assert meta["filename"].endswith("simple.xlsx") and meta["format"] == "xlsx", meta
 
-send({"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"phase3","version":"0.0.1"}}})
-init_resp = recv()
-assert init_resp.get("id") == 1 and "result" in init_resp, init_resp
-send({"jsonrpc":"2.0","method":"notifications/initialized"})
+    closed = call(p, 5, "workbook.close", {"handle": handle})
+    assert closed.get("closed") is True, closed
 
-opened = call(2, "workbook.open", {"path": fixture})
-handle = opened["handle"]
-assert opened["format"] == "xlsx" and opened["sheet_count"] == 2, opened
-
-ls = call(3, "workbook.list_sheets", {"handle": handle})
-names = [s["name"] for s in ls["sheets"]]
-assert names == ["Sheet1", "Hidden"], ls
-assert ls["sheets"][1]["is_hidden"] is True, ls
-
-meta = call(4, "workbook.metadata", {"handle": handle})
-assert meta["filename"].endswith("simple.xlsx") and meta["format"] == "xlsx", meta
-
-closed = call(5, "workbook.close", {"handle": handle})
-assert closed.get("closed") is True, closed
-
-p.terminate()
-try: p.wait(timeout=3)
-except subprocess.TimeoutExpired: p.kill()
-
-print("Phase 3 smoke OK.")
-print(f"handle={handle} sheets={names} filename={meta['filename']}")
+    print("Phase 3 smoke OK.")
+    print(f"handle={handle} sheets={names} filename={meta['filename']}")
+finally:
+    p.terminate()
+    try: p.wait(timeout=3)
+    except Exception: p.kill()
 PY

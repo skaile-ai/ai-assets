@@ -12,64 +12,29 @@
 #   B. Full list_modules / get_module round-trip against the committed .xlsm fixture, plus
 #      VBA_MODULE_NOT_FOUND + transport-survives-error regressions.
 set -euo pipefail
-
-export EXCEL_MCP_ALLOW_UNSANDBOXED=true
-
-ROOT="$(cd "$(dirname "$0")"/.. && pwd)"
-JAR="$ROOT/target/excel-mcp-0.1.0-SNAPSHOT.jar"
-[[ -f "$JAR" ]] || { echo "jar not found: $JAR" >&2; exit 2; }
+source "$(dirname "$0")/_common.sh"
 
 FIXTURE="$ROOT/src/test/resources/fixtures/vba-hello.xlsm"
 [[ -f "$FIXTURE" ]] || { echo "fixture not found: $FIXTURE" >&2; exit 2; }
 
 python3 - "$JAR" "$FIXTURE" <<'PY'
-import json, os, subprocess, sys, tempfile
+import os, sys, tempfile
+sys.path.insert(0, os.environ["SMOKE_DIR"])
+from _smoke_common import start, send, recv, handshake, call, call_expect_error
+
 jar = sys.argv[1]
 fixture = sys.argv[2]
 tmp = tempfile.mkdtemp()
 
-def start():
-    return subprocess.Popen(["java", "-jar", jar],
-                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-def send(p, obj):
-    p.stdin.write((json.dumps(obj) + "\n").encode()); p.stdin.flush()
-
-def recv(p):
-    line = p.stdout.readline()
-    if not line:
-        err = p.stderr.read(2048).decode("utf-8", "replace")
-        raise EOFError("server closed stdout; stderr=" + err)
-    return json.loads(line.decode())
-
-def handshake(p):
-    send(p, {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"p9","version":"0.0.1"}}})
-    init = recv(p); assert init.get("id") == 1, init
-    send(p, {"jsonrpc":"2.0","method":"notifications/initialized"})
-
-def call(p, i, name, args):
-    send(p, {"jsonrpc":"2.0","id":i,"method":"tools/call","params":{"name":name,"arguments":args}})
-    r = recv(p); assert r.get("id") == i, r
-    body = json.loads(r["result"]["content"][0]["text"])
-    if r["result"].get("isError"):
-        raise AssertionError(f"tool error id={i}: {body}")
-    return body
-
-def call_err(p, i, name, args, expected_code):
-    send(p, {"jsonrpc":"2.0","id":i,"method":"tools/call","params":{"name":name,"arguments":args}})
-    r = recv(p); assert r.get("id") == i, r
-    body = json.loads(r["result"]["content"][0]["text"])
-    assert r["result"].get("isError"), f"expected error, got {body}"
-    assert body.get("code") == expected_code, f"expected {expected_code}, got {body}"
-
 def list_tools(p, i=2):
-    send(p, {"jsonrpc":"2.0","id":i,"method":"tools/list"})
-    r = recv(p); assert r.get("id") == i, r
+    send(p, {"jsonrpc": "2.0", "id": i, "method": "tools/list"})
+    r = recv(p)
+    assert r.get("id") == i, r
     return {t["name"] for t in r["result"]["tools"]}
 
-p = start()
+p = start(jar)
 try:
-    handshake(p)
+    handshake(p, "p9")
 
     # --- Registration: both vba.* tools listed ---
     names = list_tools(p)
@@ -79,8 +44,8 @@ try:
     # --- VBA_NOT_PRESENT (tier A): fresh .xlsx with no source on disk ---
     fresh = call(p, 10, "workbook.create", {})
     h = fresh["handle"]
-    call_err(p, 11, "vba.list_modules", {"handle": h}, "VBA_NOT_PRESENT")
-    call_err(p, 12, "vba.get_module", {"handle": h, "name": "Module1"}, "VBA_NOT_PRESENT")
+    call_expect_error(p, 11, "vba.list_modules", {"handle": h}, "VBA_NOT_PRESENT")
+    call_expect_error(p, 12, "vba.get_module", {"handle": h, "name": "Module1"}, "VBA_NOT_PRESENT")
     call(p, 13, "workbook.close", {"handle": h})
 
     # --- VBA_NOT_PRESENT (tier A, regression for Bug 3 found post-Phase-9): a plain .xlsx
@@ -96,8 +61,8 @@ try:
     call(p, 32, "workbook.close", {"handle": h2})
     opened_plain = call(p, 33, "workbook.open", {"path": plain})
     h2 = opened_plain["handle"]
-    call_err(p, 34, "vba.list_modules", {"handle": h2}, "VBA_NOT_PRESENT")
-    call_err(p, 35, "vba.get_module", {"handle": h2, "name": "Module1"}, "VBA_NOT_PRESENT")
+    call_expect_error(p, 34, "vba.list_modules", {"handle": h2}, "VBA_NOT_PRESENT")
+    call_expect_error(p, 35, "vba.get_module", {"handle": h2, "name": "Module1"}, "VBA_NOT_PRESENT")
     call(p, 36, "workbook.close", {"handle": h2})
 
     # --- Tier B: real .xlsm with VBA modules ---
@@ -126,7 +91,7 @@ try:
     assert src_ci["name"] == target, src_ci  # canonical casing preserved
 
     # Unknown module -> VBA_MODULE_NOT_FOUND.
-    call_err(p, 24, "vba.get_module",
+    call_expect_error(p, 24, "vba.get_module",
              {"handle": h, "name": "__does_not_exist__"}, "VBA_MODULE_NOT_FOUND")
 
     # Regression for Bug 2 (post-Phase-9 manual testing): a VBA_MODULE_NOT_FOUND response
@@ -140,7 +105,7 @@ try:
 finally:
     p.terminate()
     try: p.wait(timeout=3)
-    except subprocess.TimeoutExpired: p.kill()
+    except Exception: p.kill()
     for f in os.listdir(tmp):
         os.unlink(os.path.join(tmp, f))
     os.rmdir(tmp)

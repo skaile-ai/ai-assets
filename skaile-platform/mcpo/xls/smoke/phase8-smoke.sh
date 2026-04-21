@@ -4,12 +4,7 @@
 # built on the fly with jshell + POI so the smoke test is self-contained and doesn't require a
 # binary .xlsx under version control.
 set -euo pipefail
-
-export EXCEL_MCP_ALLOW_UNSANDBOXED=true
-
-ROOT="$(cd "$(dirname "$0")"/.. && pwd)"
-JAR="$ROOT/target/excel-mcp-0.1.0-SNAPSHOT.jar"
-[[ -f "$JAR" ]] || { echo "jar not found: $JAR" >&2; exit 2; }
+source "$(dirname "$0")/_common.sh"
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
@@ -78,47 +73,16 @@ JSHELL
 [[ -f "$FIXTURE" ]] || { echo "fixture not built: $FIXTURE" >&2; exit 2; }
 
 python3 - "$JAR" "$FIXTURE" <<'PY'
-import json, subprocess, sys
+import os, sys
+sys.path.insert(0, os.environ["SMOKE_DIR"])
+from _smoke_common import start, handshake, call, call_expect_error
+
 jar = sys.argv[1]
 fixture = sys.argv[2]
 
-def start():
-    return subprocess.Popen(["java", "-jar", jar],
-                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-def send(p, obj):
-    p.stdin.write((json.dumps(obj) + "\n").encode()); p.stdin.flush()
-
-def recv(p):
-    line = p.stdout.readline()
-    if not line:
-        err = p.stderr.read(2048).decode("utf-8", "replace")
-        raise EOFError("server closed stdout; stderr=" + err)
-    return json.loads(line.decode())
-
-def handshake(p):
-    send(p, {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"p8","version":"0.0.1"}}})
-    init = recv(p); assert init.get("id") == 1, init
-    send(p, {"jsonrpc":"2.0","method":"notifications/initialized"})
-
-def call(p, i, name, args):
-    send(p, {"jsonrpc":"2.0","id":i,"method":"tools/call","params":{"name":name,"arguments":args}})
-    r = recv(p); assert r.get("id") == i, r
-    body = json.loads(r["result"]["content"][0]["text"])
-    if r["result"].get("isError"):
-        raise AssertionError(f"tool error id={i}: {body}")
-    return body
-
-def call_err(p, i, name, args, expected_code):
-    send(p, {"jsonrpc":"2.0","id":i,"method":"tools/call","params":{"name":name,"arguments":args}})
-    r = recv(p); assert r.get("id") == i, r
-    body = json.loads(r["result"]["content"][0]["text"])
-    assert r["result"].get("isError"), f"expected error, got {body}"
-    assert body.get("code") == expected_code, f"expected {expected_code}, got {body}"
-
-p = start()
+p = start(jar)
 try:
-    handshake(p)
+    handshake(p, "p8")
 
     opened = call(p, 10, "workbook.open", {"path": fixture})
     h = opened["handle"]
@@ -148,7 +112,7 @@ try:
     assert first_row[2]["value"] == 1200, first_row  # NUMBER integer-normalised
 
     # --- table.get error: unknown table ---
-    call_err(p, 13, "table.get", {"handle": h, "name": "tblNope"}, "TABLE_NOT_FOUND")
+    call_expect_error(p, 13, "table.get", {"handle": h, "name": "tblNope"}, "TABLE_NOT_FOUND")
 
     # --- named_range.list ---
     names = call(p, 14, "named_range.list", {"handle": h})
@@ -202,13 +166,13 @@ try:
     assert all(c["type"] == "blank" for row in blk["cells"] for c in row), blk
 
     # --- named_range.get error: unknown name ---
-    call_err(p, 18, "named_range.get", {"handle": h, "name": "DoesNotExist"}, "NAMED_RANGE_NOT_FOUND")
+    call_expect_error(p, 18, "named_range.get", {"handle": h, "name": "DoesNotExist"}, "NAMED_RANGE_NOT_FOUND")
 
     call(p, 19, "workbook.close", {"handle": h})
 finally:
     p.terminate()
     try: p.wait(timeout=3)
-    except subprocess.TimeoutExpired: p.kill()
+    except Exception: p.kill()
 
 print("Phase 8 smoke OK: table.list/get + named_range.list/get round-trip on fixture.")
 PY

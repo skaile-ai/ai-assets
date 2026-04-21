@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 # Phase 6 verify: sheet.create/delete/rename/merged_regions round-trip.
 set -euo pipefail
-
-export EXCEL_MCP_ALLOW_UNSANDBOXED=true
-
-ROOT="$(cd "$(dirname "$0")"/.. && pwd)"
-JAR="$ROOT/target/excel-mcp-0.1.0-SNAPSHOT.jar"
-[[ -f "$JAR" ]] || { echo "jar not found: $JAR" >&2; exit 2; }
+source "$(dirname "$0")/_common.sh"
 
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
@@ -33,48 +28,16 @@ EOF
 ( cd "$TMP" && javac -cp "$JAR" MakeMerged.java && java -cp "$JAR:$TMP" MakeMerged "$MERGED" )
 
 python3 - "$JAR" "$MERGED" <<'PY'
-import json, subprocess, sys
+import os, sys
+sys.path.insert(0, os.environ["SMOKE_DIR"])
+from _smoke_common import start, handshake, call, call_expect_error
+
 jar, merged = sys.argv[1], sys.argv[2]
 
-def start():
-    return subprocess.Popen(["java", "-jar", jar],
-                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-def send(p, obj):
-    p.stdin.write((json.dumps(obj) + "\n").encode()); p.stdin.flush()
-
-def recv(p):
-    line = p.stdout.readline()
-    if not line:
-        err = p.stderr.read(2048).decode("utf-8", "replace")
-        raise EOFError("server closed stdout; stderr=" + err)
-    return json.loads(line.decode())
-
-def handshake(p):
-    send(p, {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"p6","version":"0.0.1"}}})
-    init = recv(p); assert init.get("id") == 1, init
-    send(p, {"jsonrpc":"2.0","method":"notifications/initialized"})
-
-def call(p, i, name, args):
-    send(p, {"jsonrpc":"2.0","id":i,"method":"tools/call","params":{"name":name,"arguments":args}})
-    r = recv(p); assert r.get("id") == i, r
-    body = json.loads(r["result"]["content"][0]["text"])
-    if r["result"].get("isError"):
-        raise AssertionError(f"tool error id={i}: {body}")
-    return body
-
-def call_expect_error(p, i, name, args, expected_code):
-    send(p, {"jsonrpc":"2.0","id":i,"method":"tools/call","params":{"name":name,"arguments":args}})
-    r = recv(p); assert r.get("id") == i, r
-    body = json.loads(r["result"]["content"][0]["text"])
-    assert r["result"].get("isError"), f"expected error but got success: {body}"
-    assert body.get("code") == expected_code, f"expected {expected_code}, got {body}"
-    return body
-
 # --- Part 1: create/rename/delete on a brand-new workbook ---
-p = start()
+p = start(jar)
 try:
-    handshake(p)
+    handshake(p, "p6")
     opened = call(p, 10, "workbook.create", {})
     h = opened["handle"]
 
@@ -112,12 +75,12 @@ try:
 finally:
     p.terminate()
     try: p.wait(timeout=3)
-    except subprocess.TimeoutExpired: p.kill()
+    except Exception: p.kill()
 
 # --- Part 2: merged_regions returns the configured ranges ---
-p = start()
+p = start(jar)
 try:
-    handshake(p)
+    handshake(p, "p6")
     opened = call(p, 30, "workbook.open", {"path": merged})
     h = opened["handle"]
     got = call(p, 31, "sheet.merged_regions", {"handle": h, "sheet": "Data"})
@@ -134,7 +97,7 @@ try:
 finally:
     p.terminate()
     try: p.wait(timeout=3)
-    except subprocess.TimeoutExpired: p.kill()
+    except Exception: p.kill()
 
 print("Phase 6 smoke OK: sheet.create/rename/delete + merged_regions verified.")
 PY

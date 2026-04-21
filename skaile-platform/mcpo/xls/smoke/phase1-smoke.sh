@@ -7,13 +7,7 @@
 # transport corrupts and the agent disconnects with an opaque error. The server does not
 # self-exit on stdin EOF; we run it under `timeout` and parse the captured stdout.
 set -uo pipefail
-
-# Smoke tests exercise server behaviour unrelated to the sandbox; opt in to the
-# unsandboxed mode explicitly so the fail-closed default doesn't abort startup.
-export EXCEL_MCP_ALLOW_UNSANDBOXED=true
-
-JAR="$(dirname "$0")/../target/excel-mcp-0.1.0-SNAPSHOT.jar"
-[[ -f "$JAR" ]] || { echo "jar not found: $JAR" >&2; exit 2; }
+source "$(dirname "$0")/_common.sh"
 
 EXPECTED_TOOL_COUNT=26
 
