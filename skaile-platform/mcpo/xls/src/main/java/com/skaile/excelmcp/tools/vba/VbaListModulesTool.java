@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.skaile.excelmcp.engine.WorkbookEngine;
 import com.skaile.excelmcp.error.McpException;
 import com.skaile.excelmcp.handles.HandleId;
+import com.skaile.excelmcp.handles.OpenWorkbook;
 import com.skaile.excelmcp.server.ToolDefinition;
 import com.skaile.excelmcp.shape.VbaModuleShape;
 import java.util.List;
@@ -34,9 +35,11 @@ public final class VbaListModulesTool implements ToolDefinition {
         + " (per-sheet ThisWorkbook / Sheet1), standard Module entries, and Class modules."
         + " Requires an open workbook handle whose source file on disk actually contains a VBA"
         + " project — workbooks created via workbook.create() or saved as plain .xlsx (not"
-        + " .xlsm) raise VBA_NOT_PRESENT. UserForms are not exposed in v1 (extraction is"
-        + " known-incomplete across Java and Python tooling) — only the three listed module"
-        + " types appear.";
+        + " .xlsm) raise VBA_NOT_PRESENT. The response includes"
+        + " source_disk_mtime_changed_since_open: true if the source file has been modified"
+        + " since workbook.open (VBA is read from disk, so the extracted modules reflect the"
+        + " current on-disk content, not the in-memory workbook state). UserForms are not"
+        + " exposed in v1 (extraction is known-incomplete across Java and Python tooling).";
   }
 
   @Override
@@ -58,6 +61,8 @@ public final class VbaListModulesTool implements ToolDefinition {
   public Object execute(JsonNode input) throws McpException {
     HandleId id = requireHandle(input);
     List<VbaModuleShape> modules = engine.listVbaModules(id);
-    return Map.of("modules", modules);
+    OpenWorkbook meta = engine.describe(id);
+    boolean changed = VbaSourceFreshness.changedSinceOpen(meta);
+    return Map.of("modules", modules, "source_disk_mtime_changed_since_open", changed);
   }
 }

@@ -7,13 +7,14 @@ import com.skaile.excelmcp.error.ErrorCode;
 import com.skaile.excelmcp.error.McpException;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 /** Coverage for the in-memory handle registry contract. */
 class HandleRegistryTest {
 
   private static OpenWorkbook entry(HandleId id) {
-    return new OpenWorkbook(id, Path.of("/tmp/wb.xlsx"), "xlsx", Instant.EPOCH);
+    return new OpenWorkbook(id, Path.of("/tmp/wb.xlsx"), "xlsx", Instant.EPOCH, Optional.empty());
   }
 
   @Test

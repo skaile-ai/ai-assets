@@ -109,8 +109,18 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
     }
     HandleId id = HandleId.newRandom();
     workbooks.put(id, wb);
-    registry.register(new OpenWorkbook(id, path, format, Instant.now()));
+    Optional<Instant> sourceMtime = readMtime(path);
+    registry.register(new OpenWorkbook(id, path, format, Instant.now(), sourceMtime));
     return id;
+  }
+
+  /** Best-effort source-file mtime read. Returns empty if the stat fails for any reason. */
+  private static Optional<Instant> readMtime(Path path) {
+    try {
+      return Optional.of(Files.getLastModifiedTime(path).toInstant());
+    } catch (IOException ignored) {
+      return Optional.empty();
+    }
   }
 
   @Override
@@ -127,7 +137,8 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
     wb.createSheet("Sheet1");
     HandleId id = HandleId.newRandom();
     workbooks.put(id, wb);
-    registry.register(new OpenWorkbook(id, sourcePath.orElse(null), format, Instant.now()));
+    registry.register(
+        new OpenWorkbook(id, sourcePath.orElse(null), format, Instant.now(), Optional.empty()));
     return id;
   }
 
