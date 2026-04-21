@@ -1,0 +1,7 @@
+{
+  "description": "Renames Sheet1 to Data; POI rewrites the cross-sheet formula on Sheet2!A1 automatically. Recalc refreshes its cached value (which must still be 30).",
+  "operations": [
+    { "tool": "sheet.rename", "arguments": { "old_name": "Sheet1", "new_name": "Data" } },
+    { "tool": "workbook.recalculate", "arguments": {} }
+  ]
+}
