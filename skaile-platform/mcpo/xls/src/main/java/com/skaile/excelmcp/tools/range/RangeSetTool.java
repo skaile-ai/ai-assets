@@ -127,8 +127,9 @@ public final class RangeSetTool implements ToolDefinition {
     List<List<Object>> values = parse2D(valuesNode);
     JsonNode formulasNode = input.get("formulas");
     List<List<String>> formulas = null;
-    if (formulasNode != null && formulasNode.isArray()) {
+    if (formulasNode != null && formulasNode.isArray() && !formulasNode.isEmpty()) {
       formulas = parse2DStrings(formulasNode);
+      assertSameShape(values, formulas);
     }
 
     Optional<String> rangeStr = optionalString(input, "range");
@@ -151,6 +152,41 @@ public final class RangeSetTool implements ToolDefinition {
     }
     int written = engine.writeRange(id, sheet, startRow, startCol, values, formulas);
     return Map.of("written_cells", written);
+  }
+
+  private static void assertSameShape(List<List<Object>> values, List<List<String>> formulas)
+      throws McpException {
+    int vRows = values.size();
+    int fRows = formulas.size();
+    int vCols = values.isEmpty() ? 0 : values.get(0).size();
+    int fCols = formulas.isEmpty() ? 0 : formulas.get(0).size();
+    if (vRows != fRows) {
+      throw new McpException(
+          ErrorCode.RANGE_INVALID,
+          "values and formulas must have the same shape: values="
+              + vRows
+              + "x"
+              + vCols
+              + ", formulas="
+              + fRows
+              + "x"
+              + fCols,
+          Map.of(
+              "values_rows", vRows,
+              "values_cols", vCols,
+              "formulas_rows", fRows,
+              "formulas_cols", fCols));
+    }
+    for (int i = 0; i < vRows; i++) {
+      int vc = values.get(i).size();
+      int fc = formulas.get(i).size();
+      if (vc != fc) {
+        throw new McpException(
+            ErrorCode.RANGE_INVALID,
+            "values and formulas row " + i + " differ in length: values=" + vc + ", formulas=" + fc,
+            Map.of("row", i, "values_cols", vc, "formulas_cols", fc));
+      }
+    }
   }
 
   private static List<List<Object>> parse2D(JsonNode node) {
