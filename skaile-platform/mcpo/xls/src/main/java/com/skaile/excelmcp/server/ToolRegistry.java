@@ -79,21 +79,22 @@ public final class ToolRegistry {
       return errorResult(ErrorEnvelope.of(ex));
     } catch (RuntimeException ex) {
       log.error("tool={} unexpected failure", def.name(), ex);
-      ErrorEnvelope env =
-          new ErrorEnvelope(
-              ErrorCode.INTERNAL_ERROR.name(),
-              ex.getClass().getSimpleName() + ": " + String.valueOf(ex.getMessage()),
-              Map.of("exception", ex.getClass().getName()));
-      return errorResult(env);
+      return errorResult(opaqueInternalError());
     } catch (Exception ex) {
       log.error("tool={} checked failure", def.name(), ex);
-      ErrorEnvelope env =
-          new ErrorEnvelope(
-              ErrorCode.INTERNAL_ERROR.name(),
-              ex.getClass().getSimpleName() + ": " + String.valueOf(ex.getMessage()),
-              Map.of("exception", ex.getClass().getName()));
-      return errorResult(env);
+      return errorResult(opaqueInternalError());
     }
+  }
+
+  /**
+   * Envelope for unexpected failures. Both the exception class and the message stay in the
+   * server-side log; the agent sees a fixed string with no details map. The exception type and
+   * message can carry POI internals, library versions, or path fragments that an agent has no use
+   * for and that we don't want to publish on the wire.
+   */
+  private static ErrorEnvelope opaqueInternalError() {
+    return new ErrorEnvelope(
+        ErrorCode.INTERNAL_ERROR.name(), "unexpected internal failure", Map.of());
   }
 
   private CallToolResult errorResult(ErrorEnvelope env) {

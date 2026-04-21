@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Validates agent-supplied paths against the rules in §6. Stateful only in that it holds a resolved
@@ -19,8 +21,16 @@ import java.util.Map;
  * <p>Canonicalisation uses {@link Path#toRealPath()} on the target when it exists and on the parent
  * otherwise, so symlink escapes ({@code /data/link -> /etc/passwd}) are caught even for destination
  * paths that don't yet exist.
+ *
+ * <p>Error-envelope hygiene: {@code details} returned to the agent only echoes the original input
+ * string. Server-computed paths (the sandbox root, canonicalised realpaths that differ from input,
+ * temp-file paths) are never exposed in the envelope. When a canonicalised path differs from the
+ * input string, it is logged at INFO for operator debuggability and {@code details.path} echoes the
+ * agent's own input — tautologically safe, and enough to recover.
  */
 public final class PathValidator {
+
+  private static final Logger log = LoggerFactory.getLogger(PathValidator.class);
 
   private final ExcelMcpRoot root;
 
@@ -31,11 +41,11 @@ public final class PathValidator {
   /** Validate for an existing file (open, save-to-existing). */
   public Path validateExisting(String input) throws McpException {
     Path p = parse(input);
-    assertInsideRoot(p);
-    FormatWhitelist.format(p);
+    assertInsideRoot(p, input);
+    FormatWhitelist.format(p, input);
     if (!Files.exists(p)) {
       throw new McpException(
-          ErrorCode.FILE_NOT_FOUND, "no such file: " + p, Map.of("path", p.toString()));
+          ErrorCode.FILE_NOT_FOUND, "no such file: " + input, Map.of("path", input));
     }
     return p;
   }
@@ -43,8 +53,8 @@ public final class PathValidator {
   /** Validate for a destination path that may not yet exist (create, save-to-new). */
   public Path validateDestination(String input) throws McpException {
     Path p = parse(input);
-    assertInsideRoot(p);
-    FormatWhitelist.format(p);
+    assertInsideRoot(p, input);
+    FormatWhitelist.format(p, input);
     return p;
   }
 
@@ -67,17 +77,20 @@ public final class PathValidator {
     }
   }
 
-  private void assertInsideRoot(Path candidate) throws McpException {
+  private void assertInsideRoot(Path candidate, String input) throws McpException {
     if (!root.isEnabled()) {
       return;
     }
     Path rootPath = root.canonical().orElseThrow();
-    Path canonical = canonicaliseForContainment(candidate);
+    Path canonical = canonicaliseForContainment(candidate, input);
     if (!canonical.startsWith(rootPath)) {
+      log.info(
+          "path rejected as outside root: input={} canonical={} root={}",
+          input,
+          canonical,
+          rootPath);
       throw new McpException(
-          ErrorCode.PATH_OUTSIDE_ROOT,
-          "path escapes EXCEL_MCP_ROOT",
-          Map.of("path", canonical.toString(), "root", rootPath.toString()));
+          ErrorCode.PATH_OUTSIDE_ROOT, "path escapes EXCEL_MCP_ROOT", Map.of("path", input));
     }
   }
 
@@ -93,7 +106,7 @@ public final class PathValidator {
    *       containment correctly rejects it.
    * </ul>
    */
-  private Path canonicaliseForContainment(Path candidate) throws McpException {
+  private Path canonicaliseForContainment(Path candidate, String input) throws McpException {
     try {
       if (Files.exists(candidate)) {
         return candidate.toRealPath();
@@ -107,7 +120,7 @@ public final class PathValidator {
       throw new McpException(
           ErrorCode.PATH_INVALID,
           "cannot canonicalise: " + ex.getMessage(),
-          Map.of("path", candidate.toString()),
+          Map.of("path", input),
           ex);
     }
   }

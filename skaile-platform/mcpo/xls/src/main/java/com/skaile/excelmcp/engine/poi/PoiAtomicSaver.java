@@ -45,7 +45,7 @@ public final class PoiAtomicSaver {
       throw new McpException(
           ErrorCode.SAVE_FAILED,
           "atomic save failed: " + ex.getMessage(),
-          Map.of("destination", destination.toString()),
+          Map.of("destination", destination.getFileName().toString()),
           ex);
     }
   }

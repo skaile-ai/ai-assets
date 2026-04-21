@@ -119,4 +119,34 @@ class PathValidatorTest {
 
     assertThat(v.validateExisting(anywhere.toString())).isEqualTo(anywhere);
   }
+
+  @Test
+  void pathOutsideRootDoesNotLeakRoot(@TempDir Path root, @TempDir Path elsewhere)
+      throws Exception {
+    Path outside = Files.writeString(elsewhere.resolve("leak.xlsx"), "stub");
+    String input = outside.toString();
+    PathValidator v = validatorFor(root);
+
+    McpException ex =
+        org.junit.jupiter.api.Assertions.assertThrows(
+            McpException.class, () -> v.validateExisting(input));
+    assertThat(ex.code()).isEqualTo(ErrorCode.PATH_OUTSIDE_ROOT);
+    assertThat(ex.details().keySet()).containsExactly("path");
+    assertThat(ex.details().get("path")).isEqualTo(input);
+  }
+
+  @Test
+  void formatUnsupportedDetailsEchoAgentInputNotCanonicalPath(@TempDir Path root) throws Exception {
+    // Build an input string with a redundant ./ segment so the agent input differs from the
+    // server-normalised absolute path; the envelope must still echo the agent's own form.
+    String input = root + "/./report.txt";
+    PathValidator v = validatorFor(root);
+
+    McpException ex =
+        org.junit.jupiter.api.Assertions.assertThrows(
+            McpException.class, () -> v.validateDestination(input));
+    assertThat(ex.code()).isEqualTo(ErrorCode.FORMAT_UNSUPPORTED);
+    assertThat(ex.details()).containsEntry("path", input);
+    assertThat(ex.details().get("path").toString()).contains("/./");
+  }
 }

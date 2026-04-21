@@ -89,7 +89,7 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
       throw new McpException(
           ErrorCode.INTERNAL_ERROR,
           "POI could not open workbook: " + ex.getMessage(),
-          Map.of("path", path.toString(), "exception", ex.getClass().getName()),
+          Map.of("path", path.getFileName().toString(), "exception", ex.getClass().getName()),
           ex);
     }
     try {
