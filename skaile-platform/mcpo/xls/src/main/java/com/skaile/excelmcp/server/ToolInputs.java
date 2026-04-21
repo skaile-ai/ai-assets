@@ -62,7 +62,7 @@ public final class ToolInputs {
           "required integer field missing: " + field,
           Map.of("field", field));
     }
-    if (!v.canConvertToInt()) {
+    if (!v.isIntegralNumber() || !v.canConvertToInt()) {
       throw new McpException(
           ErrorCode.VALIDATION_ERROR, "field is not an integer: " + field, Map.of("field", field));
     }
@@ -72,7 +72,7 @@ public final class ToolInputs {
   /** Optional-integer reader for genuinely-optional fields (no default value). */
   public static java.util.OptionalInt optionalInt(JsonNode node, String field) {
     JsonNode v = node == null ? null : node.get(field);
-    if (v == null || v.isNull() || !v.canConvertToInt()) {
+    if (v == null || v.isNull() || !v.isIntegralNumber() || !v.canConvertToInt()) {
       return java.util.OptionalInt.empty();
     }
     return java.util.OptionalInt.of(v.intValue());
