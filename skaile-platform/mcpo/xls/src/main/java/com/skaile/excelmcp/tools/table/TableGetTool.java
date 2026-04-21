@@ -38,8 +38,9 @@ public final class TableGetTool implements ToolDefinition {
         + " the resolved table_name alongside the cells (each cell carries type, value, and any"
         + " typed formula). Requires an open workbook handle and a table that exists — use"
         + " table.list first if you don't already know the name. The header row is included in"
-        + " the cell grid; the result has the same shape as range.get, not a row-of-structs, so"
-        + " column-header-to-value mapping is the caller's job.";
+        + " the cell grid; the result has the same shape as range.get (dates are naive local"
+        + " timestamps like \"2024-03-05T10:00:00\" — Excel date serials are wall-clock with"
+        + " no timezone), so column-header-to-value mapping is the caller's job.";
   }
 
   @Override

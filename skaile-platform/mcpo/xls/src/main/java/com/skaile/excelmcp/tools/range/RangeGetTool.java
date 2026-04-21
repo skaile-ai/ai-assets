@@ -46,11 +46,13 @@ public final class RangeGetTool implements ToolDefinition {
         + " every cell carries its type, value, and (if any) typed formula. Requires an open"
         + " handle and an existing sheet; read-only. Empty cells appear as type:\"blank\" (not"
         + " omitted), formula cells with no cached result read as type:\"formula_uncomputed\""
-        + " until workbook.recalculate runs, and responses beyond max_cells are truncated"
-        + " row-major with truncated=true and total_cells set. The range string accepts"
-        + " sheet-prefixed (\"Sheet1!A1:B2\", \"'Sheet Name'!A1:B2\") and full-column /"
-        + " full-row (\"A:A\", \"1:5\") forms; if the prefix names a different sheet than the"
-        + " sheet argument the call fails with RANGE_INVALID.";
+        + " until workbook.recalculate runs, dates are returned as naive local timestamps"
+        + " (e.g. \"2024-03-05T10:00:00\"; Excel stores date serials as wall-clock values"
+        + " with no timezone), and responses beyond max_cells are truncated row-major with"
+        + " truncated=true and total_cells set. The range string accepts sheet-prefixed"
+        + " (\"Sheet1!A1:B2\", \"'Sheet Name'!A1:B2\") and full-column / full-row (\"A:A\","
+        + " \"1:5\") forms; if the prefix names a different sheet than the sheet argument the"
+        + " call fails with RANGE_INVALID.";
   }
 
   @Override

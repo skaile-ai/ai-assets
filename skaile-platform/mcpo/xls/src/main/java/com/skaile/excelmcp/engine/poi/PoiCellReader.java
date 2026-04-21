@@ -2,11 +2,8 @@ package com.skaile.excelmcp.engine.poi;
 
 import com.skaile.excelmcp.shape.CellShape;
 import com.skaile.excelmcp.shape.CellShape.Type;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Map;
 import org.apache.poi.ss.formula.eval.ErrorEval;
 import org.apache.poi.ss.usermodel.Cell;
@@ -23,8 +20,11 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
  */
 public final class PoiCellReader {
 
-  private static final DateTimeFormatter ISO_NAIVE =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+  // ISO_LOCAL_DATE_TIME emits naive timestamps with no offset / Z suffix and only includes the
+  // fractional-second portion when one is present (e.g. "2024-03-05T10:00:00", or
+  // "2024-03-05T10:00:00.123" if the serial carries milliseconds). Excel date serials are
+  // wall-clock values with no timezone, so a Z-suffixed UTC instant would be a category error.
+  private static final DateTimeFormatter ISO_NAIVE = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
   private PoiCellReader() {}
 
@@ -87,11 +87,8 @@ public final class PoiCellReader {
 
   private static Object numericValue(Cell cell) {
     if (DateUtil.isCellDateFormatted(cell)) {
-      Date d = cell.getDateCellValue();
-      if (d == null) return null;
-      LocalDateTime ldt =
-          LocalDateTime.ofInstant(Instant.ofEpochMilli(d.getTime()), ZoneOffset.UTC);
-      return ldt.format(ISO_NAIVE);
+      LocalDateTime ldt = DateUtil.getLocalDateTime(cell.getNumericCellValue());
+      return ldt == null ? null : ldt.format(ISO_NAIVE);
     }
     double v = cell.getNumericCellValue();
     if (v == Math.floor(v) && !Double.isInfinite(v) && Math.abs(v) < 1e15) {

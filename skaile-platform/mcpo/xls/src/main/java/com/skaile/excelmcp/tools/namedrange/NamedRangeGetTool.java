@@ -38,10 +38,12 @@ public final class NamedRangeGetTool implements ToolDefinition {
   @Override
   public String description() {
     return "Reads the cells the given defined name points at and returns the resolved"
-        + " named_range alongside the cell grid. Requires an open workbook handle and a name"
-        + " that resolves to a simple rectangular A1 range (e.g. Sheet1!$A$1:$B$10); names whose"
-        + " refers_to is a formula expression or a multi-sheet 3D reference are rejected with"
-        + " NAMED_RANGE_NOT_FOUND in v1 — enumerate with named_range.list first if unsure.";
+        + " named_range alongside the cell grid (dates are naive local timestamps like"
+        + " \"2024-03-05T10:00:00\" — Excel date serials are wall-clock with no timezone)."
+        + " Requires an open workbook handle and a name that resolves to a simple rectangular"
+        + " A1 range (e.g. Sheet1!$A$1:$B$10); names whose refers_to is a formula expression"
+        + " or a multi-sheet 3D reference are rejected with NAMED_RANGE_NOT_FOUND in v1 —"
+        + " enumerate with named_range.list first if unsure.";
   }
 
   @Override
