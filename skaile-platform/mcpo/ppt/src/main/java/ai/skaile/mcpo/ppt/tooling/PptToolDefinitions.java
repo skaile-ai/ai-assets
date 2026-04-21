@@ -248,6 +248,40 @@ final class PptToolDefinitions {
                                     "additionalProperties": false
                                 }
                                 """),
+                tool(mapper, "ppt.set_picture_effects",
+                        "Apply crop / alpha / recolor effects to a picture shape. Crop fractions are relative to the original picture (0 = no crop, sum-on-axis must be < 1). Alpha is 0..1. Recolor mode duotone requires color.",
+                        """
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "document_id": {"type": "string"},
+                                        "slide_index": {"type": "integer", "minimum": 0},
+                                        "shape_index": {"type": "integer", "minimum": 0},
+                                        "crop": {
+                                            "type": "object",
+                                            "properties": {
+                                                "left": {"type": "number", "minimum": 0, "maximum": 1},
+                                                "top": {"type": "number", "minimum": 0, "maximum": 1},
+                                                "right": {"type": "number", "minimum": 0, "maximum": 1},
+                                                "bottom": {"type": "number", "minimum": 0, "maximum": 1}
+                                            },
+                                            "additionalProperties": false
+                                        },
+                                        "alpha": {"type": "number", "minimum": 0, "maximum": 1},
+                                        "recolor": {
+                                            "type": "object",
+                                            "properties": {
+                                                "mode": {"type": "string", "enum": ["grayscale", "sepia", "duotone", "washout"]},
+                                                "color": {"type": "string"}
+                                            },
+                                            "required": ["mode"],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": ["document_id", "slide_index", "shape_index"],
+                                    "additionalProperties": false
+                                }
+                                """),
                 tool(mapper, "ppt.replace_image", "Replace an existing picture shape with a new image while preserving placement.",
                         """
                                 {
@@ -321,7 +355,7 @@ final class PptToolDefinitions {
                                 }
                                 """),
                 tool(mapper, "ppt.edit_table",
-                        "Edit a table via a single operation. Implemented: set_cell, insert_row, delete_row, insert_col, delete_col, set_row_height, set_col_width, set_header_style. Reserved for Phase 4: merge_cells, set_cell_border.",
+                        "Edit a table via a single operation: set_cell, insert_row, delete_row, insert_col, delete_col, set_row_height, set_col_width, set_header_style, merge_cells, set_cell_border.",
                         """
                                 {
                                     "type": "object",
@@ -366,7 +400,7 @@ final class PptToolDefinitions {
                                 }
                                 """),
                 tool(mapper, "ppt.set_text",
-                        "Unified text mutation. scope=shape|run|paragraph selects the target; run-style fields (bold/italic/underline/font_*) apply to the selected runs, paragraph-style fields (text_align/line_spacing/bullet_*) apply to the matching paragraphs. strikethrough, rotation, auto_fit accept the schema but implementation lands in Phase 4.",
+                        "Unified text mutation. scope=shape|run|paragraph selects the target; run-style fields (bold/italic/underline/strikethrough/font_*) apply to the selected runs; rotation and auto_fit apply to the shape body; paragraph-style fields (text_align/line_spacing/bullet_*) apply to the matching paragraphs.",
                         """
                                 {
                                     "type": "object",
@@ -418,7 +452,7 @@ final class PptToolDefinitions {
                                     "additionalProperties": false
                                 }
                                 """),
-                tool(mapper, "ppt.clone_shape", "Clone a text-capable shape on the same slide.",
+                tool(mapper, "ppt.clone_shape", "Clone any shape on the same slide via deep XML copy and apply offset_x/offset_y.",
                         """
                                 {
                                     "type": "object",
@@ -545,7 +579,7 @@ final class PptToolDefinitions {
 
 
                 tool(mapper, "ppt.export_document",
-                        "Export an open in-memory document to disk. format=pptx|pdf are implemented; html|png_batch|jpg_batch|svg_batch|outline_text are reserved for Phase 3.",
+                        "Export an open in-memory document to disk. format=pptx (POI), pdf|html (LibreOffice), png_batch|jpg_batch|svg_batch (LibreOffice, output_path is a directory), outline_text (deterministic POI traversal).",
                         """
                                 {
                                   "type": "object",
@@ -563,7 +597,7 @@ final class PptToolDefinitions {
                                 }
                                 """),
                 tool(mapper, "ppt.render_slide",
-                        "Render one slide to an image. format=png|jpg|svg (default png). fidelity=low|high; high fidelity lands in Phase 3.",
+                        "Render one slide to an image. format=png|jpg|svg (default png). fidelity=low (POI + Batik, fast/crude) or high (LibreOffice, slow/accurate).",
                         """
                                 {
                                   "type": "object",
@@ -581,7 +615,7 @@ final class PptToolDefinitions {
                                 }
                                 """),
                 tool(mapper, "ppt.render_all_slides",
-                        "Render every slide to an image file in output_dir. format=png|jpg|svg (default png). fidelity=low|high; high fidelity lands in Phase 3.",
+                        "Render every slide to an image file in output_dir. format=png|jpg|svg (default png). fidelity=low (POI + Batik) or high (LibreOffice).",
                         """
                                 {
                                   "type": "object",
@@ -690,7 +724,8 @@ final class PptToolDefinitions {
                                     "additionalProperties": false
                                 }
                                 """),
-                tool(mapper, "ppt.set_shape_style", "Set shape fill, border, and text alignment style.",
+                tool(mapper, "ppt.set_shape_style",
+                        "Set shape fill (solid/gradient/pattern/none), border, and text alignment style. fill_color is the fill_type=solid shorthand. fill_gradient.stops must have >=2 entries; angle is degrees, linear only.",
                         """
                                 {
                                     "type": "object",
@@ -698,7 +733,40 @@ final class PptToolDefinitions {
                                         "document_id": {"type": "string"},
                                         "slide_index": {"type": "integer", "minimum": 0},
                                         "shape_index": {"type": "integer", "minimum": 0},
+                                        "fill_type": {"type": "string", "enum": ["solid", "gradient", "pattern", "none"]},
                                         "fill_color": {"type": "string"},
+                                        "fill_gradient": {
+                                            "type": "object",
+                                            "properties": {
+                                                "type": {"type": "string", "enum": ["linear", "radial"]},
+                                                "angle": {"type": "number"},
+                                                "stops": {
+                                                    "type": "array",
+                                                    "minItems": 2,
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "color": {"type": "string"},
+                                                            "position": {"type": "number", "minimum": 0, "maximum": 1}
+                                                        },
+                                                        "required": ["color", "position"],
+                                                        "additionalProperties": false
+                                                    }
+                                                }
+                                            },
+                                            "required": ["type", "stops"],
+                                            "additionalProperties": false
+                                        },
+                                        "fill_pattern": {
+                                            "type": "object",
+                                            "properties": {
+                                                "preset": {"type": "string", "enum": ["horizontal", "vertical", "diagonal_up", "diagonal_down", "cross", "dotted"]},
+                                                "fg_color": {"type": "string"},
+                                                "bg_color": {"type": "string"}
+                                            },
+                                            "required": ["preset", "fg_color", "bg_color"],
+                                            "additionalProperties": false
+                                        },
                                         "border_color": {"type": "string"},
                                         "border_width": {"type": "number", "minimum": 0},
                                         "text_align": {"type": "string", "enum": ["left", "center", "right", "justify"]}

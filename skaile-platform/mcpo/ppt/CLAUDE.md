@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Stateful MCP server (`ai.skaile.mcpo:ppt-mcp-server`) that exposes PowerPoint manipulation as JSON-RPC tools over stdio. An agent opens a `.pptx`, receives a `document_id` handle, and drives subsequent mutations through that handle until it calls `ppt.save_document` / `ppt.close_document`. Backed by Apache POI 5.5.x; LibreOffice (`soffice`) is only invoked for PDF export.
 
-`README.md` contains the authoritative tool catalog (currently 56 tools), response envelope schema, and example JSON-RPC frames — read it before adding or modifying a tool. Note that README sometimes drifts ahead of the pom (see "Known doc/source drift" below).
+`README.md` contains the authoritative tool catalog (currently 50 tools after Phase 1 consolidation + Phase 4 addition of `ppt.set_picture_effects`), response envelope schema, and example JSON-RPC frames — read it before adding or modifying a tool. Note that README sometimes drifts ahead of the pom (see "Known doc/source drift" below).
 
 ## Commands
 
@@ -47,18 +47,21 @@ Three packages under `src/main/java/ai/skaile/mcpo/ppt/`. Keep concerns inside t
     - `PptSlideBuilder` — shared slide-construction helpers (title placement, body text, best-effort layout).
     - `ColorParser` — the only hex-color parser. Malformed input → `INVALID_COLOR`.
     - `PptUnits` — EMU ↔ points ↔ pixels; the only place `914400 EMU/inch` appears.
+    - `PptShapeXml` — Phase 4 XML helpers for things POI doesn't expose at the facade: gradient/pattern fills on `CTShapeProperties`, picture crop/alpha/recolor on `CTBlipFillProperties`, and shape-id management for clone.
     - `SofficeAvailability` — one-shot LibreOffice probe, cached process-wide.
     - `ToolArgumentValidator`, `ToolResponseFactory` — unchanged.
   - `tooling/operations/` — behavior organized by tool family. Each class is **self-contained**: real dependencies via constructor (no lambda-reference pass-through from `PptToolService`), owns its handler methods, and exposes `public Map<String, ToolHandler> handlers()`.
-    - `PptDocumentOperations` — doc lifecycle, export, transactions, merge, generate.
-    - `PptSlideOperations` — slide content + text (add/duplicate/delete, update/replace/find, notes, get_slide_content).
-    - `PptShapeMutationOperations` — shape add/move/resize/clone/delete, style, z-order, hyperlink, replace_image.
-    - `PptTableOperations` — table add/get/edit + `set_text` styling.
+    - `PptDocumentOperations` — doc lifecycle, export (incl. all Phase-3 formats), transactions, merge, generate.
+    - `PptSlideOperations` — slide content (add/duplicate/delete, update/replace/find, notes, get_slide_content).
+    - `PptShapeMutationOperations` — shape add/move/resize/clone (Phase 4: any shape type via deep XML copy + cache invalidation)/delete, style (Phase 4: gradient/pattern fills), z-order, hyperlink, replace_image, **set_picture_effects**.
+    - `PptTableOperations` — table add/get/edit (incl. Phase 4 `merge_cells` + `set_cell_border`).
+    - `PptTextOperations` — `ppt.set_text` only. Split out of `PptTableOperations` in Phase 4 when `strikethrough`/`rotation`/`auto_fit` additions would have pushed the table class past the 800-line cap.
     - `PptPageOperations` — `set_page_setup`, `set_slide_background`, `set_slide_layout`, `set_document_metadata`.
     - `PptRenderOperations` — `render_slide`, `render_all_slides`, `find_text`, `get_slide_metrics`.
     - `PptTemplateOperations` — `insert_image`, template upload/default, `import_markdown_outline`. Owns the mutable default-template pointer consulted by `PptDocumentOperations` when creating sessions.
     - `PptCapabilitiesOperations` — `ppt.capabilities` self-describe handler.
     - `PptTransactionManager` — per-session transaction snapshots (begin/commit/rollback).
+    - `SofficeRenderer` — single entry point for all soffice invocations; semaphore-guarded, 90s timeout, cleans temp files on exception paths.
 
 ### Response envelope
 

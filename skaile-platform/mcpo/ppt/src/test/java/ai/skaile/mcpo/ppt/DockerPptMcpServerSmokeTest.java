@@ -85,6 +85,7 @@ class DockerPptMcpServerSmokeTest {
             "ppt.delete_shape",
             "ppt.get_shape_properties",
             "ppt.set_shape_style",
+            "ppt.set_picture_effects",
             "ppt.set_document_metadata",
             "ppt.set_slide_layout",
             "ppt.set_shape_z_order",
@@ -198,6 +199,33 @@ class DockerPptMcpServerSmokeTest {
             assertEquals("Target met",
                     tableSnapshot.path("cells").path(1).path(1).path("text").asText());
 
+            // Phase 4: merge a 2x2 anchored block + apply a per-cell border with dash style.
+            JsonNode merged = callTool(session, "ppt.edit_table", objectNode(
+                    "document_id", documentId,
+                    "slide_index", 0,
+                    "shape_index", tableShapeIndex,
+                    "operation", "merge_cells",
+                    "start_row", 0,
+                    "start_col", 0,
+                    "end_row", 1,
+                    "end_col", 1));
+            assertEquals(2, merged.path("row_span").asInt());
+            assertEquals(2, merged.path("col_span").asInt());
+
+            ObjectNode borderArgs = objectNode(
+                    "document_id", documentId,
+                    "slide_index", 0,
+                    "shape_index", tableShapeIndex,
+                    "operation", "set_cell_border",
+                    "row", 0,
+                    "col", 0,
+                    "color", "#226699",
+                    "width", 2.0,
+                    "dash_style", "dashdot");
+            borderArgs.putArray("sides").add("all");
+            JsonNode bordered = callTool(session, "ppt.edit_table", borderArgs);
+            assertEquals(4, bordered.path("sides_applied").asInt());
+
             JsonNode style = callTool(session, "ppt.set_text", objectNode(
                     "document_id", documentId,
                     "slide_index", 0,
@@ -223,6 +251,57 @@ class DockerPptMcpServerSmokeTest {
                     "height", 90));
             int imageShapeIndex = insertedImage.path("shape_index").asInt(-1);
             assertTrue(imageShapeIndex >= 0);
+
+            // Phase 4: gradient fill on a primitive shape and picture effects on the inserted image.
+            JsonNode rect = callTool(session, "ppt.add_shape", objectNode(
+                    "document_id", documentId,
+                    "slide_index", 0,
+                    "shape_type", "rectangle",
+                    "x", 50, "y", 290,
+                    "width", 200, "height", 60));
+            int rectShapeIndex = rect.path("shape_index").asInt(-1);
+            ObjectNode gradientStyle = objectNode(
+                    "document_id", documentId,
+                    "slide_index", 0,
+                    "shape_index", rectShapeIndex,
+                    "fill_type", "gradient");
+            ObjectNode gradient = MAPPER.createObjectNode();
+            gradient.put("type", "linear");
+            gradient.put("angle", 45.0);
+            ArrayNode stops = gradient.putArray("stops");
+            ObjectNode stop1 = stops.addObject();
+            stop1.put("color", "#FF6600"); stop1.put("position", 0.0);
+            ObjectNode stop2 = stops.addObject();
+            stop2.put("color", "#003366"); stop2.put("position", 1.0);
+            gradientStyle.set("fill_gradient", gradient);
+            JsonNode gradientResult = callTool(session, "ppt.set_shape_style", gradientStyle);
+            assertEquals("success", gradientResult.path("status").asText());
+
+            ObjectNode pictureFx = objectNode(
+                    "document_id", documentId,
+                    "slide_index", 0,
+                    "shape_index", imageShapeIndex,
+                    "alpha", 0.7);
+            ObjectNode crop = MAPPER.createObjectNode();
+            crop.put("left", 0.05); crop.put("right", 0.05);
+            crop.put("top", 0.05); crop.put("bottom", 0.05);
+            pictureFx.set("crop", crop);
+            ObjectNode recolor = MAPPER.createObjectNode();
+            recolor.put("mode", "grayscale");
+            pictureFx.set("recolor", recolor);
+            JsonNode pictureFxResult = callTool(session, "ppt.set_picture_effects", pictureFx);
+            assertTrue(pictureFxResult.path("crop_applied").asBoolean());
+            assertTrue(pictureFxResult.path("alpha_applied").asBoolean());
+            assertTrue(pictureFxResult.path("recolor_applied").asBoolean());
+
+            // Phase 4: clone_shape now works on any shape, e.g. the table built earlier.
+            JsonNode cloned = callTool(session, "ppt.clone_shape", objectNode(
+                    "document_id", documentId,
+                    "slide_index", 0,
+                    "shape_index", tableShapeIndex,
+                    "offset_x", 30.0,
+                    "offset_y", 30.0));
+            assertTrue(cloned.path("shape_index").asInt(-1) >= 0);
 
                 Path pptxPath = workspace.resolve("output/report.pptx");
             JsonNode savedPptx = callTool(session, "ppt.export_document", objectNode(

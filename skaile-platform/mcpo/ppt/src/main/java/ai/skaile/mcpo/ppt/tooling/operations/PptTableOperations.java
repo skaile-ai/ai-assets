@@ -14,24 +14,22 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.poi.sl.usermodel.AutoNumberingScheme;
-import org.apache.poi.sl.usermodel.TextParagraph;
 import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
 import org.apache.poi.xslf.usermodel.XSLFTable;
 import org.apache.poi.xslf.usermodel.XSLFTableCell;
 import org.apache.poi.xslf.usermodel.XSLFTableRow;
 import org.apache.poi.xslf.usermodel.XSLFTextRun;
-import org.apache.poi.xslf.usermodel.XSLFTextShape;
 
 /**
- * Table and text-styling tool handlers: {@code ppt.add_table}, {@code ppt.get_table},
- * {@code ppt.edit_table}, {@code ppt.set_text}. Internally dispatches the multi-operation
- * {@code edit_table} surface through to the relevant cell / structure mutation path.
+ * Table tool handlers: {@code ppt.add_table}, {@code ppt.get_table}, {@code ppt.edit_table}.
+ * Internally dispatches the multi-operation {@code edit_table} surface through to the relevant
+ * cell / structure / style mutation path. The merge and per-cell border operations land on
+ * the underlying {@link org.openxmlformats.schemas.drawingml.x2006.main.CTTableCell} XML
+ * directly because POI doesn't expose all of these knobs at the {@link XSLFTableCell} level.
  */
 public final class PptTableOperations {
 
@@ -58,8 +56,7 @@ public final class PptTableOperations {
         return Map.of(
                 "ppt.add_table", this::addTable,
                 "ppt.get_table", this::getTable,
-                "ppt.edit_table", this::editTable,
-                "ppt.set_text", this::setText);
+                "ppt.edit_table", this::editTable);
     }
 
     ToolCallResult addTable(JsonNode args) {
@@ -177,9 +174,9 @@ public final class PptTableOperations {
             case "set_header_style":
                 return setTableHeaderStyle(args);
             case "merge_cells":
+                return mergeCells(args);
             case "set_cell_border":
-                return responseFactory.error("FEATURE_NOT_IMPLEMENTED",
-                        "operation=" + operation + " lands in Phase 4.", false);
+                return setCellBorder(args);
             default:
                 return responseFactory.error("VALIDATION_ERROR",
                         "operation must be one of: set_cell, insert_row, delete_row, insert_col, delete_col, set_row_height, set_col_width, set_header_style, merge_cells, set_cell_border",
@@ -457,231 +454,232 @@ public final class PptTableOperations {
         return success(payload);
     }
 
-    ToolCallResult setText(JsonNode args) {
+    private ToolCallResult mergeCells(JsonNode args) {
+        int startRow = args.path("start_row").asInt(-1);
+        int startCol = args.path("start_col").asInt(-1);
+        int endRow = args.path("end_row").asInt(-1);
+        int endCol = args.path("end_col").asInt(-1);
+        if (startRow < 0 || startCol < 0 || endRow < startRow || endCol < startCol) {
+            return responseFactory.error("VALIDATION_ERROR",
+                    "merge_cells requires 0 <= start_row <= end_row and 0 <= start_col <= end_col",
+                    false);
+        }
+        if (startRow == endRow && startCol == endCol) {
+            return responseFactory.error("VALIDATION_ERROR",
+                    "merge_cells range must cover at least 2 cells", false);
+        }
+
         PptDocumentSession session = shapeFinder.requireSession(args);
         int slideIndex = args.path("slide_index").asInt(-1);
         int shapeIndex = args.path("shape_index").asInt(-1);
         XSLFSlide slide = shapeFinder.requireSlide(session, slideIndex);
         XSLFShape shape = shapeFinder.requireShape(slide, shapeIndex);
-        if (!(shape instanceof XSLFTextShape textShape)) {
-            return error("shape_index does not point to a text-capable shape");
+        if (!(shape instanceof XSLFTable table)) {
+            return error("shape_index does not point to a table on the selected slide");
         }
-
-        String scope = args.path("scope").asText("shape").toLowerCase(Locale.ROOT);
-        if (!("shape".equals(scope) || "run".equals(scope) || "paragraph".equals(scope))) {
+        if (endRow >= table.getNumberOfRows() || endCol >= table.getNumberOfColumns()) {
             return responseFactory.error("VALIDATION_ERROR",
-                    "scope must be one of: shape, run, paragraph", false);
+                    "merge_cells range exceeds table dimensions", false);
         }
 
-        Double fontSize = args.has("font_size") ? args.path("font_size").asDouble() : null;
-        if (fontSize != null && fontSize <= 0) {
-            return error("font_size must be > 0");
-        }
-        Color fontColor = args.has("font_color") ? ColorParser.parseHex(args.path("font_color").asText("")) : null;
-
-        ObjectNode payload = okPayload();
-        payload.put("document_id", session.getId());
-        payload.put("slide_index", slideIndex);
-        payload.put("shape_index", shapeIndex);
-        payload.put("scope", scope);
-
-        List<XSLFTextRun> targetRuns;
-        List<org.apache.poi.xslf.usermodel.XSLFTextParagraph> targetParagraphs;
-
-        if ("run".equals(scope)) {
-            RunSelection selection = selectRunByTargetText(textShape, args);
-            if (selection.error != null) {
-                return selection.error;
+        for (int r = startRow; r <= endRow; r++) {
+            XSLFTableRow row = table.getRows().get(r);
+            for (int c = startCol; c <= endCol; c++) {
+                if (c >= row.getCells().size()) {
+                    continue;
+                }
+                XSLFTableCell cell = row.getCells().get(c);
+                org.openxmlformats.schemas.drawingml.x2006.main.CTTableCell ct =
+                        (org.openxmlformats.schemas.drawingml.x2006.main.CTTableCell) cell.getXmlObject();
+                if ((ct.isSetGridSpan() && ct.getGridSpan() > 1)
+                        || (ct.isSetRowSpan() && ct.getRowSpan() > 1)
+                        || (ct.isSetHMerge() && ct.getHMerge())
+                        || (ct.isSetVMerge() && ct.getVMerge())) {
+                    return responseFactory.error("MERGE_CONFLICT",
+                            "Cells in merge range already participate in another merge",
+                            false);
+                }
             }
-            targetRuns = List.of(selection.styledRun);
-            targetParagraphs = List.of();
-            payload.put("start", selection.start);
-            payload.put("end", selection.end);
-        } else if ("paragraph".equals(scope)) {
-            int paragraphIndex = args.path("paragraph_index").asInt(-1);
-            if (paragraphIndex < 0 || paragraphIndex >= textShape.getTextParagraphs().size()) {
-                return error("Invalid paragraph_index: " + paragraphIndex);
-            }
-            var paragraph = textShape.getTextParagraphs().get(paragraphIndex);
-            targetRuns = new ArrayList<>(paragraph.getTextRuns());
-            if (targetRuns.isEmpty()) {
-                XSLFTextRun run = paragraph.addNewTextRun();
-                run.setText("");
-                targetRuns.add(run);
-            }
-            targetParagraphs = List.of(paragraph);
-            payload.put("paragraph_index", paragraphIndex);
-        } else {
-            targetRuns = collectTextRuns(textShape);
-            if (targetRuns.isEmpty()) {
-                var paragraph = textShape.addNewTextParagraph();
-                XSLFTextRun run = paragraph.addNewTextRun();
-                run.setText("");
-                targetRuns.add(run);
-            }
-            targetParagraphs = new ArrayList<>(textShape.getTextParagraphs());
         }
 
-        applyRunStyle(targetRuns, args, fontSize, fontColor);
-        if (!targetParagraphs.isEmpty()) {
-            ToolCallResult paragraphError = applyParagraphStyle(targetParagraphs, args);
-            if (paragraphError != null) {
-                return paragraphError;
+        int rowSpan = endRow - startRow + 1;
+        int colSpan = endCol - startCol + 1;
+        XSLFTableCell anchor = table.getRows().get(startRow).getCells().get(startCol);
+        org.openxmlformats.schemas.drawingml.x2006.main.CTTableCell anchorCt =
+                (org.openxmlformats.schemas.drawingml.x2006.main.CTTableCell) anchor.getXmlObject();
+        if (colSpan > 1) {
+            anchorCt.setGridSpan(colSpan);
+        }
+        if (rowSpan > 1) {
+            anchorCt.setRowSpan(rowSpan);
+        }
+        for (int r = startRow; r <= endRow; r++) {
+            for (int c = startCol; c <= endCol; c++) {
+                if (r == startRow && c == startCol) {
+                    continue;
+                }
+                XSLFTableCell cell = table.getRows().get(r).getCells().get(c);
+                org.openxmlformats.schemas.drawingml.x2006.main.CTTableCell ct =
+                        (org.openxmlformats.schemas.drawingml.x2006.main.CTTableCell) cell.getXmlObject();
+                if (c > startCol) {
+                    ct.setHMerge(true);
+                }
+                if (r > startRow) {
+                    ct.setVMerge(true);
+                }
             }
         }
 
         session.touch(true);
-        payload.put("message", "Text updated");
+        ObjectNode payload = okPayload();
+        payload.put("document_id", session.getId());
+        payload.put("slide_index", slideIndex);
+        payload.put("shape_index", shapeIndex);
+        payload.put("start_row", startRow);
+        payload.put("start_col", startCol);
+        payload.put("end_row", endRow);
+        payload.put("end_col", endCol);
+        payload.put("row_span", rowSpan);
+        payload.put("col_span", colSpan);
+        payload.put("message", "Cells merged");
         return success(payload);
     }
 
-    private void applyRunStyle(List<XSLFTextRun> runs, JsonNode args, Double fontSize, Color fontColor) {
-        for (XSLFTextRun run : runs) {
-            if (args.has("bold")) {
-                run.setBold(args.path("bold").asBoolean());
-            }
-            if (args.has("italic")) {
-                run.setItalic(args.path("italic").asBoolean());
-            }
-            if (args.has("underline")) {
-                run.setUnderlined(args.path("underline").asBoolean());
-            }
-            if (fontSize != null) {
-                run.setFontSize(fontSize);
-            }
-            if (fontColor != null) {
-                run.setFontColor(fontColor);
-            }
-            if (args.has("font_family") && !args.path("font_family").asText("").isBlank()) {
-                run.setFontFamily(args.path("font_family").asText());
+    private ToolCallResult setCellBorder(JsonNode args) {
+        int rowIndex = args.path("row").asInt(-1);
+        int colIndex = args.path("col").asInt(-1);
+        JsonNode sidesNode = args.path("sides");
+        if (!sidesNode.isArray() || sidesNode.size() == 0) {
+            return responseFactory.error("VALIDATION_ERROR",
+                    "set_cell_border requires non-empty sides array", false);
+        }
+        Color color = args.has("color")
+                ? ColorParser.parseHex(args.path("color").asText(""))
+                : null;
+        Double width = args.has("width") ? args.path("width").asDouble() : null;
+        if (width != null && width < 0) {
+            return responseFactory.error("VALIDATION_ERROR", "width must be >= 0", false);
+        }
+        String dashStyle = args.path("dash_style").asText("").toLowerCase(Locale.ROOT);
+
+        java.util.EnumSet<org.apache.poi.sl.usermodel.TableCell.BorderEdge> edges =
+                java.util.EnumSet.noneOf(org.apache.poi.sl.usermodel.TableCell.BorderEdge.class);
+        for (JsonNode sideNode : sidesNode) {
+            String side = sideNode.asText("").toLowerCase(Locale.ROOT);
+            switch (side) {
+                case "top":
+                    edges.add(org.apache.poi.sl.usermodel.TableCell.BorderEdge.top);
+                    break;
+                case "bottom":
+                    edges.add(org.apache.poi.sl.usermodel.TableCell.BorderEdge.bottom);
+                    break;
+                case "left":
+                    edges.add(org.apache.poi.sl.usermodel.TableCell.BorderEdge.left);
+                    break;
+                case "right":
+                    edges.add(org.apache.poi.sl.usermodel.TableCell.BorderEdge.right);
+                    break;
+                case "all":
+                    edges.add(org.apache.poi.sl.usermodel.TableCell.BorderEdge.top);
+                    edges.add(org.apache.poi.sl.usermodel.TableCell.BorderEdge.bottom);
+                    edges.add(org.apache.poi.sl.usermodel.TableCell.BorderEdge.left);
+                    edges.add(org.apache.poi.sl.usermodel.TableCell.BorderEdge.right);
+                    break;
+                default:
+                    return responseFactory.error("VALIDATION_ERROR",
+                            "sides entries must be one of: top, bottom, left, right, all",
+                            false);
             }
         }
+
+        org.openxmlformats.schemas.drawingml.x2006.main.STPresetLineDashVal.Enum dashVal = null;
+        if (!dashStyle.isEmpty()) {
+            switch (dashStyle) {
+                case "solid":
+                    dashVal = org.openxmlformats.schemas.drawingml.x2006.main.STPresetLineDashVal.SOLID;
+                    break;
+                case "dash":
+                    dashVal = org.openxmlformats.schemas.drawingml.x2006.main.STPresetLineDashVal.DASH;
+                    break;
+                case "dot":
+                    dashVal = org.openxmlformats.schemas.drawingml.x2006.main.STPresetLineDashVal.DOT;
+                    break;
+                case "dashdot":
+                    dashVal = org.openxmlformats.schemas.drawingml.x2006.main.STPresetLineDashVal.DASH_DOT;
+                    break;
+                default:
+                    return responseFactory.error("VALIDATION_ERROR",
+                            "dash_style must be one of: solid, dash, dot, dashdot", false);
+            }
+        }
+
+        PptDocumentSession session = shapeFinder.requireSession(args);
+        int slideIndex = args.path("slide_index").asInt(-1);
+        int shapeIndex = args.path("shape_index").asInt(-1);
+        XSLFSlide slide = shapeFinder.requireSlide(session, slideIndex);
+        XSLFShape shape = shapeFinder.requireShape(slide, shapeIndex);
+        if (!(shape instanceof XSLFTable table)) {
+            return error("shape_index does not point to a table on the selected slide");
+        }
+        XSLFTableCell cell = getTableCell(table, rowIndex, colIndex);
+        if (cell == null) {
+            return error("Invalid table cell coordinates");
+        }
+
+        for (org.apache.poi.sl.usermodel.TableCell.BorderEdge edge : edges) {
+            if (color != null) {
+                cell.setBorderColor(edge, color);
+            }
+            if (width != null) {
+                cell.setBorderWidth(edge, width);
+            }
+            if (dashVal != null) {
+                applyBorderDash(cell, edge, dashVal);
+            }
+        }
+
+        session.touch(true);
+        ObjectNode payload = okPayload();
+        payload.put("document_id", session.getId());
+        payload.put("slide_index", slideIndex);
+        payload.put("shape_index", shapeIndex);
+        payload.put("row", rowIndex);
+        payload.put("col", colIndex);
+        payload.put("sides_applied", edges.size());
+        payload.put("message", "Cell border updated");
+        return success(payload);
     }
 
-    private ToolCallResult applyParagraphStyle(
-            List<org.apache.poi.xslf.usermodel.XSLFTextParagraph> paragraphs, JsonNode args) {
-        TextParagraph.TextAlign align = null;
-        if (args.has("text_align")) {
-            try {
-                align = parseTextAlign(args.path("text_align").asText(""));
-            } catch (IllegalArgumentException ex) {
-                return responseFactory.error("VALIDATION_ERROR", ex.getMessage(), false);
-            }
-        }
-        Double lineSpacing = args.has("line_spacing") ? args.path("line_spacing").asDouble() : null;
-        Double spaceBefore = args.has("space_before") ? args.path("space_before").asDouble() : null;
-        Double spaceAfter = args.has("space_after") ? args.path("space_after").asDouble() : null;
-        Double leftMargin = args.has("left_margin") ? args.path("left_margin").asDouble() : null;
-        Double indent = args.has("indent") ? args.path("indent").asDouble() : null;
-        boolean setBullet = args.has("bullet_enabled");
-        boolean bulletEnabled = args.path("bullet_enabled").asBoolean(false);
-        boolean numbered = args.path("numbered").asBoolean(false);
-        String bulletChar = args.path("bullet_character").asText("");
-        Integer bulletLevel = args.has("bullet_level") ? args.path("bullet_level").asInt() : null;
-
-        for (var paragraph : paragraphs) {
-            if (align != null) {
-                paragraph.setTextAlign(align);
-            }
-            if (numbered) {
-                paragraph.setBulletAutoNumber(AutoNumberingScheme.arabicPeriod, 1);
-            } else if (setBullet) {
-                paragraph.setBullet(bulletEnabled);
-            }
-            if (!bulletChar.isBlank()) {
-                paragraph.setBulletCharacter(bulletChar);
-            }
-            if (bulletLevel != null) {
-                double margin = Math.max(0, bulletLevel) * 18.0;
-                paragraph.setLeftMargin(margin);
-                paragraph.setIndent(Math.max(0, margin - 12.0));
-            }
-            if (leftMargin != null) {
-                paragraph.setLeftMargin(leftMargin);
-            }
-            if (indent != null) {
-                paragraph.setIndent(indent);
-            }
-            if (lineSpacing != null) {
-                paragraph.setLineSpacing(lineSpacing);
-            }
-            if (spaceBefore != null) {
-                paragraph.setSpaceBefore(spaceBefore);
-            }
-            if (spaceAfter != null) {
-                paragraph.setSpaceAfter(spaceAfter);
-            }
-        }
-        return null;
-    }
-
-    private static final class RunSelection {
-        final XSLFTextRun styledRun;
-        final int start;
-        final int end;
-        final ToolCallResult error;
-
-        private RunSelection(XSLFTextRun styledRun, int start, int end, ToolCallResult error) {
-            this.styledRun = styledRun;
-            this.start = start;
-            this.end = end;
-            this.error = error;
-        }
-    }
-
-    private RunSelection selectRunByTargetText(XSLFTextShape textShape, JsonNode args) {
-        String targetText = args.path("target_text").asText("");
-        if (targetText.isEmpty()) {
-            return new RunSelection(null, 0, 0,
-                    responseFactory.error("VALIDATION_ERROR", "scope=run requires non-empty target_text", false));
-        }
-        int occurrence = args.path("occurrence").asInt(1);
-        boolean caseSensitive = args.path("case_sensitive").asBoolean(true);
-        if (occurrence < 1) {
-            return new RunSelection(null, 0, 0,
-                    responseFactory.error("VALIDATION_ERROR", "occurrence must be >= 1", false));
-        }
-        String sourceText = textShape.getText();
-        if (sourceText == null || sourceText.isBlank()) {
-            return new RunSelection(null, 0, 0, error("Selected text shape is empty"));
-        }
-        String haystack = caseSensitive ? sourceText : sourceText.toLowerCase(Locale.ROOT);
-        String needle = caseSensitive ? targetText : targetText.toLowerCase(Locale.ROOT);
-        int start = -1;
-        int from = 0;
-        int seen = 0;
-        while (true) {
-            int idx = haystack.indexOf(needle, from);
-            if (idx < 0) {
+    private static void applyBorderDash(
+            XSLFTableCell cell,
+            org.apache.poi.sl.usermodel.TableCell.BorderEdge edge,
+            org.openxmlformats.schemas.drawingml.x2006.main.STPresetLineDashVal.Enum dashVal) {
+        // POI's XSLFTableCell does not expose dash style. Drop into the underlying CTTableCell
+        // and locate (or create) the matching <a:lnT/B/L/R> + <a:prstDash val="..."/>.
+        org.openxmlformats.schemas.drawingml.x2006.main.CTTableCell ct =
+                (org.openxmlformats.schemas.drawingml.x2006.main.CTTableCell) cell.getXmlObject();
+        org.openxmlformats.schemas.drawingml.x2006.main.CTTableCellProperties tcPr =
+                ct.isSetTcPr() ? ct.getTcPr() : ct.addNewTcPr();
+        org.openxmlformats.schemas.drawingml.x2006.main.CTLineProperties line;
+        switch (edge) {
+            case top:
+                line = tcPr.isSetLnT() ? tcPr.getLnT() : tcPr.addNewLnT();
                 break;
-            }
-            seen++;
-            if (seen == occurrence) {
-                start = idx;
+            case bottom:
+                line = tcPr.isSetLnB() ? tcPr.getLnB() : tcPr.addNewLnB();
                 break;
-            }
-            from = idx + Math.max(1, needle.length());
+            case left:
+                line = tcPr.isSetLnL() ? tcPr.getLnL() : tcPr.addNewLnL();
+                break;
+            case right:
+                line = tcPr.isSetLnR() ? tcPr.getLnR() : tcPr.addNewLnR();
+                break;
+            default:
+                return;
         }
-        if (start < 0) {
-            return new RunSelection(null, 0, 0,
-                    error("Could not find target_text occurrence in shape text"));
-        }
-        int end = start + targetText.length();
-        String before = sourceText.substring(0, start);
-        String target = sourceText.substring(start, end);
-        String after = sourceText.substring(end);
-
-        textShape.clearText();
-        var paragraph = textShape.addNewTextParagraph();
-        if (!before.isEmpty()) {
-            paragraph.addNewTextRun().setText(before);
-        }
-        XSLFTextRun styledRun = paragraph.addNewTextRun();
-        styledRun.setText(target);
-        if (!after.isEmpty()) {
-            paragraph.addNewTextRun().setText(after);
-        }
-        return new RunSelection(styledRun, start, end, null);
+        org.openxmlformats.schemas.drawingml.x2006.main.CTPresetLineDashProperties prst =
+                line.isSetPrstDash() ? line.getPrstDash() : line.addNewPrstDash();
+        prst.setVal(dashVal);
     }
 
     // -- helpers --
@@ -719,28 +717,6 @@ public final class PptTableOperations {
             }
         }
         return out;
-    }
-
-    private List<XSLFTextRun> collectTextRuns(XSLFTextShape textShape) {
-        List<XSLFTextRun> runs = new ArrayList<>();
-        textShape.getTextParagraphs().forEach(paragraph -> runs.addAll(paragraph.getTextRuns()));
-        return runs;
-    }
-
-    private TextParagraph.TextAlign parseTextAlign(String raw) {
-        String value = raw == null ? "" : raw.strip().toLowerCase(Locale.ROOT);
-        switch (value) {
-            case "left":
-                return TextParagraph.TextAlign.LEFT;
-            case "center":
-                return TextParagraph.TextAlign.CENTER;
-            case "right":
-                return TextParagraph.TextAlign.RIGHT;
-            case "justify":
-                return TextParagraph.TextAlign.JUSTIFY;
-            default:
-                throw new IllegalArgumentException("text_align must be one of: left, center, right, justify");
-        }
     }
 
     private String requiredString(JsonNode args, String key) {

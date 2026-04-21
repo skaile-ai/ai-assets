@@ -1163,7 +1163,11 @@ class PptToolServiceTest {
                     .available();
             assertEquals(sofficeAvailable,
                     payload.path("feature_flags").path("high_fidelity_render").asBoolean());
-            assertFalse(payload.path("feature_flags").path("gradients").asBoolean());
+            // Phase 4 turned these on unconditionally — they're pure POI/XmlBeans manipulation.
+            assertTrue(payload.path("feature_flags").path("gradients").asBoolean());
+            assertTrue(payload.path("feature_flags").path("picture_effects").asBoolean());
+            assertTrue(payload.path("feature_flags").path("table_borders").asBoolean());
+            assertTrue(payload.path("feature_flags").path("table_merge").asBoolean());
             assertFalse(payload.path("feature_flags").path("charts_update").asBoolean());
         } finally {
             service.closeAllSessions();
@@ -1297,7 +1301,49 @@ class PptToolServiceTest {
     }
 
     @Test
-    void editTableReportsFeatureNotImplementedForPhase3Operations() {
+    void editTableMergeCellsRoundTripsAndDetectsConflict() {
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            ObjectNode at = mapper.createObjectNode();
+            at.put("document_id", docId);
+            at.put("slide_index", 0);
+            at.put("rows", 3);
+            at.put("cols", 3);
+            at.put("x", 20); at.put("y", 20); at.put("width", 400); at.put("height", 200);
+            int idx = service.call("ppt.add_table", at).payload().path("shape_index").asInt();
+
+            ToolCallResult merge = service.call("ppt.edit_table",
+                    objectNode("document_id", docId, "slide_index", 0,
+                            "shape_index", idx, "operation", "merge_cells",
+                            "start_row", 0, "start_col", 0, "end_row", 1, "end_col", 1));
+            assertTrue(merge.success(), merge.payload().toString());
+            assertEquals(2, merge.payload().path("row_span").asInt());
+            assertEquals(2, merge.payload().path("col_span").asInt());
+
+            // Re-merging an overlapping range must reject with MERGE_CONFLICT.
+            ToolCallResult overlap = service.call("ppt.edit_table",
+                    objectNode("document_id", docId, "slide_index", 0,
+                            "shape_index", idx, "operation", "merge_cells",
+                            "start_row", 1, "start_col", 1, "end_row", 2, "end_col", 2));
+            assertFalse(overlap.success());
+            assertEquals("MERGE_CONFLICT", overlap.payload().path("code").asText());
+
+            // A single-cell range is rejected as a validation error before touching the table.
+            ToolCallResult single = service.call("ppt.edit_table",
+                    objectNode("document_id", docId, "slide_index", 0,
+                            "shape_index", idx, "operation", "merge_cells",
+                            "start_row", 2, "start_col", 2, "end_row", 2, "end_col", 2));
+            assertFalse(single.success());
+            assertEquals("VALIDATION_ERROR", single.payload().path("code").asText());
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    @Test
+    void editTableSetCellBorderAcceptsAllSidesAndDashStyle() {
         PptToolService service = new PptToolService();
         try {
             String docId = service.call("ppt.create_document", mapper.createObjectNode())
@@ -1310,12 +1356,34 @@ class PptToolServiceTest {
             at.put("x", 20); at.put("y", 20); at.put("width", 400); at.put("height", 200);
             int idx = service.call("ppt.add_table", at).payload().path("shape_index").asInt();
 
-            ToolCallResult merge = service.call("ppt.edit_table",
-                    objectNode("document_id", docId, "slide_index", 0,
-                            "shape_index", idx, "operation", "merge_cells",
-                            "start_row", 0, "start_col", 0, "end_row", 1, "end_col", 1));
-            assertFalse(merge.success());
-            assertEquals("FEATURE_NOT_IMPLEMENTED", merge.payload().path("code").asText());
+            ObjectNode border = mapper.createObjectNode();
+            border.put("document_id", docId);
+            border.put("slide_index", 0);
+            border.put("shape_index", idx);
+            border.put("operation", "set_cell_border");
+            border.put("row", 0);
+            border.put("col", 0);
+            border.putArray("sides").add("all");
+            border.put("color", "#112233");
+            border.put("width", 2.0);
+            border.put("dash_style", "dash");
+            ToolCallResult result = service.call("ppt.edit_table", border);
+            assertTrue(result.success(), result.payload().toString());
+            assertEquals(4, result.payload().path("sides_applied").asInt());
+
+            // Empty sides array → validation error, not silent no-op.
+            ObjectNode bad = mapper.createObjectNode();
+            bad.put("document_id", docId);
+            bad.put("slide_index", 0);
+            bad.put("shape_index", idx);
+            bad.put("operation", "set_cell_border");
+            bad.put("row", 0);
+            bad.put("col", 0);
+            bad.putArray("sides");
+            bad.put("color", "#000000");
+            ToolCallResult badResult = service.call("ppt.edit_table", bad);
+            assertFalse(badResult.success());
+            assertEquals("VALIDATION_ERROR", badResult.payload().path("code").asText());
         } finally {
             service.closeAllSessions();
         }
@@ -1941,6 +2009,305 @@ class PptToolServiceTest {
             ToolCallResult r2 = service.call("ppt.upload_template",
                     objectNode("source_path", src.toString()));
             assertFalse(r2.success());
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    // -------- Phase 4 --------
+
+    @Test
+    void setShapeStyleAcceptsGradientFill() {
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            ObjectNode addShape = mapper.createObjectNode();
+            addShape.put("document_id", docId);
+            addShape.put("slide_index", 0);
+            addShape.put("shape_type", "rectangle");
+            addShape.put("x", 50); addShape.put("y", 50);
+            addShape.put("width", 200); addShape.put("height", 100);
+            int idx = service.call("ppt.add_shape", addShape).payload().path("shape_index").asInt();
+
+            ObjectNode style = mapper.createObjectNode();
+            style.put("document_id", docId);
+            style.put("slide_index", 0);
+            style.put("shape_index", idx);
+            style.put("fill_type", "gradient");
+            ObjectNode grad = style.putObject("fill_gradient");
+            grad.put("type", "linear");
+            grad.put("angle", 90.0);
+            var stops = grad.putArray("stops");
+            ObjectNode a = stops.addObject(); a.put("color", "#FF0000"); a.put("position", 0.0);
+            ObjectNode b = stops.addObject(); b.put("color", "#0000FF"); b.put("position", 1.0);
+            ToolCallResult result = service.call("ppt.set_shape_style", style);
+            assertTrue(result.success(), result.payload().toString());
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    @Test
+    void setShapeStyleRejectsGradientWithSingleStop() {
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            ObjectNode addShape = mapper.createObjectNode();
+            addShape.put("document_id", docId);
+            addShape.put("slide_index", 0);
+            addShape.put("shape_type", "rectangle");
+            addShape.put("x", 0); addShape.put("y", 0);
+            addShape.put("width", 100); addShape.put("height", 50);
+            int idx = service.call("ppt.add_shape", addShape).payload().path("shape_index").asInt();
+
+            ObjectNode style = mapper.createObjectNode();
+            style.put("document_id", docId);
+            style.put("slide_index", 0);
+            style.put("shape_index", idx);
+            style.put("fill_type", "gradient");
+            ObjectNode grad = style.putObject("fill_gradient");
+            grad.put("type", "linear");
+            ObjectNode stop = grad.putArray("stops").addObject();
+            stop.put("color", "#000000"); stop.put("position", 0.5);
+            ToolCallResult result = service.call("ppt.set_shape_style", style);
+            assertFalse(result.success());
+            // Schema rejects minItems=2 violation as VALIDATION_ERROR.
+            assertEquals("VALIDATION_ERROR", result.payload().path("code").asText());
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    @Test
+    void setShapeStyleAcceptsPatternFill() {
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            ObjectNode addShape = mapper.createObjectNode();
+            addShape.put("document_id", docId);
+            addShape.put("slide_index", 0);
+            addShape.put("shape_type", "ellipse");
+            addShape.put("x", 0); addShape.put("y", 0);
+            addShape.put("width", 100); addShape.put("height", 50);
+            int idx = service.call("ppt.add_shape", addShape).payload().path("shape_index").asInt();
+
+            ObjectNode style = mapper.createObjectNode();
+            style.put("document_id", docId);
+            style.put("slide_index", 0);
+            style.put("shape_index", idx);
+            style.put("fill_type", "pattern");
+            ObjectNode patt = style.putObject("fill_pattern");
+            patt.put("preset", "horizontal");
+            patt.put("fg_color", "#FFAA00");
+            patt.put("bg_color", "#FFFFFF");
+            ToolCallResult result = service.call("ppt.set_shape_style", style);
+            assertTrue(result.success(), result.payload().toString());
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    @Test
+    void setPictureEffectsRejectsNonPictureShape() {
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            ObjectNode addShape = mapper.createObjectNode();
+            addShape.put("document_id", docId);
+            addShape.put("slide_index", 0);
+            addShape.put("shape_type", "rectangle");
+            addShape.put("x", 0); addShape.put("y", 0);
+            addShape.put("width", 100); addShape.put("height", 50);
+            int idx = service.call("ppt.add_shape", addShape).payload().path("shape_index").asInt();
+
+            ObjectNode args = mapper.createObjectNode();
+            args.put("document_id", docId);
+            args.put("slide_index", 0);
+            args.put("shape_index", idx);
+            args.put("alpha", 0.5);
+            ToolCallResult result = service.call("ppt.set_picture_effects", args);
+            assertFalse(result.success());
+            assertEquals("SHAPE_NOT_PICTURE", result.payload().path("code").asText());
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    @Test
+    void setPictureEffectsAppliesCropAlphaRecolorOnRealPicture() throws Exception {
+        // Build a tiny PNG so insert_image has something to point at.
+        Path img = Files.createTempFile("phase4-pic", ".png");
+        BufferedImage bi = new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB);
+        ImageIO.write(bi, "png", img.toFile());
+
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            ObjectNode insert = mapper.createObjectNode();
+            insert.put("document_id", docId);
+            insert.put("slide_index", 0);
+            insert.put("image_path", img.toString());
+            insert.put("x", 10); insert.put("y", 10);
+            insert.put("width", 100); insert.put("height", 100);
+            assertTrue(service.call("ppt.insert_image", insert).success());
+
+            int picIdx = service.call("ppt.get_slide_content",
+                    objectNode("document_id", docId, "slide_index", 0))
+                    .payload().path("shapes").size() - 1;
+
+            ObjectNode args = mapper.createObjectNode();
+            args.put("document_id", docId);
+            args.put("slide_index", 0);
+            args.put("shape_index", picIdx);
+            ObjectNode crop = args.putObject("crop");
+            crop.put("left", 0.1); crop.put("top", 0.1);
+            crop.put("right", 0.1); crop.put("bottom", 0.1);
+            args.put("alpha", 0.6);
+            args.putObject("recolor").put("mode", "grayscale");
+            ToolCallResult result = service.call("ppt.set_picture_effects", args);
+            assertTrue(result.success(), result.payload().toString());
+            assertTrue(result.payload().path("crop_applied").asBoolean());
+            assertTrue(result.payload().path("alpha_applied").asBoolean());
+            assertTrue(result.payload().path("recolor_applied").asBoolean());
+        } finally {
+            service.closeAllSessions();
+            Files.deleteIfExists(img);
+        }
+    }
+
+    @Test
+    void setPictureEffectsRejectsCropOverflow() throws Exception {
+        Path img = Files.createTempFile("phase4-pic", ".png");
+        BufferedImage bi = new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB);
+        ImageIO.write(bi, "png", img.toFile());
+
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            ObjectNode insert = mapper.createObjectNode();
+            insert.put("document_id", docId);
+            insert.put("slide_index", 0);
+            insert.put("image_path", img.toString());
+            insert.put("x", 10); insert.put("y", 10);
+            insert.put("width", 100); insert.put("height", 100);
+            assertTrue(service.call("ppt.insert_image", insert).success());
+            int picIdx = service.call("ppt.get_slide_content",
+                    objectNode("document_id", docId, "slide_index", 0))
+                    .payload().path("shapes").size() - 1;
+
+            ObjectNode args = mapper.createObjectNode();
+            args.put("document_id", docId);
+            args.put("slide_index", 0);
+            args.put("shape_index", picIdx);
+            ObjectNode crop = args.putObject("crop");
+            crop.put("left", 0.6); crop.put("right", 0.5);
+            ToolCallResult result = service.call("ppt.set_picture_effects", args);
+            assertFalse(result.success());
+            assertEquals("VALIDATION_ERROR", result.payload().path("code").asText());
+        } finally {
+            service.closeAllSessions();
+            Files.deleteIfExists(img);
+        }
+    }
+
+    @Test
+    void cloneShapeNowSupportsAnyShapeNotJustText() {
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            ObjectNode at = mapper.createObjectNode();
+            at.put("document_id", docId);
+            at.put("slide_index", 0);
+            at.put("rows", 2); at.put("cols", 2);
+            at.put("x", 10); at.put("y", 10);
+            at.put("width", 200); at.put("height", 100);
+            int tableIdx = service.call("ppt.add_table", at).payload().path("shape_index").asInt();
+
+            ObjectNode clone = mapper.createObjectNode();
+            clone.put("document_id", docId);
+            clone.put("slide_index", 0);
+            clone.put("shape_index", tableIdx);
+            clone.put("offset_x", 30.0);
+            clone.put("offset_y", 30.0);
+            int shapesBefore = service.call("ppt.get_slide_content",
+                    objectNode("document_id", docId, "slide_index", 0))
+                    .payload().path("shapes").size();
+            ToolCallResult result = service.call("ppt.clone_shape", clone);
+            assertTrue(result.success(), result.payload().toString());
+            assertNotEquals(tableIdx, result.payload().path("shape_index").asInt());
+            int shapesAfter = service.call("ppt.get_slide_content",
+                    objectNode("document_id", docId, "slide_index", 0))
+                    .payload().path("shapes").size();
+            assertEquals(shapesBefore + 1, shapesAfter);
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    @Test
+    void setTextWiresStrikethroughAndAutoFitAndRotation() {
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            ObjectNode tb = mapper.createObjectNode();
+            tb.put("document_id", docId);
+            tb.put("slide_index", 0);
+            tb.put("text", "Sample text");
+            tb.put("x", 30); tb.put("y", 30);
+            tb.put("width", 300); tb.put("height", 80);
+            assertTrue(service.call("ppt.add_textbox", tb).success());
+
+            int idx = service.call("ppt.get_slide_content",
+                    objectNode("document_id", docId, "slide_index", 0))
+                    .payload().path("shapes").size() - 1;
+
+            ObjectNode args = mapper.createObjectNode();
+            args.put("document_id", docId);
+            args.put("slide_index", 0);
+            args.put("shape_index", idx);
+            args.put("strikethrough", true);
+            args.put("rotation", 15.0);
+            args.put("auto_fit", "normal");
+            ToolCallResult result = service.call("ppt.set_text", args);
+            assertTrue(result.success(), result.payload().toString());
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    @Test
+    void setTextRejectsInvalidAutoFit() {
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            ObjectNode tb = mapper.createObjectNode();
+            tb.put("document_id", docId);
+            tb.put("slide_index", 0);
+            tb.put("text", "x");
+            tb.put("x", 0); tb.put("y", 0);
+            tb.put("width", 100); tb.put("height", 50);
+            assertTrue(service.call("ppt.add_textbox", tb).success());
+            int idx = service.call("ppt.get_slide_content",
+                    objectNode("document_id", docId, "slide_index", 0))
+                    .payload().path("shapes").size() - 1;
+
+            ObjectNode args = mapper.createObjectNode();
+            args.put("document_id", docId);
+            args.put("slide_index", 0);
+            args.put("shape_index", idx);
+            args.put("auto_fit", "bogus");
+            ToolCallResult result = service.call("ppt.set_text", args);
+            assertFalse(result.success());
+            assertEquals("VALIDATION_ERROR", result.payload().path("code").asText());
         } finally {
             service.closeAllSessions();
         }

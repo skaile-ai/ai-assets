@@ -80,10 +80,10 @@ public final class PptCapabilitiesOperations {
         // high_fidelity_render is wired end-to-end; the flag reports whether the host can
         // actually serve it — soffice may be missing on dev machines.
         flags.put("high_fidelity_render", soffice.available());
-        flags.put("gradients", false);
-        flags.put("picture_effects", false);
-        flags.put("table_borders", false);
-        flags.put("table_merge", false);
+        flags.put("gradients", true);
+        flags.put("picture_effects", true);
+        flags.put("table_borders", true);
+        flags.put("table_merge", true);
 
         ObjectNode limitsNode = payload.putObject("limits");
         limitsNode.put("max_open_docs", config.maxOpenDocs());

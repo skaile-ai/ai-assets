@@ -92,14 +92,14 @@ Maintenance conventions:
 
 ## Tools
 
-Current build ships **49 tools** across document lifecycle, slide management, shape/text mutation, rendering, metadata, layout control, templating, markdown import, and transaction workflows. All tools are supported by Apache POI 5.5.x and/or LibreOffice. Call `ppt.capabilities` at runtime for the authoritative list of versions, feature flags, and safety limits.
+Current build ships **50 tools** across document lifecycle, slide management, shape/text mutation, rendering, metadata, layout control, templating, markdown import, and transaction workflows. All tools are supported by Apache POI 5.5.x and/or LibreOffice. Call `ppt.capabilities` at runtime for the authoritative list of versions, feature flags, and safety limits.
 
 Supported tool families:
 - Document lifecycle: `ppt.create_document`, `ppt.open_document`, `ppt.close_document`, `ppt.export_document`, `ppt.get_document_info`
 - Page setup: `ppt.set_page_setup`
 - Slide management: `ppt.list_slides`, `ppt.add_slide`, `ppt.duplicate_slide`, `ppt.delete_slides`, `ppt.reorder_slides`, `ppt.merge_presentations`
 - Slide content: `ppt.get_slide_content`, `ppt.update_text`, `ppt.replace_text_globally`, `ppt.add_textbox`, `ppt.set_text`, `ppt.get_slide_notes`, `ppt.set_slide_notes`
-- Media: `ppt.insert_image`, `ppt.replace_image`
+- Media: `ppt.insert_image`, `ppt.replace_image`, `ppt.set_picture_effects`
 - Tables: `ppt.add_table`, `ppt.get_table`, `ppt.edit_table`
 - Search: `ppt.find_text`
 - Shapes & styling: `ppt.add_shape`, `ppt.move_shape`, `ppt.clone_shape`, `ppt.resize_shape`, `ppt.delete_shape`, `ppt.get_shape_properties`, `ppt.set_shape_style`, `ppt.set_shape_z_order`, `ppt.add_hyperlink`, `ppt.set_slide_background`
@@ -119,7 +119,7 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Document lifecycle | `ppt.open_document` | `path` | Open an existing presentation into memory and return a document handle. |
 | Document lifecycle | `ppt.close_document` | `document_id` | Close a document handle and release resources. |
 | Document lifecycle | `ppt.get_document_info` | `document_id` | Return document metadata, dirty state, page size, and timestamps. |
-| Document lifecycle | `ppt.export_document` | `document_id`; `output_path?`; `format?` | Export to disk. `format` = `pptx` \| `pdf` (implemented) \| `html` \| `png_batch` \| `jpg_batch` \| `svg_batch` \| `outline_text` (reserved for Phase 3; return `FORMAT_NOT_YET_IMPLEMENTED`). |
+| Document lifecycle | `ppt.export_document` | `document_id`; `output_path?`; `format?` | Export to disk. `format` = `pptx` (POI) \| `pdf` \| `html` (LibreOffice) \| `png_batch` \| `jpg_batch` \| `svg_batch` (LibreOffice — `output_path` must be a directory) \| `outline_text` (POI). |
 | Page setup | `ppt.set_page_setup` | `document_id`; `preset`; `width?`; `height?` | Set page size using a preset or custom dimensions. |
 | Slide management | `ppt.list_slides` | `document_id` | List slides with index, text preview, and shape count. |
 | Slide management | `ppt.reorder_slides` | `document_id`; `new_order` | Reorder all slides using a full index permutation. |
@@ -131,17 +131,17 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Slide content | `ppt.update_text` | `document_id`; `slide_index`; `old_text`; `new_text`; `occurrence?` | Replace a specific text occurrence on a slide. |
 | Slide content | `ppt.replace_text_globally` | `document_id`; `old_text`; `new_text`; `case_sensitive?`; `max_replacements?` | Replace text occurrences across all slides. |
 | Slide content | `ppt.add_textbox` | `document_id`; `slide_index`; `text`; `x`; `y`; `width`; `height`; `font_size?` | Add a textbox to a slide at a specific position. |
-| Slide content | `ppt.set_text` | `document_id`; `slide_index`; `shape_index`; `scope?` (`shape`\|`run`\|`paragraph`); `target_text?`; `occurrence?`; `case_sensitive?`; `paragraph_index?`; run-style: `bold?`, `italic?`, `underline?`, `strikethrough?`, `font_size?`, `font_color?`, `font_family?`, `rotation?`, `auto_fit?`; paragraph-style: `text_align?`, `line_spacing?`, `space_before?`, `space_after?`, `left_margin?`, `indent?`, `bullet_enabled?`, `numbered?`, `bullet_character?`, `bullet_level?`. | Unified text mutation (replaces `ppt.set_text_style`, `ppt.set_text_run_style`, `ppt.set_text_formatting`, `ppt.set_list_formatting`). `strikethrough`/`rotation`/`auto_fit` accept the schema but land in Phase 4. |
+| Slide content | `ppt.set_text` | `document_id`; `slide_index`; `shape_index`; `scope?` (`shape`\|`run`\|`paragraph`); `target_text?`; `occurrence?`; `case_sensitive?`; `paragraph_index?`; run-style: `bold?`, `italic?`, `underline?`, `strikethrough?`, `font_size?`, `font_color?`, `font_family?`; shape-body: `rotation?`, `auto_fit?` (`none`\|`normal`\|`shrink`); paragraph-style: `text_align?`, `line_spacing?`, `space_before?`, `space_after?`, `left_margin?`, `indent?`, `bullet_enabled?`, `numbered?`, `bullet_character?`, `bullet_level?`. | Unified text mutation (replaces `ppt.set_text_style`, `ppt.set_text_run_style`, `ppt.set_text_formatting`, `ppt.set_list_formatting`). |
 | Shapes | `ppt.add_shape` | `document_id`; `slide_index`; `shape_type`; `x`; `y`; `width`; `height`; `text?`; `fill_color?`; `border_color?`; `border_width?` | Add a primitive shape (rectangle/ellipse/line/arrow). |
 | Media | `ppt.insert_image` | `document_id`; `slide_index`; `image_path`; `x`; `y`; `width`; `height` | Insert an image into a slide. |
 | Media | `ppt.replace_image` | `document_id`; `slide_index`; `shape_index`; `image_path`; `keep_size?` | Replace a picture shape while preserving placement/size. |
 | Notes | `ppt.get_slide_notes` | `document_id`; `slide_index` | Get speaker notes text for a slide. |
 | Notes | `ppt.set_slide_notes` | `document_id`; `slide_index`; `notes_text` | Set speaker notes text for a slide. |
 | Tables | `ppt.add_table` | `document_id`; `slide_index`; `rows`; `cols`; `x`; `y`; `width`; `height` | Add a table to a slide. |
-| Tables | `ppt.get_table` | `document_id`; `slide_index`; `shape_index` | Return `{rows, cols, cells, row_heights, col_widths, merged_regions}`. Merge-edit operations land in Phase 4. |
-| Tables | `ppt.edit_table` | `document_id`; `slide_index`; `shape_index`; `operation`; op-specific fields. | Single operation per call. Implemented: `set_cell` (`row`/`col`/`text`), `insert_row`/`delete_row` (`index`), `insert_col`/`delete_col` (`index`), `set_row_height` (`row_index`/`height`), `set_col_width` (`col_index`/`width`), `set_header_style` (`row_index?`/`fill_color?`/`font_color?`/`bold?`). Reserved for Phase 4 (`FEATURE_NOT_IMPLEMENTED`): `merge_cells` (`start_row`/`start_col`/`end_row`/`end_col`), `set_cell_border` (`row`/`col`/`sides`/`color`/`width`/`dash_style?`). |
+| Tables | `ppt.get_table` | `document_id`; `slide_index`; `shape_index` | Return `{rows, cols, cells, row_heights, col_widths, merged_regions}`. |
+| Tables | `ppt.edit_table` | `document_id`; `slide_index`; `shape_index`; `operation`; op-specific fields. | Single operation per call. Operations: `set_cell` (`row`/`col`/`text`), `insert_row`/`delete_row` (`index`), `insert_col`/`delete_col` (`index`), `set_row_height` (`row_index`/`height`), `set_col_width` (`col_index`/`width`), `set_header_style` (`row_index?`/`fill_color?`/`font_color?`/`bold?`), `merge_cells` (`start_row`/`start_col`/`end_row`/`end_col` — overlapping merges → `MERGE_CONFLICT`), `set_cell_border` (`row`/`col`/`sides`/`color`/`width`/`dash_style?`). |
 | Shapes | `ppt.move_shape` | `document_id`; `slide_index`; `shape_index`; `x`; `y` | Move a shape to new coordinates. |
-| Shapes | `ppt.clone_shape` | `document_id`; `slide_index`; `shape_index`; `offset_x?`; `offset_y?` | Clone a text-capable shape on the same slide. Full shape support lands in Phase 4. |
+| Shapes | `ppt.clone_shape` | `document_id`; `slide_index`; `shape_index`; `offset_x?`; `offset_y?` | Clone any shape on the same slide via deep XML copy and apply offset. |
 | Shapes | `ppt.resize_shape` | `document_id`; `slide_index`; `shape_index`; `width`; `height` | Resize a shape to a new width and height. |
 | Shapes | `ppt.add_hyperlink` | `document_id`; `slide_index`; `shape_index`; `url` | Attach hyperlink to all text runs in a text shape. |
 | Slide styling | `ppt.set_slide_background` | `document_id`; `slide_index`; `color` | Set a solid slide background color. |
@@ -150,7 +150,7 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Transactions | `ppt.transaction_commit` | `document_id` | Commit changes and discard transaction snapshot. |
 | Transactions | `ppt.transaction_rollback` | `document_id` | Roll back document state to transaction snapshot. |
 | Metrics | `ppt.get_slide_metrics` | `document_id`; `slide_index` | Analyze slide composition and text density. |
-| Rendering | `ppt.render_slide` | `document_id`; `slide_index`; `output_path`; `format?` (`png`\|`jpg`\|`svg`, default `png`); `fidelity?` (`low`\|`high`, default `low`); `width?`; `height?` | Render one slide. High fidelity is reserved for Phase 3 (returns `FORMAT_NOT_YET_IMPLEMENTED`). |
+| Rendering | `ppt.render_slide` | `document_id`; `slide_index`; `output_path`; `format?` (`png`\|`jpg`\|`svg`, default `png`); `fidelity?` (`low`\|`high`, default `low`); `width?`; `height?` | Render one slide. `low` = POI + Batik (fast/crude); `high` = LibreOffice (slow/accurate). |
 | Rendering | `ppt.render_all_slides` | `document_id`; `output_dir`; `format?`; `fidelity?`; `file_name_pattern?`; `width?`; `height?` | Render every slide as PNG/JPG/SVG files in `output_dir`. |
 | Search | `ppt.find_text` | `document_id`; `query`; `case_sensitive?` | Find text occurrences across all slides. |
 | Templates | `ppt.upload_template` | `source_path`; `template_name?`; `make_default?` | Copy/upload a template into the template store. |
@@ -159,7 +159,8 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 | Presentation generation | `ppt.generate_presentation` | `title?`; `slide_titles?`; `template_path?`; `output_path?` | Generate a presentation from titles and optional template. |
 | Shapes | `ppt.delete_shape` | `document_id`; `slide_index`; `shape_index` | Remove a shape from a slide by index. |
 | Shapes | `ppt.get_shape_properties` | `document_id`; `slide_index`; `shape_index` | Return detailed shape properties (type, anchor, text). |
-| Shapes | `ppt.set_shape_style` | `document_id`; `slide_index`; `shape_index`; `fill_color?`; `border_color?`; `border_width?`; `text_align?` | Set fill, border, and text alignment style on a shape. Gradients/patterns land in Phase 4. |
+| Shapes | `ppt.set_shape_style` | `document_id`; `slide_index`; `shape_index`; `fill_type?` (`solid`\|`gradient`\|`pattern`\|`none`); `fill_color?` (solid shorthand); `fill_gradient?` (`type`, `angle?`, `stops[]` ≥2); `fill_pattern?` (`preset`, `fg_color`, `bg_color`); `border_color?`; `border_width?`; `text_align?` | Set fill (solid/gradient/pattern/none), border, and text alignment on a shape. |
+| Media | `ppt.set_picture_effects` | `document_id`; `slide_index`; `shape_index`; one or more of `crop` (`left`/`top`/`right`/`bottom` fractions, sum-on-axis < 1), `alpha` (0-1), `recolor` (`mode` ∈ `grayscale`\|`sepia`\|`duotone`\|`washout`, `color?` required for `duotone`). | Apply crop / alpha / recolor effects to a picture shape. Non-picture shapes → `SHAPE_NOT_PICTURE`. |
 | Metadata | `ppt.set_document_metadata` | `document_id`; `title?`; `author?`; `subject?`; `keywords?` | Set core document metadata fields. |
 | Layout | `ppt.set_slide_layout` | `document_id`; `slide_index`; `layout_type` | Apply a layout type to a slide. |
 | Shapes | `ppt.set_shape_z_order` | `document_id`; `slide_index`; `shape_index`; `position` | Move shape in z-order (front/back/forward/backward). |
@@ -167,16 +168,16 @@ For exact argument schemas, rely on `tools/list` output at runtime or the tool d
 
 ### Feature flags
 
-`ppt.capabilities` reports six flags that gate advanced authoring features. All are `false` after Phase 2; later phases flip them:
+`ppt.capabilities` reports six flags that gate advanced authoring features. The boolean reflects current build:
 
-| Flag | Phase | Gates |
+| Flag | Default | Gates |
 |---|---|---|
-| `high_fidelity_render` | 3 | `ppt.render_slide`/`ppt.render_all_slides` with `fidelity=high`, and non-PPTX `ppt.export_document` formats. |
-| `gradients` | 4 | `fill_type=gradient` / `pattern` on `ppt.set_shape_style`. |
-| `picture_effects` | 4 | `ppt.set_picture_effects` (new tool) — crop, alpha, recolor. |
-| `table_borders` | 4 | `ppt.edit_table` `operation=set_cell_border`. |
-| `table_merge` | 4 | `ppt.edit_table` `operation=merge_cells` plus merge metadata in `ppt.get_table`. |
-| `charts_update` | 5 | `ppt.list_charts` / `ppt.update_chart_data` (new tools). |
+| `high_fidelity_render` | dynamic — `true` iff soffice is on PATH | `ppt.render_slide`/`ppt.render_all_slides` with `fidelity=high`, and non-PPTX `ppt.export_document` formats. |
+| `gradients` | `true` | `fill_type=gradient` / `pattern` on `ppt.set_shape_style`. |
+| `picture_effects` | `true` | `ppt.set_picture_effects` — crop, alpha, recolor. |
+| `table_borders` | `true` | `ppt.edit_table` `operation=set_cell_border`. |
+| `table_merge` | `true` | `ppt.edit_table` `operation=merge_cells`. |
+| `charts_update` | `false` | `ppt.list_charts` / `ppt.update_chart_data` (Phase 5). |
 
 ### Safety limits
 
@@ -366,7 +367,7 @@ Keep the `/workspace/resources` mount in place so Copilot can work against the s
 ## v1 limits (by design)
 
 - Formats: `.pptx` and `.pptm` (macro-enabled) are fully supported. Older `.ppt` files (ODP) are not yet supported.
-- Tool surface: 49 tools across document lifecycle, slide/content management, shape/text formatting, rendering (PNG/JPEG/SVG), metadata, layout updates, templating, search, markdown import, and transaction workflows. No native animation, transitions, embedded media timelines, or VBA source inspection.
+- Tool surface: 50 tools across document lifecycle, slide/content management, shape/text formatting (incl. gradient/pattern fills, picture effects, table merge/borders), rendering (PNG/JPEG/SVG, dual-fidelity), metadata, layout updates, templating, search, markdown import, and transaction workflows. No native animation, transitions, embedded media timelines, or VBA source inspection.
 - Transport: stdio only. No HTTP / SSE.
 - Tenancy: one process per agent session; no per-handle locking or idle-handle eviction (process death is the eviction).
 - Rendering: slides render via POI native → image/SVG. LibreOffice used only for PDF export; if unavailable, PDF export fails gracefully with a tool error.

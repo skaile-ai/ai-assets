@@ -20,6 +20,7 @@ import ai.skaile.mcpo.ppt.tooling.operations.PptShapeMutationOperations;
 import ai.skaile.mcpo.ppt.tooling.operations.PptSlideOperations;
 import ai.skaile.mcpo.ppt.tooling.operations.PptTableOperations;
 import ai.skaile.mcpo.ppt.tooling.operations.PptTemplateOperations;
+import ai.skaile.mcpo.ppt.tooling.operations.PptTextOperations;
 import ai.skaile.mcpo.ppt.tooling.operations.PptTransactionManager;
 import ai.skaile.mcpo.ppt.tooling.operations.SofficeRenderer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -71,6 +72,7 @@ public final class PptToolService {
     private final PptSlideOperations slideOperations;
     private final PptShapeMutationOperations shapeOperations;
     private final PptTableOperations tableOperations;
+    private final PptTextOperations textOperations;
     private final PptPageOperations pageOperations;
     private final PptRenderOperations renderOperations;
     private final PptCapabilitiesOperations capabilitiesOperations;
@@ -105,6 +107,7 @@ public final class PptToolService {
                 argumentValidator, responseFactory, pathResolver, shapeFinder, limits);
         this.tableOperations = new PptTableOperations(
                 mapper, argumentValidator, responseFactory, shapeFinder, limits);
+        this.textOperations = new PptTextOperations(responseFactory, shapeFinder);
         this.pageOperations = new PptPageOperations(
                 argumentValidator, responseFactory, shapeFinder);
         this.renderOperations = new PptRenderOperations(
@@ -126,6 +129,7 @@ public final class PptToolService {
         handlers.putAll(slideOperations.handlers());
         handlers.putAll(shapeOperations.handlers());
         handlers.putAll(tableOperations.handlers());
+        handlers.putAll(textOperations.handlers());
         handlers.putAll(pageOperations.handlers());
         handlers.putAll(renderOperations.handlers());
         handlers.putAll(templateOperations.handlers());

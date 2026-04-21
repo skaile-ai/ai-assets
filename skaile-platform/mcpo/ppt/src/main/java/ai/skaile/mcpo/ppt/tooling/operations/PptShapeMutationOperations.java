@@ -7,6 +7,7 @@ import ai.skaile.mcpo.ppt.tooling.infra.ColorParser;
 import ai.skaile.mcpo.ppt.tooling.infra.PptLimits;
 import ai.skaile.mcpo.ppt.tooling.infra.PptPathResolver;
 import ai.skaile.mcpo.ppt.tooling.infra.PptShapeFinder;
+import ai.skaile.mcpo.ppt.tooling.infra.PptShapeXml;
 import ai.skaile.mcpo.ppt.tooling.infra.ToolArgumentValidator;
 import ai.skaile.mcpo.ppt.tooling.infra.ToolResponseFactory;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -59,17 +60,19 @@ public final class PptShapeMutationOperations {
     }
 
     public Map<String, ToolHandler> handlers() {
-        return Map.of(
-                "ppt.add_shape", this::addShape,
-                "ppt.delete_shape", this::deleteShape,
-                "ppt.move_shape", this::moveShape,
-                "ppt.resize_shape", this::resizeShape,
-                "ppt.clone_shape", this::cloneShape,
-                "ppt.get_shape_properties", this::getShapeProperties,
-                "ppt.set_shape_style", this::setShapeStyle,
-                "ppt.set_shape_z_order", this::setShapeZOrder,
-                "ppt.add_hyperlink", this::addHyperlink,
-                "ppt.replace_image", this::replaceImage);
+        Map<String, ToolHandler> map = new java.util.HashMap<>();
+        map.put("ppt.add_shape", this::addShape);
+        map.put("ppt.delete_shape", this::deleteShape);
+        map.put("ppt.move_shape", this::moveShape);
+        map.put("ppt.resize_shape", this::resizeShape);
+        map.put("ppt.clone_shape", this::cloneShape);
+        map.put("ppt.get_shape_properties", this::getShapeProperties);
+        map.put("ppt.set_shape_style", this::setShapeStyle);
+        map.put("ppt.set_picture_effects", this::setPictureEffects);
+        map.put("ppt.set_shape_z_order", this::setShapeZOrder);
+        map.put("ppt.add_hyperlink", this::addHyperlink);
+        map.put("ppt.replace_image", this::replaceImage);
+        return Map.copyOf(map);
     }
 
     public ToolCallResult addShape(JsonNode args) {
@@ -231,29 +234,57 @@ public final class PptShapeMutationOperations {
         }
 
         PptDocumentSession session = shapeFinder.requireSession(args);
-
         int slideIndex = args.path("slide_index").asInt(-1);
         int shapeIndex = args.path("shape_index").asInt(-1);
         XSLFSlide slide = shapeFinder.requireSlide(session, slideIndex);
         XSLFShape original = shapeFinder.requireShape(slide, shapeIndex);
-        if (!(original instanceof XSLFTextShape originalText)) {
-            return error("clone_shape currently supports only text-capable shapes");
-        }
 
         Rectangle2D anchor = original.getAnchor();
-        if (anchor == null) {
-            return error("Selected shape has no anchor");
-        }
         double offsetX = args.path("offset_x").asDouble(20);
         double offsetY = args.path("offset_y").asDouble(20);
 
-        XSLFTextShape clone = slide.createTextBox();
-        clone.setAnchor(new Rectangle2D.Double(
-                anchor.getX() + offsetX,
-                anchor.getY() + offsetY,
-                anchor.getWidth(),
-                anchor.getHeight()));
-        clone.setText(originalText.getText());
+        // Add a typed child element to the slide's spTree, then deep-copy the original shape's
+        // XML into it. This handles every shape kind uniformly (autoShape, picture,
+        // table/graphicFrame, connector, group) and produces an element POI's buildShapes()
+        // recognizes when reparsing.
+        var spTree = slide.getXmlObject().getCSld().getSpTree();
+        org.apache.xmlbeans.XmlObject originalXml = original.getXmlObject();
+        org.apache.xmlbeans.XmlObject newChild;
+        if (originalXml instanceof org.openxmlformats.schemas.presentationml.x2006.main.CTShape) {
+            newChild = spTree.addNewSp();
+        } else if (originalXml instanceof org.openxmlformats.schemas.presentationml.x2006.main.CTPicture) {
+            newChild = spTree.addNewPic();
+        } else if (originalXml instanceof org.openxmlformats.schemas.presentationml.x2006.main.CTGroupShape) {
+            newChild = spTree.addNewGrpSp();
+        } else if (originalXml instanceof org.openxmlformats.schemas.presentationml.x2006.main.CTGraphicalObjectFrame) {
+            newChild = spTree.addNewGraphicFrame();
+        } else if (originalXml instanceof org.openxmlformats.schemas.presentationml.x2006.main.CTConnector) {
+            newChild = spTree.addNewCxnSp();
+        } else {
+            return responseFactory.error("VALIDATION_ERROR",
+                    "Unsupported shape type for clone: " + originalXml.getClass().getSimpleName(),
+                    false);
+        }
+        newChild.set(originalXml);
+
+        // POI caches XSLFShape instances on XSLFSheet._shapes. Direct XML manipulation does not
+        // invalidate the cache, so getShapes() would return the stale list. Reset it.
+        invalidateShapeCache(slide);
+
+        List<XSLFShape> shapesAfter = slide.getShapes();
+        XSLFShape clone = shapesAfter.get(shapesAfter.size() - 1);
+
+        long newId = ai.skaile.mcpo.ppt.tooling.infra.PptShapeXml.nextShapeId(clone);
+        ai.skaile.mcpo.ppt.tooling.infra.PptShapeXml.setShapeCnvPrId(clone.getXmlObject(), newId);
+
+        if (anchor != null) {
+            Rectangle2D shifted = new Rectangle2D.Double(
+                    anchor.getX() + offsetX,
+                    anchor.getY() + offsetY,
+                    anchor.getWidth(),
+                    anchor.getHeight());
+            applyAnchor(clone, shifted);
+        }
 
         session.touch(true);
 
@@ -261,9 +292,36 @@ public final class PptShapeMutationOperations {
         payload.put("document_id", session.getId());
         payload.put("slide_index", slideIndex);
         payload.put("source_shape_index", shapeIndex);
-        payload.put("shape_index", slide.getShapes().size() - 1);
+        payload.put("shape_index", shapesAfter.size() - 1);
         payload.put("message", "Shape cloned");
         return success(payload);
+    }
+
+    private static void invalidateShapeCache(XSLFSlide slide) {
+        try {
+            java.lang.reflect.Field field =
+                    org.apache.poi.xslf.usermodel.XSLFSheet.class.getDeclaredField("_shapes");
+            field.setAccessible(true);
+            field.set(slide, null);
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {
+            // POI version drift will leave the cache populated; getShapes() returns stale data.
+        }
+    }
+
+    private static void applyAnchor(XSLFShape shape, Rectangle2D anchor) {
+        if (shape instanceof XSLFSimpleShape simple) {
+            simple.setAnchor(anchor);
+            return;
+        }
+        if (shape instanceof org.apache.poi.xslf.usermodel.XSLFGraphicFrame frame) {
+            frame.setAnchor(anchor);
+            return;
+        }
+        if (shape instanceof org.apache.poi.xslf.usermodel.XSLFGroupShape group) {
+            group.setAnchor(anchor);
+            return;
+        }
+        // Unknown shape type — leave the anchor as-is rather than fail the clone.
     }
 
     public ToolCallResult getShapeProperties(JsonNode args) {
@@ -314,11 +372,9 @@ public final class PptShapeMutationOperations {
         XSLFSlide slide = shapeFinder.requireSlide(session, slideIndex);
         XSLFShape shape = shapeFinder.requireShape(slide, shapeIndex);
 
-        if (args.has("fill_color")) {
-            if (!(shape instanceof XSLFSimpleShape simpleShape)) {
-                return error("fill_color is only supported for simple shapes");
-            }
-            simpleShape.setFillColor(ColorParser.parseHex(args.path("fill_color").asText("")));
+        ToolCallResult fillError = applyFill(shape, args);
+        if (fillError != null) {
+            return fillError;
         }
 
         if (args.has("border_color")) {
@@ -352,6 +408,90 @@ public final class PptShapeMutationOperations {
         payload.put("slide_index", slideIndex);
         payload.put("shape_index", shapeIndex);
         payload.put("message", "Shape style updated");
+        return success(payload);
+    }
+
+    /**
+     * Routes the {@code fill_type} branch. Returns {@code null} on success, otherwise an
+     * error result. {@code fill_color} without {@code fill_type} is treated as the
+     * legacy {@code fill_type=solid} shorthand for backward compatibility.
+     */
+    private ToolCallResult applyFill(XSLFShape shape, JsonNode args) {
+        boolean hasFillType = args.has("fill_type");
+        boolean hasFillColor = args.has("fill_color");
+        boolean hasGradient = args.has("fill_gradient");
+        boolean hasPattern = args.has("fill_pattern");
+        if (!hasFillType && !hasFillColor && !hasGradient && !hasPattern) {
+            return null;
+        }
+        if (!(shape instanceof XSLFSimpleShape simpleShape)) {
+            return error("fill is only supported for simple shapes");
+        }
+        String fillType = hasFillType
+                ? args.path("fill_type").asText("").toLowerCase(Locale.ROOT)
+                : "solid";
+        switch (fillType) {
+            case "solid":
+                if (hasFillColor) {
+                    simpleShape.setFillColor(ColorParser.parseHex(args.path("fill_color").asText("")));
+                }
+                return null;
+            case "gradient":
+                PptShapeXml.applyGradientFill(PptShapeXml.getShapeProperties(simpleShape),
+                        args.path("fill_gradient"));
+                return null;
+            case "pattern":
+                PptShapeXml.applyPatternFill(PptShapeXml.getShapeProperties(simpleShape),
+                        args.path("fill_pattern"));
+                return null;
+            case "none":
+                PptShapeXml.applyNoFill(PptShapeXml.getShapeProperties(simpleShape));
+                return null;
+            default:
+                return responseFactory.error("VALIDATION_ERROR",
+                        "fill_type must be one of: solid, gradient, pattern, none", false);
+        }
+    }
+
+    public ToolCallResult setPictureEffects(JsonNode args) {
+        PptDocumentSession session = shapeFinder.requireSession(args);
+        int slideIndex = args.path("slide_index").asInt(-1);
+        int shapeIndex = args.path("shape_index").asInt(-1);
+        XSLFSlide slide = shapeFinder.requireSlide(session, slideIndex);
+        XSLFShape shape = shapeFinder.requireShape(slide, shapeIndex);
+        if (!(shape instanceof XSLFPictureShape picture)) {
+            return responseFactory.error("SHAPE_NOT_PICTURE",
+                    "shape_index does not point to a picture shape", false);
+        }
+
+        boolean hasCrop = args.hasNonNull("crop");
+        boolean hasAlpha = args.hasNonNull("alpha");
+        boolean hasRecolor = args.hasNonNull("recolor");
+        if (!hasCrop && !hasAlpha && !hasRecolor) {
+            return responseFactory.error("VALIDATION_ERROR",
+                    "set_picture_effects requires at least one of: crop, alpha, recolor", false);
+        }
+
+        var blipFill = PptShapeXml.getBlipFill(picture);
+        if (hasCrop) {
+            PptShapeXml.applyCrop(blipFill, args.path("crop"));
+        }
+        if (hasAlpha) {
+            PptShapeXml.applyAlpha(blipFill, args.path("alpha").asDouble());
+        }
+        if (hasRecolor) {
+            PptShapeXml.applyRecolor(blipFill, args.path("recolor"));
+        }
+
+        session.touch(true);
+        ObjectNode payload = okPayload();
+        payload.put("document_id", session.getId());
+        payload.put("slide_index", slideIndex);
+        payload.put("shape_index", shapeIndex);
+        payload.put("crop_applied", hasCrop);
+        payload.put("alpha_applied", hasAlpha);
+        payload.put("recolor_applied", hasRecolor);
+        payload.put("message", "Picture effects applied");
         return success(payload);
     }
 
