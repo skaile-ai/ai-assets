@@ -5,6 +5,9 @@ package com.skaile.excelmcp.error;
  * enum and documenting them in the README error table.
  */
 public enum ErrorCode {
+  // Generic input validation (missing required field, wrong-typed scalar)
+  VALIDATION_ERROR,
+
   // Path / format
   PATH_INVALID,
   PATH_OUTSIDE_ROOT,

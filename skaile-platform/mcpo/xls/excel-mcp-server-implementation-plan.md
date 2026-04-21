@@ -452,6 +452,9 @@ Always include `code` and `message`. `details` carries code-specific structured 
 ### 8.2 Initial code set
 
 ```
+// Generic input validation
+VALIDATION_ERROR              // required field missing or scalar wrong type (string/int) — distinct from path / handle / range codes
+
 // Path / format
 PATH_INVALID                  // unparseable, NUL byte, etc.
 PATH_OUTSIDE_ROOT             // EXCEL_MCP_ROOT set and path escapes it

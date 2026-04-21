@@ -15,11 +15,11 @@ public final class ToolInputs {
   private ToolInputs() {}
 
   public static String requireString(JsonNode node, String field) throws McpException {
-    JsonNode v = node.get(field);
+    JsonNode v = node == null ? null : node.get(field);
     if (v == null || v.isNull() || !v.isTextual()) {
       throw new McpException(
-          ErrorCode.PATH_INVALID,
-          "required string field missing: " + field,
+          ErrorCode.VALIDATION_ERROR,
+          "required string field missing or not a string: " + field,
           Map.of("field", field));
     }
     return v.textValue();
@@ -50,7 +50,14 @@ public final class ToolInputs {
   }
 
   public static HandleId requireHandle(JsonNode input) throws McpException {
-    String raw = requireString(input, "handle");
+    JsonNode v = input == null ? null : input.get("handle");
+    if (v == null || v.isNull() || !v.isTextual()) {
+      // Missing/non-string handle stays in the HANDLE_* family rather than the generic
+      // VALIDATION_ERROR — agents already key handle-recovery flows off the HANDLE_ prefix.
+      throw new McpException(
+          ErrorCode.HANDLE_UNKNOWN, "missing or malformed handle", Map.of("field", "handle"));
+    }
+    String raw = v.textValue();
     try {
       return new HandleId(raw);
     } catch (IllegalArgumentException ex) {
