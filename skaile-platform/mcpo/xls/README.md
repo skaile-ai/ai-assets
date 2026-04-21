@@ -12,7 +12,7 @@ Design docs:
 ## Tech stack
 
 - **Java 21 LTS** (Eclipse Temurin), **Maven** with the wrapper pinned to 3.9.9, **Spotless** for Google Java Format.
-- **Apache POI 5.5.x** (`poi`, `poi-ooxml`, `poi-scratchpad`) — in-process, Apache-2.0, broadest single-library coverage of what this MCP needs. POI is only imported from the engine layer.
+- **Apache POI 5.5.x** (`poi`, `poi-ooxml`) — in-process, Apache-2.0, broadest single-library coverage of what this MCP needs. POI is only imported from the engine layer.
 - **Official MCP Java SDK** over stdio. No HTTP / SSE in v1.
 - **Jackson** for JSON, **SLF4J + Logback** for logging (stderr-only — stdout is reserved for the MCP protocol).
 - **JUnit 5 + AssertJ** for tests; a handful of smoke + regression tests, no coverage targets.
@@ -169,9 +169,11 @@ Run the server under [`@modelcontextprotocol/inspector`](https://github.com/mode
    pwd && npx @modelcontextprotocol/inspector \
      docker run --rm -i \
        -v "$PWD/test-data:/data" \
-       -e EXCEL_MCP_ROOT=/data \
+       --env EXCEL_MCP_ROOT=/data \
        excel-mcp:dev
    ```
+
+   Use the long-form `--env` (not `-e`): the inspector's argument parser intercepts `-e KEY=VAL` pairs and lifts them into its own child-process environment, which means they never reach `docker run` and the container starts with the sandbox env var missing. With the fail-closed default on `EXCEL_MCP_ROOT`, that causes the container to exit on startup and the inspector shows "no connection". `--env` sails through untouched.
 
    The image runs as UID 1000 by default, matching the primary user on most Linux/WSL hosts — no `--user` flag is needed and `workbook.save` can atomically replace files in the bind-mounted directory. If your host uses a different primary UID, pass `--user "$(id -u):$(id -g)"` as documented under "Running with a different UID" in the Run section above.
 

@@ -16,9 +16,9 @@ import org.apache.poi.poifs.macros.Module;
 import org.apache.poi.poifs.macros.VBAMacroReader;
 
 /**
- * Read-only VBA module extraction via POI's {@link VBAMacroReader} (lives in {@code
- * poi-scratchpad}). Confined to this class — no VBA-adjacent POI import appears anywhere else in
- * {@code engine/}, and no MCP/tool class imports {@code poi-scratchpad} directly.
+ * Read-only VBA module extraction via POI's {@link VBAMacroReader} (ships in the main {@code poi}
+ * artifact). Confined to this class — no VBA-adjacent POI import appears anywhere else in {@code
+ * engine/}.
  *
  * <p>v1 reads VBA from the workbook's source file on disk. A workbook created via {@code
  * workbook.create()} with no source path always reports {@link ErrorCode#VBA_NOT_PRESENT}, which is

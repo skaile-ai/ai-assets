@@ -60,11 +60,6 @@
       <artifactId>poi-ooxml</artifactId>
       <version>${poi.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.poi</groupId>
-      <artifactId>poi-scratchpad</artifactId>
-      <version>${poi.version}</version>
-    </dependency>
 
     <!-- Jackson (aligned with the version the MCP SDK transitively pulls to avoid dual-version clashes). -->
     <dependency>
