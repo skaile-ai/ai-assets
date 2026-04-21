@@ -469,6 +469,7 @@ HANDLE_CLOSED                 // handle existed but was already closed
 // Worksheet / range
 SHEET_NOT_FOUND
 SHEET_ALREADY_EXISTS          // sheet.create with conflicting name
+SHEET_LAST_REMAINING          // sheet.delete on the only remaining sheet (Excel rejects zero-sheet wb)
 RANGE_INVALID                 // unparseable A1 reference
 RANGE_OUT_OF_BOUNDS           // range exceeds sheet bounds (read or write)
 ROW_INDEX_INVALID             // for sheet.insert_rows / delete_rows
@@ -688,8 +689,8 @@ Either `range` or `start` is required. `values` is required. `formulas` is optio
 
 **Input:** `{ "handle": "wb-…", "name": "Old" }`
 **Output:** `{ "deleted": true }`
-**Errors:** `HANDLE_UNKNOWN`, `HANDLE_CLOSED`, `SHEET_NOT_FOUND`
-**POI:** `workbook.removeSheetAt(workbook.getSheetIndex(name))`.
+**Errors:** `HANDLE_UNKNOWN`, `HANDLE_CLOSED`, `SHEET_NOT_FOUND`, `SHEET_LAST_REMAINING`
+**POI:** `workbook.removeSheetAt(workbook.getSheetIndex(name))`. Pre-check `getNumberOfSheets() == 1` and reject — Excel refuses to open a zero-sheet workbook.
 
 #### `sheet.rename`
 

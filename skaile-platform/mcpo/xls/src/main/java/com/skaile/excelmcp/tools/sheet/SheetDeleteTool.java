@@ -8,6 +8,7 @@ import static com.skaile.excelmcp.server.ToolInputs.stringProp;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.skaile.excelmcp.engine.WorkbookEngine;
+import com.skaile.excelmcp.error.ErrorCode;
 import com.skaile.excelmcp.error.McpException;
 import com.skaile.excelmcp.handles.HandleId;
 import com.skaile.excelmcp.server.ToolDefinition;
@@ -34,8 +35,9 @@ public final class SheetDeleteTool implements ToolDefinition {
   @Override
   public String description() {
     return "Removes the named sheet and all of its cells from the workbook. Requires an open"
-        + " workbook handle; the deletion is in-memory until workbook.save. Excel rejects a"
-        + " workbook with zero sheets as corrupt — always keep at least one sheet.";
+        + " workbook handle; the deletion is in-memory until workbook.save. Deleting the last"
+        + " remaining sheet fails with SHEET_LAST_REMAINING — Excel rejects a workbook with"
+        + " zero sheets, so the workbook must always retain at least one.";
   }
 
   @Override
@@ -60,6 +62,12 @@ public final class SheetDeleteTool implements ToolDefinition {
   public Object execute(JsonNode input) throws McpException {
     HandleId id = requireHandle(input);
     String name = requireString(input, "name");
+    if (engine.listSheets(id).size() == 1) {
+      throw new McpException(
+          ErrorCode.SHEET_LAST_REMAINING,
+          "cannot delete the last remaining sheet; a workbook must have at least one sheet",
+          Map.of("sheet", name));
+    }
     engine.deleteSheet(id, name);
     log.info("sheet.delete handle={} name={}", id.value(), name);
     return Map.of("deleted", true);
