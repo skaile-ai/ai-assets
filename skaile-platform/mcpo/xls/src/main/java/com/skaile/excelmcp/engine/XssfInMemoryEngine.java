@@ -85,6 +85,15 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
     // 2x file size during load; acceptable within the 100 MB file cap.
     try (InputStream in = Files.newInputStream(path)) {
       wb = WorkbookFactory.create(in);
+    } catch (java.nio.file.NoSuchFileException | java.io.FileNotFoundException ex) {
+      // Race: PathValidator confirmed the file existed, but it was deleted between the check
+      // and Files.newInputStream. Surface the same FILE_NOT_FOUND code rather than the generic
+      // INTERNAL_ERROR fallback so the agent's retry-or-give-up logic stays simple.
+      throw new McpException(
+          ErrorCode.FILE_NOT_FOUND,
+          "no such file: " + path.getFileName(),
+          Map.of("path", path.getFileName().toString()),
+          ex);
     } catch (IOException ex) {
       throw new McpException(
           ErrorCode.INTERNAL_ERROR,
