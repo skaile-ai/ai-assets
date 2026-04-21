@@ -13,6 +13,8 @@
 #      VBA_MODULE_NOT_FOUND + transport-survives-error regressions.
 set -euo pipefail
 
+export EXCEL_MCP_ALLOW_UNSANDBOXED=true
+
 ROOT="$(cd "$(dirname "$0")"/.. && pwd)"
 JAR="$ROOT/target/excel-mcp-0.1.0-SNAPSHOT.jar"
 [[ -f "$JAR" ]] || { echo "jar not found: $JAR" >&2; exit 2; }

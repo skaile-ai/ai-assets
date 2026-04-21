@@ -106,8 +106,9 @@ docker run --rm -i \
   -e LOG_LEVEL=INFO \
   excel-mcp:dev
 
-# Without sandboxing (dev only; accepts any path the agent gives):
-docker run --rm -i excel-mcp:dev
+# Without sandboxing (dev only; accepts any path the agent gives).
+# The fail-closed default refuses to start without EXCEL_MCP_ROOT; opt in explicitly:
+docker run --rm -i -e EXCEL_MCP_ALLOW_UNSANDBOXED=true excel-mcp:dev
 ```
 
 ### MCP client descriptor
@@ -155,10 +156,10 @@ Run the server under [`@modelcontextprotocol/inspector`](https://github.com/mode
    docker build --no-cache -t excel-mcp:dev .
    ```
 
-2. **Smoke-run the image standalone** (no inspector, no mounts) to confirm it starts and exits cleanly on EOF. Should log `EXCEL_MCP_ROOT not set; path sandboxing disabled` and `mcp server started … tools=<N>`:
+2. **Smoke-run the image standalone** (no inspector, no mounts) to confirm it starts and exits cleanly on EOF. Pass `EXCEL_MCP_ALLOW_UNSANDBOXED=true` to opt out of the fail-closed default; the image then logs a WARN line about the posture and `mcp server started … tools=<N>`:
 
    ```bash
-   docker run --rm -i excel-mcp:dev
+   docker run --rm -i -e EXCEL_MCP_ALLOW_UNSANDBOXED=true excel-mcp:dev
    ```
 
 3. **Launch the inspector pointed at the image**, mounting a host directory as the sandbox root:
@@ -188,8 +189,9 @@ Run the server under [`@modelcontextprotocol/inspector`](https://github.com/mode
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `EXCEL_MCP_ROOT` | unset | If set, every path passed to a tool must resolve inside this subtree. Unset → all paths accepted (developer convenience; warned at startup). |
-| `EXCEL_MCP_MAX_FILE_BYTES` | `100000000` (100 MB) | Upper bound on workbook file size at open. |
+| `EXCEL_MCP_ROOT` | unset | If set, every path passed to a tool must resolve inside this subtree. Required for startup unless `EXCEL_MCP_ALLOW_UNSANDBOXED=true` is also set. |
+| `EXCEL_MCP_ALLOW_UNSANDBOXED` | `false` | Explicit opt-in to run without `EXCEL_MCP_ROOT`. Set to exactly `true` to bypass the fail-closed startup check (all paths reachable to the process are accessible; a WARN line logs the posture). Any other value — including unset — keeps the sandbox required. |
+| `EXCEL_MCP_MAX_FILE_BYTES` | `104857600` (100 MiB) | Upper bound on workbook file size at open. |
 | `EXCEL_MCP_MAX_CELLS` | `1000000` | Upper bound on total cell count after POI loads the workbook. |
 | `LOG_LEVEL` | `INFO` | Logback root level. Accepts `ERROR` / `WARN` / `INFO` / `DEBUG`. |
 

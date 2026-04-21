@@ -57,6 +57,14 @@ public final class McpServerMain {
     LoggingSetup.lockDownStdout();
 
     ServerConfig config = ServerConfig.fromEnvironment();
+    if (config.excelMcpRoot().isEmpty() && !config.allowUnsandboxed()) {
+      log.error(
+          "refusing to start: EXCEL_MCP_ROOT is not set. "
+              + "Set EXCEL_MCP_ROOT=/some/dir to enable path sandboxing, "
+              + "or set EXCEL_MCP_ALLOW_UNSANDBOXED=true to run without a sandbox.");
+      System.exit(2);
+      return;
+    }
     ExcelMcpRoot root;
     try {
       root = ExcelMcpRoot.resolve(config.excelMcpRoot());
@@ -68,7 +76,9 @@ public final class McpServerMain {
     if (root.isEnabled()) {
       log.info("EXCEL_MCP_ROOT={} (path sandboxing enabled)", root.canonical().orElseThrow());
     } else {
-      log.warn("EXCEL_MCP_ROOT not set; path sandboxing disabled");
+      log.warn(
+          "running without EXCEL_MCP_ROOT sandbox — "
+              + "all filesystem paths reachable to the server process are accessible");
     }
     log.info("limits maxFileBytes={} maxCells={}", config.maxFileBytes(), config.maxCells());
 

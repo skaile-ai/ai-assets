@@ -21,7 +21,10 @@ class RangeBoundsTest {
 
   private static final ServerConfig CFG =
       new ServerConfig(
-          Optional.empty(), ServerConfig.DEFAULT_MAX_FILE_BYTES, ServerConfig.DEFAULT_MAX_CELLS);
+          Optional.empty(),
+          true,
+          ServerConfig.DEFAULT_MAX_FILE_BYTES,
+          ServerConfig.DEFAULT_MAX_CELLS);
 
   @Test
   void readPastLastColumnIsRejected() throws Exception {
