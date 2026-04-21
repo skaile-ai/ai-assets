@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Stateful MCP server (`ai.skaile.mcpo:ppt-mcp-server`) that exposes PowerPoint manipulation as JSON-RPC tools over stdio. An agent opens a `.pptx`, receives a `document_id` handle, and drives subsequent mutations through that handle until it calls `ppt.save_document` / `ppt.close_document`. Backed by Apache POI 5.5.x; LibreOffice (`soffice`) is only invoked for PDF export.
 
-`README.md` contains the authoritative tool catalog (currently 50 tools after Phase 1 consolidation + Phase 4 addition of `ppt.set_picture_effects`), response envelope schema, and example JSON-RPC frames — read it before adding or modifying a tool. Note that README sometimes drifts ahead of the pom (see "Known doc/source drift" below).
+`README.md` contains the authoritative tool catalog (currently 52 tools after Phase 1 consolidation, Phase 4 addition of `ppt.set_picture_effects`, and Phase 5 addition of `ppt.list_charts` + `ppt.update_chart_data`), response envelope schema, and example JSON-RPC frames — read it before adding or modifying a tool. Note that README sometimes drifts ahead of the pom (see "Known doc/source drift" below).
 
 ## Commands
 
@@ -59,6 +59,7 @@ Three packages under `src/main/java/ai/skaile/mcpo/ppt/`. Keep concerns inside t
     - `PptPageOperations` — `set_page_setup`, `set_slide_background`, `set_slide_layout`, `set_document_metadata`.
     - `PptRenderOperations` — `render_slide`, `render_all_slides`, `find_text`, `get_slide_metrics`.
     - `PptTemplateOperations` — `insert_image`, template upload/default, `import_markdown_outline`. Owns the mutable default-template pointer consulted by `PptDocumentOperations` when creating sessions.
+    - `PptChartOperations` — Phase 5: `list_charts` + `update_chart_data`. Updates both the chart's numCache/strCache XML and the embedded XLSX workbook cells so PowerPoint's "Edit Data" dialog stays consistent. Creating charts from scratch is v2.
     - `PptCapabilitiesOperations` — `ppt.capabilities` self-describe handler.
     - `PptTransactionManager` — per-session transaction snapshots (begin/commit/rollback).
     - `SofficeRenderer` — single entry point for all soffice invocations; semaphore-guarded, 90s timeout, cleans temp files on exception paths.

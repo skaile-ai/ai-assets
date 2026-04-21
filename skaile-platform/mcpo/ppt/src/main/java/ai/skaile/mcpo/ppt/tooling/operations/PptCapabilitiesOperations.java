@@ -76,7 +76,7 @@ public final class PptCapabilitiesOperations {
         }
 
         ObjectNode flags = payload.putObject("feature_flags");
-        flags.put("charts_update", false);
+        flags.put("charts_update", true);
         // high_fidelity_render is wired end-to-end; the flag reports whether the host can
         // actually serve it — soffice may be missing on dev machines.
         flags.put("high_fidelity_render", soffice.available());

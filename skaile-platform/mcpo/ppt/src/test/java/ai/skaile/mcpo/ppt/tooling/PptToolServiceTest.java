@@ -1168,7 +1168,8 @@ class PptToolServiceTest {
             assertTrue(payload.path("feature_flags").path("picture_effects").asBoolean());
             assertTrue(payload.path("feature_flags").path("table_borders").asBoolean());
             assertTrue(payload.path("feature_flags").path("table_merge").asBoolean());
-            assertFalse(payload.path("feature_flags").path("charts_update").asBoolean());
+            // Phase 5 flipped charts_update on.
+            assertTrue(payload.path("feature_flags").path("charts_update").asBoolean());
         } finally {
             service.closeAllSessions();
         }

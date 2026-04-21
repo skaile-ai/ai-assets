@@ -817,6 +817,53 @@ final class PptToolDefinitions {
                                     "additionalProperties": false
                                 }
                                 """),
+                tool(mapper, "ppt.list_charts",
+                        "List all charts on a document or a single slide. Returns chart_type, per-series name and point counts, the shared category labels, and whether an editable embedded XLSX workbook is present.",
+                        """
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "document_id": {"type": "string"},
+                                        "slide_index": {"type": "integer", "minimum": 0}
+                                    },
+                                    "required": ["document_id"],
+                                    "additionalProperties": false
+                                }
+                                """),
+                tool(mapper, "ppt.update_chart_data",
+                        "Update numeric values (and optionally category labels or series names) on an existing chart. Updates both the chart's cached XML and the embedded XLSX so PowerPoint's 'Edit Data' dialog remains consistent. Series and per-series value counts must match the chart; non-chart shapes return SHAPE_NOT_CHART; legacy charts without an embedded workbook return EMBEDDED_WORKBOOK_MISSING.",
+                        """
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "document_id": {"type": "string"},
+                                        "slide_index": {"type": "integer", "minimum": 0},
+                                        "shape_index": {"type": "integer", "minimum": 0},
+                                        "series": {
+                                            "type": "array",
+                                            "minItems": 1,
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "name": {"type": "string"},
+                                                    "values": {
+                                                        "type": "array",
+                                                        "items": {"type": "number"}
+                                                    }
+                                                },
+                                                "required": ["values"],
+                                                "additionalProperties": false
+                                            }
+                                        },
+                                        "categories": {
+                                            "type": "array",
+                                            "items": {"type": "string"}
+                                        }
+                                    },
+                                    "required": ["document_id", "slide_index", "shape_index", "series"],
+                                    "additionalProperties": false
+                                }
+                                """),
                 tool(mapper, "ppt.capabilities",
                         "Return server version, Apache POI / LibreOffice availability, supported input/export/render formats, installed fonts, feature flags, and safety limits.",
                         """

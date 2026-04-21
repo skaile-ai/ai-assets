@@ -89,6 +89,8 @@ class DockerPptMcpServerSmokeTest {
             "ppt.set_document_metadata",
             "ppt.set_slide_layout",
             "ppt.set_shape_z_order",
+            "ppt.list_charts",
+            "ppt.update_chart_data",
             "ppt.capabilities");
 
     @BeforeAll
@@ -420,6 +422,78 @@ class DockerPptMcpServerSmokeTest {
             } else {
                 assertEquals("error", slideVector.path("status").asText());
             }
+
+            // Phase 5: list_charts + update_chart_data. Build a chart-bearing fixture on the
+            // host via ChartFixtureBuilder, drop it in the bind-mount, then open + list +
+            // update + high-fidelity render. Compare pre-/post-update PNGs to confirm the
+            // rendered chart actually changed.
+            Path chartFixture = workspace.resolve("output/chart-sample.pptx");
+            ai.skaile.mcpo.ppt.tooling.operations.ChartFixtureBuilder
+                    .writeClusteredColumn(chartFixture);
+            JsonNode chartOpened = callTool(session, "ppt.open_document", objectNode(
+                    "path", containerPath("output/chart-sample.pptx")));
+            String chartDocId = chartOpened.path("document_id").asText();
+            assertFalse(chartDocId.isBlank());
+
+            JsonNode listed = callTool(session, "ppt.list_charts", objectNode(
+                    "document_id", chartDocId));
+            assertEquals(1, listed.path("charts").size());
+            JsonNode chartInfo = listed.path("charts").get(0);
+            assertEquals("column", chartInfo.path("chart_type").asText());
+            assertTrue(chartInfo.path("has_embedded_workbook").asBoolean());
+            int chartSlide = chartInfo.path("slide_index").asInt();
+            int chartShape = chartInfo.path("shape_index").asInt();
+
+            Path beforePng = workspace.resolve("output/chart-before.png");
+            JsonNode beforeRender = callTool(session, "ppt.render_slide", objectNode(
+                    "document_id", chartDocId,
+                    "slide_index", chartSlide,
+                    "output_path", containerPath("output/chart-before.png"),
+                    "format", "png",
+                    "fidelity", "high"));
+            assertEquals("success", beforeRender.path("status").asText());
+            assertTrue(Files.exists(beforePng));
+            long beforeSize = Files.size(beforePng);
+
+            ObjectNode updateArgs = objectNode(
+                    "document_id", chartDocId,
+                    "slide_index", chartSlide,
+                    "shape_index", chartShape);
+            ArrayNode updatedSeries = updateArgs.putArray("series");
+            for (int s = 0; s < 3; s++) {
+                ObjectNode sNode = updatedSeries.addObject();
+                sNode.put("name", "Updated " + (s + 1));
+                ArrayNode vals = sNode.putArray("values");
+                // Large values to force a visible change in the rendered chart.
+                for (int i = 0; i < 4; i++) {
+                    vals.add(1000.0 * (s + 1) + i * 100.0);
+                }
+            }
+            JsonNode chartUpdated = callTool(session, "ppt.update_chart_data", updateArgs);
+            assertEquals("success", chartUpdated.path("status").asText());
+            assertEquals(3, chartUpdated.path("updated_series").asInt());
+
+            Path afterPng = workspace.resolve("output/chart-after.png");
+            JsonNode afterRender = callTool(session, "ppt.render_slide", objectNode(
+                    "document_id", chartDocId,
+                    "slide_index", chartSlide,
+                    "output_path", containerPath("output/chart-after.png"),
+                    "format", "png",
+                    "fidelity", "high"));
+            assertEquals("success", afterRender.path("status").asText());
+            assertTrue(Files.exists(afterPng));
+            long afterSize = Files.size(afterPng);
+            // Identical PNGs are the failure we're guarding against: if the renderer
+            // silently ignores the mutation, the two files would be byte-identical.
+            // Tolerate minor JPEG-ish encoder drift via a byte-diff OR size-diff check.
+            boolean bytesDiffer = !java.util.Arrays.equals(
+                    Files.readAllBytes(beforePng), Files.readAllBytes(afterPng));
+            assertTrue(bytesDiffer || afterSize != beforeSize,
+                    "chart render before/after must differ after update_chart_data");
+
+            JsonNode chartClosed = callTool(session, "ppt.close_document",
+                    objectNode("document_id", chartDocId));
+            assertEquals("success", chartClosed.path("status").asText());
 
             JsonNode templateUpload = callTool(session, "ppt.upload_template", objectNode(
                     "source_path", containerPath("output/report.pptx"),

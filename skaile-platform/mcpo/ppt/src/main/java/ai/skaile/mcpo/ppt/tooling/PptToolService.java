@@ -13,6 +13,7 @@ import ai.skaile.mcpo.ppt.tooling.infra.PptShapeFinder;
 import ai.skaile.mcpo.ppt.tooling.infra.ToolArgumentValidator;
 import ai.skaile.mcpo.ppt.tooling.infra.ToolResponseFactory;
 import ai.skaile.mcpo.ppt.tooling.operations.PptCapabilitiesOperations;
+import ai.skaile.mcpo.ppt.tooling.operations.PptChartOperations;
 import ai.skaile.mcpo.ppt.tooling.operations.PptDocumentOperations;
 import ai.skaile.mcpo.ppt.tooling.operations.PptPageOperations;
 import ai.skaile.mcpo.ppt.tooling.operations.PptRenderOperations;
@@ -75,6 +76,7 @@ public final class PptToolService {
     private final PptTextOperations textOperations;
     private final PptPageOperations pageOperations;
     private final PptRenderOperations renderOperations;
+    private final PptChartOperations chartOperations;
     private final PptCapabilitiesOperations capabilitiesOperations;
 
     private final List<ToolDefinition> tools;
@@ -113,6 +115,7 @@ public final class PptToolService {
         this.renderOperations = new PptRenderOperations(
                 mapper, argumentValidator, responseFactory, pathResolver,
                 shapeFinder, limits, sofficeRenderer);
+        this.chartOperations = new PptChartOperations(mapper, responseFactory, shapeFinder);
         this.capabilitiesOperations = new PptCapabilitiesOperations(responseFactory, config);
 
         this.tools = PptToolDefinitions.create(mapper);
@@ -133,6 +136,7 @@ public final class PptToolService {
         handlers.putAll(pageOperations.handlers());
         handlers.putAll(renderOperations.handlers());
         handlers.putAll(templateOperations.handlers());
+        handlers.putAll(chartOperations.handlers());
         handlers.putAll(capabilitiesOperations.handlers());
         return Map.copyOf(handlers);
     }
