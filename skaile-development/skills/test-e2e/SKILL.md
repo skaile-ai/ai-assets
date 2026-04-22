@@ -150,7 +150,7 @@ EMIT [test-e2e] started target=<pkg> mode=<mode> kind=<kind>
 
 STEP 1: Determine kind
   IF kind = auto:
-    IF <target> is platform/frontend → delegate to platform/e2e (do NOT create a parallel config) — inform user
+    IF <target> is platform/frontend OR platform/e2e → STOP and hand off to `e2e-platform` skill. That skill already knows the existing platform/e2e harness (session modes, impersonation, org-scoped URLs, failure-mode table) and has two modes: `run` executes the suite with auto-recovery; `add` analyzes a diff and proposes new specs with a user approval gate. Do NOT create a parallel Playwright config.
     IF <target>/nuxt.config.ts exists OR <target>/vite.config.* with React → web
     IF <target> is agent-framework/cli OR package.json has `bin` entry → cli
     ELSE → report "this package is library-grade; use test-integration"
