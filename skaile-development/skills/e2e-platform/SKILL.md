@@ -121,8 +121,8 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
    IF either is down:
      Report to user:
        > "Service down: <frontend|backend>. Start it first:
-       >   cd platform/frontend && bun run dev:noAuth   (for frontend)
-       >   cd platform/backend && bun run e2e:stateless (for backend, e2e mode)"
+       >   cd platform/frontend && bun run build && bun run preview   (for frontend — production build required; catches minified-only bugs)
+       >   cd platform/backend && bun run e2e:stateless               (for backend, e2e mode)"
      STOP — do not proceed until the user has services running. Do NOT auto-start (side-effect risk).
 
 3. Kill stale `skaile serve` subprocesses (cheap hygiene):
