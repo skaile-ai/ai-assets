@@ -54,6 +54,9 @@ public final class PptCapabilitiesOperations {
             payload.put("soffice_version", soffice.version());
         }
         payload.put("java_version", config.javaVersion());
+        if (config.allowedRoot() != null) {
+            payload.put("allowed_root", config.allowedRoot().toString());
+        }
 
         ArrayNode inputFormats = payload.putArray("supported_input_formats");
         inputFormats.add("pptx");

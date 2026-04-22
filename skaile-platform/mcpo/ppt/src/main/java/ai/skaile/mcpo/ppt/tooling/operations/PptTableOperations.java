@@ -128,16 +128,39 @@ public final class PptTableOperations {
         payload.put("cols", cols);
 
         ArrayNode cellRows = payload.putArray("cells");
+        ArrayNode mergedRegions = mapper.createArrayNode();
         for (int r = 0; r < rows; r++) {
             ArrayNode row = cellRows.addArray();
             XSLFTableRow tableRow = table.getRows().get(r);
             for (int c = 0; c < cols && c < tableRow.getCells().size(); c++) {
                 XSLFTableCell cell = tableRow.getCells().get(c);
+                org.openxmlformats.schemas.drawingml.x2006.main.CTTableCell ct =
+                        (org.openxmlformats.schemas.drawingml.x2006.main.CTTableCell) cell.getXmlObject();
+                int colSpan = ct.isSetGridSpan() ? (int) ct.getGridSpan() : 1;
+                int rowSpan = ct.isSetRowSpan() ? (int) ct.getRowSpan() : 1;
+                boolean hMerged = ct.isSetHMerge() && ct.getHMerge();
+                boolean vMerged = ct.isSetVMerge() && ct.getVMerge();
+                // An anchor carries gridSpan/rowSpan > 1; continuation cells carry hMerge
+                // and/or vMerge. A cell with neither flag nor span is a standalone cell.
+                boolean isAnchor = (colSpan > 1 || rowSpan > 1) && !hMerged && !vMerged;
                 ObjectNode cellNode = row.addObject();
                 cellNode.put("text", cell.getText() == null ? "" : cell.getText());
-                cellNode.put("row_span", 1);
-                cellNode.put("col_span", 1);
-                cellNode.put("is_merge_anchor", false);
+                cellNode.put("row_span", rowSpan);
+                cellNode.put("col_span", colSpan);
+                cellNode.put("is_merge_anchor", isAnchor);
+                if (hMerged) {
+                    cellNode.put("h_merge", true);
+                }
+                if (vMerged) {
+                    cellNode.put("v_merge", true);
+                }
+                if (isAnchor) {
+                    ObjectNode region = mergedRegions.addObject();
+                    region.put("start_row", r);
+                    region.put("start_col", c);
+                    region.put("end_row", r + rowSpan - 1);
+                    region.put("end_col", c + colSpan - 1);
+                }
             }
         }
 
@@ -149,7 +172,7 @@ public final class PptTableOperations {
         for (int c = 0; c < cols; c++) {
             colWidths.add(table.getColumnWidth(c));
         }
-        payload.putArray("merged_regions");
+        payload.set("merged_regions", mergedRegions);
         return success(payload);
     }
 
@@ -353,7 +376,12 @@ public final class PptTableOperations {
         PptDocumentSession session = shapeFinder.requireSession(args);
         int slideIndex = args.path("slide_index").asInt(-1);
         int shapeIndex = args.path("shape_index").asInt(-1);
-        int rowIndex = args.path("row_index").asInt(-1);
+        // Accept either `row_index` (legacy, matches setTableHeaderStyle) or the generic
+        // `index` used by insert_row / delete_row / insert_col / delete_col so callers don't
+        // have to remember which table op wants which spelling.
+        int rowIndex = args.has("row_index")
+                ? args.path("row_index").asInt(-1)
+                : args.path("index").asInt(-1);
         double height = args.path("height").asDouble(Double.NaN);
         if (Double.isNaN(height) || height <= 0) {
             return error("height must be > 0");
@@ -384,7 +412,11 @@ public final class PptTableOperations {
         PptDocumentSession session = shapeFinder.requireSession(args);
         int slideIndex = args.path("slide_index").asInt(-1);
         int shapeIndex = args.path("shape_index").asInt(-1);
-        int colIndex = args.path("col_index").asInt(-1);
+        // Accept either `col_index` (legacy) or the generic `index` used by the row/col
+        // structural ops — see setTableRowHeight for the same rationale.
+        int colIndex = args.has("col_index")
+                ? args.path("col_index").asInt(-1)
+                : args.path("index").asInt(-1);
         double width = args.path("width").asDouble(Double.NaN);
         if (Double.isNaN(width) || width <= 0) {
             return error("width must be > 0");

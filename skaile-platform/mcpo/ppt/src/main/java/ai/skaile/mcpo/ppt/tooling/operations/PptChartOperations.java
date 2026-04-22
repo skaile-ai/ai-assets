@@ -234,7 +234,14 @@ public final class PptChartOperations {
             }
             updateSeriesValues(chart, flatSeries.get(i), newValues);
             if (s.hasNonNull("name")) {
-                flatSeries.get(i).setTitle(s.path("name").asText());
+                String newName = s.path("name").asText();
+                XDDFChartData.Series series = flatSeries.get(i);
+                series.setTitle(newName);
+                // series.setTitle rewrites the chart XML's c:tx strCache but leaves the
+                // embedded XLSX header cell pointing at the old shared-string entry.
+                // Resolve the title's cell reference and overwrite the cell so
+                // PowerPoint's "Edit Data" dialog stays consistent with the chart.
+                writeSeriesNameToWorkbook(chart, series, newName);
             }
         }
 
@@ -462,6 +469,51 @@ public final class PptChartOperations {
             int colIdx = sr.range.getFirstColumn() + (columnRange ? 0 : i);
             cellAt(sr.sheet, rowIdx, colIdx).setCellValue(values[i] == null ? "" : values[i]);
         }
+    }
+
+    /**
+     * Extract the series title's c:tx/c:strRef/c:f cell reference (e.g. {@code Sheet1!$B$1})
+     * and overwrite the targeted workbook cell with {@code newName}. Best-effort: if the
+     * series title is a direct c:v literal with no ref, or the ref can't be resolved, we
+     * skip silently — the chart XML was already updated by {@code series.setTitle}.
+     */
+    private static void writeSeriesNameToWorkbook(XSLFChart chart, XDDFChartData.Series series,
+                                                  String newName)
+            throws IOException, InvalidFormatException {
+        String titleRef = extractSeriesTitleRef(series);
+        if (titleRef == null || titleRef.isBlank()) {
+            return;
+        }
+        SheetRange sheetRange = resolveSheetRange(chart, titleRef);
+        if (sheetRange == null) {
+            return;
+        }
+        // Series-title refs are almost always a single cell (e.g. $B$1), but the range
+        // may include multiple cells when a series name spans merged headers — write to
+        // the first cell in the range either way.
+        int rowIdx = sheetRange.range.getFirstRow();
+        int colIdx = sheetRange.range.getFirstColumn();
+        cellAt(sheetRange.sheet, rowIdx, colIdx).setCellValue(newName == null ? "" : newName);
+    }
+
+    /** Pulls {@code c:tx/c:strRef/c:f} off the series tx via the reflective helper already used by list_charts. */
+    private static String extractSeriesTitleRef(XDDFChartData.Series series) {
+        try {
+            java.lang.reflect.Method m = XDDFChartData.Series.class.getDeclaredMethod("getSeriesText");
+            m.setAccessible(true);
+            Object tx = m.invoke(series);
+            if (tx instanceof org.openxmlformats.schemas.drawingml.x2006.chart.CTSerTx ctTx) {
+                if (ctTx.isSetStrRef()) {
+                    String f = ctTx.getStrRef().getF();
+                    if (f != null && !f.isBlank()) {
+                        return f;
+                    }
+                }
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // POI surface changed — fall through to null, caller skips the write.
+        }
+        return null;
     }
 
     private static XSSFCell cellAt(XSSFSheet sheet, int rowIdx, int colIdx) {

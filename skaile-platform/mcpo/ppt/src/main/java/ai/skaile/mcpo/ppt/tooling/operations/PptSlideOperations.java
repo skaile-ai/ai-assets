@@ -77,7 +77,7 @@ public final class PptSlideOperations {
             shapeNode.put("shape_index", i++);
             shapeNode.put("shape_type", shape.getClass().getSimpleName());
             if (shape instanceof XSLFTextShape textShape) {
-                shapeNode.put("text", textShape.getText());
+                shapeNode.put("text", PptSlideBuilder.visibleText(textShape));
             }
             if (shape instanceof XSLFTable table) {
                 shapeNode.put("rows", table.getNumberOfRows());
@@ -203,8 +203,8 @@ public final class PptSlideOperations {
             if (!(shape instanceof XSLFTextShape textShape)) {
                 continue;
             }
-            String current = textShape.getText();
-            if (current == null || current.isEmpty()) {
+            String current = PptSlideBuilder.visibleText(textShape);
+            if (current.isEmpty()) {
                 continue;
             }
             int idx = current.indexOf(oldText);
@@ -249,8 +249,8 @@ public final class PptSlideOperations {
                 if (!(shape instanceof XSLFTextShape textShape)) {
                     continue;
                 }
-                String text = textShape.getText();
-                if (text == null || text.isEmpty()) {
+                String text = PptSlideBuilder.visibleText(textShape);
+                if (text.isEmpty()) {
                     continue;
                 }
                 int remaining = maxReplacements - replacementsCount;
@@ -309,11 +309,21 @@ public final class PptSlideOperations {
 
         XSLFTextShape box = slide.createTextBox();
         box.setAnchor(new Rectangle2D.Double(x, y, width, height));
-        var paragraph = box.addNewTextParagraph();
-        XSLFTextRun run = paragraph.addNewTextRun();
-        run.setText(text);
-        if (args.has("font_size")) {
-            run.setFontSize(args.path("font_size").asDouble());
+        // Split on \n so multi-line text becomes one paragraph per line — matches user
+        // intuition from Word/Docs where pressing Enter starts a new paragraph. Reuse the
+        // first paragraph POI creates with the shape; addNewTextParagraph would otherwise
+        // leave a leading empty paragraph.
+        Double fontSize = args.has("font_size") ? args.path("font_size").asDouble() : null;
+        String[] lines = text.replace("\r\n", "\n").split("\n", -1);
+        for (int i = 0; i < lines.length; i++) {
+            var paragraph = i == 0 && !box.getTextParagraphs().isEmpty()
+                    ? box.getTextParagraphs().get(0)
+                    : box.addNewTextParagraph();
+            XSLFTextRun run = paragraph.addNewTextRun();
+            run.setText(lines[i]);
+            if (fontSize != null) {
+                run.setFontSize(fontSize);
+            }
         }
 
         session.touch(true);
@@ -332,7 +342,11 @@ public final class PptSlideOperations {
         XSLFSlide slide = shapeFinder.requireSlide(session, slideIndex);
 
         XSLFNotes notes = slide.getNotes();
-        String notesText = notes == null ? "" : PptSlideBuilder.collectNotesText(notes);
+        XSLFTextShape bodyShape = notes == null ? null : findNotesBody(notes);
+        String notesText = bodyShape == null ? "" : bodyShape.getText();
+        if (notesText == null) {
+            notesText = "";
+        }
 
         ObjectNode payload = okPayload();
         payload.put("document_id", session.getId());
@@ -348,18 +362,20 @@ public final class PptSlideOperations {
         XSLFSlide slide = shapeFinder.requireSlide(session, slideIndex);
 
         String notesText = requiredString(args, "notes_text");
-        XSLFNotes notes = slide.getNotes();
+        // getNotesSlide is get-or-create: it lazily materializes a notes part (and the
+        // notes master on first use) when the slide doesn't already have one. Without
+        // this, freshly-created slides — which carry no notes until authored — would
+        // error on the very first set_slide_notes call.
+        XSLFNotes notes = session.getSlideShow().getNotesSlide(slide);
         if (notes == null) {
-            return error("Slide does not have a notes section");
+            return error("Could not initialize notes section for this slide");
         }
 
-        XSLFTextShape targetShape = null;
-        for (XSLFShape shape : notes.getShapes()) {
-            if (shape instanceof XSLFTextShape textShape) {
-                targetShape = textShape;
-                break;
-            }
-        }
+        // Target the BODY placeholder specifically. Notes slides created from the master
+        // carry date / slide-number / footer placeholders pre-populated with master
+        // prompts — writing into "the first text shape" would clobber the date placeholder
+        // and leave the master's prompts visible through get_slide_notes.
+        XSLFTextShape targetShape = findNotesBody(notes);
         if (targetShape == null) {
             targetShape = notes.createTextBox();
             targetShape.setAnchor(new Rectangle2D.Double(30, 30, 900, 120));
@@ -375,6 +391,19 @@ public final class PptSlideOperations {
         payload.put("notes_text", notesText);
         payload.put("message", "Slide notes updated");
         return success(payload);
+    }
+
+    private static XSLFTextShape findNotesBody(XSLFNotes notes) {
+        for (XSLFShape shape : notes.getShapes()) {
+            if (!(shape instanceof XSLFTextShape textShape)) {
+                continue;
+            }
+            org.apache.poi.sl.usermodel.Placeholder ph = textShape.getTextType();
+            if (ph == org.apache.poi.sl.usermodel.Placeholder.BODY) {
+                return textShape;
+            }
+        }
+        return null;
     }
 
     private ReplacementResult replaceOccurrences(

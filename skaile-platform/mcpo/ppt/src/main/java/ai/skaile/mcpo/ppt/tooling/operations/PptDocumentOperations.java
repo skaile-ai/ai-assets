@@ -517,7 +517,8 @@ public final class PptDocumentOperations {
         PptDocumentSession session = shapeFinder.requireSession(args);
 
         if (!transactions.rollback(session)) {
-            return error("No active transaction snapshot for document");
+            return error("NO_ACTIVE_TRANSACTION",
+                    "No active transaction snapshot for document", false);
         }
 
         ObjectNode payload = okPayload();

@@ -15,6 +15,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import javax.imageio.ImageIO;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.junit.jupiter.api.Test;
@@ -703,7 +705,7 @@ class PptToolServiceTest {
         formatArgs.put("slide_index", 0);
         formatArgs.put("shape_index", shapeIndex);
         formatArgs.put("text_align", "justify");
-        formatArgs.put("line_spacing", 120.0);
+        formatArgs.put("line_spacing", 1.2);
         formatArgs.put("left_margin", 10.0);
         formatArgs.put("indent", 5.0);
         ToolCallResult formatted = service.call("ppt.set_text", formatArgs);
@@ -926,7 +928,7 @@ class PptToolServiceTest {
         listArgs.put("bullet_enabled", true);
         listArgs.put("bullet_character", "•");
         listArgs.put("bullet_level", 1);
-        listArgs.put("line_spacing", 110.0);
+        listArgs.put("line_spacing", 1.1);
         listArgs.put("space_before", 2.0);
         listArgs.put("space_after", 2.0);
         ToolCallResult formatted = service.call("ppt.set_text", listArgs);
@@ -1740,6 +1742,148 @@ class PptToolServiceTest {
             assertTrue(r.success());
         } finally {
             service.closeAllSessions();
+        }
+    }
+
+    @Test
+    void getSlideContentHidesMasterPlaceholderPrompts() {
+        // POI returns "Click to edit Master title style" / "Click to edit Master subtitle
+        // style" via XSLFTextShape.getText() for empty inherited placeholders. The tool
+        // surface should expose these as "", not leak the master prompt text to agents.
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+
+            ToolCallResult content = service.call("ppt.get_slide_content", objectNode(
+                    "document_id", docId, "slide_index", 0));
+            assertTrue(content.success());
+            var shapes = content.payload().path("shapes");
+            for (int i = 0; i < shapes.size(); i++) {
+                String text = shapes.get(i).path("text").asText("");
+                assertFalse(text.startsWith("Click to "),
+                        "shape " + i + " leaked master prompt: " + text);
+            }
+
+            // get_shape_properties should also return "" for an empty title placeholder.
+            ToolCallResult props = service.call("ppt.get_shape_properties", objectNode(
+                    "document_id", docId, "slide_index", 0, "shape_index", 0));
+            assertTrue(props.success());
+            assertEquals("", props.payload().path("text").asText());
+
+            // find_text must not match against the master prompt.
+            ToolCallResult find = service.call("ppt.find_text", objectNode(
+                    "document_id", docId, "query", "Click to edit"));
+            assertTrue(find.success());
+            assertEquals(0, find.payload().path("count").asInt());
+
+            // replace_text_globally must not rewrite the prompt into real content.
+            ToolCallResult replaced = service.call("ppt.replace_text_globally", objectNode(
+                    "document_id", docId,
+                    "old_text", "Click to edit Master title style",
+                    "new_text", "HIJACKED"));
+            assertTrue(replaced.success());
+            assertEquals(0, replaced.payload().path("replacements_count").asInt());
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    @Test
+    void setTextParagraphSpacingWritesCorrectXmlUnits() throws Exception {
+        // Regression guard for the spcPct/spcPts unit bug: line_spacing is a multiplier
+        // (1.5 = 150%), space_before/space_after are in points. These map to
+        // <a:spcPct val="150000"/> (thousandths-of-percent) and <a:spcPts val="600"/>
+        // (hundredths-of-point). Earlier code passed the user value through raw and wrote
+        // <a:spcPct val="1500"/> (1.5%) / <a:spcPct val="600"/> (6% of line height).
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            assertTrue(service.call("ppt.add_textbox", objectNode(
+                    "document_id", docId, "slide_index", 0, "text", "spacing",
+                    "x", 30, "y", 30, "width", 400, "height", 80)).success());
+
+            ObjectNode args = mapper.createObjectNode();
+            args.put("document_id", docId);
+            args.put("slide_index", 0);
+            args.put("shape_index", 0);
+            args.put("line_spacing", 1.5);
+            args.put("space_before", 6.0);
+            args.put("space_after", 12.0);
+            assertTrue(service.call("ppt.set_text", args).success());
+
+            Path pptx = Files.createTempFile("ppt-mcp-spacing", ".pptx");
+            assertTrue(service.call("ppt.export_document", objectNode(
+                    "document_id", docId, "output_path", pptx.toString())).success());
+
+            String slideXml = readEntry(pptx, "ppt/slides/slide1.xml");
+            assertTrue(slideXml.contains("<a:spcPct val=\"150000\"/>"),
+                    "line_spacing=1.5 should write 150000 (150%), got: " + slideXml);
+            assertTrue(slideXml.contains("<a:spcPts val=\"600\"/>"),
+                    "space_before=6pt should write 600, got: " + slideXml);
+            assertTrue(slideXml.contains("<a:spcPts val=\"1200\"/>"),
+                    "space_after=12pt should write 1200, got: " + slideXml);
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    @Test
+    void addTextboxSplitsNewlinesIntoParagraphs() throws Exception {
+        // Regression guard: add_textbox with embedded \n should produce one paragraph per
+        // line, not one paragraph holding the whole blob. Users expect Word-style behavior.
+        PptToolService service = new PptToolService();
+        try {
+            String docId = service.call("ppt.create_document", mapper.createObjectNode())
+                    .payload().path("document_id").asText();
+            assertTrue(service.call("ppt.add_textbox", objectNode(
+                    "document_id", docId, "slide_index", 0,
+                    "text", "first\r\nsecond\nthird",
+                    "x", 30, "y", 30, "width", 400, "height", 80)).success());
+
+            Path pptx = Files.createTempFile("ppt-mcp-multiline", ".pptx");
+            assertTrue(service.call("ppt.export_document", objectNode(
+                    "document_id", docId, "output_path", pptx.toString())).success());
+
+            String slideXml = readEntry(pptx, "ppt/slides/slide1.xml");
+            // Grab the txBody from the shape marked txBox="true" so we don't read the master
+            // placeholder's prompt text by accident.
+            int txBoxSp = slideXml.indexOf("txBox=\"true\"");
+            assertTrue(txBoxSp > 0, "no txBox shape found in: " + slideXml);
+            int boxStart = slideXml.indexOf("<p:txBody>", txBoxSp);
+            int boxEnd = slideXml.indexOf("</p:txBody>", boxStart);
+            assertTrue(boxStart > 0 && boxEnd > boxStart, "txBody not found");
+            String txBody = slideXml.substring(boxStart, boxEnd);
+            int paragraphOpens = 0;
+            int from = 0;
+            while (true) {
+                int i = txBody.indexOf("<a:p>", from);
+                if (i < 0) {
+                    break;
+                }
+                paragraphOpens++;
+                from = i + 1;
+            }
+            assertEquals(3, paragraphOpens,
+                    "expected 3 <a:p> paragraphs (one per line) in: " + txBody);
+            assertTrue(txBody.contains(">first</a:t>"), txBody);
+            assertTrue(txBody.contains(">second</a:t>"), txBody);
+            assertTrue(txBody.contains(">third</a:t>"), txBody);
+        } finally {
+            service.closeAllSessions();
+        }
+    }
+
+    private static String readEntry(Path pptx, String entryName) throws Exception {
+        try (ZipFile zf = new ZipFile(pptx.toFile())) {
+            ZipEntry entry = zf.getEntry(entryName);
+            if (entry == null) {
+                throw new IllegalStateException("missing entry: " + entryName);
+            }
+            try (var in = zf.getInputStream(entry)) {
+                return new String(in.readAllBytes());
+            }
         }
     }
 

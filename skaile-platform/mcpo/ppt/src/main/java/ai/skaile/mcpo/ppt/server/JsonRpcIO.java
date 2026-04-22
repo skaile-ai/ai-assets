@@ -14,21 +14,38 @@ public final class JsonRpcIO {
     }
 
     public static byte[] readMessage(InputStream in) throws IOException {
-        String line = readLine(in);
-        while (line != null && line.isBlank()) {
-            line = readLine(in);
+        byte[] lineBytes = readLineBytes(in);
+        while (lineBytes != null && isBlankBytes(lineBytes)) {
+            lineBytes = readLineBytes(in);
         }
 
-        if (line == null) {
+        if (lineBytes == null) {
             return null;
         }
 
-        String trimmed = line.trim();
-        if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
-            return line.getBytes(StandardCharsets.UTF_8);
+        int firstNonWs = 0;
+        while (firstNonWs < lineBytes.length
+                && Character.isWhitespace((char) (lineBytes[firstNonWs] & 0xFF))) {
+            firstNonWs++;
+        }
+        if (firstNonWs < lineBytes.length
+                && (lineBytes[firstNonWs] == '{' || lineBytes[firstNonWs] == '[')) {
+            // Line-framed JSON: bytes are already the UTF-8 encoded body. Returning them as-is
+            // preserves any non-ASCII payload (e.g. bullet_character "•" encoded as E2 80 A2).
+            return lineBytes;
         }
 
-        return readFramedBody(in, line);
+        // Content-Length framing: the first line is an HTTP-style header (ASCII by spec).
+        return readFramedBody(in, new String(lineBytes, StandardCharsets.US_ASCII));
+    }
+
+    private static boolean isBlankBytes(byte[] bytes) {
+        for (byte b : bytes) {
+            if (!Character.isWhitespace((char) (b & 0xFF))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static void writeMessage(OutputStream out, byte[] body) throws IOException {
@@ -74,6 +91,11 @@ public final class JsonRpcIO {
     }
 
     private static String readLine(InputStream in) throws IOException {
+        byte[] bytes = readLineBytes(in);
+        return bytes == null ? null : new String(bytes, StandardCharsets.US_ASCII);
+    }
+
+    private static byte[] readLineBytes(InputStream in) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         while (true) {
             int b = in.read();
@@ -90,6 +112,6 @@ public final class JsonRpcIO {
                 buffer.write(b);
             }
         }
-        return buffer.toString(StandardCharsets.US_ASCII);
+        return buffer.toByteArray();
     }
 }

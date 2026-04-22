@@ -6,6 +6,7 @@ import ai.skaile.mcpo.ppt.tooling.contracts.ToolHandler;
 import ai.skaile.mcpo.ppt.tooling.infra.ColorParser;
 import ai.skaile.mcpo.ppt.tooling.infra.PptLimits;
 import ai.skaile.mcpo.ppt.tooling.infra.PptPathResolver;
+import ai.skaile.mcpo.ppt.tooling.infra.PptSlideBuilder;
 import ai.skaile.mcpo.ppt.tooling.infra.PptShapeFinder;
 import ai.skaile.mcpo.ppt.tooling.infra.PptShapeXml;
 import ai.skaile.mcpo.ppt.tooling.infra.ToolArgumentValidator;
@@ -347,7 +348,7 @@ public final class PptShapeMutationOperations {
         }
 
         if (shape instanceof XSLFTextShape textShape) {
-            payload.put("text", textShape.getText());
+            payload.put("text", PptSlideBuilder.visibleText(textShape));
         }
         if (shape instanceof XSLFSimpleShape simpleShape) {
             Color fill = simpleShape.getFillColor();
@@ -545,6 +546,11 @@ public final class PptShapeMutationOperations {
             } else {
                 parent.insertBefore(shapeNode, remaining.get(insertAt));
             }
+            // Raw DOM reordering bypasses POI's facade, so XSLFSheet._shapes keeps the
+            // pre-reorder XSLFShape list. Without invalidation, a subsequent delete_shape
+            // at a given shape_index removes the wrong shape and later getShapes() calls
+            // NPE on the now-detached XSLFShape wrappers.
+            invalidateShapeCache(slide);
             session.touch(true);
         }
 
@@ -574,8 +580,25 @@ public final class PptShapeMutationOperations {
             return error("Selected text shape has no text runs to hyperlink");
         }
 
+        // XSLFAutoShape.setText(...) produces runs whose underlying CTRegularTextRun has no
+        // rPr element yet; POI's createHyperlink() calls getRPr(true).addNewHlinkClick() on
+        // the run and NPEs when the run subclass can't supply an rPr. Guard each run so a
+        // hostile subclass skips rather than poisons the whole call.
+        int applied = 0;
         for (XSLFTextRun run : runs) {
-            run.createHyperlink().setAddress(url);
+            try {
+                org.apache.poi.xslf.usermodel.XSLFHyperlink link = run.createHyperlink();
+                if (link == null) {
+                    continue;
+                }
+                link.setAddress(url);
+                applied++;
+            } catch (RuntimeException ignored) {
+                // best-effort — continue with the remaining runs
+            }
+        }
+        if (applied == 0) {
+            return error("No text run in this shape accepted the hyperlink");
         }
 
         session.touch(true);
@@ -584,6 +607,7 @@ public final class PptShapeMutationOperations {
         payload.put("slide_index", slideIndex);
         payload.put("shape_index", shapeIndex);
         payload.put("url", url);
+        payload.put("runs_updated", applied);
         payload.put("message", "Hyperlink added");
         return success(payload);
     }

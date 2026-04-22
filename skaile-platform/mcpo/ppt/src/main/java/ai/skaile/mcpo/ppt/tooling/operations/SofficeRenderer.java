@@ -43,12 +43,38 @@ public final class SofficeRenderer {
     private static final long SOFFICE_TIMEOUT_SECONDS = 90;
     private static final Semaphore SOFFICE_SEMAPHORE = new Semaphore(1);
 
+    /**
+     * Writable home directory handed to every soffice child process. Lazily created at first
+     * use and reused process-wide. soffice stores its user profile under {@code $HOME/.config};
+     * when the container runs as a uid with no {@code /etc/passwd} entry (e.g. the documented
+     * {@code --user 1000:1000}), {@code HOME} defaults to {@code "/"} which is not writable
+     * and soffice exits 77 before doing anything. Pointing {@code HOME} at a temp dir keeps
+     * soffice working regardless of runtime uid.
+     */
+    private static volatile Path SOFFICE_HOME;
+    private static final Object SOFFICE_HOME_LOCK = new Object();
+
     private final PptPathResolver pathResolver;
     private final PptServerConfig config;
 
     public SofficeRenderer(PptPathResolver pathResolver, PptServerConfig config) {
         this.pathResolver = pathResolver;
         this.config = config;
+    }
+
+    private static Path ensureSofficeHome() throws IOException {
+        Path existing = SOFFICE_HOME;
+        if (existing != null) {
+            return existing;
+        }
+        synchronized (SOFFICE_HOME_LOCK) {
+            if (SOFFICE_HOME == null) {
+                Path dir = Files.createTempDirectory("mcpo-lo-home-");
+                dir.toFile().deleteOnExit();
+                SOFFICE_HOME = dir;
+            }
+            return SOFFICE_HOME;
+        }
     }
 
     /**
@@ -184,14 +210,23 @@ public final class SofficeRenderer {
         }
 
         try {
+            Path sofficeHome = ensureSofficeHome();
+            // -env:UserInstallation makes soffice materialize its per-user profile at a
+            // known writable path. Setting HOME alone is not enough: when the container
+            // runs with a uid that has no /etc/passwd entry (documented `--user 1000:1000`),
+            // soffice's profile-discovery ignores HOME in some code paths and falls back to
+            // "bootstrap failed" / exit 77. The file:/// URI is required by LibreOffice.
+            String userInstallationUri = sofficeHome.toUri().toString();
             ProcessBuilder pb = new ProcessBuilder(Arrays.asList(
                     config.sofficePath(),
                     "--headless",
+                    "-env:UserInstallation=" + userInstallationUri,
                     "--convert-to",
                     sofficeFormat,
                     "--outdir",
                     outputDir.toString(),
                     inputPptx.toString()));
+            pb.environment().put("HOME", sofficeHome.toString());
             pb.redirectErrorStream(true);
             Process process = pb.start();
 
@@ -225,6 +260,18 @@ public final class SofficeRenderer {
                 String output;
                 synchronized (captured) {
                     output = captured.toString().strip();
+                }
+                // Exit 77 is LibreOffice's "bootstrap failed" signal: the process never got
+                // as far as rendering, usually because the user installation could not be
+                // materialized (unwritable HOME, missing profile dir, etc.). Translate to
+                // SofficeUnavailableException so the outer handler emits SOFFICE_UNAVAILABLE
+                // rather than a raw TOOL_EXECUTION_ERROR with the exit code leaked into the
+                // message. Other non-zero exits are genuine conversion failures and keep the
+                // plain IOException path.
+                if (process.exitValue() == 77) {
+                    throw new SofficeUnavailableException(
+                            "soffice bootstrap failed (exit 77) — LibreOffice user profile could not be initialized"
+                            + (output.isEmpty() ? "" : ": " + output));
                 }
                 throw new IOException("soffice conversion failed with exit code "
                         + process.exitValue() + " (format=" + sofficeFormat + ")"

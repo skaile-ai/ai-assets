@@ -26,14 +26,22 @@ RUN apt-get update \
 
 RUN useradd --uid 10001 --create-home --shell /sbin/nologin appuser
 
+# A world-writable scratch dir for LibreOffice's user profile and Java's tmpdir.
+# Callers commonly run with `--user 1000:1000` (matches typical host uid for bind
+# mounts); that uid has no /etc/passwd entry, so `$HOME` falls back to `/` and
+# soffice exits 77 before doing anything. Pointing HOME + java.io.tmpdir at a
+# writable dir keeps the server working regardless of the runtime uid.
+RUN mkdir -p /workspace/.runtime && chmod 1777 /workspace/.runtime
+
 WORKDIR /app
 COPY --from=build /build/target/ppt-mcp-server-all.jar /app/ppt-mcp-server.jar
 
 USER 10001
+ENV HOME=/workspace/.runtime
 ENV LOG_LEVEL=INFO
 ENV SOFFICE_PATH=/usr/bin/soffice
 ENV MCPO_ALLOWED_ROOT=/workspace/resources
 ENV MCPO_TEMPLATE_DIR=/workspace/resources/.mcpo-ppt/templates
 ENV MCPO_DEFAULT_TEMPLATE_CONFIG=/workspace/resources/.mcpo-ppt/default-template.json
 
-ENTRYPOINT ["java", "-jar", "/app/ppt-mcp-server.jar"]
+ENTRYPOINT ["java", "-Djava.io.tmpdir=/workspace/.runtime", "-jar", "/app/ppt-mcp-server.jar"]

@@ -34,6 +34,17 @@ class JsonRpcIOTest {
     }
 
     @Test
+    void readsLineDelimitedJsonWithMultibyteUtf8() throws Exception {
+        // Regression: bullet character "•" (U+2022 → UTF-8 E2 80 A2) used to be decoded as
+        // US_ASCII in readLine, emerging on the server side as three U+FFFD replacements.
+        byte[] input = "{\"bullet\":\"•\"}\n".getBytes(StandardCharsets.UTF_8);
+
+        byte[] message = JsonRpcIO.readMessage(new ByteArrayInputStream(input));
+
+        assertArrayEquals("{\"bullet\":\"•\"}".getBytes(StandardCharsets.UTF_8), message);
+    }
+
+    @Test
     void writesLineDelimitedJsonMessageByDefault() throws Exception {
         byte[] body = "{\"jsonrpc\":\"2.0\",\"result\":{}}".getBytes(StandardCharsets.UTF_8);
         ByteArrayOutputStream out = new ByteArrayOutputStream();

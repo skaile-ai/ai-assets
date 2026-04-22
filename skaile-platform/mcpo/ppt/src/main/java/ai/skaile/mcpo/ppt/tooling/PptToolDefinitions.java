@@ -400,7 +400,7 @@ final class PptToolDefinitions {
                                 }
                                 """),
                 tool(mapper, "ppt.set_text",
-                        "Unified text mutation. scope=shape|run|paragraph selects the target; run-style fields (bold/italic/underline/strikethrough/font_*) apply to the selected runs; rotation and auto_fit apply to the shape body; paragraph-style fields (text_align/line_spacing/bullet_*) apply to the matching paragraphs.",
+                        "Unified text mutation. scope=shape|run|paragraph selects the target; run-style fields (bold/italic/underline/strikethrough/font_*) apply to the selected runs; rotation and auto_fit apply to the shape body; paragraph-style fields (text_align/line_spacing/bullet_*) apply to the matching paragraphs. Units: font_size in points, line_spacing as multiplier (1.0=single, 1.5=150%), space_before/space_after in points, left_margin/indent in points, rotation in degrees.",
                         """
                                 {
                                     "type": "object",

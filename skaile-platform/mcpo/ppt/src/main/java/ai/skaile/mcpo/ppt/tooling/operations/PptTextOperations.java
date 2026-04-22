@@ -5,6 +5,7 @@ import ai.skaile.mcpo.ppt.tooling.contracts.ToolCallResult;
 import ai.skaile.mcpo.ppt.tooling.contracts.ToolHandler;
 import ai.skaile.mcpo.ppt.tooling.infra.ColorParser;
 import ai.skaile.mcpo.ppt.tooling.infra.PptShapeFinder;
+import ai.skaile.mcpo.ppt.tooling.infra.PptSlideBuilder;
 import ai.skaile.mcpo.ppt.tooling.infra.ToolResponseFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -206,13 +207,17 @@ public final class PptTextOperations {
                 paragraph.setIndent(indent);
             }
             if (lineSpacing != null) {
-                paragraph.setLineSpacing(lineSpacing);
+                // User passes a multiplier (1.0 = single, 1.5 = 150%); POI's setLineSpacing
+                // expects positive = percent, so 1.5 -> 150.0 -> <a:spcPct val="150000"/>.
+                paragraph.setLineSpacing(lineSpacing * 100.0);
             }
             if (spaceBefore != null) {
-                paragraph.setSpaceBefore(spaceBefore);
+                // User passes points (6.0 = 6pt); POI's convention is negative = -points, so
+                // -6.0 -> <a:spcPts val="600"/>.
+                paragraph.setSpaceBefore(-spaceBefore);
             }
             if (spaceAfter != null) {
-                paragraph.setSpaceAfter(spaceAfter);
+                paragraph.setSpaceAfter(-spaceAfter);
             }
         }
         return null;
@@ -298,8 +303,8 @@ public final class PptTextOperations {
             return new RunSelection(null, 0, 0,
                     responseFactory.error("VALIDATION_ERROR", "occurrence must be >= 1", false));
         }
-        String sourceText = textShape.getText();
-        if (sourceText == null || sourceText.isBlank()) {
+        String sourceText = PptSlideBuilder.visibleText(textShape);
+        if (sourceText.isBlank()) {
             return new RunSelection(null, 0, 0,
                     responseFactory.error("Selected text shape is empty"));
         }

@@ -6,6 +6,7 @@ import ai.skaile.mcpo.ppt.tooling.contracts.ToolHandler;
 import ai.skaile.mcpo.ppt.tooling.infra.PptLimits;
 import ai.skaile.mcpo.ppt.tooling.infra.PptPathResolver;
 import ai.skaile.mcpo.ppt.tooling.infra.PptShapeFinder;
+import ai.skaile.mcpo.ppt.tooling.infra.PptSlideBuilder;
 import ai.skaile.mcpo.ppt.tooling.infra.ToolArgumentValidator;
 import ai.skaile.mcpo.ppt.tooling.infra.ToolResponseFactory;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -226,8 +227,8 @@ public final class PptRenderOperations {
                 if (!(shape instanceof XSLFTextShape textShape)) {
                     continue;
                 }
-                String text = textShape.getText();
-                if (text == null || text.isBlank()) {
+                String text = PptSlideBuilder.visibleText(textShape);
+                if (text.isBlank()) {
                     continue;
                 }
 
@@ -278,9 +279,13 @@ public final class PptRenderOperations {
                 }
             }
             if (shape instanceof XSLFTextShape textShape) {
+                // Count text-bearing shapes regardless of placeholder status (an empty
+                // title placeholder still counts as a text shape), but exclude POI's
+                // inherited "Click to edit..." prompts from the character / word stats
+                // so get_slide_metrics measures authored content, not master prompts.
                 textShapeCount++;
                 String text = textShape.getText();
-                if (text != null && !text.isBlank()) {
+                if (text != null && !text.isBlank() && !PptSlideBuilder.isPlaceholderPrompt(text)) {
                     String normalized = text.trim().replaceAll("\\s+", " ");
                     textChars += normalized.length();
                     wordCount += normalized.split(" ").length;
@@ -320,7 +325,12 @@ public final class PptRenderOperations {
 
     private void renderSlideToRaster(XSLFSlide slide, Path outputPath, int width, int height,
             Dimension pageSize, String format) throws IOException {
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        // JPEG has no alpha channel — ImageIO.write silently returns false for an ARGB
+        // BufferedImage and produces a zero-byte file. Use TYPE_INT_RGB for jpg/jpeg so
+        // the write path picks up a real JPEGImageWriter.
+        boolean opaque = "jpg".equalsIgnoreCase(format) || "jpeg".equalsIgnoreCase(format);
+        BufferedImage image = new BufferedImage(width, height,
+                opaque ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB);
         var graphics = image.createGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -329,7 +339,9 @@ public final class PptRenderOperations {
         graphics.scale(width / (double) pageSize.width, height / (double) pageSize.height);
         slide.draw(graphics);
         graphics.dispose();
-        javax.imageio.ImageIO.write(image, format, outputPath.toFile());
+        if (!javax.imageio.ImageIO.write(image, format, outputPath.toFile())) {
+            throw new IOException("No ImageIO writer available for format: " + format);
+        }
     }
 
     private void renderSlideToSvg(XSLFSlide slide, Path outputPath, int width, int height,

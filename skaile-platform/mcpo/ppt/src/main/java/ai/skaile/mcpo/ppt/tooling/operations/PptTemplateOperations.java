@@ -239,6 +239,12 @@ public final class PptTemplateOperations {
         }
 
         XMLSlideShow show = loadTemplateOrBlank("");
+        // Keep the template's masters/layouts but discard any pre-existing content slides
+        // so N top-level `#` headings produce exactly N slides — callers expect the
+        // template to supply styling, not a leading placeholder slide.
+        for (int i = show.getSlides().size() - 1; i >= 0; i--) {
+            show.removeSlide(i);
+        }
         List<String> lines = Arrays.asList(markdown.split("\\r?\\n"));
         XSLFSlide current = null;
         StringBuilder body = new StringBuilder();
