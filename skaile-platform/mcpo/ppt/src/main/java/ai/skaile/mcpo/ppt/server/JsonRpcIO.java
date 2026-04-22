@@ -10,6 +10,12 @@ public final class JsonRpcIO {
     private static final boolean LEGACY_FRAMED_STDIO = Boolean.parseBoolean(
             System.getenv().getOrDefault("MCPO_STDIO_FRAMED", "false"));
 
+    // Defensive cap on Content-Length-framed bodies. Untrusted senders could otherwise
+    // claim an arbitrarily large length and force readNBytes to allocate unbounded
+    // heap before the body even arrives. 64 MiB is well above any realistic JSON-RPC
+    // payload the tool surface produces (image bytes are referenced by path, not inline).
+    private static final int MAX_FRAMED_CONTENT_LENGTH = 64 * 1024 * 1024;
+
     private JsonRpcIO() {
     }
 
@@ -81,6 +87,10 @@ public final class JsonRpcIO {
 
         if (contentLength < 0) {
             throw new IOException("Missing Content-Length header");
+        }
+        if (contentLength > MAX_FRAMED_CONTENT_LENGTH) {
+            throw new IOException("Content-Length " + contentLength
+                    + " exceeds maximum " + MAX_FRAMED_CONTENT_LENGTH);
         }
 
         byte[] body = in.readNBytes(contentLength);

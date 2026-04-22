@@ -189,9 +189,6 @@ public final class PptChartOperations {
                             + seriesInput.size() + " provided", false);
         }
 
-        int expectedValueCount = flatSeries.isEmpty()
-                ? 0
-                : flatSeries.get(0).getValuesData().getPointCount();
         for (int i = 0; i < seriesInput.size(); i++) {
             JsonNode values = seriesInput.get(i).path("values");
             if (!values.isArray()) {

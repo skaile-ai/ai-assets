@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public final class McpServer {
     private static final Logger LOG = LoggerFactory.getLogger(McpServer.class);
     private static final String SERVER_NAME = "skaile-ppt-poi-mcp";
-    private static final String SERVER_VERSION = "0.1.0";
+    private static final String SERVER_VERSION = "1.0.0";
     private final ObjectMapper mapper = new ObjectMapper();
     private final PptToolService toolService = new PptToolService();
 

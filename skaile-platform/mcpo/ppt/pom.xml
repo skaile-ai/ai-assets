@@ -5,7 +5,7 @@
 
   <groupId>ai.skaile.mcpo</groupId>
   <artifactId>ppt-mcp-server</artifactId>
-  <version>0.1.0</version>
+  <version>1.0.0</version>
   <name>ppt-mcp-server</name>
   <description>Stateful MCP server for PowerPoint using Apache POI</description>
 

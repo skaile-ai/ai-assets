@@ -55,7 +55,6 @@ public final class PptDocumentOperations {
     private final ToolResponseFactory responseFactory;
     private final PptPathResolver pathResolver;
     private final PptShapeFinder shapeFinder;
-    private final PptLimits limits;
     private final PptTransactionManager transactions;
     private final PptTemplateOperations templates;
     private final SofficeRenderer sofficeRenderer;
@@ -77,7 +76,6 @@ public final class PptDocumentOperations {
         this.responseFactory = responseFactory;
         this.pathResolver = pathResolver;
         this.shapeFinder = shapeFinder;
-        this.limits = limits;
         this.transactions = transactions;
         this.templates = templates;
         this.sofficeRenderer = sofficeRenderer;

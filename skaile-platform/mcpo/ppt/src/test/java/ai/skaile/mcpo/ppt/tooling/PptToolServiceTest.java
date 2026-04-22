@@ -1034,7 +1034,6 @@ class PptToolServiceTest {
             CountDownLatch start = new CountDownLatch(1);
             List<Future<Boolean>> results = new ArrayList<>();
             for (int w = 0; w < workers; w++) {
-                final int workerId = w;
                 results.add(pool.submit(() -> {
                     start.await();
                     for (int i = 0; i < iterations; i++) {
@@ -1107,9 +1106,6 @@ class PptToolServiceTest {
 
     @Test
     void savePdfReturnsSofficeUnavailableWhenBinaryMissing() throws Exception {
-        // With SOFFICE_PATH pointing nowhere, the probe returns unavailable and the PDF
-        // branch must short-circuit to a structured error instead of throwing.
-        String previousPath = System.getenv("SOFFICE_PATH");
         // We cannot mutate the process env from Java portably, but we can reset the probe
         // cache and depend on the shipped resolver: if no soffice is on PATH, the probe
         // fails; else this test is a no-op.
@@ -1148,7 +1144,7 @@ class PptToolServiceTest {
             ToolCallResult result = service.call("ppt.capabilities", mapper.createObjectNode());
             assertTrue(result.success());
             var payload = result.payload();
-            assertEquals("0.1.0", payload.path("server_version").asText());
+            assertEquals("1.0.0", payload.path("server_version").asText());
             assertFalse(payload.path("poi_version").asText().isBlank());
             assertFalse(payload.path("java_version").asText().isBlank());
             assertTrue(payload.path("supported_input_formats").isArray());
@@ -3044,9 +3040,6 @@ class PptToolServiceTest {
             args.put("slide_index", 0);
             args.put("shape_index", idx);
             args.put("font_size", 0.5);
-            // Schema minimum is an integer so use 1 for schema-pass + runtime-validate by
-            // supplying a negative paragraph_index instead: covers both branches.
-            ToolCallResult r1 = service.call("ppt.set_text", args);
             // Either VALIDATION_ERROR (schema) or tool-level error — both are negative outcomes.
             // Test the not-text-shape branch by inserting an image and targeting it.
             java.nio.file.Path img;

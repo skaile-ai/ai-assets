@@ -70,10 +70,33 @@ public final class SofficeRenderer {
         synchronized (SOFFICE_HOME_LOCK) {
             if (SOFFICE_HOME == null) {
                 Path dir = Files.createTempDirectory("mcpo-lo-home-");
-                dir.toFile().deleteOnExit();
+                // File.deleteOnExit() only removes empty directories, so it would leave the
+                // soffice user profile behind. Register an explicit shutdown hook that walks
+                // the tree in reverse order. Best-effort: a hard kill (SIGKILL) still leaks.
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> deleteRecursivelyQuietly(dir),
+                        "mcpo-lo-home-cleanup"));
                 SOFFICE_HOME = dir;
             }
             return SOFFICE_HOME;
+        }
+    }
+
+    // Package-private for direct coverage in SofficeRendererTest — the
+    // shutdown-hook caller only runs during JVM teardown.
+    static void deleteRecursivelyQuietly(Path root) {
+        if (root == null || !Files.exists(root)) {
+            return;
+        }
+        try (var stream = Files.walk(root)) {
+            stream.sorted(java.util.Comparator.reverseOrder()).forEach(p -> {
+                try {
+                    Files.deleteIfExists(p);
+                } catch (IOException ignored) {
+                    // Best-effort on shutdown.
+                }
+            });
+        } catch (IOException ignored) {
+            // Best-effort on shutdown.
         }
     }
 

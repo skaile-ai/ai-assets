@@ -60,7 +60,6 @@ public final class PptToolService {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final SessionStore store = new SessionStore();
-    private final PptServerConfig config;
     private final PptPathResolver pathResolver;
     private final ToolResponseFactory responseFactory;
     private final ToolArgumentValidator argumentValidator;
@@ -88,7 +87,6 @@ public final class PptToolService {
     }
 
     public PptToolService(PptServerConfig config) {
-        this.config = config;
         this.pathResolver = new PptPathResolver(config.allowedRoot());
         this.responseFactory = new ToolResponseFactory(mapper);
         this.argumentValidator = new ToolArgumentValidator(mapper);
@@ -201,6 +199,11 @@ public final class PptToolService {
         }
         Optional<PptDocumentSession> maybe = store.get(idNode.asText());
         if (maybe.isEmpty()) {
+            // Intentional: no lock to acquire. The handler will re-resolve the session via
+            // PptShapeFinder and raise DOCUMENT_NOT_FOUND, which the catch block translates.
+            // Any future handler that mutates process-wide state on a missing-session path
+            // must serialize itself — the per-session lock cannot cover a session that
+            // doesn't exist.
             return handler.handle(arguments);
         }
         ReentrantLock lock = maybe.get().getLock();

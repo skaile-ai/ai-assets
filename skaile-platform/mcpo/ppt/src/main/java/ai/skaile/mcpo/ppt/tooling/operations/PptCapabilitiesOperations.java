@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class PptCapabilitiesOperations {
     private static final Logger LOG = LoggerFactory.getLogger(PptCapabilitiesOperations.class);
-    private static final String SERVER_VERSION = "0.1.0";
+    private static final String SERVER_VERSION = "1.0.0";
 
     private final ToolResponseFactory responseFactory;
     private final PptServerConfig config;

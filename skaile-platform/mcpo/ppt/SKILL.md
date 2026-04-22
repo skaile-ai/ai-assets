@@ -2,8 +2,9 @@
 name: "ppt-mcp-server"
 description: "Use when an agent needs to author, modify, review, render, or export PowerPoint (.pptx / .pptm) decks — create/open/close documents, add/duplicate/delete/reorder slides, edit text (with run/paragraph/shape scope + styling), insert images with picture effects, add/edit tables (incl. merge + per-cell borders), draw shapes (solid/gradient/pattern fills), update chart data in existing charts, render slides to PNG/JPG/SVG at low or high fidelity, and export to PPTX/PDF/HTML/PNG-batch/JPG-batch/SVG-batch/outline-text. Invoke via the `ppt-mcp:dev` Docker MCP server over stdio."
 metadata:
-  stage: "stable"
   version: "1.0.0"
+  source: "skaile-platform/mcpo/ppt"
+  stage: "stable"
   tags: [powerpoint, pptx, mcp, rendering, apache-poi, libreoffice]
   env_vars:
     MCPO_ALLOWED_ROOT: "Required inside Docker. Sandbox root under which every path argument must resolve. Default in the shipped image: /workspace/resources."
@@ -79,18 +80,18 @@ Invoke this skill when the agent's task involves any of:
 
 See `README.md` for the authoritative catalog with argument schemas. The 52 tools group as:
 
-- **Document lifecycle (5):** create, open, close, get info, export.
+- **Document lifecycle (8):** `create_document`, `open_document`, `close_document`, `export_document`, `get_document_info`, `set_document_metadata`, `merge_presentations`, `generate_presentation`.
 - **Page setup (1):** preset + custom dimensions.
-- **Slide management (6):** list, add, duplicate, delete, reorder, merge from another deck.
+- **Slide management (5):** list, add, duplicate, delete, reorder.
 - **Slide content (7):** get content, update/replace text, textbox, unified `set_text`, notes.
 - **Media (3):** insert/replace image, picture effects (crop/alpha/recolor).
 - **Tables (3):** add, get, unified edit (set cell, insert/delete row/col, row height/col width, header style, merge cells, cell border).
 - **Charts (2):** list, update data (series + categories). Creation is v2.
 - **Shapes & styling (10):** add, move, resize, clone any shape, delete, get properties, set style (solid/gradient/pattern/none fills), set z-order, add hyperlink, set slide background.
-- **Layout & metadata (2):** set slide layout, set document metadata.
+- **Layout (1):** set slide layout.
 - **Rendering (2):** render single slide, render all. Dual-fidelity.
 - **Search & metrics (2):** find text, slide metrics.
-- **Templates & generation (5):** upload, set/get default, generate from titles, import markdown outline.
+- **Templates (4):** upload, set default, get default, import markdown outline.
 - **Transactions (3):** begin, commit, rollback.
 - **Capabilities (1):** self-describe — versions, formats, installed fonts, feature flags, safety limits.
 
@@ -188,3 +189,28 @@ Enforced server-side and surfaced via `ppt.capabilities.limits`:
 - **High-fidelity CJK or emoji text renders as tofu:** fonts weren't baked into the image. The shipped `Dockerfile` installs `fonts-noto fonts-noto-cjk fonts-noto-color-emoji fonts-liberation` — verify the image was built from the shipped Dockerfile.
 - **`ppt.export_document format=pptx` can't overwrite a host file:** the container isn't running as a user that can replace the file. Add `--user 1000:1000` (or match your host UID).
 - **Concurrent calls on the same `document_id` appear to serialize:** by design. POI's `XMLSlideShow` DOM is not thread-safe, so a per-session `ReentrantLock` guards every call. Concurrent calls on *different* `document_id` values run in parallel.
+
+## Contract
+
+- **ROLE:** Expose PowerPoint (.pptx / .pptm) authoring, inspection, rendering, and export as JSON-RPC tools over stdio. Stateful — one `document_id` handle per open deck, scoped to the container process.
+- **READS:**
+  - `.pptx` / `.pptm` files under `MCPO_ALLOWED_ROOT` (via `ppt.open_document`, `ppt.merge_presentations`).
+  - Image files under `MCPO_ALLOWED_ROOT` (via `ppt.insert_image`, `ppt.replace_image`).
+  - Template files under `MCPO_TEMPLATE_DIR` and the default-template pointer at `MCPO_DEFAULT_TEMPLATE_CONFIG`.
+  - Markdown outlines under `MCPO_ALLOWED_ROOT` (via `ppt.import_markdown_outline`).
+- **WRITES:**
+  - Exported artefacts (`pptx`, `pdf`, `html`, `png_batch`, `jpg_batch`, `svg_batch`, `outline_text`) to paths under `MCPO_ALLOWED_ROOT`.
+  - Rendered slide images (`png`, `jpg`, `svg`) to paths under `MCPO_ALLOWED_ROOT`.
+  - Uploaded templates into `MCPO_TEMPLATE_DIR`; default-template pointer into `MCPO_DEFAULT_TEMPLATE_CONFIG`.
+  - Ephemeral scratch files in the sandbox tmp directory; cleaned on normal exit.
+- **MUST:**
+  - Call `ppt.capabilities` at session start and branch on `feature_flags.high_fidelity_render` / `feature_flags.charts_update` before using `fidelity=high` or `ppt.update_chart_data`.
+  - Always pass container-local paths (under `/workspace/resources` in the shipped image), never host paths.
+  - Bind-mount the host workspace to `/workspace/resources:rw` and run with `--user 1000:1000` (or matching host uid) so `ppt.export_document` can atomically replace files.
+  - Call `ppt.export_document` before exit — handles are in-memory and vanish when the container stops.
+  - Honour the uniform response envelope (`status`, `code`, `error`, `retriable`, `correlation_id`, `tool_name`, `data`). Do not auto-retry: `retriable` is always `false` in v1.
+- **NEVER:**
+  - Parallelise calls on the same `document_id`. Different `document_id`s are fine.
+  - Attempt to author new charts from scratch, edit animations/transitions/slide-master/theme, add SmartArt/comments/video/audio, or inspect VBA — all out of scope for v1.
+  - Open legacy `.ppt` (binary) or `.odp` input.
+  - Assume the handle persists across `docker run` invocations — it does not.

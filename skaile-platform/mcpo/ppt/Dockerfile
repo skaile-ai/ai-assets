@@ -1,12 +1,17 @@
 # syntax=docker/dockerfile:1
 
 # ---- build stage ----
+# Uses the Maven Wrapper pinned in .mvn/wrapper/maven-wrapper.properties so image
+# builds and local `./mvnw` builds resolve the same Maven version. The base image
+# supplies a JDK + network egress for the wrapper to download its pinned Maven.
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /build
+COPY mvnw .
+COPY .mvn ./.mvn
 COPY pom.xml .
-RUN mvn -B -q -e dependency:go-offline
+RUN ./mvnw -B -q -e dependency:go-offline
 COPY src ./src
-RUN mvn -B -q -e -DskipTests package
+RUN ./mvnw -B -q -e -DskipTests package
 
 # ---- runtime stage ----
 FROM eclipse-temurin:21-jre-jammy

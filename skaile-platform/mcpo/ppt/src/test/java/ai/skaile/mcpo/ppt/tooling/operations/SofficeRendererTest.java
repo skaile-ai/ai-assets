@@ -147,6 +147,21 @@ final class SofficeRendererTest {
         assertNoStaleTempFiles();
     }
 
+    @Test
+    void deleteRecursivelyQuietlyRemovesTreeAndToleratesMissingInput() throws Exception {
+        Path root = Files.createTempDirectory("mcpo-del-rec-");
+        Path sub = Files.createDirectories(root.resolve("a/b"));
+        Files.writeString(sub.resolve("leaf.txt"), "x");
+        Files.writeString(root.resolve("top.txt"), "y");
+
+        SofficeRenderer.deleteRecursivelyQuietly(root);
+        assertFalse(Files.exists(root), "root and all descendants must be deleted");
+
+        // Null + non-existent paths must be safe (shutdown-hook contract: best-effort).
+        SofficeRenderer.deleteRecursivelyQuietly(null);
+        SofficeRenderer.deleteRecursivelyQuietly(root.resolve("never-created"));
+    }
+
     private void assertNoStaleTempFiles() throws Exception {
         Path tmpDir = sandboxRoot.resolve(PptPathResolver.SANDBOX_TMP_SUBDIR);
         if (!Files.exists(tmpDir)) {
