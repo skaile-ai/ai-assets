@@ -119,6 +119,7 @@ MUST  create a git branch before implementing (via git skill)
 NEVER implement across packages without reading each package's CLAUDE.md
 NEVER skip the plan phase for standard or large complexity
 NEVER commit to main directly — always use a feature branch
+NEVER run Biome (biome format / biome lint / bun run format) inside platform/ — platform uses Prettier + ESLint; run bun run lint from within platform/backend or platform/frontend instead
 
 EMIT [implement] started task=<slug> packages=<list> complexity=<tier>
 

@@ -134,3 +134,4 @@ question about any skaile-dev package, and you have provided a resolved answer.
 - Never advise on platform backend patterns without reading `platform/CLAUDE.md` first
 - Never route to a `skailup-*` skill for quality work in the monorepo — use the local skaile-development skills instead
 - Never mark work "done" until tests + audit + docs are in a consistent state
+- **Never run Biome on `platform/`.** Platform uses Prettier + ESLint. Running `biome format` or `biome lint` against `platform/` files rewrites them in the wrong style. When working in platform, use `bun run lint` (ESLint) inside the relevant subpackage.
