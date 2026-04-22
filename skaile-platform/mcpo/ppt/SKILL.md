@@ -3,7 +3,6 @@ name: "ppt-mcp-server"
 description: "Use when an agent needs to author, modify, review, render, or export PowerPoint (.pptx / .pptm) decks — create/open/close documents, add/duplicate/delete/reorder slides, edit text (with run/paragraph/shape scope + styling), insert images with picture effects, add/edit tables (incl. merge + per-cell borders), draw shapes (solid/gradient/pattern fills), update chart data in existing charts, render slides to PNG/JPG/SVG at low or high fidelity, and export to PPTX/PDF/HTML/PNG-batch/JPG-batch/SVG-batch/outline-text. Invoke via the `ppt-mcp:dev` Docker MCP server over stdio."
 metadata:
   version: "1.0.0"
-  source: "skaile-platform/mcpo/ppt"
   stage: "stable"
   tags: [powerpoint, pptx, mcp, rendering, apache-poi, libreoffice]
   env_vars:
