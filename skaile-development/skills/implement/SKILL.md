@@ -116,10 +116,12 @@ MUST  run audit scope=diff after tests pass (gate Phase 5 on audit ≠ fail)
 MUST  run doc --mode update after any public API or structure change
 MUST  add a devlog entry after every completed implementation
 MUST  create a git branch before implementing (via git skill)
+MUST  verify platform/backend starts (bun run dev) after any structural backend change before marking the phase complete — structural changes include: new @Injectable service, constructor parameter changes, *.module.ts providers/imports/exports changes, import path changes in a service or module
 NEVER implement across packages without reading each package's CLAUDE.md
 NEVER skip the plan phase for standard or large complexity
 NEVER commit to main directly — always use a feature branch
 NEVER run Biome (biome format / biome lint / bun run format) inside platform/ — platform uses Prettier + ESLint; run bun run lint from within platform/backend or platform/frontend instead
+NEVER create barrel index.ts files in platform/backend/libs/ — import directly via subpath alias (@lib/file) instead; barrel files break NestJS DI module boundaries (exception: PostXL-generated barrels tracked in postxl-lock.json)
 
 EMIT [implement] started task=<slug> packages=<list> complexity=<tier>
 
@@ -246,6 +248,38 @@ STEP 8: Run tests
 CHECKPOINT tests_passed
   > "All tests passing. Running diff-scoped audit before doc sync."
 
+# ── Phase 4a: Backend Start Verification ────────────────────────────
+
+STEP 8a: Verify platform/backend starts (conditional)
+  IF any structural platform/backend change was made in this implementation — i.e., any of:
+    - New or modified `@Injectable()` or `@Module()` class
+    - Constructor parameter added, removed, or retyped in a service
+    - `providers:`, `imports:`, or `exports:` arrays changed in `*.module.ts`
+    - Import paths changed in a service or module file
+
+  THEN:
+    RUN in background (15 s timeout): cd platform/backend && bun run dev
+    Watch for startup success ("Nest application successfully started") or an exception.
+
+    IF port 3001 already in use:
+      ASK:
+        > "Port 3001 is in use. Choose:
+        >   1. Use kill-backend skill to free it, then retry
+        >   2. Kill it manually — confirm when done
+        >   3. Skip verification and proceed"
+      HANDLE response (retry on options 1/2; skip on option 3).
+
+    IF NestJS DI error / unresolved dependency exception before startup banner:
+      Terminate dev process.
+      STOP: "Backend failed to start: <error summary>. Fix the DI error before proceeding."
+      Fix the issue, re-run tests (STEP 8), then re-run this step.
+
+    IF startup banner appears:
+      Terminate dev process.
+      > "Backend starts cleanly."
+
+EMIT [implement] backend_start_verified
+
 # ── Phase 4b: Audit (scope=diff) ──────────────────────────────────
 
 STEP 8b: Run audit on the diff
@@ -332,6 +366,7 @@ CHECKLIST
   - [ ] Git branch created (never commit to main)
   - [ ] Spec compliance review run for every task
   - [ ] Full test suite passing before audit
+  - [ ] Backend start verified (or explicitly skipped) if structural platform/backend changes made
   - [ ] audit scope=diff run and verdict ≠ fail before docs sync
   - [ ] doc --mode update run after any public API change
   - [ ] Devlog entry written

@@ -40,6 +40,8 @@ Every finding MUST include:
 - Missing DTO validation (`@ValidationPipe()`, `class-validator` decorators)
 - Inject-by-token drift (`@Inject('TOKEN')` vs. provider token)
 - Circular module dependencies
+- Barrel file in `libs/*/src/index.ts` that re-exports from sibling modules (anti-pattern: breaks DI module boundaries; only PostXL-generated barrels tracked in `postxl-lock.json` are allowed)
+- Import from a bare lib alias (`from '@credential'`, `from '@session'`) instead of a direct subpath import (`from '@credential/credential.service'`)
 
 ### React (platform/frontend)
 

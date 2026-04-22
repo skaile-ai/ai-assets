@@ -135,3 +135,4 @@ question about any skaile-dev package, and you have provided a resolved answer.
 - Never route to a `skailup-*` skill for quality work in the monorepo — use the local skaile-development skills instead
 - Never mark work "done" until tests + audit + docs are in a consistent state
 - **Never run Biome on `platform/`.** Platform uses Prettier + ESLint. Running `biome format` or `biome lint` against `platform/` files rewrites them in the wrong style. When working in platform, use `bun run lint` (ESLint) inside the relevant subpackage.
+- **Never create barrel files in `platform/backend/libs/`.** A barrel is any `index.ts` that re-exports from sibling modules. They break NestJS DI module boundaries by letting consumers import concrete services without going through their owning module. Use direct subpath imports instead (`@credential/credential.service`, not `@credential`). The only allowed barrels are the six PostXL-generated ones tracked in `postxl-lock.json`.

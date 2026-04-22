@@ -106,6 +106,7 @@ MUST  require typed confirmation for destructive operations (force-delete, disca
 MUST  write git-state.json when branch or worktree is created
 MUST  run full test suite before any merge to main
 MUST  include the ---agent--- YAML block in every commit to main
+MUST  verify platform/backend starts before committing any structural backend change — see STEP 1b in commit mode
 NEVER force-push or rewrite published history
 NEVER merge to main without tests passing
 NEVER delete a branch without typed confirmation
@@ -127,6 +128,41 @@ IF mode = commit
     2. Identify the packages modified by mapping changed file paths to their package roots (e.g. `agent-framework/session/src/foo.ts` -> `agent-framework/session`).
     3. For each modified package, read its `CLAUDE.md` to understand architecture and conventions.
     4. Identify downstream packages that import from or depend on the modified packages — these are candidates for the `affects` field.
+
+  STEP 1b: Backend start verification (conditional)
+    Scan the diff for structural platform/backend changes — any of:
+    - New or modified `@Injectable()` / `@Module()` class
+    - Constructor parameter added, removed, or retyped in a service
+    - `providers:`, `imports:`, or `exports:` arrays changed in a `*.module.ts`
+    - Import paths changed in a service or module file
+
+    IF none of the above → skip this step.
+
+    IF structural change detected:
+      > "Structural backend change detected — verifying the backend starts."
+      RUN in background (15 s timeout): cd platform/backend && bun run dev
+      Watch stdout for either a startup success banner ("Nest application successfully started")
+      or an exception / unresolved dependency error.
+
+      IF port already in use (EADDRINUSE / port 3001 blocked):
+        ASK:
+          > "Port 3001 is in use. Choose:
+          >   1. Use kill-backend skill to free it, then retry
+          >   2. Kill it manually — confirm when done
+          >   3. Skip verification and commit anyway"
+        HANDLE response:
+          - option 1: RUN kill-backend skill, then retry the dev start
+          - option 2: wait for user confirmation, then retry
+          - option 3: proceed to STEP 2 without verification
+
+      IF NestJS DI error or exception before startup banner:
+        Terminate dev process.
+        STOP: "Backend failed to start: <error summary>. Fix the DI error before committing."
+
+      IF startup banner appears:
+        Terminate dev process.
+        > "Backend starts cleanly. Proceeding."
+        Continue to STEP 2.
 
   STEP 2: Analyze Changes
     For each modified package:
@@ -574,6 +610,7 @@ CHECKLIST
   - [ ] git-state.json written/updated
   - [ ] deploy mode only runs from main (or after explicit merge-to-main)
   - [ ] stash popped after deploy (even on failure)
+  - [ ] Backend start verified (or explicitly skipped) when structural platform/backend changes are present
 
 ---
 
