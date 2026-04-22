@@ -174,9 +174,14 @@ IF mode = run
 
   STEP 2: Execute
     FOR EACH package in scope:
-      - $ <run command for package> [--reporter=verbose] [--testNamePattern=<filter>]
+      - $ <run command for package> [--reporter=verbose] [--testNamePattern=<filter>] 2>&1 | tail -80
       - Capture: total, passed, failed, skipped, duration
       EMIT [test] package_result package=<name> total=<n> passed=<n> failed=<n>
+
+    COMPACT CHECKPOINT (every 3 packages or when scope=all):
+      After completing each group of 3 packages, pause and call /compact before
+      continuing. This prevents context from growing unboundedly across many test
+      iterations and is the single most impactful token-saving action in this skill.
 
   STEP 3: Triage failures
     FOR EACH failing test:
@@ -245,6 +250,13 @@ IF mode = construct
 
     Only fall through to the legacy in-place construction below when the user
     explicitly wants a quick one-file addition in an already-configured package.
+
+    DISPATCH HYGIENE (construct mode):
+      When scope covers multiple packages, do NOT dispatch one agent per package
+      sequentially. Group packages by L-layer (see CLAUDE.md layer table) and
+      dispatch one agent per layer group in parallel. Apply MVC prompts: each
+      agent receives only its package's CLAUDE.md excerpt and the relevant source
+      files — not the full parent context. See references/sub-agent-dispatch.md.
 
   STEP 0.5: Patterns new tests MUST follow
 
@@ -399,41 +411,64 @@ CHECKLIST
 
 ---
 
+## Token Hygiene (read before running)
+
+Test runs are the largest single driver of context growth. Follow these rules to
+keep sessions from ballooning:
+
+**Truncate output.** Every test run appends to context. Always pipe to `| tail -80`
+unless you need to see full output for triage. The summary line at the end is what
+matters — the rest is noise once tests pass.
+
+**Compact between packages.** When running scope=all or more than 3 packages, call
+`/compact` in the conversation after each package group finishes. Do not run the
+entire monorepo suite in one uninterrupted loop without compaction.
+
+**Split wide scopes into separate sessions.** For test gap-fill or construct work
+spanning many packages, prefer one session per L-layer group:
+- Session A: L0–L2 (types, core, resolver, flow-engine, bridge/pure, common-ui)
+- Session B: L3 (transport, client, session, store, asset-manager, sdk, tui)
+- Session C: L4+ (connectors, runner, bridge/drivers, lab, cli, forge apps)
+
+**Do not re-read CLAUDE.md or spec files on every iteration.** Read once, keep in
+context. If you've already loaded a package's CLAUDE.md this session, don't read
+it again.
+
 ## Bun Workspace Test Commands (Quick Reference)
 
 ```bash
-# Run all agent-framework + _scripts tests (monorepo-wide)
-bun x --bun vitest run
+# Run all agent-framework + _scripts tests — truncate output to summary
+bun x --bun vitest run 2>&1 | tail -80
 
 # Run with watch mode (development)
 bun x --bun vitest
 
 # Run with test name filter
-bun x --bun vitest run -t "workspace rename"
+bun x --bun vitest run -t "workspace rename" 2>&1 | tail -40
 
-# Run a single test file
+# Run a single test file (full output is fine for a single file)
 bun x --bun vitest run agent-framework/core/src/manifest.test.ts
 
 # Run a forge Nuxt app's suite (their own vitest config — happy-dom + Nitro shims)
-bun run --filter @skaile/forge-project test
-bun run --filter @skaile/forge-assistant test
-bun run --filter @skaile/forge-concept test    # vitest@4.1, scoped only
+bun run --filter @skaile/forge-project test 2>&1 | tail -60
+bun run --filter @skaile/forge-assistant test 2>&1 | tail -60
+bun run --filter @skaile/forge-concept test 2>&1 | tail -60    # vitest@4.1, scoped only
 
 # Run platform backend (Jest)
-bun run --filter ./platform/backend test
+bun run --filter ./platform/backend test 2>&1 | tail -80
 
 # Run platform / forge-project E2E (Playwright)
-bun run --filter ./platform/e2e test:e2e
-(cd forge/project && bun run test:e2e)
+bun run --filter ./platform/e2e test:e2e 2>&1 | tail -60
+(cd forge/project && bun run test:e2e 2>&1 | tail -60)
 
 # Run with coverage (istanbul under Bun — mirrors test-full.yml CI lane)
 bun x --bun vitest run \
   --coverage.enabled \
   --coverage.provider=istanbul \
-  --coverage.reporter=text \
   --coverage.reporter=text-summary \
   --coverage.reporter=json-summary \
-  --coverage.reportsDirectory=_devlog/reports/coverage-ci
+  --coverage.reportsDirectory=_devlog/reports/coverage-ci \
+  2>&1 | tail -40
 
 # Check the ratchet against the committed baseline
 bun _scripts/check-coverage-ratchet.ts

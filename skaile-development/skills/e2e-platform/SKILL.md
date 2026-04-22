@@ -161,11 +161,14 @@ IF mode = run
     ```bash
     cd platform/e2e
     BASE_URL='http://localhost:3000' API_URL='http://localhost:3001' \
-      bunx playwright test <scope> --retries=0 --workers=1 --reporter=list
+      bunx playwright test <scope> --retries=0 --workers=1 --reporter=list \
+      2>&1 | tail -100
     ```
     - `<scope>` is the user-provided scope, if any. Omit for full suite.
     - `--retries=0` is load-bearing — surfaces the real failure mode instead of retry-masked flakiness.
     - `--workers=1` is the current default (per playwright.config); bumping it is out-of-scope for `run`.
+    - `| tail -100` keeps context bounded — playwright list output is verbose; only the summary and failure
+      lines matter. For triage, re-run the failing spec alone (no tail) to see the full trace.
 
   STEP R2: Classify failures (if any)
     For each failed test, match against `platform/e2e/CLAUDE.md`'s failure-mode table:
@@ -326,7 +329,8 @@ IF mode = add
     Run ONLY the newly-written / edited specs (not the full suite) for faster feedback:
     ```bash
     cd platform/e2e
-    bunx playwright test <new-spec-paths> --retries=0 --workers=1 --reporter=list
+    bunx playwright test <new-spec-paths> --retries=0 --workers=1 --reporter=list \
+      2>&1 | tail -80
     ```
 
     IF failures:

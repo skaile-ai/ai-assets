@@ -174,12 +174,13 @@ EMIT [quality] step=typecheck status=pass|fail
 
 STEP 3: Run tests
   IF mode = full:
-    - Mirror the test-full.yml CI lane locally:
+    - Mirror the test-full.yml CI lane locally (truncate to summary):
       $ bun x --bun vitest run \
           --coverage.enabled --coverage.provider=istanbul \
-          --coverage.reporter=text --coverage.reporter=text-summary \
+          --coverage.reporter=text-summary \
           --coverage.reporter=json-summary \
-          --coverage.reportsDirectory=_devlog/reports/coverage-ci
+          --coverage.reportsDirectory=_devlog/reports/coverage-ci \
+          2>&1 | tail -40
     - Then run the ratchet:
       $ bun _scripts/check-coverage-ratchet.ts
       Exit codes: 0 pass, 1 regression (fail the gate), 2 invalid input (fail the gate).
@@ -187,7 +188,12 @@ STEP 3: Run tests
       fail on improvement; updating the committed baseline is a manual PR step.
     - Note: forge/concept (vitest 4.1), forge/project, forge/assistant, platform/*,
       and all Playwright suites are not part of the root istanbul run — run them
-      via their scoped test commands (`bun run --filter <pkg> test`) if they're in scope.
+      via their scoped test commands (`bun run --filter <pkg> test 2>&1 | tail -60`)
+      if they're in scope.
+    - mode=full SESSION NOTE: If this is running in a long session that already has
+      significant context, consider starting a fresh session for mode=full — the
+      coverage + audit + doc sequence is resource-intensive and benefits from a clean
+      context window.
   ELSE (quick, package):
     - Call: test mode=run scope=<affected packages>
     - Capture test JSON (if test skill writes one, otherwise parse stdout)
@@ -197,6 +203,12 @@ STEP 3: Run tests
     - Report: "quality gate failed at [test] — <N> tests failing" (or
       "coverage ratchet regression: <pkg> -<delta>pts below baseline")
     - EXIT non-zero
+
+  COMPACT CHECKPOINT (before audit):
+    After the test step completes (pass or skip), call /compact before proceeding
+    to audit. Test output is the largest context contributor in this pipeline;
+    compacting here prevents audit + doc phases from re-reading full test history
+    on every API call.
 
 EMIT [quality] step=test status=pass|fail coverage_ratchet=<pass|fail|skipped>
 
