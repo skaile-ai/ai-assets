@@ -2,13 +2,14 @@
 name: "test-e2e"
 description: "Set up and generate end-to-end tests for forge apps, platform/frontend, and the agent-framework CLI. Scaffolds Playwright for web apps (forge + platform) including config, global setup/teardown, sandbox, and fixtures. For CLI packages, generates shell-based end-to-end tests that invoke the bin and assert stdout/artifacts. Verifies tests run against a real dev server or real process."
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   tags:
     - "testing"
     - "e2e"
     - "playwright"
     - "browser"
     - "cli"
+    - "ct"
     - "setup"
     - "generation"
     - "journey"
@@ -41,8 +42,9 @@ metadata:
           - "auto"
           - "web"
           - "cli"
+          - "ct"
         default: "auto"
-        hint: "auto = infer from package type | web = Playwright | cli = shell"
+        hint: "auto = infer from package type | web = Playwright | cli = shell | ct = Playwright Component Testing"
     reads:
       - path: "<target>/CLAUDE.md"
       - path: "<target>/TEST_PLAN.md"
@@ -86,7 +88,7 @@ metadata:
       - id: "kind"
         label: "Kind"
         type: "select"
-        options: ["auto", "web", "cli"]
+        options: ["auto", "web", "cli", "ct"]
         required: false
         default: "auto"
     files: []
@@ -104,6 +106,7 @@ Bootstraps and generates end-to-end tests for the top of the layer stack. Two fl
 | **L5** | Nitro integration (cheap cousin) | `forge/project`, `forge/assistant`, `forge/concept` | Vitest + synthetic h3 event | In-process route handler invoked with `makeEvent({ cookies })` | `.test.ts` (prefix `api-`) |
 | **L5** | Spawned-server harness | `forge/project`, `forge/assistant` | Vitest + child Nitro process | Real Nuxt dev server spawned, gated behind `FORGE_SERVER_TESTS=1` | `.test.ts` (prefix `api-server-`) |
 | **L5** | Web E2E | `forge/*`, `platform/e2e` | Playwright | Browser journeys against a running dev server | `.spec.ts` |
+| **L1/L2** | Component Testing (CT) | `forge/common-ui` (composable libraries) | `@playwright/experimental-ct-vue` | Mounts a `.vue` fixture in Chromium via Vite CT server — no Nuxt app | `.spec.ts` |
 
 Read these canonical documents before scaffolding anything:
 
@@ -191,7 +194,9 @@ STEP 1: Determine kind
     IF <target>/nuxt.config.ts exists OR <target>/vite.config.* with React → web (Playwright, L5)
       Also consider: does this forge app need L5 Nitro integration or the L5 spawned-server harness? Both live alongside Playwright and may be generated together.
     IF <target> is agent-framework/cli OR package.json has `bin` entry → cli (L4 spawn-harness)
+    IF <target> is a library package (no nuxt.config.ts, no bin) AND it exports Vue composables that require browser DOM (TipTap, ProseMirror, WebGL, Canvas, ResizeObserver) → ct (Playwright CT)
     ELSE → report "this package is library-grade; use test-integration"
+  IF kind = ct → skip to Phase 2b (CT setup) and Phase 4b (CT generation)
 
 STEP 2: Load context
   - Read CLAUDE.md
@@ -268,6 +273,120 @@ STEP 3a (web, skip if mode=generate): Scaffold Playwright (L5)
     CI caches the browser binaries keyed on `bun.lock` + `package.json` hashes — no extra setup needed per app. Local dev: run once after adding `@playwright/test`.
 
   Add `.gitignore` entries if missing: `playwright-report/`, `test-results/`, `tests/e2e/screenshots/` (or `test/e2e/screenshots/` for forge/concept).
+
+# ── Phase 2b: CT Setup (Playwright Component Testing) ───────────
+
+## Kind: ct — Playwright Component Testing (composable libraries)
+
+Use when the target is a Vue composable library whose composables require a real
+browser DOM (TipTap, ProseMirror, WebGL, Canvas, ResizeObserver, etc.) that
+happy-dom cannot provide.
+
+### When to choose `ct` over `web`
+- Target is a library/package (not a Nuxt app)
+- Composable uses editor DOM (ProseMirror, CodeMirror, TipTap)
+- happy-dom unit tests fail with DOM-mutation or lifecycle errors
+
+STEP 3c (ct, skip if mode=generate): Scaffold Playwright CT infrastructure
+
+  1. Add devDependencies to `<target>/package.json`:
+     - `@playwright/experimental-ct-vue`
+     - `@vitejs/plugin-vue`
+     - `@vue/compiler-dom`
+     - `playwright`
+  2. Add scripts to `<target>/package.json`:
+     - `"test:e2e": "playwright test -c playwright-ct.config.ts"`
+     - `"test:e2e:ui": "playwright test -c playwright-ct.config.ts --ui"`
+     - `"test:e2e:record": "playwright codegen"`
+  3. Create `<target>/playwright-ct.config.ts` — always include the `resolveVueCompilerDom()` plugin:
+     ```typescript
+     import { defineConfig, devices } from "@playwright/experimental-ct-vue";
+     import vue from "@vitejs/plugin-vue";
+     import { createRequire } from "node:module";
+     import type { Plugin } from "vite";
+
+     const require = createRequire(import.meta.url);
+
+     function resolveVueCompilerDom(): Plugin {
+       const compilerDomPath = require.resolve("@vue/compiler-dom");
+       return {
+         name: "resolve-vue-compiler-dom",
+         enforce: "pre",
+         resolveId(id) {
+           if (id === "@vue/compiler-dom") return compilerDomPath;
+         },
+       };
+     }
+
+     export default defineConfig({
+       testDir: "./tests/e2e",
+       outputDir: "./tests/test-results",
+       timeout: 30_000,
+       expect: { timeout: 5_000 },
+       fullyParallel: true,
+       forbidOnly: !!process.env.CI,
+       retries: process.env.CI ? 2 : 0,
+       reporter: [["html", { outputFolder: "tests/playwright-report" }]],
+       use: {
+         ctPort: 3101,  // choose a unique port per package
+         ctViteConfig: {
+           plugins: [vue(), resolveVueCompilerDom()],
+           resolve: { dedupe: ["vue"] },
+         },
+       },
+       projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+     });
+     ```
+  4. Create `<target>/playwright/index.html` — standard Playwright CT bootstrap HTML
+  5. Create `<target>/playwright/index.ts` — CT bootstrap entry with `beforeMount`/`afterMount` hooks
+  6. Add to `.gitignore`: `**/playwright/.cache/`
+  7. Run `bun install` from the monorepo root.
+
+  Reference: `forge/common-ui/playwright-ct.config.ts`
+
+### Fixture component pattern
+Each composable gets a minimal `tests/e2e/fixtures/<ComposableName>Fixture.vue` SFC:
+- Calls the composable with props passed from the test
+- Renders the component's output (e.g. `<EditorContent :editor="editor" />`)
+- Exposes `data-testid` attributes for locators
+- Emits events (e.g. `update`) so the test can observe callbacks
+
+### Test file pattern
+```typescript
+import { test, expect } from "@playwright/experimental-ct-vue";
+import MyFixture from "./fixtures/MyFixture.vue";
+
+test("composable renders correctly", async ({ mount, page }) => {
+  await mount(MyFixture, { props: { initialValue: "hello" } });
+  await expect(page.locator('[data-testid="root"]')).toBeVisible();
+});
+```
+Use `page.locator()` — not `component.locator()` (the internal control marker
+is not attached by this CT version under Bun workspace hoisting).
+
+### Recording new tests
+```bash
+# Terminal 1: start CT server in watch/UI mode
+cd <package> && bun run test:e2e:ui
+
+# Terminal 2: open Playwright Inspector + browser
+cd <package> && bun run test:e2e:record -- http://localhost:<ctPort>
+```
+The Inspector records all interactions (clicks, typing, navigation) as test code.
+Paste the generated output into a new `tests/e2e/<feature>.spec.ts` file.
+
+### Known constraint: Bun workspace hoisting
+The `resolveVueCompilerDom()` plugin is REQUIRED under Bun. Without it, the
+CT framework's virtual-module context emits `@vue/compiler-dom` as an external
+bare specifier which the browser cannot load. The plugin maps it to its absolute
+resolved path, forcing Rollup to inline it. See `forge/common-ui/playwright-ct.config.ts`.
+
+### Collaboration tests (Hocuspocus, real WebSocket)
+Composable tests that require a live WebSocket server (e.g. Hocuspocus collaboration)
+must be skipped with `test.skip` and a comment explaining the required server.
+Do not attempt to mock the WebSocket inside the CT environment.
+
+EMIT [test-e2e] setup_done target=<pkg> kind=ct
 
 # ── Phase 3: CLI E2E Setup ───────────────────────────────────────
 
@@ -502,6 +621,7 @@ STEP 5: Run the e2e suite
   L4 CLI: `bun x --bun vitest run tests/cli-e2e` inside <target>
   L5 Nitro integration: `bun x --bun vitest run tests/api-*.test.ts` inside <target>
   L5 Spawn-server: `FORGE_SERVER_TESTS=1 bun x --bun vitest run tests/api-server-harness.test.ts`
+  CT: `cd <target> && bun run test:e2e` (Playwright CT, no dev server needed)
 
   Capture journey pass/fail + screenshots.
   IF dev server fails to start → report error (port conflict / missing env var)
@@ -540,7 +660,7 @@ STEP 6: Present
 EMIT [test-e2e] completed target=<pkg> kind=<kind> journeys=<N> passing=<N>
 
 CHECKLIST
-  - [ ] Kind + layer (L4 CLI / L5 Nitro / L5 spawn-server / L5 Playwright) correctly determined
+  - [ ] Kind + layer (L4 CLI / L5 Nitro / L5 spawn-server / L5 Playwright / L1-L2 CT) correctly determined
   - [ ] Port unique per forge app (see allocation table below)
   - [ ] L5 Playwright: globalSetup + globalTeardown in place
   - [ ] L5 Playwright: per-test sandbox isolates DB / workspace
@@ -551,6 +671,9 @@ CHECKLIST
   - [ ] Test file suffix: `.test.ts` for Vitest-based (L4/Nitro/spawn); `.spec.ts` for Playwright
   - [ ] Screenshots configured on failure (Playwright only)
   - [ ] `@skaile/test-utils` in devDependencies if the package gained L4 or Nitro integration tests
+  - [ ] CT: `playwright-ct.config.ts` includes `resolveVueCompilerDom()` plugin (required under Bun)
+  - [ ] CT: fixture components in `tests/e2e/fixtures/` expose `data-testid` attributes
+  - [ ] CT: collaboration/WebSocket-dependent tests skipped with explanatory comment
   - [ ] Generated tests pass or source bugs reported
 
 ---
@@ -573,6 +696,7 @@ CHECKLIST
 | L5 | Nitro integration (synthetic h3 event) | `forge/project/tests/_setup/h3-event.ts`, `forge/project/tests/api-auth-me.test.ts` |
 | L5 | Spawned-server harness | `forge/project/tests/_setup/spawn-server.ts`, `forge/project/tests/api-server-harness.test.ts` |
 | L5 | Playwright web E2E | `forge/project/tests/e2e/*.spec.ts`, `forge/assistant/tests/e2e/*.spec.ts`, `forge/concept/test/e2e/*.spec.ts`, `platform/e2e/` |
+| L1/L2 | Playwright CT | `forge/common-ui/playwright-ct.config.ts`, `forge/common-ui/tests/e2e/fixtures/EditorFixture.vue`, `forge/common-ui/tests/e2e/useSkaileEditor.spec.ts` |
 
 ## Port Allocation for Forge Apps
 
@@ -586,5 +710,7 @@ Pick a stable port per forge app to avoid conflicts during parallel e2e runs:
 | `forge/chat` | 3420 |
 | `forge/mattermost` | 3430 |
 | `forge/tui` | 3440 |
+| `forge/common-ui` (CT) | 3101 |
 
 When adding a new forge app, append to the table here and use the next free port.
+For CT packages, pick a port below 3100 or above 3109 to avoid conflicts (3101 is taken by `forge/common-ui`).

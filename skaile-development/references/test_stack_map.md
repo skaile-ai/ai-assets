@@ -15,15 +15,17 @@ All forge packages share a single root `vitest.config.ts` at `forge/` that picks
 |---|---|---|---|---|
 | `forge/project` | Vitest (unit) + Playwright (e2e) | `tests/` + `tests/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
 | `forge/concept` | Vitest (unit) + Playwright (e2e) | `test/unit/` + `test/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
-| `forge/assistant` | Playwright (e2e only) | `tests/e2e/` | `*.spec.ts` | e2e ✓, unit planned |
-| `forge/chat` | — | — | — | no tests yet |
-| `forge/mattermost` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
+| `forge/assistant` | Playwright (e2e only) | `tests/e2e/` | `*.spec.ts` | e2e ✓ |
+| `forge/chat` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
+| `forge/mattermost` | Vitest | `tests/` | `*.test.ts` | unit ✓, integration ✓ |
 | `forge/tui` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
 | `forge/common-backend` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
-| `forge/common-ui` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
+| `forge/common-ui` | Vitest + Playwright CT | `tests/` + `tests/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ (Playwright CT) |
 | `forge/common-tui` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
 
 Forge E2E runs Playwright against `bun run dev` on a dedicated port. Fixtures in `test/e2e/fixtures.ts`, sandbox in `test/e2e/sandbox.ts`. Use `bun x playwright test` inside the package.
+
+For `forge/common-ui`, E2E uses Playwright CT (component testing) instead of a full Nuxt dev server — see the Playwright Component Testing section below.
 
 ## Agent Framework (TypeScript + Bun + OMP)
 
@@ -41,7 +43,6 @@ Forge E2E runs Playwright against `bun run dev` on a dedicated port. Fixtures in
 | `agent-framework/core` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-core` |
 | `agent-framework/types` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-types` |
 | `agent-framework/transport` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-transport` |
-| `agent-framework/workspace` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-workspace` |
 | `agent-framework/workspace-plugin` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-workspace-plugin` |
 | `agent-framework/lab` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-lab` |
 | `agent-framework/sdk` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-sdk` |
@@ -70,6 +71,26 @@ Forge E2E runs Playwright against `bun run dev` on a dedicated port. Fixtures in
 | Unit | Vitest, `test/unit/` or `tests/` | Vitest, `tests/` | Jest, colocated `*.spec.ts` | Vitest, `__tests__/` |
 | Integration | Vitest w/ real SQLite temp DB | Vitest w/ in-memory fixtures | Jest w/ PostgreSQL test container | — |
 | E2E | Playwright, `test/e2e/` | — (N/A — library) | — (delegated to platform/e2e) | Playwright, via `platform/e2e/` |
+
+## Playwright Component Testing (forge/common-ui)
+
+`forge/common-ui` uses `@playwright/experimental-ct-vue` for composables that
+require a real browser DOM (TipTap/ProseMirror). CT mode spins up a Vite server,
+mounts a `.vue` fixture component in Chromium, and tears down cleanly — no Nuxt
+app needed.
+
+Config: `forge/common-ui/playwright-ct.config.ts` (port 3101)
+Run:    `cd forge/common-ui && bun run test:e2e`
+UI:     `cd forge/common-ui && bun run test:e2e:ui`
+Record: `cd forge/common-ui && bun run test:e2e:record -- http://localhost:3101`
+
+The config includes a `resolveVueCompilerDom()` Vite plugin that forces Rollup
+to inline `@vue/compiler-dom`. This is required under Bun workspace hoisting
+because the CT framework's virtual-module context cannot resolve bare specifiers
+via normal node_modules traversal.
+
+Collaboration tests (Hocuspocus) are excluded — they require a live WebSocket
+server. Document with skip comments in `tests/e2e/useSkaileEditor.spec.ts`.
 
 ## Database Isolation
 

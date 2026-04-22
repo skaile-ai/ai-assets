@@ -2,7 +2,7 @@
 name: "test-plan"
 description: "Generates a per-package test plan for any skaile-dev package. Reads CLAUDE.md (architecture, public API), the source tree, and existing tests; produces <package>/TEST_PLAN.md listing untested units, coverage gaps, integration seams, and recommended scenarios per layer (unit/integration/e2e). Used as the input for test-unit, test-integration, and test-e2e."
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   tags:
     - "testing"
     - "test-plan"
@@ -86,7 +86,7 @@ The 2026-04-22 test gap-fill initiative established the layered test strategy fo
 | Layer | Description | Line coverage target |
 |---|---|---|
 | L0 | Pure types (`agent-framework/types`) | `tsc --noEmit` only |
-| L1 | Pure functions, no I/O | ≥ 90% lines / ≥ 80% branches |
+| L1 | Pure functions, no I/O (agent-framework/core, flow-engine, resolver, forge/common-ui) | ≥ 90% lines / ≥ 80% branches |
 | L2 | I/O-bound units with in-process mocks | ≥ 75% lines |
 | L3 | Cross-module integration (subprocess/Docker/temp-dir) | ≥ 60% lines |
 | L4 | CLI/SDK entry points via spawn harness | ≥ 1 happy + 1 error path per command |
@@ -157,7 +157,7 @@ STEP 2: Classify package category and test layer
 
   Also assign the **test layer (L0-L5)** from the concept spec:
   - L0 — types-only (tsc --noEmit)
-  - L1 — pure functions (core, resolver, flow-engine, bridge/pure, forge/common-ui)
+  - L1 — pure functions + composable libraries (core, resolver, flow-engine, bridge/pure, forge/common-ui)
   - L2 — I/O-bound with in-process mocks (transport, client, session, store, asset-manager, sdk, forge/common-backend, forge/tui)
   - L3 — cross-module integration (connectors, runner, bridge/drivers, lab, workspace-plugin)
   - L4 — entry points (cli, sdk acceptance)
@@ -226,6 +226,13 @@ STEP 5: Enumerate testable units per layer
       Reference: `forge/project/tests/_setup/h3-event.ts`, `_setup/nitro-globals.ts`,
       `api-auth-logout.test.ts`, `api-auth-me.test.ts`
     - E2E (Playwright) — critical user journeys only.
+    - **Library composable E2E (Playwright CT):** when an L1/L2 library package exports
+      composables that happy-dom cannot test (TipTap, ProseMirror, WebGL, etc.), use
+      `@playwright/experimental-ct-vue` instead of a full app. The "L5 shape" for a
+      composable library is:
+        - Unit (Vitest + happy-dom): pure reactive logic, computed derivations, $fetch mocking
+        - CT E2E (Playwright CT): real browser, mount fixture component, assert DOM behavior
+      Reference: `forge/common-ui/tests/e2e/useSkaileEditor.spec.ts`
 
   Skip: generated files, `dist/`, `node_modules`, test files themselves, `.config.ts` files.
 

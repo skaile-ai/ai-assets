@@ -2,7 +2,7 @@
 name: "test"
 description: "Test construction and execution for the skaile-dev monorepo. Two modes: 'run' executes the test suite for one or more packages and reports results; 'construct' generates new tests for recently implemented code. Knows the full test stack: Vitest 3.2.4 (agent-framework + forge/project + forge/assistant + _scripts), Vitest 4.1 (forge/concept), Jest (platform backend), Vitest (platform frontend), Playwright (E2E), and how to run each via the Bun workspace. Coverage is collected under Bun with @vitest/coverage-istanbul (not v8) and ratcheted against the committed baseline via _scripts/check-coverage-ratchet.ts."
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   tags:
     - "testing"
     - "vitest"
@@ -110,7 +110,8 @@ vitest 4.1 for forge/concept) keep their own `vitest.config.ts` and their own
 | `forge/assistant` | Vitest 3.2.4 + `happy-dom` | `bun run --filter @skaile/forge-assistant test` |
 | `forge/concept` | Vitest 4.1 | `bun run --filter @skaile/forge-concept test` |
 | `forge/common-backend` | Vitest 3.2.4 | root `bun x --bun vitest run` (included via root config) |
-| `forge/common-ui` | Vitest 3.2.4 | root `bun x --bun vitest run` |
+| `forge/common-ui` | Vitest 3.2.4 (unit) + Playwright CT (e2e) | `bun x --bun vitest run` (unit); `cd forge/common-ui && bun run test:e2e` (CT) |
+| `forge/chat` | Vitest 3.2.4 | `bun run --filter @skaile/forge-chat test` |
 | `platform/backend` | Jest | `bun run --filter ./platform/backend test` |
 | `platform/frontend` | Vitest | `bun run --filter ./platform/frontend test` |
 | `platform/e2e` | Playwright | `bun run --filter ./platform/e2e test:e2e` |
@@ -293,6 +294,14 @@ IF mode = construct
       `agent-framework/cli/tests/e2e/<subcommand>.test.ts`.
     - **Playwright** (L5 E2E): `.spec.ts` suffix under `tests/e2e/`. Each forge
       app owns its own `playwright.config.ts` and runs via `bun run test:e2e`.
+    - **Playwright Component Testing (CT)** (composable libraries): when a Vue composable
+      uses TipTap, ProseMirror, or any other library that requires real browser DOM beyond
+      what happy-dom provides, use `@playwright/experimental-ct-vue`. Config at
+      `playwright-ct.config.ts`, fixtures in `tests/e2e/fixtures/`, spec files as `*.spec.ts`
+      under `tests/e2e/`. Requires the `resolveVueCompilerDom()` Vite plugin (see
+      `forge/common-ui/playwright-ct.config.ts`). Run with `bun run test:e2e`.
+      Recording: `bun run test:e2e:record -- http://localhost:<ctPort>` — opens `playwright codegen`
+      against the CT dev server, records interactions as spec code.
 
   STEP 0.6: Mocking gotchas (project-specific — do not fight these)
 
@@ -460,6 +469,13 @@ bun run --filter ./platform/backend test 2>&1 | tail -80
 # Run platform / forge-project E2E (Playwright)
 bun run --filter ./platform/e2e test:e2e 2>&1 | tail -60
 (cd forge/project && bun run test:e2e 2>&1 | tail -60)
+
+# Run forge/common-ui Playwright CT (TipTap/ProseMirror browser tests)
+(cd forge/common-ui && bun run test:e2e 2>&1 | tail -20)
+
+# Record new CT tests (codegen)
+# Terminal 1: cd forge/common-ui && bun run test:e2e:ui
+# Terminal 2: cd forge/common-ui && bun run test:e2e:record -- http://localhost:3101
 
 # Run with coverage (istanbul under Bun — mirrors test-full.yml CI lane)
 bun x --bun vitest run \

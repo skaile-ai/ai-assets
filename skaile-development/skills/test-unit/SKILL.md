@@ -2,7 +2,7 @@
 name: "test-unit"
 description: "Set up and generate unit tests for any skaile-dev package (forge apps, agent-framework libraries, platform frontend/backend). Reads TEST_PLAN.md when present, otherwise discovers testable units from source. Scaffolds missing test infra (vitest.config.ts, test harness), then generates one test file per module with test cases mapped to CLAUDE.md Architecture. Verifies tests run before completing."
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   tags:
     - "testing"
     - "unit-tests"
@@ -207,6 +207,11 @@ STEP 3 (skip if mode=generate): Scaffold missing infrastructure
   - Add `environment: "happy-dom"` to the package's `vitest.config.ts`.
   - Already configured on forge/project, forge/assistant, forge/concept.
   - Add `happy-dom` to `devDependencies` if missing.
+  - **When happy-dom is insufficient** (TipTap, ProseMirror, WebGL, Canvas): skip
+    the composable in the unit suite with a TODO comment and route to `test-e2e`
+    with `kind=ct`. The CT E2E approach (`@playwright/experimental-ct-vue`) provides
+    a real browser environment without requiring a full Nuxt app.
+    Reference: `forge/common-ui/tests/e2e/useSkaileEditor.spec.ts`
 
   **Example vitest.config.ts for a new forge package:**
   ```typescript
@@ -389,6 +394,13 @@ STEP 6: For each uncovered unit, generate a test file
 
   Add `environment: "happy-dom"` to the package's `vitest.config.ts`. Then composables that
   touch `document` / `window` work without a full browser.
+
+  When happy-dom cannot satisfy the composable's DOM requirements (TipTap/ProseMirror/WebGL/Canvas),
+  skip the composable in this unit suite:
+  ```typescript
+  it.skip("TODO: requires real browser DOM — covered by CT E2E (test-e2e kind=ct)", () => {})
+  ```
+  Then route to `test-e2e` with `kind=ct`. Reference: `forge/common-ui/tests/e2e/useSkaileEditor.spec.ts`.
 
 ### Pattern 9 — Subprocess harness (L3 drivers — integration, not unit)
 
