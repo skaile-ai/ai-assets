@@ -55,10 +55,12 @@ do not need docs. Internal helpers not exported from the package are exempt.
 
 **After annotating:** run `_scripts/generate-api-docs.ts` if `docs/api-reference.md`
 exists for this package to regenerate the Starlight API reference page.
+The generated `docs/api-reference.md` is never hand-edited — all changes flow from
+TSDoc annotations in source.
 
 ---
 
-## Tier 1 — README.md (user-facing, served by Starlight)
+## Tier 1 — README.md (user-facing; served by Starlight for registered packages)
 
 ### Required structure
 
@@ -99,11 +101,11 @@ why does it exist and how does it connect to the rest of the system?"
 
 ---
 
-## Tier 2 — CLAUDE.md (developer + agent guide, served by Starlight)
+## Tier 2 — CLAUDE.md (developer + agent guide)
 
 ### Reminders (structure is defined in the root CLAUDE.md)
 
-- CLAUDE.md is picked up by Starlight glob loaders — stale content = stale docs site
+- CLAUDE.md is the authoritative developer guide — keep it current so agents get correct context
 - Cross-package contract change: update *both* the losing and gaining package's CLAUDE.md
 - Write for an AI agent that has never seen the codebase
 
@@ -135,6 +137,13 @@ New packages must be registered in:
 
 Follow the existing `arm` (agent-framework) pattern in both files.
 
+> **New package with no `docs/` directory yet:** Only create a `docs/` directory when the
+> package warrants three or more pages (see root `CLAUDE.md` Writing Documentation rules).
+> For smaller packages, TSDoc in source + `README.md` + `CLAUDE.md` are sufficient.
+> If `docs/api-reference.md` does not yet exist, `_scripts/generate-api-docs.ts` will
+> create it automatically — you still must register the package in `config.ts` and
+> `astro.config.mjs`.
+
 ---
 
 ## Decision Table
@@ -164,6 +173,6 @@ When the `implement` skill runs Phase 5 (Documentation Sync):
 
 ---
 
-## Context
+---
 
-This is in the `ai-assets/skaile-development/references/` directory alongside `doc_tiers.md`, `audit_checklists.md`, `readiness_criteria.md`, `sub-agent-dispatch.md`, `test_stack_map.md`.
+*See also: `references/doc_tiers.md` (which tier to update), `skills/doc/SKILL.md` (how the doc skill works).*
