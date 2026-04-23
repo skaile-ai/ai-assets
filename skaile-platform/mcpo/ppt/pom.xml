@@ -104,6 +104,15 @@
         <configuration>
           <!-- @{argLine} lets jacoco's prepare-agent inject its javaagent at runtime. -->
           <argLine>@{argLine} -Djava.awt.headless=true</argLine>
+          <!-- Keep template-upload and default-template state out of the developer's
+               $HOME. Without these overrides, PptServerConfig defaults to
+               $HOME/.mcpo-ppt-default-template.json + $HOME/.mcpo-ppt/templates/,
+               which leaks across test runs, pollutes the dev environment, and
+               leaves one test's default template visible to unrelated tests. -->
+          <environmentVariables>
+            <MCPO_TEMPLATE_DIR>${project.build.directory}/test-home/templates</MCPO_TEMPLATE_DIR>
+            <MCPO_DEFAULT_TEMPLATE_CONFIG>${project.build.directory}/test-home/default-template.json</MCPO_DEFAULT_TEMPLATE_CONFIG>
+          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
