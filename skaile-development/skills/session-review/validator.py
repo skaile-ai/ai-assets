@@ -70,6 +70,11 @@ REQUIRED_WORKFLOW_STEPS = [
     "Worktree",
 ]
 
+# Required subsections that must appear in the output
+REQUIRED_SUBSECTIONS = [
+    "Known Limitations",
+]
+
 VALID_GRADES = {"A", "B", "C", "D"}
 
 
@@ -82,6 +87,9 @@ def validate_markdown(text: str) -> list[str]:
     for step in REQUIRED_WORKFLOW_STEPS:
         if step not in text:
             errors.append(f"Workflow step missing from Block 2: '{step}'")
+    for subsection in REQUIRED_SUBSECTIONS:
+        if subsection not in text:
+            errors.append(f"Missing required subsection: '{subsection}'")
     if not any(f"Grade: {g}" in text for g in VALID_GRADES):
         errors.append("Block 2 missing overall grade (A/B/C/D)")
     if "Optimization Tips" not in text and "Block 3" in text:

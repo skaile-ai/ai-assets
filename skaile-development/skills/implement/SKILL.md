@@ -399,8 +399,8 @@ STEP 10: Write devlog entry
 EMIT [implement] devlog_written
 
 SUGGEST session_review
-  > "Session complete. Run `/session-review` for a token usage and workflow analysis
-  >  of this implementation session."
+  > "Session complete. Run `/session-review` to see token usage, cost, workflow analysis,
+  >  and suggestions for this session."
 
 # ── Phase 6b: Notify (optional) ──────────────────────────────────
 

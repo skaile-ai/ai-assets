@@ -323,4 +323,4 @@ EMIT [session-review] complete grade=<grade>
 - **Reads:** Claude Code session JSONL at `~/.claude/projects/<slug>/<session-id>.jsonl`
 - **Sub-agent costs:** In `~/.claude/projects/<slug>/<session-id>/subagents/` — not parsed here
 
-*See also: `references/doc_pattern.md`, `skills/implement/SKILL.md`*
+*See also: `skills/implement/SKILL.md`*
