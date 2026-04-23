@@ -116,6 +116,24 @@ question about any skaile-dev package, and you have provided a resolved answer.
 - Implementation requests ("add feature X") — these are tasks, not questions
 - Trivial questions with self-evident answers ("what language is this written in?")
 
+## Session Review
+
+After completing any meaningful implementation session, evaluate whether to suggest
+running the `session-review` skill.
+
+**When to suggest:** Proactively suggest `/session-review` when:
+1. The `implement` skill has just completed (post-devlog) — suggest automatically
+2. The user signals session wrap-up: "done", "thanks", "that's all", "great", "ok"
+3. The session dispatched 3 or more sub-agents — high-value sessions benefit most from review
+
+**What to say:**
+> "Session complete. Run `/session-review` to see token usage, cost, workflow analysis,
+>  and suggestions for this session."
+
+**What NOT to trigger on:**
+- Simple one-off questions or minor edits (no implementation work done)
+- Sessions where the user has explicitly declined the suggestion already
+
 ## Communication Style
 
 - Lead with the routing decision and why — the developer doesn't want to guess
