@@ -4,7 +4,7 @@ description: "Day-to-day development workflow for the skaile-dev monorepo — im
 type: domain
 building_blocks:
   agents: "skaile-development — routes tasks to the right skills, maintains session context."
-  skills: "git, implement, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend"
+  skills: "git, implement, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, session-review"
   references: "Branch naming, worktree patterns, test stack map, audit checklists, readiness criteria, devlog entry formats, documentation tier roles, commit spec."
 stage: beta
 ---
@@ -58,6 +58,7 @@ Reach for `skaile-development` when you are:
 | `skills/faq/` | FAQ curation for all monorepo packages |
 | `skills/release/` | Changelog, semantic versioning, and git tagging |
 | `skills/kill-backend/` | Kills the platform backend process chain cleanly (port 3001, nest, bun, dotenvx) |
+| `skills/session-review/` | End-of-session analysis: token usage, cost, workflow adherence, optimization tips |
 | `references/doc_tiers.md` | Five-tier documentation role table |
 | `references/test_stack_map.md` | Package → framework + run-command map (authoritative) |
 | `references/audit_checklists.md` | Logic / security / UI-UX checklists per sub-agent |
@@ -87,6 +88,7 @@ Reach for `skaile-development` when you are:
 | `faq` | After resolving a question — curates FAQ entries with user approval |
 | `release` | Preparing a release — changelog generation, version bumps, and git tagging |
 | `kill-backend` | Killing the platform backend and its full process chain (port 3001, nest, bun, dotenvx) |
+| `session-review` | At the end of an implementation session — token cost, workflow grade, and improvement tips |
 
 ## Quality Gates
 
