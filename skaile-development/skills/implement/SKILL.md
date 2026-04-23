@@ -115,6 +115,9 @@ MUST  identify the correct prog-expert for the tech stack and note it in the pla
 MUST  run tests after implementation (via test skill)
 MUST  run audit scope=diff after tests pass (gate Phase 5 on audit ≠ fail)
 MUST  run doc --mode update after any public API or structure change
+MUST  annotate all added or modified exported symbols with TSDoc (per references/doc_pattern.md) before running doc --mode update
+MUST  update README.md Purpose section when the package's role or public API changes
+MUST  update CLAUDE.md when architecture, conventions, or environment variables change
 MUST  add a devlog entry after every completed implementation
 MUST  create a git branch before implementing (via git skill)
 MUST  verify platform/backend starts (bun run dev) after any structural backend change before marking the phase complete — structural changes include: new @Injectable service, constructor parameter changes, *.module.ts providers/imports/exports changes, import path changes in a service or module
@@ -367,6 +370,15 @@ EMIT [implement] audit_done verdict=<verdict>
 # ── Phase 5: Documentation Sync ───────────────────────────────────
 
 STEP 9: Update docs
+
+  PRE-CHECK (TypeScript packages only):
+    Did this change add or modify any exported symbols?
+    IF yes:
+      - Annotate all changed exports with TSDoc per references/doc_pattern.md
+      - IF docs/api-reference.md exists for this package:
+          $ bun _scripts/generate-api-docs.ts --package <pkg>
+      - $ git add -p && git commit -m "docs: add TSDoc annotations for <task-slug>"
+
   - RUN doc --mode update
   - Scope: files changed since branch was created
   IF docs were updated
@@ -385,6 +397,10 @@ STEP 10: Write devlog entry
     - report_needed: true if this is a conceptual/architectural change
 
 EMIT [implement] devlog_written
+
+SUGGEST session_review
+  > "Session complete. Run `/session-review` for a token usage and workflow analysis
+  >  of this implementation session."
 
 # ── Phase 6b: Notify (optional) ──────────────────────────────────
 
@@ -439,6 +455,7 @@ CHECKLIST
   - [ ] Full test suite passing before audit
   - [ ] Backend start verified (or explicitly skipped) if structural platform/backend changes made
   - [ ] audit scope=diff run and verdict ≠ fail before docs sync
+  - [ ] TSDoc added to all new/modified exported symbols (TypeScript packages)
   - [ ] doc --mode update run after any public API change
   - [ ] Devlog entry written
   - [ ] Branch finished (merge / PR / keep)
