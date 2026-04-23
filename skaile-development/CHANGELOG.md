@@ -5,6 +5,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-04-23
+
+### Features
+- New `session-review` skill: reads Claude Code session JSONL to report token usage, cache efficiency, estimated cost, workflow adherence, optimization tips, and skillset improvement suggestions
+- New `references/doc_pattern.md`: three-tier documentation convention — TSDoc (Tier 0, prerequisite), mandatory README.md Purpose section, Starlight API reference generation
+
+### Enhancements
+- `implement` skill: three new MUST rules (TSDoc annotations, README Purpose, CLAUDE.md updates); Phase 5 TSDoc pre-check; session-review suggestion after devlog phase
+- `doc` skill: reads `doc_pattern.md` alongside `doc_tiers.md`; Tier 0 pre-check for TypeScript packages
+- `references/doc_tiers.md`: cross-reference to `doc_pattern.md`; TSDoc prerequisite note added to decision table
+- `agents/skaile-development/SOUL.md`: proactive session-review suggestion on wrap-up signals and post-implement
+
 ## [0.2.0] — 2026-03-30
 
 ### Breaking Changes
