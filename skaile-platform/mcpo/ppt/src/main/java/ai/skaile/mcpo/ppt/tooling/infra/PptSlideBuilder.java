@@ -2,6 +2,7 @@ package ai.skaile.mcpo.ppt.tooling.infra;
 
 import java.awt.geom.Rectangle2D;
 import java.util.regex.Pattern;
+import org.apache.poi.sl.usermodel.Placeholder;
 import org.apache.poi.xslf.usermodel.SlideLayout;
 import org.apache.poi.xslf.usermodel.XSLFNotes;
 import org.apache.poi.xslf.usermodel.XSLFShape;
@@ -81,20 +82,54 @@ public final class PptSlideBuilder {
     }
 
     public static XSLFSlide createDefaultSlide(XMLSlideShow show) {
+        XSLFSlide slide;
         if (!show.getSlideMasters().isEmpty()) {
             XSLFSlideMaster master = show.getSlideMasters().get(0);
             SlideLayout preferred = bestEffortLayout(master);
             if (preferred != null) {
                 XSLFSlideLayout layout = master.getLayout(preferred);
                 if (layout != null) {
-                    return show.createSlide(layout);
+                    slide = show.createSlide(layout);
+                    clearUnfilledPlaceholders(slide);
+                    return slide;
                 }
             }
         }
-        return show.createSlide();
+        slide = show.createSlide();
+        clearUnfilledPlaceholders(slide);
+        return slide;
+    }
+
+    /**
+     * Replaces any layout-inherited placeholder prompt text ("Click to edit Master title style",
+     * "Click to edit Master subtitle style", "Click to add text", ...) with a truly empty text
+     * body so LibreOffice renders the slide without those prompts. POI's default behaviour is to
+     * leave newly-created placeholders inheriting the layout's prompt, which PowerPoint hides in
+     * slideshow mode but LibreOffice rasterises into PNG/PDF output.
+     */
+    public static void clearUnfilledPlaceholders(XSLFSlide slide) {
+        for (XSLFShape shape : slide.getShapes()) {
+            if (shape instanceof XSLFTextShape textShape) {
+                String text = textShape.getText();
+                if (text != null && isPlaceholderPrompt(text)) {
+                    textShape.clearText();
+                }
+            }
+        }
     }
 
     public static void setSlideTitle(XSLFSlide slide, String title) {
+        for (XSLFShape shape : slide.getShapes()) {
+            if (shape instanceof XSLFTextShape textShape) {
+                Placeholder type = textShape.getTextType();
+                if (type == Placeholder.TITLE || type == Placeholder.CENTERED_TITLE) {
+                    textShape.clearText();
+                    textShape.setText(title);
+                    return;
+                }
+            }
+        }
+
         for (XSLFShape shape : slide.getShapes()) {
             if (shape instanceof XSLFTextShape textShape) {
                 String existing = textShape.getText();

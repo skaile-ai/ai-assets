@@ -331,6 +331,7 @@ public final class PptSlideOperations {
         ObjectNode payload = okPayload();
         payload.put("document_id", session.getId());
         payload.put("slide_index", slideIndex);
+        payload.put("shape_index", slide.getShapes().size() - 1);
         payload.put("message", "Text box added");
         return success(payload);
     }

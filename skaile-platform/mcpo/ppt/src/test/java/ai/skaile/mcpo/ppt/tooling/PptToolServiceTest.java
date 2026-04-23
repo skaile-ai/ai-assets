@@ -1664,11 +1664,13 @@ class PptToolServiceTest {
                     "x", 50, "y", 50)).success());
 
             // add_hyperlink
-            assertTrue(service.call("ppt.add_textbox", objectNode(
+            ToolCallResult textboxAdd = service.call("ppt.add_textbox", objectNode(
                     "document_id", docId, "slide_index", 0, "text", "Go",
-                    "x", 200, "y", 200, "width", 80, "height", 40)).success());
+                    "x", 200, "y", 200, "width", 80, "height", 40));
+            assertTrue(textboxAdd.success());
+            int textboxIndex = textboxAdd.payload().path("shape_index").asInt();
             assertTrue(service.call("ppt.add_hyperlink", objectNode(
-                    "document_id", docId, "slide_index", 0, "shape_index", 1,
+                    "document_id", docId, "slide_index", 0, "shape_index", textboxIndex,
                     "url", "https://example.com")).success());
         } finally {
             service.closeAllSessions();

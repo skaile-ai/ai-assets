@@ -111,12 +111,24 @@ public final class PptTemplateOperations {
             return new XMLSlideShow();
         }
 
+        XMLSlideShow loaded;
         try (FileInputStream in = new FileInputStream(templateToUse.toFile())) {
-            return new XMLSlideShow(in);
+            loaded = new XMLSlideShow(in);
         } catch (IOException e) {
             throw new IllegalArgumentException(
                     "Failed to load template: " + templateToUse + " (" + e.getMessage() + ")", e);
         }
+
+        // Strip layout-inherited prompt text ("Click to edit Master ...") from every
+        // slide in the loaded template. Otherwise those prompts bleed into authored
+        // decks at render time, because LibreOffice rasterises them even though
+        // PowerPoint hides them in slideshow mode. Authored content is preserved —
+        // {@code clearUnfilledPlaceholders} only touches shapes whose text matches
+        // the exact POI placeholder-prompt regex.
+        for (var slide : loaded.getSlides()) {
+            PptSlideBuilder.clearUnfilledPlaceholders(slide);
+        }
+        return loaded;
     }
 
     public String currentTemplatePathAsString(String requestedTemplatePath) {
