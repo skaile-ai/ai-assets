@@ -2,7 +2,7 @@
 name: "git"
 description: "Git operations for the skaile-dev monorepo. Seven modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (two-way sync: pull + push shell repo and all submodules, print per-repo summary of commits pulled and pushed), deploy (merge main into deploy branch and push)."
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
   tags:
     - "git"
     - "commit"
@@ -558,7 +558,31 @@ IF mode = deploy
       IF user chooses cancel:
         STOP: "Deploy cancelled."
 
-  STEP 2: Stash working tree changes if needed
+  STEP 2: Ensure all submodules and shell repo are pushed
+    CI checks out the deploy branch and recursively fetches submodules at the
+    committed SHAs. If any submodule or the shell repo has unpushed commits,
+    CI will fail because it cannot resolve those SHAs.
+
+    Discover submodule paths:
+    $ git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}'
+
+    FOR EACH submodule path:
+      $ git -C <path> rev-parse --abbrev-ref HEAD → branch
+      IF branch = HEAD (detached): skip (submodule points at a fixed SHA)
+      $ git -C <path> log origin/<branch>..<branch> --oneline → unpushed
+      IF unpushed is non-empty:
+        $ git -C <path> push origin <branch>
+        IF push fails:
+          STOP: "Cannot deploy: failed to push <path> -- <error>. Fix and retry."
+
+    Check shell repo:
+    $ git log origin/main..main --oneline → unpushed_shell
+    IF unpushed_shell is non-empty:
+      $ git push origin main
+      IF push fails:
+        STOP: "Cannot deploy: failed to push shell repo -- <error>. Fix and retry."
+
+  STEP 3: Stash working tree changes if needed
     $ git status --short → status
     IF any tracked files are modified (M lines):
       $ git stash push -m "pre-deploy stash"
@@ -566,7 +590,7 @@ IF mode = deploy
     ELSE
       SET stashed = false
 
-  STEP 3: Checkout and update deploy branch
+  STEP 4: Checkout and update deploy branch
     $ git checkout deploy
     $ git pull origin deploy
     IF pull fails:
@@ -574,7 +598,7 @@ IF mode = deploy
       $ git checkout main
       STOP: "✗ Failed to pull deploy branch — <error>. Returned to main."
 
-  STEP 4: Merge main into deploy
+  STEP 5: Merge main into deploy
     $ git merge main --no-edit
     IF merge conflict:
       $ git merge --abort
@@ -582,14 +606,14 @@ IF mode = deploy
       IF stashed: $ git stash pop
       STOP: "✗ Merge conflict between main and deploy. Resolve on deploy branch manually."
 
-  STEP 5: Push deploy
+  STEP 6: Push deploy
     $ git push origin deploy
     IF push fails:
       $ git checkout main
       IF stashed: $ git stash pop
       STOP: "✗ Push to deploy failed — <error>. Returned to main."
 
-  STEP 6: Return to main
+  STEP 7: Return to main
     $ git checkout main
     IF stashed: $ git stash pop
 
@@ -609,6 +633,7 @@ CHECKLIST
   - [ ] Worktree cleaned up after finish (merge, keep, discard)
   - [ ] git-state.json written/updated
   - [ ] deploy mode only runs from main (or after explicit merge-to-main)
+  - [ ] all submodules and shell repo pushed before deploy merge
   - [ ] stash popped after deploy (even on failure)
   - [ ] Backend start verified (or explicitly skipped) when structural platform/backend changes are present
 
