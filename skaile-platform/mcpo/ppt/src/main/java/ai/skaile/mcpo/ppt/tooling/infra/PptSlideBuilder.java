@@ -102,10 +102,15 @@ public final class PptSlideBuilder {
 
     /**
      * Replaces any layout-inherited placeholder prompt text ("Click to edit Master title style",
-     * "Click to edit Master subtitle style", "Click to add text", ...) with a truly empty text
-     * body so LibreOffice renders the slide without those prompts. POI's default behaviour is to
+     * "Click to edit Master subtitle style", "Click to add text", ...) with an empty paragraph
+     * so LibreOffice renders the slide without those prompts. POI's default behaviour is to
      * leave newly-created placeholders inheriting the layout's prompt, which PowerPoint hides in
      * slideshow mode but LibreOffice rasterises into PNG/PDF output.
+     *
+     * <p>Preserves PPTX validity by leaving one empty {@code <a:p/>} paragraph in the text body.
+     * {@link XSLFTextShape#clearText()} alone strips every paragraph, producing
+     * {@code <p:txBody><a:bodyPr/><a:lstStyle/></p:txBody>} — which LibreOffice accepts but
+     * PowerPoint flags as corrupt and refuses to open.
      */
     public static void clearUnfilledPlaceholders(XSLFSlide slide) {
         for (XSLFShape shape : slide.getShapes()) {
@@ -113,6 +118,7 @@ public final class PptSlideBuilder {
                 String text = textShape.getText();
                 if (text != null && isPlaceholderPrompt(text)) {
                     textShape.clearText();
+                    textShape.addNewTextParagraph();
                 }
             }
         }

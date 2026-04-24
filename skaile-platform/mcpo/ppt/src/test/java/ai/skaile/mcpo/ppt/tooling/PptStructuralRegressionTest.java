@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,8 @@ class PptStructuralRegressionTest {
 
     private static final String PLACEHOLDER_PROMPT_MARKER = "Click to edit Master";
     private static final String PLACEHOLDER_ADD_TEXT_MARKER = "Click to add text";
+    // <a:p> / <a:p/> / <a:p attr="..."> — NOT <a:pPr>, <a:pStyle>, etc.
+    private static final Pattern PARAGRAPH_OPEN = Pattern.compile("<a:p[\\s/>]");
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -123,6 +126,53 @@ class PptStructuralRegressionTest {
                         && name.endsWith(".xml"));
         assertTrue(hasMaster,
                 "exported pptx has no slideMaster: entries=" + entries);
+    }
+
+    @Test
+    void everyTxBodyInSlideXmlContainsAtLeastOneParagraph() throws Exception {
+        // PowerPoint refuses to open a deck whose <p:txBody> has no <a:p/> child,
+        // even though LibreOffice tolerates it. The placeholder-clearing path
+        // (PptSlideBuilder.clearUnfilledPlaceholders) must preserve an empty
+        // paragraph after removing the inherited prompt text. Assert on every
+        // txBody element across a few authoring paths.
+        Path pptx = Files.createTempFile("ppt-mcp-validity", ".pptx");
+        PptToolService service = new PptToolService();
+        try {
+            ObjectNode args = mapper.createObjectNode();
+            args.put("title", "deck");
+            ArrayNode titles = args.putArray("slide_titles");
+            titles.add("a");
+            titles.add("b");
+            args.put("output_path", pptx.toString());
+            assertTrue(service.call("ppt.generate_presentation", args).success());
+
+            try (ZipFile zip = new ZipFile(pptx.toFile())) {
+                Enumeration<? extends ZipEntry> entries = zip.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    String name = entry.getName();
+                    if (!name.startsWith("ppt/slides/slide") || !name.endsWith(".xml")) {
+                        continue;
+                    }
+                    String xml;
+                    try (InputStream in = zip.getInputStream(entry)) {
+                        xml = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+                    }
+                    int txBodyStart = 0;
+                    while ((txBodyStart = xml.indexOf("<p:txBody>", txBodyStart)) >= 0) {
+                        int txBodyEnd = xml.indexOf("</p:txBody>", txBodyStart);
+                        assertTrue(txBodyEnd > txBodyStart,
+                                name + ": unterminated <p:txBody>");
+                        String body = xml.substring(txBodyStart, txBodyEnd);
+                        assertTrue(PARAGRAPH_OPEN.matcher(body).find(),
+                                name + ": <p:txBody> has no <a:p/> paragraph — PowerPoint will reject this deck. Body was: " + body);
+                        txBodyStart = txBodyEnd;
+                    }
+                }
+            }
+        } finally {
+            Files.deleteIfExists(pptx);
+        }
     }
 
     // --- helpers ---
