@@ -94,6 +94,105 @@ See `README.md` for the authoritative catalog with argument schemas. The 52 tool
 - **Transactions (3):** begin, commit, rollback.
 - **Capabilities (1):** self-describe — versions, formats, installed fonts, feature flags, safety limits.
 
+## Design principles
+
+Agents that only know the tool API tend to produce decks that are technically correct and visually poor — 12pt walls of text, mis-aligned shapes, low-contrast color pairs, overflowing textboxes. These rules are concrete and enforceable. Follow them by default; deviate only when the user explicitly asks for a different aesthetic.
+
+### Composition budget
+
+One idea per slide. If a slide has more than one conclusion, split it. Per content slide, cap at:
+
+- Title: ≤ 10 words.
+- Body: ≤ 40 words total OR ≤ 6 bullets (whichever is tighter). Each bullet ≤ 12 words.
+- Shapes: ≤ 10. If you need more, you're making a diagram — use `ppt.insert_image` with a pre-rendered figure instead.
+
+Long-form narrative belongs in speaker notes (`ppt.set_slide_notes`), not on the slide.
+
+### Typography scale
+
+Use these sizes unless a template master dictates otherwise. Never go below 14pt on a rendered slide — it is unreadable in conference rooms.
+
+| Role | Size (pt) | Weight |
+|---|---|---|
+| Slide title | 32–44 | bold |
+| Section header | 40–52 | bold |
+| Subtitle / lead | 20–24 | regular |
+| Body text | 18–22 | regular |
+| Emphasised body | 18–22 | bold or accent color, not both |
+| Caption / footnote | 12–14 | regular, secondary color |
+
+Set via `ppt.set_text` with `scope=shape` or `scope=paragraph`. Prefer **one** weight change or color change per emphasis — stacking bold + italic + color fights for attention.
+
+### Color and contrast
+
+Pick a small palette and reuse it across the deck. A default palette that works on white and on dark backgrounds:
+
+| Role | Light bg | Dark bg |
+|---|---|---|
+| Primary text | `#1F2937` | `#F9FAFB` |
+| Secondary text | `#6B7280` | `#D1D5DB` |
+| Accent (links, highlights) | `#0EA5E9` | `#38BDF8` |
+| Positive | `#10B981` | `#34D399` |
+| Negative | `#EF4444` | `#F87171` |
+| Subtle rule / border | `#E5E7EB` | `#374151` |
+
+Rules:
+
+- Max **3 hues** per slide (primary text + accent + one status color). A rainbow of statuses on one slide means the slide is doing too much — split it.
+- Contrast floor: text vs. background lightness delta ≥ 50% (approximates WCAG AA 4.5:1). `#6B7280` on `#FFFFFF` passes; `#D1D5DB` on `#FFFFFF` fails. When in doubt, go darker on light, lighter on dark.
+- Never use red + green as the only distinction for positive/negative — also use the word or an icon, for colorblindness.
+
+### Alignment and layout
+
+- **Prefer placeholders, not raw textboxes.** When a layout (`TITLE`, `TITLE_AND_CONTENT`) already defines a title/content region, set text on the placeholder via `ppt.set_text` rather than dropping a new textbox via `ppt.add_textbox`. Placeholders inherit the master's typography and alignment for free.
+- When you must add shapes, position them on a **10-point grid** (`x`, `y`, `width`, `height` all multiples of 10).
+- Slide content area (for a 960×540 page): title band `y=30, height=80`; body region `y=130, bottom=510` (leaves ~30pt breathing room at the bottom). Side margins ≥ 50pt. These match `PptSlideBuilder` defaults.
+- Align elements on shared edges. If two shapes are roughly at the same `y`, make them exactly equal. If two images are a column, share their `x` and `width`.
+
+### Overflow guard
+
+Before exporting or rendering, call `ppt.get_slide_metrics` for each slide and verify no text shape's `estimated_overflow` flag is set. If it is, either:
+
+1. Reduce text (preferred — see composition budget above), or
+2. Increase the shape `height` via `ppt.resize_shape`, or
+3. Enable auto-fit via `ppt.set_text` with `auto_fit="shrink"` (last resort — shrinking below 14pt defeats the purpose).
+
+### Images and figures
+
+- Respect aspect ratio. Use `ppt.insert_image` and let it compute the non-specified dimension rather than forcing both.
+- Leave ≥ 20pt of whitespace between an image and any text shape.
+- For screenshots, crop to the relevant region via `ppt.set_picture_effects` before inserting — don't shrink a full screen into a thumbnail.
+
+### Template-first workflow
+
+The cheapest way to make a deck look good is to **start from a template**. Before authoring:
+
+1. Call `ppt.get_default_template` — if one is set, use it in `ppt.create_document` via `template_path`.
+2. If no default exists and the user has brand requirements, ask them to upload a `.pptx` template via `ppt.upload_template` and set it as default.
+3. Only fall back to the blank default if neither is available.
+
+A good template supplies: masters with the typography above, at least three layouts (title, title+content, section-header), the brand palette as theme colors, and consistent placeholder geometry. With a template, most of the other rules in this section are automatic — authored text inherits correct size, color, and alignment.
+
+#### Bundled `skaile-default.pptx`
+
+The ppt-mcp jar ships a minimal default template at classpath `templates/skaile-default.pptx`: 16:9 page size (960×540 pt), POI default theme, one clean title-layout slide with placeholder prompts stripped. It is **not** automatically installed — consumers of the Docker image that want it as a system default should:
+
+1. Extract it from the jar (`unzip -p target/ppt-mcp-server-all.jar templates/skaile-default.pptx > skaile-default.pptx`), or copy from `src/main/resources/templates/skaile-default.pptx` in this repo.
+2. Drop it into the bind-mounted workspace (e.g. `/host/workspace/.mcpo-ppt/templates/`).
+3. Call `ppt.upload_template` with the in-container path, then `ppt.set_default_template` with the returned handle.
+
+Regenerate the committed file (after a POI upgrade or palette change) with `./mvnw test -Dtest=DefaultTemplateGenerator -Dgenerate.template=true`.
+
+### Common design mistakes
+
+| Rationalization | Reality |
+|---|---|
+| "I'll set every slide's background color directly" | Use a template's slide master. Per-slide backgrounds drift and break when the deck is reused. |
+| "Bigger title = more impact" | Above ~48pt the title crowds the content region and forces body text smaller. Stay in the scale. |
+| "One more bullet won't hurt" | 7+ bullets always means the slide should be two slides. Split. |
+| "I'll use accent color for normal body text so it stands out" | Nothing stands out if everything is accent. Reserve accent for ≤ 10% of on-slide text. |
+| "I'll center-align the body text because it looks balanced" | Left-align body. Center-alignment makes ragged left edges that the eye struggles with at scale. Center only titles and short labels. |
+
 ## Response envelope
 
 Every tool returns a uniform structured envelope:
