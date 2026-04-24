@@ -2,6 +2,16 @@ spec_version: "0.1.0"
 name: "skaile"
 version: "1.0.0"
 description: "Skaile unified AI agent — orchestrates conceptualization, architecture, implementation, and quality workflows across the full software development lifecycle."
+
+# ── Composition (mixin pattern) ──────────────────────────────────────────────
+# Paths are relative to this agent.yaml's directory.
+# ../../../  → ai-assets/
+persona:
+  - ../../../_agent-parts/personas/skaile-base.md
+
+rules:
+  - ../../../_agent-parts/rules/skaile-safety.md
+
 model:
   preferred: "claude-sonnet-4-6"
   fallback:
