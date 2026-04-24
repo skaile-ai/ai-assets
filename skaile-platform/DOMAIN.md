@@ -1,6 +1,10 @@
 ---
 name: "skaile-platform"
+type: "domain"
 description: "Platform-level components of the Skaile runtime — agents, assistants, and MCP servers (stateful MCPO services) consumed by Skaile agents and the CLI."
+building_blocks:
+  - mcpo/ppt
+  - agents/assistant
 ---
 
 # skaile-platform
