@@ -121,6 +121,7 @@ MUST  update CLAUDE.md when architecture, conventions, or environment variables 
 MUST  add a devlog entry after every completed implementation
 MUST  create a git branch before implementing (via git skill)
 MUST  verify platform/backend starts (bun run dev) after any structural backend change before marking the phase complete — structural changes include: new @Injectable service, constructor parameter changes, *.module.ts providers/imports/exports changes, import path changes in a service or module
+MUST  run formatting and linting on all affected packages before each commit — the git skill's STEP 1c handles this, but ensure it runs: Biome (format+lint) for agent-framework/forge/docs/theme; Prettier+ESLint for platform
 NEVER implement across packages without reading each package's CLAUDE.md
 NEVER skip the plan phase for standard or large complexity
 NEVER commit to main directly — always use a feature branch
@@ -214,7 +215,12 @@ STEP 7: Execute
   IF complexity = small
     - Implement directly (no subagent dispatch needed)
     - Read prog-expert skill recipes if applicable
-    - Verify implementation compiles / lint passes
+    - Verify implementation compiles (typecheck)
+    - Run formatting and linting for affected packages:
+      - agent-framework/: `cd agent-framework && bun run format && bun run lint`
+      - forge/: `cd forge && bun run format && bun run lint`
+      - platform/backend/: `cd platform/backend && bun run lint` (NEVER Biome)
+      - platform/frontend/: `cd platform/frontend && bun run lint` (NEVER Biome)
     - $ git add -p
     - RUN git mode=commit to generate structured commit
 
@@ -452,6 +458,7 @@ CHECKLIST
   - [ ] Sub-agent dispatch: decision table consulted, batch+parallel applied, MVC prompts written
   - [ ] /compact called before first Agent dispatch (if session has prior context)
   - [ ] Spec compliance review run for every task
+  - [ ] Formatting and linting run on all affected packages (Biome for agent-framework/forge; Prettier+ESLint for platform)
   - [ ] Full test suite passing before audit
   - [ ] Backend start verified (or explicitly skipped) if structural platform/backend changes made
   - [ ] audit scope=diff run and verdict ≠ fail before docs sync

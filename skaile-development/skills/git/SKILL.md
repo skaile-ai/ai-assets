@@ -107,7 +107,9 @@ MUST  write git-state.json when branch or worktree is created
 MUST  run full test suite before any merge to main
 MUST  include the ---agent--- YAML block in every commit to main
 MUST  verify platform/backend starts before committing any structural backend change — see STEP 1b in commit mode
+MUST  run formatting and linting on all affected packages before committing — see STEP 1c in commit mode
 NEVER force-push or rewrite published history
+NEVER run Biome inside platform/ — platform uses Prettier + ESLint exclusively
 NEVER merge to main without tests passing
 NEVER delete a branch without typed confirmation
 NEVER create a worktree for sequential (non-parallel) work — use branch mode instead
@@ -162,7 +164,27 @@ IF mode = commit
       IF startup banner appears:
         Terminate dev process.
         > "Backend starts cleanly. Proceeding."
-        Continue to STEP 2.
+        Continue to STEP 1c.
+
+  STEP 1c: Format and lint affected packages
+    From the packages identified in STEP 1, determine which formatters to run.
+
+    | Path prefix | Tool | Command (run from monorepo root) |
+    |---|---|---|
+    | `agent-framework/` | Biome | `cd agent-framework && bun run format && bun run lint` |
+    | `forge/` | Biome | `cd forge && bun run format && bun run lint` |
+    | `docs/`, `theme/` | Biome | `biome format --write docs/ theme/` |
+    | `platform/backend/` | Prettier + ESLint | `cd platform/backend && bun run lint` |
+    | `platform/frontend/` | Prettier + ESLint | `cd platform/frontend && bun run lint` |
+
+    NEVER run Biome on `platform/` — it uses Prettier + ESLint exclusively.
+    Only run the commands for areas that have staged changes.
+
+    IF formatting/linting modified any staged files:
+      $ git add <modified files>
+      > "Formatted <N> files in <areas> — re-staged."
+    IF linting reports unfixable errors:
+      STOP: "Lint errors found. Fix them before committing."
 
   STEP 2: Analyze Changes
     For each modified package:
@@ -636,6 +658,7 @@ CHECKLIST
   - [ ] all submodules and shell repo pushed before deploy merge
   - [ ] stash popped after deploy (even on failure)
   - [ ] Backend start verified (or explicitly skipped) when structural platform/backend changes are present
+  - [ ] Formatting and linting run on all affected packages before commit (Biome for agent-framework/forge/docs/theme; Prettier+ESLint for platform)
 
 ---
 
@@ -650,6 +673,8 @@ CHECKLIST
 | Force-pushing after rebase | Never rewrite history on shared branches |
 | Writing commit messages manually | Use `mode=commit` for structured messages with `---agent---` blocks |
 | Omitting the ---agent--- block | Every commit to main must include the agent metadata block |
+| Committing without formatting | Always run format+lint before committing — Biome for agent-framework/forge; Prettier+ESLint for platform |
+| Running Biome on platform/ | Platform uses Prettier + ESLint. Biome reformats it incorrectly. |
 
 ## Integration
 
