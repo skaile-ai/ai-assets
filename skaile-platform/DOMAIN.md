@@ -3,8 +3,8 @@ name: "skaile-platform"
 type: "domain"
 description: "Platform-level components of the Skaile runtime — agents, assistants, and MCP servers (stateful MCPO services) consumed by Skaile agents and the CLI."
 building_blocks:
-  - mcpo/ppt
-  - agents/assistant
+  agents: "assistant — default agent persona (RULES.md + SOUL.md) consumed at runtime"
+  mcpo_servers: "ppt — PowerPoint (.pptx/.pptm) authoring, rendering, and export via Apache POI + LibreOffice, exposed as 52 JSON-RPC tools over stdio"
 ---
 
 # skaile-platform
