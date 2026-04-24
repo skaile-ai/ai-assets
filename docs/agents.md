@@ -3,11 +3,21 @@ title: Agents
 description: The GitAgent format — agent.yaml spec, SOUL.md, RULES.md, knowledge/, imprint assembly, and how agents are used by the runner.
 _sources:
   - path: ai-assets/ai-asset-management/agents/skaile/agent.yaml
+    description: Root orchestrator — persona/rules mixin pattern, model config, delegation, requires
   - path: ai-assets/skailup/agents/skailup/agent.yaml
+    description: Guide agent — skailup-* discovery convention
   - path: ai-assets/skaileup-conceptualization/agents/skailup-conceptualize/agent.yaml
+    description: Concept pipeline agent — extends pattern, metadata fields
   - path: ai-assets/skaileup-implementation/agents/skailup-implement/agent.yaml
-_based_on_commit: 0083cc0d1cd7892ac8fa3bb57c55c73af6852558
-_last_synced: "2026-04-16"
+    description: Implementation pipeline agent
+  - path: ai-assets/forge-project/agent/agent.yaml
+    description: Forge-Project in-app dev assistant — skills field, app-specific pattern
+  - path: ai-assets/skaile-development/agents/skaile-development/agent.yaml
+    description: Skaile-dev workflow agent
+  - path: ai-assets/skaile-platform/agents/assistant/agent.yaml
+    description: Platform assistant agent
+_based_on_commit: 5fd26c1
+_last_synced: "2026-04-25"
 ---
 
 An **agent** in ai-assets is a [GitAgent](https://gitagent.sh) — a portable, version-controlled agent definition stored as a plain directory. The GitAgent format defines the structure and schema; the `agent-runner` assembles the definition into a system prompt (called an **imprint**) before executing a flow.
@@ -18,7 +28,7 @@ An **agent** in ai-assets is a [GitAgent](https://gitagent.sh) — a portable, v
 
 ```
 <agent-name>/
-├── agent.yaml          ← Manifest — spec version, name, model, delegation, dependencies
+├── agent.yaml          ← Manifest — spec version, name, model, delegation, requires
 ├── SOUL.md             ← Agent identity: who it is, what it cares about, its values
 ├── RULES.md            ← Behavioral constraints: what it must and must never do
 └── knowledge/
@@ -38,6 +48,13 @@ description: >
   Concept pipeline orchestrator — runs Discovery → Experience → Blueprint.
 
 extends: ../../ai-asset-management/agents/skaile/agent.yaml  # optional inheritance
+
+# Mixin composition (optional — pulls in shared persona/rules fragments)
+persona:
+  - ../../../_agent-parts/personas/skaile-base.md
+
+rules:
+  - ../../../_agent-parts/rules/skaile-safety.md
 
 model:
   preferred: claude-opus-4-6     # Primary model
@@ -64,6 +81,20 @@ metadata:                        # Freeform — domain, skill paths, pipeline no
 ```
 
 ## Field Reference
+
+### `persona` and `rules` (mixin composition)
+
+Optional arrays of relative file paths. The runner reads each file and prepends its content to the assembled system prompt, before SOUL.md and RULES.md respectively.
+
+```yaml
+persona:
+  - ../../../_agent-parts/personas/skaile-base.md   # shared identity fragment
+
+rules:
+  - ../../../_agent-parts/rules/skaile-safety.md    # shared constraint fragment
+```
+
+Mixin files live in `_agent-parts/` at the ai-assets root and are reused across multiple agents to avoid duplication. Paths are relative to the `agent.yaml` file.
 
 ### `model`
 
@@ -99,12 +130,12 @@ agents:
         - discovery_requested
 ```
 
-### `dependencies`
+### `requires`
 
-Declares which other agent definitions this agent depends on:
+Declares which other agent definitions this agent depends on. The runner resolves these at startup and mounts them at the specified path:
 
 ```yaml
-dependencies:
+requires:
   - name: conceptualization
     source: ../../skaileup-conceptualization/agents/skailup-conceptualize
     version: 1.0.0
@@ -113,7 +144,7 @@ dependencies:
 
 ### `extends`
 
-Inherits base configuration from a parent `agent.yaml`. Fields in the child override parent fields; `agents`, `dependencies`, and `tags` are merged.
+Inherits base configuration from a parent `agent.yaml`. Fields in the child override parent fields; `agents`, `requires`, and `tags` are merged.
 
 ## SOUL.md
 
@@ -175,7 +206,11 @@ Parts are joined with `\n\n---\n\n`. Missing files are silently skipped.
 | `skailup-implement` | `skaileup-implementation/agents/skailup-implement/` | Implementation pipeline (Setup → Verify) |
 | `quality` | `skaileup-evaluate/agents/quality/` | Quality assurance |
 | `architecture` | `skaileup-architecture/agents/architecture/` | System architecture |
-| `pi` | `pichi/agent/` | Default CLI agent — focused software development assistant |
+| `skaile-development` | `skaile-development/agents/skaile-development/` | skaile-dev monorepo expert — routes tasks to skills and prog-experts |
+| `forge-project-assistant` | `forge-project/agent/` | In-app dev assistant for forge/project workspaces |
+| `forge-project-base-orchestrator` | `forge-project/base-orchestrator/` | Home workspace guide — creates projects, explains Forge Project features |
+| `forge-project-orchestrator` | `forge-project/project-orchestrator/` | Project workspace assistant — coding, writing, research, file management |
+| `skaile-assistant` | `skaile-platform/agents/assistant/` | Skaile platform enterprise assistant — research, analysis, writing, code |
 
 The `skailup-*` naming convention is significant: any agent installed to `.claude/agents/` whose name starts with `skailup-` is automatically discovered by the `skailup` guide agent at session start. New orchestrators (e.g. `skailup-implement-supabase`) are discovered without any change to `skailup` itself.
 

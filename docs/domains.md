@@ -4,8 +4,8 @@ description: What a domain is, its folder structure, DOMAIN.md, and how domains 
 _sources:
   - path: ai-assets/skailup/DOMAIN.md
   - path: ai-assets/README.md
-_based_on_commit: 0083cc0d1cd7892ac8fa3bb57c55c73af6852558
-_last_synced: "2026-04-16"
+_based_on_commit: 5fd26c1
+_last_synced: "2026-04-25"
 ---
 
 A **domain** is a top-level folder in `ai-assets/` that groups related skills, agents, flows, prompts, and contracts by concern. Domains are the organizational unit — `arm` discovers assets by scanning within domain directories, and the runner resolves skills by walking across them.
@@ -60,11 +60,12 @@ stage: alpha
 | Type | Pattern | Examples |
 |---|---|---|
 | **Guide domains** | Conversational entry point; discovers and routes to other agents at runtime | `skailup` |
-| **Pipeline domains** | Numbered skill groups following a workflow order | `skaileup-conceptualization`, `skaileup-implementation`, `skaileup-evaluate` |
+| **Pipeline domains** | Numbered skill groups following a workflow order | `skaileup-conceptualization`, `skaileup-implementation`, `skaileup-evaluate`, `skaile-development` |
 | **Expert domains** | One skill per technology, no pipeline order | `dev-implementation-experts-js`, `-python`, `-typst` |
 | **Knowledge domains** | Research and content production | `knowledge-research`, `knowledge-writing` |
-| **Integration domains** | One skill per external service | `use` |
-| **Meta domains** | Manage the ecosystem itself | `ai-asset-management` |
+| **Integration domains** | One skill per external service or workflow | `use`, `github-ops` |
+| **Application domains** | Agent definitions and skills scoped to a specific Skaile app | `forge-project`, `skaile-platform` |
+| **Meta domains** | Manage the ecosystem itself | `ai-asset-management`, `skaileup-lab` |
 | **Shared domains** | Reference material only, never invoked | `skaileup-shared` |
 
 ## How Domains Relate
