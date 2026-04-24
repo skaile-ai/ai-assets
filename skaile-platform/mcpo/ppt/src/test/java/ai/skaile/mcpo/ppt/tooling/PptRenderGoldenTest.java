@@ -66,6 +66,10 @@ class PptRenderGoldenTest {
 
     @Test
     void contentSlideWithTextbox() throws Exception {
+        // The TITLE layout's CENTERED_TITLE placeholder occupies roughly y=233–349pt
+        // on the default 720×540pt page. Place the body textbox well below that band
+        // so title and body are visually distinct — overlap would both look wrong in
+        // the golden and weaken what the test can detect.
         renderAndCompare("textbox-body", service -> {
             ObjectNode create = mapper.createObjectNode();
             create.put("title", "Findings");
@@ -76,9 +80,9 @@ class PptRenderGoldenTest {
             tb.put("document_id", docId);
             tb.put("slide_index", 0);
             tb.put("text", "Revenue is up 42%");
-            tb.put("x", 60);
-            tb.put("y", 200);
-            tb.put("width", 500);
+            tb.put("x", 250);
+            tb.put("y", 300);
+            tb.put("width", 560);
             tb.put("height", 60);
             tb.put("font_size", 24);
             service.call("ppt.add_textbox", tb);
