@@ -539,13 +539,19 @@ class DockerPptMcpServerSmokeTest {
             java.awt.image.BufferedImage hiFidelityImage =
                     javax.imageio.ImageIO.read(hiFidelityPng.toFile());
             assertTrue(hiFidelityImage != null && hiFidelityImage.getWidth() > 0);
+            // Full-scan for any non-white pixel with early exit. An earlier version
+            // sampled every h/20 × w/20 — too coarse once slide authoring stopped
+            // leaking wide placeholder-prompt text across the page: a small CJK
+            // textbox in the top-left could slip between sample points and the
+            // slide looked blank to the test even though the CJK font rendered
+            // fine. The rendered PNG is ~500k pixels; scanning all of them is
+            // trivial compared to the soffice render it just waited for.
             boolean hasNonWhitePixel = false;
             int w = hiFidelityImage.getWidth();
             int h = hiFidelityImage.getHeight();
-            for (int y = 0; y < h && !hasNonWhitePixel; y += Math.max(1, h / 20)) {
-                for (int x = 0; x < w && !hasNonWhitePixel; x += Math.max(1, w / 20)) {
-                    int rgb = hiFidelityImage.getRGB(x, y) & 0xFFFFFF;
-                    if (rgb != 0xFFFFFF) {
+            for (int y = 0; y < h && !hasNonWhitePixel; y++) {
+                for (int x = 0; x < w && !hasNonWhitePixel; x++) {
+                    if ((hiFidelityImage.getRGB(x, y) & 0xFFFFFF) != 0xFFFFFF) {
                         hasNonWhitePixel = true;
                     }
                 }
