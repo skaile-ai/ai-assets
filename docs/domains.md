@@ -6,6 +6,8 @@ _sources:
   - path: ai-assets/README.md
 _based_on_commit: 5fd26c1
 _last_synced: "2026-04-25"
+sidebar:
+  order: 50
 ---
 
 A **domain** is a top-level folder in `ai-assets/` that groups related skills, agents, flows, prompts, and contracts by concern. Domains are the organizational unit — `arm` discovers assets by scanning within domain directories, and the runner resolves skills by walking across them.

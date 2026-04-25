@@ -1,6 +1,8 @@
 ---
 title: Flows
 description: What a flow is, how nodes and edges work, how the runner executes a flow, globals reference, and writing a new flow.
+sidebar:
+  order: 20
 ---
 
 A **flow** is a `flow.json` file — a directed acyclic graph of skill nodes connected by typed edges. The `agent-flow-engine` computes which nodes are ready to run; `agent-runner` executes them sequentially or in parallel groups.
@@ -159,4 +161,4 @@ skaile-agent start cli-concept --project-dir ./my-project
    - Group nodes (`type: 'group'`) are ignored by the engine — visual only
    - Files starting with `_` are skipped by `loadAllFlows`
 
-See the [flow-engine concepts](/flow-engine/concepts/) and [flow.json reference](/flow-engine/flow-json/) for full engine documentation.
+See the [flow-engine concepts](/integrate/flow-engine/concepts/) and [flow.json reference](/integrate/flow-engine/flow-json/) for full engine documentation.

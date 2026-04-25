@@ -18,6 +18,8 @@ _sources:
     description: Platform assistant agent
 _based_on_commit: 5fd26c1
 _last_synced: "2026-04-25"
+sidebar:
+  order: 30
 ---
 
 An **agent** in ai-assets is a [GitAgent](https://gitagent.sh) — a portable, version-controlled agent definition stored as a plain directory. The GitAgent format defines the structure and schema; the `agent-runner` assembles the definition into a system prompt (called an **imprint**) before executing a flow.
