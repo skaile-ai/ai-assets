@@ -1,3 +1,0 @@
-# Changelog — skaileup-architecture
-
-## [Unreleased]

@@ -1,8 +1,0 @@
-name: skaileup-architecture
-description: System architecture and AI agent integration design
-version: 0.1.0
-dependencies:
-  - contract:architecture-contract
-  - skill:skailup-prog-expert-integration-ai-agents
-  - skill:skailup-prog-expert-skill-system
-  - agent:architecture
