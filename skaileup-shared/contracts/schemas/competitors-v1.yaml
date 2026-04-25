@@ -1,0 +1,38 @@
+id: competitors-v1
+description: "Structured competitor analysis produced by skailup-research. Stored at _grounding/research/competitors.md."
+version: 1
+type: object
+required: [products_analyzed, last_updated, products]
+properties:
+  products_analyzed:
+    type: integer
+    description: "Number of competitor products analyzed"
+  last_updated:
+    type: string
+    format: date
+  products:
+    type: array
+    items:
+      type: object
+      required: [name, url, category]
+      properties:
+        name: { type: string }
+        url: { type: string }
+        category: { type: string, description: "direct | indirect | adjacent" }
+        strengths: { type: array, items: { type: string } }
+        weaknesses: { type: array, items: { type: string } }
+        features: { type: array, items: { type: string } }
+        positioning: { type: string }
+        pricing_model: { type: string }
+
+example:
+  products_analyzed: 3
+  last_updated: "2026-04-25"
+  products:
+    - name: "Competitor A"
+      url: "https://competitor-a.com"
+      category: direct
+      strengths: ["Fast onboarding", "Clean UI"]
+      weaknesses: ["No offline mode", "Limited API"]
+      features: ["Dashboard", "Reports", "Team management"]
+      positioning: "Enterprise-first project management"

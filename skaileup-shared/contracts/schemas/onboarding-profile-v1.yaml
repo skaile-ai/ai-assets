@@ -1,0 +1,52 @@
+id: onboarding-profile-v1
+description: "Machine-readable project identity produced by skailup-onboard. Stored at _grounding/onboarding/profile.yaml."
+version: 1
+type: object
+required: [name, problem, audience, type, created, tiers]
+properties:
+  name:
+    type: string
+    description: "Project name"
+  problem:
+    type: string
+    description: "Problem statement — what pain this project solves"
+  audience:
+    type: string
+    description: "Target audience description"
+  type:
+    type: string
+    enum: [web-app, cli-tool, api-service, library, data-pipeline, mobile-app]
+    description: "Project type — determines which artifact profile to load"
+  created:
+    type: string
+    format: date
+    description: "Project creation date (ISO 8601)"
+  tiers:
+    type: object
+    description: "Per-domain tier settings (none/light/medium/max)"
+    properties:
+      skaileup-research: { type: string, enum: [none, light, medium, max] }
+      skaileup-discovery: { type: string, enum: [none, light, medium, max] }
+      skaileup-experience: { type: string, enum: [none, light, medium, max] }
+      skaileup-prototype: { type: string, enum: [none, light, medium, max] }
+      skaileup-storybook: { type: string, enum: [none, light, medium, max] }
+      skaileup-blueprint: { type: string, enum: [none, light, medium, max] }
+      skaileup-concept-meta: { type: string, enum: [none, light, medium, max] }
+    additionalProperties:
+      type: string
+      enum: [none, light, medium, max]
+
+example:
+  name: "ProjectFlow"
+  problem: "Teams waste hours manually syncing project status across tools"
+  audience: "Engineering managers at mid-size companies (50-500 people)"
+  type: web-app
+  created: "2026-04-25"
+  tiers:
+    skaileup-research: medium
+    skaileup-discovery: medium
+    skaileup-experience: medium
+    skaileup-blueprint: medium
+    skaileup-prototype: light
+    skaileup-storybook: none
+    skaileup-concept-meta: light

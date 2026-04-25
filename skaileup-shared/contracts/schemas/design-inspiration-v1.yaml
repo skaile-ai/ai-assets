@@ -1,0 +1,43 @@
+id: design-inspiration-v1
+description: "Design inspiration and visual reference collection produced by skailup-research. Stored at _grounding/research/design-inspiration.md."
+version: 1
+type: object
+required: [references_collected, last_updated]
+properties:
+  references_collected:
+    type: integer
+  last_updated:
+    type: string
+    format: date
+  layout_patterns:
+    type: array
+    items:
+      type: object
+      properties:
+        source: { type: string }
+        pattern: { type: string }
+        applicability: { type: string }
+  color_references:
+    type: array
+    items:
+      type: object
+      properties:
+        source: { type: string }
+        palette: { type: string }
+        mood: { type: string }
+  typography_references:
+    type: array
+    items:
+      type: object
+      properties:
+        source: { type: string }
+        fonts: { type: string }
+        usage: { type: string }
+  component_patterns:
+    type: array
+    items:
+      type: object
+      properties:
+        source: { type: string }
+        component: { type: string }
+        notes: { type: string }
