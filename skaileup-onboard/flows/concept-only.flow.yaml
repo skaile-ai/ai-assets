@@ -25,6 +25,31 @@ globals:
   auto_review: true
   subagent_mode: true
   verbosity: "detailed"
+tier_presets:
+  quick:
+    skaileup-research: light
+    skaileup-discovery: light
+    skaileup-experience: light
+    skaileup-prototype: none
+    skaileup-storybook: none
+    skaileup-blueprint: light
+    skaileup-concept-meta: none
+  standard:
+    skaileup-research: medium
+    skaileup-discovery: medium
+    skaileup-experience: medium
+    skaileup-prototype: light
+    skaileup-storybook: none
+    skaileup-blueprint: medium
+    skaileup-concept-meta: light
+  thorough:
+    skaileup-research: max
+    skaileup-discovery: max
+    skaileup-experience: max
+    skaileup-prototype: medium
+    skaileup-storybook: max
+    skaileup-blueprint: max
+    skaileup-concept-meta: medium
 modes:
   research:
     enabled: true
@@ -40,12 +65,31 @@ modes:
         - "domain"
         - "competitors"
         - "audiences"
-        - "design_inspiration"
+        - "design-inspiration"
         - "patterns"
   standards:
     enabled: false
-entry: "overview"
+entry: "onboard"
 nodes:
+  - id: "onboard"
+    type: "skill"
+    position:
+      x: -400
+      y: 200
+    data:
+      skill: "skailup-onboard"
+      label: "Project Onboarding"
+      optional: false
+  - id: "ingest-seeds"
+    type: "skill"
+    position:
+      x: -200
+      y: 200
+    data:
+      skill: "skailup-ingest-seeds"
+      label: "Ingest Seeds"
+      optional: true
+      skip_when: "no_seeds_dir"
   - id: "g-concept"
     type: "group"
     position:
@@ -70,6 +114,7 @@ nodes:
       skill: "skailup-overview"
       label: "Project Brief"
       optional: false
+      depth_from: "skaileup-discovery"
   - id: "journeys"
     type: "skill"
     parentNode: "g-concept"
@@ -80,6 +125,7 @@ nodes:
       skill: "skailup-journeys"
       label: "User Journeys"
       optional: false
+      depth_from: "skaileup-experience"
       parameters:
         hero_approval_required: true
       overrides:
@@ -95,6 +141,7 @@ nodes:
       skill: "skailup-brand-visual"
       label: "Brand Visual"
       optional: false
+      depth_from: "skaileup-discovery"
       parallel_group: "identity"
       overrides:
         skip_checks:
@@ -109,6 +156,7 @@ nodes:
       skill: "skailup-techstack"
       label: "Tech Stack"
       optional: false
+      depth_from: "skaileup-blueprint"
       parallel_group: "identity"
       overrides:
         skip_checks:
@@ -123,6 +171,7 @@ nodes:
       skill: "skailup-features"
       label: "Features"
       optional: false
+      depth_from: "skaileup-experience"
       subagent: true
       overrides:
         skip_checks:
@@ -138,6 +187,9 @@ nodes:
       skill: "skailup-brand-behavioral"
       label: "Brand Behavioral"
       optional: true
+      depth_from: "skaileup-discovery"
+      skip_when:
+        tier_is: none
       overrides:
         skip_checks:
           - "_concept/1_discovery/1_overview/brief.md"
@@ -151,6 +203,9 @@ nodes:
       skill: "skailup-behaviors"
       label: "Behaviors"
       optional: true
+      depth_from: "skaileup-experience"
+      skip_when:
+        tier_is: none
       overrides:
         skip_checks:
           - "_concept/2_experience/2_features"
@@ -164,6 +219,7 @@ nodes:
       skill: "skailup-architecture"
       label: "Architecture"
       optional: false
+      depth_from: "skaileup-blueprint"
       subagent: true
       overrides:
         skip_checks:
@@ -179,6 +235,7 @@ nodes:
       skill: "skailup-datamodel"
       label: "Data Model"
       optional: false
+      depth_from: "skaileup-blueprint"
       subagent: true
       overrides:
         skip_checks:
@@ -193,6 +250,7 @@ nodes:
       skill: "skailup-screens"
       label: "Screens"
       optional: false
+      depth_from: "skaileup-experience"
       subagent: true
       overrides:
         skip_checks:
@@ -207,6 +265,9 @@ nodes:
       skill: "skailup-components"
       label: "Components"
       optional: true
+      depth_from: "skaileup-experience"
+      skip_when:
+        tier_is: none
       overrides:
         skip_checks:
           - "_concept/2_experience/2_features"
@@ -220,6 +281,9 @@ nodes:
       skill: "skailup-storybook"
       label: "Storybook"
       optional: true
+      depth_from: "skaileup-storybook"
+      skip_when:
+        tier_is: none
       overrides:
         skip_checks:
           - "_concept/2_experience/2_features"
@@ -233,12 +297,23 @@ nodes:
       skill: "skailup-mock"
       label: "Mockups"
       optional: true
+      depth_from: "skaileup-prototype"
+      skip_when:
+        tier_is: none
       parameters:
         framework: "vue"
       overrides:
         skip_checks:
           - "_concept/2_experience/2_features"
 edges:
+  - id: "e-onboard-ingest"
+    source: "onboard"
+    target: "ingest-seeds"
+    type: "flow"
+  - id: "e-ingest-overview"
+    source: "ingest-seeds"
+    target: "overview"
+    type: "flow"
   - id: "e-overview-journeys"
     source: "overview"
     target: "journeys"
@@ -321,10 +396,10 @@ edges:
     type: "optional"
 next_flows:
   - id: "standard"
-    domain: "skaileup-implementation"
+    domain: "skaileup-build"
     label: "Implement →"
     hint: "Scaffold, implement features with TDD, run tests, and verify."
   - id: "full"
-    domain: "skaileup-implementation"
+    domain: "skaileup-build"
     label: "Full Production →"
     hint: "Readiness gate, design pass, comprehensive test suite, verify."

@@ -13,6 +13,11 @@ metadata:
     - "routes"
     - "navigation"
   source: "MIGRATED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
 ---
 
 > **NOTE:** This skill is a variant of `screens` reserved for future testing and
@@ -206,6 +211,15 @@ screens:
 |------|---------|
 | `_concept/2_experience/3_screens/00_layout/shell.md` | App shell: navigation, sidebar, header, footer, breakpoints |
 | `_concept/2_experience/3_screens/<NN_group>/<screen>.md` | Per-screen spec with component inventory, data, states |
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Core items only — list names and one-line descriptions, skip edge cases |
+| `medium` | Standard coverage — full specs for core items, brief for secondary (default) |
+| `max` | Exhaustive coverage — every feature/screen/component with full detail, edge cases, error states |
 
 ## Common Mistakes
 

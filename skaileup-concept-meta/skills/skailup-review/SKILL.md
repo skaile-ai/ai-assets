@@ -15,6 +15,11 @@ metadata:
     - "cleanup"
     - "quality"
   source: "MERGED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     inputs_optional:
       - id: mode
@@ -259,6 +264,15 @@ CHECKLIST
   - [ ] model.json/model.dbml not directly modified
 
 ---
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Quick scan — high-level issues only |
+| `medium` | Standard review — all sections checked, fixes suggested (default) |
+| `max` | Deep audit — cross-reference validation, consistency checks, improvement suggestions |
 
 ## Common Mistakes
 

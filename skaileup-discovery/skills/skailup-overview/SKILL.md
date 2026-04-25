@@ -14,6 +14,11 @@ metadata:
     - "audience"
     - "problem"
   source: "MERGED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     inputs_optional:
       - id: raw_description
@@ -269,6 +274,15 @@ CHECKLIST
   - [ ] User has explicitly approved the brief
 
 ---
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Produce minimal output — key points only, no elaboration |
+| `medium` | Standard output — balanced detail and coverage (default) |
+| `max` | Comprehensive output — exhaustive analysis, extended examples, edge cases |
 
 ## Common Mistakes
 

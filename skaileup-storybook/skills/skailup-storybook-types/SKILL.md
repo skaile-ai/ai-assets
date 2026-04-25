@@ -12,6 +12,11 @@ metadata:
     - "compilation"
     - "postxl"
   source: "MIGRATED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
 ---
 
 > **NOTE:** This skill is PostXL-specific. It requires the `pxl` CLI tool for type
@@ -131,6 +136,15 @@ If build fails, fix runtime issues not caught by `tsc` and re-run until build su
 | `_concept/2_experience/4_storybook/src/types/` | Generated types from `pxl types` |
 | `_concept/2_experience/4_storybook/src/types/ui.ts` | Preserved UI-only types |
 | `_concept/2_experience/4_storybook/src/types/index.ts` | Barrel re-exporting both |
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Minimal setup — hero flow stories only |
+| `medium` | Standard setup — hero + vital flow stories (default) |
+| `max` | Full setup — all flows, edge cases, responsive variants, dark mode |
 
 ## Common Mistakes
 

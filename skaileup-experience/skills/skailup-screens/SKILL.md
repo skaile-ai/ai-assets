@@ -13,6 +13,11 @@ metadata:
     - "experience"
     - "user-perspective"
   source: "MERGED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     files:
       - path: "_concept/2_experience/2_features"
@@ -241,6 +246,15 @@ CHECKLIST
   - [ ] User has explicitly approved the screen specs
 
 ---
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Core items only — list names and one-line descriptions, skip edge cases |
+| `medium` | Standard coverage — full specs for core items, brief for secondary (default) |
+| `max` | Exhaustive coverage — every feature/screen/component with full detail, edge cases, error states |
 
 ## Common Mistakes
 

@@ -13,6 +13,11 @@ metadata:
     - "must-have"
     - "nice-to-have"
   source: "MERGED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     files:
       - path: "_concept/1_discovery/1_overview/brief.md"
@@ -249,6 +254,15 @@ CHECKLIST
   - [ ] Summary table shown and user has explicitly approved
 
 ---
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Core items only — list names and one-line descriptions, skip edge cases |
+| `medium` | Standard coverage — full specs for core items, brief for secondary (default) |
+| `max` | Exhaustive coverage — every feature/screen/component with full detail, edge cases, error states |
 
 ## Common Mistakes
 

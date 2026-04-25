@@ -13,6 +13,11 @@ metadata:
     - "vital"
     - "hygiene"
   source: "MERGED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     files:
       - path: "_concept/2_experience/4_storybook/src/pages"
@@ -137,6 +142,15 @@ MUST  mark hero flow as the default Storybook story
 NEVER create journey-specific components, layouts, or wrappers
 NEVER add explicit "Next Step" / "Previous Step" navigation
 NEVER skip vital or hygiene flows — all non-backlog journeys are required
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Minimal setup — hero flow stories only |
+| `medium` | Standard setup — hero + vital flow stories (default) |
+| `max` | Full setup — all flows, edge cases, responsive variants, dark mode |
 
 CHECKLIST
   - [ ] Hero flow has a journey story in Journeys/Hero/

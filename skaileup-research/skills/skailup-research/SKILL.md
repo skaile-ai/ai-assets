@@ -17,6 +17,11 @@ metadata:
     - "patterns"
     - "grounding"
   source: "MIGRATED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     inputs_required:
       - id: research_scope
@@ -294,6 +299,15 @@ CHECKLIST
 | `_grounding/research/behavioral-patterns.md` | State machines and lifecycle patterns (scope: behavioral or all) |
 | `_grounding/step/{step}/*.md` | Step-specific research when dispatched alongside a skill |
 | `_grounding/findings/` | Raw screenshots, excerpts, links |
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Produce minimal output — key points only, no elaboration |
+| `medium` | Standard output — balanced detail and coverage (default) |
+| `max` | Comprehensive output — exhaustive analysis, extended examples, edge cases |
 
 ## Common Mistakes
 

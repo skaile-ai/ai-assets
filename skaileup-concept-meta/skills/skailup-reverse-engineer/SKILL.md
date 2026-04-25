@@ -15,6 +15,11 @@ metadata:
     - "infer"
     - "scan"
   source: "MIGRATED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     inputs_required:
       - id: repo_path
@@ -545,6 +550,15 @@ EMIT  [reverse-engineer] completed run_id=<uuid> artifacts_written=<N> needs_rev
 | `_concept/1_discovery/2_brand/identity.md` | Brand character extracted from CSS/theme |
 | `_concept/1_discovery/2_brand/tokens.json` | Design tokens extracted from config |
 | `_concept/2_experience/3_screens/<NN>/<screen>.md` | Screen specs extracted from page components |
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Quick scan — high-level issues only |
+| `medium` | Standard review — all sections checked, fixes suggested (default) |
+| `max` | Deep audit — cross-reference validation, consistency checks, improvement suggestions |
 
 ## Common Mistakes
 

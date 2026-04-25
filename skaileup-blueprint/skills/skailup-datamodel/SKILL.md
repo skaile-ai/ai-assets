@@ -14,6 +14,11 @@ metadata:
     - "seed"
     - "feature-map"
   source: "MERGED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     files:
       - path: "_concept/2_experience/2_features"
@@ -307,6 +312,15 @@ CHECKLIST
   - [ ] User has explicitly approved the data model
 
 ---
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Key decisions only — technology names, brief rationale |
+| `medium` | Standard documentation — decisions with reasoning, diagrams, trade-offs (default) |
+| `max` | Comprehensive documentation — full ADRs, alternative analysis, migration paths |
 
 ## Common Mistakes
 

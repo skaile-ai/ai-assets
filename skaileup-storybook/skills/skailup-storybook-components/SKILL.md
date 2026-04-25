@@ -10,6 +10,11 @@ metadata:
     - "building-blocks"
     - "custom-components"
   source: "MERGED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     files:
       - path: "_concept/2_experience/4_storybook"
@@ -122,6 +127,15 @@ MUST  write src/components/index barrel — the pages sub-skill imports from her
 MUST  use realistic domain-appropriate data in stories
 NEVER create stories for components already available in the component_library
 NEVER invent colors or fonts — use CSS custom properties from brand tokens
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Minimal setup — hero flow stories only |
+| `medium` | Standard setup — hero + vital flow stories (default) |
+| `max` | Full setup — all flows, edge cases, responsive variants, dark mode |
 
 CHECKLIST
   - [ ] All screen spec UI elements inventoried and categorized (library vs custom)

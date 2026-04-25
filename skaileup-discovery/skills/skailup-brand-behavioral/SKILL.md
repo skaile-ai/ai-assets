@@ -15,6 +15,11 @@ metadata:
     - "messaging"
     - "ux-writing"
   source: "MERGED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     files:
       - path: "_concept/1_discovery/1_overview/brief.md"
@@ -260,6 +265,15 @@ CHECKLIST
   - [ ] copy_guidelines.md includes button label conventions and capitalization rules
 
 ---
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Produce minimal output — key points only, no elaboration |
+| `medium` | Standard output — balanced detail and coverage (default) |
+| `max` | Comprehensive output — exhaustive analysis, extended examples, edge cases |
 
 ## Common Mistakes
 

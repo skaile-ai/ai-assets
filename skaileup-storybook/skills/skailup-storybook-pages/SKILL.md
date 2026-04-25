@@ -12,6 +12,11 @@ metadata:
     - "states"
     - "responsive"
   source: "MERGED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     files:
       - path: "_concept/2_experience/4_storybook/src/components"
@@ -145,6 +150,15 @@ MUST  write src/pages/manifest.json — required by storybook-journeys
 NEVER hardcode navigation items — derive from shell spec
 NEVER skip screen states documented in screen specs
 NEVER invent colors or fonts — use CSS custom properties
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Minimal setup — hero flow stories only |
+| `medium` | Standard setup — hero + vital flow stories (default) |
+| `max` | Full setup — all flows, edge cases, responsive variants, dark mode |
 
 CHECKLIST
   - [ ] AppShell component built from shell.md

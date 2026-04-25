@@ -12,6 +12,11 @@ metadata:
     - "profile"
     - "stack-selection"
   source: "MERGED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     files:
       - path: "_concept/1_discovery/1_overview/brief.md"
@@ -302,6 +307,15 @@ CHECKLIST
   - [ ] User has explicitly approved the stack
 
 ---
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Key decisions only — technology names, brief rationale |
+| `medium` | Standard documentation — decisions with reasoning, diagrams, trade-offs (default) |
+| `max` | Comprehensive documentation — full ADRs, alternative analysis, migration paths |
 
 ## Common Mistakes
 

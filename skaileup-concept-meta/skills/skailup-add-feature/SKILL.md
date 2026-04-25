@@ -14,6 +14,11 @@ metadata:
     - "iteration"
     - "incremental"
   source: "MERGED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     files:
       - path: "_concept/1_discovery/1_overview/brief.md"
@@ -272,6 +277,15 @@ CHECKLIST
   - [ ] User has explicitly approved cascade
 
 ---
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Quick scan — high-level issues only |
+| `medium` | Standard review — all sections checked, fixes suggested (default) |
+| `max` | Deep audit — cross-reference validation, consistency checks, improvement suggestions |
 
 ## Common Mistakes
 

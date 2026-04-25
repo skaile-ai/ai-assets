@@ -18,6 +18,11 @@ metadata:
     - "preact"
     - "htm"
   source: "MIGRATED"
+  parameters:
+    depth:
+      type: enum
+      values: [none, light, medium, max]
+      default: medium
   prerequisites:
     files:
       - path: "_concept/2_experience/3_screens"
@@ -247,6 +252,15 @@ For each screen in `2_experience/3_screens/`, generate an HTML file. Each screen
 | `_concept/mockups/shared/seed.js` | Seed data as JS for all screens |
 | `_concept/mockups/screens/*.html` | One HTML per screen, all linked |
 | `_concept/mockups/README.md` | How to open, what to test |
+
+## Depth Behavior
+
+| Depth | Behavior |
+|---|---|
+| `none` | Skip this skill entirely |
+| `light` | Hero flow mockup only |
+| `medium` | Hero + vital flow mockups (default) |
+| `max` | All flows including edge cases and error states |
 
 ## Common Mistakes
 
