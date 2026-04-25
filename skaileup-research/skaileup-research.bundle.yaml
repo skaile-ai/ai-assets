@@ -1,0 +1,5 @@
+name: skaileup-research
+description: Agentic web research and knowledge grounding
+version: 0.1.0
+dependencies:
+  - skill:skailup-research

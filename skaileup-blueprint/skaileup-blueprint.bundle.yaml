@@ -1,0 +1,7 @@
+name: skaileup-blueprint
+description: Technical decisions — technology stack, system architecture, and data model
+version: 0.1.0
+dependencies:
+  - skill:skailup-techstack
+  - skill:skailup-architecture
+  - skill:skailup-datamodel

@@ -1,0 +1,15 @@
+name: skaileup-concept-meta
+description: Concept operations — review, extend, evaluate, and multi-product umbrella concepts
+version: 0.1.0
+dependencies:
+  - contract:CONTRACT.md
+  - skill:skailup-review
+  - skill:skailup-add-feature
+  - skill:skailup-reverse-engineer
+  - skill:skailup-eval-concept
+  - skill:skailup-eval-feature
+  - skill:skailup-eval-product
+  - skill:skailup-project-overview
+  - skill:skailup-subsystem-map
+  - skill:skailup-integration-arch
+  - skill:skailup-project-review

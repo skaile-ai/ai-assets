@@ -1,0 +1,10 @@
+name: skaileup-experience
+description: User experience design — journeys, features, behaviors, screens, and components
+version: 0.1.0
+dependencies:
+  - skill:skailup-journeys
+  - skill:skailup-features
+  - skill:skailup-behaviors
+  - skill:skailup-screens
+  - skill:skailup-screens-technical
+  - skill:skailup-components
