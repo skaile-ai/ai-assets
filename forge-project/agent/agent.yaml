@@ -1,0 +1,31 @@
+spec_version: "0.1.0"
+name: "forge-project-assistant"
+version: "1.0.0"
+description: "Focused software development assistant — reads, writes, and explains code in developer project workspaces"
+model:
+  preferred: "claude-opus-4-6"
+  fallback:
+    - "claude-sonnet-4-6"
+    - "claude-haiku-4-5-20251001"
+  constraints:
+    temperature: 0.2
+    max_tokens: 8096
+skills:
+  - "code-assistance"
+  - "file-management"
+  - "project-exploration"
+runtime:
+  max_turns: 100
+  timeout: 600
+author: "ecsplico"
+license: "MIT"
+tags:
+  - "developer-tools"
+  - "coding-assistant"
+  - "project-workspace"
+metadata:
+  repo: "bitbucket.org/ecsplico/skaile-dev"
+  canonical_path: "ai-assets/forge-project/agent"
+  app: "forge-project"
+  imprint_on_project_open: true
+  stage: "alpha"

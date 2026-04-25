@@ -1,6 +1,8 @@
 ---
 title: Skills
 description: What a skill is, how it's structured, SKILL.md frontmatter reference, body sections, optional files, and skill resolution search path.
+sidebar:
+  order: 10
 ---
 
 A **skill** is the atomic unit of agent instruction. It is a directory containing a `SKILL.md` file — YAML frontmatter describing metadata and I/O, plus a Markdown prompt body the agent reads and follows when the skill is activated.

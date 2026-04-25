@@ -1,0 +1,69 @@
+name: imprint-project
+version: "1.0"
+description: >-
+  Injects forge-project agent context into an agent session when a project is opened.
+  Reads the GitAgent definition and builds a structured system prompt that includes
+  the agent's identity, architectural knowledge, and project-specific CLAUDE.md.
+
+trigger:
+  event: project_open
+  condition: "session.imprinted == false"
+
+steps:
+  - id: load-soul
+    description: Load agent identity
+    action: read_file
+    path: "agent/SOUL.md"
+    store_as: soul_content
+
+  - id: load-knowledge
+    description: Load architecture and conventions from knowledge base
+    action: read_knowledge_index
+    path: "agent/knowledge/index.yaml"
+    store_as: knowledge_docs
+
+  - id: load-project-claude
+    description: Load project-specific context if CLAUDE.md exists in workspace
+    action: read_file_if_exists
+    path: "data/projects/{slug}/CLAUDE.md"
+    store_as: project_claude
+    fallback: ""
+
+  - id: build-system-prompt
+    description: Compose the imprint system prompt
+    action: template
+    template: |
+      {soul_content}
+
+      ---
+
+      ## Project Context
+
+      {knowledge_docs.architecture}
+
+      ---
+
+      ## Code Conventions
+
+      {knowledge_docs.conventions}
+
+      {project_claude_section}
+    vars:
+      project_claude_section: |
+        ---
+
+        ## Project-Specific Instructions
+
+        {project_claude}
+    store_as: imprint_prompt
+
+  - id: inject
+    description: Set system prompt on the active agent session
+    action: set_session_context
+    session: "{slug}"
+    system_prompt: "{imprint_prompt}"
+    mark_imprinted: true
+
+output:
+  imprint_prompt: "{imprint_prompt}"
+  tokens_estimate: auto

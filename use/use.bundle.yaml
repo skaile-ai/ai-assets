@@ -13,3 +13,4 @@ dependencies:
   - skill:use-context7-api
   - skill:use-mcp2cli
   - skill:agent-browser
+  - skill:use-skills-sh

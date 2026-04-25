@@ -1,13 +1,19 @@
 ---
 title: ai-assets
 description: The master library of AI agent skills, flows, and agents for the Skaile ecosystem.
+_sources:
+  - path: ai-assets/README.md
+_based_on_commit: 5fd26c1
+_last_synced: "2026-04-25"
+sidebar:
+  order: 1
 ---
 
-`ai-assets` is the skill library that powers all Skaile agent workflows. It contains `SKILL.md` prompt manifests organized into 14 domain directories, `flow.json` state machine definitions, GitAgent definitions, and shared contracts.
+`ai-assets` is the skill library that powers all Skaile agent workflows. It contains `SKILL.md` prompt manifests organized into focused domain directories, `flow.json` state machine definitions, GitAgent definitions, and shared contracts.
 
 ## Two Ways to Use
 
-### Via [skaile](/cli/) CLI (recommended for running flows)
+### Via [skaile](/use/cli/) CLI (recommended for running flows)
 
 ```bash
 skaile flow list                                    # see what's available

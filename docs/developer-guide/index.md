@@ -1,6 +1,9 @@
 ---
 title: Developer Guide
 description: Repository structure, skill resolution algorithm, contract inheritance, merge strategy, and adding a domain.
+sidebar:
+  order: 90
+  label: "Developer Guide"
 ---
 
 ## Repository Structure

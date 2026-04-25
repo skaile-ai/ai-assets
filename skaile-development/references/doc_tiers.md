@@ -3,6 +3,11 @@
 Every change to the skaile-dev monorepo may need to be reflected in up to five different
 documentation surfaces. Each has a distinct audience, scope, and update trigger.
 
+> **TypeScript source documentation and README structure:** See `references/doc_pattern.md`.
+> That reference defines TSDoc conventions (Tier 0 — prerequisite before any surface update)
+> and the mandatory README.md Purpose section. This file covers which surface to update;
+> `doc_pattern.md` covers how to write it.
+
 ---
 
 ## The Five Tiers
@@ -131,6 +136,7 @@ migration guidance, rationale, and downstream effects.
 
 | Change type | README | CLAUDE.md | Starlight | DOMAIN/SKILL | _devlog |
 |-------------|--------|-----------|-----------|--------------|---------|
+| New or modified exported TypeScript symbol | No | No | Yes (api-reference, generated) | No | No |
 | New public CLI command | Yes | Maybe | Yes | No | Yes |
 | New env variable | No | Yes | Yes (if configurable) | No | Yes |
 | Architecture refactor | No | Yes | Maybe | No | Yes + Report |
@@ -141,6 +147,9 @@ migration guidance, rationale, and downstream effects.
 | Breaking API change | Yes | Yes | Yes | No | Yes + Report |
 | Test-only change | No | No | No | No | Yes (brief) |
 | Dependency update | No | No | No | No | Yes (brief) |
+
+> **TSDoc prerequisite:** For any change involving TypeScript exported symbols, annotate with
+> TSDoc (`/** */`) *before* consulting this table. See `doc_pattern.md` for conventions.
 
 ---
 

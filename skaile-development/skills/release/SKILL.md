@@ -130,6 +130,17 @@ IF mode = status
 
 IF mode = bump
 
+  STEP 0: Readiness gate (mandatory)
+    - RUN ready with scope=<target's scope: package or domain or all>
+    - Read _devlog/reports/readiness-<stamp>.json
+    IF verdict = blocked
+      - Report blockers to the user
+      - STOP: "Release blocked. Fix blockers (see readiness report) or re-run with `ready=skip` (dangerous, not default)."
+    IF verdict = pass with warnings
+      - Show warnings; ask: "Proceed despite warnings?"
+
+    On pass or confirmed-ignore-warnings → continue to STEP 1.
+
   STEP 1: Run status mode internally (steps 1-4 above)
 
   STEP 2: Determine bump level

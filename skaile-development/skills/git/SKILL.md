@@ -1,8 +1,8 @@
 ---
 name: "git"
-description: "Git operations for the skaile-dev monorepo. Six modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (two-way sync: pull + push shell repo and all submodules, print per-repo summary of commits pulled and pushed)."
+description: "Git operations for the skaile-dev monorepo. Seven modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (two-way sync: pull + push shell repo and all submodules, print per-repo summary of commits pulled and pushed), deploy (merge main into deploy branch and push)."
 metadata:
-  version: "1.0.0"
+  version: "1.3.0"
   tags:
     - "git"
     - "commit"
@@ -12,6 +12,7 @@ metadata:
     - "submodule"
     - "monorepo"
     - "skaile-development"
+    - "deploy"
   source: "MERGED"
   stage: "beta"
   user_inputs:
@@ -26,8 +27,9 @@ metadata:
           - "pr"
           - "finish"
           - "sync"
+          - "deploy"
         required: true
-        hint: "commit = structured commit message | branch = create/switch feature branch | worktree = isolated checkout | pr = open pull request | finish = merge/PR/keep/discard | sync = update submodules"
+        hint: "commit = structured commit message | branch = create/switch feature branch | worktree = isolated checkout | pr = open pull request | finish = merge/PR/keep/discard | sync = update submodules | deploy = merge main into deploy branch and push"
       - id: "description"
         label: "Change description (plain language) — used to derive branch name and commit message"
         type: "text"
@@ -65,6 +67,7 @@ Handles all git operations for the skaile-dev monorepo. Works in six modes:
 | `pr` | Open a pull request with structured description | When change needs review before merging |
 | `finish` | Close a branch: merge, PR, keep, or discard | After implementation is verified |
 | `sync` | Fetch and update all submodules | After pulling, or to align submodule pointers |
+| `deploy` | Merge main into the `deploy` branch and push | When ready to ship current main to the deploy target |
 
 ## When to Use
 
@@ -74,6 +77,7 @@ Handles all git operations for the skaile-dev monorepo. Works in six modes:
 - Closing out an implementation: `mode=finish`
 - Team review: `mode=pr`
 - Submodule alignment: `mode=sync`
+- Shipping to deploy target: `mode=deploy`
 
 ## When NOT to Use
 
@@ -102,7 +106,10 @@ MUST  require typed confirmation for destructive operations (force-delete, disca
 MUST  write git-state.json when branch or worktree is created
 MUST  run full test suite before any merge to main
 MUST  include the ---agent--- YAML block in every commit to main
+MUST  verify platform/backend starts before committing any structural backend change — see STEP 1b in commit mode
+MUST  run formatting and linting on all affected packages before committing — see STEP 1c in commit mode
 NEVER force-push or rewrite published history
+NEVER run Biome inside platform/ — platform uses Prettier + ESLint exclusively
 NEVER merge to main without tests passing
 NEVER delete a branch without typed confirmation
 NEVER create a worktree for sequential (non-parallel) work — use branch mode instead
@@ -123,6 +130,61 @@ IF mode = commit
     2. Identify the packages modified by mapping changed file paths to their package roots (e.g. `agent-framework/session/src/foo.ts` -> `agent-framework/session`).
     3. For each modified package, read its `CLAUDE.md` to understand architecture and conventions.
     4. Identify downstream packages that import from or depend on the modified packages — these are candidates for the `affects` field.
+
+  STEP 1b: Backend start verification (conditional)
+    Scan the diff for structural platform/backend changes — any of:
+    - New or modified `@Injectable()` / `@Module()` class
+    - Constructor parameter added, removed, or retyped in a service
+    - `providers:`, `imports:`, or `exports:` arrays changed in a `*.module.ts`
+    - Import paths changed in a service or module file
+
+    IF none of the above → skip this step.
+
+    IF structural change detected:
+      > "Structural backend change detected — verifying the backend starts."
+      RUN in background (15 s timeout): cd platform/backend && bun run dev
+      Watch stdout for either a startup success banner ("Nest application successfully started")
+      or an exception / unresolved dependency error.
+
+      IF port already in use (EADDRINUSE / port 3001 blocked):
+        ASK:
+          > "Port 3001 is in use. Choose:
+          >   1. Use kill-backend skill to free it, then retry
+          >   2. Kill it manually — confirm when done
+          >   3. Skip verification and commit anyway"
+        HANDLE response:
+          - option 1: RUN kill-backend skill, then retry the dev start
+          - option 2: wait for user confirmation, then retry
+          - option 3: proceed to STEP 2 without verification
+
+      IF NestJS DI error or exception before startup banner:
+        Terminate dev process.
+        STOP: "Backend failed to start: <error summary>. Fix the DI error before committing."
+
+      IF startup banner appears:
+        Terminate dev process.
+        > "Backend starts cleanly. Proceeding."
+        Continue to STEP 1c.
+
+  STEP 1c: Format and lint affected packages
+    From the packages identified in STEP 1, determine which formatters to run.
+
+    | Path prefix | Tool | Command (run from monorepo root) |
+    |---|---|---|
+    | `agent-framework/` | Biome | `cd agent-framework && bun run format && bun run lint` |
+    | `forge/` | Biome | `cd forge && bun run format && bun run lint` |
+    | `docs/`, `theme/` | Biome | `biome format --write docs/ theme/` |
+    | `platform/backend/` | Prettier + ESLint | `cd platform/backend && bun run lint` |
+    | `platform/frontend/` | Prettier + ESLint | `cd platform/frontend && bun run lint` |
+
+    NEVER run Biome on `platform/` — it uses Prettier + ESLint exclusively.
+    Only run the commands for areas that have staged changes.
+
+    IF formatting/linting modified any staged files:
+      $ git add <modified files>
+      > "Formatted <N> files in <areas> — re-staged."
+    IF linting reports unfixable errors:
+      STOP: "Lint errors found. Fix them before committing."
 
   STEP 2: Analyze Changes
     For each modified package:
@@ -187,6 +249,26 @@ IF mode = commit
 
     Output the complete commit message ready to be used with `git commit -m`.
     Do not wrap it in a code block or add commentary.
+
+  STEP 5: Optional Review (before committing)
+    After presenting the commit message, ask:
+    > "Run a quick review before committing? (y/n)"
+
+    IF user says yes (or equivalent):
+      Run the `review` skill with target=staged (or target=branch for squash-merge prep).
+      Wait for review output.
+      IF review finds Important issues:
+        > "Review found <N> important issue(s). Fix before committing?"
+        STOP — do not commit. Let the user address the findings.
+      IF review finds only Nits or no issues:
+        > "Review passed. Proceeding with commit."
+        Continue to commit.
+
+    IF user says no (or equivalent):
+      Proceed to commit without review.
+
+    IF committing to main:
+      Default to running the review (still skippable with explicit "no").
 
   EMIT [git] commit_ready
 
@@ -475,6 +557,93 @@ IF mode = sync
 
   EMIT [git] sync_complete
 
+# ── Mode: deploy ─────────────────────────────────────────────────
+
+IF mode = deploy
+
+  You are merging main into the `deploy` branch and pushing it.
+  This is the standard way to ship the current state of main to the deploy target.
+
+  STEP 1: Pre-flight — verify current branch
+    $ git rev-parse --abbrev-ref HEAD → current_branch
+
+    IF current_branch ≠ main
+      ASK:
+        > "You are on '<current_branch>', not main. What would you like to do?
+        >
+        > 1. merge-to-main — finish this branch and merge it to main first (runs mode=finish)
+        > 2. cancel — abort the deploy"
+
+      IF user chooses merge-to-main:
+        RUN mode=finish → let user complete the merge flow
+        THEN continue from STEP 2 (now on main)
+      IF user chooses cancel:
+        STOP: "Deploy cancelled."
+
+  STEP 2: Ensure all submodules and shell repo are pushed
+    CI checks out the deploy branch and recursively fetches submodules at the
+    committed SHAs. If any submodule or the shell repo has unpushed commits,
+    CI will fail because it cannot resolve those SHAs.
+
+    Discover submodule paths:
+    $ git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}'
+
+    FOR EACH submodule path:
+      $ git -C <path> rev-parse --abbrev-ref HEAD → branch
+      IF branch = HEAD (detached): skip (submodule points at a fixed SHA)
+      $ git -C <path> log origin/<branch>..<branch> --oneline → unpushed
+      IF unpushed is non-empty:
+        $ git -C <path> push origin <branch>
+        IF push fails:
+          STOP: "Cannot deploy: failed to push <path> -- <error>. Fix and retry."
+
+    Check shell repo:
+    $ git log origin/main..main --oneline → unpushed_shell
+    IF unpushed_shell is non-empty:
+      $ git push origin main
+      IF push fails:
+        STOP: "Cannot deploy: failed to push shell repo -- <error>. Fix and retry."
+
+  STEP 3: Stash working tree changes if needed
+    $ git status --short → status
+    IF any tracked files are modified (M lines):
+      $ git stash push -m "pre-deploy stash"
+      SET stashed = true
+    ELSE
+      SET stashed = false
+
+  STEP 4: Checkout and update deploy branch
+    $ git checkout deploy
+    $ git pull origin deploy
+    IF pull fails:
+      IF stashed: $ git stash pop
+      $ git checkout main
+      STOP: "✗ Failed to pull deploy branch — <error>. Returned to main."
+
+  STEP 5: Merge main into deploy
+    $ git merge main --no-edit
+    IF merge conflict:
+      $ git merge --abort
+      $ git checkout main
+      IF stashed: $ git stash pop
+      STOP: "✗ Merge conflict between main and deploy. Resolve on deploy branch manually."
+
+  STEP 6: Push deploy
+    $ git push origin deploy
+    IF push fails:
+      $ git checkout main
+      IF stashed: $ git stash pop
+      STOP: "✗ Push to deploy failed — <error>. Returned to main."
+
+  STEP 7: Return to main
+    $ git checkout main
+    IF stashed: $ git stash pop
+
+  EMIT [git] deploy_complete
+  REPORT:
+    > "Deployed: main merged into deploy and pushed.
+    > deploy is now at: <git rev-parse --short deploy>"
+
 # ── End Modes ────────────────────────────────────────────────────
 
 CHECKLIST
@@ -485,6 +654,11 @@ CHECKLIST
   - [ ] Typed confirmation received for merge and discard
   - [ ] Worktree cleaned up after finish (merge, keep, discard)
   - [ ] git-state.json written/updated
+  - [ ] deploy mode only runs from main (or after explicit merge-to-main)
+  - [ ] all submodules and shell repo pushed before deploy merge
+  - [ ] stash popped after deploy (even on failure)
+  - [ ] Backend start verified (or explicitly skipped) when structural platform/backend changes are present
+  - [ ] Formatting and linting run on all affected packages before commit (Biome for agent-framework/forge/docs/theme; Prettier+ESLint for platform)
 
 ---
 
@@ -499,8 +673,11 @@ CHECKLIST
 | Force-pushing after rebase | Never rewrite history on shared branches |
 | Writing commit messages manually | Use `mode=commit` for structured messages with `---agent---` blocks |
 | Omitting the ---agent--- block | Every commit to main must include the agent metadata block |
+| Committing without formatting | Always run format+lint before committing — Biome for agent-framework/forge; Prettier+ESLint for platform |
+| Running Biome on platform/ | Platform uses Prettier + ESLint. Biome reformats it incorrectly. |
 
 ## Integration
 
 - **Called by:** `implement` (git setup, commit, finish branch)
+- **Calls:** `review` (optional review step in commit mode, default-on for main)
 - **Reads:** `references/commit-spec.md`, `references/branch_naming.md`, `references/worktree_patterns.md`

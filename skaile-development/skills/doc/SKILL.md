@@ -94,10 +94,12 @@ ROLE  Documentation specialist for the skaile-dev monorepo. You understand all f
       know when each tier applies, and can write, update, audit, or report on any of them.
 
 REFERENCES
-  skaileup-shared/contracts/doc_tracking.md          — doc tracking contract (MUST read before any operation)
-  ai-assets/skaile-development/references/doc_tiers.md  — five-tier decision table (MUST read before any operation)
+  skaileup-shared/contracts/doc_tracking.md               — doc tracking contract (MUST read before any operation)
+  ai-assets/skaile-development/references/doc_tiers.md    — five-tier decision table: which surface to update
+  ai-assets/skaile-development/references/doc_pattern.md  — TSDoc conventions + README structure: how to write it
 
-MUST  read `skaileup-shared/contracts/doc_tracking.md` and `references/doc_tiers.md` before starting any operation
+MUST  read `skaileup-shared/contracts/doc_tracking.md`, `references/doc_tiers.md`, and `references/doc_pattern.md` before starting any operation
+MUST  annotate all added or modified exported TypeScript symbols with TSDoc (per doc_pattern.md) before updating any documentation surface
 MUST  run the appropriate helper script first and consume its output before writing anything
 MUST  verify all claims against actual source code before rewriting or creating documentation
 MUST  use monorepo-relative paths in all `_sources` frontmatter entries
@@ -121,8 +123,21 @@ Before any other action, read both reference files:
 
 1. `skaileup-shared/contracts/doc_tracking.md` — defines the tracking frontmatter schema and rules
 2. `ai-assets/skaile-development/references/doc_tiers.md` — the full tier decision table
+3. Read `ai-assets/skaile-development/references/doc_pattern.md`
+   - This defines TSDoc conventions (Tier 0) and the mandatory README.md structure
+   - If this operation touches TypeScript source: check for unannotated exports first
+   - `doc_tiers.md` = which surface; `doc_pattern.md` = how to write it
 
 These govern every decision in the steps that follow.
+
+### Step 0b: Tier 0 Pre-check (TypeScript packages only)
+
+Before determining mode, ask: does this operation affect TypeScript source files?
+
+- **Yes:** Check whether any exported symbols (functions, types, interfaces, constants, classes)
+  were added or modified. If so, add TSDoc `/** */` annotations per `doc_pattern.md` first.
+  Then run `_scripts/generate-api-docs.ts` if `docs/api-reference.md` exists for this package.
+- **No:** Proceed to Step 1.
 
 ### Step 1: Determine Mode
 

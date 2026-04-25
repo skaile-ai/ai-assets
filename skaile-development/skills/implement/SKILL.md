@@ -108,16 +108,25 @@ REFERENCES
   skaileup-shared/contracts/iron_laws.md                      — non-negotiable constraints
   skaileup-implementation-superpowers/skills/*/SKILL.md       — supervised dispatch patterns
   skills/git/references/branch_naming.md                 — branch naming for this change
+  ! references/sub-agent-dispatch.md                     — fan-out mitigation: MVC prompts, batching, pre-dispatch compaction
 
 MUST  read the target package(s) CLAUDE.md before writing any code
 MUST  identify the correct prog-expert for the tech stack and note it in the plan
 MUST  run tests after implementation (via test skill)
+MUST  run audit scope=diff after tests pass (gate Phase 5 on audit ≠ fail)
 MUST  run doc --mode update after any public API or structure change
+MUST  annotate all added or modified exported symbols with TSDoc (per references/doc_pattern.md) before running doc --mode update
+MUST  update README.md Purpose section when the package's role or public API changes
+MUST  update CLAUDE.md when architecture, conventions, or environment variables change
 MUST  add a devlog entry after every completed implementation
 MUST  create a git branch before implementing (via git skill)
+MUST  verify platform/backend starts (bun run dev) after any structural backend change before marking the phase complete — structural changes include: new @Injectable service, constructor parameter changes, *.module.ts providers/imports/exports changes, import path changes in a service or module
+MUST  run formatting and linting on all affected packages before each commit — the git skill's STEP 1c handles this, but ensure it runs: Biome (format+lint) for agent-framework/forge/docs/theme; Prettier+ESLint for platform
 NEVER implement across packages without reading each package's CLAUDE.md
 NEVER skip the plan phase for standard or large complexity
 NEVER commit to main directly — always use a feature branch
+NEVER run Biome (biome format / biome lint / bun run format) inside platform/ — platform uses Prettier + ESLint; run bun run lint from within platform/backend or platform/frontend instead
+NEVER create barrel index.ts files in platform/backend/libs/ — import directly via subpath alias (@lib/file) instead; barrel files break NestJS DI module boundaries (exception: PostXL-generated barrels tracked in postxl-lock.json)
 
 EMIT [implement] started task=<slug> packages=<list> complexity=<tier>
 
@@ -206,28 +215,94 @@ STEP 7: Execute
   IF complexity = small
     - Implement directly (no subagent dispatch needed)
     - Read prog-expert skill recipes if applicable
-    - Verify implementation compiles / lint passes
+    - Verify implementation compiles (typecheck)
+    - Run formatting and linting for affected packages:
+      - agent-framework/: `cd agent-framework && bun run format && bun run lint`
+      - forge/: `cd forge && bun run format && bun run lint`
+      - platform/backend/: `cd platform/backend && bun run lint` (NEVER Biome)
+      - platform/frontend/: `cd platform/frontend && bun run lint` (NEVER Biome)
     - $ git add -p
     - RUN git mode=commit to generate structured commit
 
-  IF complexity = standard
-    FOR EACH task in skaile-plan.md:
-      - Dispatch subagent with verbatim task text (do NOT ask subagent to read plan)
-      - Include: task spec, tech context, expert skill references, acceptance criteria
-      - Run spec-compliance review: does the produced code fulfill the task spec?
-        IF NON_COMPLIANT → fix and re-review
+  PRE-DISPATCH (standard and large): read references/sub-agent-dispatch.md once.
+  Then apply the three techniques before any Agent call:
+
+  TECHNIQUE 1 — Minimum Viable Context (MVC) prompt
+    Build each sub-agent prompt explicitly using this template.
+    NEVER pass the parent conversation or ask the agent to "read the plan":
+
+    ```
+    # Task: <one-line summary>
+
+    ## Context
+    Package: <name>
+    Files to change: <paths — only the ones this task touches>
+    Key types / signatures (paste relevant excerpts — do NOT ask agent to read files):
+    <paste only the sections of CLAUDE.md or source that this task needs>
+
+    ## What to implement
+    <Precise description. Acceptance criteria as a checklist.>
+    - [ ] ...
+
+    ## Constraints
+    <Naming rules, patterns to follow, anti-patterns to avoid — specific to this task.>
+
+    ## What NOT to do
+    <Explicit scope boundary — name files or concerns to leave untouched.>
+
+    ## Output
+    Files to create or modify: <list>
+    ```
+
+  TECHNIQUE 2 — Batch + parallel dispatch
+    Consult the decision table in references/sub-agent-dispatch.md to pick the
+    right grouping for the number of tasks at hand. Key rules:
+    - Group by package boundary (shared context, one CLAUDE.md excerpt per batch)
+    - 4–8 tasks per agent, 3–5 agents in parallel
+    - Independent tasks → parallel; dependent tasks → sequential within batch
+
+  TECHNIQUE 3 — Pre-dispatch compaction
+    Before sending any Agent call, call /compact if the parent session has:
+    - Read 3+ files, OR
+    - Run any test commands, OR
+    - Been running more than 20 minutes
+    The compaction summary is what every sub-agent inherits — keep it small.
+
+  IF complexity = standard (≤5 tasks total)
+    STEP 7a: Apply dispatch pattern from decision table
+      IF 1–3 tasks: one agent per task, all in parallel, MVC prompts
+      IF 4–5 tasks: group by package → one batch agent per package (parallel)
+
+    AFTER each parallel batch returns:
+      - Run spec-compliance review for each produced change
+        IF NON_COMPLIANT → fix inline (do NOT re-dispatch; fix is cheap at this scale)
       - Run code quality check: naming, no debug artifacts, no cross-task bleed
-        IF FAIL → fix and re-check
       - $ git add -p
       - RUN git mode=commit to generate structured commit
-      - Update skaile-plan.md: mark task done
-      - Run full test suite (quick pass to catch regressions)
-        IF tests fail → fix before moving to next task
+      - Update skaile-plan.md: mark tasks done
+      - Run quick test pass — pipe output: 2>&1 | tail -60
+        IF tests fail → fix before next batch
+
+      COMPACT CHECKPOINT: call /compact before the next batch.
+
       EMIT [implement] task_complete task=<id>
 
-  IF complexity = large
-    - Use `implement-supervised` from skaileup-implementation-superpowers
-    - Feed it skaile-plan.md as the superpowers-plan.md equivalent
+  IF complexity = large (6+ tasks)
+    STEP 7b: Structure as batch waves
+      WAVE PLANNING:
+        - Group tasks into 3–5 batch agents by package + independence
+        - Each batch agent gets 4–8 tasks and a single batch MVC prompt
+        - Dispatch all agents in the wave in parallel (one Agent call per wave)
+        - Do NOT dispatch one agent per task — this is the fan-out failure mode
+
+      FOR EACH wave:
+        - /compact before dispatch (enforce pre-dispatch compaction)
+        - Dispatch all batch agents in the wave in parallel
+        - After the wave returns: review, commit, quick test pass
+        - /compact before the next wave
+
+      After all waves: use `implement-supervised` from skaileup-implementation-superpowers
+      for any remaining cross-cutting or integration tasks.
 
 EMIT [implement] implementation_done tasks=<N>
 
@@ -235,18 +310,81 @@ EMIT [implement] implementation_done tasks=<N>
 
 STEP 8: Run tests
   - RUN test with mode=run, scope=<affected packages>
+  - All test commands must pipe output: 2>&1 | tail -80
   IF tests fail
     - Fix failures
     - Commit fix: "fix: <description>"
     - Re-run tests
   UNTIL all tests pass
 
+  COMPACT CHECKPOINT:
+    After tests pass, call /compact before proceeding to audit.
+    The test→fix→retest loop is the highest single growth point for context in
+    this skill. Compacting here prevents audit + doc phases from paying the cost
+    of the entire test loop history.
+
 CHECKPOINT tests_passed
-  > "All tests passing. Ready to update docs and log the change."
+  > "All tests passing. Running diff-scoped audit before doc sync."
+
+# ── Phase 4a: Backend Start Verification ────────────────────────────
+
+STEP 8a: Verify platform/backend starts (conditional)
+  IF any structural platform/backend change was made in this implementation — i.e., any of:
+    - New or modified `@Injectable()` or `@Module()` class
+    - Constructor parameter added, removed, or retyped in a service
+    - `providers:`, `imports:`, or `exports:` arrays changed in `*.module.ts`
+    - Import paths changed in a service or module file
+
+  THEN:
+    RUN in background (15 s timeout): cd platform/backend && bun run dev
+    Watch for startup success ("Nest application successfully started") or an exception.
+
+    IF port 3001 already in use:
+      ASK:
+        > "Port 3001 is in use. Choose:
+        >   1. Use kill-backend skill to free it, then retry
+        >   2. Kill it manually — confirm when done
+        >   3. Skip verification and proceed"
+      HANDLE response (retry on options 1/2; skip on option 3).
+
+    IF NestJS DI error / unresolved dependency exception before startup banner:
+      Terminate dev process.
+      STOP: "Backend failed to start: <error summary>. Fix the DI error before proceeding."
+      Fix the issue, re-run tests (STEP 8), then re-run this step.
+
+    IF startup banner appears:
+      Terminate dev process.
+      > "Backend starts cleanly."
+
+EMIT [implement] backend_start_verified
+
+# ── Phase 4b: Audit (scope=diff) ──────────────────────────────────
+
+STEP 8b: Run audit on the diff
+  - RUN audit with scope=diff, diff_source=branch
+  - Read _devlog/reports/audit-<stamp>.json
+  IF verdict = fail
+    - Report blockers to user
+    - Ask: "fix now or abort?"
+    - IF fix: apply fixes, re-run audit; UNTIL verdict ≠ fail
+    - IF abort: stop here (branch is preserved)
+  IF verdict = warn
+    - Show findings summary; proceed (warnings do not block implementation)
+
+EMIT [implement] audit_done verdict=<verdict>
 
 # ── Phase 5: Documentation Sync ───────────────────────────────────
 
 STEP 9: Update docs
+
+  PRE-CHECK (TypeScript packages only):
+    Did this change add or modify any exported symbols?
+    IF yes:
+      - Annotate all changed exports with TSDoc per references/doc_pattern.md
+      - IF docs/api-reference.md exists for this package:
+          $ bun _scripts/generate-api-docs.ts --package <pkg>
+      - $ git add -p && git commit -m "docs: add TSDoc annotations for <task-slug>"
+
   - RUN doc --mode update
   - Scope: files changed since branch was created
   IF docs were updated
@@ -265,6 +403,10 @@ STEP 10: Write devlog entry
     - report_needed: true if this is a conceptual/architectural change
 
 EMIT [implement] devlog_written
+
+SUGGEST session_review
+  > "Session complete. Run `/session-review` to see token usage, cost, workflow analysis,
+  >  and suggestions for this session."
 
 # ── Phase 6b: Notify (optional) ──────────────────────────────────
 
@@ -313,8 +455,14 @@ CHECKLIST
   - [ ] Tech stack identified and prog-expert noted in plan
   - [ ] Plan approved before implementation starts
   - [ ] Git branch created (never commit to main)
+  - [ ] Sub-agent dispatch: decision table consulted, batch+parallel applied, MVC prompts written
+  - [ ] /compact called before first Agent dispatch (if session has prior context)
   - [ ] Spec compliance review run for every task
-  - [ ] Full test suite passing before docs sync
+  - [ ] Formatting and linting run on all affected packages (Biome for agent-framework/forge; Prettier+ESLint for platform)
+  - [ ] Full test suite passing before audit
+  - [ ] Backend start verified (or explicitly skipped) if structural platform/backend changes made
+  - [ ] audit scope=diff run and verdict ≠ fail before docs sync
+  - [ ] TSDoc added to all new/modified exported symbols (TypeScript packages)
   - [ ] doc --mode update run after any public API change
   - [ ] Devlog entry written
   - [ ] Branch finished (merge / PR / keep)
@@ -331,9 +479,13 @@ CHECKLIST
 | Forgetting test after implementation | Tests are the safety net; never skip |
 | Skipping doc for non-trivial changes | If a public API, command, or structure changed, docs must sync |
 | Skipping the devlog | Every completed change gets a devlog entry — this is the institutional memory |
+| Dispatching one sub-agent per task sequentially | Use batch+parallel pattern from references/sub-agent-dispatch.md — see decision table |
+| Sub-agent prompt says "based on our conversation…" | Always build an explicit MVC prompt — sub-agents must be self-contained |
+| Sub-agent prompt asks agent to "read CLAUDE.md" | Paste the relevant CLAUDE.md excerpt directly into the prompt |
+| Dispatching agents without /compact first | Pre-dispatch compaction is mandatory when parent session has done prior work |
 
 ## Integration
 
 - **Routes to:** `prog-expert-nuxt`, `prog-expert-omp`, `prog-expert-python`, `implement-supervised`
-- **Calls:** `git`, `test`, `doc`, `devlog`, `notify`
+- **Calls:** `git`, `test`, `audit`, `doc`, `devlog`, `notify`
 - **Called by:** `skaile-development` or user directly
