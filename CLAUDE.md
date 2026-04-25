@@ -12,16 +12,23 @@ Skills are organized into domains. Each domain has a `DOMAIN.md` and contains sk
 
 ```
 ai-asset-management/   ← meta: skill/domain scaffolding, catalog navigation
-skaileup-architecture/         ← system architecture, AI agent design
-skaileup-conceptualization/    ← discovery → experience → blueprint pipeline
-skaileup-implementation/       ← setup → features → verification pipeline
+skaileup-onboard/              ← project initialization, onboarding, seed ingestion, orchestration
+skaileup-research/             ← agentic web research, knowledge grounding
+skaileup-discovery/            ← problem space: brief, goals, brand identity
+skaileup-experience/           ← user experience: journeys, features, screens, components
+skaileup-prototype/            ← simple mockup prototypes
+skaileup-storybook/            ← living Storybook prototypes
+skaileup-blueprint/            ← technical decisions: techstack, architecture, datamodel
+skaileup-concept-meta/         ← concept operations: review, extend, evaluate, umbrella
+skaileup-build/                ← implementation: scaffolding, TDD features, migrations
+skaileup-quality/              ← code quality: audit, tests, readiness gates
+skaileup-shared/               ← merged contracts (referenced by all skills)
+skaileup-standards/            ← codebase standards discovery/injection/sync
+skaileup-lab/                  ← skill testing and improvement
 dev-implementation-experts-js/    ← JS/TS framework experts
 dev-implementation-experts-python/ ← Python experts
 dev-implementation-experts-typst/  ← Typst expert
-skaileup-evaluate/              ← audit, E2E, testing, readiness gates
-skaileup-shared/               ← merged contracts (referenced by all skills)
-skaileup-standards/            ← codebase standards discovery/injection/sync
-external/                 ← tracked third-party resources
+external/                 ← tracked external resources
 knowledge-research/       ← deep research, paper extraction
 knowledge-writing/        ← book/podcast generation
 use/                      ← external service integrations (exa, perplexity, outline, etc.)
