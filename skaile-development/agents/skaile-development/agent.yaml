@@ -6,7 +6,7 @@ extends: "../../../../ai-asset-management/agents/skaile/agent.yaml"
 model:
   preferred: "claude-opus-4"
   fallback:
-    - "claude-sonnet-4"
+    - "claude-sonnet-4-6"
   constraints:
     temperature: 0.15
     max_tokens: 8192
