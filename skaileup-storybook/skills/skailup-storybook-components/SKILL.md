@@ -15,6 +15,15 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: prototype
+        gate: hard
+        variant: storybook
+    produces:
+      - id: prototype
+        description: "Storybook custom building-block component stories"
+        variant: storybook
   prerequisites:
     files:
       - path: "_concept/2_experience/4_storybook"

@@ -18,6 +18,16 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: brief
+        gate: hard
+    produces:
+      - id: journeys
+        description: "User journey stories with hero/vital/hygiene classification"
+    consumes:
+      - id: research-audiences
+        gate: soft
   prerequisites:
     files:
       - path: "_concept/1_discovery/1_overview/brief.md"

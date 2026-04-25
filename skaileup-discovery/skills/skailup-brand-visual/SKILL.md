@@ -21,6 +21,20 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: brief
+        gate: hard
+    produces:
+      - id: brand-identity
+        description: "Brand identity document — colors, fonts, tone"
+      - id: brand-tokens
+        description: "Machine-readable design tokens (JSON)"
+    consumes:
+      - id: onboarding-decisions
+        gate: soft
+      - id: research-design-inspiration
+        gate: soft
   prerequisites:
     files:
       - path: "_concept/1_discovery/1_overview/brief.md"

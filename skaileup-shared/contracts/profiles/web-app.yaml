@@ -1,0 +1,128 @@
+profile: web-app
+description: "Web application — full artifact set with UI-centric paths"
+version: 1
+
+artifacts:
+  # -- Input layers --
+  onboarding-profile:
+    path: "_grounding/onboarding/profile.yaml"
+    type: yaml
+    lifecycle: input
+
+  onboarding-decisions:
+    path: "_grounding/onboarding/decisions.yaml"
+    type: yaml
+    lifecycle: input
+
+  seeds:
+    path: "_seeds/"
+    type: directory
+    lifecycle: input
+
+  # -- Research layer --
+  research-domain:
+    path: "_grounding/research/domain.md"
+    type: markdown
+    lifecycle: grounding
+
+  research-competitors:
+    path: "_grounding/research/competitors.md"
+    type: markdown
+    schema: competitors-v1
+    lifecycle: grounding
+
+  research-audiences:
+    path: "_grounding/research/audiences.md"
+    type: markdown
+    schema: audiences-v1
+    lifecycle: grounding
+
+  research-design-inspiration:
+    path: "_grounding/research/design-inspiration.md"
+    type: markdown
+    schema: design-inspiration-v1
+    lifecycle: grounding
+
+  research-patterns:
+    path: "_grounding/research/patterns.md"
+    type: markdown
+    lifecycle: grounding
+
+  research-findings:
+    path: "_grounding/findings/"
+    type: directory
+    lifecycle: grounding
+
+  # -- Discovery --
+  brief:
+    path: "discovery/brief.md"
+    type: markdown
+    schema: brief-v1
+
+  goals:
+    path: "discovery/goals.md"
+    type: markdown
+
+  comparable:
+    path: "discovery/comparable.md"
+    type: markdown
+
+  brand-identity:
+    path: "discovery/brand/identity.md"
+    type: markdown
+
+  brand-tokens:
+    path: "discovery/brand/tokens.json"
+    type: json
+    schema: design-tokens-v1
+
+  # -- Experience --
+  journeys:
+    path: "experience/journeys/stories.json"
+    type: json
+    schema: stories-v1
+
+  features:
+    path: "experience/features/"
+    type: directory
+    schema: feature-spec-v1
+    children: numbered-groups
+
+  screens:
+    path: "experience/screens/"
+    type: directory
+    schema: screen-spec-v1
+    children: numbered-groups
+
+  behaviors:
+    path: "experience/behaviors/"
+    type: directory
+    schema: allium-v1
+
+  # -- Prototype --
+  prototype:
+    path: "prototype/"
+    type: directory
+    variants:
+      mock: "prototype/mockups/"
+      storybook: "prototype/storybook/"
+
+  # -- Blueprint --
+  techstack:
+    path: "blueprint/techstack.md"
+    type: markdown
+
+  architecture:
+    path: "blueprint/architecture.md"
+    type: markdown
+
+  datamodel:
+    path: "blueprint/datamodel/"
+    type: directory
+    schema: datamodel-v1
+
+  # -- Standards (cross-cutting) --
+  standards:
+    path: "_standards/"
+    type: directory
+    lifecycle: reference

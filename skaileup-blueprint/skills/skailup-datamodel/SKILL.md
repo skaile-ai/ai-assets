@@ -19,6 +19,27 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: features
+        gate: hard
+      - id: techstack
+        gate: hard
+    produces:
+      - id: datamodel
+        description: "Data model (DBML, Prisma, or PostXL format)"
+    consumes:
+      - id: architecture
+        gate: soft
+      - id: behaviors
+        gate: soft
+      - id: onboarding-decisions
+        gate: soft
+    seed_modes:
+      datamodel:
+        - adopt
+        - extend
+      default: extend
   prerequisites:
     files:
       - path: "_concept/2_experience/2_features"

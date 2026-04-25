@@ -19,6 +19,22 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires: []
+    produces:
+      - id: brief
+        description: "Project brief with elevator pitch, audience, and problem"
+      - id: goals
+        description: "Success criteria, constraints, deadlines"
+      - id: comparable
+        description: "Reference apps, what to borrow/avoid"
+    consumes:
+      - id: onboarding-profile
+        gate: soft
+      - id: onboarding-decisions
+        gate: soft
+      - id: research-competitors
+        gate: soft
   prerequisites:
     inputs_optional:
       - id: raw_description

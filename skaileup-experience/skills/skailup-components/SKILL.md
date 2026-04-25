@@ -19,6 +19,16 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: screens
+        gate: hard
+    produces:
+      - id: components
+        description: "Reusable UI component catalog"
+    consumes:
+      - id: brand-tokens
+        gate: soft
   prerequisites:
     files:
       - path: "_concept/2_experience/3_screens"

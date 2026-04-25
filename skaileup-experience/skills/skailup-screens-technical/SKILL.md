@@ -18,6 +18,18 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: screens
+        gate: hard
+    produces:
+      - id: screens-technical
+        description: "Developer-ready technical screen annotations"
+    consumes:
+      - id: techstack
+        gate: soft
+      - id: datamodel
+        gate: soft
 ---
 
 > **NOTE:** This skill is a variant of `screens` reserved for future testing and

@@ -20,6 +20,16 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: brief
+        gate: hard
+    produces:
+      - id: brand-behavioral
+        description: "Behavioral brand personality and interaction principles"
+    consumes:
+      - id: brand-identity
+        gate: soft
   prerequisites:
     files:
       - path: "_concept/1_discovery/1_overview/brief.md"

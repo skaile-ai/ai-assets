@@ -18,6 +18,25 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: screens
+        gate: hard
+      - id: features
+        gate: hard
+    produces:
+      - id: prototype
+        description: "Full Storybook prototype"
+        variant: storybook
+    consumes:
+      - id: brand-tokens
+        gate: hard
+      - id: techstack
+        gate: soft
+      - id: journeys
+        gate: soft
+      - id: datamodel
+        gate: soft
   prerequisites:
     files:
       - path: "_concept/2_experience/3_screens"

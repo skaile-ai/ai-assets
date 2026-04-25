@@ -18,6 +18,30 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: brief
+        gate: hard
+      - id: journeys
+        gate: hard
+    produces:
+      - id: features
+        description: "Feature specifications organized in numbered groups"
+    consumes:
+      - id: brand-tokens
+        gate: soft
+      - id: techstack
+        gate: soft
+      - id: onboarding-decisions
+        gate: soft
+      - id: research-competitors
+        gate: soft
+    seed_modes:
+      features:
+        - adopt
+        - extend
+        - inspire
+      default: extend
   prerequisites:
     files:
       - path: "_concept/1_discovery/1_overview/brief.md"

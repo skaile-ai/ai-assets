@@ -1,0 +1,57 @@
+profile: library
+description: "Library package — API surface instead of features, no UI or deployment"
+version: 1
+
+artifacts:
+  onboarding-profile:
+    path: "_grounding/onboarding/profile.yaml"
+    type: yaml
+    lifecycle: input
+
+  onboarding-decisions:
+    path: "_grounding/onboarding/decisions.yaml"
+    type: yaml
+    lifecycle: input
+
+  seeds:
+    path: "_seeds/"
+    type: directory
+    lifecycle: input
+
+  research-domain:
+    path: "_grounding/research/domain.md"
+    type: markdown
+    lifecycle: grounding
+
+  brief:
+    path: "overview/brief.md"
+    type: markdown
+
+  features:
+    path: "api/"
+    type: directory
+    label: "Public API"
+
+  techstack:
+    path: "toolchain/stack.md"
+    type: markdown
+
+  architecture:
+    path: "toolchain/architecture.md"
+    type: markdown
+
+  standards:
+    path: "_standards/"
+    type: directory
+    lifecycle: reference
+
+excluded:
+  - journeys
+  - screens
+  - brand-identity
+  - brand-tokens
+  - prototype
+  - behaviors
+  - datamodel
+  - comparable
+  - goals

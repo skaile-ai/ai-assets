@@ -17,6 +17,15 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: prototype
+        gate: hard
+        variant: storybook
+    produces:
+      - id: prototype
+        description: "Storybook project with schema-generated TypeScript types"
+        variant: storybook
 ---
 
 > **NOTE:** This skill is PostXL-specific. It requires the `pxl` CLI tool for type

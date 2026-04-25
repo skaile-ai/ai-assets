@@ -15,6 +15,15 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: prototype
+        gate: hard
+        variant: storybook
+    produces:
+      - id: prototype
+        description: "Storybook project scaffold with brand token integration"
+        variant: storybook
   prerequisites:
     files:
       - path: "_concept/1_discovery/2_brand/tokens.json"

@@ -20,6 +20,28 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: brief
+        gate: hard
+      - id: features
+        gate: hard
+      - id: techstack
+        gate: hard
+    produces:
+      - id: architecture
+        description: "System architecture document"
+    consumes:
+      - id: behaviors
+        gate: soft
+      - id: onboarding-decisions
+        gate: soft
+    seed_modes:
+      architecture:
+        - adopt
+        - extend
+        - inspire
+      default: extend
   prerequisites:
     files:
       - path: "_concept/1_discovery/1_overview/brief.md"

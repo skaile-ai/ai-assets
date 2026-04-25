@@ -19,6 +19,16 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: features
+        gate: hard
+    produces:
+      - id: behaviors
+        description: "Behavioral specs (.allium format) per feature group"
+    consumes:
+      - id: brief
+        gate: soft
   prerequisites:
     files:
       - path: "_concept/2_experience/2_features"

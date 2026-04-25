@@ -1,0 +1,69 @@
+profile: api-service
+description: "API service — endpoints instead of screens, no UI components"
+version: 1
+
+artifacts:
+  onboarding-profile:
+    path: "_grounding/onboarding/profile.yaml"
+    type: yaml
+    lifecycle: input
+
+  onboarding-decisions:
+    path: "_grounding/onboarding/decisions.yaml"
+    type: yaml
+    lifecycle: input
+
+  seeds:
+    path: "_seeds/"
+    type: directory
+    lifecycle: input
+
+  research-domain:
+    path: "_grounding/research/domain.md"
+    type: markdown
+    lifecycle: grounding
+
+  research-competitors:
+    path: "_grounding/research/competitors.md"
+    type: markdown
+    lifecycle: grounding
+
+  brief:
+    path: "discovery/brief.md"
+    type: markdown
+
+  goals:
+    path: "discovery/goals.md"
+    type: markdown
+
+  features:
+    path: "endpoints/"
+    type: directory
+    label: "API Endpoints"
+    children: numbered-groups
+
+  techstack:
+    path: "blueprint/techstack.md"
+    type: markdown
+
+  architecture:
+    path: "blueprint/architecture.md"
+    type: markdown
+
+  datamodel:
+    path: "blueprint/datamodel/"
+    type: directory
+
+  standards:
+    path: "_standards/"
+    type: directory
+    lifecycle: reference
+
+excluded:
+  - journeys
+  - screens
+  - brand-identity
+  - brand-tokens
+  - prototype
+  - behaviors
+  - comparable

@@ -18,6 +18,22 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: features
+        gate: hard
+    produces:
+      - id: screens
+        description: "Screen design specifications"
+    consumes:
+      - id: brand-identity
+        gate: soft
+      - id: brand-tokens
+        gate: soft
+      - id: datamodel
+        gate: soft
+      - id: architecture
+        gate: soft
   prerequisites:
     files:
       - path: "_concept/2_experience/2_features"

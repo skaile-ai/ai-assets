@@ -17,6 +17,15 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires:
+      - id: prototype
+        gate: hard
+        variant: storybook
+    produces:
+      - id: prototype
+        description: "Storybook full-page screen compositions and page manifest"
+        variant: storybook
   prerequisites:
     files:
       - path: "_concept/2_experience/4_storybook/src/components"

@@ -22,6 +22,19 @@ metadata:
       type: enum
       values: [none, light, medium, max]
       default: medium
+  artifacts:
+    requires: []
+    produces:
+      - id: research-domain
+      - id: research-competitors
+      - id: research-audiences
+      - id: research-design-inspiration
+      - id: research-patterns
+    consumes:
+      - id: brief
+        gate: soft
+      - id: onboarding-profile
+        gate: soft
   prerequisites:
     inputs_required:
       - id: research_scope
