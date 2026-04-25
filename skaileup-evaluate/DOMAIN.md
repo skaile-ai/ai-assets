@@ -7,7 +7,6 @@ building_blocks:
   docs: "Quality workflow guides, test strategy documentation, and audit format specifications."
   skills: "Skills for auditing code, generating tests, checking readiness gates, syncing cross-references, and compiling validators."
   agents: "agents/quality/ (GitAgent spec v0.1.0)"
-  prompts: "TBD"
   tools: "Validator scripts, lint tools (lint_concept.py)."
 stage: alpha
 ---
@@ -16,7 +15,7 @@ stage: alpha
 
 This domain implements the quality layer of the development pipeline. It covers static code analysis and audits, test generation at all levels (unit, integration, E2E), concept structure validation, cross-reference repair, and readiness gating before deployment.
 
-CF and Saxe variants coexist under `cf/` and `saxe/` subdirectories. Quality skills can operate standalone against a project directory or be orchestrated as a gate after implementation.
+Quality skills can operate standalone against a project directory or be orchestrated as a gate after implementation. All skills are unified — there are no per-variant subdirectories.
 
 ## Building Blocks
 

@@ -4,11 +4,8 @@ description: "System architecture and design skills for AI-integrated applicatio
 type: domain
 building_blocks:
   contracts: "Architecture review criteria, system design constraints, and integration patterns shared by architecture skills."
-  docs: "Architecture decision records (ADRs), reference architectures, and integration pattern documentation."
   skills: "Invocable skills for AI agent integration architecture and skill system design."
   agents: "agents/architecture/ (GitAgent spec v0.1.0)"
-  prompts: "TBD"
-  tools: "TBD"
 stage: alpha
 ---
 
@@ -23,18 +20,18 @@ Architecture skills in this domain produce design documents, ADRs, and integrati
 | Folder | Purpose |
 |--------|---------|
 | `contracts/` | Shared architecture constraints, review criteria, and integration pattern vocabulary |
-| `docs/` | Reference architectures, ADRs, and canonical design patterns used across projects |
-| `skills/` | Invocable skills — architecture analysis, AI agent integration design, skill system design |
+| `skills/` | Invocable skills — AI agent integration design, skill system design |
+| `agents/` | Agent specs for orchestrated architecture analysis runs |
 
 ## Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `skailup-prog-expert-integration-ai-agents` | Design architecture for systems that integrate LLM agents |
-| `skailup-prog-expert-skill-system` | Design and audit skill system structure and conventions |
+| `skills/skailup-prog-expert-integration-ai-agents/` | Design architecture for systems that integrate LLM agents |
+| `skills/skailup-prog-expert-skill-system/` | Design and audit skill system structure and conventions |
 
 ## Conventions
 
 - Architecture skills produce documents, not code
 - Designs reference semantic types and stack-independent patterns where possible
-- Output feeds forward to `skaileup-implementation` and `skaileup-conceptualization/30_blueprint/`
+- Output feeds forward to `skaileup-implementation`

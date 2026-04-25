@@ -16,7 +16,7 @@ stage: alpha
 
 This domain is the single source of truth for cross-cutting conventions. It is **not invoked directly** — all domains read from it. It defines the vocabulary, rules, and file structures that skills must follow to remain interoperable.
 
-CF and Saxe contracts have been merged into a unified vocabulary at `contracts/` root. The original `cf/` and `saxe/` subdirectories are kept as legacy archives for reference and to support projects created with older tooling (see `contracts/MIGRATION.md`). Documentation in `docs/` is still split and pending a separate merge pass.
+Contracts are unified at `contracts/` root. The original `cf/` and `saxe/` subdirectories are kept as legacy archives for reference and to support projects created with older tooling (see `contracts/MIGRATION.md`). Documentation in `docs/` retains `cf/` and `saxe/` subdirectories as separate reference archives.
 
 ## Building Blocks
 
@@ -38,5 +38,5 @@ This domain IS the contract layer — there is no separate contract skill. All o
 - Nothing in this domain is invocable
 - When a contract changes, all domains that read it must be reviewed for impact
 - `contracts/cf/` and `contracts/saxe/` are legacy archives — the merge is complete
-- `docs/` is still split pending a docs merge pass; consult both if coverage is uncertain
+- `docs/cf/` and `docs/saxe/` are separate reference archives; consult both if coverage is uncertain
 - Scripts here are shared utilities; domain-specific scripts live within their own domain's `tools/`
