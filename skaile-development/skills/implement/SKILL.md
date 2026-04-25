@@ -116,7 +116,7 @@ MUST  run tests after implementation (via test skill)
 MUST  run audit scope=diff after tests pass (gate Phase 5 on audit ≠ fail)
 MUST  run doc --mode update after any public API or structure change
 MUST  annotate all added or modified exported symbols with TSDoc (per references/doc_pattern.md) before running doc --mode update
-MUST  update README.md Purpose section when the package's role or public API changes
+MUST  update README.md (The Problem / What It Does / Features) when the package's value proposition or user-facing capabilities change
 MUST  update CLAUDE.md when architecture, conventions, or environment variables change
 MUST  add a devlog entry after every completed implementation
 MUST  create a git branch before implementing (via git skill)

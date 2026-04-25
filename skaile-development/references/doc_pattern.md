@@ -60,44 +60,65 @@ TSDoc annotations in source.
 
 ---
 
-## Tier 1 — README.md (user-facing; served by Starlight for registered packages)
+## Tier 1 — README.md (human entry point — product-first, not code-first)
+
+The README is the front door of a repo. A human arriving here has never seen the
+project. They want to know: **what is this, what problem does it solve, why should
+I care, and what can it do?** Technical setup details are secondary — link to them,
+don't lead with them.
 
 ### Required structure
 
 ```markdown
 # Package Name
 
-One-sentence description of what this package does.
+One-sentence hook: what this is and who it's for.
 
-## Purpose
+## The Problem
 
-Short paragraph (2–4 sentences) explaining what problem this package solves and
-where it fits in the skaile-dev monorepo. Who uses it, what it depends on,
-what depends on it.
+What pain point or gap does this package address? Why does it need to exist?
+Write for someone who has the problem but doesn't know this tool yet.
 
-## Installation
-# setup / install steps
+## What It Does
 
-## Usage
-# key commands or code examples for the main use case
+The approach: how does this package solve the problem? What makes it different
+from alternatives? This is the USP — keep it concrete and benefits-oriented.
 
-## <Feature Heading>
-# repeat for major capabilities
+## Features
 
-→ [Full docs](/slug/)
+Bullet list of key capabilities. Each bullet is a feature name + one sentence
+explaining the user benefit. Order by importance, not by implementation date.
+
+## Quick Start
+
+Minimal steps to go from zero to working. Just enough to prove it works.
+Link to full installation/configuration docs for details.
+
+## Learn More
+
+Links to detailed docs: installation guide, configuration, API reference,
+CLAUDE.md (for contributors), etc.
 ```
 
-The **Purpose** section is mandatory. It answers: "I've never seen this package —
-why does it exist and how does it connect to the rest of the system?"
+The **Problem** and **What It Does** sections are mandatory. They answer: "I've
+never seen this package — why does it exist and why would I choose it?"
+
+### Tone
+- Write for a human, not a machine. No jargon in the first three sections.
+- Lead with benefits, not implementation details.
+- Use concrete examples of what the user can accomplish, not abstract descriptions.
 
 ### Update when
-- Public API, CLI commands, or usage patterns change
-- The package's role in the monorepo changes
+- The product positioning, value proposition, or key features change
+- New user-facing capabilities are added
+- The package's role in the ecosystem changes
 
 ### Do NOT include
 - Architecture internals (those go in CLAUDE.md)
 - Environment variable tables (link to CLAUDE.md for those)
-- Anything a user doesn't need to operate the package
+- Exhaustive API references (link to Starlight docs for those)
+- Installation/configuration details beyond a minimal Quick Start
+- Anything that reads like a developer guide rather than a product introduction
 
 ---
 
@@ -151,8 +172,8 @@ Follow the existing `arm` (agent-framework) pattern in both files.
 | I want to document… | Where it goes |
 |---|---|
 | What an exported function/type/interface does | TSDoc `/** */` in source (Tier 0 — always first) |
-| Package purpose and how it fits in the project | `README.md` — mandatory Purpose section |
-| How to install / quick-start / main usage | `README.md` |
+| What problem this solves and why it exists | `README.md` — The Problem + What It Does sections |
+| Key capabilities and user benefits | `README.md` — Features section |
 | Architecture, conventions, env vars, internal recipes | `CLAUDE.md` |
 | Full API reference | `docs/api-reference.md` generated from TSDoc — never hand-edit |
 | Concept explanation or mental model | `docs/concepts.md` |

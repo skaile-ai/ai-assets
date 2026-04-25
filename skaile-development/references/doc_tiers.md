@@ -12,24 +12,28 @@ documentation surfaces. Each has a distinct audience, scope, and update trigger.
 
 ## The Five Tiers
 
-### 1. README.md — User-Facing Overview
+### 1. README.md — Human Entry Point (Product-First)
 
-**Audience:** End users, package consumers, anyone evaluating the package.
+**Audience:** Humans arriving at the repo for the first time — evaluators, potential users, new team members.
 **Location:** `<package>/README.md`
-**Purpose:** What the package is, how to install it, how to use it. Quick-start focused.
+**Purpose:** What the package is, what problem it solves, why it's different, and what it can do. Product introduction, not technical manual.
+
+**Required sections:** The Problem, What It Does, Features, Quick Start, Learn More.
+See `references/doc_pattern.md` for the full structure.
 
 **Update when:**
-- Public API, commands, or usage patterns change
-- Installation steps change
-- New capabilities are added that users need to know about
+- Product positioning, value proposition, or key features change
+- New user-facing capabilities are added
+- The package's role in the ecosystem changes
 
 **Do NOT include:**
-- Architecture internals
-- Debugging tips
-- Environment variable tables (link to CLAUDE.md for those)
-- Anything a user doesn't need to operate the package
+- Architecture internals (link to CLAUDE.md)
+- Exhaustive API references (link to Starlight docs)
+- Environment variable tables (link to CLAUDE.md)
+- Installation/configuration details beyond a minimal Quick Start
+- Anything that reads like a developer guide rather than a product introduction
 
-**Format:** No frontmatter. H1 = package name. Code blocks for every command.
+**Format:** No frontmatter. H1 = package name. Lead with benefits, not code.
 
 ---
 
@@ -137,14 +141,14 @@ migration guidance, rationale, and downstream effects.
 | Change type | README | CLAUDE.md | Starlight | DOMAIN/SKILL | _devlog |
 |-------------|--------|-----------|-----------|--------------|---------|
 | New or modified exported TypeScript symbol | No | No | Yes (api-reference, generated) | No | No |
-| New public CLI command | Yes | Maybe | Yes | No | Yes |
+| New public CLI command | Yes (Features) | Maybe | Yes | No | Yes |
 | New env variable | No | Yes | Yes (if configurable) | No | Yes |
 | Architecture refactor | No | Yes | Maybe | No | Yes + Report |
 | New AI skill | No | No | No | Yes (SKILL.md + DOMAIN.md) | Yes |
 | Shared contract change | No | No | No | Yes (all affected SKILL.md) | Yes + Report |
 | Bug fix | No | No | No | No | Yes |
-| New package added | Yes | Yes | Yes | No | Yes |
-| Breaking API change | Yes | Yes | Yes | No | Yes + Report |
+| New package added | Yes (full) | Yes | Yes | No | Yes |
+| Breaking API change | Yes (Features/What It Does if user-visible) | Yes | Yes | No | Yes + Report |
 | Test-only change | No | No | No | No | Yes (brief) |
 | Dependency update | No | No | No | No | Yes (brief) |
 

@@ -59,10 +59,11 @@ For each stale page:
 ### Step 3 — Check README.md accuracy
 
 For each package whose source files changed:
-- Verify the installation steps are still accurate.
-- Verify usage examples reflect current CLI flags, API, or import paths.
-- Verify the feature list matches what is actually implemented.
-- Update any section that is stale. Do not rewrite sections that are accurate.
+- Verify **The Problem** and **What It Does** still accurately describe the package's value proposition.
+- Verify the **Features** list matches what is actually available to users. Add new capabilities, remove deprecated ones.
+- Verify the **Quick Start** still works with the current code.
+- Ensure the tone stays product-first — if any section has drifted into technical/architectural detail, move that content to CLAUDE.md and replace it with a user-benefit description.
+- Update only sections that are stale. Do not rewrite sections that are accurate.
 
 ### Step 4 — Check CLAUDE.md accuracy
 

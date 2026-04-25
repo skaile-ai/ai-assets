@@ -99,10 +99,13 @@ If a new Starlight page was created:
 ### Step 6 — Write README.md sections (if tier requires it)
 
 If the target is user-facing and README.md does not yet exist or is missing this feature:
-- Add to an existing section if the change is small.
-- Add a new `## Feature Name` section if it is a distinct capability.
-- Open with the most common use case. Use concrete `bash` or `typescript` code blocks.
-- Link to Starlight for extended reference.
+
+README is the human entry point — product-first, not code-first. See `references/doc_pattern.md` for the full required structure (The Problem, What It Does, Features, Quick Start, Learn More).
+
+- If README does not exist: create it with the full required structure. Lead with the problem and value proposition, not installation steps.
+- If README exists but is missing coverage for this feature: add a bullet to the **Features** section describing the user benefit. Update **What It Does** if the feature changes the package's value proposition.
+- Do not add technical implementation details. Link to Starlight or CLAUDE.md for depth.
+- Write for a human evaluating the tool, not a developer implementing with it.
 
 ### Step 7 — Write CLAUDE.md sections (if tier requires it)
 

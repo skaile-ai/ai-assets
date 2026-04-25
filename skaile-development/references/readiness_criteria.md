@@ -9,7 +9,7 @@ Used by the `ready` skill. Each package is evaluated against the criteria table 
 | # | Criterion | Check | How to verify |
 |---|---|---|---|
 | 1 | README.md exists | File present at `<pkg>/README.md` | `fs.existsSync` |
-| 2 | README.md has quick-start | First H2 or earlier is `## Installation`, `## Usage`, or `## Quick Start` | Regex on H2 headings |
+| 2 | README.md has product sections | Has `## The Problem` and `## What It Does` (or legacy `## Purpose`) | Regex on H2 headings |
 | 3 | CLAUDE.md exists | File present at `<pkg>/CLAUDE.md` | `fs.existsSync` |
 | 4 | CLAUDE.md has required sections | Must have: `## What This Is`, `## Architecture`, `## Tech Stack`, `## Key Conventions` | Regex on H2 headings |
 | 5 | package.json exists | Required for every TS package | `fs.existsSync` |
