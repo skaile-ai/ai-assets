@@ -16,7 +16,7 @@ metadata:
     - "design"
     - "patterns"
     - "grounding"
-  source: "MERGED"
+  source: "MIGRATED"
   prerequisites:
     inputs_required:
       - id: research_scope
@@ -35,18 +35,18 @@ metadata:
     reads:
       - path: "_concept/1_discovery/1_overview/brief.md"
         description: "App name, problem statement, target audience for focused research"
-      - path: "_concept/_grounding/overview/user_input.json"
+      - path: "_concept/_grounding/onboarding/inputs/overview.json"
         description: "Pre-collected answers to sharpen research scope"
     produces:
-      - path: "_concept/_grounding/general/domain.md"
+      - path: "_concept/_grounding/research/domain.md"
         description: "Domain landscape findings"
-      - path: "_concept/_grounding/general/competitors.md"
+      - path: "_concept/_grounding/research/competitors.md"
         description: "Competitor analysis"
-      - path: "_concept/_grounding/general/audiences.md"
+      - path: "_concept/_grounding/research/audiences.md"
         description: "Target audience personas"
-      - path: "_concept/_grounding/general/design_inspiration.md"
+      - path: "_concept/_grounding/research/design-inspiration.md"
         description: "Visual and layout references"
-      - path: "_concept/_grounding/general/behavioral_patterns.md"
+      - path: "_concept/_grounding/research/behavioral-patterns.md"
         description: "UX behavioral patterns"
   user_inputs:
     dialog:
@@ -80,7 +80,7 @@ design references, and screens adopt proven layout patterns.
 **This is a MODE skill, not a sequential pipeline step.** It can be dispatched
 alongside any other step in the pipeline. Research runs in parallel.
 
-**Writes to:** `_grounding/general/` (cross-cutting research), `_grounding/{step}/` (step-specific research), `_grounding/findings/` (raw screenshots and excerpts)
+**Writes to:** `_grounding/research/` (cross-cutting research), `_grounding/step/{step}/` (step-specific research), `_grounding/findings/` (raw screenshots and excerpts)
 
 ## When to Use
 
@@ -130,16 +130,16 @@ READS
   _concept/1_discovery/1_overview/comparable.md  — user-identified reference apps
 
 WRITES
-  _grounding/general/domain.md              — industry terms, regulations, trends, workflows
-  _grounding/general/competitors.md         — per-product analysis (features, strengths, gaps)
-  _grounding/general/audiences.md           — persona profiles with design implications
-  _grounding/general/design_inspiration.md  — layout patterns, color, typography, components
-  _grounding/general/patterns.md            — UX patterns for this domain
-  _grounding/general/colors_fonts.md        — color palette and typography research
-  _grounding/general/behavioral_patterns.md — state machines and lifecycle patterns
-  _grounding/{step}/*.md                    — step-specific research when dispatched alongside a skill
-  _grounding/findings/index.md              — catalog of screenshots and raw material
-  _grounding/findings/*.png                 — screenshots captured via browser tool
+  _grounding/research/domain.md              — industry terms, regulations, trends, workflows
+  _grounding/research/competitors.md         — per-product analysis (features, strengths, gaps)
+  _grounding/research/audiences.md           — persona profiles with design implications
+  _grounding/research/design-inspiration.md  — layout patterns, color, typography, components
+  _grounding/research/patterns.md            — UX patterns for this domain
+  _grounding/research/colors-fonts.md        — color palette and typography research
+  _grounding/research/behavioral-patterns.md — state machines and lifecycle patterns
+  _grounding/step/{step}/*.md                — step-specific research when dispatched alongside a skill
+  _grounding/findings/index.md               — catalog of screenshots and raw material
+  _grounding/findings/*.png                  — screenshots captured via browser tool
 
 REFERENCES
   skaileup-shared/contracts/concept_structure.md       — valid paths
@@ -151,7 +151,7 @@ REFERENCES
 MUST  cite sources or note evidence for all factual claims
 MUST  include "Relevance to Our App" section for every competitor
 MUST  include "Design Implications" section for every persona
-MUST  always produce design_inspiration.md — even if other sections are thin
+MUST  always produce design-inspiration.md — even if other sections are thin
 MUST  save screenshots to _grounding/findings/ when browser tool is available
 
 NEVER  make claims without web search evidence
@@ -178,7 +178,7 @@ STEP 2: Competitor and comparable analysis
   - Capture screenshots of notable UI patterns via browser tool when available
   - Write each competitor using the structure in references/competitor_template.md
 
-OUTPUT _grounding/general/competitors.md
+OUTPUT _grounding/research/competitors.md
   ---
   products_analyzed: <N>
   last_updated: <YYYY-MM-DD>
@@ -193,7 +193,7 @@ STEP 3: Audience research
     pain points, values, community channels
   - Write each persona using the structure in references/persona_template.md
 
-OUTPUT _grounding/general/audiences.md
+OUTPUT _grounding/research/audiences.md
   ---
   personas_defined: <N>
   last_updated: <YYYY-MM-DD>
@@ -208,7 +208,7 @@ STEP 4: Domain research
     common workflows, and integration expectations
   - Write findings covering: industry terminology, compliance, trends, workflows, integrations
 
-OUTPUT _grounding/general/domain.md
+OUTPUT _grounding/research/domain.md
   ---
   last_updated: <YYYY-MM-DD>
   ---
@@ -220,7 +220,7 @@ STEP 5: Design inspiration and brand references
   - Capture screenshots via browser tool where possible; save to _grounding/findings/
   - Write using the structure in references/design_inspiration_template.md
 
-OUTPUT _grounding/general/design_inspiration.md
+OUTPUT _grounding/research/design-inspiration.md
   ---
   references_collected: <N>
   last_updated: <YYYY-MM-DD>
@@ -231,11 +231,11 @@ OUTPUT _grounding/general/design_inspiration.md
 EMIT  [research] checkpoint phase=design_inspiration_collected references=<N>
 
 STEP 6: Additional scope coverage (based on research_scope)
-  - `patterns`    → write _grounding/general/patterns.md (UX patterns for this domain)
-  - `colors`      → write _grounding/general/colors_fonts.md (color palette and typography)
-  - `behavioral`  → write _grounding/general/behavioral_patterns.md (state machines and lifecycles)
+  - `patterns`    → write _grounding/research/patterns.md (UX patterns for this domain)
+  - `colors`      → write _grounding/research/colors-fonts.md (color palette and typography)
+  - `behavioral`  → write _grounding/research/behavioral-patterns.md (state machines and lifecycles)
   - `all`         → write all three files above
-  - Step-specific research (when dispatched alongside another skill): write to _grounding/{step}/*.md
+  - Step-specific research (when dispatched alongside another skill): write to _grounding/step/{step}/*.md
 
 STEP 7: Save raw findings
   - Save screenshots, excerpts, and links to _grounding/findings/
@@ -269,7 +269,7 @@ STEP 9: Hand off
   > - Run `journeys` to map user journeys (reads audience research)
   > - Run `features` to define feature requirements (reads competitor gaps + domain)"
 
-EMIT  [research] completed run_id=<uuid> artifacts=_grounding/general/ scope=<research_scope>
+EMIT  [research] completed run_id=<uuid> artifacts=_grounding/research/ scope=<research_scope>
 
 CHECKLIST
   - [ ] competitors.md has per-product Relevance section
@@ -285,14 +285,14 @@ CHECKLIST
 
 | File | Description |
 |------|-------------|
-| `_grounding/general/domain.md` | Domain terminology, trends, regulations |
-| `_grounding/general/competitors.md` | Competitor analysis with features, strengths, weaknesses |
-| `_grounding/general/audiences.md` | Persona profiles with design implications |
-| `_grounding/general/design_inspiration.md` | Layout patterns, color approaches, typography, components |
-| `_grounding/general/patterns.md` | UX patterns for this domain (scope: patterns or all) |
-| `_grounding/general/colors_fonts.md` | Color palette and typography research (scope: colors or all) |
-| `_grounding/general/behavioral_patterns.md` | State machines and lifecycle patterns (scope: behavioral or all) |
-| `_grounding/{step}/*.md` | Step-specific research when dispatched alongside a skill |
+| `_grounding/research/domain.md` | Domain terminology, trends, regulations |
+| `_grounding/research/competitors.md` | Competitor analysis with features, strengths, weaknesses |
+| `_grounding/research/audiences.md` | Persona profiles with design implications |
+| `_grounding/research/design-inspiration.md` | Layout patterns, color approaches, typography, components |
+| `_grounding/research/patterns.md` | UX patterns for this domain (scope: patterns or all) |
+| `_grounding/research/colors-fonts.md` | Color palette and typography research (scope: colors or all) |
+| `_grounding/research/behavioral-patterns.md` | State machines and lifecycle patterns (scope: behavioral or all) |
+| `_grounding/step/{step}/*.md` | Step-specific research when dispatched alongside a skill |
 | `_grounding/findings/` | Raw screenshots, excerpts, links |
 
 ## Common Mistakes
@@ -303,4 +303,13 @@ CHECKLIST
 | Inventing competitor features or pricing | Verify via search. If unknown, say "not publicly available". |
 | Generic personas ("busy professional") | Be specific to the domain. Use real job titles, real pain points. |
 | Skipping design inspiration | Design inspiration is critical input for brand. Always produce it. |
-| Writing to `_concept/1_discovery/2_research/` or `_concept/_research/` | Research output goes to `_grounding/`. Cross-cutting topics to `_grounding/general/`, step-specific to `_grounding/{step}/`. |
+| Writing to `_concept/1_discovery/2_research/` or `_concept/_research/` | Research output goes to `_grounding/`. Cross-cutting topics to `_grounding/research/`, step-specific to `_grounding/step/{step}/`. |
+
+## Backward Compatibility
+
+When reading from `_grounding/`, check for both old and new paths:
+- `_grounding/general/` → `_grounding/research/` (prefer new)
+- `_grounding/{step}/user_input.json` → `_grounding/onboarding/inputs/{step}.json` (prefer new)
+- Underscore filenames (`design_inspiration.md`) → hyphenated (`design-inspiration.md`) (prefer new)
+
+When writing, always use new paths. When reading, try new path first, fall back to old.
