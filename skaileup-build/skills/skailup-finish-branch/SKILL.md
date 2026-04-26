@@ -1,5 +1,5 @@
 ---
-name: "finish-branch"
+name: "skailup-finish-branch"
 description: "Controlled branch completion after supervised implementation. Presents four options: merge to main, create pull request, keep branch for later, or discard. Requires explicit confirmation for merge and discard actions. Triggers on: 'finish the branch', 'close out the implementation', 'we're done — what now', 'merge or PR', after implement-supervised completes."
 metadata:
   version: "1.0.0"

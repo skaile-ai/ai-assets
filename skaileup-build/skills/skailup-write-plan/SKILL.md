@@ -1,5 +1,5 @@
 ---
-name: "write-plan"
+name: "skailup-write-plan"
 description: "Converts concept artifacts and brainstorm output into a decomposed, dependency-ordered implementation plan ready for supervised subagent dispatch. Each task is self-contained with pasted spec text, tech context, and a model tier recommendation. Triggers on: 'write the plan', 'decompose into tasks', 'create the implementation plan', 'plan before we build'."
 metadata:
   version: "1.0.0"

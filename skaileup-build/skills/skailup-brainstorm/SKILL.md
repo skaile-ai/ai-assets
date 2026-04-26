@@ -1,5 +1,5 @@
 ---
-name: "brainstorm"
+name: "skailup-brainstorm"
 description: "Structured problem decomposition before implementation planning. Explores unknowns, surfaces risks, identifies dependencies, and formulates open questions that would block implementation if unanswered. Run before write-plan. Triggers on: 'let's think before we start', 'what are the risks', 'brainstorm the implementation', 'what could go wrong', starting a complex feature with unclear scope."
 metadata:
   version: "1.0.0"

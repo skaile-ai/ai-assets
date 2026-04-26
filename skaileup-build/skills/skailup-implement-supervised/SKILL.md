@@ -1,5 +1,5 @@
 ---
-name: "implement-supervised"
+name: "skailup-implement-supervised"
 description: "Supervised subagent-driven implementation. Dispatches one subagent per task from the superpowers plan, enforces spec-compliance review before code-quality review for each task, handles 4-status implementer reports (DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED), and manages escalation paths. The primary orchestrator in this domain. Triggers on: 'start implementing', 'run the plan', 'implement supervised', 'dispatch the tasks'."
 metadata:
   version: "1.0.0"

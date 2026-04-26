@@ -55,6 +55,13 @@ files at startup and building a name→path registry.
 | `skailup-migrate` | skaileup-build | Database migrations |
 | `skailup-seed` | skaileup-build | Load seed data scenarios |
 | `skailup-implement-feature` | skaileup-build | TDD feature implementation |
+| `skailup-update-docs` | skaileup-build | Sync docs after implementation |
+| `skailup-generate` | skaileup-build | Code generation utilities |
+| `skailup-git-prepare` | skaileup-build | Git repo prep for supervised implementation |
+| `skailup-brainstorm` | skaileup-build | Structured problem decomposition before planning |
+| `skailup-write-plan` | skaileup-build | Decomposed implementation plan from concept artifacts |
+| `skailup-implement-supervised` | skaileup-build | Supervised subagent-driven implementation |
+| `skailup-finish-branch` | skaileup-build | Controlled branch completion (merge/PR/keep/discard) |
 | `skailup-audit` | skaileup-quality | Static code + structure analysis |
 | `skailup-e2e` | skaileup-quality | Browser-based E2E journey testing |
 | `skailup-ready` | skaileup-quality | Pre-flight readiness gate |

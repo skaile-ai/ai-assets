@@ -1,5 +1,5 @@
 ---
-name: "git-prepare"
+name: "skailup-git-prepare"
 description: "Prepare the git repository for a supervised implementation run. Initializes git if needed, creates the implementation branch, and optionally sets up a git worktree (Claude Code / local mode only). Run before brainstorm or write-plan. Triggers on: 'set up git', 'prepare the repo', 'create implementation branch', no git repo found before implementation starts."
 metadata:
   version: "1.0.0"

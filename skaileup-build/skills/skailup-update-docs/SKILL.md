@@ -1,5 +1,5 @@
 ---
-name: "skailup-update-starlight-docs"
+name: "skailup-update-docs"
 description: "Use after completing an implementation step to verify and update Starlight documentation. Detects git-changed files, resolves which doc pages cover them via _sources frontmatter, checks accuracy, and rewrites stale sections. Run automatically at the end of implement-feature, scaffold, foundation, infrastructure, or any coding step."
 metadata:
   version: "1.0.0"
