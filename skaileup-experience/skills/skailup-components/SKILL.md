@@ -90,6 +90,7 @@ Before starting, read:
 - `skaileup-shared/contracts/frontmatter.md` — screen frontmatter fields
 - `skaileup-shared/contracts/iron_laws.md` — non-negotiable constraints
 - `skaileup-shared/contracts/agent_patterns.md` — communication style, standalone mode
+- `skaileup-shared/contracts/wireframe_conventions.md` — ASCII wireframe symbol vocabulary
 
 ## Context Budget
 
@@ -209,6 +210,21 @@ PrimeVue DataTable with:
 - `paginator` + `rows` + `rowsPerPageOptions`
 - `filterDisplay="menu"` for column filters
 - Custom `#empty` template slot for empty state
+
+## Anatomy
+
+~~~text
+┌─────────────────────────────────────────┐
+│ [Bulk Actions]            [search] [v]  │  <- toolbar zone
+├───────┬──────┬────────┬─────────────────┤
+│ [ ] ^ │ Name │ Status │ Actions         │  <- header (sortable)
+├───────┼──────┼────────┼─────────────────┤
+│ [ ]   │ ...  │  * Ok  │ [Edit] [Delete] │  <- row
+│ [ ]   │ ...  │  o New │ [Edit] [Delete] │
+├───────┴──────┴────────┴─────────────────┤
+│              < 1 2 3 >       20/page [v]│  <- pagination
+└─────────────────────────────────────────┘
+~~~
 ```
 
 Component file names are lowercase, underscore-separated: `data_table.md`,
@@ -251,6 +267,19 @@ components:
 | Missing empty/loading/error states | Every component needs at least: loading, empty, error, populated states |
 | Not cross-referencing screens | Every component must list `used_in` screens; screens should reference components |
 | Inventing components not in screens | Only spec components actually referenced in existing screen specs |
+
+MUST  include a ## Anatomy wireframe for components with 3+ internal zones
+MUST  read skaileup-shared/contracts/wireframe_conventions.md before generating anatomy wireframes
+
+Anatomy wireframe depth behavior:
+  - depth none/light: skip anatomy wireframes
+  - depth medium: anatomy for complex components (3+ zones) only
+  - depth max: anatomy for all components + variant wireframes showing different states
+
+A zone is a visually distinct functional region within the component — e.g.,
+toolbar, header row, body, footer, action bar. Interactive sub-elements within
+a zone (individual buttons, inputs) do not count as separate zones.
+Examples: data table has 4 zones (toolbar, header, body, pagination); badge has 1 zone.
 
 EMIT  [components] started run_id=<uuid>
 EMIT  [components] checkpoint phase=patterns_identified components=<N> screens_analyzed=<N>
