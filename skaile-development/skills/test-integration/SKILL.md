@@ -24,7 +24,7 @@ metadata:
       - id: target
         label: "Package path"
         type: text
-        hint: "e.g. forge/project, platform/backend, agent-framework/runner"
+        hint: "e.g. forge/L4-project, platform/backend, agent-framework/runner"
     inputs_optional:
       - id: mode
         label: "Mode"
@@ -113,7 +113,7 @@ Integration tests at Layer 3 come in four flavours. Pick the one that matches th
 
 | Package | Storage | Isolation strategy |
 |---|---|---|
-| `forge/project`, `forge/concept` (+ other forge apps) | SQLite + drizzle-orm | `:memory:` DB **or** per-test tempfile via `makeTempDir`; drizzle migrations in `beforeAll` |
+| `forge/L4-project`, `forge/L5-concept` (+ other forge apps) | SQLite + drizzle-orm | `:memory:` DB **or** per-test tempfile via `makeTempDir`; drizzle migrations in `beforeAll` |
 | `platform/backend` | PostgreSQL + Prisma | Separate test database (`DATABASE_URL_TEST`); `prisma migrate deploy` in `beforeAll`; truncate tables in `afterEach` |
 | `agent-framework/runner`, `session`, `bridge`, `workspace-plugin`, `lab` | Temp dirs on disk | `makeTempDir("<pkg>-test")` per test; cleanup is auto-scheduled by the helper via `onTestFinished`; no DB |
 | `agent-framework/connectors` | Per-connector (postgres, redis, sqlite, ...) | `makeTempDir` + in-memory variants; Docker for container-backed adapters (gate behind `SKAILE_DOCKER_TESTS=1`) |

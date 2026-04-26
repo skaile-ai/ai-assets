@@ -34,7 +34,7 @@ metadata:
       - id: target
         label: "Package path (required for scope=package)"
         type: text
-        hint: "e.g. forge/project, agent-framework/runner, platform/backend"
+        hint: "e.g. forge/L4-project, agent-framework/runner, platform/backend"
       - id: diff_source
         label: "Diff source (only for scope=diff)"
         type: select

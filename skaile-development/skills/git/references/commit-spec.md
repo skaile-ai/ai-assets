@@ -175,7 +175,7 @@ use the Claude SDK or Pi drivers.
 scope: [agent-framework/bridge]
 type: refactor
 breaking: true
-affects: [agent-framework/runner, agent-framework/cli, forge/project]
+affects: [agent-framework/runner, agent-framework/cli, forge/L4-project]
 
 changes:
 - Remove OmpDriver class and omp.ts module
@@ -190,7 +190,7 @@ decisions:
 migrate:
 - agent-framework/runner: remove any omp-specific driver config
 - agent-framework/cli: remove --driver omp from CLI options
-- forge/project: switch to claude-sdk driver in agent config
+- forge/L4-project: switch to claude-sdk driver in agent config
 
 exports:
 - OmpDriver (class) from @skaile/agent-bridge

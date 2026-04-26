@@ -209,7 +209,7 @@ Parts are joined with `\n\n---\n\n`. Missing files are silently skipped.
 | `quality` | `skaileup-evaluate/agents/quality/` | Quality assurance |
 | `architecture` | `skaileup-architecture/agents/architecture/` | System architecture |
 | `skaile-development` | `skaile-development/agents/skaile-development/` | skaile-dev monorepo expert — routes tasks to skills and prog-experts |
-| `forge-project-assistant` | `forge-project/agent/` | In-app dev assistant for forge/project workspaces |
+| `forge-project-assistant` | `forge-project/agent/` | In-app dev assistant for forge/L4-project workspaces |
 | `forge-project-base-orchestrator` | `forge-project/base-orchestrator/` | Home workspace guide — creates projects, explains Forge Project features |
 | `forge-project-orchestrator` | `forge-project/project-orchestrator/` | Project workspace assistant — coding, writing, research, file management |
 | `skaile-assistant` | `skaile-platform/agents/assistant/` | Skaile platform enterprise assistant — research, analysis, writing, code |

@@ -23,7 +23,7 @@ Quick reference for writing devlog entries and reports. See `SKILL.md` for the f
 ```
 
 **Good titles:** Action + subject, plain language.
-- "Add workspace rename to forge/project"
+- "Add workspace rename to forge/L4-project"
 - "Fix session token expiry race condition in platform backend"
 - "Move shared auth logic into forge/common-backend"
 - "Add agent-framework/connectors package"

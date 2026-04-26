@@ -21,7 +21,7 @@ metadata:
       - id: target
         label: "Package path"
         type: text
-        hint: "e.g. forge/project, agent-framework/runner, platform/backend"
+        hint: "e.g. forge/L4-project, agent-framework/runner, platform/backend"
     inputs_optional:
       - id: layers
         label: "Layers to plan (comma-separated)"
@@ -158,7 +158,7 @@ STEP 2: Classify package category and test layer
   Also assign the **test layer (L0-L5)** from the concept spec:
   - L0 — types-only (tsc --noEmit)
   - L1 — pure functions + composable libraries (core, resolver, flow-engine, bridge/pure, forge/common-ui)
-  - L2 — I/O-bound with in-process mocks (transport, client, session, store, asset-manager, sdk, forge/common-backend, forge/tui)
+  - L2 — I/O-bound with in-process mocks (transport, client, session, store, asset-manager, sdk, forge/common-backend, forge/L2-tui)
   - L3 — cross-module integration (connectors, runner, bridge/drivers, lab, workspace-plugin)
   - L4 — entry points (cli, sdk acceptance)
   - L5 — reference apps (forge/*)
@@ -221,9 +221,9 @@ STEP 5: Enumerate testable units per layer
 
   L5 — Reference apps (forge) have three shapes:
     - Unit (composables, server utilities, auth middleware):
-      Reference: `forge/project/tests/use-color-mode.test.ts` (happy-dom for Vue composables)
+      Reference: `forge/L4-project/tests/use-color-mode.test.ts` (happy-dom for Vue composables)
     - Integration (Nitro route handlers with synthetic h3 events + mocked @skaile/forge-common-backend):
-      Reference: `forge/project/tests/_setup/h3-event.ts`, `_setup/nitro-globals.ts`,
+      Reference: `forge/L4-project/tests/_setup/h3-event.ts`, `_setup/nitro-globals.ts`,
       `api-auth-logout.test.ts`, `api-auth-me.test.ts`
     - E2E (Playwright) — critical user journeys only.
     - **Library composable E2E (Playwright CT):** when an L1/L2 library package exports

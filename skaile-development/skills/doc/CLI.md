@@ -74,7 +74,7 @@ Write fresh documentation for source files, features, or packages that have no c
 skaile skill run doc --input MODE=write --input TARGET=agent-framework/cli
 
 # Write docs for specific source files
-skaile skill run doc --input MODE=write --input TARGET=forge/project/src/auth.ts
+skaile skill run doc --input MODE=write --input TARGET=forge/L4-project/src/auth.ts
 
 # Write docs for a feature or topic
 skaile skill run doc --input MODE=write --input TARGET="session lifecycle"

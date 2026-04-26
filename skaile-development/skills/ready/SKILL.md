@@ -207,18 +207,18 @@ STEP 6: Write markdown
   ## Packages
   | Package | Category | Required | Soft | Status |
   |---|---|---|---|---|
-  | forge/project | app | 11/12 | 4/5 | BLOCKED |
+  | forge/L4-project | app | 11/12 | 4/5 | BLOCKED |
   ...
 
   ## Blockers
-  ### forge/project
+  ### forge/L4-project
   - [!] 8 Tests fail — 3 failing in tests/e2e/chat.spec.ts
     Fix: `bun x --bun vitest run --project forge-project` and triage
   - [!] 10 Lint not clean — 2 biome errors in app/pages/index.vue
-    Fix: `bun x biome check --write forge/project`
+    Fix: `bun x biome check --write forge/L4-project`
 
   ## Warnings
-  ### forge/project
+  ### forge/L4-project
   - [~] S1 CHANGELOG.md missing — create one before releasing
 
   ## Summary

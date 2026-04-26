@@ -63,7 +63,7 @@ Not every criterion applies to every package. The `ready` skill categorizes pack
 
 | Category | Criteria applied | Examples |
 |---|---|---|
-| **app** | 1-12, S1-S5 | `forge/project`, `forge/concept`, `platform/backend`, `platform/frontend` |
+| **app** | 1-12, S1-S5 | `forge/L4-project`, `forge/L5-concept`, `platform/backend`, `platform/frontend` |
 | **library** | 1, 3-12, S1-S3 | `agent-framework/runner`, `agent-framework/bridge`, `forge/common-backend` |
 | **internal-library** | 3, 5-12 (README optional) | `agent-framework/core`, `agent-framework/types`, `agent-framework/transport` |
 | **cli** | 1-12, S1, S2 | `agent-framework/cli` |
@@ -93,14 +93,14 @@ The category is inferred from:
 
 | Package | Category | Required | Soft | Status |
 |---|---|---|---|---|
-| forge/project | app | 11/12 | 4/5 | BLOCKED |
-| forge/concept | app | 12/12 | 5/5 | READY |
+| forge/L4-project | app | 11/12 | 4/5 | BLOCKED |
+| forge/L5-concept | app | 12/12 | 5/5 | READY |
 | agent-framework/runner | library | 12/12 | 3/3 | READY |
 | ...
 
 ## Blockers
 
-### forge/project
+### forge/L4-project
 - [!] 8 Tests fail — 3 failing tests in tests/e2e/chat.spec.ts
   Fix: investigate recent chat refactor
 
@@ -110,7 +110,7 @@ The category is inferred from:
 
 ## Warnings
 
-### forge/project
+### forge/L4-project
 - [~] S1 CHANGELOG.md missing — create one before releasing
 
 ## Verdict

@@ -13,12 +13,12 @@ All forge packages share a single root `vitest.config.ts` at `forge/` that picks
 
 | Package | Framework | Test Dir | Pattern | Status |
 |---|---|---|---|---|
-| `forge/project` | Vitest (unit) + Playwright (e2e) | `tests/` + `tests/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
-| `forge/concept` | Vitest (unit) + Playwright (e2e) | `test/unit/` + `test/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
-| `forge/assistant` | Playwright (e2e only) | `tests/e2e/` | `*.spec.ts` | e2e ✓ |
-| `forge/chat` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
-| `forge/mattermost` | Vitest | `tests/` | `*.test.ts` | unit ✓, integration ✓ |
-| `forge/tui` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
+| `forge/L4-project` | Vitest (unit) + Playwright (e2e) | `tests/` + `tests/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
+| `forge/L5-concept` | Vitest (unit) + Playwright (e2e) | `test/unit/` + `test/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
+| `forge/L4-assistant` | Playwright (e2e only) | `tests/e2e/` | `*.spec.ts` | e2e ✓ |
+| `forge/L1-chat` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
+| `forge/L3-mattermost` | Vitest | `tests/` | `*.test.ts` | unit ✓, integration ✓ |
+| `forge/L2-tui` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
 | `forge/common-backend` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
 | `forge/common-ui` | Vitest + Playwright CT | `tests/` + `tests/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ (Playwright CT) |
 | `forge/common-tui` | Vitest | `tests/` | `*.test.ts` | unit ✓ |

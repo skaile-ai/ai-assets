@@ -127,7 +127,7 @@
         {
           "key": "target_package",
           "required": false,
-          "label": "Target package(s) if known (e.g., forge/project, platform/backend/libs/session-manager)",
+          "label": "Target package(s) if known (e.g., forge/L4-project, platform/backend/libs/session-manager)",
           "type": "text"
         },
         {

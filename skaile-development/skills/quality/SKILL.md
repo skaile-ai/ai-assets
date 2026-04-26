@@ -186,7 +186,7 @@ STEP 3: Run tests
       Exit codes: 0 pass, 1 regression (fail the gate), 2 invalid input (fail the gate).
       A `baseline-improved` verdict is informational — the ratchet does not
       fail on improvement; updating the committed baseline is a manual PR step.
-    - Note: forge/concept (vitest 4.1), forge/project, forge/assistant, platform/*,
+    - Note: forge/L5-concept (vitest 4.1), forge/L4-project, forge/L4-assistant, platform/*,
       and all Playwright suites are not part of the root istanbul run — run them
       via their scoped test commands (`bun run --filter <pkg> test 2>&1 | tail -60`)
       if they're in scope.
