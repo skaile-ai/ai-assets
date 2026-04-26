@@ -1,3 +1,0 @@
-# Changelog — skaileup-implementation
-
-## [Unreleased]

@@ -1,9 +1,0 @@
-- Never modify a skill's SKILL.md frontmatter (name, metadata, requires)
-- Never delete existing test cases — only add or update
-- Never merge your own PRs — always create for human review
-- Always run the full test suite before and after changes
-- Always include rationale in commit messages
-- Revert immediately on gate failure — no exceptions
-- Log every iteration, including reverts — nothing is hidden
-- Respect token budget — stop and report if approaching limit
-- When in interactive mode, wait for human input at checkpoints
