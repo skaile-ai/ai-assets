@@ -141,6 +141,7 @@ REFERENCES
   skaileup-shared/contracts/frontmatter.md            — required YAML fields
   skaileup-shared/contracts/feedback_loop.md          — cross-reference protocol (screens ↔ features)
   references/screen_spec_template.md             — screen spec structure with all sections
+  skaileup-shared/contracts/wireframe_conventions.md  — ASCII wireframe symbol vocabulary and layout rules
 
 MUST  write 00_layout/shell.md before any individual screen specs
 MUST  register every screen back into its parent feature's screens[] frontmatter (feedback loop)
@@ -149,6 +150,9 @@ MUST  identify data entities from model.json (or infer if model.json is absent)
 NEVER  include component library names, CSS tokens, or implementation details in screen specs
 NEVER  write screens for features that have no feature spec
 NEVER  invent brand colors or fonts — reference tokens.json if it exists; omit if absent
+MUST  include a ### Wireframe section in every screen spec at depth medium or max
+MUST  read wireframe_conventions.md before generating any wireframe
+MUST  annotate wireframe zones with feat:<feature-name> at depth max when screen implements multiple features
 
 EMIT  [screens] started run_id=<uuid>
 
@@ -203,6 +207,17 @@ STEP 3: Write layout shell
     ## Responsive Behaviour
     (Reference brand tokens if available — do not invent values)
 
+STEP 3b: Write shell wireframe
+  - Read skaileup-shared/contracts/wireframe_conventions.md for symbol vocabulary
+  - Generate an ASCII wireframe for shell.md showing:
+    - Header zone with app name, search, user menu
+    - Sidebar zone with navigation items
+    - Content zone (placeholder)
+  - Add wireframe as ## Wireframe section in shell.md (after ## Layout Areas)
+  - At depth max: add responsive variant (mobile with collapsed sidebar using [=] toggle)
+  IF depth is light or none
+    - Skip wireframe generation entirely
+
 STEP 4: Write screen specs
   - $ mkdir -p _concept/experience/screens/<NN_group>  (for each feature group)
   - For each screen, write a spec following references/screen_spec_template.md
@@ -219,6 +234,10 @@ STEP 4: Write screen specs
     ## Purpose
     ## Route
     ## What the User Sees
+    ## Wireframe
+      (ASCII wireframe of this screen's layout within the shell — see wireframe_conventions.md)
+      IF depth is max AND screen implements[] has 2+ features
+        - Annotate zones with feat:<feature-name> labels
     ## Information Displayed
     ## Actions
     ## Situations
@@ -260,6 +279,10 @@ CHECKLIST
   - [ ] Data entities referenced from model.json (or inferred if model absent)
   - [ ] Feature files updated with screens[] in frontmatter (feedback loop complete)
   - [ ] User has explicitly approved the screen specs
+  - [ ] Every screen spec includes a ### Wireframe section (at depth medium+)
+  - [ ] Wireframes follow skaileup-shared/contracts/wireframe_conventions.md
+  - [ ] Shell wireframe shows desktop and mobile variants (at depth max)
+  - [ ] Multi-feature screens have feat: annotations (at depth max)
 
 ---
 
