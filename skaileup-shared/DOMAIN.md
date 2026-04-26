@@ -3,7 +3,7 @@ name: skaileup-shared
 description: "Shared contracts, documentation, and scripts that all skills across all domains read — the single source of truth for cross-cutting conventions."
 type: domain
 building_blocks:
-  contracts: "Merged contracts at contracts/ root: concept_structure, frontmatter, golden_principles, iron_laws, agent_patterns, feedback_loop, semantic_types, skill_template, skill_testing, skill_grammar, acceptance_criteria, plans, flows, seed_data, MIGRATION. Legacy cf/ and saxe/ subdirs are archived originals."
+  contracts: "Merged contracts at contracts/ root: concept_structure, frontmatter, golden_principles, iron_laws, agent_patterns, feedback_loop, semantic_types, skill_template, skill_testing, skill_grammar, acceptance_criteria, plans, flows, seed_data, wireframe_conventions, MIGRATION. Legacy cf/ and saxe/ subdirs are archived originals."
   docs: "Architecture docs and observability specs — still split into docs/cf/ and docs/saxe/ pending a docs merge pass."
   scripts: "Shared Python linting/validation scripts: lint_concept.py, validate_skill_rules.py, validator_lib.py."
   agents: "n/a — this domain contains reference material, not invocable skills"
