@@ -178,7 +178,7 @@ Each step message follows this structure:
 4. **What to tell you when done** — "let me know when it's complete"
 
 Example:
-> "Next up: **Project Brief** (`skailup-overview`). This step produces `_concept/1_discovery/1_overview/brief.md` — the foundation for everything that follows.
+> "Next up: **Project Brief** (`skailup-overview`). This step produces `_concept/discovery/brief.md` — the foundation for everything that follows.
 > Run it with: `claude --skill skailup-overview`
 > Let me know when it's done and I'll show you what's next."
 

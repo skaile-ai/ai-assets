@@ -48,13 +48,13 @@ can be correlated.
 ```
 [concept-2-experience-3-screens] started
   run_id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
-  reads: 1_discovery/1_overview/brief.md, 2_experience/2_features/*, 1_discovery/3_brand/tokens.json, 3_blueprint/1_techstack/stack.md, 3_blueprint/3_datamodel/postxl-schema.json
+  reads: discovery/brief.md, experience/features/*, discovery/3_brand/tokens.json, blueprint/techstack.md, blueprint/datamodel/postxl-schema.json
 
 [concept-2-experience-3-screens] checkpoint phase=screen_list_confirmed
-  screens: 2_experience/3_screens/01_user_auth/login.md, 2_experience/3_screens/01_user_auth/registration.md, 2_experience/3_screens/02_dashboard/overview.md
+  screens: experience/screens/01_user_auth/login.md, experience/screens/01_user_auth/registration.md, experience/screens/02_dashboard/overview.md
 
-[concept-2-experience-3-screens] feedback_loop updated 2_experience/2_features/01_user_auth/login.md
-  added screen: 2_experience/3_screens/01_user_auth/login.md
+[concept-2-experience-3-screens] feedback_loop updated experience/features/01_user_auth/login.md
+  added screen: experience/screens/01_user_auth/login.md
   source_skill: concept-2-experience-3-screens
 
 [concept-2-experience-3-screens] completed

@@ -70,7 +70,7 @@ metadata:
 ## Injection Protocol
 
 When a skill requests standards injection:
-1. Read `_concept/3_blueprint/1_techstack/stack.md` for declared stack
+1. Read `_concept/blueprint/techstack.md` for declared stack
 2. Match declared stack → profile name
 3. Load `profiles/<profile>/SKILL.md` + matching `_standards/` files
 4. Return only the subset relevant to the requesting skill's domain (ui, api, etc.)
