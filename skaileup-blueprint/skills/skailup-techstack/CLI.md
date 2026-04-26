@@ -6,7 +6,7 @@ Invoke with: "tech stack", "framework", "what should we build with", "database c
 
 ## Output
 
-- `_concept/3_blueprint/1_techstack/stack.md`
+- `_concept/blueprint/techstack.md`
 
 ## Next Steps
 

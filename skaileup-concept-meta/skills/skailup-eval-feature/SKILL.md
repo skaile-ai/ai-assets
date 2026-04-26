@@ -17,11 +17,11 @@ metadata:
   stage: "alpha"
   prerequisites:
     files:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Feature specs required for acceptance criteria verification"
         min_entries: 1
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: hard
         description: "Screen specs required for UI fidelity check"
         min_entries: 1
@@ -36,11 +36,11 @@ metadata:
         type: text
         default: "http://localhost:3000"
     reads:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         description: "Feature specs and acceptance criteria"
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         description: "Screen specs for UI fidelity check"
-      - path: "_concept/2_experience/1_journeys/stories.json"
+      - path: "_concept/experience/journeys/stories.json"
         description: "Journey definitions for end-to-end simulation"
       - path: "_implementation/eval-feature"
         description: "Previous eval results for regression check"
@@ -61,9 +61,9 @@ You were NOT present during implementation. You have never seen the code.
 You only see the spec and the running app.
 
 READS
-  ! _concept/2_experience/2_features/**/*.md   — feature specs + acceptance criteria
-  ! _concept/2_experience/3_screens/**/*.md    — screen specs for UI fidelity
-  ? _concept/2_experience/1_journeys/stories.json  — journey stages for E2E simulation
+  ! _concept/experience/features/**/*.md   — feature specs + acceptance criteria
+  ! _concept/experience/screens/**/*.md    — screen specs for UI fidelity
+  ? _concept/experience/journeys/stories.json  — journey stages for E2E simulation
   ? _implementation/eval-feature/*.json        — previous results for regression check
 
 WRITES

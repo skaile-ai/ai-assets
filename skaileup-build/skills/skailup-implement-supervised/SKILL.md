@@ -22,7 +22,7 @@ metadata:
       - path: "_implementation/git-state.json"
         gate: hard
         description: "Git state required — run git-prepare first"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Feature specs required for spec compliance review"
         min_entries: 1
@@ -36,8 +36,8 @@ metadata:
   reads_from:
     - "_implementation/superpowers-plan.md"
     - "_implementation/git-state.json"
-    - "_concept/2_experience/2_features/**/*.md"
-    - "_concept/2_experience/3_screens/**/*.md"
+    - "_concept/experience/features/**/*.md"
+    - "_concept/experience/screens/**/*.md"
   writes_to:
     - "_implementation/superpowers-plan.md"
     - "_implementation/decisions.md"
@@ -74,8 +74,8 @@ ROLE  Supervised implementation orchestrator — dispatches subagents per task, 
 READS
   _implementation/superpowers-plan.md        — task list with verbatim specs
   _implementation/git-state.json             — branch, git_mode, worktree path
-  _concept/2_experience/2_features/**/*.md   — for spec compliance review reference
-  _concept/2_experience/3_screens/**/*.md    — for spec compliance review reference
+  _concept/experience/features/**/*.md   — for spec compliance review reference
+  _concept/experience/screens/**/*.md    — for spec compliance review reference
 
 WRITES
   _implementation/superpowers-plan.md        — task status updates
@@ -162,7 +162,7 @@ FOR EACH task in superpowers-plan.md (in dependency order, starting from start t
       - Resume loop from first sub-task
 
   STEP 6: Spec compliance review
-    - Read the feature spec(s) for this task from _concept/2_experience/2_features/
+    - Read the feature spec(s) for this task from _concept/experience/features/
     - Read the code produced by the subagent
     - Check each requirement in the spec against the code — line by line
     - Assume the implementer "finished suspiciously quickly" — do not trust tests alone

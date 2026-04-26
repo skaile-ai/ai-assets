@@ -48,7 +48,7 @@ behavior.
 
 ## When to Use
 
-- All upstream artifacts are approved and `_concept/2_experience/3_screens/` is empty
+- All upstream artifacts are approved and `_concept/experience/screens/` is empty
 - User asks about screens, pages, UI layout, navigation, routes
 - User says "design the screens", "what pages do we need", "UI specs"
 
@@ -61,10 +61,10 @@ behavior.
 ## Prerequisites
 
 **Hard gates:**
-- `_concept/2_experience/2_features/` must exist with at least one feature file
-- `_concept/1_discovery/2_brand/tokens.json` must exist (unless brand was explicitly skipped)
-- `_concept/3_blueprint/1_techstack/stack.md` must exist
-- `_concept/3_blueprint/3_datamodel/model.json` must exist
+- `_concept/experience/features/` must exist with at least one feature file
+- `_concept/discovery/brand/tokens.json` must exist (unless brand was explicitly skipped)
+- `_concept/blueprint/techstack.md` must exist
+- `_concept/blueprint/datamodel/model.json` must exist
 
 If any gate fails, stop immediately and name the missing prerequisite skill.
 
@@ -81,14 +81,14 @@ Before starting, read:
 
 | Source | Priority |
 |--------|----------|
-| `_concept/1_discovery/1_overview/brief.md` | Required |
-| `_concept/2_experience/2_features/**/*.md` | Required |
-| `_concept/1_discovery/2_brand/identity.md` | Required |
-| `_concept/1_discovery/2_brand/tokens.json` | Required |
-| `_concept/3_blueprint/1_techstack/stack.md` | Required |
-| `_concept/3_blueprint/3_datamodel/model.json` | Required |
-| `_concept/2_experience/4_behaviors/*.allium` | Optional — surface definitions |
-| `_concept/3_blueprint/2_architecture/architecture.md` | Optional — protocols and custom services |
+| `_concept/discovery/brief.md` | Required |
+| `_concept/experience/features/**/*.md` | Required |
+| `_concept/discovery/brand/identity.md` | Required |
+| `_concept/discovery/brand/tokens.json` | Required |
+| `_concept/blueprint/techstack.md` | Required |
+| `_concept/blueprint/datamodel/model.json` | Required |
+| `_concept/experience/behaviors/*.allium` | Optional — surface definitions |
+| `_concept/blueprint/architecture.md` | Optional — protocols and custom services |
 | `_grounding/general/design_inspiration.md` | Optional |
 | `_grounding/general/patterns.md` | Optional |
 
@@ -103,13 +103,13 @@ the prerequisite skill.
 
 | Artifact | Path | Missing? Run |
 |----------|------|-------------|
-| Project brief | `_concept/1_discovery/1_overview/brief.md` | `overview` |
-| Features | `_concept/2_experience/2_features/**/*.md` | `features` |
-| Brand tokens | `_concept/1_discovery/2_brand/tokens.json` | `brand-visual` |
-| Tech stack | `_concept/3_blueprint/1_techstack/stack.md` | `techstack` |
-| Data model | `_concept/3_blueprint/3_datamodel/model.json` | `datamodel` |
+| Project brief | `_concept/discovery/brief.md` | `overview` |
+| Features | `_concept/experience/features/**/*.md` | `features` |
+| Brand tokens | `_concept/discovery/brand/tokens.json` | `brand-visual` |
+| Tech stack | `_concept/blueprint/techstack.md` | `techstack` |
+| Data model | `_concept/blueprint/datamodel/model.json` | `datamodel` |
 
-**Optional: Behavioral specs.** Check if `_concept/2_experience/4_behaviors/*.allium` exists.
+**Optional: Behavioral specs.** Check if `_concept/experience/behaviors/*.allium` exists.
 If present, read all `.allium` files. Use Allium surfaces to enrich screen specs:
 
 - Surface `exposes` blocks → screen **Data Requirements** (which fields to show)
@@ -122,7 +122,7 @@ what actions are available. The screen spec should match the surface contract.
 
 ### Step 2: Read Brand Tokens
 
-Load `_concept/1_discovery/2_brand/tokens.json`. Use these values for:
+Load `_concept/discovery/brand/tokens.json`. Use these values for:
 - Color references in component descriptions
 - Font family names
 - Border radius, spacing conventions
@@ -146,25 +146,25 @@ Confirm the screen list with the user before writing:
 ### Step 4: Write Screen Specifications
 
 ```
-_concept/2_experience/3_screens/00_layout/
-_concept/2_experience/3_screens/01_user_auth/
+_concept/experience/screens/00_layout/
+_concept/experience/screens/01_user_auth/
 ```
 
 **First, write the layout shell:**
 
-`_concept/2_experience/3_screens/00_layout/shell.md` — navigation, sidebar, header,
+`_concept/experience/screens/00_layout/shell.md` — navigation, sidebar, header,
 footer, responsive breakpoints.
 
 **Then, for each screen:**
 
-`_concept/2_experience/3_screens/<NN_group>/<screen>.md`
+`_concept/experience/screens/<NN_group>/<screen>.md`
 
 ```yaml
 ---
 implements:
-  - 2_experience/2_features/01_user_auth/login.md
+  - experience/features/01_user_auth/login.md
 data_entities: [user]
-layout: 2_experience/3_screens/00_layout/shell.md
+layout: experience/screens/00_layout/shell.md
 last_updated: YYYY-MM-DD
 ---
 
@@ -212,17 +212,17 @@ User immediately sees a login form and can sign in.
 For each screen written, update the feature files it implements:
 
 ```yaml
-# In 2_experience/2_features/01_user_auth/login.md — add to screens[]
+# In experience/features/01_user_auth/login.md — add to screens[]
 screens:
-  - path: 2_experience/3_screens/01_user_auth/login.md
+  - path: experience/screens/01_user_auth/login.md
 ```
 
 ## Outputs
 
 | File | Purpose |
 |------|---------|
-| `_concept/2_experience/3_screens/00_layout/shell.md` | App shell: navigation, sidebar, header, footer, breakpoints |
-| `_concept/2_experience/3_screens/<NN_group>/<screen>.md` | Per-screen spec with component inventory, data, states |
+| `_concept/experience/screens/00_layout/shell.md` | App shell: navigation, sidebar, header, footer, breakpoints |
+| `_concept/experience/screens/<NN_group>/<screen>.md` | Per-screen spec with component inventory, data, states |
 
 ## Depth Behavior
 

@@ -9,9 +9,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "skaileup-shared" /
 from validator_lib import Validator, main  # noqa: E402
 
 SKILL = "overview"
-BRIEF = "_concept/1_discovery/1_overview/brief.md"
-GOALS = "_concept/1_discovery/1_overview/goals.md"
-COMPARABLE = "_concept/1_discovery/1_overview/comparable.md"
+BRIEF = "_concept/discovery/brief.md"
+GOALS = "_concept/discovery/goals.md"
+COMPARABLE = "_concept/discovery/comparable.md"
 GROUNDING = "_concept/_grounding/overview/user_input.json"
 
 REQUIRED_FRONTMATTER = (

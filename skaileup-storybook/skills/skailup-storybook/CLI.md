@@ -6,7 +6,7 @@ Invoke with: "storybook", "component library", "design system", "story", or afte
 
 ## Output
 
-- `_concept/2_experience/4_storybook/` — complete standalone Storybook project
+- `_concept/experience/4_storybook/` — complete standalone Storybook project
   - `.storybook/` — config (main, preview, theme)
   - `src/components/` — custom building-block components
   - `src/pages/` — full-page screen compositions
@@ -23,7 +23,7 @@ Invoke with: "storybook", "component library", "design system", "story", or afte
 ## Run the Storybook
 
 ```bash
-cd _concept/2_experience/4_storybook
+cd _concept/experience/4_storybook
 <package_manager> install
 <package_manager> run storybook
 ```

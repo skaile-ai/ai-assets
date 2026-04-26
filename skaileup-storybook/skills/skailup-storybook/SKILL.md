@@ -39,23 +39,23 @@ metadata:
         gate: soft
   prerequisites:
     files:
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: hard
         description: "Screen specs required — storybook generates components and pages from screen specs"
         min_entries: 1
-      - path: "_concept/1_discovery/2_brand/tokens.json"
+      - path: "_concept/discovery/brand/tokens.json"
         gate: hard
         description: "Design tokens required for brand-accurate component styling"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         gate: hard
         description: "Tech stack determines storybook addon, story format, and component library"
     reads:
-      - path: "_concept/2_experience/1_journeys/stories.json"
+      - path: "_concept/experience/journeys/stories.json"
         description: "User journeys for journey flow stories (4th storybook layer)"
-      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+      - path: "_concept/blueprint/datamodel/seed.json"
         description: "Seed data for realistic story args"
     produces:
-      - path: "_concept/2_experience/4_storybook"
+      - path: "_concept/experience/4_storybook"
         description: "Complete storybook project: setup, components, pages, journey stories"
 ---
 
@@ -84,7 +84,7 @@ It delegates to 4 sub-skills that run in sequence:
 
 - Screen specs are approved and the team wants a living component library
 - User says "storybook", "component library", "design system", "story"
-- After `2_experience/3_screens/` is complete and before or alongside implementation
+- After `experience/screens/` is complete and before or alongside implementation
 
 ## When NOT to Use
 
@@ -98,20 +98,20 @@ It delegates to 4 sub-skills that run in sequence:
 **REQUIRED BACKGROUND:** Read `skaileup-shared/contracts/concept_structure.md` before proceeding.
 
 **Hard gates:**
-1. `_concept/2_experience/3_screens/` has at least one screen spec
-2. `_concept/1_discovery/2_brand/tokens.json` exists
-3. `_concept/3_blueprint/1_techstack/stack.md` exists (required for stack resolution)
+1. `_concept/experience/screens/` has at least one screen spec
+2. `_concept/discovery/brand/tokens.json` exists
+3. `_concept/blueprint/techstack.md` exists (required for stack resolution)
 
 ## Context Budget
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/3_blueprint/1_techstack/stack.md` | Yes |
+| Must read | `_concept/blueprint/techstack.md` | Yes |
 | Must read | `skaileup-standards/profiles/<tech_stack_skill>/SKILL.md` | Yes |
-| Must read | `_concept/1_discovery/2_brand/tokens.json` | Yes |
-| Must read | `_concept/2_experience/3_screens/**/*.md` | Yes |
-| Check if present | `_concept/2_experience/1_journeys/stories.json` | No (Layer 3) |
-| Check if present | `_concept/3_blueprint/3_datamodel/seed.json` | No (story data) |
+| Must read | `_concept/discovery/brand/tokens.json` | Yes |
+| Must read | `_concept/experience/screens/**/*.md` | Yes |
+| Check if present | `_concept/experience/journeys/stories.json` | No (Layer 3) |
+| Check if present | `_concept/blueprint/datamodel/seed.json` | No (story data) |
 
 ## Standalone Mode
 
@@ -123,18 +123,18 @@ It delegates to 4 sub-skills that run in sequence:
 ROLE  Storybook Orchestrator — resolves tech stack, then delegates to 4 sub-skills in sequence.
 
 READS
-  _concept/3_blueprint/1_techstack/stack.md              — tech_stack_skill, package_manager
+  _concept/blueprint/techstack.md              — tech_stack_skill, package_manager
   skaileup-standards/profiles/<tech_stack_skill>/SKILL.md     — storybook_addon, story_format, component_library, icon_library
-  _concept/2_experience/3_screens/**/*.md                — screen specs (UI elements, states, data requirements)
-  _concept/2_experience/3_screens/00_layout/shell.md     — app shell structure, navigation
-  _concept/1_discovery/2_brand/tokens.json               — color palette, fonts, radius, spacing, shadows, mode
-  _concept/1_discovery/2_brand/identity.md               — design philosophy, atmosphere
-  ? _concept/2_experience/1_journeys/stories.json        — user journeys (for Layer 3)
-  ? _concept/2_experience/2_features/**/*.md             — feature context for story organization
-  ? _concept/3_blueprint/3_datamodel/seed.json           — seed data for realistic story content
+  _concept/experience/screens/**/*.md                — screen specs (UI elements, states, data requirements)
+  _concept/experience/screens/00_layout/shell.md     — app shell structure, navigation
+  _concept/discovery/brand/tokens.json               — color palette, fonts, radius, spacing, shadows, mode
+  _concept/discovery/brand/identity.md               — design philosophy, atmosphere
+  ? _concept/experience/journeys/stories.json        — user journeys (for Layer 3)
+  ? _concept/experience/features/**/*.md             — feature context for story organization
+  ? _concept/blueprint/datamodel/seed.json           — seed data for realistic story content
 
 WRITES
-  _concept/2_experience/4_storybook/                     — complete standalone Storybook project
+  _concept/experience/4_storybook/                     — complete standalone Storybook project
 
 REFERENCES
   skaileup-shared/contracts/concept_structure.md      — valid _concept/ paths
@@ -168,7 +168,7 @@ STEP 1: Resolve tech stack
 STEP 2: Run storybook-setup
   - Delegate to `storybook-setup` sub-skill
   - Pass: addon, story_format, story_extension, component_library, package_manager, tokens.json, brief.md, shell.md
-  - Verify `_concept/2_experience/4_storybook/` exists with passing build before continuing
+  - Verify `_concept/experience/4_storybook/` exists with passing build before continuing
   EMIT  [storybook] checkpoint phase=setup_complete
 
 STEP 3: Run storybook-components
@@ -184,7 +184,7 @@ STEP 4: Run storybook-pages
   EMIT  [storybook] checkpoint phase=pages_complete pages=<N>
 
 STEP 5: Run storybook-journeys
-  IF _concept/2_experience/1_journeys/stories.json exists
+  IF _concept/experience/journeys/stories.json exists
     - Delegate to `storybook-journeys` sub-skill
     - Pass: stories.json, manifest.json, story_extension, package_manager
     EMIT  [storybook] checkpoint phase=journeys_complete journeys=<N>
@@ -193,7 +193,7 @@ STEP 5: Run storybook-journeys
     EMIT  [storybook] checkpoint phase=journeys_skipped reason=stories.json_absent
 
 STEP 6: Final verification
-  $ cd _concept/2_experience/4_storybook && <package_manager> run build
+  $ cd _concept/experience/4_storybook && <package_manager> run build
   IF build fails
     - Fix errors, retry
   - Count story files per layer and report
@@ -206,7 +206,7 @@ CHECKPOINT storybook_review
   > **2. Screens:** <N> page compositions with all states (Populated, Empty, Error, Loading)
   > **3. User Journeys:** <N> clickable flows (hero + vital + hygiene)
   >
-  > Run `cd _concept/2_experience/4_storybook && <package_manager> run storybook dev` to explore.
+  > Run `cd _concept/experience/4_storybook && <package_manager> run storybook dev` to explore.
   >
   > Review and tell me what to adjust."
 
@@ -243,5 +243,5 @@ CHECKLIST
 ## Integration
 
 - **Called by:** `concept-orchestrator` or standalone
-- **Requires:** `screens/`, `1_discovery/2_brand/tokens.json`, `3_blueprint/1_techstack/stack.md`
+- **Requires:** `screens/`, `discovery/brand/tokens.json`, `blueprint/techstack.md`
 - **Feeds into:** design review, component documentation, implementation reference

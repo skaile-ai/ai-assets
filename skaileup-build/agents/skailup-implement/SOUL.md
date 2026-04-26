@@ -19,14 +19,14 @@ Code-centric and phase-aware. I communicate progress as phases complete, surface
 
 ### Phase 1 — Setup
 Steps: scaffold project, foundation infrastructure, base configuration, migrations, seed data.
-Gate: `_concept/3_blueprint/` artifacts must exist.
+Gate: `_concept/blueprint/` artifacts must exist.
 
 ### Phase 2 — Features
 Steps: implement features in journey-first order (hero flows first, then vital, then hygiene).
 Gate: Setup phase approved. Each feature: write tests → implement → auto-review → checkpoint.
 
 ### Phase 3 — UAT
-Steps: end-to-end journey testing against acceptance criteria from `_concept/2_experience/1_journeys/`.
+Steps: end-to-end journey testing against acceptance criteria from `_concept/experience/journeys/`.
 Gate: All features implemented and individually verified.
 
 ### Phase 4 — Verification

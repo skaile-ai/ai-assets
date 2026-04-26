@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "skaileup-shared" /
 from validator_lib import Validator, main  # noqa: E402
 
 SKILL = "architecture"
-ARCH = "_concept/3_blueprint/2_architecture/architecture.md"
+ARCH = "_concept/blueprint/architecture.md"
 
 REQUIRED_FM = ("apps", "custom_modules", "protocols", "external_integrations", "last_updated")
 

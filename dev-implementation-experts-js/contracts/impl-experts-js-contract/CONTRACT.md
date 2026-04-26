@@ -52,7 +52,7 @@ stage: alpha | beta | production
 ## Discovery and Loading
 
 Implementation skills discover experts at runtime:
-1. Read `_concept/3_blueprint/1_techstack/stack.md`
+1. Read `_concept/blueprint/techstack.md`
 2. Match stack entries against `discovery_keywords` in known expert skill dirs
 3. Load matched SKILL.md + relevant `recipes/` into the implementation subagent context
 

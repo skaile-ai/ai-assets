@@ -28,10 +28,10 @@ Input artifacts. Each line: path (glob ok) + brief purpose.
 
 ```
 READS
-  _concept/1_discovery/1_overview/brief.md          — app name, audience
-  _concept/2_experience/2_features/**/*.md          — requirements per feature
-  _concept/3_blueprint/1_techstack/stack.md         — chosen stack (drives output format)
-  ? _concept/2_experience/1_journeys/stories.json   — user journeys and acceptance criteria
+  _concept/discovery/brief.md          — app name, audience
+  _concept/experience/features/**/*.md          — requirements per feature
+  _concept/blueprint/techstack.md         — chosen stack (drives output format)
+  ? _concept/experience/journeys/stories.json   — user journeys and acceptance criteria
 ```
 
 ---
@@ -42,9 +42,9 @@ Output artifacts. Each line: path + brief description.
 
 ```
 WRITES
-  _concept/3_blueprint/3_datamodel/model.json       — canonical semantic data model
-  _concept/3_blueprint/3_datamodel/seed.json        — scenario-based test data
-  _concept/3_blueprint/3_datamodel/feature_map.json — model-to-feature mapping
+  _concept/blueprint/datamodel/model.json       — canonical semantic data model
+  _concept/blueprint/datamodel/seed.json        — scenario-based test data
+  _concept/blueprint/datamodel/feature_map.json — model-to-feature mapping
 ```
 
 ---
@@ -70,11 +70,11 @@ Path lines accept `_concept/` paths (files or directories) or tool names.
 
 ```
 REQUIRES
-  hard: _concept/1_discovery/1_overview/brief.md  — Project brief must exist
-  soft: _concept/2_experience/1_journeys/stories.json  — Enriches output but not required
+  hard: _concept/discovery/brief.md  — Project brief must exist
+  soft: _concept/experience/journeys/stories.json  — Enriches output but not required
   hard: git
   soft: docker (database setup deferred without it)
-  state: _concept/2_experience/2_features/ contains at least one .md file
+  state: _concept/experience/features/ contains at least one .md file
 ```
 
 `hard:` lines map to `metadata.prerequisites.files[].gate: hard` in the frontmatter schema.
@@ -115,7 +115,7 @@ STEP 1: Read context
 STEP 2: Draft data model
   - Derive entities from feature data_entities[] fields
   - Apply standard_fields: ["id", "created_at", "updated_at"] to every entity
-  - $ cat _concept/2_experience/2_features/**/*.md | grep data_entities
+  - $ cat _concept/experience/features/**/*.md | grep data_entities
 ```
 
 ---
@@ -138,7 +138,7 @@ RUN  bun run lint || echo "Fix lint errors above before continuing"
 Expected file output with inline template. Shows structure, not full content.
 
 ```
-OUTPUT _concept/3_blueprint/3_datamodel/model.json
+OUTPUT _concept/blueprint/datamodel/model.json
   {
     "entities": {
       "<entity_name>": {
@@ -182,7 +182,7 @@ CHECKPOINT data_model
 Conditional branch. Condition is a plain-language predicate.
 
 ```
-IF _concept/2_experience/1_journeys/stories.json exists
+IF _concept/experience/journeys/stories.json exists
   - Read journey acceptance criteria for state transitions
   - Use EARS criteria to derive enum values
 ELSE

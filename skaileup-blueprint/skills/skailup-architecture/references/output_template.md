@@ -1,6 +1,6 @@
 # Architecture Document Template
 
-The output file `_concept/3_blueprint/2_architecture/architecture.md` has six sections.
+The output file `_concept/blueprint/architecture.md` has six sections.
 Every section starts with what the chosen stack provides by default, then adds
 project-specific extensions where needed.
 

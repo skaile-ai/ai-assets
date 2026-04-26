@@ -38,14 +38,14 @@ or as a separate section)
 
 ### Progress
 
-- [x] 1_discovery/1_overview — approved YYYY-MM-DD
-- [x] 1_discovery/2_research — skipped (reason)
-- [ ] 2_experience/2_features — in progress (3 of 5 groups done)
-- [ ] 1_discovery/2_brand — not started
-- [ ] 3_blueprint/1_techstack — not started
-- [ ] 3_blueprint/2_architecture — not started
-- [ ] 3_blueprint/3_datamodel — blocked (requires features, techstack)
-- [ ] 2_experience/3_screens — blocked (requires features, brand, datamodel)
+- [x] discovery — approved YYYY-MM-DD
+- [x] discovery/2_research — skipped (reason)
+- [ ] experience/features — in progress (3 of 5 groups done)
+- [ ] discovery/brand — not started
+- [ ] blueprint — not started
+- [ ] blueprint/architecture.md — not started
+- [ ] blueprint/datamodel — blocked (requires features, techstack)
+- [ ] experience/screens — blocked (requires features, brand, datamodel)
 
 ### Decisions
 
@@ -69,12 +69,12 @@ or as a separate section)
 
 ### Source Artifacts
 
-- Brief: _concept/1_discovery/1_overview/brief.md
-- Features: _concept/2_experience/2_features/ (N features, M must-have)
-- Tech stack: _concept/3_blueprint/1_techstack/stack.md
-- Data model: _concept/3_blueprint/3_datamodel/model.json (N entities)
-- Screens: _concept/2_experience/3_screens/ (N screens)
-- Brand: _concept/1_discovery/2_brand/tokens.json
+- Brief: _concept/discovery/brief.md
+- Features: _concept/experience/features/ (N features, M must-have)
+- Tech stack: _concept/blueprint/techstack.md
+- Data model: _concept/blueprint/datamodel/model.json (N entities)
+- Screens: _concept/experience/screens/ (N screens)
+- Brand: _concept/discovery/brand/tokens.json
 
 ### Progress
 

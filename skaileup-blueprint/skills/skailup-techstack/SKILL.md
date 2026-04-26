@@ -36,7 +36,7 @@ metadata:
       default: adopt
   prerequisites:
     files:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Project brief required to recommend appropriate tech stack"
     inputs_required:
@@ -66,10 +66,10 @@ metadata:
           - managed/cloud
         hint: "Manage your own server or use hosted services?"
     reads:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         description: "Feature complexity and count to inform stack recommendation"
     produces:
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         description: "Chosen tech stack with profile reference for downstream skills"
   user_inputs:
     dialog:
@@ -125,7 +125,7 @@ downstream skills use to find implementation recipes.
 
 ## When NOT to Use
 
-- `_concept/3_blueprint/1_techstack/stack.md` already exists and is approved
+- `_concept/blueprint/techstack.md` already exists and is approved
 - No project brief yet — run **overview** first
 - The user already has a codebase — use **audit** or **reverse-engineer** instead
 
@@ -134,38 +134,38 @@ downstream skills use to find implementation recipes.
 **REQUIRED BACKGROUND:** Read `skaileup-shared/contracts/concept_structure.md` and
 `skaileup-shared/contracts/frontmatter.md` before proceeding.
 
-**Hard gate:** `_concept/1_discovery/1_overview/brief.md` must exist.
+**Hard gate:** `_concept/discovery/brief.md` must exist.
 
 ## Context Budget
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/1_discovery/1_overview/brief.md` | Yes |
+| Must read | `_concept/discovery/brief.md` | Yes |
 | Must read | `skaileup-standards/profiles/*/SKILL.md` | Yes (stack discovery) |
-| Check if present | `_concept/2_experience/2_features/**/*.md` | No (complexity signals) |
+| Check if present | `_concept/experience/features/**/*.md` | No (complexity signals) |
 | Check if present | `_concept/_grounding/overview/user_input.json` | No (complexity + pre-answers) |
 | Check if present | `_concept/_grounding/general/onboarding.md` | No (skip pre-answered questions) |
-| Never load | `_concept/3_blueprint/3_datamodel/`, `_concept/2_experience/3_screens/` | — |
+| Never load | `_concept/blueprint/datamodel/`, `_concept/experience/screens/` | — |
 
 ## Standalone Mode
 
-**Gate check:** `_concept/1_discovery/1_overview/brief.md` must exist.
+**Gate check:** `_concept/discovery/brief.md` must exist.
 **On completion:** Present stack summary and suggest next steps (architecture, datamodel).
 
 ---
 
 ROLE  Tech Stack Advisor — discovers available profiles, recommends the best match,
-      and writes `_concept/3_blueprint/1_techstack/stack.md`.
+      and writes `_concept/blueprint/techstack.md`.
 
 READS
-  _concept/1_discovery/1_overview/brief.md              — app name, description, audience
+  _concept/discovery/brief.md              — app name, description, audience
   skaileup-standards/profiles/*/SKILL.md                     — available stack profiles (discovered at runtime)
-  ? _concept/2_experience/2_features/**/*.md            — feature requirements (complexity signals)
+  ? _concept/experience/features/**/*.md            — feature requirements (complexity signals)
   ? _concept/_grounding/overview/user_input.json        — complexity field + pre-collected answers
   ? _concept/_grounding/general/onboarding.md           — pre-answered tech preferences
 
 WRITES
-  _concept/3_blueprint/1_techstack/stack.md             — full stack definition with tech_stack_skill reference
+  _concept/blueprint/techstack.md             — full stack definition with tech_stack_skill reference
 
 REFERENCES
   skaileup-shared/contracts/concept_structure.md      — valid _concept/ paths
@@ -186,7 +186,7 @@ STEP 1: Read context
   - Check _grounding/overview/user_input.json for complexity and any pre-answered tech preferences
   IF _grounding/general/onboarding.md exists
     - Read onboarding notes — skip questions already answered there
-  IF 2_experience/2_features/ exists
+  IF experience/features/ exists
     - Read feature files to gauge complexity signals
 
 STEP 2: Discover available stacks
@@ -250,9 +250,9 @@ STEP 5: Ask about additional integrations
 EMIT  [techstack] checkpoint phase=preset_recommended tech_stack_skill=<profile-id>
 
 STEP 6: Write stack file
-  - $ mkdir -p _concept/3_blueprint/1_techstack
+  - $ mkdir -p _concept/blueprint
 
-  OUTPUT _concept/3_blueprint/1_techstack/stack.md
+  OUTPUT _concept/blueprint/techstack.md
     ---
     platform: <web|mobile|api|desktop>
     frontend: <framework + version>
@@ -347,5 +347,5 @@ CHECKLIST
 ## Integration
 
 - **Called by:** `concept-orchestrator` or standalone (parallel track after overview)
-- **Requires:** `_concept/1_discovery/1_overview/brief.md`
+- **Requires:** `_concept/discovery/brief.md`
 - **Feeds into:** `architecture`, `datamodel`, `scaffold`, `mock` — all read `tech_stack_skill` from stack.md

@@ -44,23 +44,23 @@ metadata:
       default: extend
   prerequisites:
     files:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Project brief required for system context and scope"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Features drive architectural decisions (services, protocols, integrations)"
         min_entries: 1
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         gate: hard
         description: "Tech stack determines default architecture; extends only where features demand"
     reads:
       - path: "_concept/_grounding/overview/user_input.json"
         description: "Complexity tier for architectural depth"
-      - path: "_concept/2_experience/4_behaviors"
+      - path: "_concept/experience/behaviors"
         description: "Behavioral specs for state machine and lifecycle architecture"
     produces:
-      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+      - path: "_concept/blueprint/architecture.md"
         description: "System design: modules, data flow, protocols, infrastructure, integrations"
 ---
 
@@ -69,7 +69,7 @@ metadata:
 ## Overview
 
 The **architecture** skill is the Architecture agent. It analyzes features and
-the chosen tech stack to produce `_concept/3_blueprint/2_architecture/architecture.md`
+the chosen tech stack to produce `_concept/blueprint/architecture.md`
 — a complete system design specification that downstream skills (datamodel, screens,
 implementation) can rely on.
 
@@ -95,21 +95,21 @@ only where features demand it.
 `skaileup-shared/contracts/frontmatter.md`, and `skaileup-shared/contracts/semantic_types.md`.
 
 **Hard gates:**
-- `_concept/1_discovery/1_overview/brief.md` must exist
-- `_concept/2_experience/2_features/` must contain at least one feature file
-- `_concept/3_blueprint/1_techstack/stack.md` must exist
+- `_concept/discovery/brief.md` must exist
+- `_concept/experience/features/` must contain at least one feature file
+- `_concept/blueprint/techstack.md` must exist
 
 ## Context Budget
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/1_discovery/1_overview/brief.md` | Yes |
-| Must read | `_concept/2_experience/2_features/**/*.md` | Yes |
-| Must read | `_concept/3_blueprint/1_techstack/stack.md` | Yes |
+| Must read | `_concept/discovery/brief.md` | Yes |
+| Must read | `_concept/experience/features/**/*.md` | Yes |
+| Must read | `_concept/blueprint/techstack.md` | Yes |
 | Check if present | `_concept/_grounding/overview/user_input.json` | No (complexity) |
 | Check if present | `_concept/_grounding/general/onboarding.md` | No |
-| Check if present | `_concept/2_experience/4_behaviors/*.allium` | No |
-| Never load | `_concept/3_blueprint/3_datamodel/`, `_concept/2_experience/3_screens/` | — |
+| Check if present | `_concept/experience/behaviors/*.allium` | No |
+| Never load | `_concept/blueprint/datamodel/`, `_concept/experience/screens/` | — |
 
 ## Standalone Mode
 
@@ -119,18 +119,18 @@ only where features demand it.
 ---
 
 ROLE  Architecture agent — reads features and tech stack, produces
-      `_concept/3_blueprint/2_architecture/architecture.md`.
+      `_concept/blueprint/architecture.md`.
 
 READS
-  _concept/1_discovery/1_overview/brief.md             — app name, audience, problem domain
-  _concept/2_experience/2_features/**/*.md             — feature requirements (drives module needs)
-  _concept/3_blueprint/1_techstack/stack.md           — confirmed tech stack and constraints
+  _concept/discovery/brief.md             — app name, audience, problem domain
+  _concept/experience/features/**/*.md             — feature requirements (drives module needs)
+  _concept/blueprint/techstack.md           — confirmed tech stack and constraints
   ? _concept/_grounding/overview/user_input.json      — complexity field (drives involvement level)
   ? _concept/_grounding/general/onboarding.md         — pre-answered architecture notes
-  ? _concept/2_experience/4_behaviors/*.allium        — entity state machines, complex workflows
+  ? _concept/experience/behaviors/*.allium        — entity state machines, complex workflows
 
 WRITES
-  _concept/3_blueprint/2_architecture/architecture.md — complete system architecture specification
+  _concept/blueprint/architecture.md — complete system architecture specification
 
 REFERENCES
   skaileup-shared/contracts/concept_structure.md      — valid _concept/ paths and naming rules
@@ -155,7 +155,7 @@ STEP 1: Read context
   IF _grounding/general/onboarding.md exists
     - Read onboarding notes — user may have specified architecture constraints
     - Use these as pre-answered context; skip redundant questions
-  IF _concept/2_experience/4_behaviors/*.allium exists
+  IF _concept/experience/behaviors/*.allium exists
     - Read all .allium files; look for:
       - Entity state machines → may require event-driven patterns
       - Complex workflows → may need background processing
@@ -190,12 +190,12 @@ STEP 2: Analyze architecture needs (involved mode)
   - If user is uncertain, analyze features and suggest what is likely needed
 
 STEP 3: Write architecture document
-  - $ mkdir -p _concept/3_blueprint/2_architecture
+  - $ mkdir -p _concept/blueprint/architecture.md
   - Write architecture.md following references/output_template.md
   - Baseline every section with what stack.md's chosen stack provides out of the box
   - Add project-specific extensions identified in STEP 1–2
 
-  OUTPUT _concept/3_blueprint/2_architecture/architecture.md
+  OUTPUT _concept/blueprint/architecture.md
     ---
     apps: [<list of app/service names>]
     custom_modules: [<list of custom backend modules>]
@@ -236,7 +236,7 @@ STEP 5: Hand off
 EMIT  [architecture] completed run_id=<uuid> apps=<N> custom_modules=<N> external_integrations=<N>
 
 CHECKLIST
-  - [ ] _concept/3_blueprint/2_architecture/architecture.md exists with all frontmatter fields
+  - [ ] _concept/blueprint/architecture.md exists with all frontmatter fields
   - [ ] All six sections present (overview, backend structure, data flow, protocols, integrations, infrastructure)
   - [ ] Every section shows the stack default baseline before project extensions
   - [ ] Custom modules have purpose and dependencies listed

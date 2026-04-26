@@ -1,6 +1,6 @@
 ---
 name: "skailup-brand-behavioral"
-description: "Use when the visual brand exists and you need to define communication tone, error message style, empty state messaging, micro-copy guidelines, and notification voice. Produces behavioral.md + copy_guidelines.md in _concept/1_discovery/2_brand/."
+description: "Use when the visual brand exists and you need to define communication tone, error message style, empty state messaging, micro-copy guidelines, and notification voice. Produces behavioral.md + copy_guidelines.md in _concept/discovery/brand/."
 metadata:
   version: "1.0.0"
   tags:
@@ -32,24 +32,24 @@ metadata:
         gate: soft
   prerequisites:
     files:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Project brief required for brand voice alignment"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Features must exist so behavioral copy can cover all UI states"
         min_entries: 1
-      - path: "_concept/1_discovery/2_brand/identity.md"
+      - path: "_concept/discovery/brand/identity.md"
         gate: hard
         description: "Visual identity must exist before defining behavioral companion"
-      - path: "_concept/1_discovery/2_brand/tokens.json"
+      - path: "_concept/discovery/brand/tokens.json"
         gate: hard
         description: "Design tokens must exist (confirms visual brand step is complete)"
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: soft
         description: "Screen specs improve copy specificity but are not blocking"
         min_entries: 1
-      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+      - path: "_concept/blueprint/datamodel/seed.json"
         gate: soft
         description: "Seed data helps write realistic example copy"
     inputs_optional:
@@ -73,9 +73,9 @@ metadata:
           - "5"
         default: "3"
     produces:
-      - path: "_concept/1_discovery/2_brand/behavioral.md"
+      - path: "_concept/discovery/brand/behavioral.md"
         description: "Tone of voice, personality, and communication principles"
-      - path: "_concept/1_discovery/2_brand/copy_guidelines.md"
+      - path: "_concept/discovery/brand/copy_guidelines.md"
         description: "Error messages, empty states, notifications, micro-copy patterns"
   user_inputs:
     dialog:
@@ -112,8 +112,8 @@ like it was written by the same person.
 
 ## When to Use
 
-- Visual brand identity exists (`1_discovery/2_brand/identity.md` + `tokens.json`)
-- Features are defined (`2_experience/2_features/`)
+- Visual brand identity exists (`discovery/brand/identity.md` + `tokens.json`)
+- Features are defined (`experience/features/`)
 - You want consistent messaging across all UI states before implementation
 - The app has user-facing text beyond simple labels
 
@@ -131,12 +131,12 @@ like it was written by the same person.
 
 | Artifact | Path | Missing? Run | Gate |
 |---|---|---|---|
-| Project brief | `_concept/1_discovery/1_overview/brief.md` | `overview` | Hard |
-| Features | `_concept/2_experience/2_features/**/*.md` | `features` | Hard |
-| Brand identity | `_concept/1_discovery/2_brand/identity.md` | `brand-visual` | Hard |
-| Brand tokens | `_concept/1_discovery/2_brand/tokens.json` | `brand-visual` | Hard |
-| Screens | `_concept/2_experience/3_screens/**/*.md` | `screens` | Soft (skim for states) |
-| Seed data | `_concept/3_blueprint/3_datamodel/seed.json` | `datamodel` | Soft (empty/edge scenarios) |
+| Project brief | `_concept/discovery/brief.md` | `overview` | Hard |
+| Features | `_concept/experience/features/**/*.md` | `features` | Hard |
+| Brand identity | `_concept/discovery/brand/identity.md` | `brand-visual` | Hard |
+| Brand tokens | `_concept/discovery/brand/tokens.json` | `brand-visual` | Hard |
+| Screens | `_concept/experience/screens/**/*.md` | `screens` | Soft (skim for states) |
+| Seed data | `_concept/blueprint/datamodel/seed.json` | `datamodel` | Soft (empty/edge scenarios) |
 
 If any hard gate artifact is missing, stop immediately and name the prerequisite skill.
 
@@ -144,12 +144,12 @@ If any hard gate artifact is missing, stop immediately and name the prerequisite
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/1_discovery/1_overview/brief.md` | Yes |
-| Must read | `_concept/1_discovery/2_brand/identity.md` | Yes |
-| Must read | `_concept/1_discovery/2_brand/tokens.json` | Yes |
-| Must read | `_concept/2_experience/2_features/**/*.md` | Yes |
-| Skim for states | `_concept/2_experience/3_screens/**/*.md` | No |
-| Skim for scenarios | `_concept/3_blueprint/3_datamodel/seed.json` | No |
+| Must read | `_concept/discovery/brief.md` | Yes |
+| Must read | `_concept/discovery/brand/identity.md` | Yes |
+| Must read | `_concept/discovery/brand/tokens.json` | Yes |
+| Must read | `_concept/experience/features/**/*.md` | Yes |
+| Skim for states | `_concept/experience/screens/**/*.md` | No |
+| Skim for scenarios | `_concept/blueprint/datamodel/seed.json` | No |
 
 ## Standalone Mode
 
@@ -162,16 +162,16 @@ ROLE  Brand Voice Writer — defines tone, copy patterns, and UX writing guideli
       to ensure every UI string feels consistent with the visual brand.
 
 READS
-  _concept/1_discovery/1_overview/brief.md              — app name, audience, problem
-  _concept/1_discovery/2_brand/identity.md              — established aesthetic, mood, tone of voice hints
-  _concept/1_discovery/2_brand/tokens.json              — mode, atmosphere context
-  _concept/2_experience/2_features/**/*.md              — all user-facing states that need copy
-  ? _concept/2_experience/3_screens/**/*.md             — concrete UI states to enumerate
-  ? _concept/3_blueprint/3_datamodel/seed.json          — empty/edge scenarios for empty-state copy
+  _concept/discovery/brief.md              — app name, audience, problem
+  _concept/discovery/brand/identity.md              — established aesthetic, mood, tone of voice hints
+  _concept/discovery/brand/tokens.json              — mode, atmosphere context
+  _concept/experience/features/**/*.md              — all user-facing states that need copy
+  ? _concept/experience/screens/**/*.md             — concrete UI states to enumerate
+  ? _concept/blueprint/datamodel/seed.json          — empty/edge scenarios for empty-state copy
 
 WRITES
-  _concept/1_discovery/2_brand/behavioral.md            — tone definition, voice rules, per-category examples
-  _concept/1_discovery/2_brand/copy_guidelines.md       — practical templates for implementers
+  _concept/discovery/brand/behavioral.md            — tone definition, voice rules, per-category examples
+  _concept/discovery/brand/copy_guidelines.md       — practical templates for implementers
 
 REFERENCES
   skaileup-shared/contracts/concept_structure.md      — valid _concept/ paths
@@ -220,9 +220,9 @@ STEP 3: Present sample copy and calibrate
   > Does this feel right? Adjust any example and I'll recalibrate."
 
 STEP 4: Write artifacts
-  $ mkdir -p _concept/1_discovery/2_brand
+  $ mkdir -p _concept/discovery/brand
 
-  OUTPUT _concept/1_discovery/2_brand/behavioral.md
+  OUTPUT _concept/discovery/brand/behavioral.md
     ---
     tone: <friendly|professional|playful|serious>
     formality_level: <1-5>
@@ -238,7 +238,7 @@ STEP 4: Write artifacts
       errors, empty states, confirmations, loading, notifications,
       tooltips, button labels, destructive action confirmations>
 
-  OUTPUT _concept/1_discovery/2_brand/copy_guidelines.md
+  OUTPUT _concept/discovery/brand/copy_guidelines.md
     ---
     last_updated: <YYYY-MM-DD>
     ---
@@ -256,7 +256,7 @@ STEP 4: Write artifacts
 EMIT  [brand-behavioral] completed run_id=<uuid> artifacts=behavioral.md,copy_guidelines.md
 
 STEP 5: Present summary
-  > "Brand voice written to `_concept/1_discovery/2_brand/`:
+  > "Brand voice written to `_concept/discovery/brand/`:
   >
   > - **behavioral.md** — tone rules + per-category examples
   > - **copy_guidelines.md** — templates for implementers

@@ -44,10 +44,10 @@ metadata:
       default: extend
   prerequisites:
     files:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Project brief required for feature context and scope"
-      - path: "_concept/2_experience/1_journeys/stories.json"
+      - path: "_concept/experience/journeys/stories.json"
         gate: hard
         description: "User journeys must exist — features are derived from story candidates"
     inputs_optional:
@@ -68,7 +68,7 @@ metadata:
       - path: "_concept/_grounding/general/audiences.md"
         description: "Audience needs to prioritize feature depth"
     produces:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         description: "Feature files organized in numbered groups (one .md per feature)"
   user_inputs:
     dialog:
@@ -91,14 +91,14 @@ metadata:
 
 The **features** skill is the Feature Planning agent. It derives features from
 approved user journeys (`stories.json`) and the project brief, producing individual
-feature files organized in numbered groups under `_concept/2_experience/2_features/`.
+feature files organized in numbered groups under `_concept/experience/features/`.
 
 Features are the source of truth for screens and the data model. It does NOT write
 screen specs, data models, brand, or tech stack.
 
 ## When to Use
 
-- `_concept/2_experience/1_journeys/stories.json` exists and is approved
+- `_concept/experience/journeys/stories.json` exists and is approved
 - The user says "define features", "what should the app do", "plan functionality"
 - The orchestrator dispatches this after journeys are complete
 - The user wants to redo or expand an existing feature set
@@ -117,21 +117,21 @@ screen specs, data models, brand, or tech stack.
 and `skaileup-shared/contracts/golden_principles.md` before proceeding.
 
 **Hard gates:**
-- `_concept/1_discovery/1_overview/brief.md` must exist and be non-empty
-- `_concept/2_experience/1_journeys/stories.json` must exist and be non-empty
+- `_concept/discovery/brief.md` must exist and be non-empty
+- `_concept/experience/journeys/stories.json` must exist and be non-empty
 
 ## Context Budget
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/1_discovery/1_overview/brief.md` | Yes |
-| Must read | `_concept/1_discovery/1_overview/goals.md` | Yes |
-| Must read | `_concept/2_experience/1_journeys/stories.json` | Yes |
+| Must read | `_concept/discovery/brief.md` | Yes |
+| Must read | `_concept/discovery/goals.md` | Yes |
+| Must read | `_concept/experience/journeys/stories.json` | Yes |
 | Must read | `references/feature_template.md` | Yes |
 | Check if present | `_concept/_grounding/general/competitors.md` | No |
 | Check if present | `_concept/_grounding/general/audiences.md` | No |
 | Check if present | `_concept/_grounding/features/user_input.json` | No |
-| Never load | `_concept/2_experience/3_screens/`, `_concept/3_blueprint/` | — |
+| Never load | `_concept/experience/screens/`, `_concept/blueprint/` | — |
 
 ## Standalone Mode
 
@@ -144,15 +144,15 @@ ROLE  Feature Planning agent — derives features from approved user journeys an
       project brief, producing feature files in numbered groups.
 
 READS
-  _concept/1_discovery/1_overview/brief.md              — app name, audience, scope
-  _concept/1_discovery/1_overview/goals.md              — success criteria, constraints
-  _concept/2_experience/1_journeys/stories.json          — user journeys with candidate features
+  _concept/discovery/brief.md              — app name, audience, scope
+  _concept/discovery/goals.md              — success criteria, constraints
+  _concept/experience/journeys/stories.json          — user journeys with candidate features
   ? _concept/_grounding/general/competitors.md           — feature gaps from competitor analysis
   ? _concept/_grounding/general/audiences.md             — user needs influencing priorities
   ? _concept/_grounding/features/user_input.json         — pre-collected dialog answers
 
 WRITES
-  _concept/2_experience/2_features/<NN_group>/<feature>.md  — one file per feature
+  _concept/experience/features/<NN_group>/<feature>.md  — one file per feature
 
 REFERENCES
   skaileup-shared/contracts/concept_structure.md      — valid _concept/ paths and naming rules
@@ -172,10 +172,10 @@ NEVER  invent features with no traceability to the brief or stories.json
 EMIT  [features] started run_id=<uuid>
 
 STEP 1: Read context
-  - Read _concept/1_discovery/1_overview/brief.md
+  - Read _concept/discovery/brief.md
   - Stop if missing or empty:
     > "No approved project brief found. Run `overview` first."
-  - Read _concept/2_experience/1_journeys/stories.json
+  - Read _concept/experience/journeys/stories.json
   - Stop if missing or empty:
     > "No user journeys found. Run `journeys` first."
   - Check _grounding/features/user_input.json for pre-collected answers (feature_priorities, etc.)
@@ -198,7 +198,7 @@ STEP 2: Identify and group features
   - Group related candidates into feature groups (e.g. user authentication, task management)
   - For each feature, answer the identification questions (see references/feature_template.md)
   - Create numbered group folders using NN_ prefix (no letter prefix):
-    $ mkdir -p _concept/2_experience/2_features/01_user_auth
+    $ mkdir -p _concept/experience/features/01_user_auth
   - Write one feature file per feature using the template in references/feature_template.md
 
 STEP 2b: Define roles and permissions
@@ -212,7 +212,7 @@ STEP 2b: Define roles and permissions
   - Write a ## Permissions section in each feature file with a role-action matrix
   - Add permissions field to each feature's frontmatter
 
-OUTPUT _concept/2_experience/2_features/<NN_group>/<feature>.md
+OUTPUT _concept/experience/features/<NN_group>/<feature>.md
   ---
   priority: <must-have|nice-to-have>
   story_refs: [<story-id-1>, <story-id-2>]
@@ -269,8 +269,8 @@ STEP 5: Hand off
 EMIT  [features] completed run_id=<uuid> feature_count=<N> groups=<N>
 
 CHECKLIST
-  - [ ] _concept/1_discovery/1_overview/brief.md was read and exists
-  - [ ] _concept/2_experience/1_journeys/stories.json was read and exists
+  - [ ] _concept/discovery/brief.md was read and exists
+  - [ ] _concept/experience/journeys/stories.json was read and exists
   - [ ] Every feature traces to at least one story via story_refs
   - [ ] Every feature has required frontmatter (priority, story_refs, roles, last_updated)
   - [ ] screens[] and data_entities[] are empty (not pre-populated)
@@ -316,7 +316,7 @@ accessibility requirements for the target audience.
 ## Integration
 
 - **Called by:** `concept-orchestrator` or standalone (after journeys)
-- **Requires:** `_concept/1_discovery/1_overview/brief.md` and `_concept/2_experience/1_journeys/stories.json`
+- **Requires:** `_concept/discovery/brief.md` and `_concept/experience/journeys/stories.json`
 - **Feedback from downstream:**
   - **datamodel** skill populates `data_entities[]` in feature frontmatter
   - **screens** skill populates `screens[]` in feature frontmatter

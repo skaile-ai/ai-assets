@@ -1,6 +1,6 @@
 ---
 name: project-concept-overview
-description: "Generate the 1_discovery/ section of a meta-concept: ecosystem brief, unified goals, and competitive positioning for a multi-product project."
+description: "Generate the discovery/ section of a meta-concept: ecosystem brief, unified goals, and competitive positioning for a multi-product project."
 source: MERGED
 version: 1.0.0
 keywords: [meta-concept, discovery, brief, goals, comparable, ecosystem, umbrella]
@@ -14,10 +14,10 @@ reads_from:
   - "{PROJECT_ROOT}/_devlog/DEVLOG.md"
   - "{PROJECT_ROOT}/**/CLAUDE.md"
 writes_to:
-  - "{PROJECT_ROOT}/_concept/1_discovery/1_overview/brief.md"
-  - "{PROJECT_ROOT}/_concept/1_discovery/1_overview/goals.md"
-  - "{PROJECT_ROOT}/_concept/1_discovery/1_overview/comparable.md"
-  - "{PROJECT_ROOT}/_concept/1_discovery/2_brand/identity.md"
+  - "{PROJECT_ROOT}/_concept/discovery/brief.md"
+  - "{PROJECT_ROOT}/_concept/discovery/goals.md"
+  - "{PROJECT_ROOT}/_concept/discovery/comparable.md"
+  - "{PROJECT_ROOT}/_concept/discovery/brand/identity.md"
 ---
 
 # Project Concept: Overview
@@ -41,7 +41,7 @@ Read the following to understand the ecosystem:
 
 ### Step 2: Write brief.md
 
-Produce `_concept/1_discovery/1_overview/brief.md` with:
+Produce `_concept/discovery/brief.md` with:
 
 1. **Frontmatter** per the contract schema (`elevator_pitch`, `audience`, `problem`, `hero_flow`, `comparable_products`, `subsystem_count`)
 2. **Vision** — what the ecosystem is and why it exists as a multi-product system
@@ -53,7 +53,7 @@ Produce `_concept/1_discovery/1_overview/brief.md` with:
 
 ### Step 3: Write goals.md
 
-Produce `_concept/1_discovery/1_overview/goals.md` with:
+Produce `_concept/discovery/goals.md` with:
 
 1. **Success Criteria** — ecosystem-level (not per-subsystem)
 2. **Current Scope** — what's being built now
@@ -62,7 +62,7 @@ Produce `_concept/1_discovery/1_overview/goals.md` with:
 
 ### Step 4: Write comparable.md
 
-Produce `_concept/1_discovery/1_overview/comparable.md` with:
+Produce `_concept/discovery/comparable.md` with:
 
 1. **Comparable ecosystems** — not individual apps, but platforms/ecosystems that solve similar problems
 2. **What to borrow / what to avoid** per comparable

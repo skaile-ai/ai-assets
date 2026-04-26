@@ -28,22 +28,22 @@ metadata:
         variant: storybook
   prerequisites:
     files:
-      - path: "_concept/2_experience/4_storybook/src/components"
+      - path: "_concept/experience/4_storybook/src/components"
         gate: hard
         description: "Custom components must be built first (run storybook-components)"
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: hard
         description: "Screen specs required to build full-page compositions"
         min_entries: 1
     reads:
-      - path: "_concept/1_discovery/2_brand/tokens.json"
+      - path: "_concept/discovery/brand/tokens.json"
         description: "Brand tokens for page styling"
-      - path: "_concept/2_experience/3_screens/00_layout/shell.md"
+      - path: "_concept/experience/screens/00_layout/shell.md"
         description: "App shell structure and navigation for AppShell component"
     produces:
-      - path: "_concept/2_experience/4_storybook/src/pages"
+      - path: "_concept/experience/4_storybook/src/pages"
         description: "Full-page screen compositions including AppShell"
-      - path: "_concept/2_experience/4_storybook/src/pages/manifest.json"
+      - path: "_concept/experience/4_storybook/src/pages/manifest.json"
         description: "Screen-to-page mapping consumed by storybook-journeys"
 ---
 
@@ -52,35 +52,35 @@ metadata:
 ROLE  Page Builder — creates full-page screen compositions from screen specs, including AppShell.
 
 READS
-  _concept/2_experience/3_screens/**/*.md               — screen specs (purpose, route, UI elements, states, data)
-  _concept/2_experience/3_screens/00_layout/shell.md    — app shell structure, navigation, breakpoints
-  _concept/1_discovery/2_brand/tokens.json              — brand tokens
-  _concept/2_experience/4_storybook/src/components/     — custom components from sub-skill 2
+  _concept/experience/screens/**/*.md               — screen specs (purpose, route, UI elements, states, data)
+  _concept/experience/screens/00_layout/shell.md    — app shell structure, navigation, breakpoints
+  _concept/discovery/brand/tokens.json              — brand tokens
+  _concept/experience/4_storybook/src/components/     — custom components from sub-skill 2
   [passed by orchestrator]: component_library, story_extension, package_manager
 
 WRITES
-  _concept/2_experience/4_storybook/src/components/AppShell.<ext>       — shared app shell wrapper
-  _concept/2_experience/4_storybook/src/pages/<Group>/<PageName>.<ext>  — page compositions
-  _concept/2_experience/4_storybook/src/stories/Pages/<NN Group>/<Page>.stories.<ext>
-  _concept/2_experience/4_storybook/src/@types/<entity>.<ts|js>         — minimal interfaces for page data
-  _concept/2_experience/4_storybook/src/pages/manifest.json             — screen-to-page mapping for journeys
+  _concept/experience/4_storybook/src/components/AppShell.<ext>       — shared app shell wrapper
+  _concept/experience/4_storybook/src/pages/<Group>/<PageName>.<ext>  — page compositions
+  _concept/experience/4_storybook/src/stories/Pages/<NN Group>/<Page>.stories.<ext>
+  _concept/experience/4_storybook/src/@types/<entity>.<ts|js>         — minimal interfaces for page data
+  _concept/experience/4_storybook/src/pages/manifest.json             — screen-to-page mapping for journeys
 
 REQUIRES
-  state: _concept/2_experience/4_storybook/ exists with passing build
-  state: _concept/2_experience/4_storybook/src/components/ has barrel export (from sub-skill 2)
-  state: _concept/2_experience/3_screens/ has screen specs
+  state: _concept/experience/4_storybook/ exists with passing build
+  state: _concept/experience/4_storybook/src/components/ has barrel export (from sub-skill 2)
+  state: _concept/experience/screens/ has screen specs
   provided: component_library, story_extension, package_manager (from orchestrator)
 
 EMIT  [storybook-pages] started run_id=<uuid> screens=<N>
 
 STEP 1: Read all screen specs
   - Read 00_layout/shell.md for navigation structure, sidebar items, header, footer, breakpoints
-  - Read ALL screen specs in _concept/2_experience/3_screens/**/*.md (excluding 00_layout/)
+  - Read ALL screen specs in _concept/experience/screens/**/*.md (excluding 00_layout/)
   - Build complete inventory:
     | Group | Screen | Route | UI Elements | States | Data Requirements |
 
 STEP 2: Build AppShell component
-  OUTPUT _concept/2_experience/4_storybook/src/components/AppShell.<ext>
+  OUTPUT _concept/experience/4_storybook/src/components/AppShell.<ext>
     - Render full app shell from shell.md: sidebar, header/top bar, content area
     - Navigation items derived from shell spec — never hardcoded
     - Accept children prop/slot for page content area
@@ -90,7 +90,7 @@ STEP 2: Build AppShell component
     - Apply brand tokens throughout
 
 STEP 3: Build AppShell story
-  OUTPUT _concept/2_experience/4_storybook/src/stories/Pages/00 Layout/AppShell.stories.<ext>
+  OUTPUT _concept/experience/4_storybook/src/stories/Pages/00 Layout/AppShell.stories.<ext>
     - title: 'Pages/00 Layout/AppShell'
     - layout: 'fullscreen'
     - Variants: DesktopExpanded, DesktopCollapsed, Mobile (at minimum)
@@ -130,7 +130,7 @@ STEP 5: Build page components
       - Add responsive variants: Mobile, Tablet
 
 STEP 6: Write manifest and verify
-  OUTPUT _concept/2_experience/4_storybook/src/pages/manifest.json
+  OUTPUT _concept/experience/4_storybook/src/pages/manifest.json
     {
       "<screen-spec-relative-path>": {
         "component": "<Group>/<PageName>",
@@ -139,10 +139,10 @@ STEP 6: Write manifest and verify
       }
     }
 
-  $ find _concept/2_experience/4_storybook/src/stories/Pages -name '*.stories.*' | wc -l
+  $ find _concept/experience/4_storybook/src/stories/Pages -name '*.stories.*' | wc -l
   → Should cover every screen spec + AppShell
 
-  $ cd _concept/2_experience/4_storybook && <package_manager> run build
+  $ cd _concept/experience/4_storybook && <package_manager> run build
   IF build fails
     - Fix and retry
 

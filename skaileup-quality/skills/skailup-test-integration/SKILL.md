@@ -17,20 +17,20 @@ metadata:
       - path: "package.json"
         gate: hard
         description: "Source code with API endpoints must exist"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Feature specs required for API endpoint coverage"
         min_entries: 1
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         gate: hard
         description: "Data model required for database operation test scenarios"
       - path: ".env.example"
         gate: hard
         description: "Database connection info required (database must be accessible)"
     reads:
-      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+      - path: "_concept/blueprint/datamodel/seed.json"
         description: "Seed scenarios for test fixture data"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         description: "Tech stack for test framework and API client selection"
       - path: "_concept/testing/test_plan.md"
         description: "Test plan for API test scenario coverage"
@@ -67,8 +67,8 @@ cycle — from HTTP request through business logic to database mutation and resp
 
 **Hard gates:**
 1. Source code must exist with API endpoints (`server/api/`, `routes/`, or equivalent)
-2. Feature specs must exist in `_concept/2_experience/2_features/`
-3. Data model must exist at `_concept/3_blueprint/3_datamodel/model.json`
+2. Feature specs must exist in `_concept/experience/features/`
+3. Data model must exist at `_concept/blueprint/datamodel/model.json`
 4. Database must be accessible (check `.env` or `.env.example` for connection details)
 
 ## Shared Contracts
@@ -83,10 +83,10 @@ Before starting, read:
 
 | Source | Priority |
 |--------|----------|
-| `_concept/2_experience/2_features/**/*.md` | Required |
-| `_concept/3_blueprint/3_datamodel/model.json` | Required |
-| `_concept/3_blueprint/3_datamodel/seed.json` | Required |
-| `_concept/3_blueprint/1_techstack/stack.md` | Required |
+| `_concept/experience/features/**/*.md` | Required |
+| `_concept/blueprint/datamodel/model.json` | Required |
+| `_concept/blueprint/datamodel/seed.json` | Required |
+| `_concept/blueprint/techstack.md` | Required |
 | API route source files | Required |
 | Existing test files (patterns) | Required |
 | `.env.example` | Required |
@@ -98,8 +98,8 @@ Before starting, read:
 
 #### Sub-agent 1: API & Database Inventory
 
-1. Read `_concept/3_blueprint/3_datamodel/model.json` — all entities, relationships, field constraints
-2. Read `_concept/3_blueprint/3_datamodel/seed.json` — test data scenarios
+1. Read `_concept/blueprint/datamodel/model.json` — all entities, relationships, field constraints
+2. Read `_concept/blueprint/datamodel/seed.json` — test data scenarios
 3. Read API route files — map endpoints to entities
 4. Read `.env.example` — database type, connection pattern
 5. Read migration files — understand actual schema

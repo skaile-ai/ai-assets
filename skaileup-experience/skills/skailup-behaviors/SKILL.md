@@ -31,7 +31,7 @@ metadata:
         gate: soft
   prerequisites:
     files:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Features must exist — behavioral specs formalize feature rules into state machines"
         min_entries: 1
@@ -39,7 +39,7 @@ metadata:
       - path: "_concept/_grounding/general/behavioral_patterns.md"
         description: "Domain behavioral patterns from research phase"
     produces:
-      - path: "_concept/2_experience/4_behaviors"
+      - path: "_concept/experience/behaviors"
         description: "Allium behavioral specification files (one per feature group)"
 ---
 
@@ -53,7 +53,7 @@ transition rules, and boundary surfaces. It fills the gap between informal featu
 requirements and the data model — the rules and state machines that feature
 checklists leave implicit.
 
-**Writes to:** `_concept/2_experience/4_behaviors/`
+**Writes to:** `_concept/experience/behaviors/`
 
 This step is **optional**. The pipeline works without it. But when present,
 downstream skills (`datamodel`, `screens`) read these specs to produce more
@@ -75,7 +75,7 @@ precise schemas and screen definitions.
 
 ## Prerequisites
 
-**Hard gate:** `_concept/2_experience/2_features/` must have at least one feature file.
+**Hard gate:** `_concept/experience/features/` must have at least one feature file.
 
 If not: "No approved features found. Run the `features` skill first."
 
@@ -95,21 +95,21 @@ Also read the Allium language subset reference bundled with this skill:
 
 | Source | Priority |
 |--------|----------|
-| `_concept/1_discovery/1_overview/brief.md` | Required |
-| `_concept/2_experience/2_features/**/*.md` | Required |
+| `_concept/discovery/brief.md` | Required |
+| `_concept/experience/features/**/*.md` | Required |
 | `_grounding/general/behavioral_patterns.md` | Optional |
 
-**Never load:** `_concept/3_blueprint/3_datamodel/`, `_concept/2_experience/3_screens/`
+**Never load:** `_concept/blueprint/datamodel/`, `_concept/experience/screens/`
 
 ## Workflow
 
 ### Step 1: Read Context
 
-Read `_concept/2_experience/2_features/**/*.md`. If no feature files exist, stop:
+Read `_concept/experience/features/**/*.md`. If no feature files exist, stop:
 
 > "No features found. Run the `features` skill first."
 
-Also read `_concept/1_discovery/1_overview/brief.md` for domain context.
+Also read `_concept/discovery/brief.md` for domain context.
 
 If `_grounding/general/behavioral_patterns.md` exists, read it for domain-specific
 behavioral patterns that should inform the specs.
@@ -132,10 +132,10 @@ For each feature group, extract:
 
 **Output: one `.allium` file per feature group.**
 
-File naming mirrors feature groups: `_concept/2_experience/4_behaviors/<group_name>.allium`
+File naming mirrors feature groups: `_concept/experience/behaviors/<group_name>.allium`
 
-For feature group `01_user_auth/`, write `_concept/2_experience/4_behaviors/user_auth.allium`.
-For feature group `02_tasks/`, write `_concept/2_experience/4_behaviors/tasks.allium`.
+For feature group `01_user_auth/`, write `_concept/experience/behaviors/user_auth.allium`.
+For feature group `02_tasks/`, write `_concept/experience/behaviors/tasks.allium`.
 
 Drop the numeric prefix from the filename — it is already ordered by the feature
 group it corresponds to.
@@ -145,7 +145,7 @@ Every file starts with the version marker and a comment linking to the feature g
 ```
 -- allium: 2
 -- Behavioral spec for feature group: 01_user_auth
--- Source: _concept/2_experience/2_features/01_user_auth/
+-- Source: _concept/experience/features/01_user_auth/
 ```
 
 #### Entity pattern
@@ -242,7 +242,7 @@ Show what was formalized:
 
 | File | Description |
 |------|-------------|
-| `_concept/2_experience/4_behaviors/<group>.allium` | Allium behavioral spec per feature group |
+| `_concept/experience/behaviors/<group>.allium` | Allium behavioral spec per feature group |
 
 ## Depth Behavior
 

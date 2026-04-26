@@ -18,7 +18,7 @@ last_updated: YYYY-MM-DD    # ISO date, updated on every write
 
 ---
 
-## 1_discovery/1_overview/brief.md
+## discovery/brief.md
 
 ```yaml
 ---
@@ -70,7 +70,7 @@ last_updated: YYYY-MM-DD
 
 ---
 
-## 1_discovery/2_brand/identity.md
+## discovery/brand/identity.md
 
 ```yaml
 ---
@@ -82,7 +82,7 @@ last_updated: YYYY-MM-DD
 
 ---
 
-## 2_experience/1_journeys/stories.json
+## experience/journeys/stories.json
 
 JSON file — no frontmatter. Structure:
 
@@ -119,7 +119,7 @@ JSON file — no frontmatter. Structure:
 
 ---
 
-## 2_experience/2_features/\<group\>/\<feature\>.md
+## experience/features/\<group\>/\<feature\>.md
 
 ```yaml
 ---
@@ -143,7 +143,7 @@ last_updated: YYYY-MM-DD
 
 ```yaml
 screens:
-  - path: 2_experience/3_screens/01_user_auth/login.md
+  - path: experience/screens/01_user_auth/login.md
 ```
 
 ### data_entities[] format (populated by downstream skill)
@@ -154,22 +154,22 @@ data_entities: [User, Session]
 
 ---
 
-## 2_experience/3_screens/\<group\>/\<screen\>.md
+## experience/screens/\<group\>/\<screen\>.md
 
 ```yaml
 ---
 implements:
-  - 2_experience/2_features/01_user_auth/login.md
-  - 2_experience/2_features/01_user_auth/registration.md
+  - experience/features/01_user_auth/login.md
+  - experience/features/01_user_auth/registration.md
 data_entities: [User]
-layout: 2_experience/3_screens/00_layout/shell.md
+layout: experience/screens/00_layout/shell.md
 last_updated: YYYY-MM-DD
 ---
 ```
 
 ---
 
-## 3_blueprint/1_techstack/stack.md
+## blueprint/techstack.md
 
 ```yaml
 ---
@@ -188,7 +188,7 @@ last_updated: YYYY-MM-DD
 
 ---
 
-## 3_blueprint/2_architecture/architecture.md
+## blueprint/architecture.md
 
 ```yaml
 ---
@@ -203,7 +203,7 @@ last_updated: YYYY-MM-DD
 
 ---
 
-## 3_blueprint/3_datamodel/feature_map.json
+## blueprint/datamodel/feature_map.json
 
 JSON file — no frontmatter. Maps each model to its source feature files:
 
@@ -213,8 +213,8 @@ JSON file — no frontmatter. Maps each model to its source feature files:
   "models": {
     "User": {
       "source_features": [
-        "2_experience/2_features/01_user_auth/login.md",
-        "2_experience/2_features/01_user_auth/registration.md"
+        "experience/features/01_user_auth/login.md",
+        "experience/features/01_user_auth/registration.md"
       ]
     }
   }

@@ -15,11 +15,11 @@ metadata:
   source: "MERGED"
   prerequisites:
     files:
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: hard
         description: "Screen spec for this page (passed by implement-feature orchestrator)"
         min_entries: 1
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Feature specs for this page's features"
         min_entries: 1
@@ -27,15 +27,15 @@ metadata:
         gate: hard
         description: "Dev stack must be running with passing test baseline"
     reads:
-      - path: "_concept/2_experience/4_storybook/src/pages"
+      - path: "_concept/experience/4_storybook/src/pages"
         description: "Storybook page compositions as UI starting point"
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         description: "Data model for entity implementation"
-      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+      - path: "_concept/blueprint/datamodel/seed.json"
         description: "Seed data for realistic test fixtures"
-      - path: "_concept/1_discovery/2_brand/tokens.json"
+      - path: "_concept/discovery/brand/tokens.json"
         description: "Brand tokens for styled component implementation"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         description: "Tech stack for framework-specific implementation patterns"
 ---
 
@@ -72,13 +72,13 @@ Called by `implement-feature` orchestrator — not invoked directly by users.
 ROLE  Page implementer — implements all features on one page using TDD Guard-enforced Red→Green cycles.
 
 READS
-  _concept/2_experience/3_screens/<group>/<screen>.md         — page spec: layout, states, routes, data
-  _concept/2_experience/2_features/<group>/<feature>.md       — feature specs for features on this page
-  ? _concept/2_experience/4_storybook/src/pages/              — storybook page composition (UI reference)
-  _concept/3_blueprint/3_datamodel/model.json                 — data model (relevant entities)
-  _concept/3_blueprint/3_datamodel/seed.json                  — seed data scenarios
-  _concept/1_discovery/2_brand/tokens.json                    — brand tokens (never invent colors)
-  _concept/3_blueprint/1_techstack/stack.md                   — tech stack profile to load
+  _concept/experience/screens/<group>/<screen>.md         — page spec: layout, states, routes, data
+  _concept/experience/features/<group>/<feature>.md       — feature specs for features on this page
+  ? _concept/experience/4_storybook/src/pages/              — storybook page composition (UI reference)
+  _concept/blueprint/datamodel/model.json                 — data model (relevant entities)
+  _concept/blueprint/datamodel/seed.json                  — seed data scenarios
+  _concept/discovery/brand/tokens.json                    — brand tokens (never invent colors)
+  _concept/blueprint/techstack.md                   — tech stack profile to load
 
 WRITES
   e2e/specs/pages/<group>/<page-slug>.spec.<ext>              — page-level e2e tests

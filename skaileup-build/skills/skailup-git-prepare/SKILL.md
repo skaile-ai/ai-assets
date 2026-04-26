@@ -14,7 +14,7 @@ metadata:
   source: "MERGED"
   prerequisites:
     files:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Brief required for the app slug used in branch naming"
   user_inputs:
@@ -70,7 +70,7 @@ for sequential dispatch.
 ROLE  Git repository preparation — initializes repo, creates implementation branch, optionally creates worktree.
 
 READS
-  _concept/1_discovery/1_overview/brief.md   — app name + slug for branch naming
+  _concept/discovery/brief.md   — app name + slug for branch naming
   ? _implementation/PLANS.md                 — detect if resuming
 
 WRITES
@@ -89,7 +89,7 @@ NEVER commit application code in this skill — only git structure setup
 # ── Workflow ───────────────────────────────────────────────────────
 
 STEP 1: Read brief
-  - Read _concept/1_discovery/1_overview/brief.md
+  - Read _concept/discovery/brief.md
   - Extract: app_name, app_slug (lowercase, hyphenated)
 
 STEP 2: Check git state

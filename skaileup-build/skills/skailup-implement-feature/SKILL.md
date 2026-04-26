@@ -16,15 +16,15 @@ metadata:
   source: "MERGED"
   prerequisites:
     files:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Feature specs required for implementation targets"
         min_entries: 1
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: hard
         description: "Screen specs required for page implementation"
         min_entries: 1
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         gate: hard
         description: "Data model required for entity and migration implementation"
       - path: "package.json"
@@ -35,9 +35,9 @@ metadata:
         label: "Single feature to implement? (e.g., 01_user_auth/login) — leave blank for journey-first mode"
         type: text
     reads:
-      - path: "_concept/2_experience/1_journeys/stories.json"
+      - path: "_concept/experience/journeys/stories.json"
         description: "Journey stages for hero → vital → hygiene implementation order"
-      - path: "_concept/2_experience/4_storybook/src/pages"
+      - path: "_concept/experience/4_storybook/src/pages"
         description: "Storybook page compositions as UI starting point for each page"
     produces:
       - path: "_implementation/progress.json"
@@ -100,26 +100,26 @@ without journey context (useful for `add-feature` follow-through).
 
 **Hard gates:**
 - Project is scaffolded and `foundation` phase is complete
-- `_concept/2_experience/2_features/` has at least one feature group
-- `_concept/2_experience/3_screens/` has screen specs
-- `_concept/3_blueprint/3_datamodel/model.json` exists
+- `_concept/experience/features/` has at least one feature group
+- `_concept/experience/screens/` has screen specs
+- `_concept/blueprint/datamodel/model.json` exists
 - Dev stack is running (frontend + backend accessible)
 
 **Recommended (journey mode):**
-- `_concept/2_experience/1_journeys/stories.json` exists
-- `_concept/2_experience/4_storybook/src/pages/` exists (UI reference)
+- `_concept/experience/journeys/stories.json` exists
+- `_concept/experience/4_storybook/src/pages/` exists (UI reference)
 
 ## Context Budget
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/2_experience/1_journeys/stories.json` | Journey mode |
-| Must read | `_concept/2_experience/2_features/**/*.md` | Yes |
-| Must read | `_concept/2_experience/3_screens/**/*.md` | Yes |
-| Must read | `_concept/3_blueprint/3_datamodel/model.json` | Yes |
-| Must read | `_concept/3_blueprint/1_techstack/stack.md` | Yes |
-| Read if exists | `_concept/2_experience/4_storybook/src/pages/` | Recommended (UI reference) |
-| Read if exists | `_concept/3_blueprint/3_datamodel/seed.json` | Recommended |
+| Must read | `_concept/experience/journeys/stories.json` | Journey mode |
+| Must read | `_concept/experience/features/**/*.md` | Yes |
+| Must read | `_concept/experience/screens/**/*.md` | Yes |
+| Must read | `_concept/blueprint/datamodel/model.json` | Yes |
+| Must read | `_concept/blueprint/techstack.md` | Yes |
+| Read if exists | `_concept/experience/4_storybook/src/pages/` | Recommended (UI reference) |
+| Read if exists | `_concept/blueprint/datamodel/seed.json` | Recommended |
 | Read if exists | `_implementation/progress.json` | If resuming |
 
 ---
@@ -127,12 +127,12 @@ without journey context (useful for `add-feature` follow-through).
 ROLE  Journey-first feature orchestrator — implements features by walking user journeys outside-in with three-level TDD.
 
 READS
-  _concept/2_experience/1_journeys/stories.json            — journey definitions, story maps
-  _concept/2_experience/2_features/**/*.md                  — feature specs
-  _concept/2_experience/3_screens/**/*.md                   — screen/page specs
-  ? _concept/2_experience/4_storybook/src/pages/            — storybook page compositions (UI reference)
-  _concept/3_blueprint/3_datamodel/model.json               — data model
-  _concept/3_blueprint/3_datamodel/seed.json                — seed data scenarios
+  _concept/experience/journeys/stories.json            — journey definitions, story maps
+  _concept/experience/features/**/*.md                  — feature specs
+  _concept/experience/screens/**/*.md                   — screen/page specs
+  ? _concept/experience/4_storybook/src/pages/            — storybook page compositions (UI reference)
+  _concept/blueprint/datamodel/model.json               — data model
+  _concept/blueprint/datamodel/seed.json                — seed data scenarios
   ? _implementation/progress.json                           — resume state
 
 WRITES
@@ -198,7 +198,7 @@ STEP 1: Build implementation map
   - Skip backlog stage
   - For each story_map (journey):
     - Collect candidate_screens from its stories
-    - Resolve each to a screen spec file in _concept/2_experience/3_screens/
+    - Resolve each to a screen spec file in _concept/experience/screens/
     - For each screen spec, find features whose frontmatter screens[] includes it
     - Deduplicate: a page/feature appears only in the FIRST journey that references it
   - Track already-implemented pages/features from progress.json (if resuming)
@@ -376,5 +376,5 @@ CHECKLIST
 
 - **Called by:** `implement` orchestrator or standalone
 - **Dispatches to:** `implement-feature-page` (per page)
-- **Reads:** `_concept/2_experience/` (journeys, features, screens, storybook)
+- **Reads:** `_concept/experience/` (journeys, features, screens, storybook)
 - **Writes:** E2E test files, `_implementation/progress.json`

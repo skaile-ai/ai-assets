@@ -47,12 +47,12 @@ Verdict messages by readiness level:
 
 | Check | Required | How to verify |
 |-------|----------|---------------|
-| Concept doc | Yes | `_concept/2_experience/2_features/<group>/<feature>.md` exists |
-| Screen spec | Yes | At least one `.md` in `_concept/2_experience/3_screens/` with this feature in `implements:` |
-| Data model | Yes | Feature listed in `_concept/3_blueprint/3_datamodel/feature_map.json` for at least one model |
-| Brand tokens | Yes (global) | `_concept/1_discovery/2_brand/tokens.json` exists |
-| Tech stack | Yes (global) | `_concept/3_blueprint/1_techstack/stack.md` exists |
-| Mockup/composition | Soft | Storybook page at `_concept/2_experience/4_storybook/src/pages/` OR html in `_concept/05_mockups/` |
+| Concept doc | Yes | `_concept/experience/features/<group>/<feature>.md` exists |
+| Screen spec | Yes | At least one `.md` in `_concept/experience/screens/` with this feature in `implements:` |
+| Data model | Yes | Feature listed in `_concept/blueprint/datamodel/feature_map.json` for at least one model |
+| Brand tokens | Yes (global) | `_concept/discovery/brand/tokens.json` exists |
+| Tech stack | Yes (global) | `_concept/blueprint/techstack.md` exists |
+| Mockup/composition | Soft | Storybook page at `_concept/experience/4_storybook/src/pages/` OR html in `_concept/05_mockups/` |
 
 **Note:** `status` field is not checked — status has been globally removed from all frontmatter.
 Implementation progress is tracked in `_implementation/PLANS.md` (if present).

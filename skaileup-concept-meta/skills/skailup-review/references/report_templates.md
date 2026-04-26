@@ -28,14 +28,14 @@ Output templates for audit and gardening modes.
 
 | Phase | Folder | Status | Files |
 |-------|--------|--------|-------|
-| Overview | `1_discovery/1_overview/` | <status> | <count> |
-| Brand | `1_discovery/2_brand/` | <status> | <count> |
-| Journeys | `2_experience/1_journeys/` | <status> | <count> |
-| Features | `2_experience/2_features/` | <status> | <count> |
-| Screens | `2_experience/3_screens/` | <status> | <count> |
-| Tech Stack | `3_blueprint/1_techstack/` | <status> | <count> |
-| Architecture | `3_blueprint/2_architecture/` | <status> | <count> |
-| Data Model | `3_blueprint/3_datamodel/` | <status> | <count> |
+| Overview | `discovery/` | <status> | <count> |
+| Brand | `discovery/brand/` | <status> | <count> |
+| Journeys | `experience/journeys/` | <status> | <count> |
+| Features | `experience/features/` | <status> | <count> |
+| Screens | `experience/screens/` | <status> | <count> |
+| Tech Stack | `blueprint/` | <status> | <count> |
+| Architecture | `blueprint/` | <status> | <count> |
+| Data Model | `blueprint/datamodel/` | <status> | <count> |
 
 ---
 

@@ -11,16 +11,16 @@ Skills use this to detect and handle projects created with older tooling.
 
 | Old path (CF flat) | Old path (Saxe grouped) | New canonical path |
 |---|---|---|
-| `01_project/` | `1_discovery/1_overview/` | `1_discovery/1_overview/` |
-| `04_brand/` | `1_discovery/3_brand/` | `1_discovery/2_brand/` |
-| `03_features/` | `2_experience/2_features/` | `2_experience/2_features/` |
-| `03b_behavior/` | — | `2_experience/4_behaviors/` |
-| `05_techstack/` | `3_blueprint/1_techstack/` | `3_blueprint/1_techstack/` |
-| `05b_architecture/` | `3_blueprint/2_architecture/` | `3_blueprint/2_architecture/` |
-| `06_datamodel/` | `3_blueprint/3_datamodel/` | `3_blueprint/3_datamodel/` |
-| `07_screens/` | `2_experience/3_screens/` | `2_experience/3_screens/` |
+| `01_project/` | `discovery/` | `discovery/` |
+| `04_brand/` | `discovery/3_brand/` | `discovery/brand/` |
+| `03_features/` | `experience/features/` | `experience/features/` |
+| `03b_behavior/` | — | `experience/behaviors/` |
+| `05_techstack/` | `blueprint/` | `blueprint/` |
+| `05b_architecture/` | `blueprint/` | `blueprint/` |
+| `06_datamodel/` | `blueprint/datamodel/` | `blueprint/datamodel/` |
+| `07_screens/` | `experience/screens/` | `experience/screens/` |
 | `08_testing/` | — | removed |
-| `_research/` | `1_discovery/2_research/` | `_grounding/general/` |
+| `_research/` | `discovery/2_research/` | `_grounding/general/` |
 | `02_research/` | — | `_grounding/general/` |
 
 ### Feature group prefix change
@@ -47,7 +47,7 @@ if _concept/01_project/ exists → legacy CF flat structure
   remap paths per table above when writing new files
   read from both old and new paths during transition
 
-if _concept/1_discovery/ exists → Saxe or merged structure
+if _concept/discovery/ exists → Saxe or merged structure
   check subfolder numbering:
     2_brand/ (new) vs 3_brand/ (old Saxe) → prefer 2_brand/
 
@@ -89,11 +89,11 @@ if _concept/A_01_*/ exists inside features/ → legacy letter+number groups
 
 | Old reference | New reference |
 |---|---|
-| `02_research/` / `1_discovery/2_research/` | `_grounding/general/` |
-| `07_screens/` | `2_experience/3_screens/` |
-| `03_features/` | `2_experience/2_features/` |
-| `05_techstack/` | `3_blueprint/1_techstack/` |
-| `05b_architecture/` | `3_blueprint/2_architecture/` |
+| `02_research/` / `discovery/2_research/` | `_grounding/general/` |
+| `07_screens/` | `experience/screens/` |
+| `03_features/` | `experience/features/` |
+| `05_techstack/` | `blueprint/` |
+| `05b_architecture/` | `blueprint/` |
 
 ---
 
@@ -149,7 +149,7 @@ if _concept/A_01_*/ exists inside features/ → legacy letter+number groups
 | Features → Screens | Present | Present (same rule) | **Kept, paths updated** |
 | Screens → Features (back-link) | Present | Present (same rule) | **Kept, paths updated** |
 | Datamodel → Features | `from_features` on model entities | `feature_map.json` as dedicated file | **`feature_map.json` adopted from Saxe** |
-| Behaviors protocol | Present (allium files) | Not present | **Kept from CF**, path updated to `2_experience/4_behaviors/` |
+| Behaviors protocol | Present (allium files) | Not present | **Kept from CF**, path updated to `experience/behaviors/` |
 | `screens[]` entry format | `path:` only | `path:` + `status:` | **`path:` only** — status removed globally |
 | `story_refs` validation rule | Not present | Warning when story_refs → missing journey ID | **Adopted from Saxe** |
 
@@ -157,9 +157,9 @@ if _concept/A_01_*/ exists inside features/ → legacy letter+number groups
 
 | Old (CF) | Old (Saxe) | Canonical |
 |---|---|---|
-| `07_screens/01_user_auth/login.md` | `2_experience/3_screens/01_user_auth/login.md` | `2_experience/3_screens/01_user_auth/login.md` |
-| `03_features/01_user_auth/login.md` | `2_experience/2_features/01_user_auth/login.md` | `2_experience/2_features/01_user_auth/login.md` |
-| `03b_behavior/user_auth.allium` | not present | `2_experience/4_behaviors/user_auth.allium` |
+| `07_screens/01_user_auth/login.md` | `experience/screens/01_user_auth/login.md` | `experience/screens/01_user_auth/login.md` |
+| `03_features/01_user_auth/login.md` | `experience/features/01_user_auth/login.md` | `experience/features/01_user_auth/login.md` |
+| `03b_behavior/user_auth.allium` | not present | `experience/behaviors/user_auth.allium` |
 
 ---
 
@@ -292,10 +292,10 @@ Source: ADOPT_CF — no Saxe equivalent.
 | Change | Old | New |
 |---|---|---|
 | Intro reference | "Skills read these from `pipeline.json` hard_gates" | "Skills enforce these via their `requires` field (flow node or SKILL.md frontmatter)" |
-| Law 1 path | `01_project/brief.md` | `1_discovery/1_overview/brief.md` |
-| Law 2 paths | `06_datamodel/`, `03_features/` | `3_blueprint/3_datamodel/`, `2_experience/2_features/` |
-| Law 3 paths | `07_screens/`, `04_brand/tokens.json` | `2_experience/3_screens/`, `1_discovery/2_brand/tokens.json` |
-| Law 4 paths | `07_screens/`, `06_datamodel/model.json` | `2_experience/3_screens/`, `3_blueprint/3_datamodel/model.json` |
+| Law 1 path | `01_project/brief.md` | `discovery/brief.md` |
+| Law 2 paths | `06_datamodel/`, `03_features/` | `blueprint/datamodel/`, `experience/features/` |
+| Law 3 paths | `07_screens/`, `04_brand/tokens.json` | `experience/screens/`, `discovery/brand/tokens.json` |
+| Law 4 paths | `07_screens/`, `06_datamodel/model.json` | `experience/screens/`, `blueprint/datamodel/model.json` |
 | Law 5 skill ref | `cf_concept_mock/` (directory path) | `mock` (canonical skill name) |
 | Law 7 wording | "verify its hard_gates (file existence checks)" | "verify its `requires` paths (file/folder existence)" |
 | Rationalization | "Use complexity presets in pipeline.json" | "Use a lighter flow (e.g. `prototype`)" |
@@ -314,8 +314,8 @@ Source: ADOPT_SAXE — no CF equivalent.
 
 | Saxe original | Merged version | Reason |
 |---|---|---|
-| `1_discovery/3_brand/tokens.json` | `1_discovery/2_brand/tokens.json` | Brand folder renumbered in concept_structure.md merge |
-| `3_blueprint/3_datamodel/postxl-schema.json` (backend ACs source) | `3_blueprint/3_datamodel/model.json` | model.json is the canonical cross-ref target per golden_principles.md |
+| `discovery/3_brand/tokens.json` | `discovery/brand/tokens.json` | Brand folder renumbered in concept_structure.md merge |
+| `blueprint/datamodel/postxl-schema.json` (backend ACs source) | `blueprint/datamodel/model.json` | model.json is the canonical cross-ref target per golden_principles.md |
 | "tRPC endpoints" / "tRPC call, dispatch, or service method" | "generated API endpoints" / "service method call, event dispatch, or endpoint invocation" | Stack-agnostic — tRPC is one possible implementation |
 | `UpdateService \| ViewService \| Adapter` (test target example) | `ServiceClass \| Adapter \| Handler` | Removed PostXL-specific naming convention from example |
 
@@ -333,8 +333,8 @@ examples are adopted verbatim from Saxe.
 
 | Aspect | CF | Saxe | Decision |
 |---|---|---|---|
-| Progress path format | Flat: `01_project`, `03_features` | Phase-grouped: `1_discovery/1_overview` | **Phase-grouped** (Saxe/canonical) |
-| Brand path | `04_brand/tokens.json` | `1_discovery/3_brand/tokens.json` | **`1_discovery/2_brand/tokens.json`** (canonical renumbering) |
+| Progress path format | Flat: `01_project`, `03_features` | Phase-grouped: `discovery` | **Phase-grouped** (Saxe/canonical) |
+| Brand path | `04_brand/tokens.json` | `discovery/3_brand/tokens.json` | **`discovery/brand/tokens.json`** (canonical renumbering) |
 | Data model path | `model.json` | `postxl-schema.json` | **`model.json`** (canonical per golden_principles.md) |
 | Skill refs in Progress | `cf_implement_bootstrap`, `cf_test_e2e` | `implement-1-setup-1-scaffold`, `app-e2e` | **Canonical names**: `scaffold`, `foundation`, `e2e`, `audit` |
 | Infrastructure section | Not present | Present (modules, providers, services, comms) | **Adopted from Saxe** |
@@ -354,10 +354,10 @@ All 7 rules are identical between CF and Saxe — kept verbatim.
 
 | Aspect | CF | Saxe | Decision |
 |---|---|---|---|
-| Example input/expected paths | Flat: `01_project/`, `03_features/` | Phase-grouped: `1_discovery/1_overview/` | **Phase-grouped** (canonical) |
+| Example input/expected paths | Flat: `01_project/`, `03_features/` | Phase-grouped: `discovery/` | **Phase-grouped** (canonical) |
 | `skill` field in `_validation.json` | `cf_concept_functionality_features` | `concept-2-experience-2-features` (path-based) | **Canonical name**: `features`, `overview`, etc. |
 | `status` frontmatter check | Present (`"draft"`) | Present (`"draft"`) | **Removed** — status field dropped globally |
-| Data model check target | `06_datamodel/model.json` + `"entities"` | `3_blueprint/3_datamodel/postxl-schema.json` + `"models"` | **`3_blueprint/3_datamodel/model.json`** + `"entities"` |
+| Data model check target | `06_datamodel/model.json` + `"entities"` | `blueprint/datamodel/postxl-schema.json` + `"models"` | **`blueprint/datamodel/model.json`** + `"entities"` |
 | Seed scenarios checked | `empty`, `populated` | `empty`, `populated` | **All 4 scenarios**: `empty`, `single_user`, `populated`, `edge_cases` (per golden_principles.md) |
 | "What to Cover" skill names | CF directory names | Saxe path-based IDs | **Canonical skill names**: `overview`, `features`, `datamodel`, etc. |
 
@@ -374,7 +374,7 @@ identical between CF and Saxe — kept verbatim.
 
 | Aspect | CF | Saxe | Decision |
 |---|---|---|---|
-| File path | `06_datamodel/seed.json` | `3_blueprint/3_datamodel/seed.json` | **Canonical path** |
+| File path | `06_datamodel/seed.json` | `blueprint/datamodel/seed.json` | **Canonical path** |
 | Entity key format | Singular snake_case: `"user"`, `"task"` | camelCase plural: `"users"`, `"tasks"` | **Singular snake_case** — matches entity names in model.json (golden_principles.md) |
 | Relation field | `assigned_to` (no suffix) | `assigned_to_id` | **`assigned_to_id`** — `_id` suffix rule |
 | Enum values | `"done"`, `"in_progress"` | `"Done"`, `"InProgress"` | **PascalCase** — locked in by semantic_types.md |
@@ -412,7 +412,7 @@ Source: ADOPT_CF — no Saxe equivalent.
 | Subagent Dispatch | `pipeline.json "subagent": true` → flow node `"subagent": true` | Same flag, now on the node |
 | Expert Discovery | `cf__shared/pipeline.json expert_search_paths` → monorepo structure | `dev-implementation-experts-js/` + `dev-implementation-experts-python/`; advisor skill added |
 | Expert Discovery | `prog-expert-*` skill naming → `skaileup-implementation-expert-<tech>` | Matches actual monorepo skill directory names |
-| Path refs | `05_techstack/stack.md`, `03_features/` | `3_blueprint/1_techstack/stack.md`, `2_experience/2_features/` |
+| Path refs | `05_techstack/stack.md`, `03_features/` | `blueprint/techstack.md`, `experience/features/` |
 | `cf__shared/` refs | `cf__shared/` | `skaileup-shared/` |
 
 ### Content unchanged
@@ -432,9 +432,9 @@ Source: MERGED — CF variant + Saxe variant.
 | Dimension | CF | Saxe | Merged |
 |---|---|---|---|
 | Skill name | `journeys` | `concept-2-experience-1-journeys` | **`journeys`** — canonical flat name |
-| Output path | `_concept/02_journeys/stories.json` | `_concept/2_experience/1_journeys/stories.json` | **`_concept/2_experience/1_journeys/stories.json`** |
+| Output path | `_concept/02_journeys/stories.json` | `_concept/experience/journeys/stories.json` | **`_concept/experience/journeys/stories.json`** |
 | Format | Prose + DSL hybrid | Pure DSL | **DSL** — consistent with monorepo style |
-| Research reads | `_grounding/general/` | `1_discovery/2_research/` (wrong) | **`_grounding/general/`** — canonical research location |
+| Research reads | `_grounding/general/` | `discovery/2_research/` (wrong) | **`_grounding/general/`** — canonical research location |
 | Hero checkpoint | CHECKPOINT after STEP 3 | No intermediate checkpoint | **CHECKPOINT kept** — high-value approval gate |
 | Final approval | Simple confirmation | Summary table with counts | **Summary table kept** — more informative |
 | Downstream field names | `entities`, `screens` (short form) | `candidate_entities`, `candidate_screens` | **`candidate_*` prefix** — more explicit, consistent |
@@ -471,13 +471,13 @@ Source: MERGED — CF variant + Saxe variant.
 | Dimension | CF | Saxe | Merged |
 |---|---|---|---|
 | Skill name | `features` | `concept-2-experience-2-features` | **`features`** |
-| Output path | `03_features/<X_NN_group>/` | `2_experience/2_features/<NN_group>/` | **`2_experience/2_features/<NN_group>/`** |
+| Output path | `03_features/<X_NN_group>/` | `experience/features/<NN_group>/` | **`experience/features/<NN_group>/`** |
 | Group prefix | `A_01_` (letter+number) | `01_` (number only) | **`01_`** — golden_principles.md rule |
 | Hard gates | brief.md only | brief.md + stories.json | **both** — features must derive from journeys |
 | `status` field | Not present | `status: draft` | **Dropped** — globally removed from markdown frontmatter |
 | `story_refs` field | Not present | Present | **Adopted** — traceability to journeys is required |
 | `permissions` field | Not present | Present | **Adopted** — role-action matrix per feature |
-| Research reads | `_research/general/` | `1_discovery/2_research/` | **`_grounding/general/`** — canonical |
+| Research reads | `_research/general/` | `discovery/2_research/` | **`_grounding/general/`** — canonical |
 | Pre-collected inputs | `_research/features/user_input.json` | Not present | **`_grounding/features/user_input.json`** |
 | `feature_priorities` user input | Present | Not present (uses story stages) | **Adopted** — scope calibration; story stages set default |
 | PostXL CRUD rule | Not present | NEVER specify PostXL CRUD | **Generalized** — "focus on custom logic over framework defaults" |
@@ -511,7 +511,7 @@ Source: MERGED — CF variant + Saxe variant.
 | Dimension | CF | Saxe | Merged |
 |---|---|---|---|
 | Skill name | `screens` | `concept-2-experience-3-screens` | **`screens`** |
-| Output path | `07_screens/` | `2_experience/3_screens/` | **`2_experience/3_screens/`** |
+| Output path | `07_screens/` | `experience/screens/` | **`experience/screens/`** |
 | Hard gates | features + brand + techstack + datamodel | features only (rest optional) | **features required; rest check-if-present** |
 | `status` in frontmatter | Not present | `status: draft` | **Dropped** — globally removed |
 | Component inventory | Explicitly forbidden | PostXL `@postxl/ui-components` required | **Dropped** — CF's plain-language approach adopted |
@@ -555,7 +555,7 @@ Source: MERGED — CF variant + Saxe variant.
 | Dimension | CF | Saxe | Merged |
 |---|---|---|---|
 | Skill name | `architecture` | `concept-3-blueprint-2-architecture` | **`architecture`** |
-| Output path | `05b_architecture/` | `3_blueprint/2_architecture/` | **`3_blueprint/2_architecture/`** |
+| Output path | `05b_architecture/` | `blueprint/` | **`blueprint/`** |
 | `status` in frontmatter | Not present | `status: draft` | **Dropped** — globally removed |
 | `custom_services` vs `custom_modules` | `custom_services` | `custom_modules` | **`custom_modules`** — more precise |
 | Stack defaults | Inline multi-stack blocks (Directus/Supabase/Nuxt/NestJS) | `references/postxl_defaults.md` (PostXL only) | **Neither** — agent derives from stack.md; details in skaileup-standards/profiles |
@@ -592,7 +592,7 @@ Source: MERGED — CF variant + Saxe variant.
 | Dimension | CF | Saxe | Merged |
 |---|---|---|---|
 | Skill name | `datamodel` | `concept-3-blueprint-3-datamodel` | **`datamodel`** |
-| Output path | `06_datamodel/` | `3_blueprint/3_datamodel/` | **`3_blueprint/3_datamodel/`** |
+| Output path | `06_datamodel/` | `blueprint/datamodel/` | **`blueprint/datamodel/`** |
 | Primary format | `model.dbml` + `model.json` (semantic types) | `postxl-schema.json` (Prisma-based) | **`model.dbml` + `model.json`** — CF canonical, stack-independent |
 | `postxl-schema.json` | Not present | Primary output | **Not included** — PostXL-specific |
 | `feature_map.json` | Not present (uses `from_features[]` inside model.json) | Present as separate file | **Adopted** — explicit cross-reference file |
@@ -636,7 +636,7 @@ Source: MERGED — CF variant + Saxe variant.
 | Dimension | CF | Saxe | Merged |
 |---|---|---|---|
 | Skill name | `techstack` | `concept-3-blueprint-1-techstack` | **`techstack`** |
-| Output path | `05_techstack/` | `3_blueprint/1_techstack/` | **`3_blueprint/1_techstack/`** |
+| Output path | `05_techstack/` | `blueprint/` | **`blueprint/`** |
 | Stack selection | Dynamic — scans `skaileup-standards/profiles/*/SKILL.md` | Fixed — hardcoded PostXL/NestJS/Next.js | **CF approach** — dynamic discovery at runtime |
 | `tech_stack_skill` field | Present — key downstream contract | Not present (hardcoded) | **Required** — all downstream skills depend on it |
 | `status` in frontmatter | Not present | `status: draft` | **Dropped** — globally removed |
@@ -688,12 +688,12 @@ allows running only visual (common) without behavioral (less common). Two separa
 | Dimension | CF | Saxe | Merged |
 |---|---|---|---|
 | Skill name | `brand-visual` | `concept-1-discovery-3-brand` | **`brand-visual`** |
-| Output path | `04_brand/` | `1_discovery/3_brand/` | **`1_discovery/2_brand/`** (canonical renumbering) |
+| Output path | `04_brand/` | `discovery/3_brand/` | **`discovery/brand/`** (canonical renumbering) |
 | `status` in identity.md frontmatter | Not present | `status: draft` | **Dropped** — globally removed |
 | tokens.json `tailwind` section | Not present | Present (PostXL/Radix CSS vars) | **Adopted, generalized** — CSS custom properties for any Tailwind/CSS theming |
 | CHECKPOINT before writing | No (write directly) | `CHECKPOINT brand_proposal` + `CHECKPOINT brand_final` | **`CHECKPOINT brand_approved`** — consistent with other blueprint skills |
 | `brandbook.html` | Present (self-contained HTML) | Not present | **Kept** from CF |
-| Research reads | `_research/general/` | `1_discovery/2_research/` (wrong) | **`_grounding/general/`** — canonical |
+| Research reads | `_research/general/` | `discovery/2_research/` (wrong) | **`_grounding/general/`** — canonical |
 | `design_philosophy.md` | Inline in SKILL.md | Separate reference file | **Separate file** (Saxe approach), PostXL section dropped |
 | `tokens_schema.md` | Inline in SKILL.md | Separate reference file | **Separate file** (Saxe approach), status removed, paths updated |
 | `discovery_questions.md` | Inline in SKILL.md | Separate reference file | **Separate file** (Saxe approach), adopted verbatim |
@@ -703,9 +703,9 @@ allows running only visual (common) without behavioral (less common). Two separa
 | Dimension | CF | Saxe | Merged |
 |---|---|---|---|
 | Skill name | `brand-behavioral` | (combined in saxe_brand) | **`brand-behavioral`** — kept from CF |
-| Output path | `04_brand/` | (combined) | **`1_discovery/2_brand/`** (canonical) |
+| Output path | `04_brand/` | (combined) | **`discovery/brand/`** (canonical) |
 | Hard gates | brief + features + identity + tokens | n/a | **Kept** from CF: brief, features, identity, tokens |
-| Path refs throughout | `01_project/`, `03_features/`, `04_brand/`, `07_screens/` | n/a | **Canonical**: `1_discovery/1_overview/`, `2_experience/2_features/`, `1_discovery/2_brand/`, `2_experience/3_screens/` |
+| Path refs throughout | `01_project/`, `03_features/`, `04_brand/`, `07_screens/` | n/a | **Canonical**: `discovery/`, `experience/features/`, `discovery/brand/`, `experience/screens/` |
 | Skill refs | CF directory names | n/a | **Canonical names**: `overview`, `features`, `brand-visual`, `screens`, `datamodel` |
 
 ### Content adopted from each source
@@ -742,14 +742,14 @@ Five skills: `storybook` (orchestrator) + `storybook-setup` + `storybook-compone
 | Dimension | CF | Saxe | Merged |
 |---|---|---|---|
 | Architecture | Single skill | Orchestrator + 4 sub-skills | **Saxe's 4-sub-skill approach** |
-| Output path | `08_storybook/` | `2_experience/4_storybook/` | **`2_experience/4_storybook/`** |
+| Output path | `08_storybook/` | `experience/4_storybook/` | **`experience/4_storybook/`** |
 | Component library | Tech stack profile lookup | `@postxl/ui-components` hardcoded | **`component_library` from tech stack profile** |
 | Story file format | Derived from tech stack profile | React `.tsx` hardcoded | **`story_extension` from tech stack profile** |
 | Package manager | `package_manager` from stack.md | `pnpm` hardcoded | **`package_manager` from stack.md** |
 | Icon library | Derived from tech stack | `lucide-react` hardcoded | **`icon_library` from tech stack profile** |
 | Type generation | Not present | `pxl types` CLI | **Dropped** — storybook-types is a separate skill |
 | Click-dummy journeys | Layer 3 (basic) | Click-dummy with `.click-hint`, persona banner | **Saxe's click-dummy pattern kept** (framework-agnostic) |
-| Brand path | `04_brand/` | `1_discovery/3_brand/` | **`1_discovery/2_brand/`** (canonical renumbering) |
+| Brand path | `04_brand/` | `discovery/3_brand/` | **`discovery/brand/`** (canonical renumbering) |
 | `status` field | Not present | `status: draft` | **Dropped** — globally removed |
 | Setup templates | Not present | PostXL-specific templates/ | **Not included** — templates belong in skaileup-standards/profiles |
 
@@ -801,10 +801,10 @@ Source: MERGED — CF variant + Saxe variant.
 
 | Rule | CF | Saxe | Merged |
 |---|---|---|---|
-| Journeys path | `02_journeys/stories.json` | `2_experience/1_journeys/stories.json` | **Canonical** |
-| Tech stack path | `05_techstack/stack.md` | `3_blueprint/1_techstack/stack.md` | **Canonical** |
-| Architecture path | `05b_architecture/architecture.md` | `3_blueprint/2_architecture/architecture.md` | **Canonical** |
-| Data model path | `06_datamodel/model.json` | `3_blueprint/3_datamodel/postxl-schema.json` | **`3_blueprint/3_datamodel/model.json`** |
+| Journeys path | `02_journeys/stories.json` | `experience/journeys/stories.json` | **Canonical** |
+| Tech stack path | `05_techstack/stack.md` | `blueprint/techstack.md` | **Canonical** |
+| Architecture path | `05b_architecture/architecture.md` | `blueprint/architecture.md` | **Canonical** |
+| Data model path | `06_datamodel/model.json` | `blueprint/datamodel/postxl-schema.json` | **`blueprint/datamodel/model.json`** |
 | Schema validation | Not present | `pxl validate` | **Dropped** |
 | Seed key format | Not specified | camelCase plural | **Singular snake_case** |
 | `labelField` validation | Not present | Present (PostXL-specific) | **Dropped** — PostXL schema concept |
@@ -885,12 +885,12 @@ Source: MERGED — CF + Saxe variants.
 
 | Dimension | CF (cf_foundation) | Saxe (saxe_foundation) | Merged |
 |---|---|---|---|
-| Brand tokens path | `04_brand/tokens.json` (old flat) | `1_discovery/3_brand/tokens.json` | **`1_discovery/2_brand/tokens.json`** (canonical) |
+| Brand tokens path | `04_brand/tokens.json` (old flat) | `discovery/3_brand/tokens.json` | **`discovery/brand/tokens.json`** (canonical) |
 | Stack specifics | Generic (css_vars_mapping from profile) | PostXL-specific (HSL, @postxl/ui-components) | **Generic** from tech-stack profile |
 | Seed data setup | Not present | PostXL Prisma seed | **Generic** — stack-appropriate seed from seed.json |
 | Storybook config | Not present | Present | **Adopted** — conditional on storybook being installed |
 | E2E test update | Not present | PostXL-specific E2E update | **Dropped** — not meaningful without PostXL |
-| Shell path | `07_screens/00_layout/shell.md` | `2_experience/3_screens/00_layout/shell.md` | **`2_experience/3_screens/00_layout/shell.md`** (canonical) |
+| Shell path | `07_screens/00_layout/shell.md` | `experience/screens/00_layout/shell.md` | **`experience/screens/00_layout/shell.md`** (canonical) |
 
 ### implement-feature (20_features)
 
@@ -899,7 +899,7 @@ Source: MERGED — CF + Saxe variants.
 | Strategy | Single-feature TDD | Journey-first 3-level TDD | **Journey-first** (default); single-feature as standalone mode |
 | TDD Guard | Not present | Present (hooks in frontmatter) | **Adopted** from Saxe |
 | Page sub-skill | Not present | saxe_page as separate sub-skill | **Adopted** — implement-feature-page sub-skill |
-| UI reference | Not present | Storybook page compositions | **Adopted** — `2_experience/4_storybook/src/pages/` |
+| UI reference | Not present | Storybook page compositions | **Adopted** — `experience/4_storybook/src/pages/` |
 | `postxl-schema.json` | `model.json` | `postxl-schema.json` | **`model.json`** |
 | `pnpm run generate` | Not present | Required after customAction | **Dropped** |
 | `@postxl/ui-components` | Not present | Required | **Dropped** — use `component_library` from stack profile |
@@ -924,7 +924,7 @@ Source: MERGED — CF + Saxe variants.
 
 | Skill | Change |
 |---|---|
-| `migrate` | Canonical paths: `3_blueprint/3_datamodel/`, `3_blueprint/1_techstack/`, `skaileup-shared/contracts/`. Expert skills from `dev-implementation-experts-*`. |
+| `migrate` | Canonical paths: `blueprint/datamodel/`, `blueprint/`, `skaileup-shared/contracts/`. Expert skills from `dev-implementation-experts-*`. |
 | `seed` | Same path updates as migrate. |
 | `generate` | Saxe adopted unchanged. Marked explicitly PostXL-specific. `postxl-schema.json` sync note with `model.json`. |
 | `utilities/scaffold` | Merged into `10_setup/scaffold` — overlap resolved. |
@@ -955,7 +955,7 @@ Source: MERGED — CF + Saxe variants.
 | Skill name | `e2e` (cf_test_e2e) | `app-e2e` | **`e2e`** |
 | Format | Prose workflow | DSL | **Hybrid** (prose header + DSL body) |
 | Paths | Old flat paths (`01_project/`, `03_features/`, `06_datamodel/`) | Canonical phase-grouped | **Canonical phase-grouped** (Saxe) |
-| Data model | `06_datamodel/model.json` | `3_blueprint/3_datamodel/postxl-schema.json` | **`3_blueprint/3_datamodel/model.json`** |
+| Data model | `06_datamodel/model.json` | `blueprint/datamodel/postxl-schema.json` | **`blueprint/datamodel/model.json`** |
 | DB validation | Against `model.json` entity definitions | Against `postxl-schema.json` models | **Against `model.json`** |
 | `status: tested` | Updates `impl_status: tested` in feature frontmatter | Updates `status: tested` | **Dropped** — update `last_updated` only (status globally removed) |
 | MUST/NEVER rules | Implicit in prose | Explicit DSL block | **Saxe's explicit rules adopted** |
@@ -969,10 +969,10 @@ Source: MERGED — CF + Saxe variants.
 | Skill name | `ready` (cf_quality_ready) | `app-ready` | **`ready`** |
 | Format | Prose workflow | DSL | **Hybrid** (prose header + DSL body) |
 | Paths | Old flat paths (`03_features/`, `07_screens/`, etc.) | Canonical phase-grouped | **Canonical phase-grouped** (Saxe) |
-| Data model | `06_datamodel/model.json` | `3_blueprint/3_datamodel/postxl-schema.json` | **`3_blueprint/3_datamodel/model.json` + `feature_map.json`** |
-| Brand tokens path | `04_brand/tokens.json` | `1_discovery/3_brand/tokens.json` | **`1_discovery/2_brand/tokens.json`** (canonical renumbering) |
+| Data model | `06_datamodel/model.json` | `blueprint/datamodel/postxl-schema.json` | **`blueprint/datamodel/model.json` + `feature_map.json`** |
+| Brand tokens path | `04_brand/tokens.json` | `discovery/3_brand/tokens.json` | **`discovery/brand/tokens.json`** (canonical renumbering) |
 | Status check | `impl_status: implemented` | `status: implemented` or `status: mockup_ready` | **Dropped** — status globally removed from frontmatter |
-| Mockup check | `05_mockups/*.html` | `05_mockups/*.html` | **Generalized** — storybook compositions (`2_experience/4_storybook/`) OR mockup HTML; soft check |
+| Mockup check | `05_mockups/*.html` | `05_mockups/*.html` | **Generalized** — storybook compositions (`experience/4_storybook/`) OR mockup HTML; soft check |
 | Fix skill refs | CF directory names | Path-based IDs | **Canonical names**: `screens`, `datamodel`, `storybook` |
 | Event prefix | `[cf_quality_ready]` | `[app-ready]` | **`[ready]`** — canonical |
 

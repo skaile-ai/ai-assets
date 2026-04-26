@@ -16,13 +16,13 @@ metadata:
   source: "CF"
   prerequisites:
     files:
-      - path: "_concept/3_blueprint/3_datamodel/model.dbml"
+      - path: "_concept/blueprint/datamodel/model.dbml"
         gate: hard
         description: "DBML model required for entity and field definitions"
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         gate: hard
         description: "JSON model required for relationship and type mapping"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         gate: hard
         description: "Tech stack required to select target ORM and migration framework"
     produces:
@@ -57,18 +57,18 @@ stack-specific types using the translation table in
 ## Prerequisites
 
 **Hard gates:**
-- `_concept/3_blueprint/3_datamodel/model.dbml`
-- `_concept/3_blueprint/3_datamodel/model.json`
-- `_concept/3_blueprint/1_techstack/stack.md`
+- `_concept/blueprint/datamodel/model.dbml`
+- `_concept/blueprint/datamodel/model.json`
+- `_concept/blueprint/techstack.md`
 
 ---
 
 ROLE  Migration agent — generates stack-specific database migrations from model.json + model.dbml.
 
 READS
-  _concept/3_blueprint/3_datamodel/model.dbml    — human-readable model structure
-  _concept/3_blueprint/3_datamodel/model.json    — relationships, enums, field metadata
-  _concept/3_blueprint/1_techstack/stack.md      — ORM + migration tool + database
+  _concept/blueprint/datamodel/model.dbml    — human-readable model structure
+  _concept/blueprint/datamodel/model.json    — relationships, enums, field metadata
+  _concept/blueprint/techstack.md      — ORM + migration tool + database
   skaileup-shared/contracts/semantic_types.md         — type translation table
 
 WRITES

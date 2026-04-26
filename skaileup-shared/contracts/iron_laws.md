@@ -10,7 +10,7 @@ This document explains the WHY behind each gate.
 
 ### 1. NO CONCEPT WORK WITHOUT A BRIEF
 
-Every conceptualization skill requires `1_discovery/1_overview/brief.md` to exist.
+Every conceptualization skill requires `discovery/brief.md` to exist.
 
 **Why:** Without a brief, all downstream work is speculative and will be discarded.
 
@@ -18,7 +18,7 @@ Every conceptualization skill requires `1_discovery/1_overview/brief.md` to exis
 
 ### 2. NO DATA MODEL WITHOUT FEATURES
 
-`3_blueprint/3_datamodel/` requires `2_experience/2_features/` with at least one feature file.
+`blueprint/datamodel/` requires `experience/features/` with at least one feature file.
 
 **Why:** Entities derive from features. A model without features is an architecture astronaut exercise.
 
@@ -26,7 +26,7 @@ Every conceptualization skill requires `1_discovery/1_overview/brief.md` to exis
 
 ### 3. NO SCREENS WITHOUT BRAND TOKENS
 
-`2_experience/3_screens/` requires `1_discovery/2_brand/tokens.json` to exist,
+`experience/screens/` requires `discovery/brand/tokens.json` to exist,
 unless the brand step was explicitly skipped by the user.
 
 **Why:** Screens without brand tokens produce generic specs that need complete rewrites later.
@@ -35,7 +35,7 @@ unless the brand step was explicitly skipped by the user.
 
 ### 4. NO SCREENS WITHOUT DATA MODEL
 
-`2_experience/3_screens/` requires `3_blueprint/3_datamodel/model.json`.
+`experience/screens/` requires `blueprint/datamodel/model.json`.
 
 **Why:** Screens must reference real entities and seed data for template data sections.
 
@@ -43,7 +43,7 @@ unless the brand step was explicitly skipped by the user.
 
 ### 5. NO MOCKUPS WITHOUT SCREEN SPECS
 
-The `mock` skill requires `2_experience/3_screens/` with at least one screen file.
+The `mock` skill requires `experience/screens/` with at least one screen file.
 
 **Why:** Mockups that don't trace back to screen specs create drift between concept and visual output.
 

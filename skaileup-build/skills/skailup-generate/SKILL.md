@@ -19,7 +19,7 @@ metadata:
         gate: hard
         description: "PostXL schema file required — this skill is PostXL-specific"
     reads:
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         description: "Data model for sync-check between concept and PostXL schema"
       - path: "postxl-lock.json"
         description: "Lock file to detect schema drift and guide conflict resolution"
@@ -57,7 +57,7 @@ and verifies the build. Keeps generated code synchronized with
 ROLE  Code generation agent — runs PostXL generators, resolves conflicts, verifies build.
 
 READS
-  _concept/3_blueprint/3_datamodel/model.json   — authoritative concept schema (for sync check)
+  _concept/blueprint/datamodel/model.json   — authoritative concept schema (for sync check)
   postxl-schema.json                            — project-root schema consumed by generators
   postxl-lock.json                              — file-state tracking (generated/ejected/custom)
 
@@ -82,7 +82,7 @@ STEP 1: Pre-flight
   - Verify postxl-schema.json exists and is valid JSON
   - Check postxl-lock.json (absent = first-time generation)
   - Warn if uncommitted changes in working tree
-  IF project-root schema differs from _concept/3_blueprint/3_datamodel/model.json
+  IF project-root schema differs from _concept/blueprint/datamodel/model.json
     - Ask user which version to use (concept is authoritative unless intentionally diverged)
 
 STEP 2: Schema sync (if needed)

@@ -134,26 +134,27 @@ def get_body(filepath: Path) -> str:
 def check_structure(concept: Path):
     """Check pipeline folders exist."""
     required = {
-        "1_discovery/1_overview": "Run `concept-1-discovery-1-overview` to create the project brief.",
-        "2_experience/1_journeys": "Run `concept-2-experience-1-journeys` to map user journeys.",
-        "2_experience/2_features": "Run `concept-2-experience-2-features` to define features.",
-        "3_blueprint/1_techstack": "Run `concept-3-blueprint-1-techstack` or create _concept/3_blueprint/1_techstack/stack.md manually.",
-        "3_blueprint/3_datamodel": "Run `concept-3-blueprint-3-datamodel` to design the data model.",
-        "2_experience/3_screens": "Run `concept-2-experience-3-screens` to specify screens.",
+        "discovery": "Run `skailup-overview` to create the project brief.",
+        "experience/journeys": "Run `skailup-journeys` to map user journeys.",
+        "experience/features": "Run `skailup-features` to define features.",
+        "blueprint/techstack.md": "Run `skailup-techstack` or create _concept/blueprint/techstack.md manually.",
+        "blueprint/datamodel": "Run `skailup-datamodel` to design the data model.",
+        "experience/screens": "Run `skailup-screens` to specify screens.",
     }
-    optional = {"1_discovery/2_research", "1_discovery/3_brand", "3_blueprint/2_architecture"}
+    optional = {"discovery/brand", "blueprint/architecture.md", "experience/behaviors", "prototype/storybook"}
 
     for folder, fix in required.items():
-        if not (concept / folder).is_dir():
-            emit("HIGH", "structure", folder, f"Required pipeline folder missing: {folder}/", fix)
+        target = concept / folder
+        if not target.exists():
+            emit("HIGH", "structure", folder, f"Required pipeline artifact missing: {folder}", fix)
 
-    # Check 1_discovery/3_brand specifically for tokens.json
-    brand = concept / "1_discovery/3_brand"
+    # Check discovery/brand specifically for tokens.json
+    brand = concept / "discovery/brand"
     if brand.is_dir():
         if not (brand / "tokens.json").exists():
-            emit("MEDIUM", "structure", "1_discovery/3_brand/tokens.json",
+            emit("MEDIUM", "structure", "discovery/brand/tokens.json",
                  "Brand folder exists but tokens.json is missing.",
-                 "Create _concept/1_discovery/3_brand/tokens.json with color palette, fonts, and mode.")
+                 "Create _concept/discovery/brand/tokens.json with color palette, fonts, and mode.")
 
 
 def check_frontmatter(concept: Path):
@@ -195,7 +196,7 @@ def check_frontmatter(concept: Path):
                      "Use ISO format: YYYY-MM-DD")
 
         # Feature-specific
-        if str(rel).startswith("2_experience/2_features/"):
+        if str(rel).startswith("experience/features/"):
             for req_field in ["priority", "roles"]:
                 if req_field not in fm:
                     emit("MEDIUM", "frontmatter", str(rel),
@@ -218,7 +219,7 @@ def check_frontmatter(concept: Path):
                      f"Add 'data_entities: []' to {rel}.")
 
         # Screen-specific
-        if str(rel).startswith("2_experience/3_screens/") and not str(rel).startswith("2_experience/3_screens/00_layout"):
+        if str(rel).startswith("experience/screens/") and not str(rel).startswith("experience/screens/00_layout"):
             if "implements" not in fm:
                 emit("HIGH", "frontmatter", str(rel),
                      "Screen missing 'implements' field.",
@@ -229,12 +230,12 @@ def check_golden_principles(concept: Path):
     """Check mechanical rules from golden_principles.md."""
 
     # Feature group numbering
-    features_dir = concept / "2_experience/2_features"
+    features_dir = concept / "experience/features"
     if features_dir.is_dir():
         groups = sorted([d.name for d in features_dir.iterdir() if d.is_dir()])
         for i, g in enumerate(groups):
             if not re.match(r"^\d{2}_", g):
-                emit("MEDIUM", "golden", f"2_experience/2_features/{g}",
+                emit("MEDIUM", "golden", f"experience/features/{g}",
                      f"Feature group folder not numbered: '{g}'.",
                      f"Rename to '{str(i+1).zfill(2)}_{g}' to follow convention.")
 
@@ -242,22 +243,22 @@ def check_golden_principles(concept: Path):
         nums = [int(g[:2]) for g in groups if re.match(r"^\d{2}_", g)]
         for i in range(len(nums) - 1):
             if nums[i + 1] != nums[i] + 1:
-                emit("MEDIUM", "golden", "2_experience/2_features/",
+                emit("MEDIUM", "golden", "experience/features/",
                      f"Feature group numbering gap: {nums[i]:02d} → {nums[i+1]:02d}.",
                      f"Renumber groups to be sequential (01, 02, 03...).")
                 break
 
     # Screen groups must mirror feature groups
-    screens_dir = concept / "2_experience/3_screens"
+    screens_dir = concept / "experience/screens"
     if features_dir.is_dir() and screens_dir.is_dir():
         feat_groups = {d.name for d in features_dir.iterdir() if d.is_dir()}
         screen_groups = {d.name for d in screens_dir.iterdir() if d.is_dir() and d.name != "00_layout"}
 
         for fg in feat_groups:
             if fg not in screen_groups and screens_dir.exists():
-                emit("LOW", "golden", f"2_experience/3_screens/{fg}",
+                emit("LOW", "golden", f"experience/screens/{fg}",
                      f"Feature group '{fg}' has no matching screen group.",
-                     f"Run `concept-2-experience-3-screens` to create screens for {fg}.")
+                     f"Run `skailup-screens` to create screens for {fg}.")
 
     # Feature files must have requirement checkboxes
     if features_dir.is_dir():
@@ -300,8 +301,8 @@ def check_cross_references(concept: Path):
     """Check two-way links between features and screens."""
 
     # Feature → Screen links
-    features_dir = concept / "2_experience/2_features"
-    screens_dir = concept / "2_experience/3_screens"
+    features_dir = concept / "experience/features"
+    screens_dir = concept / "experience/screens"
 
     if not features_dir.is_dir():
         return
@@ -328,6 +329,7 @@ def check_cross_references(concept: Path):
     for md in screens_dir.rglob("*.md"):
         if "00_layout" in str(md):
             continue
+
         fm = parse_frontmatter(md)
         if not fm:
             continue
@@ -342,7 +344,7 @@ def check_cross_references(concept: Path):
                          f"Remove '{feat_path}' from implements[] in {rel}, or create the missing feature file.")
 
     # data_entities → postxl-schema.json model names
-    schema_path = concept / "3_blueprint/3_datamodel" / "postxl-schema.json"
+    schema_path = concept / "blueprint/datamodel" / "postxl-schema.json"
     if schema_path.exists():
         try:
             schema_data = json.loads(schema_path.read_text(encoding="utf-8"))
@@ -368,14 +370,14 @@ def check_cross_references(concept: Path):
 
 def _load_postxl_schema(concept: Path):
     """Load and return parsed postxl-schema.json, or None on error."""
-    schema_path = concept / "3_blueprint/3_datamodel" / "postxl-schema.json"
+    schema_path = concept / "blueprint/datamodel" / "postxl-schema.json"
     if not schema_path.exists():
         return None
 
     try:
         data = json.loads(schema_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as e:
-        emit("CRITICAL", "model", "3_blueprint/3_datamodel/postxl-schema.json",
+        emit("CRITICAL", "model", "blueprint/datamodel/postxl-schema.json",
              f"Invalid JSON: {e}",
              "Fix the JSON syntax error in postxl-schema.json.")
         return None
@@ -402,15 +404,15 @@ def check_model(concept: Path):
     # Required top-level fields
     for req in ["name", "slug", "models"]:
         if req not in data:
-            emit("HIGH", "model", "3_blueprint/3_datamodel/postxl-schema.json",
+            emit("HIGH", "model", "blueprint/datamodel/postxl-schema.json",
                  f"Missing required top-level field: '{req}'.",
                  f"Add \"{req}\" to postxl-schema.json.")
 
     models = data.get("models", [])
     if not models:
-        emit("HIGH", "model", "3_blueprint/3_datamodel/postxl-schema.json",
+        emit("HIGH", "model", "blueprint/datamodel/postxl-schema.json",
              "No models defined.",
-             "Run `concept-3-blueprint-3-datamodel` to create models from features.")
+             "Run `skailup-datamodel` to create models from features.")
         return
 
     # Collect all model names for relation validation
@@ -428,7 +430,7 @@ def check_model(concept: Path):
 
         # Model name must be PascalCase
         if not _is_pascal_case(mname):
-            emit("MEDIUM", "model", "3_blueprint/3_datamodel/postxl-schema.json",
+            emit("MEDIUM", "model", "blueprint/datamodel/postxl-schema.json",
                  f"Model name '{mname}' is not PascalCase.",
                  f"Rename to PascalCase (e.g., start with uppercase, no underscores).")
 
@@ -437,7 +439,7 @@ def check_model(concept: Path):
         required_std = {"id", "createdAt", "updatedAt"}
         missing_std = required_std - set(std_fields)
         if missing_std:
-            emit("HIGH", "model", "3_blueprint/3_datamodel/postxl-schema.json",
+            emit("HIGH", "model", "blueprint/datamodel/postxl-schema.json",
                  f"Model '{mname}' missing standardFields: {', '.join(sorted(missing_std))}.",
                  f"Add {sorted(missing_std)} to standardFields in model '{mname}'. "
                  f"Required: [\"id\", \"createdAt\", \"updatedAt\"].")
@@ -448,7 +450,7 @@ def check_model(concept: Path):
 
             # Field name must be camelCase
             if not _is_camel_case(fname):
-                emit("MEDIUM", "model", "3_blueprint/3_datamodel/postxl-schema.json",
+                emit("MEDIUM", "model", "blueprint/datamodel/postxl-schema.json",
                      f"Field '{fname}' in model '{mname}' is not camelCase.",
                      f"Rename to camelCase (start with lowercase, no underscores).")
 
@@ -460,7 +462,7 @@ def check_model(concept: Path):
                 ref_name = fname[:-2]  # strip "Id"
                 ref_model = ref_name[0].upper() + ref_name[1:] if ref_name else ""
                 if ref_model and ref_model not in model_names and ref_model not in standard_models:
-                    emit("MEDIUM", "model", "3_blueprint/3_datamodel/postxl-schema.json",
+                    emit("MEDIUM", "model", "blueprint/datamodel/postxl-schema.json",
                          f"Relation field '{fname}' in model '{mname}' references "
                          f"'{ref_model}' which is not a defined model or standard model.",
                          f"Add a '{ref_model}' model to postxl-schema.json, or fix the field name.")
@@ -470,7 +472,7 @@ def check_model(concept: Path):
                 enum_values = ftype.get("values", [])
                 for val in enum_values:
                     if isinstance(val, str) and not _is_pascal_case(val):
-                        emit("LOW", "model", "3_blueprint/3_datamodel/postxl-schema.json",
+                        emit("LOW", "model", "blueprint/datamodel/postxl-schema.json",
                              f"Inline enum value '{val}' in field '{fname}' of model '{mname}' "
                              f"is not PascalCase.",
                              f"Rename to PascalCase (e.g., '{val[0].upper() + val[1:]}' if simple).")
@@ -478,14 +480,14 @@ def check_model(concept: Path):
 
 def check_seed(concept: Path):
     """Validate seed.json scenarios."""
-    seed_path = concept / "3_blueprint/3_datamodel" / "seed.json"
+    seed_path = concept / "blueprint/datamodel" / "seed.json"
     if not seed_path.exists():
         return
 
     try:
         data = json.loads(seed_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as e:
-        emit("HIGH", "seed", "3_blueprint/3_datamodel/seed.json",
+        emit("HIGH", "seed", "blueprint/datamodel/seed.json",
              f"Invalid JSON: {e}",
              "Fix the JSON syntax error in seed.json.")
         return
@@ -494,7 +496,7 @@ def check_seed(concept: Path):
     required = ["empty", "single_user", "populated", "edge_cases"]
     for name in required:
         if name not in scenarios:
-            emit("MEDIUM", "seed", "3_blueprint/3_datamodel/seed.json",
+            emit("MEDIUM", "seed", "blueprint/datamodel/seed.json",
                  f"Missing required scenario: '{name}'.",
                  f"Add a '{name}' scenario to seed.json. See shared/contracts/seed_data.md.")
 
@@ -502,7 +504,7 @@ def check_seed(concept: Path):
     pop = scenarios.get("populated", {}).get("data", {})
     for model, entries in pop.items():
         if isinstance(entries, list) and len(entries) < 2:
-            emit("LOW", "seed", "3_blueprint/3_datamodel/seed.json",
+            emit("LOW", "seed", "blueprint/datamodel/seed.json",
                  f"Scenario 'populated' has only {len(entries)} {model} entries (need 2+).",
                  f"Add more realistic {model} entries to the 'populated' scenario.")
 
@@ -511,7 +513,7 @@ def check_seed(concept: Path):
         scenario_data = scenario.get("data", {})
         for model_key in scenario_data:
             if model_key and not _is_pascal_case(model_key):
-                emit("LOW", "seed", "3_blueprint/3_datamodel/seed.json",
+                emit("LOW", "seed", "blueprint/datamodel/seed.json",
                      f"Model key '{model_key}' in scenario '{scenario_name}' is not PascalCase.",
                      f"Rename to PascalCase to match postxl-schema.json model names.")
 

@@ -27,7 +27,7 @@ metadata:
     reads:
       - path: "_concept/PLANS.md"
         description: "Existing plan for resuming an interrupted pipeline session"
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         description: "Existing brief to resume from a known pipeline stage"
     produces:
       - path: "_concept/PLANS.md"
@@ -100,7 +100,7 @@ ROLE  Concept Orchestrator — guides a project through Discovery, Experience, a
 
 READS
   ? _concept/PLANS.md                                    — resume state (if exists)
-  ? _concept/1_discovery/1_overview/brief.md              — app name, complexity tier (after Phase 1)
+  ? _concept/discovery/brief.md              — app name, complexity tier (after Phase 1)
   skaileup-shared/contracts/concept_structure.md               — canonical _concept/ paths
   skaileup-shared/contracts/plans.md                           — PLANS.md format
   skaileup-shared/contracts/iron_laws.md                       — non-negotiable constraints
@@ -161,7 +161,7 @@ EMIT [orchestrator] plan_created phases=3
 # -- Phase 1: Discovery -----------------------------------------------------
 
 STEP 3: Project Overview
-  - RUN overview sub-skill → _concept/1_discovery/1_overview/
+  - RUN overview sub-skill → _concept/discovery/
   - Produces: brief.md, goals.md, comparable.md
   - Read brief.md to extract complexity_tier for checkpoint control
   - DO update_progress
@@ -181,7 +181,7 @@ STEP 4: Research (optional, parallel-capable)
     - Skip research, log decision
 
 STEP 5: Brand Identity
-  - RUN brand-visual sub-skill → _concept/1_discovery/2_brand/
+  - RUN brand-visual sub-skill → _concept/discovery/brand/
   - Produces: identity.md, tokens.json
   - DO update_progress
 
@@ -205,12 +205,12 @@ EMIT [orchestrator] phase_complete phase=discovery
 
 STEP 6: User Journeys (optional)
   IF stories/journeys are part of the flow
-    - RUN journeys sub-skill → _concept/2_experience/1_journeys/
+    - RUN journeys sub-skill → _concept/experience/journeys/
     - Produces: stories.json, journey maps
     - DO update_progress
 
 STEP 7: Features
-  - RUN features sub-skill → _concept/2_experience/2_features/
+  - RUN features sub-skill → _concept/experience/features/
   - Produces: feature group folders with feature specs
   - DO update_progress
 
@@ -221,13 +221,13 @@ IF complexity_tier is complex
     > Approve to continue."
 
 STEP 8: Screens
-  - RUN screens sub-skill → _concept/2_experience/3_screens/
+  - RUN screens sub-skill → _concept/experience/screens/
   - Produces: screen specs with cross-references to features
   - DO update_progress
 
 STEP 9: Storybook / Mockups (optional)
   IF storybook/mockup is part of the flow
-    - RUN storybook or mock sub-skill → _concept/2_experience/4_storybook/
+    - RUN storybook or mock sub-skill → _concept/experience/4_storybook/
     - DO update_progress
 
 CHECKPOINT experience_complete
@@ -245,7 +245,7 @@ EMIT [orchestrator] phase_complete phase=experience
 # -- Phase 3: Blueprint ------------------------------------------------------
 
 STEP 10: Tech Stack
-  - RUN techstack sub-skill → _concept/3_blueprint/1_techstack/
+  - RUN techstack sub-skill → _concept/blueprint/
   - Produces: stack.md
   - DO update_progress
 
@@ -256,12 +256,12 @@ IF complexity_tier is complex
 
 STEP 11: Architecture (optional)
   IF project complexity warrants architecture design
-    - RUN architecture sub-skill → _concept/3_blueprint/2_architecture/
+    - RUN architecture sub-skill → _concept/blueprint/
     - Produces: architecture.md
     - DO update_progress
 
 STEP 12: Data Model
-  - RUN datamodel sub-skill → _concept/3_blueprint/3_datamodel/
+  - RUN datamodel sub-skill → _concept/blueprint/datamodel/
   - Produces: model.dbml, model.json, model.schema.json
   - DO update_progress
 

@@ -2,7 +2,7 @@
 
 ## Output path
 
-`_concept/2_experience/2_features/<NN_group>/<feature>.md`
+`_concept/experience/features/<NN_group>/<feature>.md`
 
 ## Frontmatter
 

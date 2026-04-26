@@ -36,29 +36,29 @@ metadata:
         gate: soft
   prerequisites:
     files:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "At least one feature must exist — screens implement features"
         min_entries: 1
     reads:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         description: "App name, purpose, hero flow for navigation design"
-      - path: "_concept/2_experience/1_journeys/stories.json"
+      - path: "_concept/experience/journeys/stories.json"
         description: "User journeys to ensure screens cover all story flows"
-      - path: "_concept/1_discovery/2_brand/tokens.json"
+      - path: "_concept/discovery/brand/tokens.json"
         description: "Design tokens for brand-aware component suggestions"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         description: "Tech stack for routing patterns and component conventions"
-      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+      - path: "_concept/blueprint/architecture.md"
         description: "Architecture for API surface awareness"
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         description: "Data model for data display and form field mapping"
-      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+      - path: "_concept/blueprint/datamodel/seed.json"
         description: "Seed data for realistic screen template data"
       - path: "_concept/_grounding/general/design_inspiration.md"
         description: "Design references for layout inspiration"
     produces:
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         description: "Per-screen specification files organized in numbered groups"
 ---
 
@@ -68,7 +68,7 @@ metadata:
 
 The **screens** skill is the Screen Specification agent. It reads all available
 upstream artifacts and produces per-screen descriptions organized under
-`_concept/2_experience/3_screens/`. It also registers each screen back into the
+`_concept/experience/screens/`. It also registers each screen back into the
 feature files it implements via the feedback loop.
 
 Screen specs are written from the **user's perspective** in plain language — what
@@ -77,7 +77,7 @@ tokens, no implementation details.
 
 ## When to Use
 
-- Features exist and are approved in `_concept/2_experience/2_features/`
+- Features exist and are approved in `_concept/experience/features/`
 - User asks about screens, pages, UI layout, navigation, routes
 - User says "design the screens", "what pages do we need", "UI specs"
 
@@ -93,48 +93,48 @@ tokens, no implementation details.
 `skaileup-shared/contracts/frontmatter.md`, and `skaileup-shared/contracts/feedback_loop.md`
 before proceeding.
 
-**Hard gate:** `_concept/2_experience/2_features/` must exist with at least one feature file.
+**Hard gate:** `_concept/experience/features/` must exist with at least one feature file.
 
 ## Context Budget
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/1_discovery/1_overview/brief.md` | Yes |
-| Must read | `_concept/2_experience/2_features/**/*.md` | Yes |
-| Check if present | `_concept/2_experience/1_journeys/stories.json` | No |
-| Check if present | `_concept/1_discovery/2_brand/tokens.json` | No |
-| Check if present | `_concept/3_blueprint/1_techstack/stack.md` | No |
-| Check if present | `_concept/3_blueprint/3_datamodel/model.json` | No |
-| Check if present | `_concept/3_blueprint/2_architecture/architecture.md` | No |
-| Check if present | `_concept/3_blueprint/3_datamodel/seed.json` | No |
+| Must read | `_concept/discovery/brief.md` | Yes |
+| Must read | `_concept/experience/features/**/*.md` | Yes |
+| Check if present | `_concept/experience/journeys/stories.json` | No |
+| Check if present | `_concept/discovery/brand/tokens.json` | No |
+| Check if present | `_concept/blueprint/techstack.md` | No |
+| Check if present | `_concept/blueprint/datamodel/model.json` | No |
+| Check if present | `_concept/blueprint/architecture.md` | No |
+| Check if present | `_concept/blueprint/datamodel/seed.json` | No |
 | Check if present | `_concept/_grounding/general/design_inspiration.md` | No |
 | Never load | source code, build artifacts, node_modules | — |
 
 ## Standalone Mode
 
-**Gate check:** `_concept/2_experience/2_features/` must exist with at least one file.
+**Gate check:** `_concept/experience/features/` must exist with at least one file.
 **On completion:** Show screens summary and present next steps.
 
 ---
 
-ROLE  Screen Specification agent — produces _concept/2_experience/3_screens/ from
+ROLE  Screen Specification agent — produces _concept/experience/screens/ from
       all upstream artifacts; updates feature frontmatter screens[] via feedback loop.
 
 READS
-  _concept/1_discovery/1_overview/brief.md                   — app name, audience, hero flow
-  _concept/2_experience/2_features/**/*.md                    — requirements per feature
-  ? _concept/2_experience/1_journeys/stories.json             — journey context for screen flow design
-  ? _concept/1_discovery/2_brand/tokens.json                 — brand color/typography references
-  ? _concept/3_blueprint/1_techstack/stack.md                — framework and component library
-  ? _concept/3_blueprint/3_datamodel/model.json              — entities and fields
-  ? _concept/3_blueprint/2_architecture/architecture.md     — custom protocols, additional apps
-  ? _concept/3_blueprint/3_datamodel/seed.json               — scenario-based seed data
+  _concept/discovery/brief.md                   — app name, audience, hero flow
+  _concept/experience/features/**/*.md                    — requirements per feature
+  ? _concept/experience/journeys/stories.json             — journey context for screen flow design
+  ? _concept/discovery/brand/tokens.json                 — brand color/typography references
+  ? _concept/blueprint/techstack.md                — framework and component library
+  ? _concept/blueprint/datamodel/model.json              — entities and fields
+  ? _concept/blueprint/architecture.md     — custom protocols, additional apps
+  ? _concept/blueprint/datamodel/seed.json               — scenario-based seed data
   ? _concept/_grounding/general/design_inspiration.md       — layout and interaction patterns
 
 WRITES
-  _concept/2_experience/3_screens/00_layout/shell.md          — app shell: nav, header, layout areas
-  _concept/2_experience/3_screens/<NN_group>/<screen>.md       — per-screen spec (user perspective)
-  _concept/2_experience/2_features/**/*.md                     — feedback loop: screens[] populated
+  _concept/experience/screens/00_layout/shell.md          — app shell: nav, header, layout areas
+  _concept/experience/screens/<NN_group>/<screen>.md       — per-screen spec (user perspective)
+  _concept/experience/features/**/*.md                     — feedback loop: screens[] populated
 
 REFERENCES
   skaileup-shared/contracts/concept_structure.md      — valid _concept/ paths and naming rules
@@ -154,28 +154,28 @@ EMIT  [screens] started run_id=<uuid>
 
 STEP 1: Read prerequisites
   - Read brief.md for app name, audience, hero flow
-  - Read all _concept/2_experience/2_features/**/*.md
+  - Read all _concept/experience/features/**/*.md
   - Stop if features directory is empty or missing:
     > "No feature specs found. Run `features` first."
-  IF _concept/2_experience/1_journeys/stories.json exists
+  IF _concept/experience/journeys/stories.json exists
     - Read stories.json for journey context (screen flow design, navigation order)
-  IF _concept/3_blueprint/3_datamodel/model.json exists
+  IF _concept/blueprint/datamodel/model.json exists
     - Read model.json for entity names and fields (enriches data requirements)
   ELSE
     - Infer data entities from feature requirements and journey acceptance criteria
-  IF _concept/1_discovery/2_brand/tokens.json exists
+  IF _concept/discovery/brand/tokens.json exists
     - Note brand color palette, typography, spacing scale for reference
-  IF _concept/3_blueprint/2_architecture/architecture.md exists
+  IF _concept/blueprint/architecture.md exists
     - Note custom protocols (WebSocket, SSE) for real-time screens
     - Note additional apps and their communication flows
-  IF _concept/3_blueprint/3_datamodel/seed.json exists
+  IF _concept/blueprint/datamodel/seed.json exists
     - Load scenarios for Template Data sections
 
 STEP 2: Derive screen list from features
   - For each feature, identify required screens
   - For each screen: name, route/URL, purpose in one sentence, data entities involved
   - Group screens by feature group (matching NN_group numbering from features/)
-  IF _concept/2_experience/1_journeys/stories.json exists
+  IF _concept/experience/journeys/stories.json exists
     - Use journey flows to inform screen navigation and sequence
     - Map story stages to screen priority: hero stories → primary nav, vital → secondary nav
     - Validate derived screens against downstream.candidate_screens hints in stories.json
@@ -187,9 +187,9 @@ STEP 2: Derive screen list from features
   UNTIL user approves the screen list
 
 STEP 3: Write layout shell
-  - $ mkdir -p _concept/2_experience/3_screens/00_layout
+  - $ mkdir -p _concept/experience/screens/00_layout
 
-  OUTPUT _concept/2_experience/3_screens/00_layout/shell.md
+  OUTPUT _concept/experience/screens/00_layout/shell.md
     ---
     implements: []
     data_entities: []
@@ -204,15 +204,15 @@ STEP 3: Write layout shell
     (Reference brand tokens if available — do not invent values)
 
 STEP 4: Write screen specs
-  - $ mkdir -p _concept/2_experience/3_screens/<NN_group>  (for each feature group)
+  - $ mkdir -p _concept/experience/screens/<NN_group>  (for each feature group)
   - For each screen, write a spec following references/screen_spec_template.md
 
-  OUTPUT _concept/2_experience/3_screens/<NN_group>/<screen>.md
+  OUTPUT _concept/experience/screens/<NN_group>/<screen>.md
     ---
     implements:
-      - 2_experience/2_features/<NN_group>/<feature>.md
+      - experience/features/<NN_group>/<feature>.md
     data_entities: [<Model>, ...]
-    layout: 2_experience/3_screens/00_layout/shell.md
+    layout: experience/screens/00_layout/shell.md
     last_updated: <YYYY-MM-DD>
     ---
     # Screen: <Name>
@@ -228,8 +228,8 @@ STEP 4: Write screen specs
 STEP 5: Register screens in features (feedback loop)
   - For each screen written, update the parent feature's frontmatter:
     screens:
-      - path: 2_experience/3_screens/<NN_group>/<screen>.md
-  - EMIT  [screens] feedback_loop updated 2_experience/2_features/<NN_group>/<feature>.md screens[]=<screen path>
+      - path: experience/screens/<NN_group>/<screen>.md
+  - EMIT  [screens] feedback_loop updated experience/features/<NN_group>/<feature>.md screens[]=<screen path>
 
 EMIT  [screens] checkpoint phase=screens_written screens=<N> features_updated=<N>
 
@@ -253,7 +253,7 @@ STEP 7: Hand off
 EMIT  [screens] completed run_id=<uuid> screens_written=<N> features_updated=<N>
 
 CHECKLIST
-  - [ ] _concept/2_experience/3_screens/00_layout/shell.md exists
+  - [ ] _concept/experience/screens/00_layout/shell.md exists
   - [ ] Every feature group has at least one screen spec
   - [ ] All screen specs have required frontmatter (implements, data_entities, layout, last_updated)
   - [ ] Screen specs are in plain language — no component library names or CSS
@@ -295,7 +295,7 @@ Use these to inform navigation structure and screen organization.
 ## Integration
 
 - **Called by:** `concept-orchestrator` or standalone (after features)
-- **Requires:** `_concept/2_experience/2_features/` with at least one feature
+- **Requires:** `_concept/experience/features/` with at least one feature
 - **Feedback loop:**
   - Screen registers itself into `features/**/*.md` `screens[]` (forward link)
   - Feature's `screens[]` lists which screens implement it (back-link, used by mock/storybook)

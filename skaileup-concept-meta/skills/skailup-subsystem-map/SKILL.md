@@ -10,7 +10,7 @@ user_inputs:
     required: true
 reads_from:
   - contracts/meta-concept-contract/CONTRACT.md
-  - "{PROJECT_ROOT}/_concept/1_discovery/"
+  - "{PROJECT_ROOT}/_concept/discovery/"
   - "{PROJECT_ROOT}/CLAUDE.md"
   - "{PROJECT_ROOT}/**/CLAUDE.md"
   - "{PROJECT_ROOT}/**/_concept/"
@@ -25,7 +25,7 @@ Generate the subsystem inventory for a multi-product umbrella concept.
 
 ## Prerequisites
 
-- `1_discovery/1_overview/brief.md` must exist (Iron Law 1)
+- `discovery/brief.md` must exist (Iron Law 1)
 - Read the meta-concept contract: `contracts/meta-concept-contract/CONTRACT.md`
 
 ## Process

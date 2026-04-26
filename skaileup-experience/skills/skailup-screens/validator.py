@@ -9,8 +9,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "skaileup-shared" /
 from validator_lib import Validator, main  # noqa: E402
 
 SKILL = "screens"
-SCREENS_DIR = "_concept/2_experience/3_screens"
-FEATURES_DIR = "_concept/2_experience/2_features"
+SCREENS_DIR = "_concept/experience/screens"
+FEATURES_DIR = "_concept/experience/features"
 SHELL = f"{SCREENS_DIR}/00_layout/shell.md"
 
 SCREEN_FM = ("implements", "data_entities", "layout", "last_updated")

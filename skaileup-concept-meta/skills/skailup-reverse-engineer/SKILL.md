@@ -210,7 +210,7 @@ EMIT  [reverse-engineer] checkpoint phase=discovery project_type=<type> language
 
 ### Step 3: Overview Extraction (scope: overview)
 
-**Goal:** Produce `1_discovery/1_overview/brief.md`, `goals.md`, `comparable.md`.
+**Goal:** Produce `discovery/brief.md`, `goals.md`, `comparable.md`.
 
 Read in order:
 1. `README.md` (or docs/README.md, docs/index.md)
@@ -234,7 +234,7 @@ Confidence tagging rules:
 
 Write:
 
-**`_concept/1_discovery/1_overview/brief.md`**
+**`_concept/discovery/brief.md`**
 ```yaml
 ---
 elevator_pitch: "<extracted or inferred>"
@@ -253,14 +253,14 @@ extraction_confidence:
 
 Body: narrative description synthesizing what was found.
 
-**`_concept/1_discovery/1_overview/goals.md`** — success criteria from README, milestones, known constraints.
+**`_concept/discovery/goals.md`** — success criteria from README, milestones, known constraints.
 
-**`_concept/1_discovery/1_overview/comparable.md`** — products mentioned in the README. If none found,
+**`_concept/discovery/comparable.md`** — products mentioned in the README. If none found,
 note that comparables were not documented. Never fabricate comparables.
 
 ### Step 4: Tech Stack Detection (scope: techstack)
 
-**Goal:** Produce `3_blueprint/1_techstack/stack.md`.
+**Goal:** Produce `blueprint/techstack.md`.
 
 Read:
 - Root manifest and lock file
@@ -285,7 +285,7 @@ Detect each dimension:
 
 Write:
 
-**`_concept/3_blueprint/1_techstack/stack.md`**
+**`_concept/blueprint/techstack.md`**
 ```yaml
 ---
 platform: "<detected>"
@@ -306,7 +306,7 @@ Body: notes on version constraints, known tradeoffs, or unusual combinations obs
 
 ### Step 5: Feature Extraction (scope: features)
 
-**Goal:** Produce `2_experience/2_features/<NN_group>/<feature>.md` files.
+**Goal:** Produce `experience/features/<NN_group>/<feature>.md` files.
 
 Feature extraction is a two-pass process: route discovery → behavioral inference.
 
@@ -342,7 +342,7 @@ Assign sequential two-digit prefixes: `01_`, `02_`, `03_`…
 
 Write one `.md` per logical feature within each group:
 
-**`_concept/2_experience/2_features/<NN_group>/<feature>.md`**
+**`_concept/experience/features/<NN_group>/<feature>.md`**
 ```yaml
 ---
 priority: must-have
@@ -363,7 +363,7 @@ EMIT  [reverse-engineer] checkpoint phase=features_extracted groups=<N> features
 
 ### Step 6: Data Model Extraction (scope: datamodel)
 
-**Goal:** Produce `3_blueprint/3_datamodel/model.dbml`, `model.json`, `seed.json`.
+**Goal:** Produce `blueprint/datamodel/model.dbml`, `model.json`, `seed.json`.
 
 Read in priority order:
 1. **Prisma schema** — `prisma/schema.prisma`
@@ -386,9 +386,9 @@ For each entity/model found:
 - Note unique constraints, nullable status, default values
 
 Write:
-- **`_concept/3_blueprint/3_datamodel/model.dbml`** — using DBML syntax with semantic types
-- **`_concept/3_blueprint/3_datamodel/model.json`** — using the editor-native format
-- **`_concept/3_blueprint/3_datamodel/seed.json`** — four standard scenarios (`empty`,
+- **`_concept/blueprint/datamodel/model.dbml`** — using DBML syntax with semantic types
+- **`_concept/blueprint/datamodel/model.json`** — using the editor-native format
+- **`_concept/blueprint/datamodel/seed.json`** — four standard scenarios (`empty`,
   `single_user`, `populated`, `edge_cases`). If the repo has fixture/seed/factory files,
   use their data as the `populated` scenario.
 
@@ -399,7 +399,7 @@ EMIT  [reverse-engineer] checkpoint phase=datamodel_extracted entities=<N> relat
 
 ### Step 7: Brand / Visual Extraction (scope: brand)
 
-**Goal:** Produce `1_discovery/2_brand/identity.md` and `1_discovery/2_brand/tokens.json`.
+**Goal:** Produce `discovery/brand/identity.md` and `discovery/brand/tokens.json`.
 
 Read:
 - `tailwind.config.ts` / `tailwind.config.js` — `theme.extend.colors`, fonts
@@ -417,7 +417,7 @@ Extract:
 
 Write:
 
-**`_concept/1_discovery/2_brand/identity.md`**
+**`_concept/discovery/brand/identity.md`**
 ```yaml
 ---
 mood: []
@@ -430,7 +430,7 @@ extraction_confidence: extracted | inferred | needs_review
 Body: describe the visual character inferred from the color palette, typography, and
 component style.
 
-**`_concept/1_discovery/2_brand/tokens.json`**
+**`_concept/discovery/brand/tokens.json`**
 ```json
 {
   "colors": {
@@ -465,7 +465,7 @@ Never invent a color palette from scratch — mark it `needs_review`.
 
 ### Step 8: Screen Extraction (scope: screens)
 
-**Goal:** Produce `2_experience/3_screens/<NN_group>/<screen>.md` files.
+**Goal:** Produce `experience/screens/<NN_group>/<screen>.md` files.
 
 Use the same route groups established in Step 5. For each route, read the
 corresponding page/view component:
@@ -486,7 +486,7 @@ For each screen, extract:
 
 Write:
 
-**`_concept/2_experience/3_screens/<NN_group>/<screen>.md`**
+**`_concept/experience/screens/<NN_group>/<screen>.md`**
 ```yaml
 ---
 implements: []
@@ -518,12 +518,12 @@ Run ID: <uuid>
 
 | Artifact                         | Files | Extracted | Inferred | Needs Review |
 |----------------------------------|-------|-----------|----------|--------------|
-| 1_discovery/1_overview/          | 3     | N         | N        | N            |
-| 3_blueprint/1_techstack/stack.md | 1     | N         | N        | N            |
-| 2_experience/2_features/         | N     | N         | N        | N            |
-| 3_blueprint/3_datamodel/         | 3     | N         | N        | N            |
-| 1_discovery/2_brand/             | 2     | N         | N        | N            |
-| 2_experience/3_screens/          | N     | N         | N        | N            |
+| discovery/          | 3     | N         | N        | N            |
+| blueprint/techstack.md | 1     | N         | N        | N            |
+| experience/features/         | N     | N         | N        | N            |
+| blueprint/datamodel/         | 3     | N         | N        | N            |
+| discovery/brand/             | 2     | N         | N        | N            |
+| experience/screens/          | N     | N         | N        | N            |
 
 ### Fields Needing Human Review
 List any `needs_review` fields here with the path and what information is missing.
@@ -539,17 +539,17 @@ EMIT  [reverse-engineer] completed run_id=<uuid> artifacts_written=<N> needs_rev
 
 | File | Description |
 |------|-------------|
-| `_concept/1_discovery/1_overview/brief.md` | Project vision, audience, problem, hero flow |
-| `_concept/1_discovery/1_overview/goals.md` | Goals, constraints, deadlines inferred from docs |
-| `_concept/1_discovery/1_overview/comparable.md` | Products mentioned in README / docs |
-| `_concept/3_blueprint/1_techstack/stack.md` | Tech stack detected from manifests and config |
-| `_concept/2_experience/2_features/<NN>/<feature>.md` | Features inferred from routes and components |
-| `_concept/3_blueprint/3_datamodel/model.dbml` | Data model extracted from ORM/schema files |
-| `_concept/3_blueprint/3_datamodel/model.json` | Editor-native data model format |
-| `_concept/3_blueprint/3_datamodel/seed.json` | Scenario seed data (4 standard scenarios) |
-| `_concept/1_discovery/2_brand/identity.md` | Brand character extracted from CSS/theme |
-| `_concept/1_discovery/2_brand/tokens.json` | Design tokens extracted from config |
-| `_concept/2_experience/3_screens/<NN>/<screen>.md` | Screen specs extracted from page components |
+| `_concept/discovery/brief.md` | Project vision, audience, problem, hero flow |
+| `_concept/discovery/goals.md` | Goals, constraints, deadlines inferred from docs |
+| `_concept/discovery/comparable.md` | Products mentioned in README / docs |
+| `_concept/blueprint/techstack.md` | Tech stack detected from manifests and config |
+| `_concept/experience/features/<NN>/<feature>.md` | Features inferred from routes and components |
+| `_concept/blueprint/datamodel/model.dbml` | Data model extracted from ORM/schema files |
+| `_concept/blueprint/datamodel/model.json` | Editor-native data model format |
+| `_concept/blueprint/datamodel/seed.json` | Scenario seed data (4 standard scenarios) |
+| `_concept/discovery/brand/identity.md` | Brand character extracted from CSS/theme |
+| `_concept/discovery/brand/tokens.json` | Design tokens extracted from config |
+| `_concept/experience/screens/<NN>/<screen>.md` | Screen specs extracted from page components |
 
 ## Depth Behavior
 
@@ -565,7 +565,7 @@ EMIT  [reverse-engineer] completed run_id=<uuid> artifacts_written=<N> needs_rev
 | Rationalization | Reality |
 |----------------|---------|
 | "The README is sparse, I'll infer a rich brief from the code" | Only infer what the code directly implies. Mark the rest `needs_review`. Never fabricate motivation, audience, or purpose. |
-| "I'll skip brand if there's no design system" | Always write `1_discovery/2_brand/tokens.json` — even if all fields are `needs_review`. Downstream skills require it to exist. |
+| "I'll skip brand if there's no design system" | Always write `discovery/brand/tokens.json` — even if all fields are `needs_review`. Downstream skills require it to exist. |
 | "I'll generate seed data from the test fixtures" | Yes — use fixture data for the `populated` scenario. But also generate the other three required scenarios (`empty`, `single_user`, `edge_cases`). |
 | "The entities in the ORM map 1:1 to features" | Features and entities are not 1:1. Group entities by the user-facing feature they serve. Infrastructure entities (sessions, audit logs) belong to their closest functional feature. |
 | "I can skip screens — the features already cover the routes" | Screens are separate artifacts. Features describe intent; screens describe layout, data binding, and states. Both are required for downstream design and testing skills. |

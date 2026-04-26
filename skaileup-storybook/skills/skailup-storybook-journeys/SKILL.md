@@ -29,19 +29,19 @@ metadata:
         variant: storybook
   prerequisites:
     files:
-      - path: "_concept/2_experience/4_storybook/src/pages"
+      - path: "_concept/experience/4_storybook/src/pages"
         gate: hard
         description: "Page components must be built first (run storybook-pages)"
-      - path: "_concept/2_experience/4_storybook/src/pages/manifest.json"
+      - path: "_concept/experience/4_storybook/src/pages/manifest.json"
         gate: hard
         description: "Page manifest required for screen-to-story mapping"
     reads:
-      - path: "_concept/2_experience/1_journeys/stories.json"
+      - path: "_concept/experience/journeys/stories.json"
         description: "User journeys: story maps, personas, and journey stages for story titles"
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         description: "Screen specs as fallback for page mapping"
     produces:
-      - path: "_concept/2_experience/4_storybook/src/stories/Journeys"
+      - path: "_concept/experience/4_storybook/src/stories/Journeys"
         description: "Clickable multi-screen journey stories (hero, vital, hygiene)"
 ---
 
@@ -51,21 +51,21 @@ ROLE  Journey Builder — creates clickable multi-screen user flow stories (clic
       that let users walk through complete journeys using real UI elements.
 
 READS
-  _concept/2_experience/1_journeys/stories.json          — user journeys: story maps, personas, stages
-  _concept/2_experience/4_storybook/src/pages/manifest.json — screen-to-page mapping (from pages sub-skill)
-  _concept/2_experience/3_screens/**/*.md                — screen specs (fallback for mapping)
+  _concept/experience/journeys/stories.json          — user journeys: story maps, personas, stages
+  _concept/experience/4_storybook/src/pages/manifest.json — screen-to-page mapping (from pages sub-skill)
+  _concept/experience/screens/**/*.md                — screen specs (fallback for mapping)
   [passed by orchestrator]: story_extension, package_manager
 
 WRITES
-  _concept/2_experience/4_storybook/src/stories/Journeys/Hero/<FlowName>.stories.<ext>
-  _concept/2_experience/4_storybook/src/stories/Journeys/Vital/<FlowName>.stories.<ext>
-  _concept/2_experience/4_storybook/src/stories/Journeys/Hygiene/<FlowName>.stories.<ext>
+  _concept/experience/4_storybook/src/stories/Journeys/Hero/<FlowName>.stories.<ext>
+  _concept/experience/4_storybook/src/stories/Journeys/Vital/<FlowName>.stories.<ext>
+  _concept/experience/4_storybook/src/stories/Journeys/Hygiene/<FlowName>.stories.<ext>
 
 REQUIRES
-  state: _concept/2_experience/4_storybook/src/pages/ has page components (sub-skill 3 completed)
-  state: _concept/2_experience/4_storybook/src/components/AppShell exists (sub-skill 3 completed)
-  state: _concept/2_experience/4_storybook/src/pages/manifest.json exists
-  state: _concept/2_experience/1_journeys/stories.json exists
+  state: _concept/experience/4_storybook/src/pages/ has page components (sub-skill 3 completed)
+  state: _concept/experience/4_storybook/src/components/AppShell exists (sub-skill 3 completed)
+  state: _concept/experience/4_storybook/src/pages/manifest.json exists
+  state: _concept/experience/journeys/stories.json exists
 
 EMIT  [storybook-journeys] started run_id=<uuid>
 
@@ -119,10 +119,10 @@ STEP 2: Build journey stories
     For the hero flow: mark it as the default story when Storybook opens.
 
 STEP 3: Verify
-  $ find _concept/2_experience/4_storybook/src/stories/Journeys -name '*.stories.*' | wc -l
+  $ find _concept/experience/4_storybook/src/stories/Journeys -name '*.stories.*' | wc -l
   → Must equal total count of hero + vital + hygiene story maps
 
-  $ cd _concept/2_experience/4_storybook && <package_manager> run build
+  $ cd _concept/experience/4_storybook && <package_manager> run build
   IF build fails
     - Fix and retry
 

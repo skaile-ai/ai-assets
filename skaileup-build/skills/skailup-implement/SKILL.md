@@ -18,20 +18,20 @@ metadata:
   source: "MERGED"
   prerequisites:
     files:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Project brief required for app name and implementation scope"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Features required — implementation builds features in journey order"
         min_entries: 1
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         gate: hard
         description: "Tech stack required for scaffold, foundation, and feature recipes"
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         gate: hard
         description: "Data model required for schema generation and feature implementation"
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: hard
         description: "Screen specs required for feature page implementation"
         min_entries: 1
@@ -49,7 +49,7 @@ metadata:
         default: standard
         hint: "small = consolidated setup, standard = separate scaffold+foundation, complex = all checkpoints separate"
     reads:
-      - path: "_concept/2_experience/1_journeys/stories.json"
+      - path: "_concept/experience/journeys/stories.json"
         description: "Journey stages for feature implementation ordering (hero → vital → hygiene)"
     produces:
       - path: "_implementation/PLANS.md"
@@ -111,27 +111,27 @@ This delivers a working end-to-end flow early and reduces integration surprises.
 `skaileup-shared/contracts/golden_principles.md` before starting.
 
 **Hard gates (must exist):**
-- `_concept/1_discovery/1_overview/brief.md`
-- `_concept/2_experience/2_features/` (at least one feature group)
-- `_concept/3_blueprint/1_techstack/stack.md`
-- `_concept/3_blueprint/3_datamodel/model.json`
-- `_concept/2_experience/3_screens/` (at least one screen)
+- `_concept/discovery/brief.md`
+- `_concept/experience/features/` (at least one feature group)
+- `_concept/blueprint/techstack.md`
+- `_concept/blueprint/datamodel/model.json`
+- `_concept/experience/screens/` (at least one screen)
 - `_concept/eval-concept.json` (concept must pass eval-concept — run skaileup-conceptualization orchestrator first)
 
 ## Context Budget
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/1_discovery/1_overview/brief.md` | Yes |
-| Must read | `_concept/2_experience/2_features/**/*.md` | Yes |
-| Must read | `_concept/3_blueprint/1_techstack/stack.md` | Yes |
-| Must read | `_concept/3_blueprint/3_datamodel/model.json` | Yes |
-| Must read | `_concept/3_blueprint/3_datamodel/model.dbml` | Yes |
-| Must read | `_concept/2_experience/3_screens/**/*.md` | Yes |
-| Read if exists | `_concept/2_experience/1_journeys/stories.json` | Recommended |
-| Read if exists | `_concept/3_blueprint/2_architecture/architecture.md` | Recommended |
-| Read if exists | `_concept/1_discovery/2_brand/tokens.json` | Recommended |
-| Read if exists | `_concept/3_blueprint/3_datamodel/seed.json` | Recommended |
+| Must read | `_concept/discovery/brief.md` | Yes |
+| Must read | `_concept/experience/features/**/*.md` | Yes |
+| Must read | `_concept/blueprint/techstack.md` | Yes |
+| Must read | `_concept/blueprint/datamodel/model.json` | Yes |
+| Must read | `_concept/blueprint/datamodel/model.dbml` | Yes |
+| Must read | `_concept/experience/screens/**/*.md` | Yes |
+| Read if exists | `_concept/experience/journeys/stories.json` | Recommended |
+| Read if exists | `_concept/blueprint/architecture.md` | Recommended |
+| Read if exists | `_concept/discovery/brand/tokens.json` | Recommended |
+| Read if exists | `_concept/blueprint/datamodel/seed.json` | Recommended |
 | Resume state | `_implementation/PLANS.md` | If resuming |
 | Resume state | `_implementation/progress.json` | If resuming |
 
@@ -140,15 +140,15 @@ This delivers a working end-to-end flow early and reduces integration surprises.
 ROLE  Implementation Orchestrator — drives a completed _concept/ through scaffold, foundation, features, and verification.
 
 READS
-  _concept/1_discovery/1_overview/brief.md                    — app name, slug, description, complexity tier
-  _concept/2_experience/2_features/**/*.md                    — feature list, priorities, story_refs
-  _concept/3_blueprint/3_datamodel/model.json                 — data model for dependency graph
-  _concept/3_blueprint/3_datamodel/model.dbml                 — human-readable data model
-  _concept/2_experience/3_screens/**/*.md                     — screen specs for plan tasks
-  ? _concept/2_experience/1_journeys/stories.json             — journey order (hero/vital/hygiene)
-  ? _concept/3_blueprint/2_architecture/architecture.md       — custom modules, processes
-  ? _concept/1_discovery/2_brand/tokens.json                  — brand tokens (for foundation)
-  ? _concept/3_blueprint/3_datamodel/seed.json                — seed scenarios
+  _concept/discovery/brief.md                    — app name, slug, description, complexity tier
+  _concept/experience/features/**/*.md                    — feature list, priorities, story_refs
+  _concept/blueprint/datamodel/model.json                 — data model for dependency graph
+  _concept/blueprint/datamodel/model.dbml                 — human-readable data model
+  _concept/experience/screens/**/*.md                     — screen specs for plan tasks
+  ? _concept/experience/journeys/stories.json             — journey order (hero/vital/hygiene)
+  ? _concept/blueprint/architecture.md       — custom modules, processes
+  ? _concept/discovery/brand/tokens.json                  — brand tokens (for foundation)
+  ? _concept/blueprint/datamodel/seed.json                — seed scenarios
   ? _implementation/PLANS.md                                  — resume state (if exists)
   ? _implementation/progress.json                             — feature status (if resuming)
 

@@ -6,9 +6,9 @@ Invoke with: "design the screens", "what pages do we need", "UI specs", or after
 
 ## Output
 
-- `_concept/2_experience/3_screens/00_layout/shell.md`
-- `_concept/2_experience/3_screens/<NN_group>/<screen>.md` (one file per screen)
-- Updates `_concept/2_experience/2_features/**/*.md` `screens[]` (feedback loop)
+- `_concept/experience/screens/00_layout/shell.md`
+- `_concept/experience/screens/<NN_group>/<screen>.md` (one file per screen)
+- Updates `_concept/experience/features/**/*.md` `screens[]` (feedback loop)
 
 ## Next Steps
 

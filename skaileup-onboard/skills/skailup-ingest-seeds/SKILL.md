@@ -74,7 +74,7 @@ what the user has already provided.
 | Must scan | `_concept/_seeds/` | Yes |
 | Read if present | `_concept/concept.yaml` | No (merge, not overwrite) |
 | Must read | `skaileup-shared/contracts/concept_structure.md` | Yes |
-| Never load | `_concept/1_discovery/`, `_concept/2_experience/`, `_concept/3_blueprint/` | — |
+| Never load | `_concept/discovery/`, `_concept/experience/`, `_concept/blueprint/` | — |
 
 ## Standalone Mode
 

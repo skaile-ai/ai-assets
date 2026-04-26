@@ -20,20 +20,20 @@ metadata:
       - path: "package.json"
         gate: hard
         description: "Project must be scaffolded before applying foundation layers"
-      - path: "_concept/1_discovery/2_brand/tokens.json"
+      - path: "_concept/discovery/brand/tokens.json"
         gate: hard
         description: "Brand tokens required for CSS variable generation"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         gate: hard
         description: "Tech stack required to select foundation recipes (auth, layout, theme)"
     reads:
-      - path: "_concept/1_discovery/2_brand/identity.md"
+      - path: "_concept/discovery/brand/identity.md"
         description: "Brand identity for theme customization"
-      - path: "_concept/2_experience/3_screens/00_layout/shell.md"
+      - path: "_concept/experience/screens/00_layout/shell.md"
         description: "App shell structure for navigation and layout implementation"
-      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+      - path: "_concept/blueprint/architecture.md"
         description: "Architecture for auth provider and session configuration"
-      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+      - path: "_concept/blueprint/datamodel/seed.json"
         description: "Seed data for initial database population"
     produces:
       - path: "_implementation/progress.json"
@@ -54,7 +54,7 @@ Applies the foundational layers every app needs before feature work begins:
    wired to the screen list
 4. **Seed data** — wire up `seed.json` scenarios for development and testing
 5. **Storybook brand config** — configure Storybook theme decorator with brand tokens
-   (only if `2_experience/4_storybook/` exists)
+   (only if `experience/4_storybook/` exists)
 
 **Framework-agnostic.** All file locations, variable naming, auth plugin names,
 and layout patterns come from `skaileup-standards/profiles/<tech_stack_skill>/SKILL.md`.
@@ -68,28 +68,28 @@ and layout patterns come from `skaileup-standards/profiles/<tech_stack_skill>/SK
 ## When NOT to Use
 
 - Project not scaffolded yet — run `scaffold` first
-- `_concept/1_discovery/2_brand/tokens.json` missing — run `brand-visual` first
-- `_concept/3_blueprint/1_techstack/stack.md` missing — run `techstack` first
+- `_concept/discovery/brand/tokens.json` missing — run `brand-visual` first
+- `_concept/blueprint/techstack.md` missing — run `techstack` first
 - App shell already exists and only a feature is needed — use `implement-feature`
 
 ## Prerequisites
 
 **Hard gates (all must exist):**
 1. `package.json` in the project root (project is scaffolded)
-2. `_concept/1_discovery/2_brand/tokens.json`
-3. `_concept/3_blueprint/1_techstack/stack.md`
+2. `_concept/discovery/brand/tokens.json`
+3. `_concept/blueprint/techstack.md`
 
 ## Context Budget
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/3_blueprint/1_techstack/stack.md` | Yes |
+| Must read | `_concept/blueprint/techstack.md` | Yes |
 | Must read | `skaileup-standards/profiles/<tech_stack_skill>/SKILL.md` | Yes |
-| Must read | `_concept/1_discovery/2_brand/tokens.json` | Yes |
-| Read if exists | `_concept/1_discovery/2_brand/identity.md` | Recommended |
-| Read if exists | `_concept/2_experience/3_screens/00_layout/shell.md` | Recommended |
-| Read if exists | `_concept/3_blueprint/2_architecture/architecture.md` | Optional |
-| Read if exists | `_concept/3_blueprint/3_datamodel/seed.json` | Optional |
+| Must read | `_concept/discovery/brand/tokens.json` | Yes |
+| Read if exists | `_concept/discovery/brand/identity.md` | Recommended |
+| Read if exists | `_concept/experience/screens/00_layout/shell.md` | Recommended |
+| Read if exists | `_concept/blueprint/architecture.md` | Optional |
+| Read if exists | `_concept/blueprint/datamodel/seed.json` | Optional |
 | Never load | Features, model.json, test files | — |
 
 ---
@@ -97,13 +97,13 @@ and layout patterns come from `skaileup-standards/profiles/<tech_stack_skill>/SK
 ROLE  Foundation agent — applies brand tokens, configures auth, wires app shell, seeds data, and configures Storybook.
 
 READS
-  _concept/3_blueprint/1_techstack/stack.md           — tech_stack_skill, auth provider
+  _concept/blueprint/techstack.md           — tech_stack_skill, auth provider
   skaileup-standards/profiles/<tech_stack_skill>/SKILL.md  — css_vars_mapping, auth_setup, app_shell recipes
-  _concept/1_discovery/2_brand/tokens.json            — color tokens, typography, spacing, shadows
-  ? _concept/1_discovery/2_brand/identity.md          — design philosophy, atmosphere
-  ? _concept/2_experience/3_screens/00_layout/shell.md — navigation structure, sidebar items
-  ? _concept/3_blueprint/2_architecture/architecture.md — custom routing or module structure
-  ? _concept/3_blueprint/3_datamodel/seed.json        — seed data scenarios
+  _concept/discovery/brand/tokens.json            — color tokens, typography, spacing, shadows
+  ? _concept/discovery/brand/identity.md          — design philosophy, atmosphere
+  ? _concept/experience/screens/00_layout/shell.md — navigation structure, sidebar items
+  ? _concept/blueprint/architecture.md — custom routing or module structure
+  ? _concept/blueprint/datamodel/seed.json        — seed data scenarios
 
 WRITES
   <stack-specific theme file>                          — brand tokens as CSS custom properties
@@ -172,7 +172,7 @@ STEP 2: Configure authentication
 STEP 3: Create app shell
   - Read app_shell from tech stack profile: layout file location, nav patterns
   - Read shell.md (if exists): navigation structure, sidebar items, header components
-  - If no shell.md: derive navigation from `2_experience/3_screens/` directory structure
+  - If no shell.md: derive navigation from `experience/screens/` directory structure
   - Read architecture.md (if exists): custom routing or module structure
   - Create base layout file at profile-specified location
   - Create navigation component with links to every screen in 3_screens/
@@ -198,7 +198,7 @@ STEP 4: Configure seed data
 # ── Phase 5: Storybook Brand Config ──────────────────────────────
 
 STEP 5: Configure Storybook (if exists)
-  IF _concept/2_experience/4_storybook/ exists AND Storybook is installed
+  IF _concept/experience/4_storybook/ exists AND Storybook is installed
     - Configure Storybook theme with brand tokens (background, fonts, colors)
     - Create theme decorator wrapping all stories with brand CSS variables
     - Set up viewport presets from shell spec's responsive breakpoints
@@ -261,5 +261,5 @@ If any section is missing from the profile, ask the user for guidance.
 ## Integration
 
 - **Called by:** `implement` orchestrator or standalone
-- **Reads:** `_concept/3_blueprint/1_techstack/`, `_concept/1_discovery/2_brand/`, `_concept/2_experience/3_screens/`
+- **Reads:** `_concept/blueprint/`, `_concept/discovery/brand/`, `_concept/experience/screens/`
 - **Feeds into:** `implement-feature` (features build on top of the app shell)

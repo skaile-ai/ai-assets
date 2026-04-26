@@ -16,32 +16,32 @@ metadata:
   stage: "alpha"
   prerequisites:
     files:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Project brief required"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "At least one feature must exist"
         min_entries: 1
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: hard
         description: "At least one screen spec must exist"
         min_entries: 1
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         gate: hard
         description: "Data model required for entity coverage check"
     reads:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         description: "Project goals, problem statement, target user, success metrics"
-      - path: "_concept/2_experience/1_journeys/stories.json"
+      - path: "_concept/experience/journeys/stories.json"
         description: "User journeys for end-to-end traceability check"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         description: "Feature specs with acceptance criteria"
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         description: "Screen specs for feature-to-screen cross-reference check"
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         description: "Data model for entity coverage check"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         description: "Tech stack for implementation feasibility check"
     produces:
       - path: "_concept/eval-concept.json"
@@ -60,12 +60,12 @@ Approach adversarially: assume gaps exist and prove completeness.
 Never infer intent. If something is not explicitly stated, it is missing.
 
 READS
-  ! _concept/1_discovery/1_overview/brief.md         — goals, target user, success metrics
-  ! _concept/2_experience/2_features/**/*.md          — feature specs + acceptance criteria
-  ! _concept/2_experience/3_screens/**/*.md           — screen specs
-  ! _concept/3_blueprint/3_datamodel/model.json       — data model
-  ? _concept/2_experience/1_journeys/stories.json     — journey traceability
-  ? _concept/3_blueprint/1_techstack/stack.md         — feasibility check
+  ! _concept/discovery/brief.md         — goals, target user, success metrics
+  ! _concept/experience/features/**/*.md          — feature specs + acceptance criteria
+  ! _concept/experience/screens/**/*.md           — screen specs
+  ! _concept/blueprint/datamodel/model.json       — data model
+  ? _concept/experience/journeys/stories.json     — journey traceability
+  ? _concept/blueprint/techstack.md         — feasibility check
 
 WRITES
   _concept/eval-concept.json     — MUST write before reporting

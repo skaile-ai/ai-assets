@@ -45,8 +45,8 @@ Check that every path listed in this skill's `requires` field exists in `_concep
 
 ```
 requires:
-  - 2_experience/2_features/     ← must exist
-  - 3_blueprint/1_techstack/stack.md  ← must exist
+  - experience/features/     ← must exist
+  - blueprint/techstack.md  ← must exist
 ```
 
 Stop immediately and name the missing prerequisite skill if any check fails.

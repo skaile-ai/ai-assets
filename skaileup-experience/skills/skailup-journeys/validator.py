@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "skaileup-shared" /
 from validator_lib import Validator, main  # noqa: E402
 
 SKILL = "journeys"
-STORIES = "_concept/2_experience/1_journeys/stories.json"
+STORIES = "_concept/experience/journeys/stories.json"
 SCHEMA = "skaileup-shared/contracts/stories_schema.json"
 
 
@@ -107,7 +107,7 @@ def validate(cwd: str) -> dict:
     # ── CHECKLIST ──
 
     v.checklist("brief.md was read and exists", lambda: (
-        v.file_exists("_concept/1_discovery/1_overview/brief.md")
+        v.file_exists("_concept/discovery/brief.md")
     ))
 
     v.checklist("Personas defined with ids, labels, and goals", lambda: (

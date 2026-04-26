@@ -14,22 +14,22 @@ metadata:
   source: "MERGED"
   prerequisites:
     files:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "At least one feature must exist to check readiness"
         min_entries: 1
     reads:
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         description: "Screen specs for feature-to-screen coverage check"
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         description: "Data model for feature-to-model coverage check"
-      - path: "_concept/3_blueprint/3_datamodel/feature_map.json"
+      - path: "_concept/blueprint/datamodel/feature_map.json"
         description: "Feature map for model-to-feature cross-reference"
-      - path: "_concept/1_discovery/2_brand/tokens.json"
+      - path: "_concept/discovery/brand/tokens.json"
         description: "Brand tokens existence check (global prerequisite)"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         description: "Tech stack existence check (global prerequisite)"
-      - path: "_concept/2_experience/4_storybook/src/pages"
+      - path: "_concept/experience/4_storybook/src/pages"
         description: "Storybook pages for soft mockup/composition check"
 ---
 
@@ -56,19 +56,19 @@ what is missing so the user can fix gaps efficiently.
 
 ## Prerequisites
 
-**Hard gate:** `_concept/2_experience/2_features/` must exist with at least one feature file.
+**Hard gate:** `_concept/experience/features/` must exist with at least one feature file.
 
 ## Context Budget
 
 | Action | Path | Required |
 |--------|------|----------|
-| **Must read** | `_concept/2_experience/2_features/**/*.md` | Yes |
-| **Must read** | `_concept/2_experience/3_screens/**/*.md` | Yes |
-| **Must read** | `_concept/3_blueprint/3_datamodel/model.json` | Yes |
-| **Must read** | `_concept/3_blueprint/3_datamodel/feature_map.json` | Yes |
-| **Must read** | `_concept/1_discovery/2_brand/tokens.json` | Yes (existence check) |
-| **Must read** | `_concept/3_blueprint/1_techstack/stack.md` | Yes (existence check) |
-| **Optional** | `_concept/2_experience/4_storybook/` | No (mockup/composition check) |
+| **Must read** | `_concept/experience/features/**/*.md` | Yes |
+| **Must read** | `_concept/experience/screens/**/*.md` | Yes |
+| **Must read** | `_concept/blueprint/datamodel/model.json` | Yes |
+| **Must read** | `_concept/blueprint/datamodel/feature_map.json` | Yes |
+| **Must read** | `_concept/discovery/brand/tokens.json` | Yes (existence check) |
+| **Must read** | `_concept/blueprint/techstack.md` | Yes (existence check) |
+| **Optional** | `_concept/experience/4_storybook/` | No (mockup/composition check) |
 | **Never load** | Source code, `_concept/_grounding/` | — |
 
 ## Common Mistakes
@@ -86,13 +86,13 @@ what is missing so the user can fix gaps efficiently.
 ROLE  Readiness Gate — verifies features are ready for E2E testing, surfaces gaps.
 
 READS
-  _concept/2_experience/2_features/**/*.md             — feature list and frontmatter
-  _concept/2_experience/3_screens/**/*.md              — screen specs (implements: field)
-  _concept/3_blueprint/3_datamodel/model.json          — model definitions
-  _concept/3_blueprint/3_datamodel/feature_map.json    — model-to-feature mapping
-  _concept/1_discovery/2_brand/tokens.json             — brand tokens existence
-  _concept/3_blueprint/1_techstack/stack.md            — tech stack existence
-  ? _concept/2_experience/4_storybook/                 — storybook compositions (soft check)
+  _concept/experience/features/**/*.md             — feature list and frontmatter
+  _concept/experience/screens/**/*.md              — screen specs (implements: field)
+  _concept/blueprint/datamodel/model.json          — model definitions
+  _concept/blueprint/datamodel/feature_map.json    — model-to-feature mapping
+  _concept/discovery/brand/tokens.json             — brand tokens existence
+  _concept/blueprint/techstack.md            — tech stack existence
+  ? _concept/experience/4_storybook/                 — storybook compositions (soft check)
 
 WRITES
   (none — read-only audit skill, output is the report shown to user)
@@ -102,22 +102,22 @@ REFERENCES
   references/report_templates.md                     — readiness table, fix templates, check details
 
 STEP 1: Discover features
-  - Read all files in _concept/2_experience/2_features/**/*.md
+  - Read all files in _concept/experience/features/**/*.md
   - Build feature list from discovered files (feature name + group)
   IF no feature files found
-    - Stop with: "No features found in `_concept/2_experience/2_features/`. Run `features` first."
+    - Stop with: "No features found in `_concept/experience/features/`. Run `features` first."
 
 STEP 2: Check global prerequisites
-  - Verify _concept/1_discovery/2_brand/tokens.json exists
-  - Verify _concept/3_blueprint/1_techstack/stack.md exists
+  - Verify _concept/discovery/brand/tokens.json exists
+  - Verify _concept/blueprint/techstack.md exists
   - Record global status (brand tokens ✓/✗, tech stack ✓/✗)
 
 STEP 3: Check each feature
   For each feature, verify all of:
-  - Concept doc exists: _concept/2_experience/2_features/<group>/<feature>.md
-  - Screen spec: at least one .md in _concept/2_experience/3_screens/ has this feature in `implements:`
+  - Concept doc exists: _concept/experience/features/<group>/<feature>.md
+  - Screen spec: at least one .md in _concept/experience/screens/ has this feature in `implements:`
   - Data model: feature listed in feature_map.json for at least one model
-  - Mockup/composition: soft check — storybook page at _concept/2_experience/4_storybook/src/pages/ OR html file in _concept/05_mockups/ (either counts; absence is a warning, not a blocker)
+  - Mockup/composition: soft check — storybook page at _concept/experience/4_storybook/src/pages/ OR html file in _concept/05_mockups/ (either counts; absence is a warning, not a blocker)
   A feature is "ready" when concept doc + screen spec + data model all pass.
 
 STEP 4: Print readiness report

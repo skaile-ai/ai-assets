@@ -26,18 +26,18 @@ metadata:
         variant: storybook
   prerequisites:
     files:
-      - path: "_concept/2_experience/4_storybook"
+      - path: "_concept/experience/4_storybook"
         gate: hard
         description: "Storybook project must be scaffolded first (run storybook-setup)"
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: hard
         description: "Screen specs required to identify custom building-block components"
         min_entries: 1
     reads:
-      - path: "_concept/1_discovery/2_brand/tokens.json"
+      - path: "_concept/discovery/brand/tokens.json"
         description: "Brand tokens for component styling"
     produces:
-      - path: "_concept/2_experience/4_storybook/src/components"
+      - path: "_concept/experience/4_storybook/src/components"
         description: "Custom building-block component files and barrel export"
 ---
 
@@ -47,31 +47,31 @@ ROLE  Component Builder — identifies custom components not available in the pr
       library, builds them, and creates their Storybook stories.
 
 READS
-  _concept/2_experience/3_screens/**/*.md               — UI elements from all screen specs
-  _concept/1_discovery/2_brand/tokens.json              — brand tokens for styling
+  _concept/experience/screens/**/*.md               — UI elements from all screen specs
+  _concept/discovery/brand/tokens.json              — brand tokens for styling
   [passed by orchestrator]: component_library, story_extension, icon_library, component_import
 
 WRITES
-  _concept/2_experience/4_storybook/src/components/<ComponentName>.<ext>
-  _concept/2_experience/4_storybook/src/components/index.<ts|js>         — barrel export
-  _concept/2_experience/4_storybook/src/stories/Components/<Name>.stories.<ext>
-  _concept/2_experience/4_storybook/src/@types/<entity>.<ts|js>          — minimal interfaces
+  _concept/experience/4_storybook/src/components/<ComponentName>.<ext>
+  _concept/experience/4_storybook/src/components/index.<ts|js>         — barrel export
+  _concept/experience/4_storybook/src/stories/Components/<Name>.stories.<ext>
+  _concept/experience/4_storybook/src/@types/<entity>.<ts|js>          — minimal interfaces
 
 REQUIRES
-  state: _concept/2_experience/4_storybook/ exists with passing build (setup sub-skill completed)
-  state: _concept/2_experience/3_screens/ has at least one screen spec
+  state: _concept/experience/4_storybook/ exists with passing build (setup sub-skill completed)
+  state: _concept/experience/screens/ has at least one screen spec
   provided: component_library, story_extension, icon_library (from orchestrator)
 
 EMIT  [storybook-components] started run_id=<uuid>
 
 STEP 1: Inventory components across all screen specs
-  - Read ALL screen specs in _concept/2_experience/3_screens/**/*.md
+  - Read ALL screen specs in _concept/experience/screens/**/*.md
   - Extract a DEDUPLICATED list of every UI element mentioned in "UI Elements" sections
   - For each UI element, determine:
     a) LIBRARY — available in the project's component_library → use directly in pages, no story needed
     b) CUSTOM — not in library → must be built
   - Inspect the installed component_library package to discover its exports:
-    $ cat _concept/2_experience/4_storybook/node_modules/<component_library>/dist/index.d.ts
+    $ cat _concept/experience/4_storybook/node_modules/<component_library>/dist/index.d.ts
     (or index.js — whichever exposes the exports)
   - Present the two lists to confirm scope:
     > "Component library (<component_library>) provides: [list]
@@ -112,7 +112,7 @@ STEP 3: Build each custom component
   MUST use realistic domain-appropriate data — never "Lorem ipsum"
 
 STEP 4: Write barrel export
-  OUTPUT _concept/2_experience/4_storybook/src/components/index.<ts|js>
+  OUTPUT _concept/experience/4_storybook/src/components/index.<ts|js>
     - Re-export all custom components built in Step 3
   IF no custom components were built
     - Write empty barrel with comment: `// No custom components — all from <component_library>`
@@ -120,9 +120,9 @@ STEP 4: Write barrel export
 
 STEP 5: Verify
   - Count component story files:
-    $ ls _concept/2_experience/4_storybook/src/stories/Components/*.stories.* 2>/dev/null | wc -l
+    $ ls _concept/experience/4_storybook/src/stories/Components/*.stories.* 2>/dev/null | wc -l
     -> Should equal the number of custom components
-  $ cd _concept/2_experience/4_storybook && <package_manager> run build
+  $ cd _concept/experience/4_storybook && <package_manager> run build
   IF build fails
     - Fix and retry
   EMIT  [storybook-components] completed run_id=<uuid> components=<N>

@@ -68,7 +68,7 @@ Use semantic types from `skaileup-shared/contracts/semantic_types.md`. Never use
       "icon": "user",
       "color": "#6366f1",
       "position": { "x": 100, "y": 100 },
-      "from_features": ["2_experience/2_features/01_user_auth/login.md"],
+      "from_features": ["experience/features/01_user_auth/login.md"],
       "fields": [
         { "id": "user_id", "name": "id", "type": "uuid", "primary": true },
         { "id": "user_email", "name": "email", "type": "email", "required": true, "unique": true },
@@ -82,7 +82,7 @@ Use semantic types from `skaileup-shared/contracts/semantic_types.md`. Never use
       "icon": "check-square",
       "color": "#f59e0b",
       "position": { "x": 400, "y": 100 },
-      "from_features": ["2_experience/2_features/02_tasks/create_task.md"],
+      "from_features": ["experience/features/02_tasks/create_task.md"],
       "fields": [
         { "id": "task_id", "name": "id", "type": "uuid", "primary": true },
         { "id": "task_title", "name": "title", "type": "string", "required": true },
@@ -199,9 +199,9 @@ Cross-reference mapping every entity to the feature(s) that require it.
 
 ```json
 {
-  "Task": ["2_experience/2_features/02_tasks/create_task.md", "2_experience/2_features/02_tasks/assign_task.md"],
-  "User": ["2_experience/2_features/01_user_auth/login.md"],
-  "Comment": ["2_experience/2_features/03_collaboration/comments.md"]
+  "Task": ["experience/features/02_tasks/create_task.md", "experience/features/02_tasks/assign_task.md"],
+  "User": ["experience/features/01_user_auth/login.md"],
+  "Comment": ["experience/features/03_collaboration/comments.md"]
 }
 ```
 
@@ -210,7 +210,7 @@ question whether it belongs in the model.
 
 ## Journey-Derived State Machines
 
-When `_concept/2_experience/1_journeys/stories.json` exists, use EARS acceptance criteria
+When `_concept/experience/journeys/stories.json` exists, use EARS acceptance criteria
 to derive entity state machines:
 
 - **Event-driven** (`WHEN user submits ... THE SYSTEM SHALL transition status to Done`)

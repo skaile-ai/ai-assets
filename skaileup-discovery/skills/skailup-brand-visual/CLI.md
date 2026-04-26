@@ -6,10 +6,10 @@ Invoke with: "brand", "colors", "fonts", "visual identity", "design tokens", "ma
 
 ## Output
 
-- `_concept/1_discovery/2_brand/identity.md`
-- `_concept/1_discovery/2_brand/tokens.json`
-- `_concept/1_discovery/2_brand/brandbook.html`
-- `_concept/1_discovery/2_brand/references/` (screenshots, if URLs provided)
+- `_concept/discovery/brand/identity.md`
+- `_concept/discovery/brand/tokens.json`
+- `_concept/discovery/brand/brandbook.html`
+- `_concept/discovery/brand/references/` (screenshots, if URLs provided)
 
 ## Next Steps
 

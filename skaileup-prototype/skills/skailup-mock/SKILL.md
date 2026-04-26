@@ -35,23 +35,23 @@ metadata:
         gate: soft
   prerequisites:
     files:
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: hard
         description: "Screen specs must exist — mockup renders screen specs as HTML"
         min_entries: 1
-      - path: "_concept/1_discovery/2_brand/tokens.json"
+      - path: "_concept/discovery/brand/tokens.json"
         gate: hard
         description: "Design tokens required for brand-accurate styling"
-      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+      - path: "_concept/blueprint/datamodel/seed.json"
         gate: hard
         description: "Seed data required for realistic mock content"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         gate: soft
         description: "Tech stack used to auto-select mockup stack template"
     reads:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         description: "App name and navigation structure"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         description: "Feature list for page inventory"
     produces:
       - path: "_concept/mockups"
@@ -83,7 +83,7 @@ All stacks are **CDN-only, zero build**. Every HTML file opens directly in a bro
 
 ### Auto-Selection from Tech Stack
 
-If `_concept/3_blueprint/1_techstack/stack.md` exists and contains `tech_stack_skill:`,
+If `_concept/blueprint/techstack.md` exists and contains `tech_stack_skill:`,
 the mock skill reads that profile SKILL.md and uses its `mock_template:` field to
 automatically select the template. This avoids the user having to choose manually.
 
@@ -117,15 +117,15 @@ before proceeding.
 ## Prerequisites
 
 **Hard gates:**
-1. `_concept/2_experience/3_screens/` has at least one screen file
-2. `_concept/1_discovery/2_brand/tokens.json` exists
-3. `_concept/3_blueprint/3_datamodel/seed.json` exists
+1. `_concept/experience/screens/` has at least one screen file
+2. `_concept/discovery/brand/tokens.json` exists
+3. `_concept/blueprint/datamodel/seed.json` exists
 
 If any are missing, stop and name what is needed.
 
 **Optional: Tech Stack for Template Auto-Selection**
 
-If `_concept/3_blueprint/1_techstack/stack.md` exists:
+If `_concept/blueprint/techstack.md` exists:
 - Read it and extract `tech_stack_skill:`
 - Read `skaileup-standards/profiles/<tech_stack_skill>/SKILL.md` and extract `mock_template:`
 - Use the mapped template from the table above
@@ -144,16 +144,16 @@ Before starting, read:
 
 | Source | Priority |
 |--------|----------|
-| `_concept/1_discovery/2_brand/tokens.json` | Required |
-| `_concept/2_experience/3_screens/**/*.md` | Required |
-| `_concept/2_experience/3_screens/00_layout/shell.md` | Required |
-| `_concept/3_blueprint/3_datamodel/seed.json` | Required |
-| `_concept/3_blueprint/1_techstack/stack.md` | Optional (template auto-selection) |
+| `_concept/discovery/brand/tokens.json` | Required |
+| `_concept/experience/screens/**/*.md` | Required |
+| `_concept/experience/screens/00_layout/shell.md` | Required |
+| `_concept/blueprint/datamodel/seed.json` | Required |
+| `_concept/blueprint/techstack.md` | Optional (template auto-selection) |
 | `skaileup-standards/profiles/<tech_stack_skill>/SKILL.md` | Optional (read if stack.md has tech_stack_skill) |
-| `_concept/2_experience/3_screens/components/*.md` | Optional |
+| `_concept/experience/screens/components/*.md` | Optional |
 | `_grounding/general/design_inspiration.md` | Optional |
 
-**Never load:** `_concept/1_discovery/`, `_concept/2_experience/2_features/`, source code.
+**Never load:** `_concept/discovery/`, `_concept/experience/features/`, source code.
 
 ## Output Structure
 
@@ -180,7 +180,7 @@ _concept/mockups/
 
 **Before generating any code**, determine which mock template to use:
 
-1. **Auto-select (preferred):** If `_concept/3_blueprint/1_techstack/stack.md` exists:
+1. **Auto-select (preferred):** If `_concept/blueprint/techstack.md` exists:
    - Read it, extract `tech_stack_skill:`
    - Read `skaileup-standards/profiles/<tech_stack_skill>/SKILL.md`, extract `mock_template:`
    - Use the template from the mapping table above
@@ -211,7 +211,7 @@ From `tokens.json`, generate CSS custom properties following the pattern in
 
 ### Phase 2: Shared Shell Layout
 
-Read `2_experience/3_screens/00_layout/shell.md` and build the shell component following
+Read `experience/screens/00_layout/shell.md` and build the shell component following
 `templates/{mockup_style}/shared-shell.md`:
 
 - **Sidebar/nav** with links to every screen (icons from screen specs)
@@ -229,7 +229,7 @@ Convert `seed.json` scenarios to JS:
 
 ### Phase 4: Screen Pages
 
-For each screen in `2_experience/3_screens/`, generate an HTML file. Each screen page:
+For each screen in `experience/screens/`, generate an HTML file. Each screen page:
 - **Includes the shared shell** (sidebar, header) with current page highlighted
 - **Links to other screens** via real `<a href>` tags (working navigation!)
 - **Renders seed data** with stack-appropriate binding

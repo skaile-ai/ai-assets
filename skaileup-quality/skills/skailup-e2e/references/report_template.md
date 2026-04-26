@@ -25,16 +25,16 @@ Optional: export full report to `e2e-test-report.md`.
 ## Feedback Loop Event Format
 
 For every successfully tested journey, update the corresponding feature file
-in `_concept/2_experience/2_features/` (update `last_updated` in frontmatter) and emit:
+in `_concept/experience/features/` (update `last_updated` in frontmatter) and emit:
 
 ```
-[e2e] feedback_loop updated 2_experience/2_features/<group>/<feature>.md
+[e2e] feedback_loop updated experience/features/<group>/<feature>.md
   updated last_updated: <today>
 ```
 
 ## Seed Data Scenario Usage
 
-Use scenario-based data from `_concept/3_blueprint/3_datamodel/seed.json`:
+Use scenario-based data from `_concept/blueprint/datamodel/seed.json`:
 
 | Scenario | Use for |
 |----------|---------|

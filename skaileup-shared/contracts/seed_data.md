@@ -1,6 +1,6 @@
 # Seed Data Convention
 
-`_concept/3_blueprint/3_datamodel/seed.json` provides realistic sample data for mockups,
+`_concept/blueprint/datamodel/seed.json` provides realistic sample data for mockups,
 screen specs, and E2E testing. Data is organized as named **scenarios** so
 each consumer can pick the state it needs.
 

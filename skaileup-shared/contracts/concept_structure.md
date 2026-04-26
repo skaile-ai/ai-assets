@@ -91,37 +91,37 @@ _concept/
 │   ├── testing/
 │   └── architecture/
 │
-├── 1_discovery/
-│   ├── 1_overview/
-│   │   ├── brief.md                     ← elevator pitch, audience, problem, hero flow
-│   │   ├── goals.md                     ← success criteria, constraints, deadlines
-│   │   └── comparable.md                ← reference apps, what to borrow/avoid
+├── discovery/
+│   ├── brief.md                         ← elevator pitch, audience, problem, hero flow
+│   ├── goals.md                         ← success criteria, constraints, deadlines
+│   ├── comparable.md                    ← reference apps, what to borrow/avoid
 │   │
-│   └── 2_brand/
+│   └── brand/
 │       ├── identity.md                  ← colors, fonts, tone — human-readable
 │       ├── tokens.json                  ← machine-readable design tokens
 │       └── references/                  ← screenshots from reference URLs
 │
-├── 2_experience/
-│   ├── 1_journeys/                      ← optional: user journeys
+├── experience/
+│   ├── journeys/                        ← optional: user journeys
 │   │   └── stories.json                 ← personas, story maps (hero/vital/hygiene/backlog), EARS criteria
 │   │
-│   ├── 2_features/
+│   ├── features/
 │   │   ├── 01_<group_name>/             ← numbered feature groups
 │   │   │   └── <feature>.md             ← one file per feature (includes ## Permissions section)
 │   │   └── ...
 │   │
-│   ├── 3_screens/
+│   ├── screens/
 │   │   ├── 00_layout/
 │   │   │   └── shell.md                 ← app chrome: nav, sidebar, header
-│   │   ├── 01_<group_name>/             ← numbered, matching 2_features/ groups
+│   │   ├── 01_<group_name>/             ← numbered, matching features/ groups
 │   │   │   └── <screen>.md
 │   │   └── components/                  ← reusable component specs (optional)
 │   │
-│   ├── 4_behaviors/                     ← optional: behavioral specs
-│   │   └── <group_name>.allium          ← one spec per feature group
-│   │
-│   └── 5_storybook/                     ← optional: living Storybook prototype
+│   └── behaviors/                       ← optional: behavioral specs
+│       └── <group_name>.allium          ← one spec per feature group
+│
+├── prototype/
+│   └── storybook/                       ← optional: living Storybook prototype
 │       ├── .storybook/                  ← config (main.ts, preview.ts, theme.ts)
 │       ├── src/
 │       │   ├── styles/brand.css         ← brand tokens as CSS custom properties
@@ -140,14 +140,12 @@ _concept/
 │       ├── vite.config.ts
 │       └── tsconfig.json
 │
-└── 3_blueprint/
-    ├── 1_techstack/
-    │   └── stack.md                     ← chosen technologies + reasoning
+└── blueprint/
+    ├── techstack.md                     ← chosen technologies + reasoning
     │
-    ├── 2_architecture/                  ← optional
-    │   └── architecture.md              ← system architecture, modules, data flow, protocols
+    ├── architecture.md                  ← optional: system architecture, modules, data flow, protocols
     │
-    └── 3_datamodel/                     ← schema format chosen by agent from stack (see below)
+    └── datamodel/                       ← schema format chosen by agent from stack (see below)
         ├── model.dbml                   ← canonical semantic model (generic/unknown stack)
         ├── model.json                   ← editor state for generic stack (drag-and-drop canvas)
         ├── schema.prisma                ← Prisma stack output (translated from semantic model)
@@ -158,7 +156,7 @@ _concept/
 
 ## _grounding/ — Research, Reference & User Input Layer
 
-`_grounding/` is a **special, unnumbered folder** outside the numbered pipeline sequence.
+`_grounding/` is a **special, unnumbered folder** outside the pipeline sequence.
 It is the primary destination for all research output and persisted user inputs.
 
 **Key rules:**
@@ -183,18 +181,18 @@ It is the primary destination for all research output and persisted user inputs.
 
 Step subfolder names under `_grounding/step/` map to the final segment of the skill path:
 
-| Skill path | `_grounding/step/` subfolder |
+| Skill | `_grounding/step/` subfolder |
 |---|---|
-| `1_discovery/1_overview` | `step/overview/` |
-| `2_experience/2_features` | `step/features/` |
-| `2_experience/4_behaviors` | `step/behaviors/` |
-| `1_discovery/2_brand` (visual) | `step/brand-visual/` |
-| `1_discovery/2_brand` (behavioral) | `step/brand-behavioral/` |
-| `3_blueprint/1_techstack` | `step/techstack/` |
-| `3_blueprint/2_architecture` | `step/architecture/` |
-| `3_blueprint/3_datamodel` | `step/datamodel/` |
-| `2_experience/3_screens` | `step/screens/` |
-| `2_experience/3_screens/components` | `step/components/` |
+| `skailup-overview` | `step/overview/` |
+| `skailup-features` | `step/features/` |
+| `skailup-behaviors` | `step/behaviors/` |
+| `skailup-brand-visual` | `step/brand-visual/` |
+| `skailup-brand-behavioral` | `step/brand-behavioral/` |
+| `skailup-techstack` | `step/techstack/` |
+| `skailup-architecture` | `step/architecture/` |
+| `skailup-datamodel` | `step/datamodel/` |
+| `skailup-screens` | `step/screens/` |
+| `skailup-components` | `step/components/` |
 
 ## _seeds/ — User-Provided Input Layer
 
@@ -223,10 +221,10 @@ conventions discovered from an existing codebase.
 When `_standards/` exists, skills check for applicable standards before making decisions
 (see Standards Injection pattern in `agent_patterns.md`).
 
-## 3_blueprint/3_datamodel/ — Schema Format
+## blueprint/datamodel/ — Schema Format
 
 The agent selects the schema format from the project's tech stack
-(read from `3_blueprint/1_techstack/stack.md` or `_grounding/onboarding/decisions.yaml`):
+(read from `blueprint/techstack.md` or `_grounding/onboarding/decisions.yaml`):
 
 | Stack signal | Schema file(s) |
 |---|---|
@@ -243,17 +241,17 @@ and quality audit for cross-reference validation).
 
 ## Naming Rules
 
-- Phase folders: `1_discovery/`, `2_experience/`, `3_blueprint/` (single digit, no padding)
-- Subfolders within phases: `1_overview/`, `2_features/`, `3_screens/` (single digit)
-- Feature groups and screen groups: `01_<group_name>/` (two-digit, matching across both)
+- Phase folders use plain names with no numeric prefix: `discovery/`, `experience/`, `blueprint/`, `prototype/`
+- Discovery artifacts live directly in `discovery/` (brief.md, goals.md, comparable.md) or in `discovery/brand/`
+- Feature groups and screen groups: `01_<group_name>/` (two-digit prefix, matching across both)
 - Screen groups mirror feature group numbers exactly
 - Special folders: leading underscore (`_grounding/`, `_seeds/`, `_standards/`) — not sequential steps
-- File names: lowercase, underscore-separated (`password_reset.md`)
+- File names: lowercase, hyphen-separated or underscore-separated (`password_reset.md`)
 - No spaces in paths
 
 ## Feature Files — Permissions Section
 
-Each feature file in `2_experience/2_features/` includes:
+Each feature file in `experience/features/` includes:
 
 ```markdown
 ---
@@ -272,32 +270,32 @@ permissions:
 | guest | read |
 ```
 
-This is consumed by `3_blueprint/3_datamodel` (auth rules) and `implement/1_setup/scaffold`
+This is consumed by `blueprint/datamodel/` (auth rules) and implementation scaffolding
 (authorization policy).
 
 ## Read Direction
 
-Skills read from **lower-numbered** folders and write to **their own** folder only.
+Skills read from **earlier pipeline phases** and write to **their own** folder only.
 
 | Skill writing to | May read from |
 |---|---|
-| `1_discovery/1_overview` | `_grounding/` |
-| `1_discovery/2_brand` | `_grounding/`, `1_overview/` |
-| `2_experience/1_journeys` | `_grounding/`, `1_discovery/` |
-| `2_experience/2_features` | `_grounding/`, `1_discovery/`, `2_experience/1_journeys/` |
-| `2_experience/3_screens` | `_grounding/`, `1_discovery/`, `2_experience/1_journeys/`, `2_experience/2_features/`, optionally `3_blueprint/` |
-| `2_experience/4_behaviors` | `_grounding/`, `1_discovery/`, `2_experience/2_features/` |
-| `2_experience/5_storybook` | `_grounding/`, `1_discovery/2_brand/`, `2_experience/1_journeys/`, `2_experience/2_features/`, `2_experience/3_screens/`, optionally `3_blueprint/3_datamodel/` |
-| `3_blueprint/1_techstack` | `_grounding/`, `1_discovery/`, `2_experience/` |
-| `3_blueprint/2_architecture` | `_grounding/`, `1_discovery/`, `2_experience/`, `3_blueprint/1_techstack/` |
-| `3_blueprint/3_datamodel` | `_grounding/`, `1_discovery/`, `2_experience/`, `3_blueprint/1_techstack/`, `3_blueprint/2_architecture/` |
+| `discovery/` (brief, goals, comparable) | `_grounding/` |
+| `discovery/brand/` | `_grounding/`, `discovery/brief.md` |
+| `experience/journeys/` | `_grounding/`, `discovery/` |
+| `experience/features/` | `_grounding/`, `discovery/`, `experience/journeys/` |
+| `experience/screens/` | `_grounding/`, `discovery/`, `experience/journeys/`, `experience/features/`, optionally `blueprint/` |
+| `experience/behaviors/` | `_grounding/`, `discovery/`, `experience/features/` |
+| `prototype/storybook/` | `_grounding/`, `discovery/brand/`, `experience/journeys/`, `experience/features/`, `experience/screens/`, optionally `blueprint/datamodel/` |
+| `blueprint/techstack.md` | `_grounding/`, `discovery/`, `experience/` |
+| `blueprint/architecture.md` | `_grounding/`, `discovery/`, `experience/`, `blueprint/techstack.md` |
+| `blueprint/datamodel/` | `_grounding/`, `discovery/`, `experience/`, `blueprint/techstack.md`, `blueprint/architecture.md` |
 
 `_grounding/` and `_standards/` are always readable by every skill regardless of phase.
 
-`2_experience/4_behaviors/` is optional. Skills that consume it (`2_architecture/`, `3_datamodel/`,
-`3_screens/`) check for its existence before reading.
+`experience/behaviors/` is optional. Skills that consume it (`blueprint/architecture.md`, `blueprint/datamodel/`,
+`experience/screens/`) check for its existence before reading.
 
-`3_blueprint/2_architecture/` is optional. Skills writing to `3_datamodel/` and `3_screens/`
+`blueprint/architecture.md` is optional. Skills writing to `blueprint/datamodel/` and `experience/screens/`
 read it when present to understand service boundaries, data flows, and protocols.
 
 ## Dependency Flow
@@ -309,27 +307,27 @@ read it when present to understand service boundaries, data flows, and protocols
           └─────────────┬────────────────────┘
                         │ read by all skills
                         ▼
-          ┌─────── 1_discovery ──────────────┐
-          │  1_overview     2_brand          │
+          ┌─────── discovery ────────────────┐
+          │  brief/goals/comparable   brand/ │
           └──────┬──────────────┬────────────┘
                  │              │
                  ▼              │
-       2_experience/1_journeys  │
+       experience/journeys/     │
                  │              │
                  ▼              │
-       2_experience/2_features  │
+       experience/features/     │
               │      │          │
-              ▼      └──────────┼──► 3_blueprint/1_techstack
-    2_exp/4_behaviors           │              │
+              ▼      └──────────┼──► blueprint/techstack.md
+    experience/behaviors/       │              │
               │                 │              ▼
-              └──────────►  3_blueprint/2_architecture
+              └──────────►  blueprint/architecture.md
                                 │              │
                                 ▼              ▼
-                         3_blueprint/3_datamodel
+                         blueprint/datamodel/
                                 │
                     ┌───────────┤
                     ▼           ▼
-          2_exp/3_screens   2_exp/5_storybook
+          experience/screens/  prototype/storybook/
 ```
 
 **Parallel tracks:** Brand, Journeys→Features, and Techstack run in parallel after the
@@ -342,7 +340,24 @@ continuously enriching the knowledge base. Per-skill dialog values are stored in
 
 ## Legacy Path Compatibility
 
-Projects created with older CF tooling may have:
+Projects **not yet migrated** via `_scripts/migrate-concept-v2.sh` may have v1 numbered paths:
+
+| v1 path (legacy) | v2 path (current) |
+|---|---|
+| `1_discovery/1_overview/brief.md` | `discovery/brief.md` |
+| `1_discovery/1_overview/goals.md` | `discovery/goals.md` |
+| `1_discovery/1_overview/comparable.md` | `discovery/comparable.md` |
+| `1_discovery/2_brand/` | `discovery/brand/` |
+| `2_experience/1_journeys/` | `experience/journeys/` |
+| `2_experience/2_features/` | `experience/features/` |
+| `2_experience/3_screens/` | `experience/screens/` |
+| `2_experience/4_behaviors/` | `experience/behaviors/` |
+| `2_experience/5_storybook/` | `prototype/storybook/` |
+| `3_blueprint/1_techstack/stack.md` | `blueprint/techstack.md` |
+| `3_blueprint/2_architecture/architecture.md` | `blueprint/architecture.md` |
+| `3_blueprint/3_datamodel/` | `blueprint/datamodel/` |
+
+Additional legacy paths from older CF tooling:
 - `01_project/`, `03_features/`, `04_brand/` etc. (flat numbered structure) — read both old and new paths, prefer new
 - `_research/` or `02_research/` — treat as `_grounding/research/` content
 - `A_01_<group>/` feature group prefix (letter+number) — treat same as `01_<group>/`
@@ -351,3 +366,4 @@ Projects created with older CF tooling may have:
 - `_grounding/onboarding-info.md` — treat as legacy equivalent of `_grounding/onboarding/profile.yaml` + `_grounding/onboarding/decisions.yaml`; extract and split on next write
 
 Skills should detect legacy structure from file existence and migrate output to the new paths.
+Run `_scripts/migrate-concept-v2.sh <project-dir>` to migrate a project in bulk.

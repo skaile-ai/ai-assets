@@ -19,16 +19,16 @@ Structural conventions shared with `skaileup-implementation` live in `skaileup-s
 
 ```
 _concept/
-├── 1_discovery/
+├── discovery/
 │   ├── 1_overview/         ← brief.md, goals.md, comparable.md
 │   ├── 2_research/         ← _grounding/ findings per step
 │   └── 3_brand/            ← identity.md, tokens.json, behavioral.md
-├── 2_experience/
+├── experience/
 │   ├── 1_journeys/         ← user journey maps (optional)
 │   ├── 2_features/         ← 01_group/feature.md (numbered groups)
 │   ├── 3_screens/          ← 00_layout/shell.md, 01_group/screen.md
 │   └── 4_components/       ← component inventory (optional)
-├── 3_blueprint/
+├── blueprint/
 │   ├── 1_techstack/        ← stack.md
 │   ├── 2_architecture/     ← architecture.md
 │   └── 3_datamodel/        ← model.dbml, model.json, model.schema.json
@@ -53,7 +53,7 @@ Once merged, a skill uses `source: MERGED` and lives in a flat named dir (no `cf
 Feature groups and screen groups share the same numbering:
 
 ```
-2_experience/2_features/01_user_auth/   ↔   2_experience/3_screens/01_user_auth/
+experience/features/01_user_auth/   ↔   experience/screens/01_user_auth/
 ```
 
 Skills must preserve this alignment when creating or renaming groups.

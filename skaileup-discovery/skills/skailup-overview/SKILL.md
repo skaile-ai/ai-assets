@@ -1,6 +1,6 @@
 ---
 name: "skailup-overview"
-description: "Use when starting a new concept and no _concept/1_discovery/1_overview/ exists, or when the user says 'I have an app idea', 'new project', 'start from scratch', or wants to redefine an existing brief."
+description: "Use when starting a new concept and no _concept/discovery/ exists, or when the user says 'I have an app idea', 'new project', 'start from scratch', or wants to redefine an existing brief."
 metadata:
   version: "1.0.0"
   tags:
@@ -77,11 +77,11 @@ metadata:
       - path: "_concept/_grounding/general/competitors.md"
         description: "Competitor research (if research ran first)"
     produces:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         description: "Elevator pitch, audience, problem, hero flow"
-      - path: "_concept/1_discovery/1_overview/goals.md"
+      - path: "_concept/discovery/goals.md"
         description: "Success criteria, constraints, deadlines"
-      - path: "_concept/1_discovery/1_overview/comparable.md"
+      - path: "_concept/discovery/comparable.md"
         description: "Similar apps with lessons learned"
   user_inputs:
     dialog:
@@ -133,19 +133,19 @@ metadata:
 ## Overview
 
 The **overview** skill is the Product Definition agent. It produces the project
-brief artifacts in `_concept/1_discovery/1_overview/`. It does NOT write features,
+brief artifacts in `_concept/discovery/`. It does NOT write features,
 data models, screens, brand, or tech stack.
 
 ## When to Use
 
-- The user has a new app idea and `_concept/1_discovery/1_overview/` does not yet exist
+- The user has a new app idea and `_concept/discovery/` does not yet exist
 - The user says "I have an app idea", "new project", "start from scratch"
 - The user wants to redefine or rewrite an existing project brief
 - The orchestrator dispatches this as the first conceptualization step
 
 ## When NOT to Use
 
-- `_concept/1_discovery/1_overview/brief.md` already exists and is approved — run downstream skills instead
+- `_concept/discovery/brief.md` already exists and is approved — run downstream skills instead
 - The user wants to add features to an existing concept — use the **features** skill
 - The user wants to research the domain first — use the **research** skill, then come back
 
@@ -166,7 +166,7 @@ No hard gates — this is the first step in the pipeline.
 | Check if present | `_concept/_grounding/overview/user_input.json` | No |
 | Check if present | `_concept/_grounding/general/domain.md` | No |
 | Check if present | `_concept/_grounding/general/competitors.md` | No |
-| Never load | `2_experience/`, `3_blueprint/`, or any downstream folder | — |
+| Never load | `experience/`, `blueprint/`, or any downstream folder | — |
 
 Keep context minimal. This skill writes the foundation — it must not be
 influenced by downstream artifacts.
@@ -178,7 +178,7 @@ influenced by downstream artifacts.
 
 ---
 
-ROLE  Product Definition agent — produces `_concept/1_discovery/1_overview/` artifacts only.
+ROLE  Product Definition agent — produces `_concept/discovery/` artifacts only.
 
 READS
   ? _concept/_grounding/overview/user_input.json   — pre-collected dialog answers
@@ -186,9 +186,9 @@ READS
   ? _concept/_grounding/general/competitors.md     — competitor research (if research ran first)
 
 WRITES
-  _concept/1_discovery/1_overview/brief.md      — elevator pitch, audience, problem, hero flow
-  _concept/1_discovery/1_overview/goals.md      — success criteria, constraints, deadlines
-  _concept/1_discovery/1_overview/comparable.md — similar apps with lessons learned
+  _concept/discovery/brief.md      — elevator pitch, audience, problem, hero flow
+  _concept/discovery/goals.md      — success criteria, constraints, deadlines
+  _concept/discovery/comparable.md — similar apps with lessons learned
 
 REFERENCES
   skaileup-shared/contracts/concept_structure.md  — valid _concept/ paths and naming rules
@@ -222,9 +222,9 @@ STEP 1: Gather context
   - Wait for answers before proceeding
 
 STEP 2: Write project artifacts
-  - $ mkdir -p _concept/1_discovery/1_overview
+  - $ mkdir -p _concept/discovery
 
-  OUTPUT _concept/1_discovery/1_overview/brief.md
+  OUTPUT _concept/discovery/brief.md
     ---
     elevator_pitch: "<one-sentence pitch>"
     audience: "<primary user description>"
@@ -236,10 +236,10 @@ STEP 2: Write project artifacts
     <Full description in natural language: app vision, who it serves, what
      problem it solves, and the primary user journey.>
 
-  OUTPUT _concept/1_discovery/1_overview/goals.md
+  OUTPUT _concept/discovery/goals.md
     Success criteria, constraints, deadlines, known limitations.
 
-  OUTPUT _concept/1_discovery/1_overview/comparable.md
+  OUTPUT _concept/discovery/comparable.md
     For each comparable app:
     - What it does well
     - What to borrow
@@ -262,7 +262,7 @@ STEP 2b: Assess complexity
       > "This is a substantial app. I'll be thorough at each step and involve you in key technical decisions."
   - User can disagree — update user_input.json if they do
 
-EMIT  [overview] checkpoint phase=brief_written files=1_discovery/1_overview/brief.md,1_discovery/1_overview/goals.md,1_discovery/1_overview/comparable.md
+EMIT  [overview] checkpoint phase=brief_written files=discovery/brief.md,discovery/goals.md,discovery/comparable.md
 
 STEP 3: Human approval
   CHECKPOINT brief_approval
@@ -280,12 +280,12 @@ STEP 4: Hand off
   > - Run `features` to spec out what the app does
   > - Or run the orchestrator to walk through the full pipeline"
 
-EMIT  [overview] completed run_id=<uuid> artifacts=1_discovery/1_overview/brief.md,1_discovery/1_overview/goals.md,1_discovery/1_overview/comparable.md
+EMIT  [overview] completed run_id=<uuid> artifacts=discovery/brief.md,discovery/goals.md,discovery/comparable.md
 
 CHECKLIST
-  - [ ] _concept/1_discovery/1_overview/brief.md exists with all frontmatter fields
-  - [ ] _concept/1_discovery/1_overview/goals.md exists
-  - [ ] _concept/1_discovery/1_overview/comparable.md exists
+  - [ ] _concept/discovery/brief.md exists with all frontmatter fields
+  - [ ] _concept/discovery/goals.md exists
+  - [ ] _concept/discovery/comparable.md exists
   - [ ] Complexity assessment saved to _grounding/overview/user_input.json
   - [ ] User has explicitly approved the brief
 
@@ -327,5 +327,5 @@ target audience demographics and pain points, domain terminology.
 ## Integration
 
 - **Called by:** `concept-orchestrator` or standalone (first step in the concept pipeline)
-- **Feeds into:** all downstream skills via `_concept/1_discovery/1_overview/`
-- **Feedback loops:** None inbound (root node). Every downstream skill reads from `1_discovery/1_overview/`.
+- **Feeds into:** all downstream skills via `_concept/discovery/`
+- **Feedback loops:** None inbound (root node). Every downstream skill reads from `discovery/`.

@@ -8,9 +8,9 @@ mandatory; content varies per screen.
 ```yaml
 ---
 implements:
-  - 2_experience/2_features/<NN_group>/<feature>.md
+  - experience/features/<NN_group>/<feature>.md
 data_entities: [<Model>, ...]
-layout: 2_experience/3_screens/00_layout/shell.md
+layout: experience/screens/00_layout/shell.md
 last_updated: YYYY-MM-DD
 ---
 ```
@@ -74,7 +74,7 @@ implementation skill will map these to actual components.
 ```
 
 ### Template Data *(optional — include when seed.json exists)*
-Reference scenarios from `_concept/3_blueprint/3_datamodel/seed.json`:
+Reference scenarios from `_concept/blueprint/datamodel/seed.json`:
 
 - `populated` — what the screen shows with realistic data
 - `empty` — what the screen shows when there is no data yet
@@ -82,7 +82,7 @@ Reference scenarios from `_concept/3_blueprint/3_datamodel/seed.json`:
 
 ## Enrichment from User Journeys
 
-When `_concept/2_experience/1_journeys/stories.json` exists, use it to inform screen design:
+When `_concept/experience/journeys/stories.json` exists, use it to inform screen design:
 
 | Journey element              | Maps to screen section  |
 |------------------------------|-------------------------|
@@ -94,7 +94,7 @@ When `_concept/2_experience/1_journeys/stories.json` exists, use it to inform sc
 
 ## Enrichment from Architecture
 
-When `_concept/3_blueprint/2_architecture/architecture.md` exists:
+When `_concept/blueprint/architecture.md` exists:
 
 - Custom protocols (WebSocket, SSE) — note in Information Displayed for real-time data
 - Additional apps or services — document communication flow

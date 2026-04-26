@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "skaileup-shared" /
 from validator_lib import Validator, main  # noqa: E402
 
 SKILL = "techstack"
-STACK = "_concept/3_blueprint/1_techstack/stack.md"
+STACK = "_concept/blueprint/techstack.md"
 
 REQUIRED_FM = (
     "platform", "frontend", "ui_library", "backend", "orm",

@@ -6,9 +6,9 @@ Invoke with: "I have an app idea", "new project", "start from scratch", or "defi
 
 ## Output
 
-- `_concept/1_discovery/1_overview/brief.md`
-- `_concept/1_discovery/1_overview/goals.md`
-- `_concept/1_discovery/1_overview/comparable.md`
+- `_concept/discovery/brief.md`
+- `_concept/discovery/goals.md`
+- `_concept/discovery/comparable.md`
 - `_concept/_grounding/overview/user_input.json` (complexity assessment)
 
 ## Next Steps

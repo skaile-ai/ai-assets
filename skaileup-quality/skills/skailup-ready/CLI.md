@@ -11,12 +11,12 @@ Readiness table printed in conversation — no files written.
 ## What It Checks
 
 **Global (once):**
-- Brand tokens exist at `_concept/1_discovery/2_brand/tokens.json`
-- Tech stack exists at `_concept/3_blueprint/1_techstack/stack.md`
+- Brand tokens exist at `_concept/discovery/brand/tokens.json`
+- Tech stack exists at `_concept/blueprint/techstack.md`
 
-**Per feature in `_concept/2_experience/2_features/`:**
+**Per feature in `_concept/experience/features/`:**
 1. Concept doc exists
-2. Screen spec exists in `_concept/2_experience/3_screens/` (feature in `implements:`)
+2. Screen spec exists in `_concept/experience/screens/` (feature in `implements:`)
 3. Data model entry in `feature_map.json` for at least one model
 4. Storybook composition or mockup HTML (soft — warning only if absent)
 

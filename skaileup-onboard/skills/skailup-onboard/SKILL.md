@@ -85,7 +85,7 @@ data only — the foundation that all subsequent skills build on.
 ## When NOT to Use
 
 - `profile.yaml` already exists and is approved — resume the pipeline instead
-- A project brief already exists in `_concept/1_discovery/1_overview/` — use the orchestrator to pick up from there
+- A project brief already exists in `_concept/discovery/` — use the orchestrator to pick up from there
 - Adding a feature to a running concept — use `add-feature`
 
 ## Prerequisites
@@ -102,7 +102,7 @@ data only — the foundation that all subsequent skills build on.
 | Must read | `skaileup-shared/contracts/concept_structure.md` | Yes |
 | Must read | `skaileup-shared/contracts/iron_laws.md` | Yes |
 | Resume state | `_concept/_grounding/onboarding/profile.yaml` | If resuming |
-| Never load | `_concept/1_discovery/`, `_concept/2_experience/`, `_concept/3_blueprint/` | — |
+| Never load | `_concept/discovery/`, `_concept/experience/`, `_concept/blueprint/` | — |
 
 ## Standalone Mode
 

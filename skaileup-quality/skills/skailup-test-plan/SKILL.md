@@ -13,15 +13,15 @@ metadata:
   source: "MIGRATED"
   prerequisites:
     files:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Feature specs required to generate test scenarios"
         min_entries: 1
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: hard
         description: "Screen specs required for UI state test coverage"
         min_entries: 1
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         gate: hard
         description: "Data model required for data validation test scenarios"
     inputs_required:
@@ -34,9 +34,9 @@ metadata:
         default: all-features
         hint: "Whether to generate test scenarios for must-have features only or all features"
     reads:
-      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+      - path: "_concept/blueprint/datamodel/seed.json"
         description: "Seed scenarios for test fixture mapping"
-      - path: "_concept/2_experience/4_behaviors"
+      - path: "_concept/experience/behaviors"
         description: "Behavioral specs for state machine test coverage"
     produces:
       - path: "_concept/testing/test_plan.md"
@@ -81,11 +81,11 @@ is a single plan file at `_concept/testing/test_plan.md`.
 ## Prerequisites
 
 **Hard gates:**
-1. Feature specs must exist in `_concept/2_experience/2_features/`
-2. Screen specs must exist in `_concept/2_experience/3_screens/`
-3. Data model must exist at `_concept/3_blueprint/3_datamodel/model.json`
+1. Feature specs must exist in `_concept/experience/features/`
+2. Screen specs must exist in `_concept/experience/screens/`
+3. Data model must exist at `_concept/blueprint/datamodel/model.json`
 
-Recommended (not blocking): `seed.json`, `2_experience/4_behaviors/*.allium`
+Recommended (not blocking): `seed.json`, `experience/behaviors/*.allium`
 
 ## Shared Contracts
 
@@ -100,23 +100,23 @@ Before starting, read:
 
 | Source | Priority |
 |--------|----------|
-| `_concept/1_discovery/1_overview/brief.md` | Required |
-| `_concept/2_experience/2_features/**/*.md` | Required |
-| `_concept/3_blueprint/3_datamodel/model.json` | Required |
-| `_concept/3_blueprint/3_datamodel/seed.json` | Required |
-| `_concept/2_experience/3_screens/**/*.md` | Required |
-| `_concept/2_experience/4_behaviors/*.allium` | Optional |
+| `_concept/discovery/brief.md` | Required |
+| `_concept/experience/features/**/*.md` | Required |
+| `_concept/blueprint/datamodel/model.json` | Required |
+| `_concept/blueprint/datamodel/seed.json` | Required |
+| `_concept/experience/screens/**/*.md` | Required |
+| `_concept/experience/behaviors/*.allium` | Optional |
 
 ## Workflow
 
 ### Step 1: Read Context and Apply Scope Filter
 
-1. Read `_concept/1_discovery/1_overview/brief.md` — app overview
-2. Read `_concept/2_experience/2_features/**/*.md` — all feature specs
-3. Read `_concept/2_experience/3_screens/**/*.md` — all screen specs
-4. Read `_concept/3_blueprint/3_datamodel/model.json` — entities, relationships, field constraints
-5. Read `_concept/3_blueprint/3_datamodel/seed.json` — named scenarios (if exists)
-6. Read `_concept/2_experience/4_behaviors/*.allium` — behavioral rules (if exists)
+1. Read `_concept/discovery/brief.md` — app overview
+2. Read `_concept/experience/features/**/*.md` — all feature specs
+3. Read `_concept/experience/screens/**/*.md` — all screen specs
+4. Read `_concept/blueprint/datamodel/model.json` — entities, relationships, field constraints
+5. Read `_concept/blueprint/datamodel/seed.json` — named scenarios (if exists)
+6. Read `_concept/experience/behaviors/*.allium` — behavioral rules (if exists)
 
 Apply `test_scope` filter:
 - `must-have-only`: include only features where `priority: must-have`

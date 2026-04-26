@@ -14,11 +14,11 @@ metadata:
   source: "MERGED"
   prerequisites:
     files:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Features required to derive task list"
         min_entries: 1
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         gate: hard
         description: "Data model required for entity dependency ordering"
       - path: "_implementation/brainstorm.md"
@@ -45,11 +45,11 @@ metadata:
         default: "sonnet"
     files: []
   reads_from:
-    - "_concept/2_experience/2_features/**/*.md"
-    - "_concept/2_experience/3_screens/**/*.md"
-    - "_concept/3_blueprint/3_datamodel/model.json"
-    - "_concept/3_blueprint/1_techstack/stack.md"
-    - "_concept/2_experience/1_journeys/stories.json"
+    - "_concept/experience/features/**/*.md"
+    - "_concept/experience/screens/**/*.md"
+    - "_concept/blueprint/datamodel/model.json"
+    - "_concept/blueprint/techstack.md"
+    - "_concept/experience/journeys/stories.json"
     - "_implementation/brainstorm.md"
   writes_to:
     - "_implementation/superpowers-plan.md"
@@ -83,12 +83,12 @@ Each task includes:
 ROLE  Implementation plan writer — produces a dependency-ordered, subagent-ready task list from concept artifacts.
 
 READS
-  _concept/1_discovery/1_overview/brief.md
-  _concept/2_experience/2_features/**/*.md
-  _concept/2_experience/3_screens/**/*.md
-  _concept/3_blueprint/3_datamodel/model.json
-  _concept/3_blueprint/1_techstack/stack.md
-  ? _concept/2_experience/1_journeys/stories.json
+  _concept/discovery/brief.md
+  _concept/experience/features/**/*.md
+  _concept/experience/screens/**/*.md
+  _concept/blueprint/datamodel/model.json
+  _concept/blueprint/techstack.md
+  ? _concept/experience/journeys/stories.json
   ? _implementation/brainstorm.md
   ? _implementation/superpowers-plan.md   — resume: update existing plan
 

@@ -40,8 +40,8 @@ Replaces mocked types in the Storybook project with schema-generated TypeScript
 types derived from `model.json`. Bridges the gap between placeholder types used
 during early UI development and the real data model once it is finalized.
 
-**Reads from:** `_concept/3_blueprint/3_datamodel/model.json`
-**Writes to:** `_concept/2_experience/4_storybook/src/types/`
+**Reads from:** `_concept/blueprint/datamodel/model.json`
+**Writes to:** `_concept/experience/4_storybook/src/types/`
 
 ## When to Use
 
@@ -59,8 +59,8 @@ during early UI development and the real data model once it is finalized.
 ## Prerequisites
 
 **Hard gates:**
-1. `_concept/3_blueprint/3_datamodel/model.json` must exist
-2. `_concept/2_experience/4_storybook/package.json` must exist
+1. `_concept/blueprint/datamodel/model.json` must exist
+2. `_concept/experience/4_storybook/package.json` must exist
 3. `pxl` CLI must be available in the environment
 
 ## Shared Contracts
@@ -73,9 +73,9 @@ Before starting, read:
 
 ### Step 1: Read Context
 
-- Read `_concept/3_blueprint/3_datamodel/model.json` — models, fields, enums, and relations
-- Read `_concept/3_blueprint/3_datamodel/seed.json` — seed data for type validation
-- Read the current mocked types in `_concept/2_experience/4_storybook/src/types/index.ts`
+- Read `_concept/blueprint/datamodel/model.json` — models, fields, enums, and relations
+- Read `_concept/blueprint/datamodel/seed.json` — seed data for type validation
+- Read the current mocked types in `_concept/experience/4_storybook/src/types/index.ts`
 - Inventory all type imports across `src/components/`, `src/pages/`, and `src/stories/`
 - Classify each mocked type as:
   - **schema-backed**: has a corresponding model or enum in `model.json` (will be replaced)
@@ -84,8 +84,8 @@ Before starting, read:
 ### Step 2: Generate Types from Schema
 
 ```
-RUN pxl types _concept/3_blueprint/3_datamodel/model.json \
-    --output _concept/2_experience/4_storybook/src/types
+RUN pxl types _concept/blueprint/datamodel/model.json \
+    --output _concept/experience/4_storybook/src/types
 ```
 
 This generates TypeScript interfaces and enums from the data model. Output goes
@@ -116,7 +116,7 @@ If `pxl types` fails:
 ### Step 4: Fix Compilation Errors
 
 ```
-RUN cd _concept/2_experience/4_storybook && pnpm tsc --noEmit 2>&1
+RUN cd _concept/experience/4_storybook && pnpm tsc --noEmit 2>&1
 ```
 
 For each type error, determine the cause:
@@ -133,7 +133,7 @@ Fix errors and re-run `pnpm tsc --noEmit` until no type errors remain.
 ### Step 5: Verify Storybook Build
 
 ```
-RUN cd _concept/2_experience/4_storybook && pnpm run build
+RUN cd _concept/experience/4_storybook && pnpm run build
 ```
 
 If build fails, fix runtime issues not caught by `tsc` and re-run until build succeeds.
@@ -142,9 +142,9 @@ If build fails, fix runtime issues not caught by `tsc` and re-run until build su
 
 | File | Description |
 |------|-------------|
-| `_concept/2_experience/4_storybook/src/types/` | Generated types from `pxl types` |
-| `_concept/2_experience/4_storybook/src/types/ui.ts` | Preserved UI-only types |
-| `_concept/2_experience/4_storybook/src/types/index.ts` | Barrel re-exporting both |
+| `_concept/experience/4_storybook/src/types/` | Generated types from `pxl types` |
+| `_concept/experience/4_storybook/src/types/ui.ts` | Preserved UI-only types |
+| `_concept/experience/4_storybook/src/types/index.ts` | Barrel re-exporting both |
 
 ## Depth Behavior
 

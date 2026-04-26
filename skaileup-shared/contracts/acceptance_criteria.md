@@ -9,11 +9,11 @@ Each feature's ACs are derived from multiple concept sources:
 
 | Source | What to extract |
 |---|---|
-| `2_experience/2_features/<group>/<feature>.md` | Requirements checklist, success criteria, error states |
-| `2_experience/3_screens/<group>/<screen>.md` | Component inventory, states (default/loading/error/empty/success), user actions |
-| `2_experience/1_journeys/stories.json` | EARS acceptance criteria, state transitions, guard conditions |
-| `3_blueprint/3_datamodel/seed.json` | Test data for realistic assertions |
-| `1_discovery/2_brand/tokens.json` | Visual expectations (colors, spacing — for visual checks only) |
+| `experience/features/<group>/<feature>.md` | Requirements checklist, success criteria, error states |
+| `experience/screens/<group>/<screen>.md` | Component inventory, states (default/loading/error/empty/success), user actions |
+| `experience/journeys/stories.json` | EARS acceptance criteria, state transitions, guard conditions |
+| `blueprint/datamodel/seed.json` | Test data for realistic assertions |
+| `discovery/brand/tokens.json` | Visual expectations (colors, spacing — for visual checks only) |
 
 ---
 
@@ -23,9 +23,9 @@ Save to `_implementation/acceptance_criteria/<group>/<feature>.ac.md`:
 
 ```markdown
 ---
-feature_ref: _concept/2_experience/2_features/<group>/<feature>.md
+feature_ref: _concept/experience/features/<group>/<feature>.md
 screen_refs:
-  - _concept/2_experience/3_screens/<group>/<screen>.md
+  - _concept/experience/screens/<group>/<screen>.md
 derived_from:
   - requirements: 5     # count from feature spec
   - screen_states: 4    # count from screen spec
@@ -139,9 +139,9 @@ Backend ACs are required when the feature has:
 
 | Source | What to extract for backend ACs |
 |---|---|
-| `2_experience/2_features/<group>/<feature>.md` | Business rules, validation requirements, integration requirements |
-| `2_experience/1_journeys/stories.json` | EARS acceptance criteria, state transitions, guard conditions |
-| `3_blueprint/3_datamodel/model.json` | Model relationships, enum constraints, auth rules |
+| `experience/features/<group>/<feature>.md` | Business rules, validation requirements, integration requirements |
+| `experience/journeys/stories.json` | EARS acceptance criteria, state transitions, guard conditions |
+| `blueprint/datamodel/model.json` | Model relationships, enum constraints, auth rules |
 
 ### Backend AC Format
 

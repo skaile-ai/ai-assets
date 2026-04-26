@@ -48,7 +48,7 @@ Individual subsystem concepts describe their own features, screens, data models,
 
 ```
 _concept/
-├── 1_discovery/
+├── discovery/
 │   ├── 1_overview/
 │   │   ├── brief.md              ← ecosystem elevator pitch
 │   │   ├── goals.md              ← unified success criteria, scope, constraints
@@ -72,11 +72,11 @@ _concept/
 
 | Artifact | Why excluded |
 |---|---|
-| `2_experience/2_features/` | Each subsystem defines its own features |
-| `2_experience/3_screens/` | Each subsystem defines its own screens |
-| `3_blueprint/1_techstack/` | Each subsystem has its own stack |
-| `3_blueprint/3_datamodel/` | Each subsystem has its own data model |
-| `2_experience/1_journeys/` | Journeys span subsystems but are authored per-product |
+| `experience/features/` | Each subsystem defines its own features |
+| `experience/screens/` | Each subsystem defines its own screens |
+| `blueprint/` | Each subsystem has its own stack |
+| `blueprint/datamodel/` | Each subsystem has its own data model |
+| `experience/journeys/` | Journeys span subsystems but are authored per-product |
 | `_grounding/` | Research is per-subsystem or lives in the shell repo's `_devlog/` |
 
 ---
@@ -93,7 +93,7 @@ last_updated: YYYY-MM-DD
 ---
 ```
 
-### 1_discovery/1_overview/brief.md
+### discovery/brief.md
 
 ```yaml
 ---
@@ -107,15 +107,15 @@ last_updated: YYYY-MM-DD
 ---
 ```
 
-### 1_discovery/1_overview/goals.md
+### discovery/goals.md
 
 Standard format — same as `skaileup-shared/contracts/frontmatter.md`.
 
-### 1_discovery/1_overview/comparable.md
+### discovery/comparable.md
 
 Standard format — same as `skaileup-shared/contracts/frontmatter.md`.
 
-### 1_discovery/2_brand/identity.md
+### discovery/brand/identity.md
 
 Standard format — same as `skaileup-shared/contracts/frontmatter.md`.
 If the brand identity lives in a subsystem's `_concept/`, this file can be a
@@ -123,13 +123,13 @@ reference pointer:
 
 ```yaml
 ---
-reference: platform/_concept/.snapshots/full_concept_approved/1_discovery/3_brand/identity.md
+reference: platform/_concept/.snapshots/full_concept_approved/discovery/3_brand/identity.md
 last_updated: YYYY-MM-DD
 ---
 
 # Brand Identity
 
-See [platform brand identity](../../platform/_concept/.snapshots/full_concept_approved/1_discovery/3_brand/identity.md).
+See [platform brand identity](../../platform/_concept/.snapshots/full_concept_approved/discovery/3_brand/identity.md).
 ```
 
 ### 2_subsystems/index.md
@@ -203,7 +203,7 @@ last_updated: YYYY-MM-DD
 - Subsystem file names are `lowercase_snake_case` matching their directory name in the shell repo
 - If a subsystem lives in a subdirectory (e.g., `forge/concept`), use an underscore join: `forge_concept.md`
 - No spaces in any path
-- Phase folder names use single-digit numbers: `1_discovery/`, `2_subsystems/`, `3_integration/`
+- Phase folder names use single-digit numbers: `discovery/`, `2_subsystems/`, `3_integration/`
 
 ---
 
@@ -213,9 +213,9 @@ The meta-concept follows a simplified read direction:
 
 | Section | May read from |
 |---|---|
-| `1_discovery/` | Nothing (root of the tree) |
-| `2_subsystems/` | `1_discovery/` |
-| `3_integration/` | `1_discovery/`, `2_subsystems/` |
+| `discovery/` | Nothing (root of the tree) |
+| `2_subsystems/` | `discovery/` |
+| `3_integration/` | `discovery/`, `2_subsystems/` |
 | `PLANS.md` | All sections |
 
 Each subsystem file in `2_subsystems/` may reference its own `_concept/` via `concept_ref`,
@@ -288,13 +288,13 @@ narrative descriptions, not the full stories.json format.
 | Aspect | Single-app (`concept_structure.md`) | Meta-concept (this contract) |
 |---|---|---|
 | Scope | One application | Multiple products/repos |
-| Features | `2_experience/2_features/` with groups | Delegated to subsystem `_concept/` |
-| Screens | `2_experience/3_screens/` with groups | Delegated to subsystem `_concept/` |
-| Data model | `3_blueprint/3_datamodel/` | Delegated to subsystem `_concept/` |
-| Tech stack | `3_blueprint/1_techstack/stack.md` | Per-subsystem in `2_subsystems/*.md` |
+| Features | `experience/features/` with groups | Delegated to subsystem `_concept/` |
+| Screens | `experience/screens/` with groups | Delegated to subsystem `_concept/` |
+| Data model | `blueprint/datamodel/` | Delegated to subsystem `_concept/` |
+| Tech stack | `blueprint/techstack.md` | Per-subsystem in `2_subsystems/*.md` |
 | Architecture | Intra-app modules and services | Inter-repo connections and protocols |
-| Brand | `1_discovery/2_brand/` | Shared or referenced from a subsystem |
-| Journeys | `2_experience/1_journeys/stories.json` | Lightweight cross-product narratives in PLANS.md |
+| Brand | `discovery/brand/` | Shared or referenced from a subsystem |
+| Journeys | `experience/journeys/stories.json` | Lightweight cross-product narratives in PLANS.md |
 | Permissions | Per-feature role matrix | Per-subsystem audience in subsystem files |
 | Progress | Pipeline step checkboxes in PLANS.md | Subsystem maturity + roadmap milestones |
 
@@ -309,6 +309,6 @@ narrative descriptions, not the full stories.json format.
 | New shared package or protocol | `3_integration/shared_contracts.md` |
 | Deployment model changes | `3_integration/deployment.md` |
 | New cross-product journey | `PLANS.md` Cross-Product Journeys section |
-| Brand refresh | `1_discovery/2_brand/identity.md` |
-| Competitive landscape shift | `1_discovery/1_overview/comparable.md` |
+| Brand refresh | `discovery/brand/identity.md` |
+| Competitive landscape shift | `discovery/comparable.md` |
 | Major architectural decision | `3_integration/architecture.md` + PLANS.md Decisions |

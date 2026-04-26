@@ -20,12 +20,12 @@ Conventions shared with `skaileup-conceptualization` (semantic types, pipeline g
 Implementation reads the following before starting:
 
 ```
-_concept/1_discovery/1_overview/brief.md         ← app name, slug, complexity_tier
-_concept/2_experience/2_features/**/*.md          ← feature list and priorities
-_concept/3_blueprint/3_datamodel/model.json       ← data model
-_concept/3_blueprint/1_techstack/stack.md         ← tech stack (drives expert skill selection)
-_concept/2_experience/3_screens/**/*.md           ← screen specs (for verification)
-? _concept/3_blueprint/2_architecture/architecture.md
+_concept/discovery/brief.md         ← app name, slug, complexity_tier
+_concept/experience/features/**/*.md          ← feature list and priorities
+_concept/blueprint/datamodel/model.json       ← data model
+_concept/blueprint/techstack.md         ← tech stack (drives expert skill selection)
+_concept/experience/screens/**/*.md           ← screen specs (for verification)
+? _concept/blueprint/architecture.md
 ```
 
 ## _implementation/ Folder Layout
@@ -71,7 +71,7 @@ _implementation/
 
 During implementation, skills search for matching `skailup-prog-expert-*` skills:
 
-1. Read `_concept/3_blueprint/1_techstack/stack.md`
+1. Read `_concept/blueprint/techstack.md`
 2. Search paths: `.claude/skills/`, `.agents/skills/`, paths in `pipeline.json` `config.expert_search_paths`
 3. If found: include expert SKILL.md in subagent context
 4. Expert recipes guide implementation patterns

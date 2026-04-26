@@ -99,7 +99,7 @@ Skills can declare their dependencies and outputs in `metadata.prerequisites`. T
 metadata:
   prerequisites:
     files:                              # files/dirs that must exist
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard                      # hard = block, soft = warn
         description: "Project brief"
         min_entries: 1                  # for directories only
@@ -119,7 +119,7 @@ metadata:
       - path: "_concept/_grounding/general/domain.md"
         description: "Domain research"
     produces:                           # what this skill creates
-      - path: "_concept/2_experience/2_features/"
+      - path: "_concept/experience/features/"
         description: "Feature specs"
 ```
 

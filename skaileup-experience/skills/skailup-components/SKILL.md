@@ -1,6 +1,6 @@
 ---
 name: "skailup-components"
-description: "Reusable component inventory. Use when screen specs exist and you need to identify shared UI patterns (data tables, forms, cards, navigation) across screens. Maps components to the tech stack's component library. Outputs to _concept/2_experience/3_screens/components/."
+description: "Reusable component inventory. Use when screen specs exist and you need to identify shared UI patterns (data tables, forms, cards, navigation) across screens. Maps components to the tech stack's component library. Outputs to _concept/experience/screens/components/."
 metadata:
   version: "1.0.0"
   tags:
@@ -31,18 +31,18 @@ metadata:
         gate: soft
   prerequisites:
     files:
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: hard
         description: "Screen specs required to identify shared UI patterns across screens"
         min_entries: 1
-      - path: "_concept/1_discovery/2_brand/tokens.json"
+      - path: "_concept/discovery/brand/tokens.json"
         gate: hard
         description: "Design tokens required for component styling context"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         gate: hard
         description: "Tech stack required to map abstract components to concrete library components"
     produces:
-      - path: "_concept/2_experience/3_screens/components"
+      - path: "_concept/experience/screens/components"
         description: "Component inventory files with props, variants, states, and accessibility notes"
 ---
 
@@ -74,12 +74,12 @@ tech stack to map abstract components to concrete library components
 
 | Artifact | Path | Missing? Run | Gate |
 |----------|------|-------------|------|
-| Screen specs | `_concept/2_experience/3_screens/**/*.md` | `screens` | HARD |
-| Brand tokens | `_concept/1_discovery/2_brand/tokens.json` | `brand-visual` | HARD |
-| Tech stack | `_concept/3_blueprint/1_techstack/stack.md` | `techstack` | HARD |
-| Layout shell | `_concept/2_experience/3_screens/00_layout/shell.md` | `screens` | recommended |
-| Data model | `_concept/3_blueprint/3_datamodel/model.json` | `datamodel` | recommended |
-| Features | `_concept/2_experience/2_features/**/*.md` | `features` | recommended |
+| Screen specs | `_concept/experience/screens/**/*.md` | `screens` | HARD |
+| Brand tokens | `_concept/discovery/brand/tokens.json` | `brand-visual` | HARD |
+| Tech stack | `_concept/blueprint/techstack.md` | `techstack` | HARD |
+| Layout shell | `_concept/experience/screens/00_layout/shell.md` | `screens` | recommended |
+| Data model | `_concept/blueprint/datamodel/model.json` | `datamodel` | recommended |
+| Features | `_concept/experience/features/**/*.md` | `features` | recommended |
 
 If any HARD gate artifact is missing, stop immediately and name the prerequisite skill.
 
@@ -95,24 +95,24 @@ Before starting, read:
 
 | Source | Priority |
 |--------|----------|
-| `_concept/2_experience/3_screens/**/*.md` | Required (all) |
-| `_concept/3_blueprint/1_techstack/stack.md` | Required |
-| `_concept/1_discovery/2_brand/tokens.json` | Required |
-| `_concept/2_experience/3_screens/00_layout/shell.md` | Required |
-| `_concept/3_blueprint/3_datamodel/model.json` | Skim for entity shapes |
-| `_concept/2_experience/2_features/**/*.md` | Skim for data patterns |
+| `_concept/experience/screens/**/*.md` | Required (all) |
+| `_concept/blueprint/techstack.md` | Required |
+| `_concept/discovery/brand/tokens.json` | Required |
+| `_concept/experience/screens/00_layout/shell.md` | Required |
+| `_concept/blueprint/datamodel/model.json` | Skim for entity shapes |
+| `_concept/experience/features/**/*.md` | Skim for data patterns |
 
 ## Workflow
 
 ### Step 1: Read All Screen Specs
 
-Read every file in `_concept/2_experience/3_screens/` (including `00_layout/shell.md`).
+Read every file in `_concept/experience/screens/` (including `00_layout/shell.md`).
 For each screen, extract the **Component Inventory** section. Build a
 frequency map of component types mentioned across screens.
 
 ### Step 2: Read Tech Stack
 
-Read `_concept/3_blueprint/1_techstack/stack.md`. Extract:
+Read `_concept/blueprint/techstack.md`. Extract:
 - UI library (PrimeVue, Radix UI, shadcn/ui, Tailwind-only, etc.)
 - CSS framework
 - Any component-specific notes
@@ -157,16 +157,16 @@ Present the identified components to the user:
 
 ### Step 5: Write Component Specs
 
-**Output per component: `_concept/2_experience/3_screens/components/<component_name>.md`**
+**Output per component: `_concept/experience/screens/components/<component_name>.md`**
 
 ```yaml
 ---
 pattern: data_table
 library_component: PrimeVue DataTable
 used_in:
-  - 2_experience/3_screens/02_dashboard/overview.md
-  - 2_experience/3_screens/03_tasks/task_list.md
-  - 2_experience/3_screens/04_admin/user_list.md
+  - experience/screens/02_dashboard/overview.md
+  - experience/screens/03_tasks/task_list.md
+  - experience/screens/04_admin/user_list.md
 data_entities: [task, user]
 last_updated: YYYY-MM-DD
 ---
@@ -220,17 +220,17 @@ For each screen that uses a shared component, add a `components:` array
 to the screen frontmatter if not already present:
 
 ```yaml
-# In 2_experience/3_screens/02_dashboard/overview.md
+# In experience/screens/02_dashboard/overview.md
 components:
-  - 2_experience/3_screens/components/data_table.md
-  - 2_experience/3_screens/components/status_badge.md
+  - experience/screens/components/data_table.md
+  - experience/screens/components/status_badge.md
 ```
 
 ## Outputs
 
 | File | Purpose |
 |------|---------|
-| `_concept/2_experience/3_screens/components/<name>.md` | One spec per shared component |
+| `_concept/experience/screens/components/<name>.md` | One spec per shared component |
 
 ## Depth Behavior
 

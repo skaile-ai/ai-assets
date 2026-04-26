@@ -9,11 +9,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "skaileup-shared" /
 from validator_lib import Validator, main  # noqa: E402
 
 SKILL = "datamodel"
-DBML = "_concept/3_blueprint/3_datamodel/model.dbml"
-MODEL = "_concept/3_blueprint/3_datamodel/model.json"
-SEED = "_concept/3_blueprint/3_datamodel/seed.json"
-FEATURE_MAP = "_concept/3_blueprint/3_datamodel/feature_map.json"
-FEATURES_DIR = "_concept/2_experience/2_features"
+DBML = "_concept/blueprint/datamodel/model.dbml"
+MODEL = "_concept/blueprint/datamodel/model.json"
+SEED = "_concept/blueprint/datamodel/seed.json"
+FEATURE_MAP = "_concept/blueprint/datamodel/feature_map.json"
+FEATURES_DIR = "_concept/experience/features"
 
 
 def validate(cwd: str) -> dict:

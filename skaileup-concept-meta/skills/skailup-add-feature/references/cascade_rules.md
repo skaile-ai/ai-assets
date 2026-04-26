@@ -9,11 +9,11 @@ Check for each artifact before cascading:
 
 | Artifact | Existence check | What to update |
 |---|---|---|
-| Journeys | `_concept/2_experience/1_journeys/stories.json` exists | Add stories, update downstream links |
-| Tech Stack | `_concept/3_blueprint/1_techstack/stack.md` exists | Add integrations to Additional Integrations section |
-| Architecture | `_concept/3_blueprint/2_architecture/architecture.md` exists | Update modules, protocols, external_integrations, infrastructure |
-| Data Model | `_concept/3_blueprint/3_datamodel/model.json` exists | Add entities, fields, relations; sync model.dbml; update seed.json + feature_map.json |
-| Screens | `_concept/2_experience/3_screens/` has any .md files | Add/modify screen specs; update shell.md if new route |
+| Journeys | `_concept/experience/journeys/stories.json` exists | Add stories, update downstream links |
+| Tech Stack | `_concept/blueprint/techstack.md` exists | Add integrations to Additional Integrations section |
+| Architecture | `_concept/blueprint/architecture.md` exists | Update modules, protocols, external_integrations, infrastructure |
+| Data Model | `_concept/blueprint/datamodel/model.json` exists | Add entities, fields, relations; sync model.dbml; update seed.json + feature_map.json |
+| Screens | `_concept/experience/screens/` has any .md files | Add/modify screen specs; update shell.md if new route |
 
 ## Cascade Order
 
@@ -29,7 +29,7 @@ Cascading out of order risks writing screens that don't match the data model, or
 
 ---
 
-## 1: Journeys (`2_experience/1_journeys/stories.json`)
+## 1: Journeys (`experience/journeys/stories.json`)
 
 Update when: new user flow is introduced that isn't covered by existing stories.
 
@@ -45,11 +45,11 @@ In most cases, add a story to an existing story_map.
 
 ---
 
-## 2: Tech Stack (`3_blueprint/1_techstack/stack.md`)
+## 2: Tech Stack (`blueprint/techstack.md`)
 
 Update when: the feature requires a new library, service, or integration not already in the stack.
 
-1. Read `_concept/3_blueprint/1_techstack/stack.md`
+1. Read `_concept/blueprint/techstack.md`
 2. Add the new integration to the "Additional Integrations" section
 3. Include: service name, what it does, why this feature needs it
 4. Update `last_updated`
@@ -60,11 +60,11 @@ Examples of integrations that trigger this: payment gateway (Stripe), email serv
 
 ---
 
-## 3: Architecture (`3_blueprint/2_architecture/architecture.md`)
+## 3: Architecture (`blueprint/architecture.md`)
 
 Update when: the feature introduces a new system component, protocol, or external dependency.
 
-1. Read `_concept/3_blueprint/2_architecture/architecture.md`
+1. Read `_concept/blueprint/architecture.md`
 2. Update the relevant sections:
    - Custom Modules (new service module or handler)
    - Communication Protocols (new WebSocket/SSE endpoint, new event)
@@ -77,7 +77,7 @@ Update when: the feature introduces a new system component, protocol, or externa
 
 ---
 
-## 4: Data Model (`3_blueprint/3_datamodel/`)
+## 4: Data Model (`blueprint/datamodel/`)
 
 Update when: the feature needs new entities, fields, or relations.
 
@@ -113,7 +113,7 @@ Follow `skaileup-shared/contracts/golden_principles.md`:
 
 ---
 
-## 5: Screens (`2_experience/3_screens/`)
+## 5: Screens (`experience/screens/`)
 
 Update when: the feature needs a new screen or modifies an existing screen.
 
@@ -121,9 +121,9 @@ Update when: the feature needs a new screen or modifies an existing screen.
 ```markdown
 ---
 implements:
-  - 2_experience/2_features/<NN_group>/<feature>.md
+  - experience/features/<NN_group>/<feature>.md
 data_entities: [<ModelName>, ...]
-layout: 2_experience/3_screens/00_layout/shell.md
+layout: experience/screens/00_layout/shell.md
 last_updated: YYYY-MM-DD
 ---
 
@@ -154,7 +154,7 @@ last_updated: YYYY-MM-DD
 **Existing screen update**: Modify relevant sections. Note what changed.
 
 **Navigation update**: If the new screen is a top-level route, update
-`_concept/2_experience/3_screens/00_layout/shell.md` to add the nav item.
+`_concept/experience/screens/00_layout/shell.md` to add the nav item.
 
 **Feedback loop (forward)**: Update feature spec `screens:` to include the new screen path.
 **Feedback loop (reverse)**: Update each screen's `implements:` to include the feature path.

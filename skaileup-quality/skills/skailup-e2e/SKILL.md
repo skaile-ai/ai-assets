@@ -18,21 +18,21 @@ metadata:
       - path: "package.json"
         gate: hard
         description: "Source code must exist (or pyproject.toml equivalent)"
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Project brief required for app name and test scope"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Feature specs required for user journey test coverage"
         min_entries: 1
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         gate: hard
         description: "Screen specs required for route and interaction testing"
         min_entries: 1
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         gate: hard
         description: "Data model required for database record validation"
-      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+      - path: "_concept/blueprint/datamodel/seed.json"
         gate: hard
         description: "Seed scenarios required for all test data inputs"
     reads:
@@ -78,14 +78,14 @@ database records.
 
 | Action | Path | Required |
 |--------|------|----------|
-| **Must read** | `_concept/1_discovery/1_overview/brief.md` | Yes |
-| **Must read** | `_concept/2_experience/2_features/**/*.md` | Yes |
-| **Must read** | `_concept/3_blueprint/3_datamodel/model.json` | Yes |
-| **Must read** | `_concept/3_blueprint/3_datamodel/seed.json` | Yes |
-| **Must read** | `_concept/2_experience/3_screens/**/*.md` | Yes |
+| **Must read** | `_concept/discovery/brief.md` | Yes |
+| **Must read** | `_concept/experience/features/**/*.md` | Yes |
+| **Must read** | `_concept/blueprint/datamodel/model.json` | Yes |
+| **Must read** | `_concept/blueprint/datamodel/seed.json` | Yes |
+| **Must read** | `_concept/experience/screens/**/*.md` | Yes |
 | **Must read** | `package.json` (or equivalent) | Yes |
 | **Optional** | `.env.example` | No (auth and DB connection) |
-| **Never load** | `_concept/_grounding/`, `_concept/1_discovery/2_brand/` | — |
+| **Never load** | `_concept/_grounding/`, `_concept/discovery/brand/` | — |
 
 ## Common Mistakes
 
@@ -102,11 +102,11 @@ database records.
 ROLE  E2E Testing agent — runs browser tests against every user journey, captures screenshots, validates database state.
 
 READS
-  _concept/1_discovery/1_overview/brief.md          — app name, purpose
-  _concept/2_experience/2_features/**/*.md          — feature specs, requirements, success criteria
-  _concept/3_blueprint/3_datamodel/model.json       — model definitions for DB validation
-  _concept/2_experience/3_screens/**/*.md           — screen specs with routes, components, states
-  ? _concept/3_blueprint/3_datamodel/seed.json      — scenario-based test data
+  _concept/discovery/brief.md          — app name, purpose
+  _concept/experience/features/**/*.md          — feature specs, requirements, success criteria
+  _concept/blueprint/datamodel/model.json       — model definitions for DB validation
+  _concept/experience/screens/**/*.md           — screen specs with routes, components, states
+  ? _concept/blueprint/datamodel/seed.json      — scenario-based test data
 
 WRITES
   e2e-screenshots/**/*.png              — per-journey step screenshots
@@ -120,8 +120,8 @@ REFERENCES
 REQUIRES
   hard: agent-browser
   soft: docker (database validation deferred without it)
-  state: _concept/2_experience/3_screens/**/*.md exist
-  state: _concept/2_experience/2_features/**/*.md exist
+  state: _concept/experience/screens/**/*.md exist
+  state: _concept/experience/features/**/*.md exist
 
 MUST  run audit before this skill for static analysis
 MUST  use seed.json scenario data for all form inputs (never invent test data)
@@ -144,14 +144,14 @@ STEP 1: Pre-flight checks
 
 STEP 2: Parallel research (two sub-agents)
   - Sub-agent 1 — Concept & User Journeys:
-    - Read _concept/1_discovery/1_overview/brief.md for app name, purpose
-    - Read _concept/2_experience/2_features/**/*.md for every feature, requirements, success criteria
-    - Read _concept/2_experience/3_screens/**/*.md for every screen: route, components, template data, states
+    - Read _concept/discovery/brief.md for app name, purpose
+    - Read _concept/experience/features/**/*.md for every feature, requirements, success criteria
+    - Read _concept/experience/screens/**/*.md for every screen: route, components, template data, states
     - Read package.json for dev server command, port, URL
     - Read .env.example or feature docs for auth info
     - Synthesize: startup guide (exact commands) + user journey list (steps, interactions, expected outcomes)
   - Sub-agent 2 — Database Schema & Data Flows:
-    - Read _concept/3_blueprint/3_datamodel/model.json for models, relationships, field types
+    - Read _concept/blueprint/datamodel/model.json for models, relationships, field types
     - Cross-reference .env.example for connection details
     - Return: DB type/connection, model-to-table mapping, data flows per user action, validation queries
 
@@ -167,7 +167,7 @@ EMIT  [e2e] checkpoint phase=app_started url=<url>
 
 STEP 4: Test user journeys
   - For each journey from Step 2 sub-agent 1:
-    - Use agent-browser commands with seed data from _concept/3_blueprint/3_datamodel/seed.json
+    - Use agent-browser commands with seed data from _concept/blueprint/datamodel/seed.json
       (see references/report_template.md for scenario mapping)
     - Screenshot every interaction step to e2e-screenshots/<journey>/
     - Analyze screenshots with Read tool
@@ -192,10 +192,10 @@ STEP 6: Cleanup
 
 STEP 7: Update feature tracking (feedback loop)
   - For every successfully tested journey:
-    - Find corresponding feature in _concept/2_experience/2_features/
+    - Find corresponding feature in _concept/experience/features/
     - Update last_updated in frontmatter to today's date
 
-EMIT  [e2e] feedback_loop updated 2_experience/2_features/<group>/<feature>.md updated last_updated
+EMIT  [e2e] feedback_loop updated experience/features/<group>/<feature>.md updated last_updated
 
 STEP 8: Report
   - Present summary (see references/report_template.md for format)

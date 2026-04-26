@@ -14,14 +14,14 @@ metadata:
   source: "MERGED"
   prerequisites:
     files:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Brief required for scope definition"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Features required to identify implementation risks"
         min_entries: 1
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         gate: hard
         description: "Tech stack required to surface stack-specific risks"
   user_inputs:
@@ -32,11 +32,11 @@ metadata:
         required: false
     files: []
   reads_from:
-    - "_concept/1_discovery/1_overview/brief.md"
-    - "_concept/2_experience/2_features/**/*.md"
-    - "_concept/3_blueprint/1_techstack/stack.md"
-    - "_concept/3_blueprint/3_datamodel/model.json"
-    - "_concept/2_experience/1_journeys/stories.json"
+    - "_concept/discovery/brief.md"
+    - "_concept/experience/features/**/*.md"
+    - "_concept/blueprint/techstack.md"
+    - "_concept/blueprint/datamodel/model.json"
+    - "_concept/experience/journeys/stories.json"
   writes_to:
     - "_implementation/brainstorm.md"
 ---
@@ -71,12 +71,12 @@ is known. It isn't. The brainstorm exposes the gaps before they become blockers.
 ROLE  Pre-implementation problem decomposition — surfaces risks, unknowns, and open questions before planning begins.
 
 READS
-  _concept/1_discovery/1_overview/brief.md
-  _concept/2_experience/2_features/**/*.md
-  _concept/3_blueprint/1_techstack/stack.md
-  _concept/3_blueprint/3_datamodel/model.json
-  ? _concept/2_experience/1_journeys/stories.json
-  ? _concept/3_blueprint/2_architecture/architecture.md
+  _concept/discovery/brief.md
+  _concept/experience/features/**/*.md
+  _concept/blueprint/techstack.md
+  _concept/blueprint/datamodel/model.json
+  ? _concept/experience/journeys/stories.json
+  ? _concept/blueprint/architecture.md
   ? _implementation/brainstorm.md    — check for existing brainstorm (resume/update mode)
 
 WRITES

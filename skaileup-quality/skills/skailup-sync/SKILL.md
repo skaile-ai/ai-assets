@@ -18,13 +18,13 @@ metadata:
         gate: hard
         description: "_concept/ folder must exist to scan cross-references"
     reads:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         description: "Feature files to check bidirectional links to screens"
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         description: "Screen files to check implements: references back to features"
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         description: "Data model to find orphaned entities without feature map entries"
-      - path: "_concept/3_blueprint/3_datamodel/feature_map.json"
+      - path: "_concept/blueprint/datamodel/feature_map.json"
         description: "Feature map to repair model-to-feature cross-references"
     produces:
       - path: "_concept"
@@ -74,10 +74,10 @@ Before starting, read:
 
 | Source | Priority |
 |--------|----------|
-| `_concept/2_experience/2_features/**/*.md` (frontmatter) | Required |
-| `_concept/2_experience/3_screens/**/*.md` (frontmatter) | Required |
-| `_concept/3_blueprint/3_datamodel/model.json` | Required |
-| `_concept/3_blueprint/3_datamodel/feature_map.json` | Required |
+| `_concept/experience/features/**/*.md` (frontmatter) | Required |
+| `_concept/experience/screens/**/*.md` (frontmatter) | Required |
+| `_concept/blueprint/datamodel/model.json` | Required |
+| `_concept/blueprint/datamodel/feature_map.json` | Required |
 | `skaileup-shared/contracts/feedback_loop.md` | Required |
 | All other `_concept/**/*.md` (frontmatter only) | Optional |
 
@@ -96,8 +96,8 @@ Scan `_concept/` and build a complete artifact registry:
 ```
 | Type | Path | Cross-refs |
 |------|------|-----------|
-| feature | 2_experience/2_features/01_user_auth/login.md | screens: [...] |
-| screen | 2_experience/3_screens/01_user_auth/login.md | implements: [...] |
+| feature | experience/features/01_user_auth/login.md | screens: [...] |
+| screen | experience/screens/01_user_auth/login.md | implements: [...] |
 | entity | model.json → user | — |
 ```
 
@@ -134,9 +134,9 @@ For each entity in `model.json`:
 ```
 | Entity | feature_map ref | Feature exists | Feature refs entity | Status |
 |--------|-----------------|----------------|---------------------|--------|
-| user | 2_experience/2_features/01_user_auth/login.md | Yes | Yes | OK |
-| task | 2_experience/2_features/02_tasks/create.md | Yes | No | MISSING_BACK |
-| tag | 2_experience/2_features/99_deleted/tags.md | No | — | BROKEN |
+| user | experience/features/01_user_auth/login.md | Yes | Yes | OK |
+| task | experience/features/02_tasks/create.md | Yes | No | MISSING_BACK |
+| tag | experience/features/99_deleted/tags.md | No | — | BROKEN |
 ```
 
 ### Step 4: Detect Orphans
@@ -166,26 +166,26 @@ Compile all proposed changes into a clear diff format:
 ## Proposed Changes (N fixes)
 
 ### 1. Add missing back-link
-File: _concept/2_experience/3_screens/01_user_auth/register.md
+File: _concept/experience/screens/01_user_auth/register.md
   implements:
 -   []
-+   [2_experience/2_features/01_user_auth/registration.md]
++   [experience/features/01_user_auth/registration.md]
 
 ### 2. Remove broken reference
-File: _concept/2_experience/2_features/03_settings/preferences.md
+File: _concept/experience/features/03_settings/preferences.md
   screens:
--   [2_experience/3_screens/03_settings/old_prefs.md]
+-   [experience/screens/03_settings/old_prefs.md]
 +   []
 
 ### 3. Add missing entity reference
-File: _concept/2_experience/2_features/02_tasks/create.md
+File: _concept/experience/features/02_tasks/create.md
   data_entities:
 -   []
 +   [task]
 
 ### 4. Remove broken feature_map entry
-File: _concept/3_blueprint/3_datamodel/feature_map.json → entity "tag"
-  feature: 2_experience/2_features/99_deleted/tags.md → removed (file not found)
+File: _concept/blueprint/datamodel/feature_map.json → entity "tag"
+  feature: experience/features/99_deleted/tags.md → removed (file not found)
 ```
 
 ### Step 7: Present Diff and Ask
@@ -210,9 +210,9 @@ For each approved fix:
 4. Emit event
 
 ```
-[sync] fix applied file=2_experience/3_screens/01_user_auth/register.md
+[sync] fix applied file=experience/screens/01_user_auth/register.md
   action: added back-link to implements
-  target: 2_experience/2_features/01_user_auth/registration.md
+  target: experience/features/01_user_auth/registration.md
 ```
 
 ### Step 9: Generate Sync Report
@@ -229,15 +229,15 @@ Remaining (user skipped or unsafe): N
 ### Fixes Applied
 | # | File | Change | Type |
 |---|------|--------|------|
-| 1 | 2_experience/3_screens/01_user_auth/register.md | Added back-link | MISSING_BACK |
-| 2 | 2_experience/2_features/03_settings/preferences.md | Removed broken ref | BROKEN |
-| 3 | 3_blueprint/3_datamodel/feature_map.json (tag) | Removed broken entry | BROKEN |
+| 1 | experience/screens/01_user_auth/register.md | Added back-link | MISSING_BACK |
+| 2 | experience/features/03_settings/preferences.md | Removed broken ref | BROKEN |
+| 3 | blueprint/datamodel/feature_map.json (tag) | Removed broken entry | BROKEN |
 
 ### Orphans Detected (not auto-fixed)
 | Type | Artifact | Recommendation |
 |------|----------|---------------|
 | Entity | tag | Assign to a feature or remove from model |
-| Screen | 2_experience/3_screens/04_archive/list.md | No feature references it — remove or create feature |
+| Screen | experience/screens/04_archive/list.md | No feature references it — remove or create feature |
 
 ### Group Alignment
 | Group | Features | Screens | Status |

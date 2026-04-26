@@ -51,7 +51,7 @@ metadata:
           - all
         hint: "What area to research (select 'all' for comprehensive research)"
     reads:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         description: "App name, problem statement, target audience for focused research"
       - path: "_concept/_grounding/onboarding/inputs/overview.json"
         description: "Pre-collected answers to sharpen research scope"
@@ -129,9 +129,9 @@ Before starting, read:
 
 | Source | Priority |
 |--------|----------|
-| `_concept/1_discovery/1_overview/brief.md` | Required (if exists) |
-| `_concept/1_discovery/1_overview/goals.md` | Required (if exists) |
-| `_concept/1_discovery/1_overview/comparable.md` | Required (if exists) |
+| `_concept/discovery/brief.md` | Required (if exists) |
+| `_concept/discovery/goals.md` | Required (if exists) |
+| `_concept/discovery/comparable.md` | Required (if exists) |
 | Active `_concept/` step files | Skim for context |
 | All other `_concept/` files | Never load |
 | Source code | Never load |
@@ -143,9 +143,9 @@ ROLE  Domain Research agent — investigates comparable products, competitor fea
       research artifacts with cited sources.
 
 READS
-  _concept/1_discovery/1_overview/brief.md       — elevator pitch, audience, problem, hero flow
-  _concept/1_discovery/1_overview/goals.md       — success criteria, constraints
-  _concept/1_discovery/1_overview/comparable.md  — user-identified reference apps
+  _concept/discovery/brief.md       — elevator pitch, audience, problem, hero flow
+  _concept/discovery/goals.md       — success criteria, constraints
+  _concept/discovery/comparable.md  — user-identified reference apps
 
 WRITES
   _grounding/research/domain.md              — industry terms, regulations, trends, workflows
@@ -180,7 +180,7 @@ NEVER  skip design inspiration research
 EMIT  [research] started run_id=<uuid> scope=<research_scope>
 
 STEP 1: Read brief and plan research
-  - Read all files in _concept/1_discovery/1_overview/ (if they exist)
+  - Read all files in _concept/discovery/ (if they exist)
   - Extract: domain, problem space, target audiences, comparable products, constraints
   - Present research plan to user listing:
     - 3-5 competitors/comparables to investigate (include user-mentioned ones from comparable.md)
@@ -330,7 +330,7 @@ CHECKLIST
 | Inventing competitor features or pricing | Verify via search. If unknown, say "not publicly available". |
 | Generic personas ("busy professional") | Be specific to the domain. Use real job titles, real pain points. |
 | Skipping design inspiration | Design inspiration is critical input for brand. Always produce it. |
-| Writing to `_concept/1_discovery/2_research/` or `_concept/_research/` | Research output goes to `_grounding/`. Cross-cutting topics to `_grounding/research/`, step-specific to `_grounding/step/{step}/`. |
+| Writing to `_concept/discovery/2_research/` or `_concept/_research/` | Research output goes to `_grounding/`. Cross-cutting topics to `_grounding/research/`, step-specific to `_grounding/step/{step}/`. |
 
 ## Backward Compatibility
 

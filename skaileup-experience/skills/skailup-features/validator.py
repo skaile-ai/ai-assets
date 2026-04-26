@@ -9,9 +9,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "skaileup-shared" /
 from validator_lib import Validator, main  # noqa: E402
 
 SKILL = "features"
-FEATURES_DIR = "_concept/2_experience/2_features"
-BRIEF = "_concept/1_discovery/1_overview/brief.md"
-STORIES = "_concept/2_experience/1_journeys/stories.json"
+FEATURES_DIR = "_concept/experience/features"
+BRIEF = "_concept/discovery/brief.md"
+STORIES = "_concept/experience/journeys/stories.json"
 
 REQUIRED_FM = ("priority", "story_refs", "roles", "last_updated")
 

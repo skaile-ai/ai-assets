@@ -10,7 +10,7 @@ user_inputs:
     required: true
 reads_from:
   - contracts/meta-concept-contract/CONTRACT.md
-  - "{PROJECT_ROOT}/_concept/1_discovery/"
+  - "{PROJECT_ROOT}/_concept/discovery/"
   - "{PROJECT_ROOT}/_concept/2_subsystems/"
   - "{PROJECT_ROOT}/CLAUDE.md"
   - "{PROJECT_ROOT}/package.json"
@@ -26,7 +26,7 @@ Generate the integration layer of a multi-product umbrella concept.
 
 ## Prerequisites
 
-- `1_discovery/1_overview/brief.md` must exist
+- `discovery/brief.md` must exist
 - `2_subsystems/index.md` must exist with at least two subsystems
 - Read the meta-concept contract: `contracts/meta-concept-contract/CONTRACT.md`
 

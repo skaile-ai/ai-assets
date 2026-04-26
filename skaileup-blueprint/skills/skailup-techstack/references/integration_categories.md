@@ -41,7 +41,7 @@ its core stack. Use this reference during the integration consultation step.
 ## Consultation Approach
 
 Ask the user one round of questions covering all categories above.
-Frame questions around the features already identified (if `_concept/2_experience/2_features/`
+Frame questions around the features already identified (if `_concept/experience/features/`
 exists). For example:
 
 - "I see a billing feature — do you need a payment gateway like Stripe?"

@@ -17,11 +17,11 @@ metadata:
       - path: "package.json"
         gate: hard
         description: "Source code must exist — unit tests require implemented functions to test"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Feature specs required — each requirement becomes a test case"
         min_entries: 1
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         gate: hard
         description: "Tech stack required to select correct test framework (vitest/jest)"
     reads:
@@ -60,8 +60,8 @@ individual functions, composables, utilities, and component logic in isolation.
 
 **Hard gates:**
 1. Source code must exist (`package.json`, `pyproject.toml`, or equivalent)
-2. Feature specs must exist in `_concept/2_experience/2_features/`
-3. Tech stack must be known — `_concept/3_blueprint/1_techstack/stack.md` or infer from `package.json`
+2. Feature specs must exist in `_concept/experience/features/`
+3. Tech stack must be known — `_concept/blueprint/techstack.md` or infer from `package.json`
 
 ## Shared Contracts
 
@@ -74,8 +74,8 @@ Before starting, read:
 
 | Source | Priority |
 |--------|----------|
-| `_concept/2_experience/2_features/**/*.md` | Required |
-| `_concept/3_blueprint/1_techstack/stack.md` | Required |
+| `_concept/experience/features/**/*.md` | Required |
+| `_concept/blueprint/techstack.md` | Required |
 | `package.json` (deps + scripts) | Required |
 | Existing test files (pattern discovery) | Required |
 | Source code for features under test | Required |
@@ -101,7 +101,7 @@ If no test framework is configured:
 
 #### Sub-agent 2: Feature-to-Source Mapping
 
-For each feature in `_concept/2_experience/2_features/`:
+For each feature in `_concept/experience/features/`:
 
 1. Read the feature spec — extract requirements and success criteria
 2. Find the corresponding source files (pages, components, composables, API routes)

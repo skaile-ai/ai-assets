@@ -15,19 +15,19 @@ metadata:
   source: "MERGED"
   prerequisites:
     files:
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         gate: hard
         description: "Tech stack definition required to select scaffold commands and conventions"
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Project brief required for app name and directory naming"
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         gate: hard
         description: "Data model required for initial schema generation and migration setup"
     reads:
-      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+      - path: "_concept/blueprint/architecture.md"
         description: "Architecture for monorepo vs single-app scaffold decisions"
-      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+      - path: "_concept/blueprint/datamodel/seed.json"
         description: "Seed data to configure initial seed script"
     produces:
       - path: "_implementation/PLANS.md"
@@ -65,9 +65,9 @@ tech stack profile, not from this skill directly.
 ## Prerequisites
 
 **Hard gates:**
-1. `_concept/3_blueprint/1_techstack/stack.md` exists
-2. `_concept/1_discovery/1_overview/brief.md` exists (app name + slug)
-3. `_concept/3_blueprint/3_datamodel/model.json` exists (entities for initial setup)
+1. `_concept/blueprint/techstack.md` exists
+2. `_concept/discovery/brief.md` exists (app name + slug)
+3. `_concept/blueprint/datamodel/model.json` exists (entities for initial setup)
 
 **Required background:** Read `skaileup-shared/contracts/iron_laws.md` before starting.
 
@@ -75,24 +75,24 @@ tech stack profile, not from this skill directly.
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/3_blueprint/1_techstack/stack.md` | Yes |
+| Must read | `_concept/blueprint/techstack.md` | Yes |
 | Must read | `skaileup-standards/profiles/<tech_stack_skill>/SKILL.md` | Yes (resolved from stack.md) |
-| Must read | `_concept/1_discovery/1_overview/brief.md` | Yes |
-| Must read | `_concept/3_blueprint/3_datamodel/model.json` | Yes |
-| Read if exists | `_concept/3_blueprint/2_architecture/architecture.md` | Recommended |
-| Read if exists | `_concept/3_blueprint/3_datamodel/seed.json` | Recommended |
+| Must read | `_concept/discovery/brief.md` | Yes |
+| Must read | `_concept/blueprint/datamodel/model.json` | Yes |
+| Read if exists | `_concept/blueprint/architecture.md` | Recommended |
+| Read if exists | `_concept/blueprint/datamodel/seed.json` | Recommended |
 
 ---
 
 ROLE  Scaffold agent — creates a buildable project from concept artifacts using the tech stack profile.
 
 READS
-  _concept/3_blueprint/1_techstack/stack.md                   — tech stack choice + tech_stack_skill field
+  _concept/blueprint/techstack.md                   — tech stack choice + tech_stack_skill field
   skaileup-standards/profiles/<tech_stack_skill>/SKILL.md          — scaffold commands + project structure
-  _concept/1_discovery/1_overview/brief.md                    — app name, slug
-  _concept/3_blueprint/3_datamodel/model.json                 — entity count, relationships
-  ? _concept/3_blueprint/2_architecture/architecture.md       — custom modules, processes
-  ? _concept/3_blueprint/3_datamodel/seed.json                — seed data for initial setup
+  _concept/discovery/brief.md                    — app name, slug
+  _concept/blueprint/datamodel/model.json                 — entity count, relationships
+  ? _concept/blueprint/architecture.md       — custom modules, processes
+  ? _concept/blueprint/datamodel/seed.json                — seed data for initial setup
 
 WRITES
   <app-slug>/                            — project directory (stack-specific structure)

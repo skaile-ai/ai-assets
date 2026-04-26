@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "skaileup-shared" /
 from validator_lib import Validator, main  # noqa: E402
 
 SKILL = "storybook"
-STORYBOOK_DIR = "_concept/2_experience/4_storybook"
+STORYBOOK_DIR = "_concept/experience/4_storybook"
 MAIN_CONFIG = f"{STORYBOOK_DIR}/.storybook/main"  # .ts or .js
 PREVIEW_CONFIG = f"{STORYBOOK_DIR}/.storybook/preview"
 BRAND_CSS = f"{STORYBOOK_DIR}/src/styles/brand.css"

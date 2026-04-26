@@ -16,14 +16,14 @@ Uses `skaileup-shared/contracts/concept_structure.md` for expected phase-grouped
 
 | Phase folder | Required output | Optional |
 |---|---|---|
-| `1_discovery/1_overview/` | `brief.md`, `goals.md` | `comparable.md` |
-| `1_discovery/2_brand/` | `identity.md`, `tokens.json` | `behavioral.md`, `copy_guidelines.md`, `brandbook.html` |
-| `2_experience/1_journeys/` | `stories.json` | `journey_stages.md` |
-| `2_experience/2_features/` | At least one feature group `NN_*/` | — |
-| `2_experience/3_screens/` | At least one screen group `NN_*/` | `components/` |
-| `3_blueprint/1_techstack/` | `stack.md` | — |
-| `3_blueprint/2_architecture/` | `architecture.md` | — |
-| `3_blueprint/3_datamodel/` | `model.json`, `model.dbml` | `feature_map.json`, `seed.json` |
+| `discovery/` | `brief.md`, `goals.md` | `comparable.md` |
+| `discovery/brand/` | `identity.md`, `tokens.json` | `behavioral.md`, `copy_guidelines.md`, `brandbook.html` |
+| `experience/journeys/` | `stories.json` | `journey_stages.md` |
+| `experience/features/` | At least one feature group `NN_*/` | — |
+| `experience/screens/` | At least one screen group `NN_*/` | `components/` |
+| `blueprint/` | `stack.md` | — |
+| `blueprint/` | `architecture.md` | — |
+| `blueprint/datamodel/` | `model.json`, `model.dbml` | `feature_map.json`, `seed.json` |
 
 ---
 
@@ -62,7 +62,7 @@ For every applicable rule in `skaileup-shared/contracts/golden_principles.md`:
 | Field names: `snake_case` | Check field names in `model.json` | HIGH |
 | Enum values: `PascalCase` | Check enum definitions in `model.json` | MEDIUM |
 | Relation fields: `_id` suffix | Check foreign-key fields in `model.json` | MEDIUM |
-| Feature groups: sequential | Scan `2_experience/2_features/` group numbers — no gaps | HIGH |
+| Feature groups: sequential | Scan `experience/features/` group numbers — no gaps | HIGH |
 | Screen groups mirror features | Screen group numbers match feature group numbers | HIGH |
 | Every feature has ≥1 requirement | Feature body has at least one `- [ ]` checkbox | MEDIUM |
 | All frontmatter paths resolve | Every path in `screens:`, `implements:`, `data_entities:` exists | HIGH |
@@ -109,7 +109,7 @@ If `model.json` exists:
 | Indicator | Condition | Label | Severity |
 |-----------|-----------|-------|----------|
 | Stale file | `last_updated` > 30 days old | STALE | LOW |
-| Missing link | Feature with empty `screens: []` when `2_experience/3_screens/` exists | MISSING LINK | MEDIUM |
+| Missing link | Feature with empty `screens: []` when `experience/screens/` exists | MISSING LINK | MEDIUM |
 | Orphaned entity | `model.json` entity with no `feature_map.json` entry | ORPHANED ENTITY | MEDIUM |
 | Unexpected file | File outside expected `_concept/` structure | UNEXPECTED FILE | LOW |
 | Group mismatch | Feature group without matching screen group | GROUP MISMATCH | HIGH |

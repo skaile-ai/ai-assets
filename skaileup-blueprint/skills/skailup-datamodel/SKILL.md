@@ -1,6 +1,6 @@
 ---
 name: "skailup-datamodel"
-description: "Use when features are approved but _concept/3_blueprint/3_datamodel/ is empty. Produces model.dbml (DBML), model.json (editor canvas), seed.json (test scenarios), and feature_map.json (model-to-feature cross-reference)."
+description: "Use when features are approved but _concept/blueprint/datamodel/ is empty. Produces model.dbml (DBML), model.json (editor canvas), seed.json (test scenarios), and feature_map.json (model-to-feature cross-reference)."
 metadata:
   version: "1.0.0"
   tags:
@@ -42,32 +42,32 @@ metadata:
       default: extend
   prerequisites:
     files:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "Features drive data model entities — features must exist first"
         min_entries: 1
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         gate: hard
         description: "Tech stack determines storage type and semantic type mapping"
     reads:
       - path: "_concept/_grounding/overview/user_input.json"
         description: "Complexity tier for model depth"
-      - path: "_concept/2_experience/1_journeys/stories.json"
+      - path: "_concept/experience/journeys/stories.json"
         description: "User journeys for data flow context"
-      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+      - path: "_concept/blueprint/architecture.md"
         description: "Architecture for service boundaries and data ownership"
-      - path: "_concept/2_experience/4_behaviors"
+      - path: "_concept/experience/behaviors"
         description: "Behavioral specs for entity state machine fields"
       - path: "_concept/_grounding/general/patterns.md"
         description: "Domain patterns for semantic type selection"
     produces:
-      - path: "_concept/3_blueprint/3_datamodel/model.dbml"
+      - path: "_concept/blueprint/datamodel/model.dbml"
         description: "Human-readable DBML entity definitions"
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         description: "Editor canvas state for visual data model"
-      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+      - path: "_concept/blueprint/datamodel/seed.json"
         description: "Scenario-based test data for all downstream testing"
-      - path: "_concept/3_blueprint/3_datamodel/feature_map.json"
+      - path: "_concept/blueprint/datamodel/feature_map.json"
         description: "Model-to-feature cross-reference for readiness checks"
 ---
 
@@ -88,7 +88,7 @@ SQL types. Stack translation (Prisma, Directus schema, SQL DDL) is a separate on
 
 ## When to Use
 
-- Features are approved but `_concept/3_blueprint/3_datamodel/` is empty
+- Features are approved but `_concept/blueprint/datamodel/` is empty
 - User asks about entities, tables, relationships, database schema
 - User says "data model", "what data do we need", "database design"
 
@@ -105,22 +105,22 @@ SQL types. Stack translation (Prisma, Directus schema, SQL DDL) is a separate on
 `skaileup-shared/contracts/feedback_loop.md`, and `skaileup-shared/contracts/seed_data.md`.
 
 **Hard gates:**
-- `_concept/2_experience/2_features/` must contain at least one feature file
-- `_concept/3_blueprint/1_techstack/stack.md` must exist
+- `_concept/experience/features/` must contain at least one feature file
+- `_concept/blueprint/techstack.md` must exist
 
 ## Context Budget
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/1_discovery/1_overview/brief.md` | Yes |
-| Must read | `_concept/2_experience/2_features/**/*.md` | Yes |
-| Must read | `_concept/3_blueprint/1_techstack/stack.md` | Yes |
+| Must read | `_concept/discovery/brief.md` | Yes |
+| Must read | `_concept/experience/features/**/*.md` | Yes |
+| Must read | `_concept/blueprint/techstack.md` | Yes |
 | Check if present | `_concept/_grounding/overview/user_input.json` | No (complexity) |
-| Check if present | `_concept/2_experience/1_journeys/stories.json` | No |
-| Check if present | `_concept/3_blueprint/2_architecture/architecture.md` | No |
-| Check if present | `_concept/2_experience/4_behaviors/*.allium` | No |
+| Check if present | `_concept/experience/journeys/stories.json` | No |
+| Check if present | `_concept/blueprint/architecture.md` | No |
+| Check if present | `_concept/experience/behaviors/*.allium` | No |
 | Check if present | `_concept/_grounding/general/patterns.md` | No |
-| Never load | `_concept/2_experience/3_screens/`, `_concept/1_discovery/2_brand/` | — |
+| Never load | `_concept/experience/screens/`, `_concept/discovery/brand/` | — |
 
 ## Standalone Mode
 
@@ -133,21 +133,21 @@ ROLE  Data Model agent — derives entities, relationships, and enums from featu
       produces model.dbml, model.json, seed.json, and feature_map.json.
 
 READS
-  _concept/1_discovery/1_overview/brief.md                  — app name, audience
-  _concept/2_experience/2_features/**/*.md                   — feature requirements
-  _concept/3_blueprint/1_techstack/stack.md                 — stack constraints (for translation hints)
+  _concept/discovery/brief.md                  — app name, audience
+  _concept/experience/features/**/*.md                   — feature requirements
+  _concept/blueprint/techstack.md                 — stack constraints (for translation hints)
   ? _concept/_grounding/overview/user_input.json            — complexity field (drives involvement level)
-  ? _concept/2_experience/1_journeys/stories.json            — EARS criteria → state machine derivation
-  ? _concept/3_blueprint/2_architecture/architecture.md    — custom modules → additional entities
-  ? _concept/2_experience/4_behaviors/*.allium              — entity state machines, enum values
+  ? _concept/experience/journeys/stories.json            — EARS criteria → state machine derivation
+  ? _concept/blueprint/architecture.md    — custom modules → additional entities
+  ? _concept/experience/behaviors/*.allium              — entity state machines, enum values
   ? _concept/_grounding/general/patterns.md                — domain-specific data patterns
 
 WRITES
-  _concept/3_blueprint/3_datamodel/model.dbml       — human-readable DBML entity definitions
-  _concept/3_blueprint/3_datamodel/model.json       — editor-native canvas format
-  _concept/3_blueprint/3_datamodel/seed.json        — scenario-based test data
-  _concept/3_blueprint/3_datamodel/feature_map.json — model → feature cross-reference
-  _concept/2_experience/2_features/**/*.md           — feedback loop: data_entities[] populated
+  _concept/blueprint/datamodel/model.dbml       — human-readable DBML entity definitions
+  _concept/blueprint/datamodel/model.json       — editor-native canvas format
+  _concept/blueprint/datamodel/seed.json        — scenario-based test data
+  _concept/blueprint/datamodel/feature_map.json — model → feature cross-reference
+  _concept/experience/features/**/*.md           — feedback loop: data_entities[] populated
 
 REFERENCES
   skaileup-shared/contracts/concept_structure.md   — valid _concept/ paths and naming rules
@@ -174,16 +174,16 @@ STEP 1: Read context
   - Read all feature files for functional requirements
   - Read stack.md for backend constraints (informs translation hints only)
   - Check _grounding/overview/user_input.json for complexity field
-  IF _concept/2_experience/1_journeys/stories.json exists
+  IF _concept/experience/journeys/stories.json exists
     - Read stories.json; derive state machines from EARS acceptance criteria:
       - Event-driven criteria (WHEN ... THE SYSTEM SHALL ...) → state transitions
       - State-driven criteria (IF status is X ...) → guard conditions
       - Story downstream.candidate_entities hints → model candidates
-  IF _concept/3_blueprint/2_architecture/architecture.md exists
+  IF _concept/blueprint/architecture.md exists
     - Note custom modules → may need their own entities or configuration models
     - Note communication protocols → may need session, message, or event models
     - Note external integrations → may need connection or credential models
-  IF _concept/2_experience/4_behaviors/*.allium exists
+  IF _concept/experience/behaviors/*.allium exists
     - Read all .allium files for formal entity definitions, state enums, transition rules
     - Allium states → enum values; Allium relationships → model relations
   IF _concept/_grounding/general/patterns.md exists
@@ -209,10 +209,10 @@ STEP 2: Analyze features (involved mode)
   - If user is uncertain, analyze features and propose what is needed
 
 STEP 3: Write DBML
-  - $ mkdir -p _concept/3_blueprint/3_datamodel
+  - $ mkdir -p _concept/blueprint/datamodel
   - Write model.dbml with semantic types (see references/model_conventions.md)
 
-  OUTPUT _concept/3_blueprint/3_datamodel/model.dbml
+  OUTPUT _concept/blueprint/datamodel/model.dbml
     Use DBML syntax with semantic types. Example:
     Table user {
       id uuid [pk]
@@ -235,7 +235,7 @@ STEP 3: Write DBML
 STEP 4: Write model.json
   - Write model.json as the editor-native format (see references/model_conventions.md)
 
-  OUTPUT _concept/3_blueprint/3_datamodel/model.json
+  OUTPUT _concept/blueprint/datamodel/model.json
     {
       "version": "1.0",
       "editor": { "viewport": { "x": 0, "y": 0, "zoom": 1 } },
@@ -245,7 +245,7 @@ STEP 4: Write model.json
         "icon": "<icon>",
         "color": "<hex>",
         "position": { "x": N, "y": N },
-        "from_features": ["2_experience/2_features/<group>/<feature>.md"],
+        "from_features": ["experience/features/<group>/<feature>.md"],
         "fields": [
           { "id": "<entity>_<field>", "name": "<snake_case>", "type": "<semantic_type>", ... }
         ]
@@ -272,15 +272,15 @@ STEP 5: Write seed data
   - Use names from different locales, vary string lengths, include special characters
   - IDs must be consistent across entities (relations must resolve)
 
-  OUTPUT _concept/3_blueprint/3_datamodel/seed.json
+  OUTPUT _concept/blueprint/datamodel/seed.json
     See skaileup-shared/contracts/seed_data.md for full format and examples.
 
 STEP 6: Write feature_map.json
   - Cross-reference every entity back to the feature(s) that require it
 
-  OUTPUT _concept/3_blueprint/3_datamodel/feature_map.json
+  OUTPUT _concept/blueprint/datamodel/feature_map.json
     {
-      "<PascalCaseModel>": ["2_experience/2_features/<group>/<feature>.md", ...]
+      "<PascalCaseModel>": ["experience/features/<group>/<feature>.md", ...]
     }
   - Every entity must map to at least one feature; question any entity without a feature source
 
@@ -322,10 +322,10 @@ STEP 10: Hand off
 EMIT  [datamodel] completed run_id=<uuid> entities=<N> relationships=<N> features_updated=<N>
 
 CHECKLIST
-  - [ ] _concept/3_blueprint/3_datamodel/model.dbml exists with semantic types
-  - [ ] _concept/3_blueprint/3_datamodel/model.json exists with all entities and relationships
-  - [ ] _concept/3_blueprint/3_datamodel/seed.json has all four scenarios (empty, single_user, populated, edge_cases)
-  - [ ] _concept/3_blueprint/3_datamodel/feature_map.json exists — every entity traces to a feature
+  - [ ] _concept/blueprint/datamodel/model.dbml exists with semantic types
+  - [ ] _concept/blueprint/datamodel/model.json exists with all entities and relationships
+  - [ ] _concept/blueprint/datamodel/seed.json has all four scenarios (empty, single_user, populated, edge_cases)
+  - [ ] _concept/blueprint/datamodel/feature_map.json exists — every entity traces to a feature
   - [ ] All field names are snake_case (golden_principles)
   - [ ] All enum values are PascalCase (golden_principles)
   - [ ] All relation fields use _id suffix (golden_principles)

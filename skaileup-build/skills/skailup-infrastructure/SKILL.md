@@ -1,6 +1,6 @@
 ---
 name: "skailup-infrastructure"
-description: "Sets up custom backend infrastructure from the architecture doc. Implements custom NestJS/backend modules, provider abstractions (real + in-memory), additional processes, and communication infrastructure (WebSocket, SSE). Only needed when architecture.md defines custom_modules or processes beyond the standard stack. Reads _concept/3_blueprint/2_architecture/architecture.md."
+description: "Sets up custom backend infrastructure from the architecture doc. Implements custom NestJS/backend modules, provider abstractions (real + in-memory), additional processes, and communication infrastructure (WebSocket, SSE). Only needed when architecture.md defines custom_modules or processes beyond the standard stack. Reads _concept/blueprint/architecture.md."
 metadata:
   version: "1.0.0"
   tags:
@@ -16,16 +16,16 @@ metadata:
   source: "SAXE"
   prerequisites:
     files:
-      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+      - path: "_concept/blueprint/architecture.md"
         gate: hard
         description: "Architecture doc defines custom_modules and processes that this skill implements"
       - path: "backend"
         gate: hard
         description: "Project must be scaffolded with a backend directory before infrastructure can be added"
     reads:
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         description: "Tech stack for backend framework patterns and library choices"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         description: "Features to understand which infrastructure modules are needed"
     produces:
       - path: "backend/libs"
@@ -71,7 +71,7 @@ beyond the standard stack defaults.
 ## Prerequisites
 
 **Hard gates:**
-1. `_concept/3_blueprint/2_architecture/architecture.md` exists
+1. `_concept/blueprint/architecture.md` exists
 2. Project has been scaffolded (backend/ directory exists)
 
 ---
@@ -79,9 +79,9 @@ beyond the standard stack defaults.
 ROLE  Infrastructure agent — implements custom backend modules, provider abstractions, processes, and communication from the architecture doc.
 
 READS
-  _concept/3_blueprint/2_architecture/architecture.md    — primary: custom_modules, protocols, integrations, data flows
-  _concept/3_blueprint/1_techstack/stack.md               — additional tech requirements
-  _concept/2_experience/2_features/**/*.md                — features referencing infrastructure
+  _concept/blueprint/architecture.md    — primary: custom_modules, protocols, integrations, data flows
+  _concept/blueprint/techstack.md               — additional tech requirements
+  _concept/experience/features/**/*.md                — features referencing infrastructure
 
 WRITES
   backend/libs/<module>/src/                  — custom backend module code

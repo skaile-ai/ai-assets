@@ -33,9 +33,9 @@ metadata:
     reads:
       - path: "_concept"
         description: "All _concept/ files scanned for completeness, cross-references, and entropy"
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         description: "Data model for cross-reference integrity checks"
-      - path: "_concept/3_blueprint/3_datamodel/feature_map.json"
+      - path: "_concept/blueprint/datamodel/feature_map.json"
         description: "Feature map for entity-to-feature cross-reference validation"
     produces:
       - path: "_concept/quality.json"
@@ -96,8 +96,8 @@ and `skaileup-shared/contracts/golden_principles.md` before running any checks.
 | Action | Path | Required |
 |---|---|---|
 | Must read | `_concept/**/*.md` | Yes |
-| Must read | `_concept/3_blueprint/3_datamodel/model.json` | If exists |
-| Must read | `_concept/3_blueprint/3_datamodel/feature_map.json` | If exists |
+| Must read | `_concept/blueprint/datamodel/model.json` | If exists |
+| Must read | `_concept/blueprint/datamodel/feature_map.json` | If exists |
 | Check if present | `_concept/quality.json` | No (previous score) |
 | Check if present | `PLANS.md` | No (plan drift check) |
 | Never load | Source code | — |
@@ -113,9 +113,9 @@ ROLE  Structure Auditor and Doc Gardener — scans _concept/ for completeness, c
 
 READS
   _concept/**/*.md                                         — all concept documents
-  ? _concept/3_blueprint/3_datamodel/model.json           — data model (canonical cross-ref)
-  ? _concept/3_blueprint/3_datamodel/feature_map.json     — model-to-feature mapping
-  ? _concept/3_blueprint/3_datamodel/seed.json            — seed data (format checks)
+  ? _concept/blueprint/datamodel/model.json           — data model (canonical cross-ref)
+  ? _concept/blueprint/datamodel/feature_map.json     — model-to-feature mapping
+  ? _concept/blueprint/datamodel/seed.json            — seed data (format checks)
   ? _concept/quality.json                                  — previous quality score
   ? PLANS.md                                               — concept progress plan
 

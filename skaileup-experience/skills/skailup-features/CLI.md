@@ -6,7 +6,7 @@ Invoke with: "define features", "what should the app do", "plan functionality", 
 
 ## Output
 
-- `_concept/2_experience/2_features/<NN_group>/<feature>.md` (one file per feature)
+- `_concept/experience/features/<NN_group>/<feature>.md` (one file per feature)
 
 ## Next Steps
 

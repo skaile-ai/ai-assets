@@ -9,9 +9,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "skaileup-shared" /
 from validator_lib import Validator, main  # noqa: E402
 
 SKILL = "brand-visual"
-IDENTITY = "_concept/1_discovery/2_brand/identity.md"
-TOKENS = "_concept/1_discovery/2_brand/tokens.json"
-BRANDBOOK = "_concept/1_discovery/2_brand/brandbook.html"
+IDENTITY = "_concept/discovery/brand/identity.md"
+TOKENS = "_concept/discovery/brand/tokens.json"
+BRANDBOOK = "_concept/discovery/brand/brandbook.html"
 
 # All required top-level sections in tokens.json
 REQUIRED_TOKEN_SECTIONS = ("colors", "fonts", "radius", "mode", "shadows", "atmosphere", "tailwind")

@@ -12,13 +12,13 @@ validate the skill produces correct artifacts.
 ├── examples/
 │   ├── README.md             ← describes each fixture
 │   ├── input/                ← simulated _concept/ state before skill runs
-│   │   ├── 1_discovery/1_overview/
+│   │   ├── discovery/
 │   │   │   └── brief.md
-│   │   ├── 2_experience/2_features/
+│   │   ├── experience/features/
 │   │   │   └── ...
 │   │   └── ...
 │   └── expected/             ← what the skill should produce
-│       ├── 2_experience/2_features/   ← (or whichever path the skill writes)
+│       ├── experience/features/   ← (or whichever path the skill writes)
 │       │   └── ...
 │       └── _validation.json  ← machine-checkable assertions
 └── ...
@@ -38,85 +38,85 @@ The `skill` field uses the canonical kebab-case skill name.
   "checks": [
     {
       "type": "file_exists",
-      "path": "2_experience/2_features/01_user_auth/login.md"
+      "path": "experience/features/01_user_auth/login.md"
     },
     {
       "type": "file_exists",
-      "path": "2_experience/2_features/01_user_auth/registration.md"
+      "path": "experience/features/01_user_auth/registration.md"
     },
     {
       "type": "file_exists",
-      "path": "2_experience/2_features/02_dashboard/overview.md"
+      "path": "experience/features/02_dashboard/overview.md"
     },
     {
       "type": "frontmatter_field",
-      "path": "2_experience/2_features/01_user_auth/login.md",
+      "path": "experience/features/01_user_auth/login.md",
       "field": "priority",
       "one_of": ["must-have", "nice-to-have"]
     },
     {
       "type": "frontmatter_field",
-      "path": "2_experience/2_features/01_user_auth/login.md",
+      "path": "experience/features/01_user_auth/login.md",
       "field": "screens",
       "expected": []
     },
     {
       "type": "frontmatter_field",
-      "path": "2_experience/2_features/01_user_auth/login.md",
+      "path": "experience/features/01_user_auth/login.md",
       "field": "data_entities",
       "expected": []
     },
     {
       "type": "section_exists",
-      "path": "2_experience/2_features/01_user_auth/login.md",
+      "path": "experience/features/01_user_auth/login.md",
       "heading": "## Description"
     },
     {
       "type": "section_exists",
-      "path": "2_experience/2_features/01_user_auth/login.md",
+      "path": "experience/features/01_user_auth/login.md",
       "heading": "## Requirements"
     },
     {
       "type": "contains_checkbox",
-      "path": "2_experience/2_features/01_user_auth/login.md",
+      "path": "experience/features/01_user_auth/login.md",
       "min_count": 1
     },
     {
       "type": "folder_numbered",
-      "path": "2_experience/2_features/",
+      "path": "experience/features/",
       "pattern": "^\\d{2}_"
     },
     {
       "type": "json_valid",
-      "path": "3_blueprint/3_datamodel/model.json"
+      "path": "blueprint/datamodel/model.json"
     },
     {
       "type": "json_field",
-      "path": "3_blueprint/3_datamodel/model.json",
+      "path": "blueprint/datamodel/model.json",
       "json_path": "entities",
       "min_length": 1
     },
     {
       "type": "json_field",
-      "path": "3_blueprint/3_datamodel/seed.json",
+      "path": "blueprint/datamodel/seed.json",
       "json_path": "scenarios.empty",
       "exists": true
     },
     {
       "type": "json_field",
-      "path": "3_blueprint/3_datamodel/seed.json",
+      "path": "blueprint/datamodel/seed.json",
       "json_path": "scenarios.single_user",
       "exists": true
     },
     {
       "type": "json_field",
-      "path": "3_blueprint/3_datamodel/seed.json",
+      "path": "blueprint/datamodel/seed.json",
       "json_path": "scenarios.populated",
       "exists": true
     },
     {
       "type": "json_field",
-      "path": "3_blueprint/3_datamodel/seed.json",
+      "path": "blueprint/datamodel/seed.json",
       "json_path": "scenarios.edge_cases",
       "exists": true
     }
@@ -168,7 +168,7 @@ Each skill should have at least one example fixture covering:
 
 | Skill | Fixture should demonstrate |
 |---|---|
-| `overview` | Brief from user answers → files in `1_discovery/1_overview/` |
+| `overview` | Brief from user answers → files in `discovery/` |
 | `features` | Brief → numbered feature groups with valid frontmatter |
 | `techstack` | Brief + features → `stack.md` with stack fields in frontmatter |
 | `datamodel` | Features + stack → `model.json`, `seed.json` (4 scenarios), `feature_map.json` |

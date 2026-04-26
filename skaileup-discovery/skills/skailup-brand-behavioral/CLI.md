@@ -6,8 +6,8 @@ Invoke with: "brand voice", "tone of voice", "copy guidelines", "error messages"
 
 ## Output
 
-- `_concept/1_discovery/2_brand/behavioral.md`
-- `_concept/1_discovery/2_brand/copy_guidelines.md`
+- `_concept/discovery/brand/behavioral.md`
+- `_concept/discovery/brand/copy_guidelines.md`
 
 ## Next Steps
 

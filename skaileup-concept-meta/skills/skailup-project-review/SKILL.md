@@ -22,14 +22,14 @@ Audit an existing meta-concept for quality, completeness, and consistency.
 
 ## Prerequisites
 
-- At minimum `_concept/1_discovery/1_overview/brief.md` must exist
+- At minimum `_concept/discovery/brief.md` must exist
 - Read the meta-concept contract: `contracts/meta-concept-contract/CONTRACT.md`
 
 ## Checklist
 
 ### 1. Structure Compliance
 
-- [ ] Directory structure follows the contract (`1_discovery/`, `2_subsystems/`, `3_integration/`, `PLANS.md`)
+- [ ] Directory structure follows the contract (`discovery/`, `2_subsystems/`, `3_integration/`, `PLANS.md`)
 - [ ] All markdown files have valid YAML frontmatter
 - [ ] All frontmatter includes `last_updated` with a valid ISO date
 - [ ] No files exist outside the defined structure

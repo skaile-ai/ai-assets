@@ -32,7 +32,7 @@ metadata:
     reads:
       - path: "package.json"
         description: "Project dependencies and scripts"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         description: "Expected tech stack for architecture compliance"
       - path: "_standards/index.yml"
         description: "Project coding standards (if available)"
@@ -55,7 +55,7 @@ Checkpoints in the pipeline:
 
 READS
   ! package.json (or pyproject.toml)          — scripts and dependencies
-  ? _concept/3_blueprint/1_techstack/stack.md — architecture compliance check
+  ? _concept/blueprint/techstack.md — architecture compliance check
   ? _standards/index.yml                      — project coding standards
 
 WRITES

@@ -214,7 +214,7 @@ actionable rather than opaque.
 ## Pattern: Expert Discovery (Implementation)
 
 When implementing features:
-1. Read `_concept/3_blueprint/1_techstack/stack.md` to identify the tech stack
+1. Read `_concept/blueprint/techstack.md` to identify the tech stack
 2. Search for matching expert skills in the monorepo:
    - JS/TS stack: `dev-implementation-experts-js/skills/skaileup-implementation-expert-<tech>/`
    - Python stack: `dev-implementation-experts-python/skills/skaileup-implementation-expert-<tech>/`

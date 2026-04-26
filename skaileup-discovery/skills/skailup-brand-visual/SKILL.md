@@ -1,6 +1,6 @@
 ---
 name: "skailup-brand-visual"
-description: "Use when the project brief is approved but no visual brand exists. Discovers aesthetic direction through plain-language questions, extracts palettes from reference URLs, and writes identity.md + tokens.json + brandbook.html to _concept/1_discovery/2_brand/."
+description: "Use when the project brief is approved but no visual brand exists. Discovers aesthetic direction through plain-language questions, extracts palettes from reference URLs, and writes identity.md + tokens.json + brandbook.html to _concept/discovery/brand/."
 metadata:
   version: "1.0.0"
   tags:
@@ -37,7 +37,7 @@ metadata:
         gate: soft
   prerequisites:
     files:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Project brief must exist before defining visual identity"
     inputs_required:
@@ -67,11 +67,11 @@ metadata:
       - path: "_concept/_grounding/general/design_inspiration.md"
         description: "Design inspiration from research phase (if available)"
     produces:
-      - path: "_concept/1_discovery/2_brand/identity.md"
+      - path: "_concept/discovery/brand/identity.md"
         description: "Brand identity: palette, typography, atmosphere"
-      - path: "_concept/1_discovery/2_brand/tokens.json"
+      - path: "_concept/discovery/brand/tokens.json"
         description: "Design tokens consumed by all downstream skills"
-      - path: "_concept/1_discovery/2_brand/brandbook.html"
+      - path: "_concept/discovery/brand/brandbook.html"
         description: "Visual preview of the complete brand"
   user_inputs:
     dialog:
@@ -118,7 +118,7 @@ re-inventing color names.
 
 ## When to Use
 
-- Project brief is approved but `_concept/1_discovery/2_brand/` is empty or incomplete
+- Project brief is approved but `_concept/discovery/brand/` is empty or incomplete
 - User says "brand", "colors", "fonts", "visual identity", "design tokens", "make it look good"
 - User wants to change or re-evaluate the visual brand
 
@@ -133,7 +133,7 @@ re-inventing color names.
 **REQUIRED BACKGROUND:** Read `skaileup-shared/contracts/concept_structure.md` and
 `skaileup-shared/contracts/frontmatter.md` before proceeding.
 
-**Hard gate:** `_concept/1_discovery/1_overview/brief.md` must exist.
+**Hard gate:** `_concept/discovery/brief.md` must exist.
 
 If the gate fails, stop:
 > "No project brief found. Run `overview` first."
@@ -142,35 +142,35 @@ If the gate fails, stop:
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/1_discovery/1_overview/brief.md` | Yes |
+| Must read | `_concept/discovery/brief.md` | Yes |
 | Check if present | `_concept/_grounding/general/design_inspiration.md` | No (visual references) |
 | Check if present | `_concept/_grounding/general/colors_fonts.md` | No (palette research) |
 | Check if present | `_concept/_grounding/brand-visual/user_input.json` | No (pre-collected inputs) |
-| Never load | `_concept/3_blueprint/3_datamodel/` | — |
+| Never load | `_concept/blueprint/datamodel/` | — |
 | Never load | Source code | — |
 
 ## Standalone Mode
 
-**Gate check:** `_concept/1_discovery/1_overview/brief.md` must exist.
+**Gate check:** `_concept/discovery/brief.md` must exist.
 **On completion:** Present summary and suggest next steps (screens, mock, brand-behavioral).
 
 ---
 
 ROLE  Brand Identity Designer — discovers aesthetic direction through questions,
       extracts from reference URLs, proposes brand identity, and writes
-      `_concept/1_discovery/2_brand/` artifacts upon approval.
+      `_concept/discovery/brand/` artifacts upon approval.
 
 READS
-  _concept/1_discovery/1_overview/brief.md              — app name, audience, problem, comparables
+  _concept/discovery/brief.md              — app name, audience, problem, comparables
   ? _concept/_grounding/general/design_inspiration.md  — color approaches, typography trends
   ? _concept/_grounding/general/colors_fonts.md        — palette and typography research findings
   ? _concept/_grounding/brand-visual/user_input.json   — pre-collected user inputs
 
 WRITES
-  _concept/1_discovery/2_brand/identity.md             — full brand guide (aesthetic, colors, typography, atmosphere)
-  _concept/1_discovery/2_brand/tokens.json             — machine-readable design tokens + CSS custom properties
-  _concept/1_discovery/2_brand/brandbook.html          — self-contained visual brand reference (open in browser)
-  _concept/1_discovery/2_brand/references/             — screenshots from user-provided reference URLs
+  _concept/discovery/brand/identity.md             — full brand guide (aesthetic, colors, typography, atmosphere)
+  _concept/discovery/brand/tokens.json             — machine-readable design tokens + CSS custom properties
+  _concept/discovery/brand/brandbook.html          — self-contained visual brand reference (open in browser)
+  _concept/discovery/brand/references/             — screenshots from user-provided reference URLs
 
 REFERENCES
   skaileup-shared/contracts/concept_structure.md      — valid _concept/ paths
@@ -217,7 +217,7 @@ STEP 2: Discover aesthetic direction
 STEP 3: Extract from reference URLs
   IF user provides a URL
     - Open URL with browser tool and take screenshot
-    - Save screenshot to _concept/1_discovery/2_brand/references/
+    - Save screenshot to _concept/discovery/brand/references/
     - Analyze: dominant colors, typography, layout density, elevation, border radius, mood
     - Present findings using the URL extraction template (see references/discovery_questions.md)
     - Ask: use as-is, adapt, or go in a different direction?
@@ -240,9 +240,9 @@ CHECKPOINT brand_approved
     - On approval: proceed to STEP 5
 
 STEP 5: Write artifacts
-  $ mkdir -p _concept/1_discovery/2_brand/references
+  $ mkdir -p _concept/discovery/brand/references
 
-  OUTPUT _concept/1_discovery/2_brand/identity.md
+  OUTPUT _concept/discovery/brand/identity.md
     ---
     mood: "<aesthetic-description>"
     mode: <light|dark|both>
@@ -251,7 +251,7 @@ STEP 5: Write artifacts
     <brand guide: aesthetic direction + reasoning, color usage rules, typography hierarchy,
      spacing system, elevation, atmosphere, tone of voice for UI text, memorable element, do's/don'ts>
 
-  OUTPUT _concept/1_discovery/2_brand/tokens.json
+  OUTPUT _concept/discovery/brand/tokens.json
     See references/tokens_schema.md for the complete required structure.
     Required top-level keys: colors, fonts, radius, mode, spacing_base, shadows, atmosphere, tailwind
     Required color keys: primary, secondary, accent, background, surface, text, text_muted, border, error, success, warning
@@ -259,7 +259,7 @@ STEP 5: Write artifacts
       --color-background, --color-surface, --color-foreground, --color-muted, --color-border,
       --color-destructive, --color-success, --color-warning, --radius
 
-  OUTPUT _concept/1_discovery/2_brand/brandbook.html
+  OUTPUT _concept/discovery/brand/brandbook.html
     Self-contained HTML (no external JS frameworks, Google Fonts links allowed).
     Must include: hero section, color palette swatches, typography showcase, spacing/radius
     examples, elevation/shadows, atmosphere demonstration, component previews (buttons, card,
@@ -269,7 +269,7 @@ STEP 5: Write artifacts
 EMIT  [brand-visual] checkpoint phase=artifacts_written artifacts=identity.md,tokens.json,brandbook.html
 
 STEP 6: Present summary and hand off
-  > "Brand identity written to `_concept/1_discovery/2_brand/`:
+  > "Brand identity written to `_concept/discovery/brand/`:
   >
   > - **identity.md** — full brand guide ([aesthetic summary])
   > - **tokens.json** — design tokens ([N] colors, fonts: [heading]/[body])
@@ -332,5 +332,5 @@ Every brand must be visually distinct and intentionally crafted for this specifi
 ## Integration
 
 - **Called by:** `concept-orchestrator` or standalone (parallel track after overview)
-- **Requires:** `_concept/1_discovery/1_overview/brief.md`
+- **Requires:** `_concept/discovery/brief.md`
 - **Feeds into:** `screens`, `mock`, `brand-behavioral` — all read tokens.json

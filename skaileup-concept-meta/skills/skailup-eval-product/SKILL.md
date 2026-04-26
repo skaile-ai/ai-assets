@@ -18,7 +18,7 @@ metadata:
   stage: "alpha"
   prerequisites:
     files:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Brief required — product evaluation checks against stated goals"
       - path: "_implementation/eval-feature"
@@ -30,11 +30,11 @@ metadata:
         type: text
         default: "http://localhost:3000"
     reads:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         description: "Project goals and success metrics"
-      - path: "_concept/2_experience/1_journeys/stories.json"
+      - path: "_concept/experience/journeys/stories.json"
         description: "All user journeys for full product walkthrough"
-      - path: "_concept/1_discovery/2_brand/tokens.json"
+      - path: "_concept/discovery/brand/tokens.json"
         description: "Brand tokens for design fidelity check"
       - path: "_implementation/eval-feature"
         description: "Feature eval results to confirm all groups approved"
@@ -57,10 +57,10 @@ You are NOT re-checking individual acceptance criteria. You are checking what fe
 testing cannot reveal: whether the sum of parts makes a coherent product.
 
 READS
-  ! _concept/1_discovery/1_overview/brief.md      — goals and success metrics
-  ! _concept/2_experience/1_journeys/stories.json — all journeys for full walkthrough
+  ! _concept/discovery/brief.md      — goals and success metrics
+  ! _concept/experience/journeys/stories.json — all journeys for full walkthrough
   ! _implementation/eval-feature/*.json           — confirm all groups approved
-  ? _concept/1_discovery/2_brand/tokens.json      — brand design fidelity
+  ? _concept/discovery/brand/tokens.json      — brand design fidelity
 
 WRITES
   _implementation/eval-product.json   — MUST write before reporting

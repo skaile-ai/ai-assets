@@ -17,13 +17,13 @@ metadata:
   source: "CF"
   prerequisites:
     files:
-      - path: "_concept/3_blueprint/3_datamodel/seed.json"
+      - path: "_concept/blueprint/datamodel/seed.json"
         gate: hard
         description: "Seed data scenarios required to generate seed scripts"
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         gate: hard
         description: "Data model required for entity type validation and relationship seeding"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         gate: hard
         description: "Tech stack required to select seed script format (Prisma, Drizzle, raw SQL)"
       - path: "migrations"
@@ -38,7 +38,7 @@ metadata:
 
 ## Overview
 
-Reads the scenario-based seed data from `_concept/3_blueprint/3_datamodel/seed.json`
+Reads the scenario-based seed data from `_concept/blueprint/datamodel/seed.json`
 and generates executable seed scripts for the chosen tech stack. Covers all
 scenarios: `empty`, `single_user`, `populated`, and `edge_cases` (plus any
 custom scenarios). Each scenario is independently runnable for switching
@@ -60,9 +60,9 @@ between data states during development, testing, and demos.
 ## Prerequisites
 
 **Hard gates:**
-- `_concept/3_blueprint/3_datamodel/seed.json`
-- `_concept/3_blueprint/3_datamodel/model.json`
-- `_concept/3_blueprint/1_techstack/stack.md`
+- `_concept/blueprint/datamodel/seed.json`
+- `_concept/blueprint/datamodel/model.json`
+- `_concept/blueprint/techstack.md`
 - Migration files exist (varies by stack)
 
 ---
@@ -70,9 +70,9 @@ between data states during development, testing, and demos.
 ROLE  Seed agent — generates stack-specific seed scripts from seed.json scenarios.
 
 READS
-  _concept/3_blueprint/3_datamodel/seed.json     — all scenarios (empty, single_user, populated, edge_cases)
-  _concept/3_blueprint/3_datamodel/model.json    — entity relationships, types, enums
-  _concept/3_blueprint/1_techstack/stack.md      — seed execution target
+  _concept/blueprint/datamodel/seed.json     — all scenarios (empty, single_user, populated, edge_cases)
+  _concept/blueprint/datamodel/model.json    — entity relationships, types, enums
+  _concept/blueprint/techstack.md      — seed execution target
   skaileup-shared/contracts/seed_data.md              — scenario format reference
   skaileup-shared/contracts/semantic_types.md         — type handling (dates, UUIDs, etc.)
 

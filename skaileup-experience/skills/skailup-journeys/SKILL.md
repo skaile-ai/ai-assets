@@ -30,7 +30,7 @@ metadata:
         gate: soft
   prerequisites:
     files:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Project brief must exist and be approved before mapping journeys"
     reads:
@@ -41,7 +41,7 @@ metadata:
       - path: "_concept/_grounding/general/domain.md"
         description: "Domain context for journey staging"
     produces:
-      - path: "_concept/2_experience/1_journeys/stories.json"
+      - path: "_concept/experience/journeys/stories.json"
         description: "Personas, story maps by stage, EARS acceptance criteria"
 ---
 
@@ -50,7 +50,7 @@ metadata:
 ## Overview
 
 The **journeys** skill is the Journey Mapping agent. It reads the approved project
-brief and goals, then produces `_concept/2_experience/1_journeys/stories.json` — a
+brief and goals, then produces `_concept/experience/journeys/stories.json` — a
 structured map of user personas, story maps organized by stage, and EARS acceptance
 criteria for each story.
 
@@ -59,13 +59,13 @@ are *derived* from stories, not invented from scratch.
 
 ## When to Use
 
-- The project brief (`_concept/1_discovery/1_overview/brief.md`) has been approved
+- The project brief (`_concept/discovery/brief.md`) has been approved
 - You need to define what users will do in the app before speccing features
 - The orchestrator dispatches this as step 2 in the concept pipeline
 
 ## When NOT to Use
 
-- `_concept/2_experience/1_journeys/stories.json` already exists and is approved
+- `_concept/experience/journeys/stories.json` already exists and is approved
 - No approved brief yet — run the **overview** skill first
 - You want to add a specific feature — use **features** or **add-feature** directly
 
@@ -75,40 +75,40 @@ are *derived* from stories, not invented from scratch.
 `skaileup-shared/contracts/frontmatter.md`, and `skaileup-shared/contracts/acceptance_criteria.md`
 before proceeding.
 
-**Hard gate:** `_concept/1_discovery/1_overview/brief.md` must exist and be non-empty.
+**Hard gate:** `_concept/discovery/brief.md` must exist and be non-empty.
 
 ## Context Budget
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/1_discovery/1_overview/brief.md` | Yes |
-| Must read | `_concept/1_discovery/1_overview/goals.md` | Yes |
+| Must read | `_concept/discovery/brief.md` | Yes |
+| Must read | `_concept/discovery/goals.md` | Yes |
 | Must read | `references/ears_format.md` | Yes |
 | Must read | `references/journey_stages.md` | Yes |
 | Check if present | `_concept/_grounding/general/audiences.md` | No |
 | Check if present | `_concept/_grounding/general/competitors.md` | No |
 | Check if present | `_concept/_grounding/general/domain.md` | No |
-| Never load | `2_experience/2_features/`, `3_blueprint/`, or downstream | — |
+| Never load | `experience/features/`, `blueprint/`, or downstream | — |
 
 ## Standalone Mode
 
-**Gate check:** `_concept/1_discovery/1_overview/brief.md` must exist.
+**Gate check:** `_concept/discovery/brief.md` must exist.
 **On completion:** Show summary table and present next steps (features, orchestrator).
 
 ---
 
 ROLE  Journey Mapping agent — reads the approved project brief and produces
-      `_concept/2_experience/1_journeys/stories.json` only.
+      `_concept/experience/journeys/stories.json` only.
 
 READS
-  _concept/1_discovery/1_overview/brief.md              — app name, audience, problem, hero_flow
-  _concept/1_discovery/1_overview/goals.md              — success criteria, constraints, deadlines
+  _concept/discovery/brief.md              — app name, audience, problem, hero_flow
+  _concept/discovery/goals.md              — success criteria, constraints, deadlines
   ? _concept/_grounding/general/audiences.md            — detailed persona profiles from research
   ? _concept/_grounding/general/competitors.md          — competitor flows and feature gaps
   ? _concept/_grounding/general/domain.md               — domain terminology and workflows
 
 WRITES
-  _concept/2_experience/1_journeys/stories.json         — personas, story maps, acceptance criteria
+  _concept/experience/journeys/stories.json         — personas, story maps, acceptance criteria
 
 REFERENCES
   skaileup-shared/contracts/concept_structure.md      — valid _concept/ paths and naming rules
@@ -124,17 +124,17 @@ MUST  derive personas from brief audience and research (when available)
 MUST  validate stories.json against skaileup-shared/contracts/stories_schema.json before writing
 MUST  include downstream hints (candidate_features, candidate_entities, candidate_screens) for every story
 MUST  set status: proposed on all new stories
-NEVER  write feature files, screen specs, data models, or any artifact outside 2_experience/1_journeys/
+NEVER  write feature files, screen specs, data models, or any artifact outside experience/journeys/
 NEVER  define more than one hero story map — hero is always exactly one
 NEVER  skip acceptance criteria — every story must have at least one EARS criterion
 
 EMIT  [journeys] started run_id=<uuid>
 
 STEP 1: Read context
-  - Read _concept/1_discovery/1_overview/brief.md
+  - Read _concept/discovery/brief.md
   - Stop if missing or empty:
     > "No approved project brief found. Run `overview` first."
-  - Read _concept/1_discovery/1_overview/goals.md for success criteria and constraints
+  - Read _concept/discovery/goals.md for success criteria and constraints
   - Extract: app name, problem, audience, hero_flow, success_metrics
   IF _concept/_grounding/general/ exists
     - Read audiences.md for detailed persona profiles (if present)
@@ -215,11 +215,11 @@ STEP 7: Write EARS acceptance criteria
   - Optionally add gherkin_scenarios for complex stories that benefit from step-by-step spec
 
 STEP 8: Write stories.json
-  - $ mkdir -p _concept/2_experience/1_journeys
+  - $ mkdir -p _concept/experience/journeys
   - Populate concept section from brief.md (name, problem, success_metrics)
   - Set review.mode: human_review for hero and vital stories, auto_approve for hygiene and backlog
 
-  OUTPUT _concept/2_experience/1_journeys/stories.json
+  OUTPUT _concept/experience/journeys/stories.json
     {
       "version": "1.0",
       "concept": { "name": "<app>", "problem": "...", "success_metrics": [...] },
@@ -279,7 +279,7 @@ STEP 10: Hand off
 EMIT  [journeys] completed run_id=<uuid> personas=<N> story_maps=<N> stories=<total> hero_stories=<N> acceptance_criteria=<N>
 
 CHECKLIST
-  - [ ] _concept/1_discovery/1_overview/brief.md was read and exists
+  - [ ] _concept/discovery/brief.md was read and exists
   - [ ] Personas defined with ids, labels, and goals
   - [ ] Exactly one story map has stage: hero
   - [ ] Hero journey approved by user before remaining journeys were mapped
@@ -314,6 +314,6 @@ CHECKLIST
 ## Integration
 
 - **Called by:** `concept-orchestrator` or standalone (step 2 in the concept pipeline)
-- **Requires:** `_concept/1_discovery/1_overview/brief.md` to exist and be approved
+- **Requires:** `_concept/discovery/brief.md` to exist and be approved
 - **Feeds into:** `features` skill reads `stories.json` to derive feature specs
 - **Feedback loops:** None inbound. Features skill uses `story_refs` to link back.

@@ -6,13 +6,13 @@ Invoke with: "add a feature", "add X to the concept", "I want a new feature for 
 
 ## Output
 
-- New or updated `_concept/2_experience/2_features/<NN_group>/<feature>.md`
+- New or updated `_concept/experience/features/<NN_group>/<feature>.md`
 - Cascades to any existing downstream artifacts:
-  - `_concept/2_experience/1_journeys/stories.json`
-  - `_concept/3_blueprint/1_techstack/stack.md`
-  - `_concept/3_blueprint/2_architecture/architecture.md`
-  - `_concept/3_blueprint/3_datamodel/model.json` + `model.dbml` + `seed.json` + `feature_map.json`
-  - `_concept/2_experience/3_screens/<NN_group>/<screen>.md`
+  - `_concept/experience/journeys/stories.json`
+  - `_concept/blueprint/techstack.md`
+  - `_concept/blueprint/architecture.md`
+  - `_concept/blueprint/datamodel/model.json` + `model.dbml` + `seed.json` + `feature_map.json`
+  - `_concept/experience/screens/<NN_group>/<screen>.md`
 
 ## Next Steps
 

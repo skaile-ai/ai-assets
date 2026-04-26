@@ -145,20 +145,20 @@ STEP 5: Write checks using the validator_lib API
   Common patterns (read validator_lib.py for the full API):
 
   # File existence
-  v.must("shell.md exists", lambda: v.file_exists("_concept/2_experience/3_screens/00_layout/shell.md"))
+  v.must("shell.md exists", lambda: v.file_exists("_concept/experience/screens/00_layout/shell.md"))
 
   # Directory exists and has content
-  v.must("features written", lambda: v.dir_not_empty("_concept/2_experience/2_features", "**/*.md"))
+  v.must("features written", lambda: v.dir_not_empty("_concept/experience/features", "**/*.md"))
 
   # JSON top-level keys
   v.must("tokens.json has all sections",
-         lambda: v.json_field_exists("_concept/1_discovery/2_brand/tokens.json",
+         lambda: v.json_field_exists("_concept/discovery/brand/tokens.json",
                                      "colors", "fonts", "radius", "mode", "shadows", "atmosphere", "tailwind"))
 
   # JSON nested structure — use inline lambda with read_json
   v.must("exactly one hero story map", lambda: (
       v.json_count(
-          (v.read_json("_concept/2_experience/1_journeys/stories.json") or {}).get("story_maps", []),
+          (v.read_json("_concept/experience/journeys/stories.json") or {}).get("story_maps", []),
           lambda m: m.get("stage") == "hero",
           expected=1, op="eq"
       )
@@ -167,7 +167,7 @@ STEP 5: Write checks using the validator_lib API
   # Every item in a JSON array has a field
   v.must("every story has acceptance criteria", lambda: (
       v.json_array_all_have_nonempty(
-          [s for m in (v.read_json("_concept/2_experience/1_journeys/stories.json") or {}).get("story_maps", [])
+          [s for m in (v.read_json("_concept/experience/journeys/stories.json") or {}).get("story_maps", [])
              for s in m.get("stories", [])],
           "acceptance_criteria",
           context="in stories.json"
@@ -177,26 +177,26 @@ STEP 5: Write checks using the validator_lib API
   # Frontmatter on all files matching a glob
   v.must("all features have required frontmatter",
          lambda: v.all_files_have_frontmatter(
-             "_concept/2_experience/2_features/**/*.md",
+             "_concept/experience/features/**/*.md",
              "priority", "story_refs", "roles", "last_updated"))
 
   # Folder naming pattern
   v.must("numbered group folders",
          lambda: v.folders_match_pattern(
-             "_concept/2_experience/2_features",
+             "_concept/experience/features",
              r"^\d{2}_"))
 
   # JSON Schema validation
   v.checklist("stories.json validates against schema", lambda: (
       v.json_schema_validate(
-          "_concept/2_experience/1_journeys/stories.json",
+          "_concept/experience/journeys/stories.json",
           "ai-assets/skaileup-shared/contracts/stories_schema.json")
   ))
 
   # Cross-reference: every key maps to existing files
   v.checklist("every model maps to a feature",
               lambda: v.every_key_maps_to_existing_file(
-                  "_concept/3_blueprint/3_datamodel/feature_map.json"))
+                  "_concept/blueprint/datamodel/feature_map.json"))
 
   # Semantic rules — skip
   v.skip("produce generic brand output", rule_type="NEVER", reason="semantic — quality judgment")

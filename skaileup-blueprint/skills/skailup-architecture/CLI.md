@@ -6,7 +6,7 @@ Invoke with: "document the architecture", "system design", "what services do we 
 
 ## Output
 
-- `_concept/3_blueprint/2_architecture/architecture.md`
+- `_concept/blueprint/architecture.md`
 
 ## Next Steps
 

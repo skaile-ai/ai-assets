@@ -21,10 +21,10 @@ metadata:
       default: medium
   prerequisites:
     files:
-      - path: "_concept/1_discovery/1_overview/brief.md"
+      - path: "_concept/discovery/brief.md"
         gate: hard
         description: "Project brief must exist — add-feature requires an existing concept"
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         gate: hard
         description: "At least one feature group must exist to add to"
         min_entries: 1
@@ -40,18 +40,18 @@ metadata:
           - new
           - modification
     reads:
-      - path: "_concept/2_experience/1_journeys/stories.json"
+      - path: "_concept/experience/journeys/stories.json"
         description: "Existing journeys for cascade impact assessment"
-      - path: "_concept/3_blueprint/1_techstack/stack.md"
+      - path: "_concept/blueprint/techstack.md"
         description: "Tech stack for implementation cascade planning"
-      - path: "_concept/3_blueprint/2_architecture/architecture.md"
+      - path: "_concept/blueprint/architecture.md"
         description: "Architecture for service boundary impact"
-      - path: "_concept/3_blueprint/3_datamodel/model.json"
+      - path: "_concept/blueprint/datamodel/model.json"
         description: "Data model for entity cascade"
-      - path: "_concept/2_experience/3_screens"
+      - path: "_concept/experience/screens"
         description: "Existing screens to identify cascade targets"
     produces:
-      - path: "_concept/2_experience/2_features"
+      - path: "_concept/experience/features"
         description: "New or modified feature spec file"
   user_inputs:
     dialog:
@@ -96,24 +96,24 @@ It never touches artifacts that haven't been created yet.
 `skaileup-shared/contracts/feedback_loop.md`, and `skaileup-shared/contracts/golden_principles.md` before proceeding.
 
 **Hard gates:**
-- `_concept/1_discovery/1_overview/brief.md` must exist
-- `_concept/2_experience/2_features/` must have at least one feature group
+- `_concept/discovery/brief.md` must exist
+- `_concept/experience/features/` must have at least one feature group
 
 ## Context Budget
 
 | Action | Path | Required |
 |---|---|---|
-| Must read | `_concept/1_discovery/1_overview/brief.md` | Yes |
-| Must read | `_concept/2_experience/2_features/**/*.md` | Yes |
-| Check if present | `_concept/2_experience/1_journeys/stories.json` | No |
-| Check if present | `_concept/1_discovery/2_brand/tokens.json` | No |
-| Check if present | `_concept/3_blueprint/1_techstack/stack.md` | No |
-| Check if present | `_concept/3_blueprint/2_architecture/architecture.md` | No |
-| Check if present | `_concept/3_blueprint/3_datamodel/model.json` | No |
-| Check if present | `_concept/3_blueprint/3_datamodel/model.dbml` | No |
-| Check if present | `_concept/3_blueprint/3_datamodel/seed.json` | No |
-| Check if present | `_concept/3_blueprint/3_datamodel/feature_map.json` | No |
-| Check if present | `_concept/2_experience/3_screens/**/*.md` | No |
+| Must read | `_concept/discovery/brief.md` | Yes |
+| Must read | `_concept/experience/features/**/*.md` | Yes |
+| Check if present | `_concept/experience/journeys/stories.json` | No |
+| Check if present | `_concept/discovery/brand/tokens.json` | No |
+| Check if present | `_concept/blueprint/techstack.md` | No |
+| Check if present | `_concept/blueprint/architecture.md` | No |
+| Check if present | `_concept/blueprint/datamodel/model.json` | No |
+| Check if present | `_concept/blueprint/datamodel/model.dbml` | No |
+| Check if present | `_concept/blueprint/datamodel/seed.json` | No |
+| Check if present | `_concept/blueprint/datamodel/feature_map.json` | No |
+| Check if present | `_concept/experience/screens/**/*.md` | No |
 | Check if present | `_implementation/progress.json` | No (determines if Phase 4 runs) |
 
 ## Standalone Mode
@@ -127,27 +127,27 @@ ROLE  Feature Addition agent — surgically adds or modifies a single feature an
       changes through all existing downstream artifacts.
 
 READS
-  _concept/1_discovery/1_overview/brief.md              — app purpose, audience
-  _concept/2_experience/2_features/**/*.md              — all existing features (names, groups, priorities)
-  ? _concept/2_experience/1_journeys/stories.json       — user journey context
-  ? _concept/1_discovery/2_brand/tokens.json            — brand tokens (for screen cascade)
-  ? _concept/3_blueprint/1_techstack/stack.md           — tech stack
-  ? _concept/3_blueprint/2_architecture/architecture.md — architecture
-  ? _concept/3_blueprint/3_datamodel/model.json         — data model (canonical cross-ref)
-  ? _concept/3_blueprint/3_datamodel/model.dbml         — data model (human-readable)
-  ? _concept/3_blueprint/3_datamodel/seed.json          — seed data
-  ? _concept/3_blueprint/3_datamodel/feature_map.json   — model-to-feature mapping
-  ? _concept/2_experience/3_screens/**/*.md             — screen specs
+  _concept/discovery/brief.md              — app purpose, audience
+  _concept/experience/features/**/*.md              — all existing features (names, groups, priorities)
+  ? _concept/experience/journeys/stories.json       — user journey context
+  ? _concept/discovery/brand/tokens.json            — brand tokens (for screen cascade)
+  ? _concept/blueprint/techstack.md           — tech stack
+  ? _concept/blueprint/architecture.md — architecture
+  ? _concept/blueprint/datamodel/model.json         — data model (canonical cross-ref)
+  ? _concept/blueprint/datamodel/model.dbml         — data model (human-readable)
+  ? _concept/blueprint/datamodel/seed.json          — seed data
+  ? _concept/blueprint/datamodel/feature_map.json   — model-to-feature mapping
+  ? _concept/experience/screens/**/*.md             — screen specs
   ? _implementation/progress.json                       — implementation status (determines if Phase 4 runs)
 
 WRITES
-  _concept/2_experience/2_features/<NN_group>/<feature>.md   — new or updated feature spec
+  _concept/experience/features/<NN_group>/<feature>.md   — new or updated feature spec
   Cascades (only to artifacts that already exist):
-    _concept/2_experience/1_journeys/stories.json
-    _concept/3_blueprint/1_techstack/stack.md
-    _concept/3_blueprint/2_architecture/architecture.md
-    _concept/3_blueprint/3_datamodel/model.json + model.dbml + seed.json + feature_map.json
-    _concept/2_experience/3_screens/<NN_group>/<screen>.md
+    _concept/experience/journeys/stories.json
+    _concept/blueprint/techstack.md
+    _concept/blueprint/architecture.md
+    _concept/blueprint/datamodel/model.json + model.dbml + seed.json + feature_map.json
+    _concept/experience/screens/<NN_group>/<screen>.md
 
 REFERENCES
   skaileup-shared/contracts/concept_structure.md      — valid paths, naming rules
@@ -166,13 +166,13 @@ NEVER cascade to artifacts that don't already exist
 NEVER renumber existing feature groups
 NEVER overwrite existing feature spec without showing the diff first
 NEVER invent entities or screens that aren't needed by the feature
-NEVER invent colors or fonts — consume from 1_discovery/2_brand/tokens.json
+NEVER invent colors or fonts — consume from discovery/brand/tokens.json
 
 EMIT  [add-feature] started run_id=<uuid> mode=add|modify feature=<name>
 
 STEP 1: Read existing concept
   - Read brief.md for app context
-  - Read ALL files in _concept/2_experience/2_features/ (all groups, all specs)
+  - Read ALL files in _concept/experience/features/ (all groups, all specs)
   - Read each optional artifact that exists (journeys, techstack, architecture, model, screens)
   - Check if _implementation/progress.json exists (determines if Phase 4 runs)
   - Build a mental map of:
@@ -217,7 +217,7 @@ STEP 4: Write feature spec
     - Preserve existing screens: and data_entities: arrays
     - Update last_updated to today
   CHECKPOINT feature_spec
-    > "Here's the feature spec: `_concept/2_experience/2_features/<group>/<feature>.md`
+    > "Here's the feature spec: `_concept/experience/features/<group>/<feature>.md`
     > Approve to proceed with cascade updates, or request changes."
   EMIT  [add-feature] checkpoint phase=feature_spec mode=add|modify feature=<name> group=<NN_group>
 

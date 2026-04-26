@@ -12,7 +12,7 @@ then feature Y must list screen X, and screen X must list feature Y.
 
 ### When the journeys skill creates stories:
 
-1. Write `stories.json` to `_concept/2_experience/1_journeys/`
+1. Write `stories.json` to `_concept/experience/journeys/`
 2. Each journey includes `candidate_features` (slugs) and `candidate_entities` (PascalCase names)
 3. These are consumed by the features skill to seed its feature list
 4. No frontmatter updates needed — features discover journeys by reading the JSON file directly
@@ -32,13 +32,13 @@ then feature Y must list screen X, and screen X must list feature Y.
 
 ### When the features skill reads journeys:
 
-1. Read `_concept/2_experience/1_journeys/stories.json`
+1. Read `_concept/experience/journeys/stories.json`
 2. Use `candidate_features` from each journey to seed the feature list
 3. For each created feature, set `story_refs` in frontmatter to the journey IDs that motivated it
 4. Features may be added, merged, or split beyond what journeys suggest — `story_refs` traces the origin
 
 ```yaml
-# 2_experience/2_features/01_user_auth/registration.md
+# experience/features/01_user_auth/registration.md
 ---
 story_refs: [onboarding_flow, invite_flow]
 ---
@@ -52,18 +52,18 @@ story_refs: [onboarding_flow, invite_flow]
 4. Update `last_updated` on both files
 
 ```yaml
-# 2_experience/3_screens/01_user_auth/login.md
+# experience/screens/01_user_auth/login.md
 ---
 implements:
-  - 2_experience/2_features/01_user_auth/login.md
-  - 2_experience/2_features/01_user_auth/registration.md
+  - experience/features/01_user_auth/login.md
+  - experience/features/01_user_auth/registration.md
 ---
 ```
 
 ```yaml
-# 2_experience/2_features/01_user_auth/login.md — updated by screens skill
+# experience/features/01_user_auth/login.md — updated by screens skill
 screens:
-  - path: 2_experience/3_screens/01_user_auth/login.md
+  - path: experience/screens/01_user_auth/login.md
 ```
 
 ### When the datamodel skill creates the model:
@@ -75,19 +75,19 @@ screens:
 5. Update `last_updated` on the feature file
 
 ```yaml
-# 2_experience/2_features/01_user_auth/login.md — updated by datamodel skill
+# experience/features/01_user_auth/login.md — updated by datamodel skill
 data_entities: [User, Session]
 ```
 
 ### When the behaviors skill creates behavioral specs (optional):
 
-1. Write `.allium` files to `_concept/2_experience/4_behaviors/`
+1. Write `.allium` files to `_concept/experience/behaviors/`
 2. Each file corresponds to a feature group (e.g. `user_auth.allium` ↔ `01_user_auth/`)
 3. No frontmatter updates needed — downstream skills discover allium files by checking the folder
 
 ### When the datamodel skill reads behavioral specs (optional):
 
-1. Check if `_concept/2_experience/4_behaviors/*.allium` exists
+1. Check if `_concept/experience/behaviors/*.allium` exists
 2. If present, use entity definitions to pre-populate the data model:
    - Entity status enums → model enums
    - Entity relationships → model relationships
@@ -96,7 +96,7 @@ data_entities: [User, Session]
 
 ### When the screens skill reads behavioral specs (optional):
 
-1. Check if `_concept/2_experience/4_behaviors/*.allium` exists
+1. Check if `_concept/experience/behaviors/*.allium` exists
 2. If present, use surfaces to inform screen specs:
    - Surface `exposes` → screen data requirements
    - Surface `provides` → screen user actions
@@ -130,8 +130,8 @@ The quality review skill checks for broken cross-references:
 When modifying an upstream file, emit a structured event:
 
 ```
-[feedback_loop] updated 2_experience/2_features/01_user_auth/login.md
-  added screen: 2_experience/3_screens/01_user_auth/login.md
+[feedback_loop] updated experience/features/01_user_auth/login.md
+  added screen: experience/screens/01_user_auth/login.md
   source_skill: concept/experience/screens
 ```
 
