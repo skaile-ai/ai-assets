@@ -32,6 +32,28 @@ The URL path (e.g., `/login`, `/dashboard`, `/tasks/:id`).
 A plain-language description of the initial view — what is visible on screen load.
 Write as if describing it to a non-technical stakeholder.
 
+### Wireframe
+
+ASCII wireframe showing the spatial layout of this screen within the app shell.
+Follows `skaileup-shared/contracts/wireframe_conventions.md`.
+
+- **Required** at depth `medium` and `max`
+- **Skipped** at depth `light` and `none`
+- At depth `max`, annotate zones with `feat:<feature-name>` when the screen
+  implements multiple features (derived from `implements[]` frontmatter)
+
+```text
+┌─────────────────────────────────────────────┐
+│ [=] App Name              [search] [avatar] │
+├────────────┬────────────────────────────────┤
+│ Nav Item 1 │  Page Title                    │
+│ Nav Item 2 │ ┌────────────────────────────┐ │
+│ Nav Item 3 │ │  Main content area         │ │
+│            │ │                            │ │
+│            │ └────────────────────────────┘ │
+└────────────┴────────────────────────────────┘
+```
+
 ### Information Displayed
 Group displayed information by data entity. Reference field names from model.json.
 
