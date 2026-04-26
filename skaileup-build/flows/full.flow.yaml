@@ -1,5 +1,5 @@
 id: "full"
-version: "1.0.0"
+version: "2.0.0"
 name: "Full Production"
 description: "Complete implementation pipeline — readiness gate, scaffold, foundation, optional design pass, migrate/seed, feature TDD, full test suite (unit, integration, E2E), verify."
 metadata:
@@ -25,6 +25,14 @@ modes:
     skill: "skailup-standards-discover"
     inject_skill: "skailup-standards-inject"
     trigger_after: "scaffold"
+artifact_handoff:
+  from_concept:
+    - features
+    - screens
+    - datamodel
+    - techstack
+    - architecture
+    - onboarding-decisions
 entry: "ready"
 nodes:
   - id: "g-implement"
@@ -230,10 +238,10 @@ edges:
     type: "flow"
 next_flows:
   - id: "audit"
-    domain: "skaileup-evaluate"
+    domain: "skaileup-quality"
     label: "Audit →"
     hint: "Run static analysis and structure audit on the implemented codebase."
   - id: "e2e"
-    domain: "skaileup-evaluate"
+    domain: "skaileup-quality"
     label: "E2E Suite →"
     hint: "Run the full browser-based E2E journey test suite."

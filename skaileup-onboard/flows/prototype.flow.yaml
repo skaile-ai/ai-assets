@@ -1,5 +1,5 @@
 id: "prototype"
-version: "1.0.0"
+version: "2.0.0"
 name: "Quick Prototype"
 description: "Concept + interactive mockups only. No data model, no implementation. Fastest path to a clickable prototype for user validation."
 metadata:
@@ -20,6 +20,31 @@ globals:
   auto_review: false
   subagent_mode: false
   verbosity: "brief"
+tier_presets:
+  quick:
+    skaileup-research: none
+    skaileup-discovery: light
+    skaileup-experience: light
+    skaileup-prototype: light
+    skaileup-storybook: none
+    skaileup-blueprint: none
+    skaileup-concept-meta: none
+  standard:
+    skaileup-research: light
+    skaileup-discovery: medium
+    skaileup-experience: medium
+    skaileup-prototype: medium
+    skaileup-storybook: none
+    skaileup-blueprint: none
+    skaileup-concept-meta: none
+  thorough:
+    skaileup-research: medium
+    skaileup-discovery: max
+    skaileup-experience: max
+    skaileup-prototype: medium
+    skaileup-storybook: max
+    skaileup-blueprint: none
+    skaileup-concept-meta: none
 modes:
   research:
     enabled: true
@@ -34,8 +59,27 @@ modes:
         - "colors_fonts"
   standards:
     enabled: false
-entry: "overview"
+entry: "onboard"
 nodes:
+  - id: "onboard"
+    type: "skill"
+    position:
+      x: -400
+      y: 160
+    data:
+      skill: "skailup-onboard"
+      label: "Project Onboarding"
+      optional: false
+  - id: "ingest-seeds"
+    type: "skill"
+    position:
+      x: -200
+      y: 160
+    data:
+      skill: "skailup-ingest-seeds"
+      label: "Ingest Seeds"
+      optional: true
+      skip_when: "no_seeds_dir"
   - id: "g-concept"
     type: "group"
     position:
@@ -60,6 +104,7 @@ nodes:
       skill: "skailup-overview"
       label: "Project Brief"
       optional: false
+      depth_from: "skaileup-discovery"
       parameters:
         input_style: "freeform"
   - id: "journeys"
@@ -72,13 +117,12 @@ nodes:
       skill: "skailup-journeys"
       label: "User Journeys"
       optional: true
+      depth_from: "skaileup-experience"
+      skip_when: "tier.skaileup-experience in ['none', 'light']"
       parameters:
         hero_approval_required: true
         min_stages:
           - "hero"
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
   - id: "brand-visual"
     type: "skill"
     parentNode: "g-concept"
@@ -89,10 +133,9 @@ nodes:
       skill: "skailup-brand-visual"
       label: "Brand Visual"
       optional: false
+      depth_from: "skaileup-discovery"
+      skip_when: "tier.skaileup-discovery in ['none', 'light']"
       parallel_group: "identity"
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
   - id: "techstack"
     type: "skill"
     parentNode: "g-concept"
@@ -103,10 +146,8 @@ nodes:
       skill: "skailup-techstack"
       label: "Tech Stack"
       optional: false
+      depth_from: "skaileup-blueprint"
       parallel_group: "identity"
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
   - id: "features"
     type: "skill"
     parentNode: "g-concept"
@@ -117,10 +158,7 @@ nodes:
       skill: "skailup-features"
       label: "Features"
       optional: false
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
-          - "_concept/2_experience/1_journeys/stories.json"
+      depth_from: "skaileup-experience"
   - id: "screens"
     type: "skill"
     parentNode: "g-concept"
@@ -131,40 +169,59 @@ nodes:
       skill: "skailup-screens"
       label: "Screens"
       optional: false
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
-  - id: "mock"
-    type: "skill"
+      depth_from: "skaileup-experience"
+  - id: "route-prototype"
+    type: "router"
     parentNode: "g-concept"
     position:
       x: 1120
       y: 200
     data:
+      label: "Prototype Router"
+      routes:
+        - condition: "tier.skaileup-storybook in ['medium', 'max']"
+          target: "storybook"
+        - condition: "tier.skaileup-prototype in ['light', 'medium', 'max']"
+          target: "mock"
+        - condition: "default"
+          target: null
+  - id: "mock"
+    type: "skill"
+    parentNode: "g-concept"
+    position:
+      x: 1280
+      y: 240
+    data:
       skill: "skailup-mock"
       label: "Mockups"
       optional: false
+      depth_from: "skaileup-prototype"
+      skip_when: "tier.skaileup-prototype == 'none'"
       parameters:
         framework: "alpine"
         include_seed_data: true
         include_interactions: true
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
   - id: "storybook"
     type: "skill"
     parentNode: "g-concept"
     position:
-      x: 1120
+      x: 1280
       y: 80
     data:
       skill: "skailup-storybook"
       label: "Storybook"
       optional: true
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
+      depth_from: "skaileup-storybook"
+      skip_when: "tier.skaileup-storybook == 'none'"
 edges:
+  - id: "e-onboard-ingest"
+    source: "onboard"
+    target: "ingest-seeds"
+    type: "flow"
+  - id: "e-ingest-overview"
+    source: "ingest-seeds"
+    target: "overview"
+    type: "flow"
   - id: "e-overview-journeys"
     source: "overview"
     target: "journeys"
@@ -197,28 +254,26 @@ edges:
     source: "techstack"
     target: "screens"
     type: "flow"
-  - id: "e-screens-mock"
+  - id: "e-screens-route-prototype"
     source: "screens"
-    target: "mock"
+    target: "route-prototype"
     type: "flow"
-  - id: "e-screens-storybook"
-    source: "screens"
-    target: "storybook"
-    type: "optional"
-  - id: "e-techstack-storybook"
-    source: "techstack"
-    target: "storybook"
-    type: "optional"
-  - id: "e-brand-storybook"
-    source: "brand-visual"
-    target: "storybook"
-    type: "optional"
 next_flows:
   - id: "prototype"
-    domain: "skaileup-implementation"
+    domain: "skaileup-build"
     label: "Build Prototype →"
     hint: "Scaffold and run a minimal implementation pass — fast path for user testing."
+    artifact_handoff:
+      - features
+      - screens
+      - techstack
+      - onboarding-decisions
   - id: "standard"
-    domain: "skaileup-implementation"
+    domain: "skaileup-build"
     label: "Full Implement →"
     hint: "Continue to production-grade implementation after validating the prototype concept."
+    artifact_handoff:
+      - features
+      - screens
+      - techstack
+      - onboarding-decisions

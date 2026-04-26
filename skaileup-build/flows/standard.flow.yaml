@@ -1,5 +1,5 @@
 id: "standard"
-version: "1.0.0"
+version: "2.0.0"
 name: "Standard Implementation"
 description: "Standard full-stack implementation: scaffold, foundation, migrate/seed, feature dev with TDD, unit and integration tests, E2E, verify."
 metadata:
@@ -25,6 +25,14 @@ modes:
     skill: "skailup-standards-discover"
     inject_skill: "skailup-standards-inject"
     trigger_after: "scaffold"
+artifact_handoff:
+  from_concept:
+    - features
+    - screens
+    - datamodel
+    - techstack
+    - architecture
+    - onboarding-decisions
 entry: "scaffold"
 nodes:
   - id: "g-implement"
@@ -207,6 +215,6 @@ edges:
     type: "optional"
 next_flows:
   - id: "audit"
-    domain: "skaileup-evaluate"
+    domain: "skaileup-quality"
     label: "Audit →"
     hint: "Run static analysis and structure audit on the implemented codebase."

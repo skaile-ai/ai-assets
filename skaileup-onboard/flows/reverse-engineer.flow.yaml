@@ -1,5 +1,5 @@
 id: "reverse-engineer"
-version: "1.0.0"
+version: "2.0.0"
 name: "Reverse Engineer"
 description: "Extract a full concept from an existing codebase, then optionally continue with any concept or implementation steps."
 metadata:
@@ -23,6 +23,22 @@ globals:
   auto_review: false
   subagent_mode: true
   verbosity: "detailed"
+tier_presets:
+  quick:
+    skaileup-experience: light
+    skaileup-blueprint: light
+    skaileup-storybook: none
+    skaileup-concept-meta: none
+  standard:
+    skaileup-experience: medium
+    skaileup-blueprint: medium
+    skaileup-storybook: none
+    skaileup-concept-meta: light
+  thorough:
+    skaileup-experience: max
+    skaileup-blueprint: max
+    skaileup-storybook: medium
+    skaileup-concept-meta: medium
 modes:
   research:
     enabled: false
@@ -91,11 +107,10 @@ nodes:
       skill: "skailup-journeys"
       label: "User Journeys"
       optional: true
+      depth_from: "skaileup-experience"
+      skip_when: "tier.skaileup-experience in ['none', 'light']"
       parameters:
         note: "Derive journeys from the extracted concept"
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
   - id: "architecture"
     type: "skill"
     parentNode: "g-optional-concept"
@@ -106,11 +121,9 @@ nodes:
       skill: "skailup-architecture"
       label: "Architecture"
       optional: true
+      depth_from: "skaileup-blueprint"
       subagent: true
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
-          - "_concept/2_experience/2_features"
+      extend_when: "artifact.architecture.status == 'seed-partial'"
   - id: "datamodel"
     type: "skill"
     parentNode: "g-optional-concept"
@@ -121,10 +134,9 @@ nodes:
       skill: "skailup-datamodel"
       label: "Data Model"
       optional: true
+      depth_from: "skaileup-blueprint"
       subagent: true
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
+      extend_when: "artifact.datamodel.status == 'seed-partial'"
   - id: "screens"
     type: "skill"
     parentNode: "g-optional-concept"
@@ -135,10 +147,8 @@ nodes:
       skill: "skailup-screens"
       label: "Screens"
       optional: true
+      depth_from: "skaileup-experience"
       subagent: true
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
   - id: "storybook"
     type: "skill"
     parentNode: "g-optional-concept"
@@ -149,9 +159,8 @@ nodes:
       skill: "skailup-storybook"
       label: "Storybook"
       optional: true
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
+      depth_from: "skaileup-storybook"
+      skip_when: "tier.skaileup-storybook == 'none'"
 edges:
   - id: "e-re-journeys"
     source: "reverse-engineer"
@@ -183,10 +192,17 @@ edges:
     type: "optional"
 next_flows:
   - id: "concept-only"
-    domain: "skaileup-conceptualization"
+    domain: "skaileup-onboard"
     label: "Enrich Concept →"
     hint: "Run the full concept pipeline to enrich and validate the extracted concept."
   - id: "standard"
-    domain: "skaileup-implementation"
+    domain: "skaileup-build"
     label: "Implement →"
     hint: "Proceed to implementation using the extracted concept as foundation."
+    artifact_handoff:
+      - features
+      - screens
+      - datamodel
+      - techstack
+      - architecture
+      - onboarding-decisions

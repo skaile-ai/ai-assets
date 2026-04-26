@@ -1,5 +1,5 @@
 id: "cli"
-version: "1.0.0"
+version: "2.0.0"
 name: "CLI Implementation"
 description: "Implementation pipeline for command-line tools. No UI shell, no design pass, no E2E. Scaffold, foundation (headless), optional migrate/seed, feature TDD, unit and integration tests, verify."
 metadata:
@@ -23,6 +23,13 @@ modes:
     enabled: false
   standards:
     enabled: false
+artifact_handoff:
+  from_concept:
+    - features
+    - datamodel
+    - techstack
+    - architecture
+    - onboarding-decisions
 entry: "scaffold"
 nodes:
   - id: "g-implement"
@@ -169,6 +176,6 @@ edges:
     type: "flow"
 next_flows:
   - id: "audit"
-    domain: "skaileup-evaluate"
+    domain: "skaileup-quality"
     label: "Audit →"
     hint: "Run static analysis and structure audit on the CLI codebase."

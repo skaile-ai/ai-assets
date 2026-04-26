@@ -1,5 +1,5 @@
 id: "prototype"
-version: "1.0.0"
+version: "2.0.0"
 name: "Prototype Implementation"
 description: "Minimal implementation pass for rapid prototypes. Scaffold, implement features (no strict TDD), light E2E smoke test. Optimized for speed and user testing — not production readiness."
 metadata:
@@ -22,6 +22,12 @@ modes:
     enabled: false
   standards:
     enabled: false
+artifact_handoff:
+  from_concept:
+    - features
+    - screens
+    - techstack
+    - onboarding-decisions
 entry: "scaffold"
 nodes:
   - id: "g-implement"
@@ -88,6 +94,6 @@ edges:
     type: "optional"
 next_flows:
   - id: "standard"
-    domain: "skaileup-implementation"
+    domain: "skaileup-build"
     label: "Harden →"
     hint: "Upgrade from prototype to production — foundation, TDD, full test suite, verify."

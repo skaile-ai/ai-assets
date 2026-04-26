@@ -1,5 +1,5 @@
 id: "cli-concept"
-version: "1.0.0"
+version: "2.0.0"
 name: "CLI Concept"
 description: "Concept phase for command-line tools. No UI, no brand, no screens. Covers project brief, commands/features, tech stack, and data model."
 metadata:
@@ -21,6 +21,25 @@ globals:
   subagent_mode: true
   verbosity: "standard"
   cli_mode: true
+tier_presets:
+  quick:
+    skaileup-research: none
+    skaileup-discovery: light
+    skaileup-experience: light
+    skaileup-blueprint: light
+    skaileup-concept-meta: none
+  standard:
+    skaileup-research: light
+    skaileup-discovery: light
+    skaileup-experience: medium
+    skaileup-blueprint: medium
+    skaileup-concept-meta: none
+  thorough:
+    skaileup-research: medium
+    skaileup-discovery: medium
+    skaileup-experience: max
+    skaileup-blueprint: max
+    skaileup-concept-meta: light
 modes:
   research:
     enabled: true
@@ -35,8 +54,27 @@ modes:
         - "patterns"
   standards:
     enabled: false
-entry: "overview"
+entry: "onboard"
 nodes:
+  - id: "onboard"
+    type: "skill"
+    position:
+      x: -400
+      y: 140
+    data:
+      skill: "skailup-onboard"
+      label: "Project Onboarding"
+      optional: false
+  - id: "ingest-seeds"
+    type: "skill"
+    position:
+      x: -200
+      y: 140
+    data:
+      skill: "skailup-ingest-seeds"
+      label: "Ingest Seeds"
+      optional: true
+      skip_when: "no_seeds_dir"
   - id: "g-concept"
     type: "group"
     position:
@@ -61,6 +99,7 @@ nodes:
       skill: "skailup-overview"
       label: "Project Brief"
       optional: false
+      depth_from: "skaileup-discovery"
       parameters:
         input_style: "freeform"
         note: "Describe CLI commands, flags, and expected output"
@@ -74,13 +113,12 @@ nodes:
       skill: "skailup-journeys"
       label: "User Journeys"
       optional: true
+      depth_from: "skaileup-experience"
+      skip_when: "tier.skaileup-experience in ['none', 'light']"
       parameters:
         min_stages:
           - "hero"
         note: "Map command-line workflows as journeys"
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
   - id: "features"
     type: "skill"
     parentNode: "g-concept"
@@ -91,13 +129,10 @@ nodes:
       skill: "skailup-features"
       label: "Features"
       optional: false
+      depth_from: "skaileup-experience"
       parameters:
         cli_mode: true
         describe_as_commands: true
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
-          - "_concept/2_experience/1_journeys/stories.json"
   - id: "techstack"
     type: "skill"
     parentNode: "g-concept"
@@ -108,10 +143,8 @@ nodes:
       skill: "skailup-techstack"
       label: "Tech Stack"
       optional: false
+      depth_from: "skaileup-blueprint"
       parallel_group: "identity"
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
   - id: "architecture"
     type: "skill"
     parentNode: "g-concept"
@@ -122,10 +155,8 @@ nodes:
       skill: "skailup-architecture"
       label: "Architecture"
       optional: true
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
-          - "_concept/2_experience/2_features"
+      depth_from: "skaileup-blueprint"
+      extend_when: "artifact.architecture.status == 'seed-partial'"
   - id: "datamodel"
     type: "skill"
     parentNode: "g-concept"
@@ -136,12 +167,19 @@ nodes:
       skill: "skailup-datamodel"
       label: "Data Model"
       optional: false
+      depth_from: "skaileup-blueprint"
+      extend_when: "artifact.datamodel.status == 'seed-partial'"
       parameters:
         note: "Config files, storage schemas, output formats"
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
 edges:
+  - id: "e-onboard-ingest"
+    source: "onboard"
+    target: "ingest-seeds"
+    type: "flow"
+  - id: "e-ingest-overview"
+    source: "ingest-seeds"
+    target: "overview"
+    type: "flow"
   - id: "e-overview-journeys"
     source: "overview"
     target: "journeys"
@@ -180,6 +218,12 @@ edges:
     type: "optional"
 next_flows:
   - id: "cli"
-    domain: "skaileup-implementation"
+    domain: "skaileup-build"
     label: "Implement CLI →"
     hint: "Scaffold the CLI project and implement features with unit and integration tests."
+    artifact_handoff:
+      - features
+      - datamodel
+      - techstack
+      - architecture
+      - onboarding-decisions

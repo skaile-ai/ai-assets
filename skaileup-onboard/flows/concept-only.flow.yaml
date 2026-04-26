@@ -1,5 +1,5 @@
 id: "concept-only"
-version: "1.0.0"
+version: "2.0.0"
 name: "Concept Only"
 description: "Produces a complete concept document package without implementation. For planning, documentation, or handing off to a development team."
 metadata:
@@ -90,13 +90,25 @@ nodes:
       label: "Ingest Seeds"
       optional: true
       skip_when: "no_seeds_dir"
+  - id: "research"
+    type: "skill"
+    position:
+      x: -400
+      y: 400
+    data:
+      skill: "skailup-research"
+      label: "Domain Research"
+      optional: true
+      depth_from: "skaileup-research"
+      skip_when: "tier.skaileup-research == 'none'"
+      mode: parallel
   - id: "g-concept"
     type: "group"
     position:
       x: 0
       y: 0
     style:
-      width: 1400
+      width: 1600
       height: 480
       backgroundColor: "rgba(99,102,241,0.04)"
       border: "1px solid rgba(99,102,241,0.2)"
@@ -126,11 +138,9 @@ nodes:
       label: "User Journeys"
       optional: false
       depth_from: "skaileup-experience"
+      skip_when: "tier.skaileup-experience in ['none', 'light']"
       parameters:
         hero_approval_required: true
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
   - id: "brand-visual"
     type: "skill"
     parentNode: "g-concept"
@@ -142,10 +152,8 @@ nodes:
       label: "Brand Visual"
       optional: false
       depth_from: "skaileup-discovery"
+      skip_when: "tier.skaileup-discovery in ['none', 'light']"
       parallel_group: "identity"
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
   - id: "techstack"
     type: "skill"
     parentNode: "g-concept"
@@ -158,9 +166,6 @@ nodes:
       optional: false
       depth_from: "skaileup-blueprint"
       parallel_group: "identity"
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
   - id: "features"
     type: "skill"
     parentNode: "g-concept"
@@ -173,10 +178,6 @@ nodes:
       optional: false
       depth_from: "skaileup-experience"
       subagent: true
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
-          - "_concept/2_experience/1_journeys/stories.json"
   - id: "brand-behavioral"
     type: "skill"
     parentNode: "g-concept"
@@ -190,9 +191,6 @@ nodes:
       depth_from: "skaileup-discovery"
       skip_when:
         tier_is: none
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
   - id: "behaviors"
     type: "skill"
     parentNode: "g-concept"
@@ -206,9 +204,6 @@ nodes:
       depth_from: "skaileup-experience"
       skip_when:
         tier_is: none
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
   - id: "architecture"
     type: "skill"
     parentNode: "g-concept"
@@ -221,10 +216,7 @@ nodes:
       optional: false
       depth_from: "skaileup-blueprint"
       subagent: true
-      overrides:
-        skip_checks:
-          - "_concept/1_discovery/1_overview/brief.md"
-          - "_concept/2_experience/2_features"
+      extend_when: "artifact.architecture.status == 'seed-partial'"
   - id: "datamodel"
     type: "skill"
     parentNode: "g-concept"
@@ -237,9 +229,7 @@ nodes:
       optional: false
       depth_from: "skaileup-blueprint"
       subagent: true
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
+      extend_when: "artifact.datamodel.status == 'seed-partial'"
   - id: "screens"
     type: "skill"
     parentNode: "g-concept"
@@ -252,9 +242,6 @@ nodes:
       optional: false
       depth_from: "skaileup-experience"
       subagent: true
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
   - id: "components"
     type: "skill"
     parentNode: "g-concept"
@@ -268,15 +255,27 @@ nodes:
       depth_from: "skaileup-experience"
       skip_when:
         tier_is: none
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
+  - id: "route-prototype"
+    type: "router"
+    parentNode: "g-concept"
+    position:
+      x: 1360
+      y: 200
+    data:
+      label: "Prototype Router"
+      routes:
+        - condition: "tier.skaileup-storybook in ['medium', 'max']"
+          target: "storybook"
+        - condition: "tier.skaileup-prototype in ['light', 'medium', 'max']"
+          target: "mock"
+        - condition: "default"
+          target: null
   - id: "storybook"
     type: "skill"
     parentNode: "g-concept"
     position:
-      x: 1120
-      y: 340
+      x: 1360
+      y: 60
     data:
       skill: "skailup-storybook"
       label: "Storybook"
@@ -284,15 +283,12 @@ nodes:
       depth_from: "skaileup-storybook"
       skip_when:
         tier_is: none
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
   - id: "mock"
     type: "skill"
     parentNode: "g-concept"
     position:
-      x: 1120
-      y: 200
+      x: 1360
+      y: 340
     data:
       skill: "skailup-mock"
       label: "Mockups"
@@ -302,14 +298,27 @@ nodes:
         tier_is: none
       parameters:
         framework: "vue"
-      overrides:
-        skip_checks:
-          - "_concept/2_experience/2_features"
+  - id: "review"
+    type: "skill"
+    parentNode: "g-concept"
+    position:
+      x: 1560
+      y: 200
+    data:
+      skill: "skailup-review"
+      label: "Concept Review"
+      optional: true
+      depth_from: "skaileup-concept-meta"
+      skip_when: "tier.skaileup-concept-meta == 'none'"
 edges:
   - id: "e-onboard-ingest"
     source: "onboard"
     target: "ingest-seeds"
     type: "flow"
+  - id: "e-onboard-research"
+    source: "onboard"
+    target: "research"
+    type: "parallel"
   - id: "e-ingest-overview"
     source: "ingest-seeds"
     target: "overview"
@@ -378,27 +387,37 @@ edges:
     source: "screens"
     target: "components"
     type: "optional"
-  - id: "e-screens-storybook"
+  - id: "e-screens-route-prototype"
     source: "screens"
-    target: "storybook"
-    type: "optional"
-  - id: "e-techstack-storybook"
-    source: "techstack"
-    target: "storybook"
-    type: "optional"
-  - id: "e-brand-storybook"
-    source: "brand-visual"
-    target: "storybook"
-    type: "optional"
-  - id: "e-screens-mock"
-    source: "screens"
-    target: "mock"
-    type: "optional"
+    target: "route-prototype"
+    type: "flow"
+  - id: "e-datamodel-review"
+    source: "datamodel"
+    target: "review"
+    type: "flow"
+  - id: "e-route-prototype-review"
+    source: "route-prototype"
+    target: "review"
+    type: "flow"
+  - id: "e-review-loop"
+    source: "review"
+    target: "overview"
+    type: "review-loop"
+    max_iterations: 2
+    exit_condition: "review.score >= 0.8"
+    on_exit_fail: "pause-for-human"
 next_flows:
   - id: "standard"
     domain: "skaileup-build"
     label: "Implement →"
     hint: "Scaffold, implement features with TDD, run tests, and verify."
+    artifact_handoff:
+      - features
+      - screens
+      - datamodel
+      - techstack
+      - architecture
+      - onboarding-decisions
   - id: "full"
     domain: "skaileup-build"
     label: "Full Production →"
