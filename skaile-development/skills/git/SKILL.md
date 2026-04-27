@@ -469,27 +469,40 @@ IF mode = sync
 
   STEP 3: Per-submodule — fetch, snapshot, pull
     FOR EACH submodule path (in .gitmodules order):
-      a. Resolve branch:
+      a. Resolve branch and ensure on main:
          $ git -C <path> rev-parse --abbrev-ref HEAD → branch
          IF branch = HEAD (detached):
-           WARN: "⚠ <path> is in detached HEAD state — skipping push"
-           SET detached[path] = true
+           > "<path> is in detached HEAD — checking out main."
+           $ git -C <path> checkout main
+           IF fails (no local main branch):
+             $ git -C <path> checkout -b main origin/main
+           SET branch = main
 
-      b. Fetch (skip if detached):
+      b. Fetch:
          $ git -C <path> fetch origin
 
       c. Record old SHA:
          $ git -C <path> rev-parse HEAD → old_sha[path]
 
-      d. Snapshot unpushed (skip if detached):
+      d. Snapshot unpushed:
          $ git -C <path> log origin/<branch>..<branch> --oneline → unpushed[path]
 
       e. Pull this submodule:
-         $ git submodule update --remote --merge -- <path>
+         First try: $ git submodule update --init --remote --merge -- <path>
+         The --init flag handles newly added submodules that haven't been cloned yet.
          IF fails:
            STOP: "✗ <path>: update failed — <error>"
                  List which submodules updated vs. which did not.
                  "Re-run sync after resolving the issue."
+
+         After update, the submodule may be in detached HEAD again (git submodule update
+         detaches by default). Re-attach to main:
+         $ git -C <path> rev-parse --abbrev-ref HEAD → post_branch
+         IF post_branch = HEAD (detached):
+           $ git -C <path> checkout main
+           $ git -C <path> merge HEAD@{1} --ff-only
+           (This moves the local main branch forward to the SHA that submodule update
+           checked out, keeping us on the named branch.)
 
       f. Compute incoming:
          $ git -C <path> log <old_sha[path]>..HEAD --oneline → incoming[path]
@@ -506,12 +519,12 @@ IF mode = sync
       SET ran_bun_install = true
 
     IF cli/package.json appears in sub_changed[agent-framework]:
-      $ bun install --global   (run from agent-framework/cli/ — NOT the monorepo root)
-      IF fails: STOP: "✗ bun install --global failed — <error>"
-      SET ran_bun_install_global = true
+      $ bun link   (run from monorepo root — re-links the CLI globally)
+      IF fails: STOP: "✗ bun link failed — <error>"
+      SET ran_bun_link = true
 
   STEP 5: Push submodules
-    FOR EACH submodule path where unpushed[path] is non-empty AND detached[path] ≠ true:
+    FOR EACH submodule path where unpushed[path] is non-empty:
       $ git -C <path> push origin <branch>
       IF rejected:
         STOP: "✗ push rejected: <path> — <error>"
@@ -548,10 +561,10 @@ IF mode = sync
       [if both zero: single collapsed line]
       <path>          ✓ up to date, nothing to push
 
-    [if ran_bun_install OR ran_bun_install_global: print footer block]
+    [if ran_bun_install OR ran_bun_link: print footer block]
       [blank line]
       [if ran_bun_install]      bun install        ✓ workspace deps reinstalled
-      [if ran_bun_install_global]  bun install -g     ✓ CLI reinstalled (agent-framework/cli changed)
+      [if ran_bun_link]         bun link           ✓ CLI re-linked (agent-framework/cli changed)
 
     ──────────────────────────────────────────────────────────────
 
