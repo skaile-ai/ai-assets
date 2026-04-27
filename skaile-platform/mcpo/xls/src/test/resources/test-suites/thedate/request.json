@@ -1,0 +1,6 @@
+{
+  "description": "Writes 2021-05-09 into the named 'thedate' cell (Sheet1!C5) via an ISO string — exercises PoiCellWriter's ISO-date path and DataFormatter(Locale.GERMAN) rendering against the template's existing date style (numFmtId 14).",
+  "operations": [
+    { "tool": "range.set", "arguments": { "sheet": "Sheet1", "start": "C5", "values": [["2021-05-09T00:00:00"]] } }
+  ]
+}

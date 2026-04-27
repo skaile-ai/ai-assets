@@ -1,0 +1,7 @@
+{
+  "description": "Writes the four input values C5:C8 on sheet 'SheetA' and recalculates the workbook. The template's F5 and F6 already hold VLOOKUP formulas against the named ranges 'rangeA' / 'rangeB' — recalc refreshes their cached results (10 and 202).",
+  "operations": [
+    { "tool": "range.set", "arguments": { "sheet": "SheetA", "start": "C5", "values": [[1],[2],[10],[202]] } },
+    { "tool": "workbook.recalculate", "arguments": {} }
+  ]
+}

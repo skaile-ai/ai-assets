@@ -1,0 +1,14 @@
+target/
+*.class
+*.jar
+*.war
+*.log
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+dependency-reduced-pom.xml
+hs_err_pid*
+test-data/

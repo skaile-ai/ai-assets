@@ -4,9 +4,9 @@ version: '1.0.1'
 description: 'Expert advisor for the skaile-dev monorepo. Routes implementation tasks to the right skills and prog-experts, orchestrates multi-step workflows (implement → test → docs → devlog), and provides context-aware guidance grounded in the actual package CLAUDE.md files.'
 extends: '../../../../ai-asset-management/agents/skaile/agent.yaml'
 model:
-  preferred: 'opus'
+  preferred: 'claude-opus-4'
   fallback:
-    - 'sonnet'
+    - 'claude-sonnet-4'
   constraints:
     temperature: 0.15
     max_tokens: 8192

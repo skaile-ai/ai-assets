@@ -1,0 +1,124 @@
+package com.skaile.excelmcp.server;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.skaile.excelmcp.error.ErrorCode;
+import com.skaile.excelmcp.error.McpException;
+import com.skaile.excelmcp.handles.HandleId;
+import java.util.Map;
+import java.util.Optional;
+
+/** Tiny shared helpers for tool input parsing and schema construction. */
+public final class ToolInputs {
+
+  private ToolInputs() {}
+
+  public static String requireString(JsonNode node, String field) throws McpException {
+    JsonNode v = node == null ? null : node.get(field);
+    if (v == null || v.isNull() || !v.isTextual()) {
+      throw new McpException(
+          ErrorCode.VALIDATION_ERROR,
+          "required string field missing or not a string: " + field,
+          Map.of("field", field));
+    }
+    return v.textValue();
+  }
+
+  public static Optional<String> optionalString(JsonNode node, String field) {
+    JsonNode v = node == null ? null : node.get(field);
+    if (v == null || v.isNull() || !v.isTextual()) {
+      return Optional.empty();
+    }
+    return Optional.of(v.textValue());
+  }
+
+  public static boolean boolOrDefault(JsonNode node, String field, boolean dflt) {
+    JsonNode v = node == null ? null : node.get(field);
+    if (v == null || v.isNull() || !v.isBoolean()) {
+      return dflt;
+    }
+    return v.booleanValue();
+  }
+
+  public static int intOrDefault(JsonNode node, String field, int dflt) {
+    JsonNode v = node == null ? null : node.get(field);
+    if (v == null || v.isNull() || !v.canConvertToInt()) {
+      return dflt;
+    }
+    return v.intValue();
+  }
+
+  /**
+   * Required-integer reader. Distinct from {@link #intOrDefault(JsonNode, String, int)} because
+   * silently substituting the default for a missing required field led to confusing downstream
+   * "must be &gt;= 1" errors that hid the real (validation-stage) cause.
+   */
+  public static int requireInt(JsonNode node, String field) throws McpException {
+    JsonNode v = node == null ? null : node.get(field);
+    if (v == null || v.isNull()) {
+      throw new McpException(
+          ErrorCode.VALIDATION_ERROR,
+          "required integer field missing: " + field,
+          Map.of("field", field));
+    }
+    if (!v.isIntegralNumber() || !v.canConvertToInt()) {
+      throw new McpException(
+          ErrorCode.VALIDATION_ERROR, "field is not an integer: " + field, Map.of("field", field));
+    }
+    return v.intValue();
+  }
+
+  /** Optional-integer reader for genuinely-optional fields (no default value). */
+  public static java.util.OptionalInt optionalInt(JsonNode node, String field) {
+    JsonNode v = node == null ? null : node.get(field);
+    if (v == null || v.isNull() || !v.isIntegralNumber() || !v.canConvertToInt()) {
+      return java.util.OptionalInt.empty();
+    }
+    return java.util.OptionalInt.of(v.intValue());
+  }
+
+  public static HandleId requireHandle(JsonNode input) throws McpException {
+    JsonNode v = input == null ? null : input.get("handle");
+    if (v == null || v.isNull() || !v.isTextual()) {
+      // Missing/non-string handle stays in the HANDLE_* family rather than the generic
+      // VALIDATION_ERROR — agents already key handle-recovery flows off the HANDLE_ prefix.
+      throw new McpException(
+          ErrorCode.HANDLE_UNKNOWN, "missing or malformed handle", Map.of("field", "handle"));
+    }
+    String raw = v.textValue();
+    try {
+      return new HandleId(raw);
+    } catch (IllegalArgumentException ex) {
+      throw new McpException(
+          ErrorCode.HANDLE_UNKNOWN, "malformed handle: " + raw, Map.of("handle", raw));
+    }
+  }
+
+  public static ObjectNode object() {
+    return JsonNodeFactory.instance.objectNode();
+  }
+
+  public static ObjectNode stringProp(String description) {
+    ObjectNode n = object();
+    n.put("type", "string");
+    n.put("description", description);
+    return n;
+  }
+
+  public static ObjectNode boolProp(String description, boolean defaultValue) {
+    ObjectNode n = object();
+    n.put("type", "boolean");
+    n.put("description", description);
+    n.put("default", defaultValue);
+    return n;
+  }
+
+  public static ObjectNode intProp(String description, int defaultValue) {
+    ObjectNode n = object();
+    n.put("type", "integer");
+    n.put("description", description);
+    n.put("default", defaultValue);
+    return n;
+  }
+}

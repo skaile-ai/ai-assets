@@ -1,0 +1,6 @@
+{
+  "description": "Updates Qty for Widget (Inventory!B2) from 3 to 7. The table 'Stock' and named range 'first_item' must survive the write — the comparator only checks rendered values and table name+row count, so the suite's @Test method attaches an extension that also asserts the full table/named-range inventory against a recorded snapshot.",
+  "operations": [
+    { "tool": "range.set", "arguments": { "sheet": "Inventory", "start": "B2", "values": [[7]] } }
+  ]
+}
