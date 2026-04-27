@@ -113,17 +113,21 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
 1. Read `platform/e2e/CLAUDE.md` if not already in context.
 
-2. Verify services:
+2. Ensure services are up. Both modes need backend (:3001) + frontend (:3000) listening.
    ```bash
    lsof -i :3000 -sTCP:LISTEN >/dev/null 2>&1 || echo "FE_DOWN"
    lsof -i :3001 -sTCP:LISTEN >/dev/null 2>&1 || echo "BE_DOWN"
    ```
    IF either is down:
-     Report to user:
-       > "Service down: <frontend|backend>. Start it first:
-       >   cd platform/frontend && bun run build && bun run preview   (for frontend — production build required; catches minified-only bugs)
-       >   cd platform/backend && bun run e2e:stateless               (for backend, e2e mode)"
-     STOP — do not proceed until the user has services running. Do NOT auto-start (side-effect risk).
+     Run the bundled service helper. It is idempotent — only starts what's missing (backend in `e2e:stateless` mode, frontend in `dev:noAuth` mode), reuses already-running services, detaches via `nohup` so services survive after the script exits, and writes logs to `platform/.e2e-backend.log` / `platform/.e2e-frontend.log`:
+     ```bash
+     cd platform && ./scripts/e2e.sh
+     ```
+     The script blocks until both ports listen (timeout 60s per service) and prints one line per service. After it returns, re-verify with the same `lsof` check.
+     IF a port is still down after the script ran: read the last ~30 lines of the relevant log, report the startup error verbatim to the user, STOP. Do not retry blindly — startup failures usually mean missing migrations, port conflicts with another app, or a code bug, and looping won't fix any of those.
+   ELSE: both up — continue.
+
+   NOTE: This is *auto-start* (spawn what's missing). It is **not** *auto-fix stale* (kill+restart already-running services to clear out-of-date code) — that's Step 3 below, more destructive (drops in-flight state, may break other dev work), and still requires explicit user authorization.
 
 3. **Stale-service check (post-pull guard).** A backend or frontend started before the latest commit on `platform/main` is serving pre-pull code; the suite will mass-fail with UI-drift-looking errors that are actually stale-bundle errors. Compare each service's process start time against the platform submodule HEAD commit time:
    ```bash
@@ -146,7 +150,7 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
        >   4. cd platform/backend && bun run e2e:stateless
        >   5. cd platform/frontend && bun run build && bun run preview --port 3000
        > Then re-invoke this skill."
-     STOP. Per skill rules ("Do NOT auto-start"), do not kill+restart without explicit user authorization.
+     STOP. Auto-start of *missing* services (Step 2) is fine; killing and restarting *already-running* services to clear staleness is destructive (drops in-flight requests, may interrupt parallel dev work) and requires explicit user authorization.
 
 4. **Stale-deps check.** Lockfile newer than `node_modules` means deps moved (typical post-pull symptom):
    ```bash
@@ -421,7 +425,7 @@ CHECKLIST
 ## Integration
 
 - **Called by:** human or `implement` skill (after a user-facing feature lands)
-- **Calls:** chrome-devtools MCP (via `mcp__chrome-devtools__*` tools, for live inspection), `sync-seed-data.js` via `bun run sync-seed`
+- **Calls:** `platform/scripts/e2e.sh` (auto-start FE+BE when missing, idempotent), chrome-devtools MCP (via `mcp__chrome-devtools__*` tools, for live inspection), `sync-seed-data.js` via `bun run sync-seed`
 - **Delegates to:** `verify-ui` (when user wants visual coverage alongside specs), `test-e2e` (when user asks about scaffolding a fresh e2e setup for a different package)
 - **Reads:** `platform/e2e/CLAUDE.md`, `platform/e2e/README.md`, `platform/e2e/E2E-GUIDE.md`, existing specs under `platform/e2e/specs/**`
 
