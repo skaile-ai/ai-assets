@@ -1,5 +1,5 @@
 ---
-name: "release"
+name: "skaile-dev-release"
 description: "Changelog management, semantic versioning, and git tagging for skaile-dev domains and packages. Three modes: status (show current version + unreleased changes), bump (update version + CHANGELOG.md), tag (create annotated git tag)."
 metadata:
   version: "1.0.0"
@@ -60,9 +60,9 @@ Manages the release lifecycle for skaile-dev domains and packages. Three modes:
 
 ## When NOT to Use
 
-- For committing changes — use `git mode=commit`
-- For devlog entries — use `devlog`
-- For release announcements — use `notify template=release` (this skill optionally triggers it)
+- For committing changes — use `skaile-dev-git mode=commit`
+- For devlog entries — use `skaile-dev-devlog`
+- For release announcements — use `skaile-dev-notify template=release` (this skill optionally triggers it)
 
 ---
 
@@ -131,7 +131,7 @@ IF mode = status
 IF mode = bump
 
   STEP 0: Readiness gate (mandatory)
-    - RUN ready with scope=<target's scope: package or domain or all>
+    - RUN skaile-dev-release-check with scope=<target's scope: package or domain or all>
     - Read _devlog/reports/readiness-<stamp>.json
     IF verdict = blocked
       - Report blockers to the user
@@ -216,7 +216,7 @@ IF mode = tag
 
   STEP 3: Notify (optional)
     > "Post release notification to Mattermost? (yes/no)"
-    IF yes → RUN notify template=release
+    IF yes → RUN skaile-dev-notify template=release
 
   EMIT [release] tag_complete version=<version>
 
@@ -244,6 +244,6 @@ CHECKLIST
 
 ## Integration
 
-- **Calls:** `git mode=commit` (for release commit), `notify template=release` (optional)
+- **Calls:** `skaile-dev-git mode=commit` (for release commit), `skaile-dev-notify template=release` (optional)
 - **Called by:** user directly, or as part of a release workflow
 - **Depends on:** Structured `---agent---` commit blocks for changelog generation

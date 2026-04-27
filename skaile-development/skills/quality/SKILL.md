@@ -1,5 +1,5 @@
 ---
-name: "quality"
+name: "skaile-dev-quality-gate"
 description: "Umbrella quality-gate orchestrator. Runs typecheck → test (with coverage + ratchet when the mode requires it) → audit → doc-audit → ready in sequence, early-outing on the first hard failure. Produces a consolidated health snapshot that contributors look at before opening a PR and release uses as its pre-flight check. Supports quick (diff-scoped), package (one package deep), and full (whole monorepo, mirrors test-full.yml CI lane) modes."
 metadata:
   version: "1.1.0"
@@ -85,7 +85,7 @@ Coordinates the quality skills in order, early-outing on the first hard failure:
 1. typecheck           — bun run typecheck (matches test-fast.yml step 1)
 2. test                — run affected test suite; with coverage + ratchet on full mode
 3. audit               — build, lint, security/logic/UI sub-agents
-4. doc                 — doc --mode audit for coverage gaps
+4. doc                 — skaile-dev-docs --mode audit for coverage gaps
 5. ready               — per-package readiness criteria
 ```
 
@@ -96,8 +96,8 @@ health snapshot at `_devlog/reports/quality-<date>.{md,json}`.
 
 | Mode | Scope | Steps | Typical time |
 |---|---|---|---|
-| `quick` (default) | Diff against staged/last-commit | typecheck → test (affected, no coverage) → audit scope=diff → doc status → ready (changed packages) | 2–5 min |
-| `package` | One named package | typecheck → test (that pkg) → audit scope=package → doc audit scope=pkg → ready scope=package | 10–20 min |
+| `quick` (default) | Diff against staged/last-commit | typecheck → test (affected, no coverage) → skaile-dev-code-audit scope=diff → doc status → ready (changed packages) | 2–5 min |
+| `package` | One named package | typecheck → test (that pkg) → skaile-dev-code-audit scope=package → doc audit scope=pkg → ready scope=package | 10–20 min |
 | `full` | Whole monorepo (mirrors `test-full.yml` CI lane + audit + doc + ready) | typecheck → test all (with istanbul coverage under Bun) → coverage ratchet → audit scope=full → doc audit → ready scope=all | 30–60 min |
 
 **`mode=full` is a pre-PR sanity check, not mandatory.** CI runs all three lanes
@@ -195,7 +195,7 @@ STEP 3: Run tests
       coverage + audit + doc sequence is resource-intensive and benefits from a clean
       context window.
   ELSE (quick, package):
-    - Call: test mode=run scope=<affected packages>
+    - Call: skaile-dev-test mode=run scope=<affected packages>
     - Capture test JSON (if test skill writes one, otherwise parse stdout)
   IF test fails and test is not in skip:
     - Aggregate partial result
@@ -216,7 +216,7 @@ EMIT [quality] step=test status=pass|fail coverage_ratchet=<pass|fail|skipped>
 
 STEP 4: Run audit
   audit_scope = {quick: diff, package: package, full: full}[mode]
-  - Call: audit scope=<audit_scope> target=<target>
+  - Call: skaile-dev-code-audit scope=<audit_scope> target=<target>
   - Read _devlog/reports/audit-<stamp>.json
   IF audit verdict = fail and audit not in skip:
     - Aggregate
@@ -228,7 +228,7 @@ EMIT [quality] step=audit verdict=<verdict>
 # ── Phase 4: Doc Audit ───────────────────────────────────────────
 
 STEP 5: Run doc audit
-  - Call: doc --mode audit [--scope <target>]
+  - Call: skaile-dev-docs --mode audit [--scope <target>]
   - Parse output (coverage gaps, stale pages)
   doc never hard-fails the gate — it only produces warnings.
   Aggregate gap count into the final report.
@@ -239,7 +239,7 @@ EMIT [quality] step=doc gaps=<N>
 
 STEP 6: Run readiness
   ready_scope = {quick: affected packages, package: target, full: all}[mode]
-  - Call: ready scope=<ready_scope> target=<target>
+  - Call: skaile-dev-release-check scope=<ready_scope> target=<target>
   - Read _devlog/reports/readiness-<stamp>.json
   IF ready has blockers and ready not in skip:
     - Aggregate
@@ -334,11 +334,11 @@ bun _scripts/check-coverage-ratchet.ts
 Then layer audit + doc + ready on top per STEP 4–6. The full quality gate always
 includes everything above plus audit/doc/ready; CI only runs typecheck + test +
 coverage ratchet in `test-full.yml`. The E2E lane (`test-e2e.yml`) is separate —
-the `quality` skill does not run Playwright.
+the `skaile-dev-quality-gate` skill does not run Playwright.
 
 ## Integration
 
-- **Called by:** user before PR, `release` (Phase 0 for full mode), CI on main
-- **Calls:** `test` (which may delegate to `test-plan`/`test-unit`/`test-integration`/`test-e2e`), `audit`, `doc --mode audit`, `ready`, and `_scripts/check-coverage-ratchet.ts` (mode=full)
+- **Called by:** user before PR, `skaile-dev-release` (Phase 0 for full mode), CI on main
+- **Calls:** `skaile-dev-test` (which may delegate to `skaile-dev-test-plan`/`skaile-dev-test-unit`/`skaile-dev-test-integration`/`skaile-dev-test-e2e`), `skaile-dev-code-audit`, `skaile-dev-docs --mode audit`, `skaile-dev-release-check`, and `_scripts/check-coverage-ratchet.ts` (mode=full)
 - **Reads:** artifacts from the above skills + `_devlog/reports/coverage-ci/coverage-summary.json` + `_devlog/reports/coverage-baseline-2026-04-22/summary.json`
 - **Writes:** `_devlog/reports/quality-*.{md,json}`

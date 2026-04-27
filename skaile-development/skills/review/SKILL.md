@@ -1,5 +1,5 @@
 ---
-name: "review"
+name: "skaile-dev-review-diff"
 description: "Code review for staged or committed changes. Checks quality, security, performance, scope, and repo-specific rules. Works locally without CI - designed for direct-to-main workflows."
 metadata:
   version: "1.0.0"
@@ -47,18 +47,18 @@ Performs a comprehensive code review on local changes without requiring CI or a 
 
 - Working directly on main and want a quality check before committing
 - As a pre-push sanity check
-- When the `/git commit` skill offers an optional review step
+- When the `/skaile-dev-git commit` skill offers an optional review step
 - Quick local review without opening a PR
 
 ## When NOT to Use
 
 - PR is already open with CI review enabled - let CI handle it
 - Reviewing someone else's code - use the GitHub PR review workflow instead
-- Diff is very large, high-risk, or cross-package — escalate to `audit scope=package` instead of running review
+- Diff is very large, high-risk, or cross-package — escalate to `skaile-dev-code-audit scope=package` instead of running review
 
 ## When to Escalate
 
-Automatic escalation to `audit` (the deeper skill) is recommended when:
+Automatic escalation to `skaile-dev-code-audit` (the deeper skill) is recommended when:
 
 - The diff is larger than 300 LOC or touches more than 10 files
 - The diff touches any of these high-risk areas:
@@ -71,8 +71,8 @@ Automatic escalation to `audit` (the deeper skill) is recommended when:
   - `.github/**` (CI pipeline)
   - `**/prisma/schema.prisma` or `**/drizzle/**` (schema drift potential)
 
-When these conditions are met, `review` should print a one-line notice and suggest the exact
-`audit` invocation rather than producing a shallow diff-only review.
+When these conditions are met, `skaile-dev-review-diff` should print a one-line notice and suggest the exact
+`skaile-dev-code-audit` invocation rather than producing a shallow diff-only review.
 
 ---
 
@@ -132,7 +132,7 @@ STEP 2: Identify Affected Packages and Assess Risk
   IF lines > 300 OR files > 10 OR any high-risk path touched:
     - Print:
       > "This diff crosses the threshold for a full audit.
-      >  Recommend: audit scope=package target=<first-affected-package>
+      >  Recommend: skaile-dev-code-audit scope=package target=<first-affected-package>
       >  Continue with shallow review anyway? (yes/no)"
     IF user says no → STOP, user will run audit
     IF user says yes → continue, but also print "⚠ diff exceeds review scope — audit recommended before merge"
@@ -224,6 +224,6 @@ EMIT [review] complete findings=<total_count> important=<important_count>
 
 ## Integration
 
-- **Called by:** `git` skill (optional review step in commit mode)
+- **Called by:** `skaile-dev-git` skill (optional review step in commit mode)
 - **Reads:** REVIEW.md, CLAUDE.md from affected packages
 - **Writes:** nothing (read-only)

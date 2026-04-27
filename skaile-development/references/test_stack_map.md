@@ -2,7 +2,7 @@
 
 Authoritative map of every package in the skaile-dev monorepo to its test framework, test-file location convention, and command to run.
 
-Used by: `test`, `test-plan`, `test-unit`, `test-integration`, `test-e2e`, `audit`, `ready`, `quality`.
+Used by: `skaile-dev-test`, `skaile-dev-test-plan`, `skaile-dev-test-unit`, `skaile-dev-test-integration`, `skaile-dev-test-e2e`, `skaile-dev-code-audit`, `skaile-dev-release-check`, `skaile-dev-quality-gate`.
 
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: "notify"
+name: "skaile-dev-notify"
 description: "Team notifications and messaging for skaile-dev. Supports free-form Mattermost messages plus structured templates for plans, breaking changes, releases, and devlog summaries."
 metadata:
   version: "1.0.0"
@@ -59,8 +59,8 @@ provides pre-configured auth and connection settings.
 
 ## When NOT to Use
 
-- For git operations (use `git`)
-- For writing the devlog entry itself (use `devlog`, then this skill to share it)
+- For git operations (use `skaile-dev-git`)
+- For writing the devlog entry itself (use `skaile-dev-devlog`, then this skill to share it)
 
 ---
 
@@ -192,7 +192,7 @@ is specified.
 - Package list (affected packages)
 - Task list (numbered steps from the plan)
 
-**Triggered by:** `implement` Phase 1 (after plan approval), or invoked standalone.
+**Triggered by:** `skaile-dev-implement` Phase 1 (after plan approval), or invoked standalone.
 
 **Channel:** Town Square (default)
 
@@ -229,7 +229,7 @@ is specified.
 - List of what broke (changes that are breaking)
 - Migration instructions per package
 
-**Triggered by:** `implement` Phase 6b when `breaking: true`.
+**Triggered by:** `skaile-dev-implement` Phase 6b when `breaking: true`.
 
 **Channel:** Town Square (default)
 
@@ -267,7 +267,7 @@ is specified.
 - Highlights (notable features or fixes)
 - Breaking changes (if any)
 
-**Triggered by:** `release` skill after a successful bump+tag.
+**Triggered by:** `skaile-dev-release` skill after a successful bump+tag.
 
 **Channel:** Town Square (default)
 
@@ -306,7 +306,7 @@ is specified.
 - Summary (2-3 sentences from the report)
 - Filename (path to the report under `_devlog/reports/`)
 
-**Triggered by:** `devlog` when a detailed report is generated (optional).
+**Triggered by:** `skaile-dev-devlog` when a detailed report is generated (optional).
 
 **Channel:** Town Square (default)
 
@@ -427,6 +427,6 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** `devlog`, `implement`, `release`
+- **Called by:** `skaile-dev-devlog`, `skaile-dev-implement`, `skaile-dev-release`
 - **Depends on:** `mcp2cli` skill (baked `@mattermost` tool)
 - **References:** Mattermost instance at `https://mattermost.ecsplico.de`

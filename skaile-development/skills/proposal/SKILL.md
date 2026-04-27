@@ -1,5 +1,5 @@
 ---
-name: "proposal"
+name: "skaile-dev-design-spec"
 description: "Create, review, or update a design spec / proposal for new features, architectural changes, or cross-package work in the skaile-dev monorepo. Use when work is too complex to jump straight into code — the spec captures the problem, design, alternatives, and approval status before implementation begins."
 metadata:
   version: "1.0.0"
@@ -120,12 +120,12 @@ STEP 6: Devlog
     - Write a detailed report to _devlog/reports/<date>-<topic>.md
     - Include "Thought Process" section documenting the reasoning path
   - Always write a short entry to _devlog/DEVLOG.md with status "(proposal)"
-  - Trigger the `devlog` skill or write entries directly
+  - Trigger the `skaile-dev-devlog` skill or write entries directly
 
 STEP 7: Commit
   - Stage spec + devlog files
   - Commit with: `docs: <topic> design spec (<status>)`
-  - Use the git skill's structured commit format
+  - Use the `skaile-dev-git` skill's structured commit format
 
 ## Mode: review
 

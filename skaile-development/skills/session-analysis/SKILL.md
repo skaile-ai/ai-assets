@@ -1,5 +1,5 @@
 ---
-name: "session-analysis"
+name: "skaile-dev-session-optimize"
 description: "Cross-session analysis of Claude Code session data. Reads a pre-computed digest (≤10KB) from the Python pipeline, triages improvement opportunities, reads implicated SKILL.md files, and proposes concrete diffs to reduce token waste and improve workflow adherence. Run after ./run.sh in _scripts/session-analysis/."
 metadata:
   version: "1.0.0"
@@ -50,7 +50,7 @@ cd _scripts/session-analysis && ./run.sh
 
 ## When NOT to Use
 
-- For single-session retrospectives — use `session-review` instead
+- For single-session retrospectives — use `skaile-dev-session-retro` instead
 - Mid-session — the current session's JSONL is still being written
 
 ---
@@ -148,10 +148,10 @@ For each selected opportunity, identify and read the implicated SKILL.md file(s)
 | Opportunity Type | What to Read |
 |---|---|
 | `prompt-bloat` for skill X | `ai-assets/skaile-development/skills/{X}/SKILL.md` |
-| `workflow-skip` for step X | The skill that should trigger step X (e.g., `implement` triggers `test`) + the skaile-development soul prompt if relevant |
+| `workflow-skip` for step X | The skill that should trigger step X (e.g., `skaile-dev-implement` triggers `skaile-dev-test`) + the skaile-development soul prompt if relevant |
 | `redundant-reads` for file X | Search SKILL.md files that contain instructions to read that file (Grep for the filename) |
 | `post-compact-reread` | Skills that instruct "read CLAUDE.md" without scoping |
-| `sequential-dispatch` | Skills that dispatch agents (likely `implement`) |
+| `sequential-dispatch` | Skills that dispatch agents (likely `skaile-dev-implement`) |
 
 Read each implicated SKILL.md. Note:
 - Total line count (proxy for prompt token size)
@@ -217,6 +217,6 @@ EMIT [session-analysis] complete proposals={N}
 ## Integration
 
 - **Prerequisite:** `_scripts/session-analysis/run.sh` (Python pipeline)
-- **Complements:** `session-review` (single-session retrospective)
+- **Complements:** `skaile-dev-session-retro` (single-session retrospective)
 - **Reads:** Only the digest + implicated SKILL.md files
 - **Suggests edits to:** Any skill under `ai-assets/skaile-development/skills/`

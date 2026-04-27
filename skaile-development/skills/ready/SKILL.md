@@ -1,5 +1,5 @@
 ---
-name: "ready"
+name: "skaile-dev-release-check"
 description: "Pre-release readiness gate for the skaile-dev monorepo. Verifies every package has README + CLAUDE.md with required sections, tests passing, build clean, typecheck clean, CHANGELOG present, and Starlight registration for packages with docs/. Produces a blocker/warning table and exits non-zero on any hard failure. Called by release as Phase 0."
 metadata:
   version: "1.0.0"
@@ -66,7 +66,7 @@ metadata:
 
 Binary pre-release gate. Every package (or a single target) is evaluated against `references/readiness_criteria.md`. A package is **ready** only when every `required` criterion passes. Soft criteria (S1-S5) produce warnings but do not block.
 
-Called by `release` as Phase 0 before any version bump or tag. Also callable standalone.
+Called by `skaile-dev-release` as Phase 0 before any version bump or tag. Also callable standalone.
 
 ## When to Use
 
@@ -77,9 +77,9 @@ Called by `release` as Phase 0 before any version bump or tag. Also callable sta
 
 ## When NOT to Use
 
-- For code-quality issues (findings, bugs) — use `audit`
-- For test coverage gaps — use `test-plan`
-- For drift between doc surfaces — use `sync-docs`
+- For code-quality issues (findings, bugs) — use `skaile-dev-code-audit`
+- For test coverage gaps — use `skaile-dev-test-plan`
+- For drift between doc surfaces — use `skaile-dev-docs-xref`
 
 ---
 
@@ -99,7 +99,7 @@ WRITES
 MUST  check every required criterion — never sample
 MUST  run real commands (not just file presence) for criteria 8-11 (tests, build, lint, typecheck)
 MUST  classify each package by category from readiness_criteria.md before applying checks
-MUST  exit non-zero on any blocker so `release` and CI can gate on it
+MUST  exit non-zero on any blocker so `skaile-dev-release` and CI can gate on it
 MUST  name the exact fix command for every blocker and warning
 NEVER mark a package ready when any required criterion fails
 NEVER run destructive commands during the check (no `--fix`, no `git reset`)
@@ -246,6 +246,6 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** `release` (Phase 0), `quality` (umbrella), CI on main
+- **Called by:** `skaile-dev-release` (Phase 0), `skaile-dev-quality-gate` (umbrella), CI on main
 - **Reads:** `references/readiness_criteria.md`, per-package files
 - **Writes:** `_devlog/reports/readiness-*.{md,json}`

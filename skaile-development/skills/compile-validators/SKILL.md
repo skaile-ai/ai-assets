@@ -1,5 +1,5 @@
 ---
-name: "compile-validators"
+name: "skaile-dev-skill-validators"
 description: "Compiles MUST/NEVER/CHECKLIST rules from skaile-development SKILL.md files into fast, deterministic Python validators. Generates a validator.py alongside each SKILL.md. Replaces slow LLM-based validation with sub-second structural checks. Run after editing any skill in ai-assets/skaile-development/skills/."
 metadata:
   version: "1.0.0"
@@ -115,7 +115,7 @@ STEP 3: For each rule, decide structural vs. semantic
   SEMANTIC (v.skip with reason):
     - Quality / "well-written" / "clean" / "idiomatic"
     - Process ("discuss with user first", "ask before writing")
-    - Runtime ("builds without errors" — belongs to `audit` not a validator)
+    - Runtime ("builds without errors" — belongs to `skaile-dev-code-audit` not a validator)
     - Subjective judgments
 
 # ── Phase 4: Emit Python ─────────────────────────────────────────
@@ -195,6 +195,6 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** Skill authors (after edits), `ready` (checks validator freshness via mtime), `quality`
+- **Called by:** Skill authors (after edits), `skaile-dev-release-check` (checks validator freshness via mtime), `skaile-dev-quality-gate`
 - **Reads:** skill SKILL.md files, validator_lib.py
 - **Writes:** `<skill>/validator.py` alongside each SKILL.md

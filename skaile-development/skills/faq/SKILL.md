@@ -1,5 +1,5 @@
 ---
-name: "faq"
+name: "skaile-dev-faq"
 description: "Evaluates resolved questions for FAQ-worthiness and curates entries. Broadened to all monorepo packages."
 metadata:
   version: "1.0.0"
@@ -61,8 +61,8 @@ a normal conversation. Proposes the entry to the user before writing.
 
 ## When NOT to Use
 
-- For documentation updates unrelated to FAQ — use `doc`
-- For devlog entries — use `devlog`
+- For documentation updates unrelated to FAQ — use `skaile-dev-docs`
+- For devlog entries — use `skaile-dev-devlog`
 
 ---
 
@@ -212,4 +212,4 @@ CHECKLIST
 
 - **Called by:** `skaile-development` (after resolving questions about any monorepo area)
 - **Calls:** none
-- **Related:** `doc` (general documentation), `devlog` (change log)
+- **Related:** `skaile-dev-docs` (general documentation), `skaile-dev-devlog` (change log)

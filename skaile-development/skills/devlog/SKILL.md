@@ -1,5 +1,5 @@
 ---
-name: "devlog"
+name: "skaile-dev-devlog"
 description: "Maintains the human-readable _devlog for the skaile-dev monorepo. Writes short plain-language entries to _devlog/DEVLOG.md after every meaningful change. Generates detailed reports in _devlog/reports/ when architectural concepts, shared contracts, or core patterns change. Run after completing any implementation work."
 metadata:
   version: "1.0.0"
@@ -71,14 +71,14 @@ new development paradigms.
 
 ## When to Use
 
-- After completing an implementation task (called by `implement` automatically)
+- After completing an implementation task (called by `skaile-dev-implement` automatically)
 - When user asks to "log this change" or "add a devlog entry"
 - Any time work is done that future developers or agents should know about
 
 ## When NOT to Use
 
 - For documenting current system state (use README.md, CLAUDE.md, or Starlight docs)
-- For writing a git commit message (use `git`)
+- For writing a git commit message (use `skaile-dev-git`)
 - Standalone doc updates without code changes (just add docs, no devlog needed)
 
 ## The _devlog is NOT Documentation
@@ -196,7 +196,7 @@ STEP 3: Write entry file + update index
   ```markdown
   ## 2026-03-25 — Add devlog skill to skaile-dev-ops domain
 
-  **What changed:** A new `devlog` skill is available in the `skaile-dev-ops` domain. It
+  **What changed:** A new `skaile-dev-devlog` skill is available in the `skaile-dev-ops` domain. It
   maintains `_devlog/DEVLOG.md` with short entries and generates detailed reports for
   architectural changes.
 
@@ -205,7 +205,7 @@ STEP 3: Write entry file + update index
 
   **Affected:** `ai-assets/skaile-dev-ops`
 
-  **Implications:** The `implement` orchestrator now triggers `devlog` automatically
+  **Implications:** The `skaile-dev-implement` orchestrator now triggers `skaile-dev-devlog` automatically
   after completing work. Existing workflows are unaffected.
 
   ---
@@ -347,7 +347,7 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** `implement` (step 10: write devlog)
+- **Called by:** `skaile-dev-implement` (step 10: write devlog)
 - **Calls:** none
-- **Preceded by:** `test`, `doc`
+- **Preceded by:** `skaile-dev-test`, `skaile-dev-docs`
 - **References:** `references/doc_tiers.md` for the report decision criteria

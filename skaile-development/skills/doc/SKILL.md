@@ -1,5 +1,5 @@
 ---
-name: doc
+name: skaile-dev-docs
 description: >
   Use when writing new documentation, updating stale docs, auditing for gaps,
   or checking documentation status in the skaile-dev monorepo. Covers all five
@@ -77,7 +77,7 @@ current status without making changes.
 ## When to Use
 
 - After implementing a new feature — to write docs for the new code
-- When `implement` finishes — it calls this skill in `update` mode automatically
+- When `skaile-dev-implement` finishes — it calls this skill in `update` mode automatically
 - As a quality gate before merging — run `audit` mode to surface gaps
 - When a stakeholder asks "is the documentation current?" — use `status` mode
 - When you have undocumented code and need to write coverage from scratch — use `write` mode
@@ -85,7 +85,7 @@ current status without making changes.
 ## When NOT to Use
 
 - For auto-generated resource catalog pages under `resources/` — those are managed by ai-resource-loader
-- For writing `_devlog` entries directly — this skill delegates to `devlog`
+- For writing `_devlog` entries directly — this skill delegates to `skaile-dev-devlog`
 - For non-skaile-dev projects — this skill has monorepo-specific knowledge baked in
 
 ---
@@ -105,7 +105,7 @@ MUST  verify all claims against actual source code before rewriting or creating 
 MUST  use monorepo-relative paths in all `_sources` frontmatter entries
 MUST  set `_based_on_commit` to the current HEAD SHA and `_last_synced` to today's date on all Starlight pages
 MUST  preserve existing frontmatter fields (title, description, badge, _sources) when updating pages
-MUST  delegate `_devlog` entries to `devlog` — never write devlog content directly
+MUST  delegate `_devlog` entries to `skaile-dev-devlog` — never write devlog content directly
 
 NEVER invent documentation for code you have not read
 NEVER modify auto-generated resource catalog pages (resources/**)
@@ -179,6 +179,6 @@ Follow the loaded mode instructions exactly, using the helper script output as t
 
 ## Integration
 
-- **Called by:** `implement` after tests pass (in `update` mode)
-- **Calls:** `devlog` — after any write or update operation, delegate devlog entry creation
+- **Called by:** `skaile-dev-implement` after tests pass (in `update` mode)
+- **Calls:** `skaile-dev-devlog` — after any write or update operation, delegate devlog entry creation
 - **Related:** `update-starlight-docs` (generic Starlight sync skill, no skaile-dev-specific knowledge)

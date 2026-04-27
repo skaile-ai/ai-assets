@@ -1,5 +1,5 @@
 ---
-name: 'e2e-platform'
+name: 'skaile-dev-platform-e2e'
 description: 'Run or extend the Skaile platform e2e suite. Two modes: `run` executes the existing suite with pre-flight checks (stale-service guard for post-pull stale bundles, stale-deps guard for lockfile drift, seed sync, proxy slot health), failure-mode diagnosis, and auto-recovery (kill stale skaile-serve subprocesses, sync seed data, restart stuck proxy slots); `add` analyzes a git diff, proposes a test plan, waits for explicit user approval, lives-inspects the UI via chrome-devtools MCP, then writes new specs against the existing `platform/e2e/` harness. Use when the user says "run e2e tests", "fix e2e failures", "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
   version: '1.0.0'
@@ -53,9 +53,9 @@ metadata:
 
 Covers the workflows missing from the sibling skills:
 
-- `test-e2e` scaffolds Playwright for forge apps + agent-framework CLI, but explicitly delegates `platform/frontend` to `platform/e2e/` and stops there — this skill picks up from that delegation.
-- `test` (run mode) executes Jest/Vitest/Playwright generically but lacks Skaile-specific pre-flight + recovery.
-- `verify-ui` does visual checks against a running UI without writing specs.
+- `skaile-dev-test-e2e` scaffolds Playwright for forge apps + agent-framework CLI, but explicitly delegates `platform/frontend` to `platform/e2e/` and stops there — this skill picks up from that delegation.
+- `skaile-dev-test` (run mode) executes Jest/Vitest/Playwright generically but lacks Skaile-specific pre-flight + recovery.
+- `skaile-dev-verify-ui` does visual checks against a running UI without writing specs.
 
 ## When to use
 
@@ -69,9 +69,9 @@ Invoke when the user says:
 
 ## When NOT to use
 
-- For scaffolding a brand-new Playwright harness (forge app, CLI package) → use `test-e2e`
-- For visual smoke of the platform UI without writing specs → use `verify-ui`
-- For unit tests or integration tests → use `test-unit` / `test-integration`
+- For scaffolding a brand-new Playwright harness (forge app, CLI package) → use `skaile-dev-test-e2e`
+- For visual smoke of the platform UI without writing specs → use `skaile-dev-verify-ui`
+- For unit tests or integration tests → use `skaile-dev-test-unit` / `skaile-dev-test-integration`
 - For **stateful-mode** e2e (Prisma + DB migrations). Out of scope for now — current suite is all `e2e:stateless`. Reach out to the maintainers if stateful e2e becomes a blocker.
 
 ---
@@ -101,7 +101,7 @@ MUST   use `page.addInitScript` for impersonation (pxl-mock-user + optional pxl-
 MUST   (add mode) gate writing behind explicit user approval of the proposed plan
 MUST   (add mode) live-inspect UI via chrome-devtools MCP before committing selectors (when live_inspect=true)
 MUST   delegate execution to `bunx playwright test` / the existing npm scripts — do not re-invent runners
-NEVER  write to `platform/e2e/playwright.config.ts` or global fixtures — those belong to `test-e2e`
+NEVER  write to `platform/e2e/playwright.config.ts` or global fixtures — those belong to `skaile-dev-test-e2e`
 NEVER  auto-fix assertions to make a test pass — report the drift for user review
 NEVER  use `page.waitForLoadState('networkidle')` (SSE subscriptions never idle)
 NEVER  hardcode project IDs in URLs — always slugs
@@ -268,7 +268,7 @@ IF mode = add
     | Frontend route | `platform/frontend/src/routes/` | Navigation, content assertion, impersonation gate |
     | Frontend page | `platform/frontend/src/pages/` | Interaction flow, form fill, assertion on API response |
     | Frontend component | `platform/frontend/src/components/` | Typically covered by Storybook — only add e2e if the component changes an existing journey |
-    | tRPC route | `platform/backend/libs/router-trpc/src/routes/` | End-to-end via the UI — don't test routes in isolation (that's `test-integration`) |
+    | tRPC route | `platform/backend/libs/router-trpc/src/routes/` | End-to-end via the UI — don't test routes in isolation (that's `skaile-dev-test-integration`) |
     | Backend view | `platform/backend/libs/view/src/` | Assert the UI displays view output correctly |
     | Seed data | `platform/backend/test-data.json` | May require updating existing specs; add new data only if needed for a new test |
     | Schema | `platform/backend/postxl-schema.json`, `schema.prisma` | Wide-reaching — consult user on what to cover |
@@ -311,7 +311,7 @@ IF mode = add
     Keep it TIGHT. Default to fewer tests, not more. For each proposed test, ask:
       - Does an existing spec already cover this flow? → SKIP, note in "Skipped" section.
       - Is this a component-level concern better tested by Storybook? → SKIP, note why.
-      - Is this a backend concern better tested by `test-integration`? → SKIP, note why.
+      - Is this a backend concern better tested by `skaile-dev-test-integration`? → SKIP, note why.
 
   STEP A3: User approval gate
     > "Review this plan. Reply with one of:
@@ -426,16 +426,16 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** human or `implement` skill (after a user-facing feature lands)
+- **Called by:** human or `skaile-dev-implement` skill (after a user-facing feature lands)
 - **Calls:** `platform/scripts/e2e.sh` (auto-start FE+BE when missing, idempotent), chrome-devtools MCP (via `mcp__chrome-devtools__*` tools, for live inspection), `sync-seed-data.js` via `bun run sync-seed`
-- **Delegates to:** `verify-ui` (when user wants visual coverage alongside specs), `test-e2e` (when user asks about scaffolding a fresh e2e setup for a different package)
+- **Delegates to:** `skaile-dev-verify-ui` (when user wants visual coverage alongside specs), `skaile-dev-test-e2e` (when user asks about scaffolding a fresh e2e setup for a different package)
 - **Reads:** `platform/e2e/CLAUDE.md`, `platform/e2e/README.md`, `platform/e2e/E2E-GUIDE.md`, existing specs under `platform/e2e/specs/**`
 
 ## Known limitations
 
 - **Stateful mode is out of scope.** Current suite is all `e2e:stateless`. If a PR needs stateful coverage, note it as a follow-up in the report; don't attempt to scaffold a parallel stateful flow.
 - **Flow-execution specs stay skipped.** `specs/flow-execution.spec.ts` requires docker + a real LLM — see the spec's own comment for the prerequisite checklist. `mode=run` will not try to un-skip them.
-- **Does not scaffold new e2e harnesses.** For a brand-new Playwright setup (new forge app, new CLI package), use `test-e2e` instead.
+- **Does not scaffold new e2e harnesses.** For a brand-new Playwright setup (new forge app, new CLI package), use `skaile-dev-test-e2e` instead.
 
 ## Mistakes to avoid
 

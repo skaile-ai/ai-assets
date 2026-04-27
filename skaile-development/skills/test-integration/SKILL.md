@@ -1,5 +1,5 @@
 ---
-name: "test-integration"
+name: "skaile-dev-test-integration"
 description: "Set up and generate integration tests for any skaile-dev package. Covers API routes, DB operations, and cross-module flows. Knows the storage backends: SQLite + drizzle for forge apps, PostgreSQL + Prisma for platform/backend, temp-dir state for agent-framework. Scaffolds test DB isolation (in-memory SQLite / ephemeral test DB / temp workspaces), auth helpers, seed fixtures, then generates tests. Verifies tests run."
 metadata:
   version: "1.1.0"
@@ -88,7 +88,7 @@ metadata:
 
 ## Overview
 
-Sets up integration-test infrastructure and generates tests that exercise the **real stack boundary** of a package: API request → handler → business logic → storage → response. Unlike unit tests, integration tests use real implementations (real DB, real filesystem, real subprocess) — but they stay inside one package; cross-service flows are reserved for `test-e2e`.
+Sets up integration-test infrastructure and generates tests that exercise the **real stack boundary** of a package: API request → handler → business logic → storage → response. Unlike unit tests, integration tests use real implementations (real DB, real filesystem, real subprocess) — but they stay inside one package; cross-service flows are reserved for `skaile-dev-test-e2e`.
 
 This skill targets **Layer 3** of the monorepo test concept (cross-module, temp-dir, subprocess, Docker). Read these canonical documents before scaffolding anything:
 
@@ -117,7 +117,7 @@ Integration tests at Layer 3 come in four flavours. Pick the one that matches th
 | `platform/backend` | PostgreSQL + Prisma | Separate test database (`DATABASE_URL_TEST`); `prisma migrate deploy` in `beforeAll`; truncate tables in `afterEach` |
 | `agent-framework/runner`, `session`, `bridge`, `workspace-plugin`, `lab` | Temp dirs on disk | `makeTempDir("<pkg>-test")` per test; cleanup is auto-scheduled by the helper via `onTestFinished`; no DB |
 | `agent-framework/connectors` | Per-connector (postgres, redis, sqlite, ...) | `makeTempDir` + in-memory variants; Docker for container-backed adapters (gate behind `SKAILE_DOCKER_TESTS=1`) |
-| `agent-framework/flow-engine`, `resolver`, `core`, `types` | Pure logic | Usually no integration layer; belongs in `test-unit` |
+| `agent-framework/flow-engine`, `resolver`, `core`, `types` | Pure logic | Usually no integration layer; belongs in `skaile-dev-test-unit` |
 | `agent-framework/transport`, `client` | Network protocol | `makeInMemoryTransport()` — both halves in one call; no real sockets |
 | `platform/frontend` | No direct storage | Mock API via MSW or stub fetch; render via TanStack providers |
 
@@ -129,13 +129,13 @@ Integration tests at Layer 3 come in four flavours. Pick the one that matches th
 - Exercising drizzle queries against a real SQLite schema
 - Wrapping a subprocess driver (omp-style) with a fake-binary harness
 - Exercising a client/server protocol pair end-to-end in one process
-- After `test-plan` flags integration gaps
+- After `skaile-dev-test-plan` flags integration gaps
 
 ## When NOT to Use
 
-- For pure-logic coverage — use `test-unit`
-- For cross-package browser journeys or CLI spawn-harnesses — use `test-e2e`
-- For unit-testable pure functions that happen to touch the filesystem trivially — refactor to pure + use `test-unit`
+- For pure-logic coverage — use `skaile-dev-test-unit`
+- For cross-package browser journeys or CLI spawn-harnesses — use `skaile-dev-test-e2e`
+- For unit-testable pure functions that happen to touch the filesystem trivially — refactor to pure + use `skaile-dev-test-unit`
 
 ## Scaffolding required
 
@@ -207,7 +207,7 @@ STEP 2: Determine integration pattern
     ELSE IF deps include '@prisma/client' + 'pg' → postgres-testdb
     ELSE IF path matches agent-framework/(runner|connectors|workspace-plugin|bridge|lab) → temp-dir via makeTempDir
     ELSE IF package needs Docker (lab, containerised connectors) → docker-gated (SKAILE_DOCKER_TESTS=1)
-    ELSE IF package only has pure logic → none (use test-unit instead — abort)
+    ELSE IF package only has pure logic → none (use skaile-dev-test-unit instead — abort)
 
 STEP 3: Detect existing integration infra
   - integration_dir exists? (tests/integration/)
@@ -524,7 +524,7 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** `test-plan` (next step), `implement` (after adding API routes or services), `quality`
+- **Called by:** `skaile-dev-test-plan` (next step), `skaile-dev-implement` (after adding API routes or services), `skaile-dev-quality-gate`
 - **Reads:** `<target>/CLAUDE.md`, `<target>/TEST_PLAN.md`, drizzle/prisma configs, `test_stack_map.md`, `_devlog/specs/2026-04-22-test-concept-design.md`, `_devlog/plans/2026-04-22-test-gap-fill.md`, `agent-framework/test-utils/src/index.ts`
 - **Writes:** `<target>/tests/integration/**`, `<target>/tests/fixtures/**` (including `fake-<cmd>.mjs` fixtures for subprocess drivers), `<target>/vitest.config.ts` (adds `environment: "happy-dom"` + `test.include` patterns if missing), `<target>/package.json` (adds `@skaile/test-utils` devDependency if missing)
 

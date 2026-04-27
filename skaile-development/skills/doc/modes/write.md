@@ -123,7 +123,7 @@ If the target is a new or updated AI skill or domain:
 
 ### Step 9 — Delegate _devlog to devlog
 
-After completing documentation work, trigger `devlog` to record what was written. This is a short-entry-only change unless the documentation reveals a new architectural pattern.
+After completing documentation work, trigger `skaile-dev-devlog` to record what was written. This is a short-entry-only change unless the documentation reveals a new architectural pattern.
 
 ---
 

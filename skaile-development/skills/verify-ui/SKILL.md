@@ -1,5 +1,5 @@
 ---
-name: 'verify-ui'
+name: 'skaile-dev-verify-ui'
 description: 'Visual verification of Skaile platform UI changes using browser automation. After implementing a UI feature, run this skill to systematically check that pages render correctly, navigation works, and key interactive elements are present. Uses agent-browser CLI and chrome-devtools MCP tools.'
 metadata:
   version: '1.0.0'
