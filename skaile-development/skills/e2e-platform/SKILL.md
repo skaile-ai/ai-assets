@@ -1,6 +1,6 @@
 ---
 name: 'e2e-platform'
-description: 'Run or extend the Skaile platform e2e suite. Two modes: `run` executes the existing suite with pre-flight checks, failure-mode diagnosis, and auto-recovery (kill stale skaile-serve subprocesses, sync seed data, restart stuck proxy slots); `add` analyzes a git diff, proposes a test plan, waits for explicit user approval, lives-inspects the UI via chrome-devtools MCP, then writes new specs against the existing `platform/e2e/` harness. Use when the user says "run e2e tests", "fix e2e failures", "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
+description: 'Run or extend the Skaile platform e2e suite. Two modes: `run` executes the existing suite with pre-flight checks (stale-service guard for post-pull stale bundles, stale-deps guard for lockfile drift, seed sync, proxy slot health), failure-mode diagnosis, and auto-recovery (kill stale skaile-serve subprocesses, sync seed data, restart stuck proxy slots); `add` analyzes a git diff, proposes a test plan, waits for explicit user approval, lives-inspects the UI via chrome-devtools MCP, then writes new specs against the existing `platform/e2e/` harness. Use when the user says "run e2e tests", "fix e2e failures", "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
   version: '1.0.0'
   tags:
@@ -125,12 +125,47 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
        >   cd platform/backend && bun run e2e:stateless               (for backend, e2e mode)"
      STOP — do not proceed until the user has services running. Do NOT auto-start (side-effect risk).
 
-3. Kill stale `skaile serve` subprocesses (cheap hygiene):
+3. **Stale-service check (post-pull guard).** A backend or frontend started before the latest commit on `platform/main` is serving pre-pull code; the suite will mass-fail with UI-drift-looking errors that are actually stale-bundle errors. Compare each service's process start time against the platform submodule HEAD commit time:
+   ```bash
+   PLATFORM_HEAD_TS=$(git -C platform log -1 --format=%ct HEAD)
+   for svc in backend:3001 frontend:3000; do
+     name=${svc%:*}; port=${svc#*:}
+     pid=$(lsof -i :$port -sTCP:LISTEN -t 2>/dev/null | head -1)
+     [ -z "$pid" ] && continue
+     start=$(date -j -f "%a %b %e %H:%M:%S %Y" "$(ps -o lstart= -p $pid | tail -1 | xargs)" "+%s" 2>/dev/null)
+     [ -n "$start" ] && [ "$start" -lt "$PLATFORM_HEAD_TS" ] \
+       && echo "STALE_$name (started $((PLATFORM_HEAD_TS - start))s before HEAD commit)"
+   done
+   ```
+   IF anything reports `STALE_*`:
+     Report to user — do NOT run tests (they will mass-fail and waste 30+ seconds):
+       > "Stale services detected after a recent code update. The suite will mass-fail. Recipe:
+       >   1. cd skaile-dev && bun install
+       >   2. invoke /kill-backend skill (kills the whole backend chain cleanly)
+       >   3. pkill -f 'vite preview'
+       >   4. cd platform/backend && bun run e2e:stateless
+       >   5. cd platform/frontend && bun run build && bun run preview --port 3000
+       > Then re-invoke this skill."
+     STOP. Per skill rules ("Do NOT auto-start"), do not kill+restart without explicit user authorization.
+
+4. **Stale-deps check.** Lockfile newer than `node_modules` means deps moved (typical post-pull symptom):
+   ```bash
+   LOCK=skaile-dev/bun.lockb
+   MARK=skaile-dev/node_modules/.modules.yaml
+   [ -f "$LOCK" ] && [ -f "$MARK" ] && [ "$LOCK" -nt "$MARK" ] && echo STALE_DEPS
+   ```
+   (Path adjust if running from a subfolder.)
+   IF `STALE_DEPS`:
+     Report:
+       > "bun.lockb is newer than node_modules — run `bun install` from the skaile-dev root before tests, or this run will surface as opaque module-resolution errors."
+     STOP unless the user has already authorized auto-install elsewhere. Do not run `bun install` without explicit permission.
+
+5. Kill stale `skaile serve` subprocesses (cheap hygiene):
    ```bash
    pkill -f 'skaile serve' 2>/dev/null || true
    ```
 
-4. Check seed staleness:
+6. Check seed staleness:
    ```bash
    SRC=platform/backend/test-data.json
    DST=platform/backend/dist/backend/test-data.json
@@ -138,7 +173,7 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
    ```
    IF STALE: run `cd platform/backend && bun run sync-seed`.
 
-5. Detect proxy-stuck "stopping" slots:
+7. Detect proxy-stuck "stopping" slots:
    ```bash
    tail -50 /tmp/skaile-platform-logs/backend-e2e.log 2>/dev/null | grep -c '(stopping)'
    ```
