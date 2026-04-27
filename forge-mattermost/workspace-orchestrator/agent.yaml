@@ -1,0 +1,25 @@
+spec_version: "0.1.0"
+name: "workspace-orchestrator"
+version: "1.0.0"
+description: "Channel workspace orchestrator — manages threads, shared state, and team coordination via Mattermost"
+model:
+  preferred: "claude-sonnet-4-6"
+  fallback:
+    - "claude-haiku-4-5-20251001"
+  constraints:
+    temperature: 0.4
+    max_tokens: 4096
+runtime:
+  max_turns: 100
+  timeout: 600
+author: "ecsplico"
+license: "MIT"
+tags:
+  - "orchestrator"
+  - "workspace-management"
+  - "mattermost"
+metadata:
+  repo: "github.com/skaile-ai/skaile-ai-assets"
+  canonical_path: "ai-assets/forge-mattermost/workspace-orchestrator"
+  app: "forge/L3-mattermost"
+  stage: "alpha"
