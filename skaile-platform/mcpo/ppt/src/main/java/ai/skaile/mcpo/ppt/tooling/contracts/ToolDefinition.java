@@ -1,0 +1,6 @@
+package ai.skaile.mcpo.ppt.tooling.contracts;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+public record ToolDefinition(String name, String description, JsonNode inputSchema) {
+}
