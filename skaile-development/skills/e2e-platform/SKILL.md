@@ -200,14 +200,15 @@ IF mode = run
     ```bash
     cd platform/e2e
     BASE_URL='http://localhost:3000' API_URL='http://localhost:3001' \
-      bunx playwright test <scope> --retries=0 --workers=1 --reporter=list \
-      2>&1 | tail -100
+      bunx playwright test <scope> --retries=0 --workers=1 --reporter=dot --max-failures=3 \
+      2>&1 | tail -60
     ```
     - `<scope>` is the user-provided scope, if any. Omit for full suite.
     - `--retries=0` is load-bearing — surfaces the real failure mode instead of retry-masked flakiness.
     - `--workers=1` is the current default (per playwright.config); bumping it is out-of-scope for `run`.
-    - `| tail -100` keeps context bounded — playwright list output is verbose; only the summary and failure
-      lines matter. For triage, re-run the failing spec alone (no tail) to see the full trace.
+    - `--reporter=dot` keeps agent output tiny: one char per test (`.` pass, `F` fail). Failure detail still prints in full at the end. Pass `--reporter=list` only when triaging a single failing spec and you need the per-test running narrative.
+    - `--max-failures=3` bails after 3 failures so a cascade-fail doesn't dump 30+ failures into the agent's context. Drop it when investigating broad regressions.
+    - `| tail -60` is enough for the dot summary + a couple of failure traces. For triage, re-run the failing spec alone with `--reporter=list` and no tail to see full traces.
 
   STEP R2: Classify failures (if any)
     For each failed test, match against `platform/e2e/CLAUDE.md`'s failure-mode table:
@@ -368,9 +369,10 @@ IF mode = add
     Run ONLY the newly-written / edited specs (not the full suite) for faster feedback:
     ```bash
     cd platform/e2e
-    bunx playwright test <new-spec-paths> --retries=0 --workers=1 --reporter=list \
-      2>&1 | tail -80
+    bunx playwright test <new-spec-paths> --retries=0 --workers=1 --reporter=dot --max-failures=3 \
+      2>&1 | tail -60
     ```
+    Same reasoning as Step R1 for the flags. If a new spec fails and the dot output is too terse to diagnose, re-run THAT one spec with `--reporter=list` and no tail.
 
     IF failures:
       Apply the same classification as `run` mode's Step R2. Auto-recover infra failures and retry. For spec-design failures, report verbatim — do not modify assertions to make them pass.
