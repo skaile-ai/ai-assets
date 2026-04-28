@@ -1,21 +1,60 @@
-# GIF Picker - Agent Usage
+# GIF - Agent Usage
 
 ## Sending a GIF in Chat
 
-To send a GIF in the conversation, output a JSON block with the `gif` custom
-message marker. The platform will render it as an inline animated GIF using
-the `skaile-gif-display` component.
+The platform provides a `search-gifs` capability. Use it to find GIFs, then
+include the chosen one in your response.
 
-### Format
+### Step 1: Search for GIFs
 
+Invoke the `search-gifs` capability:
+
+```json
+{
+  "type": "app_action",
+  "id": "<uuid>",
+  "action": "search-gifs",
+  "params": { "query": "thumbs up", "limit": 5 }
+}
 ```
-[CUSTOM:gif:{"url":"<gif-url>","alt":"<description>","width":<number>,"height":<number>}]
+
+You will receive results via `app_action_result`:
+
+```json
+{
+  "status": "ok",
+  "value": {
+    "results": [
+      {
+        "id": "abc",
+        "url": "https://static.klipy.com/hd.gif",
+        "preview": "https://static.klipy.com/sm.gif",
+        "alt": "thumbs up",
+        "width": 480,
+        "height": 270
+      }
+    ]
+  }
+}
 ```
 
-### Example
+### Step 2: Include in Response
 
-```
-[CUSTOM:gif:{"url":"https://static.klipy.com/ii/example/cat.gif","alt":"funny cat","width":480,"height":270}]
+Pick the best result and include it in your `finished` event:
+
+```json
+{
+  "type": "finished",
+  "summary": "Here's a thumbs up!",
+  "costUsd": 0,
+  "customType": "gif",
+  "customData": {
+    "url": "https://static.klipy.com/hd.gif",
+    "alt": "thumbs up",
+    "width": 480,
+    "height": 270
+  }
+}
 ```
 
 ### When to Use
@@ -24,23 +63,8 @@ the `skaile-gif-display` component.
 - When the conversation calls for a visual/humorous response
 - When the user shares a GIF and you want to respond in kind
 
-### Finding GIF URLs
+### Legacy Path
 
-You can use the Klipy API to search for GIFs:
-
-```
-GET https://api.klipy.com/api/v1/BMysgPJm0DEODCvgX3cMuNHkJ1uOvoN34toKNC1VTnPaXrBkVAsV97Wmhz7Eqg7x/gifs/search?q=<query>&per_page=5
-```
-
-The response contains `data.data[]` with each item having:
-- `file.hd.gif.url` - full size GIF URL
-- `file.sm.gif.url` - small preview URL  
-- `title` - description text
-- `file.hd.gif.width` / `file.hd.gif.height` - dimensions
-
-### Notes
-
-- The `[CUSTOM:gif:...]` marker must be on its own line
-- The JSON must be valid and contain at least `url`
-- The marker is consumed by the platform and not shown as text
-- Users can also send GIFs via the `/gif` input extension
+The `[CUSTOM:gif:json]` marker format still works for backward compatibility
+but the `search-gifs` capability is preferred because the API key is managed
+server-side.
