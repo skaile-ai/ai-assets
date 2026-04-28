@@ -16,18 +16,23 @@
 const PROVIDERS = {
   klipy: {
     search: async (query, apiKey) => {
-      const params = new URLSearchParams({ q: query, limit: "20" });
-      if (apiKey) params.set("api_key", apiKey);
-      const res = await fetch("https://api.klipy.com/v1/gifs/search?" + params);
+      // Klipy API v1: key goes in the URL path, uses per_page instead of limit
+      const params = new URLSearchParams({ q: query, per_page: "20" });
+      const keySegment = apiKey ? apiKey : "public";
+      const res = await fetch(
+        "https://api.klipy.com/api/v1/" + keySegment + "/gifs/search?" + params,
+      );
       if (!res.ok) throw new Error("Klipy API error: " + res.status);
-      const data = await res.json();
-      return (data.data || []).map((g) => ({
+      const text = await res.text();
+      if (!text) return [];
+      const data = JSON.parse(text);
+      return (data.data?.data || data.data || []).map((g) => ({
         id: g.id,
-        url: g.images?.original?.url || g.url,
-        preview: g.images?.fixed_width?.url || g.images?.preview?.url || g.url,
+        url: g.file?.hd?.gif?.url || g.file?.md?.gif?.url || g.url,
+        preview: g.file?.sm?.gif?.url || g.file?.xs?.gif?.url || g.url,
         alt: g.title || query,
-        width: Number(g.images?.original?.width || 480),
-        height: Number(g.images?.original?.height || 270),
+        width: Number(g.file?.hd?.gif?.width || g.file?.md?.gif?.width || 480),
+        height: Number(g.file?.hd?.gif?.height || g.file?.md?.gif?.height || 270),
       }));
     },
   },
@@ -77,7 +82,7 @@ class SkaileGifPicker extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this._query = "";
     this._provider = "klipy";
-    this._apiKey = "";
+    this._apiKey = "BMysgPJm0DEODCvgX3cMuNHkJ1uOvoN34toKNC1VTnPaXrBkVAsV97Wmhz7Eqg7x";
     this._results = [];
     this._loading = false;
     this._error = null;
@@ -202,7 +207,7 @@ class SkaileGifPicker extends HTMLElement {
     // Attach click handlers
     for (const btn of this.shadowRoot.querySelectorAll(".gif-item")) {
       const id = btn.getAttribute("data-id");
-      const gif = this._results.find((g) => g.id === id);
+      const gif = this._results.find((g) => String(g.id) === id);
       if (gif) {
         btn.addEventListener("click", () => this._handleSelect(gif));
       }
