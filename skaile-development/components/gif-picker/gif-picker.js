@@ -87,6 +87,7 @@ class SkaileGifPicker extends HTMLElement {
     this._loading = false;
     this._error = null;
     this._debounceTimer = null;
+    this._focusIndex = -1;
   }
 
   connectedCallback() {
@@ -94,10 +95,48 @@ class SkaileGifPicker extends HTMLElement {
     if (this._query) {
       this._search();
     }
+    // Keyboard navigation: arrow keys to move, enter/space to select
+    this.shadowRoot.addEventListener("keydown", (e) => {
+      const items = this.shadowRoot.querySelectorAll(".gif-item");
+      if (items.length === 0) return;
+
+      const cols = Math.floor(
+        this.shadowRoot.querySelector(".grid")?.clientWidth / 124,
+      ) || 1;
+
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        this._moveFocus(Math.min(this._focusIndex + 1, items.length - 1));
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        this._moveFocus(Math.max(this._focusIndex - 1, 0));
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        this._moveFocus(
+          Math.min(this._focusIndex + cols, items.length - 1),
+        );
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        this._moveFocus(Math.max(this._focusIndex - cols, 0));
+      } else if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        if (this._focusIndex >= 0 && this._focusIndex < items.length) {
+          items[this._focusIndex].click();
+        }
+      }
+    });
   }
 
   disconnectedCallback() {
     if (this._debounceTimer) clearTimeout(this._debounceTimer);
+  }
+
+  _moveFocus(index) {
+    this._focusIndex = index;
+    const items = this.shadowRoot.querySelectorAll(".gif-item");
+    if (items[index]) {
+      items[index].focus();
+    }
   }
 
   attributeChangedCallback(name, _old, value) {
@@ -186,7 +225,7 @@ class SkaileGifPicker extends HTMLElement {
       content = '<div class="grid">';
       for (const gif of this._results) {
         content +=
-          '<button class="gif-item" data-id="' +
+          '<button class="gif-item" tabindex="0" data-id="' +
           this._escapeHtml(gif.id) +
           '" title="' +
           this._escapeHtml(gif.alt) +
@@ -211,6 +250,13 @@ class SkaileGifPicker extends HTMLElement {
       if (gif) {
         btn.addEventListener("click", () => this._handleSelect(gif));
       }
+    }
+
+    // Auto-focus first result for immediate keyboard navigation
+    if (this._results.length > 0) {
+      this._focusIndex = 0;
+      const first = this.shadowRoot.querySelector(".gif-item");
+      if (first) first.focus();
     }
   }
 
