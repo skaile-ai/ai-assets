@@ -39,7 +39,7 @@ event once at session start (or before the first render):
       "targets": ["preview"],
       "source": {
         "kind": "web-component",
-        "url": "workspace://components/issue-tracker.js",
+        "url": "asset://skaile-development/components/issue-tracker/issue-tracker.js",
         "tagName": "skaile-issue-tracker"
       },
       "fallback": "## Issues\n{{#each issues}}\n- [{{status}}] **{{title}}** ({{priority}}) - assigned to {{assignee}}\n{{/each}}"
