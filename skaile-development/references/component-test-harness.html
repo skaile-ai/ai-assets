@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{name}} - Test Harness</title>
+    <style>
+      /* Simulate host theme tokens (light mode) */
+      :root {
+        --font-sans: system-ui, -apple-system, sans-serif;
+        --foreground: #1a1a1a;
+        --background: #ffffff;
+        --surface: #ffffff;
+        --border: #e5e5e5;
+        --primary: #2563eb;
+        --muted: #f5f5f5;
+        --muted-foreground: #666666;
+        --accent: #f0f0f0;
+        --destructive: #ef4444;
+        --radius: 8px;
+      }
+
+      /* Dark mode token overrides */
+      .dark {
+        --foreground: #f3f4f6;
+        --background: #111827;
+        --surface: #1f2937;
+        --border: #374151;
+        --primary: #60a5fa;
+        --muted: #374151;
+        --muted-foreground: #9ca3af;
+        --accent: #374151;
+        --destructive: #f87171;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        max-width: 480px;
+        margin: 40px auto;
+        padding: 0 16px;
+        font-family: system-ui, sans-serif;
+        color: var(--foreground);
+        background: var(--background);
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      h2 {
+        margin: 0 0 16px;
+        font-size: 18px;
+      }
+      h3 {
+        margin: 20px 0 8px;
+        font-size: 14px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .controls button {
+        padding: 6px 14px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--foreground);
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .controls button:hover {
+        background: var(--accent);
+      }
+
+      .width-controls {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        align-items: center;
+        font-size: 13px;
+      }
+      .width-controls label {
+        color: var(--muted-foreground);
+      }
+      .width-controls input[type="range"] {
+        flex: 1;
+      }
+      .width-controls .width-value {
+        min-width: 48px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+
+      #component-wrapper {
+        border: 1px dashed var(--border);
+        padding: 4px;
+        border-radius: 8px;
+        resize: horizontal;
+        overflow: auto;
+      }
+
+      .log {
+        font-family: ui-monospace, "SF Mono", monospace;
+        font-size: 12px;
+        background: var(--muted);
+        color: var(--foreground);
+        padding: 12px;
+        border-radius: 6px;
+        max-height: 240px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+        line-height: 1.6;
+      }
+      .log:empty::before {
+        content: "No events yet";
+        color: var(--muted-foreground);
+      }
+    </style>
+  </head>
+  <body>
+    <h2>{{name}} - Test Harness</h2>
+
+    <div class="controls">
+      <button onclick="injectSample()">Inject Sample Data</button>
+      <button onclick="clearData()">Clear Data</button>
+      <button onclick="clearLog()">Clear Log</button>
+      <button onclick="toggleDark()">Toggle Dark</button>
+    </div>
+
+    <div class="width-controls">
+      <label>Width:</label>
+      <input
+        type="range"
+        min="240"
+        max="800"
+        value="480"
+        oninput="setWidth(this.value)"
+      />
+      <span class="width-value" id="width-display">480px</span>
+    </div>
+
+    <div id="component-wrapper" style="width: 480px">
+      <skaile-{{name}} id="component"></skaile-{{name}}>
+    </div>
+
+    <h3>Event Log</h3>
+    <div class="log" id="log"></div>
+
+    <script type="module" src="./{{name}}.js"></script>
+    <script>
+      const el = document.getElementById("component");
+      const log = document.getElementById("log");
+
+      // Log all standard events
+      for (const evt of ["select", "interaction", "state_update"]) {
+        el.addEventListener(evt, (e) => {
+          const ts = new Date().toLocaleTimeString();
+          log.textContent += `[${ts}] ${evt}: ${JSON.stringify(e.detail)}\n`;
+          log.scrollTop = log.scrollHeight;
+        });
+      }
+
+      function injectSample() {
+        // Customize per component - set sample props via property setters:
+        // el.items = [{ id: "1", title: "Sample item", status: "open" }];
+        log.textContent += `[${new Date().toLocaleTimeString()}] -- injected sample data --\n`;
+      }
+
+      function clearData() {
+        // Reset component props to empty state:
+        // el.items = [];
+        log.textContent += `[${new Date().toLocaleTimeString()}] -- cleared data --\n`;
+      }
+
+      function clearLog() {
+        log.textContent = "";
+      }
+
+      function toggleDark() {
+        document.documentElement.classList.toggle("dark");
+      }
+
+      function setWidth(px) {
+        document.getElementById("component-wrapper").style.width = px + "px";
+        document.getElementById("width-display").textContent = px + "px";
+      }
+    </script>
+  </body>
+</html>
