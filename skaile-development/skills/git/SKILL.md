@@ -2,7 +2,7 @@
 name: "git"
 description: "Git operations for the skaile-dev monorepo. Seven modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (two-way sync: pull + push shell repo and all submodules, print per-repo summary of commits pulled and pushed), deploy (merge main into deploy branch and push)."
 metadata:
-  version: "1.3.0"
+  version: "1.4.0"
   tags:
     - "git"
     - "commit"
@@ -108,6 +108,7 @@ MUST  run full test suite before any merge to main
 MUST  include the ---agent--- YAML block in every commit to main
 MUST  verify platform/backend starts before committing any structural backend change — see STEP 1b in commit mode
 MUST  run formatting and linting on all affected packages before committing — see STEP 1c in commit mode
+MUST  push submodule commits to their remotes before removing a worktree or opening a PR — submodule commits only exist locally and are lost when the worktree is cleaned up
 NEVER force-push or rewrite published history
 NEVER run Biome inside platform/ — platform uses Prettier + ESLint exclusively
 NEVER merge to main without tests passing
@@ -115,6 +116,7 @@ NEVER delete a branch without typed confirmation
 NEVER create a worktree for sequential (non-parallel) work — use branch mode instead
 NEVER write commit messages without reading the diff first
 NEVER omit the scope or type fields in a commit message
+NEVER remove a worktree that contains unpushed submodule commits — they will be permanently lost
 
 EMIT [git] started mode=<mode>
 
@@ -379,6 +381,25 @@ IF mode = pr
     <optional: breaking changes, follow-up tasks, known limitations>
     ```
 
+  STEP 2a: Push submodule commits (if any)
+    Before pushing the shell repo, ensure submodule commits are on their remotes.
+    Without this, the PR's submodule pointer references commits that don't exist
+    on the submodule remote — the PR cannot be checked out by reviewers.
+
+    $ git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}'
+    FOR EACH submodule path:
+      $ git -C <path> log --oneline @{upstream}..HEAD 2>/dev/null
+      IF output is non-empty:
+        $ git -C <path> rev-parse --abbrev-ref HEAD -> sub_branch
+        IF sub_branch = HEAD (detached):
+          $ git -C <path> checkout -b <branch-name>
+          SET sub_branch = <branch-name>
+        $ git -C <path> push -u origin <sub_branch>
+        > "Pushed <N> commits in <path> to origin/<sub_branch>"
+
+    IF any push fails:
+      STOP: "Cannot open PR — submodule push failed for <path>. Fix before retrying."
+
   STEP 3: Open PR
     $ git push origin <branch-name>
     $ gh pr create \
@@ -398,6 +419,37 @@ IF mode = finish
     - Read git-state.json: branch, mode, worktree_path
     - Run full test suite
     IF tests fail -> STOP
+
+  STEP 1a: Submodule safeguard (CRITICAL for worktree branches)
+    skaile-dev is a shell repo with git submodules. When work happens in a worktree,
+    commits inside submodules (e.g. platform/, agent-framework/, forge/) exist ONLY
+    in the worktree's local copy. Removing the worktree destroys those commits
+    permanently unless they have been pushed to the submodule's own remote.
+
+    This step MUST run before presenting options — even "keep" removes the worktree.
+
+    $ git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}'
+    FOR EACH submodule path:
+      # Check if the submodule has commits not on the remote
+      $ git -C <path> log --oneline @{upstream}..HEAD 2>/dev/null
+      IF output is non-empty (unpushed commits exist):
+        # Determine current branch
+        $ git -C <path> rev-parse --abbrev-ref HEAD
+        IF branch = HEAD (detached):
+          # Create a branch from the detached commits so they can be pushed
+          $ git -C <path> checkout -b <shell-branch-name>
+        # Push submodule commits to the submodule's remote
+        $ git -C <path> push -u origin <submodule-branch>
+        Record: pushed_submodules += "<path> (<N> commits pushed to origin/<submodule-branch>)"
+
+    IF pushed_submodules is non-empty:
+      > "Submodule commits pushed to their remotes before cleanup:
+      > <list each pushed submodule and commit count>"
+
+    IF any push fails:
+      STOP: "Failed to push submodule commits in <path>. Fix the push error before
+             finishing — removing the worktree without pushing will permanently lose
+             those commits."
 
   STEP 2: Present options
     > "Implementation complete. What would you like to do with <branch-name>?

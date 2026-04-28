@@ -84,6 +84,25 @@ After both agents complete:
 
 ## Cautions
 
+- **Submodule commits are local-only.** skaile-dev uses git submodules (platform/,
+  agent-framework/, forge/, etc.). Commits made inside a submodule in a worktree exist
+  ONLY in that worktree's local copy. Running `git worktree remove` destroys those
+  commits permanently. Always push submodule commits to their remotes before removing
+  a worktree. The `mode=finish` and `mode=pr` steps handle this automatically via the
+  submodule safeguard, but manual worktree cleanup must do this explicitly:
+
+  ```bash
+  # Before removing a worktree, check each submodule for unpushed commits
+  for path in $(git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}'); do
+    unpushed=$(git -C "$path" log --oneline @{upstream}..HEAD 2>/dev/null)
+    if [ -n "$unpushed" ]; then
+      echo "WARNING: $path has unpushed commits:"
+      echo "$unpushed"
+      git -C "$path" push -u origin "$(git -C "$path" rev-parse --abbrev-ref HEAD)"
+    fi
+  done
+  ```
+
 - `node_modules/` and `bun.lock` are shared via the workspace root; running `bun install`
   in a worktree may cause lock file conflicts. Prefer running install from the main checkout.
 - Worktrees inherit `.env` files from the checked-out branch, not the main checkout.
