@@ -2,10 +2,10 @@
 title: Domains
 description: What a domain is, its folder structure, DOMAIN.md, and how domains relate to each other.
 _sources:
-  - path: ai-assets/skailup/DOMAIN.md
+  - path: ai-assets/skaileup/DOMAIN.md
   - path: ai-assets/README.md
 _based_on_commit: 5fd26c1
-_last_synced: "2026-04-25"
+_last_synced: '2026-04-25'
 sidebar:
   order: 50
 ---
@@ -35,40 +35,38 @@ Every domain has a `DOMAIN.md` that describes its purpose and building blocks. T
 ```yaml
 ---
 name: skaileup-conceptualization
-description: "Structured project concept pipeline..."
+description: 'Structured project concept pipeline...'
 type: domain
 building_blocks:
-  contracts: "..."
-  skills: "..."
-  agents: "..."
+  contracts: '...'
+  skills: '...'
+  agents: '...'
 stage: alpha
 ---
-
 # Dev Conceptualization
-
 ...
 ```
 
-| Field | Description |
-|---|---|
-| `name` | Domain identifier — matches the directory name |
-| `description` | One-line description shown in `arm` catalog |
-| `type` | Always `domain` |
-| `building_blocks` | What each subfolder contains |
-| `stage` | Development maturity: `alpha`, `beta`, or `stable` |
+| Field             | Description                                        |
+| ----------------- | -------------------------------------------------- |
+| `name`            | Domain identifier — matches the directory name     |
+| `description`     | One-line description shown in `arm` catalog        |
+| `type`            | Always `domain`                                    |
+| `building_blocks` | What each subfolder contains                       |
+| `stage`           | Development maturity: `alpha`, `beta`, or `stable` |
 
 ## Domain Types
 
-| Type | Pattern | Examples |
-|---|---|---|
-| **Guide domains** | Conversational entry point; discovers and routes to other agents at runtime | `skailup` |
-| **Pipeline domains** | Numbered skill groups following a workflow order | `skaileup-conceptualization`, `skaileup-implementation`, `skaileup-evaluate`, `skaile-development` |
-| **Expert domains** | One skill per technology, no pipeline order | `dev-implementation-experts-js`, `-python`, `-typst` |
-| **Knowledge domains** | Research and content production | `knowledge-research`, `knowledge-writing` |
-| **Integration domains** | One skill per external service or workflow | `use`, `github-ops` |
-| **Application domains** | Agent definitions and skills scoped to a specific Skaile app | `forge-project`, `skaile-platform` |
-| **Meta domains** | Manage the ecosystem itself | `ai-asset-management`, `skaileup-lab` |
-| **Shared domains** | Reference material only, never invoked | `skaileup-shared` |
+| Type                    | Pattern                                                                     | Examples                                                                                           |
+| ----------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **Guide domains**       | Conversational entry point; discovers and routes to other agents at runtime | `skaileup`                                                                                         |
+| **Pipeline domains**    | Numbered skill groups following a workflow order                            | `skaileup-conceptualization`, `skaileup-implementation`, `skaileup-evaluate`, `skaile-development` |
+| **Expert domains**      | One skill per technology, no pipeline order                                 | `dev-implementation-experts-js`, `-python`, `-typst`                                               |
+| **Knowledge domains**   | Research and content production                                             | `knowledge-research`, `knowledge-writing`                                                          |
+| **Integration domains** | One skill per external service or workflow                                  | `use`, `github-ops`                                                                                |
+| **Application domains** | Agent definitions and skills scoped to a specific Skaile app                | `forge-project`, `skaile-platform`                                                                 |
+| **Meta domains**        | Manage the ecosystem itself                                                 | `ai-asset-management`, `skaileup-lab`                                                              |
+| **Shared domains**      | Reference material only, never invoked                                      | `skaileup-shared`                                                                                  |
 
 ## How Domains Relate
 

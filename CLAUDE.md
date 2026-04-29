@@ -6,7 +6,7 @@ AI agent skills, domains, and shared resources for the Skaile ecosystem. Pure co
 
 **GitHub:** `github.com/skaile-ai/skaile-ai-assets`
 
-> **Skaileup skills** (concept, build, quality pipelines) have been extracted to the separate `ai-assets-skailup/` submodule (`github.com/skaile-ai/ai-assets-skailup`).
+> **Skaileup skills** (concept, build, quality pipelines) have been extracted to the separate `ai-assets-skaileup/` submodule (`github.com/skaile-ai/ai-assets-skaileup`).
 
 ## Structure
 
