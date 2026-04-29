@@ -1,5 +1,5 @@
 ---
-name: "skaile-dev-git"
+name: "git"
 description: "Git operations for the skaile-dev monorepo. Seven modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (two-way sync: pull + push shell repo and all submodules, print per-repo summary of commits pulled and pushed), deploy (merge main into deploy branch and push)."
 metadata:
   version: "1.4.0"

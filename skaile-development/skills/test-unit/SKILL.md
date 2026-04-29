@@ -1,5 +1,5 @@
 ---
-name: "skaile-dev-test-unit"
+name: "test-unit"
 description: "Set up and generate unit tests for any skaile-dev package (forge apps, agent-framework libraries, platform frontend/backend). Reads TEST_PLAN.md when present, otherwise discovers testable units from source. Scaffolds missing test infra (vitest.config.ts, test harness), then generates one test file per module with test cases mapped to CLAUDE.md Architecture. Verifies tests run before completing."
 metadata:
   version: "1.2.0"

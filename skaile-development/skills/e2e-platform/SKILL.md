@@ -1,5 +1,5 @@
 ---
-name: 'skaile-dev-platform-e2e'
+name: 'e2e-platform'
 description: 'Run or extend the Skaile platform e2e suite. Two modes: `run` executes the existing suite with pre-flight checks (stale-service guard for post-pull stale bundles, stale-deps guard for lockfile drift, seed sync, proxy slot health), failure-mode diagnosis, and auto-recovery (kill stale skaile-serve subprocesses, sync seed data, restart stuck proxy slots); `add` analyzes a git diff, proposes a test plan, waits for explicit user approval, lives-inspects the UI via chrome-devtools MCP, then writes new specs against the existing `platform/e2e/` harness. Use when the user says "run e2e tests", "fix e2e failures", "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
   version: '1.0.0'

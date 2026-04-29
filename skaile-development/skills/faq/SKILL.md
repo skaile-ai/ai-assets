@@ -1,6 +1,6 @@
 ---
-name: "skaile-dev-faq"
-description: "Evaluates resolved questions for FAQ-worthiness and curates entries. Broadened to all monorepo packages."
+name: "faq"
+description: "[skaile-development] Evaluates resolved questions about the skaile-dev monorepo for FAQ-worthiness and curates entries. Broadened to all monorepo packages."
 metadata:
   version: "1.0.0"
   tags:

@@ -1,5 +1,5 @@
 ---
-name: skaile-dev-docs
+name: doc
 description: >
   Use when writing new documentation, updating stale docs, auditing for gaps,
   or checking documentation status in the skaile-dev monorepo. Covers all five

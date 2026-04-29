@@ -1,5 +1,5 @@
 ---
-name: skaile-dev-kill-backend
+name: kill-backend
 description: Cleanly kills the Skaile platform backend and every process in its spawn chain (port 3001 listener, nest start --watch, dotenvx, bun run dev, sh wrappers). Use when the user says "kill the backend", "stop the backend", "free port 3001", "kill bun run dev", "clean up stray backend processes", or wants a clean slate before restarting `bun run dev` in `platform/backend`.
 source: MIGRATED
 version: 1.0.0

@@ -1,5 +1,5 @@
 ---
-name: "skaile-dev-release-check"
+name: "ready"
 description: "Pre-release readiness gate for the skaile-dev monorepo. Verifies every package has README + CLAUDE.md with required sections, tests passing, build clean, typecheck clean, CHANGELOG present, and Starlight registration for packages with docs/. Produces a blocker/warning table and exits non-zero on any hard failure. Called by release as Phase 0."
 metadata:
   version: "1.0.0"

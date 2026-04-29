@@ -1,6 +1,6 @@
 ---
-name: "skaile-dev-session-optimize"
-description: "Cross-session analysis of Claude Code session data. Reads a pre-computed digest (≤10KB) from the Python pipeline, triages improvement opportunities, reads implicated SKILL.md files, and proposes concrete diffs to reduce token waste and improve workflow adherence. Run after ./run.sh in _scripts/session-analysis/."
+name: "session-analysis"
+description: "[skaile-development] Cross-session analysis of Claude Code session data for the skaile-dev monorepo. Reads a pre-computed digest (≤10KB) from the Python pipeline, triages improvement opportunities, reads implicated SKILL.md files, and proposes concrete diffs to reduce token waste and improve workflow adherence. Run after ./run.sh in _scripts/session-analysis/."
 metadata:
   version: "1.0.0"
   tags:

@@ -1,5 +1,5 @@
 ---
-name: "skaile-dev-devlog"
+name: "devlog"
 description: "Maintains the human-readable _devlog for the skaile-dev monorepo. Writes short plain-language entries to _devlog/DEVLOG.md after every meaningful change. Generates detailed reports in _devlog/reports/ when architectural concepts, shared contracts, or core patterns change. Run after completing any implementation work."
 metadata:
   version: "1.0.0"

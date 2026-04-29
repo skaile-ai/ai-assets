@@ -1,5 +1,5 @@
 ---
-name: "skaile-dev-notify"
+name: "notify"
 description: "Team notifications and messaging for skaile-dev. Supports free-form Mattermost messages plus structured templates for plans, breaking changes, releases, and devlog summaries."
 metadata:
   version: "1.0.0"

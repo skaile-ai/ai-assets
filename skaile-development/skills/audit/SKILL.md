@@ -1,6 +1,6 @@
 ---
-name: "skaile-dev-code-audit"
-description: "Monorepo-aware code quality audit. Verifies build (lint + typecheck + build) and tests pass, then dispatches three parallel sub-agents for logic, security, and UI/UX findings. Three scopes: diff (staged or last-commit), package (one package deep), full (whole monorepo). Produces _devlog/reports/audit-<date>.json. Use before opening a PR or cutting a release."
+name: "audit"
+description: "[skaile-development] Monorepo-aware code quality audit for the skaile-dev codebase. Verifies build (lint + typecheck + build) and tests pass, then dispatches three parallel sub-agents for logic, security, and UI/UX findings. Three scopes: diff (staged or last-commit), package (one package deep), full (whole monorepo). Produces _devlog/reports/audit-<date>.json. Use before opening a PR or cutting a release."
 metadata:
   version: "1.0.0"
   tags:

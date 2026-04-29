@@ -1,5 +1,5 @@
 ---
-name: "skaile-dev-test-plan"
+name: "test-plan"
 description: "Generates a per-package test plan for any skaile-dev package. Reads CLAUDE.md (architecture, public API), the source tree, and existing tests; produces <package>/TEST_PLAN.md listing untested units, coverage gaps, integration seams, and recommended scenarios per layer (unit/integration/e2e). Used as the input for test-unit, test-integration, and test-e2e."
 metadata:
   version: "1.2.0"

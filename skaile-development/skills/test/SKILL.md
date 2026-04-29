@@ -1,5 +1,5 @@
 ---
-name: "skaile-dev-test"
+name: "test"
 description: "Test construction and execution for the skaile-dev monorepo. Two modes: 'run' executes the test suite for one or more packages and reports results; 'construct' generates new tests for recently implemented code. Knows the full test stack: Vitest 3.2.4 (agent-framework + forge/L4-project + forge/L4-assistant + _scripts), Vitest 4.1 (forge/L5-concept), Jest (platform backend), Vitest (platform frontend), Playwright (E2E), and how to run each via the Bun workspace. Coverage is collected under Bun with @vitest/coverage-istanbul (not v8) and ratcheted against the committed baseline via _scripts/check-coverage-ratchet.ts."
 metadata:
   version: "1.2.0"

@@ -1,6 +1,6 @@
 ---
-name: "skaile-dev-review-diff"
-description: "Code review for staged or committed changes. Checks quality, security, performance, scope, and repo-specific rules. Works locally without CI - designed for direct-to-main workflows."
+name: "review"
+description: "[skaile-development] Code review for staged or committed changes in the skaile-dev monorepo. Checks quality, security, performance, scope, and repo-specific rules. Works locally without CI - designed for direct-to-main workflows."
 metadata:
   version: "1.0.0"
   tags:

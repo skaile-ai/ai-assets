@@ -1,6 +1,6 @@
 ---
 name: "component-builder"
-description: "Scaffold a new dynamic web component for the Agent App Protocol. Generates COMPONENT.md, web component JS, agent-usage.md, and test harness in the components directory."
+description: "[skaile-development] Scaffold a new dynamic web component for the Agent App Protocol. Generates COMPONENT.md, web component JS, agent-usage.md, and test harness in the components directory."
 metadata:
   version: "1.0.0"
   tags:

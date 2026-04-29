@@ -1,5 +1,5 @@
 ---
-name: "skaile-dev-docs-xref"
+name: "sync-docs"
 description: "Cross-document reference repair across the skaile-dev monorepo. Scans README ↔ CLAUDE.md ↔ docs/<pkg>/ ↔ DOMAIN.md ↔ monorepo CLAUDE.md and finds broken links, missing back-references, orphan Starlight pages, stale _sources frontmatter, and drift between the monorepo domain table and actual ai-assets/*/DOMAIN.md files. Shows a complete diff of proposed changes before applying — non-destructive."
 metadata:
   version: "1.0.0"

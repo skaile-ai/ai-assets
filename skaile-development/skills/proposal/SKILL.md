@@ -1,5 +1,5 @@
 ---
-name: "skaile-dev-design-spec"
+name: "proposal"
 description: "Create, review, or update a design spec / proposal for new features, architectural changes, or cross-package work in the skaile-dev monorepo. Use when work is too complex to jump straight into code — the spec captures the problem, design, alternatives, and approval status before implementation begins."
 metadata:
   version: "1.0.0"

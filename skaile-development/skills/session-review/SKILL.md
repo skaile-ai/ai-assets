@@ -1,6 +1,6 @@
 ---
-name: "skaile-dev-session-retro"
-description: "Reviews the current Claude Code implementation session: reads the session JSONL to report token usage, cache efficiency, estimated cost, and workflow adherence against the skaile-development skill sequence. Outputs optimization tips and skillset improvement suggestions. Run at the end of any implementation session."
+name: "session-review"
+description: "[skaile-development] Reviews the current Claude Code implementation session for the skaile-dev monorepo: reads the session JSONL to report token usage, cache efficiency, estimated cost, and workflow adherence against the skaile-development skill sequence. Outputs optimization tips and skillset improvement suggestions. Run at the end of any implementation session."
 metadata:
   version: "1.0.0"
   tags:

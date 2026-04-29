@@ -1,5 +1,5 @@
 ---
-name: "skaile-dev-skill-validators"
+name: "compile-validators"
 description: "Compiles MUST/NEVER/CHECKLIST rules from skaile-development SKILL.md files into fast, deterministic Python validators. Generates a validator.py alongside each SKILL.md. Replaces slow LLM-based validation with sub-second structural checks. Run after editing any skill in ai-assets/skaile-development/skills/."
 metadata:
   version: "1.0.0"

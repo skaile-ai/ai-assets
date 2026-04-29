@@ -1,6 +1,6 @@
 ---
-name: "skaile-dev-test-e2e"
-description: "Set up and generate end-to-end tests for forge apps, platform/frontend, and the agent-framework CLI. Scaffolds Playwright for web apps (forge + platform) including config, global setup/teardown, sandbox, and fixtures. For CLI packages, generates shell-based end-to-end tests that invoke the bin and assert stdout/artifacts. Verifies tests run against a real dev server or real process."
+name: "test-e2e"
+description: "[skaile-development] Set up and generate end-to-end tests for skaile-dev packages: forge apps, platform/frontend, and the agent-framework CLI. Scaffolds Playwright for web apps (forge + platform) including config, global setup/teardown, sandbox, and fixtures. For CLI packages, generates shell-based end-to-end tests that invoke the bin and assert stdout/artifacts. Verifies tests run against a real dev server or real process."
 metadata:
   version: "1.2.0"
   tags:

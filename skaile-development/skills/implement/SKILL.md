@@ -1,5 +1,5 @@
 ---
-name: "skaile-dev-implement"
+name: "implement"
 description: "Monorepo-aware implementation orchestrator for the skaile-dev codebase. Reads the affected package CLAUDE.md files, identifies the tech stack, routes to the right prog-experts, produces a plan, executes with supervised dispatch, then triggers test, doc, and devlog on completion. Use for any non-trivial change to the skaile-dev monorepo."
 metadata:
   version: "1.0.0"

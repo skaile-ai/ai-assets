@@ -1,5 +1,5 @@
 ---
-name: "skaile-dev-test-integration"
+name: "test-integration"
 description: "Set up and generate integration tests for any skaile-dev package. Covers API routes, DB operations, and cross-module flows. Knows the storage backends: SQLite + drizzle for forge apps, PostgreSQL + Prisma for platform/backend, temp-dir state for agent-framework. Scaffolds test DB isolation (in-memory SQLite / ephemeral test DB / temp workspaces), auth helpers, seed fixtures, then generates tests. Verifies tests run."
 metadata:
   version: "1.1.0"

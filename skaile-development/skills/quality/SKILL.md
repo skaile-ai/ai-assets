@@ -1,6 +1,6 @@
 ---
-name: "skaile-dev-quality-gate"
-description: "Umbrella quality-gate orchestrator. Runs typecheck → test (with coverage + ratchet when the mode requires it) → audit → doc-audit → ready in sequence, early-outing on the first hard failure. Produces a consolidated health snapshot that contributors look at before opening a PR and release uses as its pre-flight check. Supports quick (diff-scoped), package (one package deep), and full (whole monorepo, mirrors test-full.yml CI lane) modes."
+name: "quality"
+description: "[skaile-development] Umbrella quality-gate orchestrator for the skaile-dev monorepo. Runs typecheck → test (with coverage + ratchet when the mode requires it) → audit → doc-audit → ready in sequence, early-outing on the first hard failure. Produces a consolidated health snapshot that contributors look at before opening a PR and release uses as its pre-flight check. Supports quick (diff-scoped), package (one package deep), and full (whole monorepo, mirrors test-full.yml CI lane) modes."
 metadata:
   version: "1.1.0"
   tags:
