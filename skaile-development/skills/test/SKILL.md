@@ -111,7 +111,7 @@ vitest 4.1 for forge/L5-concept) keep their own `vitest.config.ts` and their own
 | `forge/L5-concept` | Vitest 4.1 | `bun run --filter @skaile/forge-concept test` |
 | `forge/common-backend` | Vitest 3.2.4 | root `bun x --bun vitest run` (included via root config) |
 | `forge/common-ui` | Vitest 3.2.4 (unit) + Playwright CT (e2e) | `bun x --bun vitest run` (unit); `cd forge/common-ui && bun run test:e2e` (CT) |
-| `forge/L1-chat` | Vitest 3.2.4 | `bun run --filter @skaile/forge-chat test` |
+| `agent-framework/tui` | Vitest 3.2.4 | `bun run --filter @skaile/agent-tui test` |
 | `platform/backend` | Jest | `bun run --filter ./platform/backend test` |
 | `platform/frontend` | Vitest | `bun run --filter ./platform/frontend test` |
 | `platform/e2e` | Playwright | `bun run --filter ./platform/e2e test:e2e` |
