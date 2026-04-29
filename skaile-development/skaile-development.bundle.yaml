@@ -1,17 +1,17 @@
 name: skaile-development
 description: Day-to-day skaile-dev workflow — git ops, implementation, tests, docs, devlog, notifications, FAQ, and releases
-version: 0.3.0
+version: 0.4.0
 dependencies:
-  - skill:git
-  - skill:review
-  - skill:implement
-  - skill:test
-  - skill:e2e-platform
-  - skill:doc
-  - skill:devlog
-  - skill:notify
-  - skill:faq
-  - skill:release
-  - skill:verify-ui
-  - skill:kill-backend
+  - skill:skaile-dev-git
+  - skill:skaile-dev-review-diff
+  - skill:skaile-dev-implement
+  - skill:skaile-dev-test
+  - skill:skaile-dev-platform-e2e
+  - skill:skaile-dev-docs
+  - skill:skaile-dev-devlog
+  - skill:skaile-dev-notify
+  - skill:skaile-dev-faq
+  - skill:skaile-dev-release
+  - skill:skaile-dev-verify-ui
+  - skill:skaile-dev-kill-backend
   - agent:skaile-development
