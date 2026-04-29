@@ -1,0 +1,40 @@
+#!/bin/sh
+# Validate commit message format on main.
+# Title must match: type(scope): description  OR  type: description
+# If an ---agent--- block is present, required fields are checked.
+
+COMMIT_MSG_FILE="$1"
+
+# Only enforce on main
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+if [ "$branch" != "main" ]; then
+  exit 0
+fi
+
+TITLE=$(head -n1 "$COMMIT_MSG_FILE")
+
+if ! echo "$TITLE" | grep -qE '^(feat|fix|refactor|docs|test|chore|perf|build)(\([^)]+\))?: .+'; then
+  echo ""
+  echo "commit-msg: title must match '<type>(<scope>): <description>'"
+  echo "  types: feat|fix|refactor|docs|test|chore|perf|build"
+  echo "  got:   $TITLE"
+  exit 1
+fi
+
+# If agent block is present, validate required fields.
+if grep -q "^---agent---" "$COMMIT_MSG_FILE"; then
+  agent_block=$(sed -n '/^---agent---$/,$ p' "$COMMIT_MSG_FILE" | tail -n +2)
+
+  missing=""
+  echo "$agent_block" | grep -q "^scope:" || missing="$missing scope"
+  echo "$agent_block" | grep -q "^type:" || missing="$missing type"
+  echo "$agent_block" | grep -q "^breaking:" || missing="$missing breaking"
+  echo "$agent_block" | grep -q "^changes:" || missing="$missing changes"
+
+  if [ -n "$missing" ]; then
+    echo "commit-msg: ---agent--- block is missing required fields:$missing"
+    exit 1
+  fi
+fi
+
+exit 0

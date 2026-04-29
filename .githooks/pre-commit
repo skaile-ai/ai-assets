@@ -1,0 +1,13 @@
+#!/bin/sh
+# Pre-commit hook for ai-assets.
+# Runs the concept linter on staged SKILL.md / DOMAIN.md files.
+
+# Check if the lint script exists.
+if [ -f package.json ] && grep -q '"lint"' package.json; then
+  bun run lint 2>/dev/null
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "pre-commit: Lint errors found. Fix them before committing."
+    exit 1
+  fi
+fi
