@@ -17,13 +17,13 @@ SKILL = "release"
 def validate(cwd: str) -> dict:
     v = Validator(cwd, SKILL)
 
-    v.skip("read structured commit messages (---agent--- blocks) to auto-generate changelog entries", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
+    v.skip("read conventional-commits titles and descriptions to auto-generate changelog entries", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     v.skip("preserve existing CHANGELOG.md content — only prepend new version section", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     v.skip("ask for user confirmation before writing version bump", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     v.skip("use Keep Changelog format for CHANGELOG.md", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     v.skip("determine version source: bundle.yaml for ai-assets domains, package.json for code packages", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     v.skip("Current version determined from correct source (bundle.yaml vs package.json)", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")
-    v.skip("Commits analyzed for ---agent--- blocks", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")
+    v.skip("Commits analyzed by conventional-commits title type", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")
     v.skip("Version bump confirmed by user before writing", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")
     v.skip("CHANGELOG.md entries grouped by type", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")
     v.skip("Existing changelog content preserved", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")

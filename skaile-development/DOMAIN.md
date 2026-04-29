@@ -124,15 +124,14 @@ Integration points:
 The `git mode=commit` operation is the primary way to commit in skaile-dev. It reads the diff,
 identifies affected packages, and generates a structured message with:
 
-- Conventional-commits title line
-- Human description (what and why)
-- `---agent---` YAML block with scope, type, breaking, changes, decisions, migrate, exports
+- Conventional-commits title line (`type(scope): description`)
+- Human description (what and why, 1-3 sentences)
 
 The format spec lives in `skills/git/references/commit-spec.md`. The `.githooks/commit-msg`
-hook validates or generates the block on merges to main. A GitHub Action validates on PRs.
+hook validates the title format on merges to main.
 
 The `skaile-dev-git` skill handles branch/worktree/PR/finish/sync operations and also covers commit
-message generation — all unified under a single skill with mode selection.
+message generation - all unified under a single skill with mode selection.
 
 In commit mode, the `skaile-dev-git` skill offers an optional review step (via the `skaile-dev-review-diff` skill) before
 committing. This defaults to on when committing to main, and can be skipped with an explicit "no".

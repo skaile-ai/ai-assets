@@ -23,7 +23,6 @@ def validate(cwd: str) -> dict:
     v.skip("require typed confirmation for destructive operations (force-delete, discard)", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     v.skip("write git-state.json when branch or worktree is created", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     v.skip("run full test suite before any merge to main", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
-    v.skip("include the ---agent--- YAML block in every commit to main", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     v.skip("Commit messages follow references/commit-spec.md format", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")
     v.skip("Branch name follows naming convention from references/branch_naming.md", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")
     v.skip("Working tree was clean before branch/worktree creation", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")

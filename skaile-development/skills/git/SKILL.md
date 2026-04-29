@@ -71,7 +71,7 @@ Handles all git operations for the skaile-dev monorepo. Works in six modes:
 
 ## When to Use
 
-- Committing changes: `mode=commit` to generate structured messages with `---agent---` metadata
+- Committing changes: `mode=commit` to generate structured messages
 - Before any code change: `mode=branch` to get on a feature branch
 - Parallel feature work: `mode=worktree` to work in isolation
 - Closing out an implementation: `mode=finish`
@@ -105,8 +105,7 @@ MUST  check for dirty working tree before creating branches or worktrees
 MUST  require typed confirmation for destructive operations (force-delete, discard)
 MUST  write git-state.json when branch or worktree is created
 MUST  run full test suite before any merge to main
-MUST  include the ---agent--- YAML block in every commit to main
-MUST  verify platform/backend starts before committing any structural backend change — see STEP 1b in commit mode
+MUST  verify platform/backend starts before committing any structural backend change - see STEP 1b in commit mode
 MUST  run formatting and linting on all affected packages before committing — see STEP 1c in commit mode
 MUST  push submodule commits to their remotes before removing a worktree or opening a PR — submodule commits only exist locally and are lost when the worktree is cleaned up
 NEVER force-push or rewrite published history
@@ -115,8 +114,8 @@ NEVER merge to main without tests passing
 NEVER delete a branch without typed confirmation
 NEVER create a worktree for sequential (non-parallel) work — use branch mode instead
 NEVER write commit messages without reading the diff first
-NEVER omit the scope or type fields in a commit message
-NEVER remove a worktree that contains unpushed submodule commits — they will be permanently lost
+NEVER omit the scope or type fields in a commit message title
+NEVER remove a worktree that contains unpushed submodule commits - they will be permanently lost
 
 EMIT [git] started mode=<mode>
 
@@ -188,71 +187,25 @@ IF mode = commit
     IF linting reports unfixable errors:
       STOP: "Lint errors found. Fix them before committing."
 
-  STEP 2: Analyze Changes
-    For each modified package:
-    1. **Changes**: List each discrete change in imperative mood.
-    2. **Exports**: Check if public API surface changed:
-       - New types, functions, or classes exported -> `+`
-       - Changed signatures or behavior of existing exports -> `~`
-       - Removed exports -> `-`
-    3. **Breaking**: Determine if any change breaks existing consumers.
-    4. **Decisions**: Reflect on architectural choices made during this session:
-       - What alternatives existed?
-       - Why was this approach chosen?
-       - Under what conditions should it be revisited?
-
-  STEP 3: Determine Migration Impact
-    For each package in `affects`:
-    1. What would that package's maintainer need to know or do?
-    2. Is the migration required (breaking) or recommended (non-breaking enhancement)?
-    3. Write concrete, actionable instructions — not "update as needed" but specific function calls, config changes, or patterns to adopt.
-
-  STEP 4: Write the Message
+  STEP 2: Write the Message
     Follow this exact structure:
 
     ```
     <type>(<scope>): <title>
 
     <human-description>
-
-    ---agent---
-    scope: [<package-paths>]
-    type: <type>
-    breaking: <true|false>
-    affects: [<downstream-packages>]
-
-    changes:
-    - <change 1>
-    - <change 2>
-
-    decisions:
-    - <decision summary>
-      reason: <why>
-      alternatives: [<alt1>, <alt2>]
-      revisit_when: <condition>
-
-    migrate:
-    - <package>: <what to do>
-
-    exports:
-    <+|~|-> <symbol> (<kind>) from|in <package>
     ```
 
     Rules:
     - **Title**: max 72 chars, imperative mood, lowercase, no period
-    - **Human description**: 1-3 sentences. What and why, not how.
-    - **scope**: list of package paths, not npm package names
+    - **scope**: comma-separated package paths relative to repo root
     - **type**: `feat|fix|refactor|docs|test|chore|perf|build`
-    - **changes**: imperative mood, each entry is one discrete change
-    - **decisions**: only include when a non-trivial choice was made. Omit for obvious/mechanical changes.
-    - **migrate**: only include when `affects` is non-empty and action is needed
-    - **exports**: only include when public API surface changed
-    - Omit optional sections entirely rather than leaving them empty
+    - **Human description**: 1-3 sentences. What and why, not how.
 
     Output the complete commit message ready to be used with `git commit -m`.
     Do not wrap it in a code block or add commentary.
 
-  STEP 5: Optional Review (before committing)
+  STEP 3: Optional Review (before committing)
     After presenting the commit message, ask:
     > "Run a quick review before committing? (y/n)"
 
@@ -736,8 +689,7 @@ CHECKLIST
 | Using worktrees for sequential tasks | Worktrees add overhead; use branch mode for sequential work |
 | Merging without running tests | Full test suite must pass before any merge |
 | Force-pushing after rebase | Never rewrite history on shared branches |
-| Writing commit messages manually | Use `mode=commit` for structured messages with `---agent---` blocks |
-| Omitting the ---agent--- block | Every commit to main must include the agent metadata block |
+| Writing commit messages manually | Use `mode=commit` for structured messages |
 | Committing without formatting | Always run format+lint before committing — Biome for agent-framework/forge; Prettier+ESLint for platform |
 | Running Biome on platform/ | Platform uses Prettier + ESLint. Biome reformats it incorrectly. |
 

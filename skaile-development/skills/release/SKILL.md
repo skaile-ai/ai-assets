@@ -72,14 +72,14 @@ READS
   <target>/bundle.yaml OR <target>/package.json    — current version
   git log / git tag                                  — commit history and existing tags
   CHANGELOG.md                                       — existing changelog
-  ---agent--- blocks in commits                      — structured change metadata
+  conventional-commits titles + descriptions           — commit classification
 
 WRITES
   <target>/bundle.yaml OR <target>/package.json    — updated version
   CHANGELOG.md                                       — new version section with entries
   git tags                                           — annotated release tags
 
-MUST  read structured commit messages (---agent--- blocks) to auto-generate changelog entries
+MUST  read conventional-commits titles and descriptions to auto-generate changelog entries
 MUST  preserve existing CHANGELOG.md content — only prepend new version section
 MUST  ask for user confirmation before writing version bump
 MUST  use Keep Changelog format for CHANGELOG.md
@@ -107,12 +107,12 @@ IF mode = status
 
   STEP 3: Scan unreleased changes
     $ git log <last-tag>..HEAD --format="%H %s"
-    - For each commit, look for ---agent--- block
-    - Classify: breaking (breaking: true), feat, fix, other
+    - For each commit, parse the conventional-commits title (type, scope)
+    - Classify by type prefix: feat, fix, refactor, etc.
     - Count changes per category
 
   STEP 4: Determine suggested bump
-    - breaking: true anywhere → MAJOR
+    - Title contains "BREAKING" or "!" after type → MAJOR
     - Any feat type → MINOR
     - Only fix/refactor/docs/test/chore → PATCH
 
@@ -157,12 +157,12 @@ IF mode = bump
     > Proceed? (yes / change to major|minor|patch / cancel)"
 
   STEP 4: Generate changelog entries
-    - Group commits by type from ---agent--- blocks:
-      - Breaking Changes: commits with breaking: true
+    - Group commits by type from the conventional-commits title prefix:
+      - Breaking Changes: commits with "!" or "BREAKING" in title
       - Features: commits with type: feat
       - Fixes: commits with type: fix
       - Other: remaining commits (refactor, docs, test, chore, perf, build)
-    - Each entry: one line from the commit's human-description (the text between title and ---agent---)
+    - Each entry: one line from the commit's human description (the body text after the title)
     - Omit empty groups
 
   STEP 5: Update CHANGELOG.md
@@ -224,7 +224,7 @@ IF mode = tag
 
 CHECKLIST
   - [ ] Current version determined from correct source (bundle.yaml vs package.json)
-  - [ ] Commits analyzed for ---agent--- blocks
+  - [ ] Commits analyzed by conventional-commits title type
   - [ ] Version bump confirmed by user before writing
   - [ ] CHANGELOG.md entries grouped by type
   - [ ] Existing changelog content preserved
@@ -246,4 +246,4 @@ CHECKLIST
 
 - **Calls:** `skaile-dev-git mode=commit` (for release commit), `skaile-dev-notify template=release` (optional)
 - **Called by:** user directly, or as part of a release workflow
-- **Depends on:** Structured `---agent---` commit blocks for changelog generation
+- **Depends on:** Conventional-commits title format for changelog generation

@@ -250,7 +250,7 @@ is specified.
 ```
 
 **Workflow:**
-1. Extract breaking change details from the commit's agent block: title, scope, affects, changes, and migrate sections.
+1. Extract breaking change details from the commit: title, scope (from conventional-commits title), and description.
 2. Substitute the values into the template above.
 3. Post using `--stdin` JSON (the message is always multi-line).
 
