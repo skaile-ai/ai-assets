@@ -2,7 +2,7 @@
 name: 'e2e-platform'
 description: 'Run or extend the Skaile platform e2e suite. Two modes: `run` executes the existing suite with pre-flight checks (stale-service guard for post-pull stale bundles, stale-deps guard for lockfile drift, seed sync, proxy slot health), failure-mode diagnosis, and auto-recovery (kill stale skaile-serve subprocesses, sync seed data, restart stuck proxy slots); `add` analyzes a git diff, proposes a test plan, waits for explicit user approval, lives-inspects the UI via chrome-devtools MCP, then writes new specs against the existing `platform/e2e/` harness. Use when the user says "run e2e tests", "fix e2e failures", "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
-  version: '1.0.0'
+  version: '1.1.0'
   tags:
     - 'testing'
     - 'e2e'
@@ -101,6 +101,7 @@ MUST   use `page.addInitScript` for impersonation (pxl-mock-user + optional pxl-
 MUST   (add mode) gate writing behind explicit user approval of the proposed plan
 MUST   (add mode) live-inspect UI via chrome-devtools MCP before committing selectors (when live_inspect=true)
 MUST   delegate execution to `bunx playwright test` / the existing npm scripts — do not re-invent runners
+MUST   follow the stale-service / stale-deps recovery recipes verbatim and in order — even if an earlier check reported "clean", later steps may still be needed (e.g. workspace topology changes evade the lockfile-mtime check). Do NOT skip steps based on side checks.
 NEVER  write to `platform/e2e/playwright.config.ts` or global fixtures — those belong to `skaile-dev-test-e2e`
 NEVER  auto-fix assertions to make a test pass — report the drift for user review
 NEVER  use `page.waitForLoadState('networkidle')` (SSE subscriptions never idle)
@@ -143,8 +144,8 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
    ```
    IF anything reports `STALE_*`:
      Report to user — do NOT run tests (they will mass-fail and waste 30+ seconds):
-       > "Stale services detected after a recent code update. The suite will mass-fail. Recipe:
-       >   1. cd skaile-dev && bun install
+       > "Stale services detected after a recent code update. The suite will mass-fail. Run ALL steps below in order — do NOT skip step 1 even if Step 4 (stale-deps) reported clean. The lockfile-mtime check cannot detect missing workspace symlinks after a package relocation. Recipe:
+       >   1. cd skaile-dev && bun install                                  ← always run, even if deps look clean
        >   2. invoke /kill-backend skill (kills the whole backend chain cleanly)
        >   3. pkill -f 'vite preview'
        >   4. cd platform/backend && bun run e2e:stateless
@@ -152,16 +153,29 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
        > Then re-invoke this skill."
      STOP. Auto-start of *missing* services (Step 2) is fine; killing and restarting *already-running* services to clear staleness is destructive (drops in-flight requests, may interrupt parallel dev work) and requires explicit user authorization.
 
-4. **Stale-deps check.** Lockfile newer than `node_modules` means deps moved (typical post-pull symptom):
+4. **Stale-deps check.** Two independent failure modes — both produce the same opaque module-resolution errors at runtime, so check both:
+
+   (a) Lockfile newer than `node_modules` (typical post-pull symptom):
    ```bash
    LOCK=skaile-dev/bun.lockb
    MARK=skaile-dev/node_modules/.modules.yaml
    [ -f "$LOCK" ] && [ -f "$MARK" ] && [ "$LOCK" -nt "$MARK" ] && echo STALE_DEPS
    ```
-   (Path adjust if running from a subfolder.)
-   IF `STALE_DEPS`:
+
+   (b) Critical workspace symlinks missing — the mtime check above cannot detect the case where a package was relocated within the workspace tree (e.g. `theme/` → `agent-framework/theme/`). Neither file's mtime moves, but `node_modules/@skaile/*` is missing entirely. Verify directly:
+   ```bash
+   # If the @skaile namespace is gone, the workspace is catastrophically out of sync.
+   [ -d skaile-dev/node_modules/@skaile ] || echo MISSING_SKAILE_NS
+   # Spot-check a few critical packages that platform/frontend imports.
+   for pkg in @skaile/theme @skaile/agent-core @skaile/agent-types; do
+     [ -e "skaile-dev/node_modules/$pkg" ] || echo "MISSING_$pkg"
+   done
+   ```
+   (Path-adjust if running from a subfolder.)
+
+   IF `STALE_DEPS` OR any `MISSING_*`:
      Report:
-       > "bun.lockb is newer than node_modules — run `bun install` from the skaile-dev root before tests, or this run will surface as opaque module-resolution errors."
+       > "Dependencies out of sync — run `bun install` from the skaile-dev root before tests, or this run will surface as opaque module-resolution errors (e.g. Vite '[Internal server error] Can't resolve @skaile/<pkg>'). The mtime check (a) and the symlink-existence check (b) catch different failure modes — either firing requires `bun install`."
      STOP unless the user has already authorized auto-install elsewhere. Do not run `bun install` without explicit permission.
 
 5. Kill stale `skaile serve` subprocesses (cheap hygiene):
