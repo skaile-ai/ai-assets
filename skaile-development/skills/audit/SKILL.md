@@ -84,7 +84,7 @@ Three-phase structured code audit for the skaile-dev monorepo.
 
 | Scope | What runs | Typical time | When to use |
 |---|---|---|---|
-| `diff` | Build of affected packages + tests of affected packages + diff-only sub-agents | < 2 min | Before commit, in `skaile-dev-implement` Phase 4b |
+| `diff` | Build of affected packages + tests of affected packages + diff-only sub-agents | < 2 min | Before commit, in `implement` Phase 4b |
 | `package` | Full build + full tests of one package + three parallel sub-agents on the whole package | 5–15 min | Before opening a PR for a package-scoped change |
 | `full` | Every package built + tested + three parallel sub-agents over the whole monorepo | 30–60 min | Before cutting a release |
 
@@ -94,14 +94,14 @@ The build phase always runs first. If the build fails, sub-agents are skipped an
 
 - Before committing a non-trivial change (scope=diff)
 - Before opening a pull request (scope=package or diff with branch source)
-- Before cutting a release (scope=full, called by `skaile-dev-release` Phase 0)
+- Before cutting a release (scope=full, called by `release` Phase 0)
 - On-demand investigation of a suspected issue (scope=package)
 
 ## When NOT to Use
 
-- For quick diff review without build/test — use `skaile-dev-review-diff` instead
-- For runtime user-journey validation — use `skaile-dev-test-e2e` or `skaile-dev-verify-ui`
-- For documentation audit only — use `skaile-dev-docs --mode audit`
+- For quick diff review without build/test — use `review` instead
+- For runtime user-journey validation — use `test-e2e` or `verify-ui`
+- For documentation audit only — use `doc --mode audit`
 
 ---
 
@@ -314,7 +314,7 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** `skaile-dev-implement` (Phase 4b, scope=diff), `skaile-dev-release` (Phase 0, scope=full), `skaile-dev-quality-gate` (umbrella)
+- **Called by:** `implement` (Phase 4b, scope=diff), `release` (Phase 0, scope=full), `quality` (umbrella)
 - **Calls:** three parallel sub-agents for logic/security/UI-UX
 - **Reads:** `audit_checklists.md`, `test_stack_map.md`, each `<package>/CLAUDE.md`
 - **Writes:** `_devlog/reports/audit-*.{json,md}`

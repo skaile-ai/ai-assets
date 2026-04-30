@@ -158,6 +158,6 @@ dramatically reducing the snapshot that each sub-agent inherits.
 
 ## Skills That Use This Reference
 
-- `skaile-dev-implement` — primary user; applies all three techniques in Phase 3
-- `skaile-dev-test` (construct mode) — applies MVC when delegating to `skaile-dev-test-unit` / `skaile-dev-test-integration`
+- `implement` — primary user; applies all three techniques in Phase 3
+- `test` (construct mode) — applies MVC when delegating to `test-unit` / `test-integration`
 - Any skill that calls `Agent(...)` with more than one invocation in a session

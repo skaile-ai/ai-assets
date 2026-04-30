@@ -38,7 +38,7 @@ Run this at the end of any implementation session for a full retrospective.
 
 ## When to Use
 
-- At the end of any `skaile-dev-implement` session (the `skaile-dev-implement` skill suggests it automatically)
+- At the end of any `implement` session (the `implement` skill suggests it automatically)
 - When the user says "done", "that's all", or similar wrap-up signals
 - After a heavy session with 3+ sub-agent dispatches (most valuable then)
 - Any time you want to know what a session actually cost and how it went
@@ -218,12 +218,12 @@ Mark each as ✅ done / ⚠️ skipped / — not applicable.
 
 | Step | Detected if |
 |---|---|
-| Branch created | any `skill_calls` entry starts with `skaile-dev-git` and contains `mode=branch` |
-| `skaile-dev-implement` used | any `skill_calls` entry starts with `skaile-dev-implement` |
-| `skaile-dev-test` run | any `skill_calls` entry starts with `skaile-dev-test` |
-| `skaile-dev-code-audit` run | any `skill_calls` entry starts with `skaile-dev-code-audit` |
-| `skaile-dev-docs --mode update` run | any `skill_calls` entry starts with `skaile-dev-docs` and contains `update` |
-| `skaile-dev-devlog` added | any `skill_calls` entry starts with `skaile-dev-devlog` |
+| Branch created | any `skill_calls` entry starts with `git` and contains `mode=branch` |
+| `implement` used | any `skill_calls` entry starts with `implement` |
+| `test` run | any `skill_calls` entry starts with `test` |
+| `audit` run | any `skill_calls` entry starts with `audit` |
+| `doc --mode update` run | any `skill_calls` entry starts with `doc` and contains `update` |
+| `devlog` added | any `skill_calls` entry starts with `devlog` |
 | `/compact` before Agent dispatch | `compact_before_agent` = true (coarse — see Known Limitations) |
 | Worktree used | `worktree_used` = true |
 
@@ -270,11 +270,11 @@ Output the four blocks:
 | Step | Status | Notes |
 |---|---|---|
 | Branch created before code changes | ✅/⚠️/— | ... |
-| `skaile-dev-implement` used for non-trivial changes | ✅/⚠️/— | ... |
-| `skaile-dev-test` run after implementation | ✅/⚠️/— | ... |
-| `skaile-dev-code-audit scope=diff` run | ✅/⚠️/— | ... |
-| `skaile-dev-docs --mode update` run | ✅/⚠️/— | ... |
-| `skaile-dev-devlog` added | ✅/⚠️/— | ... |
+| `implement` used for non-trivial changes | ✅/⚠️/— | ... |
+| `test` run after implementation | ✅/⚠️/— | ... |
+| `audit scope=diff` run | ✅/⚠️/— | ... |
+| `doc --mode update` run | ✅/⚠️/— | ... |
+| `devlog` added | ✅/⚠️/— | ... |
 | `/compact` before Agent dispatch | ✅/⚠️/— | (coarse check — see Known Limitations) |
 | Worktree used for isolation | ✅/⚠️/— | ... |
 
@@ -319,7 +319,7 @@ EMIT [session-review] complete grade=<grade>
 
 ## Integration
 
-- **Suggested by:** `skaile-dev-implement` skill (after devlog phase), `skaile-development` agent (on wrap-up)
+- **Suggested by:** `implement` skill (after devlog phase), `skaile-development` agent (on wrap-up)
 - **Reads:** Claude Code session JSONL at `~/.claude/projects/<slug>/<session-id>.jsonl`
 - **Sub-agent costs:** In `~/.claude/projects/<slug>/<session-id>/subagents/` — not parsed here
 

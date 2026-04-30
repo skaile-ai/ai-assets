@@ -68,7 +68,7 @@ metadata:
 
 ## Overview
 
-Produces a structured test plan that enumerates *what* should be tested at each layer for one package. The plan is the input for the three setup/generation skills (`skaile-dev-test-unit`, `skaile-dev-test-integration`, `skaile-dev-test-e2e`) and for `skaile-dev-code-audit` to measure coverage gaps.
+Produces a structured test plan that enumerates *what* should be tested at each layer for one package. The plan is the input for the three setup/generation skills (`test-unit`, `test-integration`, `test-e2e`) and for `audit` to measure coverage gaps.
 
 ### Canonical documents (read these first)
 
@@ -101,16 +101,16 @@ The plan is package-local (not app-wide) and is derived from:
 
 ## When to Use
 
-- Before running `skaile-dev-test-unit` / `skaile-dev-test-integration` / `skaile-dev-test-e2e` on a package that has no plan yet
+- Before running `test-unit` / `test-integration` / `test-e2e` on a package that has no plan yet
 - After a major refactor — regenerate the plan to capture new coverage gaps
 - When onboarding a package to structured testing (most agent-framework libs)
-- As prep for a release (feeds into `skaile-dev-release-check` as evidence of coverage)
+- As prep for a release (feeds into `ready` as evidence of coverage)
 
 ## When NOT to Use
 
-- For writing tests directly — use `skaile-dev-test-unit`, `skaile-dev-test-integration`, or `skaile-dev-test-e2e`
-- For running tests — use `skaile-dev-test`
-- For a multi-package coverage dashboard — use `skaile-dev-code-audit scope=full`
+- For writing tests directly — use `test-unit`, `test-integration`, or `test-e2e`
+- For running tests — use `test`
+- For a multi-package coverage dashboard — use `audit scope=full`
 
 ---
 
@@ -346,7 +346,7 @@ STEP 8: Write <target>/TEST_PLAN.md
   ## Proposed Scenarios
 
   Scenarios are bucketed by layer. Each lists the shared helper it should use (from
-  `@skaile/test-utils`) so `skaile-dev-test-unit` / `skaile-dev-test-integration` generates consistent code.
+  `@skaile/test-utils`) so `test-unit` / `test-integration` generates consistent code.
 
   ### Unit Layer (L1/L2)
 
@@ -417,7 +417,7 @@ STEP 10: Report
   Baseline: <current_pct>% lines | Target: <target_pct>% | Gap: +<delta> pts
   Existing: N covered | To add: N
   Plan written to <target>/TEST_PLAN.md
-  Next: run `skaile-dev-test-unit target=<pkg>` to generate unit tests from the plan.
+  Next: run `test-unit target=<pkg>` to generate unit tests from the plan.
 
 EMIT [test-plan] completed target=<pkg> layer=<L> unit=<N> integration=<N> e2e=<N> gap=<pct>
 
@@ -438,12 +438,12 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** `skaile-dev-test-unit`, `skaile-dev-test-integration`, `skaile-dev-test-e2e`, `skaile-dev-release-check` (as coverage evidence), `skaile-dev-quality-gate`
+- **Called by:** `test-unit`, `test-integration`, `test-e2e`, `ready` (as coverage evidence), `quality`
 - **Reads:** `<target>/CLAUDE.md`, `<target>/src/**`, `references/test_stack_map.md`,
   `_devlog/specs/2026-04-22-test-concept-design.md`, `_devlog/plans/2026-04-22-test-gap-fill.md`,
   `_devlog/reports/coverage-baseline-2026-04-22/summary.json`,
   `_devlog/reports/coverage-ci/coverage-summary.json` (optional)
 - **Writes:** `<target>/TEST_PLAN.md`
-- **Related:** after the plan lands, `skaile-dev-test-unit` / `skaile-dev-test-integration` / `skaile-dev-test-e2e` generate the
-  actual test files; `skaile-dev-code-audit scope=package target=<pkg>` re-runs coverage against the plan; the
+- **Related:** after the plan lands, `test-unit` / `test-integration` / `test-e2e` generate the
+  actual test files; `audit scope=package target=<pkg>` re-runs coverage against the plan; the
   coverage ratchet at `_scripts/check-coverage-ratchet.ts` gates regressions in CI.

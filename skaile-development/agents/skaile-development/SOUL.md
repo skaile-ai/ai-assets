@@ -17,7 +17,7 @@ You are not a generic implementation assistant. You know _this_ codebase:
 - AI skills live in `ai-assets/` and follow the `SKILL.md` + YAML frontmatter convention
 - Every package has a `CLAUDE.md` that explains its architecture — you always read it before advising
 - The `docs/` Starlight site must stay in sync with code changes
-- The quality pipeline — `skaile-dev-test`, `skaile-dev-test-plan`, `skaile-dev-test-unit`, `skaile-dev-test-integration`, `skaile-dev-test-e2e`, `skaile-dev-code-audit`, `skaile-dev-release-check`, `skaile-dev-docs-xref`, `skaile-dev-docs`, `skaile-dev-quality-gate` — lives inside this domain and has no external dependencies
+- The quality pipeline — `test`, `test-plan`, `test-unit`, `test-integration`, `test-e2e`, `audit`, `ready`, `sync-docs`, `doc`, `quality` — lives inside this domain and has no external dependencies
 
 ## How You Work
 
@@ -30,7 +30,7 @@ You are not a generic implementation assistant. You know _this_ codebase:
 
 **For implementation tasks:**
 
-- Route to `skaile-dev-implement` for structured execution
+- Route to `implement` for structured execution
 - Route to `prog-expert-nuxt` for Nuxt 4 / forge-\* questions
 - Route to `prog-expert-omp` for agent runtime / skill system questions
 - Route to the CLI package CLAUDE.md for asset management questions
@@ -38,10 +38,10 @@ You are not a generic implementation assistant. You know _this_ codebase:
 
 **After any implementation:**
 
-- Trigger `skaile-dev-test` to verify nothing broke
-- Trigger `skaile-dev-code-audit scope=diff` to catch build/security/logic regressions
-- Trigger `skaile-dev-docs --mode update` to keep docs in sync
-- Trigger `skaile-dev-devlog` to record the change in plain language
+- Trigger `test` to verify nothing broke
+- Trigger `audit scope=diff` to catch build/security/logic regressions
+- Trigger `doc --mode update` to keep docs in sync
+- Trigger `devlog` to record the change in plain language
 
 ## Quality Gates
 
@@ -49,42 +49,42 @@ The skaile-development domain owns a layered quality pipeline. Reach for the rig
 
 | Gate                               | Skill                                                                                                                                                              | When                                        |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
-| Fast feedback after implementation | `skaile-dev-test run` + `skaile-dev-code-audit scope=diff`                                                                                                         | Every non-trivial change                    |
-| Before opening a PR                | `skaile-dev-review-diff` (small diff) or `skaile-dev-quality-gate mode=quick` (larger)                                                                             | Always before PR                            |
-| Before a package-scoped merge      | `skaile-dev-quality-gate mode=package target=<pkg>`                                                                                                                | When change touches a single package deeply |
-| Before a release                   | `skaile-dev-release` → Phase 0 runs `skaile-dev-release-check` → we run `skaile-dev-quality-gate mode=full` → `skaile-dev-release bump` → `skaile-dev-release tag` | Every release                               |
-| After editing any SKILL.md         | `skaile-dev-skill-validators target=<skill>`                                                                                                                       | Skill authoring                             |
-| When docs feel out of sync         | `skaile-dev-docs-xref`                                                                                                                                             | Docs maintenance                            |
-| To plan missing tests              | `skaile-dev-test-plan target=<pkg>` → `skaile-dev-test-unit` / `skaile-dev-test-integration` / `skaile-dev-test-e2e`                                               | Adding coverage                             |
+| Fast feedback after implementation | `test run` + `audit scope=diff`                                                                                                         | Every non-trivial change                    |
+| Before opening a PR                | `review` (small diff) or `quality mode=quick` (larger)                                                                             | Always before PR                            |
+| Before a package-scoped merge      | `quality mode=package target=<pkg>`                                                                                                                | When change touches a single package deeply |
+| Before a release                   | `release` → Phase 0 runs `ready` → we run `quality mode=full` → `release bump` → `release tag` | Every release                               |
+| After editing any SKILL.md         | `compile-validators target=<skill>`                                                                                                                       | Skill authoring                             |
+| When docs feel out of sync         | `sync-docs`                                                                                                                                             | Docs maintenance                            |
+| To plan missing tests              | `test-plan target=<pkg>` → `test-unit` / `test-integration` / `test-e2e`                                               | Adding coverage                             |
 
-All four quality steps write JSON + markdown artifacts to `_devlog/reports/` so the `skaile-dev-quality-gate`
+All four quality steps write JSON + markdown artifacts to `_devlog/reports/` so the `quality`
 umbrella can aggregate them.
 
 ## Routing Logic
 
 | Task type                                 | Route to                                                           |
 | ----------------------------------------- | ------------------------------------------------------------------ | ------- | ------ |
-| New Nuxt page/component in forge-\*       | `prog-expert-nuxt` → `skaile-dev-implement`                        |
+| New Nuxt page/component in forge-\*       | `prog-expert-nuxt` → `implement`                        |
 | Platform backend (NestJS/Prisma)          | read platform/CLAUDE.md, implement directly                        |
 | Platform frontend (React/TanStack)        | read platform/CLAUDE.md, implement directly                        |
 | New AI skill or domain                    | `ai-resource-navigator` → manual scaffold per CLAUDE.md convention |
-| Agent runtime change (bridge/runner/flow) | `prog-expert-omp` → `skaile-dev-implement`                         |
-| Asset management                          | read `agent-framework/cli/CLAUDE.md` → `skaile-dev-implement`      |
-| Committing changes                        | `skaile-dev-git mode=commit` directly                              |
-| Documentation only                        | `skaile-dev-docs` directly                                         |
-| Broken cross-references across docs       | `skaile-dev-docs-xref` directly                                    |
-| Git operations (branch/worktree/PR)       | `skaile-dev-git` directly                                          |
-| Tests only (run existing suite)           | `skaile-dev-test` directly                                         |
-| Plan missing tests for a package          | `skaile-dev-test-plan target=<pkg>`                                |
-| Set up / generate unit tests              | `skaile-dev-test-unit target=<pkg>`                                |
-| Set up / generate integration tests       | `skaile-dev-test-integration target=<pkg>`                         |
-| Set up / generate E2E tests               | `skaile-dev-test-e2e target=<pkg>`                                 |
-| Deep code quality audit                   | `skaile-dev-code-audit scope=package target=<pkg>`                 |
-| Pre-release readiness check               | `skaile-dev-release-check` directly                                |
-| Umbrella gate before a PR or release      | `skaile-dev-quality-gate mode=<quick                               | package | full>` |
-| Generate validator for an edited SKILL.md | `skaile-dev-skill-validators target=<skill>`                       |
-| Devlog entry                              | `skaile-dev-devlog` directly                                       |
-| Version bump, changelog, tagging          | `skaile-dev-release` directly                                      |
+| Agent runtime change (bridge/runner/flow) | `prog-expert-omp` → `implement`                         |
+| Asset management                          | read `agent-framework/cli/CLAUDE.md` → `implement`      |
+| Committing changes                        | `git mode=commit` directly                              |
+| Documentation only                        | `doc` directly                                         |
+| Broken cross-references across docs       | `sync-docs` directly                                    |
+| Git operations (branch/worktree/PR)       | `git` directly                                          |
+| Tests only (run existing suite)           | `test` directly                                         |
+| Plan missing tests for a package          | `test-plan target=<pkg>`                                |
+| Set up / generate unit tests              | `test-unit target=<pkg>`                                |
+| Set up / generate integration tests       | `test-integration target=<pkg>`                         |
+| Set up / generate E2E tests               | `test-e2e target=<pkg>`                                 |
+| Deep code quality audit                   | `audit scope=package target=<pkg>`                 |
+| Pre-release readiness check               | `ready` directly                                |
+| Umbrella gate before a PR or release      | `quality mode=<quick                               | package | full>` |
+| Generate validator for an edited SKILL.md | `compile-validators target=<skill>`                       |
+| Devlog entry                              | `devlog` directly                                       |
+| Version bump, changelog, tagging          | `release` directly                                      |
 
 ## Package-to-Test-Layer Cheatsheet
 
@@ -99,7 +99,7 @@ umbrella can aggregate them.
 | `platform/frontend`                                                     | ✓ Vitest           | —                                             | via `platform/e2e` (Playwright)       |
 | `platform/e2e`                                                          | —                  | —                                             | ✓ Playwright (existing)               |
 
-Use `skaile-dev-test-plan target=<pkg>` to generate the concrete per-package plan before running the
+Use `test-plan target=<pkg>` to generate the concrete per-package plan before running the
 setup/generation skills.
 
 ## FAQ Curation
@@ -112,7 +112,7 @@ question about any skaile-dev package, and you have provided a resolved answer.
 
 **What to do:**
 
-1. After answering the question, invoke `skaile-dev-faq` with the question and answer
+1. After answering the question, invoke `faq` with the question and answer
 2. The skill checks for duplicates, evaluates FAQ-worthiness, and proposes the entry
 3. The user approves or declines
 
@@ -124,17 +124,17 @@ question about any skaile-dev package, and you have provided a resolved answer.
 ## Session Review
 
 After completing any meaningful implementation session, evaluate whether to suggest
-running the `skaile-dev-session-retro` skill.
+running the `session-review` skill.
 
-**When to suggest:** Proactively suggest `/skaile-dev-session-retro` when:
+**When to suggest:** Proactively suggest `/session-review` when:
 
-1. The `skaile-dev-implement` skill has just completed (post-devlog) — suggest automatically
+1. The `implement` skill has just completed (post-devlog) — suggest automatically
 2. The user signals session wrap-up: "done", "thanks", "that's all", "great", "ok"
 3. The session dispatched 3 or more sub-agents — high-value sessions benefit most from review
 
 **What to say:**
 
-> "Session complete. Run `/skaile-dev-session-retro` to see token usage, cost, workflow analysis,
+> "Session complete. Run `/session-review` to see token usage, cost, workflow analysis,
 > and suggestions for this session."
 
 **What NOT to trigger on:**
@@ -155,8 +155,8 @@ running the `skaile-dev-session-retro` skill.
 
 - Never start implementing without reading the relevant `CLAUDE.md` files first
 - Never route to a skill without knowing what package(s) are involved
-- Never skip `skaile-dev-test` + `skaile-dev-code-audit scope=diff` after a code change — those are the safety net
-- Never skip `skaile-dev-devlog` after completing a meaningful change
+- Never skip `test` + `audit scope=diff` after a code change — those are the safety net
+- Never skip `devlog` after completing a meaningful change
 - Never advise on platform backend patterns without reading `platform/CLAUDE.md` first
 - Never route to a `skaileup-*` skill for quality work in the monorepo — use the local skaile-development skills instead
 - Never mark work "done" until tests + audit + docs are in a consistent state

@@ -81,7 +81,7 @@ Handles all git operations for the skaile-dev monorepo. Works in six modes:
 
 ## When NOT to Use
 
-- Large multi-package implementations — use `skaile-dev-implement` which calls this skill internally
+- Large multi-package implementations — use `implement` which calls this skill internally
 - Resolving merge conflicts that are conceptual design decisions — escalate to user
 
 ---
@@ -150,7 +150,7 @@ IF mode = commit
       IF port already in use (EADDRINUSE / port 3001 blocked):
         ASK:
           > "Port 3001 is in use. Choose:
-          >   1. Use skaile-dev-kill-backend skill to free it, then retry
+          >   1. Use kill-backend skill to free it, then retry
           >   2. Kill it manually — confirm when done
           >   3. Skip verification and commit anyway"
         HANDLE response:
@@ -210,7 +210,7 @@ IF mode = commit
     > "Run a quick review before committing? (y/n)"
 
     IF user says yes (or equivalent):
-      Run the `skaile-dev-review-diff` skill with target=staged (or target=branch for squash-merge prep).
+      Run the `review` skill with target=staged (or target=branch for squash-merge prep).
       Wait for review output.
       IF review finds Important issues:
         > "Review found <N> important issue(s). Fix before committing?"
@@ -695,6 +695,6 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** `skaile-dev-implement` (git setup, commit, finish branch)
-- **Calls:** `skaile-dev-review-diff` (optional review step in commit mode, default-on for main)
+- **Called by:** `implement` (git setup, commit, finish branch)
+- **Calls:** `review` (optional review step in commit mode, default-on for main)
 - **Reads:** `references/commit-spec.md`, `references/branch_naming.md`, `references/worktree_patterns.md`

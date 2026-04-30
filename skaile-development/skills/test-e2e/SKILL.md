@@ -127,14 +127,14 @@ The agent-framework itself has no Playwright layer — runner / bridge / session
 - Adding L4 CLI E2E tests for a new skaile subcommand in `agent-framework/cli`
 - Adding L5 Nitro integration tests (synthetic h3 event) for a new forge API route
 - Adding an L5 spawned-server case when `vi.mock` can't reach a route's deep transitive graph (documented pattern, gated behind `FORGE_SERVER_TESTS=1`)
-- After `skaile-dev-test-plan` flags an e2e gap
+- After `test-plan` flags an e2e gap
 
 ## When NOT to Use
 
-- For pure-logic tests — use `skaile-dev-test-unit`
-- For in-package API + DB tests that don't need a real browser or real binary — use `skaile-dev-test-integration`
-- For agent-framework runner / session / bridge libraries — use `skaile-dev-test-integration` (in-package integration covers them)
-- For visual review of a single page — use `skaile-dev-verify-ui`
+- For pure-logic tests — use `test-unit`
+- For in-package API + DB tests that don't need a real browser or real binary — use `test-integration`
+- For agent-framework runner / session / bridge libraries — use `test-integration` (in-package integration covers them)
+- For visual review of a single page — use `verify-ui`
 
 ---
 
@@ -190,7 +190,7 @@ EMIT [test-e2e] started target=<pkg> mode=<mode> kind=<kind>
 
 STEP 1: Determine kind
   IF kind = auto:
-    IF <target> is platform/frontend OR platform/e2e → STOP and hand off to `skaile-dev-platform-e2e` skill. That skill already knows the existing platform/e2e harness (session modes, impersonation, org-scoped URLs, failure-mode table) and has two modes: `run` executes the suite with auto-recovery; `add` analyzes a diff and proposes new specs with a user approval gate. Do NOT create a parallel Playwright config.
+    IF <target> is platform/frontend OR platform/e2e → STOP and hand off to `e2e-platform` skill. That skill already knows the existing platform/e2e harness (session modes, impersonation, org-scoped URLs, failure-mode table) and has two modes: `run` executes the suite with auto-recovery; `add` analyzes a diff and proposes new specs with a user approval gate. Do NOT create a parallel Playwright config.
     IF <target>/nuxt.config.ts exists OR <target>/vite.config.* with React → web (Playwright, L5)
       Also consider: does this forge app need L5 Nitro integration or the L5 spawned-server harness? Both live alongside Playwright and may be generated together.
     IF <target> is agent-framework/cli OR package.json has `bin` entry → cli (L4 spawn-harness)
@@ -680,7 +680,7 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** `skaile-dev-test-plan` (next step), `skaile-dev-implement` (after new user-facing feature), `skaile-dev-quality-gate`
+- **Called by:** `test-plan` (next step), `implement` (after new user-facing feature), `quality`
 - **Reads:** `<target>/CLAUDE.md`, `<target>/TEST_PLAN.md`, page/route source, `test_stack_map.md`, `_devlog/specs/2026-04-22-test-concept-design.md`, `_devlog/plans/2026-04-22-test-gap-fill.md`, `agent-framework/test-utils/src/index.ts`
 - **Writes:**
   - L4 CLI: `<target>/tests/cli-e2e/setup.ts`, `<target>/tests/cli-e2e/<group>.test.ts`, `<target>/package.json` (devDep on `@skaile/test-utils`)

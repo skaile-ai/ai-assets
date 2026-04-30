@@ -40,10 +40,10 @@ Display the full markdown output from doc-status.ts directly, without modificati
 After displaying the report, assess the findings and offer the relevant next steps:
 
 **If stale pages exist:**
-> "There are N stale page(s). Run `skaile-dev-docs` in `update` mode to bring them back in sync."
+> "There are N stale page(s). Run `doc` in `update` mode to bring them back in sync."
 
 **If high priority gaps exist:**
-> "There are N high priority gap(s) (undocumented public API or @doc:important files). Run `skaile-dev-docs` in `write` mode to address these."
+> "There are N high priority gap(s) (undocumented public API or @doc:important files). Run `doc` in `write` mode to address these."
 
 **If medium priority gaps exist:**
 > "There are N medium priority gap(s) (large files or uncovered directories). Review and either document them with `write` mode or mark as `@doc:skip`."

@@ -1,6 +1,6 @@
 # Readiness Criteria
 
-Used by the `skaile-dev-release-check` skill. Each package is evaluated against the criteria table below. A package is **ready** only when every `required` criterion passes.
+Used by the `ready` skill. Each package is evaluated against the criteria table below. A package is **ready** only when every `required` criterion passes.
 
 ---
 
@@ -29,7 +29,7 @@ Used by the `skaile-dev-release-check` skill. Each package is evaluated against 
 | S2 | `docs/<pkg>/` registered in Starlight | If `<pkg>/docs/` exists, must be in `docs/src/content/config.ts` + `docs/astro.config.mjs` |
 | S3 | Environment variables table in CLAUDE.md | If package reads `process.env.*` at runtime |
 | S4 | README-to-docs link | README should link to `→ [Full docs](/<prefix>/)` when docs/ exists |
-| S5 | REVIEW.md present | Repo-specific review rules for `skaile-dev-review-diff` to consume |
+| S5 | REVIEW.md present | Repo-specific review rules for `review` to consume |
 
 ## Domain (ai-assets) Specific Criteria
 
@@ -59,7 +59,7 @@ Evaluated once, not per-package:
 
 ## Package Categories
 
-Not every criterion applies to every package. The `skaile-dev-release-check` skill categorizes packages before checking:
+Not every criterion applies to every package. The `ready` skill categorizes packages before checking:
 
 | Category | Criteria applied | Examples |
 |---|---|---|
@@ -106,7 +106,7 @@ The category is inferred from:
 
 ### ai-assets/skaile-development
 - [!] D5 Stale validator.py — skills/audit/validator.py older than SKILL.md
-  Fix: bun run skill skaile-dev-skill-validators audit
+  Fix: bun run skill compile-validators audit
 
 ## Warnings
 
@@ -119,5 +119,5 @@ The category is inferred from:
 - Packages blocked: 2/16
 - Global checks: 4/5 passing
 
-Recommendation: fix blockers before `skaile-dev-release` bump.
+Recommendation: fix blockers before `release` bump.
 ```

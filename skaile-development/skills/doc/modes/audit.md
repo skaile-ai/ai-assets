@@ -61,10 +61,10 @@ For each high and medium gap, provide a concrete next step. Use this decision ta
 
 | Gap type | Suggested action |
 |---|---|
-| `@doc:important` file without coverage | Run `skaile-dev-docs` in `write` mode targeting this file |
+| `@doc:important` file without coverage | Run `doc` in `write` mode targeting this file |
 | Public API route without coverage | Write a Starlight page under `docs/src/content/docs/<pkg>/commands/` |
 | Large file (>150 lines) without coverage | Evaluate: does it export a public API? If yes → write docs. If internal only → add `@doc:skip` |
-| Directory with 3+ uncovered files | Run `skaile-dev-docs` in `write` mode targeting the package |
+| Directory with 3+ uncovered files | Run `doc` in `write` mode targeting the package |
 | Low priority untracked file | Add `// @doc:skip` if intentionally undocumented; otherwise add to write backlog |
 
 ### Step 4 — Optional auto-fix: add @doc:skip annotations
@@ -83,7 +83,7 @@ Present the stale pages table (from `stalePages` in the audit output):
 |---|---|---|
 | `docs/...` | YYYY-MM-DD | `3 files changed, 47 insertions(+)` |
 
-If stale pages exist, suggest: "Run `skaile-dev-docs` in `update` mode to bring these pages back in sync."
+If stale pages exist, suggest: "Run `doc` in `update` mode to bring these pages back in sync."
 
 If broken references (`brokenRefs`) exist, list them:
 - File and line number

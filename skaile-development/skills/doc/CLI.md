@@ -42,7 +42,7 @@ skaile skill run doc --input MODE=update --input SCOPE=forge/common-backend
 - Updated README.md / CLAUDE.md sections (if architectural changes detected)
 - Summary of all files touched
 
-**Typical use:** After `skaile-dev-implement` finishes (it calls this automatically) or when a developer has made code changes that affect public behavior.
+**Typical use:** After `implement` finishes (it calls this automatically) or when a developer has made code changes that affect public behavior.
 
 ### Mode: audit
 
@@ -169,9 +169,9 @@ bun ai-assets/skaile-development/skills/doc/scripts/doc-tracker.ts \
 
 ## Integration with implement
 
-The `skaile-dev-implement` skill automatically calls `skaile-dev-docs` in `update` mode after tests pass and verification succeeds. This ensures documentation stays in sync with code changes.
+The `implement` skill automatically calls `doc` in `update` mode after tests pass and verification succeeds. This ensures documentation stays in sync with code changes.
 
-**Why it matters:** You do not need to manually run `skaile-dev-docs` after a feature is implemented — the orchestrator handles it.
+**Why it matters:** You do not need to manually run `doc` after a feature is implemented — the orchestrator handles it.
 
 **If you need to run it manually:** Follow the workflow instructions in this CLI under **Mode: update**.
 
@@ -181,9 +181,9 @@ The `skaile-dev-implement` skill automatically calls `skaile-dev-docs` in `updat
 
 ### After Implementing a Feature
 
-1. **Run `skaile-dev-implement`** to scaffold and build the feature.
+1. **Run `implement`** to scaffold and build the feature.
 2. **Run tests and verification** to ensure everything works.
-3. **`skaile-dev-implement` calls `skaile-dev-docs update` automatically.**
+3. **`implement` calls `doc update` automatically.**
 4. *Done.* Documentation is now in sync.
 
 If you need to write docs for undocumented code, run:
@@ -262,6 +262,6 @@ Before merging a feature branch to `main`:
 
 ## Related Skills
 
-- **`skaile-dev-implement`** — calls `skaile-dev-docs update` automatically after implementation succeeds
-- **`skaile-dev-devlog`** — record what was documented in the project devlog (called after write/update)
+- **`implement`** — calls `doc update` automatically after implementation succeeds
+- **`devlog`** — record what was documented in the project devlog (called after write/update)
 - **`update-starlight-docs`** — generic Starlight sync skill (no skaile-dev-specific knowledge)

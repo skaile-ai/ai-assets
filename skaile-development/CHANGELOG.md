@@ -5,6 +5,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.4.2] — 2026-04-30
+
+### Fixes
+- Restore short skill names across all cross-references (462 occurrences in 35 files): SOUL.md, DOMAIN.md, references/, and SKILL.md bodies. Prior revert (e33b41c) only touched SKILL.md `name:` frontmatter, leaving every cross-reference pointing at non-existent prefixed names — silent dispatch failure for the agent. Map: `skaile-dev-test` → `test`, `skaile-dev-code-audit` → `audit`, `skaile-dev-quality-gate` → `quality`, `skaile-dev-release-check` → `ready`, `skaile-dev-docs-xref` → `sync-docs`, `skaile-dev-docs` → `doc`, `skaile-dev-review-diff` → `review`, `skaile-dev-skill-validators` → `compile-validators`, `skaile-dev-session-retro` → `session-review`, `skaile-dev-session-optimize` → `session-analysis`, `skaile-dev-platform-e2e` → `e2e-platform`, `skaile-dev-design-spec` → `proposal`, plus simple prefix-strip for `implement`, `devlog`, `git`, `release`, `notify`, `faq`, `verify-ui`, `kill-backend`, `test-plan/unit/integration/e2e`. `skaile-dev-ops` references in devlog narrative examples preserved as historical context.
+
 ## [0.3.0] — 2026-04-23
 
 ### Features

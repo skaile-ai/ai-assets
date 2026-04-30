@@ -74,6 +74,6 @@ feature/add-skaile-development-domain    (monorepo-wide: no package segment)
 | Branch | Protection |
 |--------|-----------|
 | `main` | No direct push. PR + passing tests required. |
-| `implement/*` | Created by `skaile-dev-implement` orchestrator. Merge via `finish-branch` only. |
+| `implement/*` | Created by `implement` orchestrator. Merge via `finish-branch` only. |
 
 All other branches are fair game — create, delete, squash-merge as needed.

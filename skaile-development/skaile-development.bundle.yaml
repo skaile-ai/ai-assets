@@ -1,6 +1,6 @@
 name: skaile-development
 description: Day-to-day skaile-dev workflow — git ops, implementation, tests, docs, devlog, notifications, FAQ, and releases
-version: 0.4.1
+version: 0.4.2
 dependencies:
   - skill:git
   - skill:review

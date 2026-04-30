@@ -184,13 +184,13 @@ Follow the existing `arm` (agent-framework) pattern in both files.
 
 ## Workflow Integration
 
-When the `skaile-dev-implement` skill runs Phase 5 (Documentation Sync):
+When the `implement` skill runs Phase 5 (Documentation Sync):
 
 1. **TSDoc first:** Did this change add or modify exported symbols?
    - Yes → Annotate all changed exports with TSDoc before anything else
    - Run `_scripts/generate-api-docs.ts` if `docs/api-reference.md` exists
 2. **Surface tiers:** Consult `doc_tiers.md` decision table for which surface to update
-3. **Run `skaile-dev-docs --mode update`** to sync all affected surfaces
+3. **Run `doc --mode update`** to sync all affected surfaces
 
 ---
 

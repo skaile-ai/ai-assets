@@ -63,7 +63,7 @@ metadata:
 ## Overview
 
 Drives implementation tasks in the skaile-dev monorepo from task description to committed,
-tested, documented code. Unlike the generic `skaile-dev-implement` skill (which consumes `_concept/`
+tested, documented code. Unlike the generic `implement` skill (which consumes `_concept/`
 to build apps), this skill works on the codebase itself.
 
 **Workflow:** Read context → Identify packages → Route to experts → Plan → Execute (supervised) → Test → Docs → Devlog
@@ -82,10 +82,10 @@ to build apps), this skill works on the codebase itself.
 
 ## When NOT to Use
 
-- Pure git operations (no code changes) — use `skaile-dev-git` directly
-- Documentation-only update — use `skaile-dev-docs` directly
-- Running existing tests — use `skaile-dev-test` directly
-- Writing a devlog entry for work already done — use `skaile-dev-devlog` directly
+- Pure git operations (no code changes) — use `git` directly
+- Documentation-only update — use `doc` directly
+- Running existing tests — use `test` directly
+- Writing a devlog entry for work already done — use `devlog` directly
 
 ---
 
@@ -112,14 +112,14 @@ REFERENCES
 
 MUST  read the target package(s) CLAUDE.md before writing any code
 MUST  identify the correct prog-expert for the tech stack and note it in the plan
-MUST  run tests after implementation (via skaile-dev-test skill)
-MUST  run skaile-dev-code-audit scope=diff after tests pass (gate Phase 5 on audit ≠ fail)
-MUST  run skaile-dev-docs --mode update after any public API or structure change
+MUST  run tests after implementation (via test skill)
+MUST  run audit scope=diff after tests pass (gate Phase 5 on audit ≠ fail)
+MUST  run doc --mode update after any public API or structure change
 MUST  annotate all added or modified exported symbols with TSDoc (per references/doc_pattern.md) before running doc --mode update
 MUST  update README.md (The Problem / What It Does / Features) when the package's value proposition or user-facing capabilities change
 MUST  update CLAUDE.md when architecture, conventions, or environment variables change
 MUST  add a devlog entry after every completed implementation
-MUST  create a git branch before implementing (via skaile-dev-git skill)
+MUST  create a git branch before implementing (via git skill)
 MUST  verify platform/backend starts (bun run dev) after any structural backend change before marking the phase complete — structural changes include: new @Injectable service, constructor parameter changes, *.module.ts providers/imports/exports changes, import path changes in a service or module
 MUST  run formatting and linting on all affected packages before each commit — the git skill's STEP 1c handles this, but ensure it runs: Biome (format+lint) for agent-framework/forge/docs/theme; Prettier+ESLint for platform
 NEVER implement across packages without reading each package's CLAUDE.md
@@ -160,7 +160,7 @@ STEP 2: Load context
   | agent-framework/* | TypeScript, Bun, OMP | prog-expert-omp |
   | agent-framework/cli | TypeScript, Bun, Commander | (read package CLAUDE.md) |
   | ai-assets/<domain> | Markdown, YAML (skill conventions) | (follow CLAUDE.md skill conventions) |
-  | docs/ | Astro, Starlight | (follow skaile-dev-docs) |
+  | docs/ | Astro, Starlight | (follow doc) |
   | agent-framework/cli | TypeScript, Bun | (read package CLAUDE.md) |
 
 STEP 3: Find relevant expert skills
@@ -205,7 +205,7 @@ STEP 5: Build plan
 # ── Phase 2: Git Setup ────────────────────────────────────────────
 
 STEP 6: Prepare git
-  - RUN skaile-dev-git with mode=branch, branch_name=<from plan>
+  - RUN git with mode=branch, branch_name=<from plan>
   EMIT [implement] git_ready branch=<name>
 
 # ── Phase 3: Implementation ───────────────────────────────────────
@@ -222,7 +222,7 @@ STEP 7: Execute
       - platform/backend/: `cd platform/backend && bun run lint` (NEVER Biome)
       - platform/frontend/: `cd platform/frontend && bun run lint` (NEVER Biome)
     - $ git add -p
-    - RUN skaile-dev-git mode=commit to generate structured commit
+    - RUN git mode=commit to generate structured commit
 
   PRE-DISPATCH (standard and large): read references/sub-agent-dispatch.md once.
   Then apply the three techniques before any Agent call:
@@ -278,7 +278,7 @@ STEP 7: Execute
         IF NON_COMPLIANT → fix inline (do NOT re-dispatch; fix is cheap at this scale)
       - Run code quality check: naming, no debug artifacts, no cross-task bleed
       - $ git add -p
-      - RUN skaile-dev-git mode=commit to generate structured commit
+      - RUN git mode=commit to generate structured commit
       - Update skaile-plan.md: mark tasks done
       - Run quick test pass — pipe output: 2>&1 | tail -60
         IF tests fail → fix before next batch
@@ -309,7 +309,7 @@ EMIT [implement] implementation_done tasks=<N>
 # ── Phase 4: Verification Loop ────────────────────────────────────
 
 STEP 8: Run tests
-  - RUN skaile-dev-test with mode=run, scope=<affected packages>
+  - RUN test with mode=run, scope=<affected packages>
   - All test commands must pipe output: 2>&1 | tail -80
   IF tests fail
     - Fix failures
@@ -342,7 +342,7 @@ STEP 8a: Verify platform/backend starts (conditional)
     IF port 3001 already in use:
       ASK:
         > "Port 3001 is in use. Choose:
-        >   1. Use skaile-dev-kill-backend skill to free it, then retry
+        >   1. Use kill-backend skill to free it, then retry
         >   2. Kill it manually — confirm when done
         >   3. Skip verification and proceed"
       HANDLE response (retry on options 1/2; skip on option 3).
@@ -361,7 +361,7 @@ EMIT [implement] backend_start_verified
 # ── Phase 4b: Audit (scope=diff) ──────────────────────────────────
 
 STEP 8b: Run audit on the diff
-  - RUN skaile-dev-code-audit with scope=diff, diff_source=branch
+  - RUN audit with scope=diff, diff_source=branch
   - Read _devlog/reports/audit-<stamp>.json
   IF verdict = fail
     - Report blockers to user
@@ -385,7 +385,7 @@ STEP 9: Update docs
           $ bun _scripts/generate-api-docs.ts --package <pkg>
       - $ git add -p && git commit -m "docs: add TSDoc annotations for <task-slug>"
 
-  - RUN skaile-dev-docs --mode update
+  - RUN doc --mode update
   - Scope: files changed since branch was created
   IF docs were updated
     - $ git add docs/ && git commit -m "docs: sync documentation for <task-slug>"
@@ -395,7 +395,7 @@ EMIT [implement] docs_synced pages_updated=<N>
 # ── Phase 6: Devlog ───────────────────────────────────────────────
 
 STEP 10: Write devlog entry
-  - RUN skaile-dev-devlog with:
+  - RUN devlog with:
     - what_changed: summary of what was implemented (1–2 sentences, plain language)
     - why: motivation and context
     - packages: list of affected packages
@@ -404,24 +404,24 @@ STEP 10: Write devlog entry
 
 EMIT [implement] devlog_written
 
-SUGGEST skaile-dev-session-retro
-  > "Session complete. Run `/skaile-dev-session-retro` to see token usage, cost, workflow analysis,
+SUGGEST session-review
+  > "Session complete. Run `/session-review` to see token usage, cost, workflow analysis,
   >  and suggestions for this session."
 
 # ── Phase 6b: Notify (optional) ──────────────────────────────────
 
 STEP 10b: Send notifications (if warranted)
   IF breaking: true in any commit on this branch
-    - RUN skaile-dev-notify template=breaking-change
+    - RUN notify template=breaking-change
   IF complexity = large
-    - RUN skaile-dev-notify template=plan-complete
+    - RUN notify template=plan-complete
 
 EMIT [implement] notified
 
 # ── Phase 7: Branch Completion ────────────────────────────────────
 
 STEP 11: Finish branch
-  - RUN skaile-dev-git with mode=finish
+  - RUN git with mode=finish
   - Options: merge (direct), pull-request, keep
 
 CHECKPOINT completion
@@ -461,9 +461,9 @@ CHECKLIST
   - [ ] Formatting and linting run on all affected packages (Biome for agent-framework/forge; Prettier+ESLint for platform)
   - [ ] Full test suite passing before audit
   - [ ] Backend start verified (or explicitly skipped) if structural platform/backend changes made
-  - [ ] skaile-dev-code-audit scope=diff run and verdict ≠ fail before docs sync
+  - [ ] audit scope=diff run and verdict ≠ fail before docs sync
   - [ ] TSDoc added to all new/modified exported symbols (TypeScript packages)
-  - [ ] skaile-dev-docs --mode update run after any public API change
+  - [ ] doc --mode update run after any public API change
   - [ ] Devlog entry written
   - [ ] Branch finished (merge / PR / keep)
 
@@ -487,5 +487,5 @@ CHECKLIST
 ## Integration
 
 - **Routes to:** `prog-expert-nuxt`, `prog-expert-omp`, `prog-expert-python`, `implement-supervised`
-- **Calls:** `skaile-dev-git`, `skaile-dev-test`, `skaile-dev-code-audit`, `skaile-dev-docs`, `skaile-dev-devlog`, `skaile-dev-notify`
+- **Calls:** `git`, `test`, `audit`, `doc`, `devlog`, `notify`
 - **Called by:** `skaile-development` or user directly

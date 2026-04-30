@@ -108,20 +108,20 @@ helper package. Stay aligned with:
 Unit tests cover L1 pure-logic modules (no I/O) and L2 I/O-bound units isolated via in-process
 mocks (`makeTempDir` for filesystem, `makeInMemoryTransport` for WS, `MockWebSocket` +
 `installMockWebSocket` for global replacement). They never touch real DBs, real network, or
-browsers — those belong to `skaile-dev-test-integration` / `skaile-dev-test-e2e`.
+browsers — those belong to `test-integration` / `test-e2e`.
 
 ## When to Use
 
 - Starting unit test coverage for an agent-framework library (several have zero coverage today)
 - Adding tests after implementing new composables / utilities in a forge app
 - After a refactor that invalidates existing tests
-- As the first layer of `skaile-dev-test-plan` → `skaile-dev-test-unit` → `skaile-dev-test-integration` → `skaile-dev-test-e2e`
+- As the first layer of `test-plan` → `test-unit` → `test-integration` → `test-e2e`
 
 ## When NOT to Use
 
-- For API endpoint tests — use `skaile-dev-test-integration`
-- For browser journeys — use `skaile-dev-test-e2e`
-- For running existing tests — use `skaile-dev-test`
+- For API endpoint tests — use `test-integration`
+- For browser journeys — use `test-e2e`
+- For running existing tests — use `test`
 
 ---
 
@@ -208,7 +208,7 @@ STEP 3 (skip if mode=generate): Scaffold missing infrastructure
   - Already configured on forge/L4-project, forge/L4-assistant, forge/L5-concept.
   - Add `happy-dom` to `devDependencies` if missing.
   - **When happy-dom is insufficient** (TipTap, ProseMirror, WebGL, Canvas): skip
-    the composable in the unit suite with a TODO comment and route to `skaile-dev-test-e2e`
+    the composable in the unit suite with a TODO comment and route to `test-e2e`
     with `kind=ct`. The CT E2E approach (`@playwright/experimental-ct-vue`) provides
     a real browser environment without requiring a full Nuxt app.
     Reference: `forge/common-ui/tests/e2e/useSkaileEditor.spec.ts`
@@ -398,15 +398,15 @@ STEP 6: For each uncovered unit, generate a test file
   When happy-dom cannot satisfy the composable's DOM requirements (TipTap/ProseMirror/WebGL/Canvas),
   skip the composable in this unit suite:
   ```typescript
-  it.skip("TODO: requires real browser DOM — covered by CT E2E (skaile-dev-test-e2e kind=ct)", () => {})
+  it.skip("TODO: requires real browser DOM — covered by CT E2E (test-e2e kind=ct)", () => {})
   ```
-  Then route to `skaile-dev-test-e2e` with `kind=ct`. Reference: `forge/common-ui/tests/e2e/useSkaileEditor.spec.ts`.
+  Then route to `test-e2e` with `kind=ct`. Reference: `forge/common-ui/tests/e2e/useSkaileEditor.spec.ts`.
 
 ### Pattern 9 — Subprocess harness (L3 drivers — integration, not unit)
 
   Reference: `agent-framework/bridge/tests/omp-driver.test.ts` (fake-omp fixture + `OMP_BRIDGE_BIN`)
 
-  Unit generation should skip these — they belong to `skaile-dev-test-integration`. Defer with a reason.
+  Unit generation should skip these — they belong to `test-integration`. Defer with a reason.
 
 ### Pattern 10 — Platform backend (Jest)
 
@@ -443,7 +443,7 @@ STEP 8: Agent-framework-specific generation
   - L1 (flow-engine, resolver, core manifest, bridge pure parts): heavy coverage via Pattern 1.
   - L2 (transport, client, session, store, asset-manager, sdk): use Patterns 2, 4, 5.
   - L3 (runner, bridge drivers, connectors, lab): limit unit tests to pure helpers; defer the
-    integration-heavy modules to `skaile-dev-test-integration`.
+    integration-heavy modules to `test-integration`.
 
 ## Constraints (must-know gotchas from the 2026-04-22 landing)
 
@@ -577,10 +577,10 @@ STEP 11: Present report
 STEP 12: Recommend follow-ups
 
   After generation:
-  - Run the `skaile-dev-devlog` skill to record the test addition in `_devlog/DEVLOG.md`.
+  - Run the `devlog` skill to record the test addition in `_devlog/DEVLOG.md`.
   - If coverage improved meaningfully, edit `_devlog/reports/coverage-baseline-2026-04-22/summary.json`
     in the same PR to lock in the gain.
-  - If L3-layer deferrals exist, recommend the user invoke `skaile-dev-test-integration target=<pkg>`.
+  - If L3-layer deferrals exist, recommend the user invoke `test-integration target=<pkg>`.
 
 EMIT [test-unit] completed target=<pkg> files=<N> tests=<N> passing=<N> failing=<N> ratchet=<pass|improved|regressed>
 
@@ -595,17 +595,17 @@ CHECKLIST
   - [ ] `bun x --bun vitest run <package>` passing — zero failures, zero regressions in sibling packages
   - [ ] Coverage ratchet re-run — no regression
   - [ ] Deferred units flagged with reason
-  - [ ] `skaile-dev-devlog` skill recommended as post-step
+  - [ ] `devlog` skill recommended as post-step
 
 ---
 
 ## Integration
 
-- **Called by:** `skaile-dev-test-plan` (suggests skaile-dev-test-unit as next step), `skaile-dev-implement` (when adding new pure logic), `skaile-dev-quality-gate`
+- **Called by:** `test-plan` (suggests test-unit as next step), `implement` (when adding new pure logic), `quality`
 - **Reads:** `<target>/CLAUDE.md`, `<target>/TEST_PLAN.md`, `<target>/src/**`, `test_stack_map.md`,
   `_devlog/specs/2026-04-22-test-concept-design.md`,
   `_devlog/plans/2026-04-22-test-gap-fill.md`,
   `agent-framework/test-utils/src/index.ts`
 - **Writes:** `<target>/vitest.config.ts` (if missing), `<target>/tests/**/*.test.ts`,
   `<target>/package.json` (adds `test` script + `@skaile/test-utils` devDep when needed)
-- **Triggers:** `skaile-dev-devlog` (as a follow-up), `_scripts/check-coverage-ratchet.ts` (verification)
+- **Triggers:** `devlog` (as a follow-up), `_scripts/check-coverage-ratchet.ts` (verification)

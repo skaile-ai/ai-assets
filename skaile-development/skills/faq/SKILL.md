@@ -61,8 +61,8 @@ a normal conversation. Proposes the entry to the user before writing.
 
 ## When NOT to Use
 
-- For documentation updates unrelated to FAQ — use `skaile-dev-docs`
-- For devlog entries — use `skaile-dev-devlog`
+- For documentation updates unrelated to FAQ — use `doc`
+- For devlog entries — use `devlog`
 
 ---
 
@@ -212,4 +212,4 @@ CHECKLIST
 
 - **Called by:** `skaile-development` (after resolving questions about any monorepo area)
 - **Calls:** none
-- **Related:** `skaile-dev-docs` (general documentation), `skaile-dev-devlog` (change log)
+- **Related:** `doc` (general documentation), `devlog` (change log)

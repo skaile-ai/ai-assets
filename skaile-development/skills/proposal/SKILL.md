@@ -120,12 +120,12 @@ STEP 6: Devlog
     - Write a detailed report to _devlog/reports/<date>-<topic>.md
     - Include "Thought Process" section documenting the reasoning path
   - Always write a short entry to _devlog/DEVLOG.md with status "(proposal)"
-  - Trigger the `skaile-dev-devlog` skill or write entries directly
+  - Trigger the `devlog` skill or write entries directly
 
 STEP 7: Commit
   - Stage spec + devlog files
   - Commit with: `docs: <topic> design spec (<status>)`
-  - Use the `skaile-dev-git` skill's structured commit format
+  - Use the `git` skill's structured commit format
 
 ## Mode: review
 

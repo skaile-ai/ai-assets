@@ -81,15 +81,15 @@ Manages the test lifecycle for the skaile-dev monorepo. Works in two modes:
 | Mode | What It Does |
 |------|-------------|
 | `run` | Execute the test suite for specified packages, report results, triage failures |
-| `construct` | Generate new tests for recently implemented code — thin wrapper that delegates to `skaile-dev-test-unit`, `skaile-dev-test-integration`, or `skaile-dev-test-e2e` based on the `level` input |
+| `construct` | Generate new tests for recently implemented code — thin wrapper that delegates to `test-unit`, `test-integration`, or `test-e2e` based on the `level` input |
 
 For any non-trivial test authoring (setting up infra from scratch, generating a full plan,
 adding a new Playwright suite), prefer the dedicated skills:
 
-- **`skaile-dev-test-plan`** — generate a per-package `TEST_PLAN.md` from CLAUDE.md + source
-- **`skaile-dev-test-unit`** — scaffold unit infra + generate unit tests
-- **`skaile-dev-test-integration`** — scaffold integration infra (DB / temp-dir) + generate tests
-- **`skaile-dev-test-e2e`** — scaffold Playwright (web) or CLI harness + generate journeys
+- **`test-plan`** — generate a per-package `TEST_PLAN.md` from CLAUDE.md + source
+- **`test-unit`** — scaffold unit infra + generate unit tests
+- **`test-integration`** — scaffold integration infra (DB / temp-dir) + generate tests
+- **`test-e2e`** — scaffold Playwright (web) or CLI harness + generate journeys
 
 `test construct` is retained for quick, already-configured packages where the user just
 wants a few tests for recently changed files.
@@ -135,10 +135,10 @@ own scoped command.
 
 ## When NOT to Use
 
-- For E2E test setup or generation — use `skaile-dev-test-e2e`
-- For integration test setup or generation — use `skaile-dev-test-integration`
-- For unit test setup or generation — use `skaile-dev-test-unit`
-- For generating a per-package test plan — use `skaile-dev-test-plan`
+- For E2E test setup or generation — use `test-e2e`
+- For integration test setup or generation — use `test-integration`
+- For unit test setup or generation — use `test-unit`
+- For generating a per-package test plan — use `test-plan`
 - For acceptance-criteria verification against `_concept/` specs — use `verify`
 
 ---
@@ -234,7 +234,7 @@ IF mode = construct
   STEP 0: Route to the right quality skill (preferred path)
 
     FIRST CHECK: does the target package have `tests/TEST_PLAN.md`?
-      IF NO → delegate to `skaile-dev-test-plan` with target=<scope> first. A TEST_PLAN
+      IF NO → delegate to `test-plan` with target=<scope> first. A TEST_PLAN
               ties the per-package work to the layer taxonomy from the
               concept spec and enumerates the cases each test file must cover.
               After test-plan returns, continue with the level-appropriate
@@ -243,11 +243,11 @@ IF mode = construct
 
     Then, by level:
       IF level = unit or level = auto + changed files look like pure logic (no I/O imports):
-        → Delegate to `skaile-dev-test-unit` with target=<scope> and STOP
+        → Delegate to `test-unit` with target=<scope> and STOP
       IF level = integration or level = auto + changed files include API routes / DB handlers / subprocess drivers:
-        → Delegate to `skaile-dev-test-integration` with target=<scope> and STOP
+        → Delegate to `test-integration` with target=<scope> and STOP
       IF level = e2e or level = auto + changed files include pages/ or CLI bins:
-        → Delegate to `skaile-dev-test-e2e` with target=<scope> and STOP
+        → Delegate to `test-e2e` with target=<scope> and STOP
 
     Only fall through to the legacy in-place construction below when the user
     explicitly wants a quick one-file addition in an already-configured package.
@@ -530,10 +530,10 @@ After finishing test work — especially construct mode — recommend:
    If the ratchet reports `baseline-improved` for a package and the gain is
    intentional, update that package's entry in
    `_devlog/reports/coverage-baseline-2026-04-22/summary.json` in the same PR.
-2. **Record the change.** Call the `skaile-dev-devlog` skill so `_devlog/DEVLOG.md` captures
+2. **Record the change.** Call the `devlog` skill so `_devlog/DEVLOG.md` captures
    the testing work (new test files added, coverage moved, known-skip list changes).
 3. **Before opening a PR**, run the local equivalent of test-full.yml
-   (via the `skaile-dev-quality-gate` skill in `mode=full`) — see that skill for the canonical
+   (via the `quality` skill in `mode=full`) — see that skill for the canonical
    pre-PR sequence.
 
 ## Common Mistakes
@@ -551,7 +551,7 @@ After finishing test work — especially construct mode — recommend:
 
 ## Integration
 
-- **Called by:** `skaile-dev-implement` (after each task and before finish), `skaile-dev-code-audit` (as a pre-analysis gate), `skaile-dev-quality-gate`
-- **Calls:** `skaile-dev-test-plan`, `skaile-dev-test-unit`, `skaile-dev-test-integration`, `skaile-dev-test-e2e` (from construct mode — skaile-dev-test-plan first when no TEST_PLAN.md exists, then the level-specific skill)
-- **Delegates to:** `skaile-dev-test-plan` → `skaile-dev-test-unit` / `skaile-dev-test-integration` / `skaile-dev-test-e2e` — all in the skaileup-evaluate domain, no external dependencies
-- **Followed by:** `_scripts/check-coverage-ratchet.ts` (ratchet), then `skaile-dev-devlog` (record)
+- **Called by:** `implement` (after each task and before finish), `audit` (as a pre-analysis gate), `quality`
+- **Calls:** `test-plan`, `test-unit`, `test-integration`, `test-e2e` (from construct mode — test-plan first when no TEST_PLAN.md exists, then the level-specific skill)
+- **Delegates to:** `test-plan` → `test-unit` / `test-integration` / `test-e2e` — all in the skaileup-evaluate domain, no external dependencies
+- **Followed by:** `_scripts/check-coverage-ratchet.ts` (ratchet), then `devlog` (record)

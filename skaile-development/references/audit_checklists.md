@@ -1,6 +1,6 @@
 # Audit Checklists
 
-Used by the `skaile-dev-code-audit` skill's three parallel sub-agents. Each checklist is tuned for the skaile-dev tech stacks (NestJS, React, Nuxt 4, TypeScript, Bun).
+Used by the `audit` skill's three parallel sub-agents. Each checklist is tuned for the skaile-dev tech stacks (NestJS, React, Nuxt 4, TypeScript, Bun).
 
 Every finding MUST include:
 - `severity`: `critical | high | medium | low`
@@ -139,7 +139,7 @@ Every finding MUST include:
 
 ## Sub-agent dispatch template
 
-When the `skaile-dev-code-audit` skill launches the three sub-agents, each gets this prompt shape:
+When the `audit` skill launches the three sub-agents, each gets this prompt shape:
 
 ```
 You are {Sub-agent A|B|C}: {Logic|Security|UI/UX} Auditor.
@@ -165,7 +165,7 @@ You MUST skip findings already caught by lint/typecheck (Biome, ESLint, tsc).
 
 ## Report synthesis
 
-The parent `skaile-dev-code-audit` skill merges the three JSON arrays into `_devlog/reports/audit-<date>.json`:
+The parent `audit` skill merges the three JSON arrays into `_devlog/reports/audit-<date>.json`:
 
 ```json
 {

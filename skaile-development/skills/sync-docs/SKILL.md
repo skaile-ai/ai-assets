@@ -95,9 +95,9 @@ Non-destructive by default — always shows a diff and asks before writing.
 
 ## When NOT to Use
 
-- For writing new content — use `skaile-dev-docs --mode write`
-- For updating existing content after a code change — use `skaile-dev-docs --mode update`
-- For code-level bugs — use `skaile-dev-code-audit`
+- For writing new content — use `doc --mode write`
+- For updating existing content after a code change — use `doc --mode update`
+- For code-level bugs — use `audit`
 
 ---
 
@@ -124,7 +124,7 @@ MUST  leave unrelated frontmatter fields and content untouched
 MUST  reject orphan detection as auto-fixable — orphans are reported, never deleted
 NEVER delete pages, files, or content without explicit user approval for each
 NEVER rewrite prose — only touch frontmatter fields, link href attributes, and table rows
-NEVER change `_based_on_commit` or `_last_synced` — those are owned by `skaile-dev-docs` skill
+NEVER change `_based_on_commit` or `_last_synced` — those are owned by `doc` skill
 
 EMIT [sync-docs] started scope=<scope>
 
@@ -249,6 +249,6 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** `skaile-dev-docs --mode audit` (when it finds refs issues), `skaile-dev-release-check` (as part of documentation readiness), `skaile-dev-quality-gate`
+- **Called by:** `doc --mode audit` (when it finds refs issues), `ready` (as part of documentation readiness), `quality`
 - **Reads:** Doc files across the monorepo, Starlight config
 - **Writes:** Minimal edits to frontmatter, links, and tables in those files (with approval)
