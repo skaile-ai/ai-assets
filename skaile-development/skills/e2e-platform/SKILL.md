@@ -120,7 +120,7 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
    lsof -i :3001 -sTCP:LISTEN >/dev/null 2>&1 || echo "BE_DOWN"
    ```
    IF either is down:
-     Run the bundled service helper. It is idempotent — only starts what's missing (backend in `e2e:stateless` mode, frontend in `dev:noAuth` mode), reuses already-running services, detaches via `nohup` so services survive after the script exits, and writes logs to `platform/.e2e-backend.log` / `platform/.e2e-frontend.log`:
+     Run the bundled service helper. It is idempotent — only starts what's missing (backend in `e2e:stateless` mode, frontend in `dev:noAuth` mode), reuses already-running services, detaches via `nohup` so services survive after the script exits, and writes logs to `platform/.e2e-backend.log` / `platform/.e2e-frontend.log`. It also runs `bun run build` in `platform/backend` first when the e2e entry-point trampoline (`dist/apps/api/apps/api/src/e2e.js`) is missing — `bun run e2e:stateless` does not generate it on its own, so without this step the backend crashes at boot with `Cannot find module .../dist/apps/api/apps/api/src/e2e.js`:
      ```bash
      cd platform && ./scripts/e2e.sh
      ```
@@ -129,6 +129,8 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
    ELSE: both up — continue.
 
    NOTE: This is *auto-start* (spawn what's missing). It is **not** *auto-fix stale* (kill+restart already-running services to clear out-of-date code) — that's Step 3 below, more destructive (drops in-flight state, may break other dev work), and still requires explicit user authorization.
+
+   NOTE: If you ever need to bring up the backend manually (bypassing `./scripts/e2e.sh`), run `bun run build` in `platform/backend` first whenever the trampoline is absent — `bun run e2e:stateless` itself never produces it.
 
 3. **Stale-service check (post-pull guard).** A backend or frontend started before the latest commit on `platform/main` is serving pre-pull code; the suite will mass-fail with UI-drift-looking errors that are actually stale-bundle errors. Compare each service's process start time against the platform submodule HEAD commit time:
    ```bash
@@ -455,6 +457,7 @@ CHECKLIST
 
 | Mistake | Instead |
 |---|---|
+| Running `bun run e2e:stateless` directly when the trampoline is missing | Backend crashes at boot with `Cannot find module .../dist/apps/api/apps/api/src/e2e.js`. Use `./scripts/e2e.sh` (it runs `bun run build` once when the trampoline is absent), or run `cd platform/backend && bun run build` first. |
 | Writing specs without live-verifying selectors | Use chrome-devtools MCP first; UI drifts faster than specs |
 | `browser.newContext()` for impersonation | `page.addInitScript` on the shared `page` fixture (coverage depends on it) |
 | Asserting on `getByText('Dashboard')` etc. | Use `getByRole('heading', { name: ... })` or enabled interactive elements — sidebar links match text before page body loads |
