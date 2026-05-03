@@ -86,6 +86,30 @@ Handles all git operations for the skaile-dev monorepo. Works in six modes:
 
 ---
 
+## Model Dispatch
+
+This skill runs in a subagent to keep the main conversation context lean.
+
+DISPATCH  Spawn a subagent using the Agent tool to execute the selected mode:
+  - Standard execution: `model: "sonnet"`
+  - On error (tool failure, STOP condition, or unexpected git state): re-dispatch with `model: "opus"`
+
+```
+Agent({
+  model: "sonnet",           // default
+  prompt: "<full skill context + mode + inputs>"
+})
+```
+
+IF the sonnet subagent returns a STOP, error, or unresolved conflict:
+  Re-dispatch with `model: "opus"` and include the error output in the prompt so opus has full context.
+  Do NOT retry with sonnet — escalate directly.
+
+NEVER execute git mode steps inline when this skill is loaded via the Skill tool.
+Always use the Agent tool for dispatch.
+
+---
+
 ROLE  Git operations manager for the skaile-dev monorepo — enforces structured commit messages, branch naming, worktree conventions, PR templates, safe commit practices, and submodule synchronization.
 
 READS
