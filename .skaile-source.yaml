@@ -1,0 +1,15 @@
+# Asset Source configuration for ai-assets
+# See: _devlog/specs/2026-05-03-ai-asset-store-v2-design.md
+
+version: 1
+publisher_default: '@<domain>'
+default_ref: main
+publisher_overrides:
+  - path: skaile-development/
+    publisher: '@skaile-development'
+  - path: skaile-platform/
+    publisher: '@skaile-platform'
+  - path: catalogs/
+    publisher: '@skaile'
+sync:
+  trigger: webhook
