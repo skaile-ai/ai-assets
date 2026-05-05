@@ -120,13 +120,17 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
    lsof -i :3001 -sTCP:LISTEN >/dev/null 2>&1 || echo "BE_DOWN"
    ```
    IF either is down:
+     **Record which services were down at preflight** — the cleanup steps at end-of-mode (R5 / A8) only tear down services we auto-started here. Services already up belong to whatever process started them (parallel dev session, another tool) and must be left alone. Track per-service: `WE_STARTED_BACKEND = BE_DOWN`, `WE_STARTED_FRONTEND = FE_DOWN`.
+     EMIT   [e2e-platform] auto_starting backend=<true|false> frontend=<true|false>
+
      Run the bundled service helper. It is idempotent — only starts what's missing (backend in `e2e:stateless` mode, frontend in `dev:noAuth` mode), reuses already-running services, detaches via `nohup` so services survive after the script exits, and writes logs to `platform/.e2e-backend.log` / `platform/.e2e-frontend.log`. It also runs `bun run build` in `platform/backend` first when the e2e entry-point trampoline (`dist/apps/api/apps/api/src/e2e.js`) is missing **or stale relative to `tsconfig.json`** — `bun run e2e:stateless` does not generate or regenerate it on its own (only `bun run build` does), so without this step the backend either crashes with `Cannot find module .../dist/apps/api/apps/api/src/e2e.js` (missing) or with an `ERR_MODULE_NOT_FOUND` for a `@skaile/*` workspace package whose path alias was added after the trampoline was last built (stale — the runtime falls through to the workspace's TS source via `package.json` `exports` and dies on a `.js`-extension relative import that has no compiled sibling):
      ```bash
      cd platform && ./scripts/e2e.sh
      ```
      The script blocks until both ports listen (timeout 60s per service) and prints one line per service. After it returns, re-verify with the same `lsof` check.
      IF a port is still down after the script ran: read the last ~30 lines of the relevant log, report the startup error verbatim to the user, STOP. Do not retry blindly — startup failures usually mean missing migrations, port conflicts with another app, or a code bug, and looping won't fix any of those.
-   ELSE: both up — continue.
+   ELSE: both up — set `WE_STARTED_BACKEND = false`, `WE_STARTED_FRONTEND = false`. Cleanup at end-of-mode (R5 / A8) will skip — services were running before this invocation, leave them.
+     EMIT   [e2e-platform] services_pre_existing  (Step R5/A8 will skip cleanup)
 
    NOTE: This is *auto-start* (spawn what's missing). It is **not** *auto-fix stale* (kill+restart already-running services to clear out-of-date code) — that's Step 3 below, more destructive (drops in-flight state, may break other dev work), and still requires explicit user authorization.
 
@@ -280,6 +284,19 @@ IF mode = run
     ```
 
   EMIT   [e2e-platform] run_complete passing=<N> failing=<N>
+
+  STEP R5: Cleanup services we auto-started (if any)
+    Reference the WE_STARTED_BACKEND / WE_STARTED_FRONTEND flags recorded at Step 0 §2 (also visible as the `auto_starting` EMIT line). Dispatch:
+
+    | WE_STARTED_BACKEND | WE_STARTED_FRONTEND | Action |
+    |---|---|---|
+    | true  | true  | `cd platform && ./scripts/e2e.sh --stop` |
+    | true  | false | `cd platform && ./scripts/e2e.sh --stop-backend` |
+    | false | true  | `cd platform && ./scripts/e2e.sh --stop-frontend` |
+    | false | false | Skip — services were already up at preflight; leave them. |
+
+    Print the script's output verbatim into the report so the user sees what was torn down. If the script reports a port "still up" after stopping, do NOT escalate (broader pkill could kill the user's parallel processes); just include the warning in the report's "Next steps" so the user can decide.
+    EMIT   [e2e-platform] cleanup_complete
 
 # ── Mode: add ────────────────────────────────────────────────────
 
@@ -443,6 +460,10 @@ IF mode = add
 
   EMIT   [e2e-platform] add_complete specs_written=<N> tests_added=<N>
 
+  STEP A8: Cleanup services we auto-started (if any)
+    Same dispatch as run mode's STEP R5 — refer to that step's table. Print the script's output verbatim, do NOT escalate beyond the script's pkill patterns.
+    EMIT   [e2e-platform] cleanup_complete
+
 # ── End modes ────────────────────────────────────────────────────
 
 CHECKLIST
@@ -453,13 +474,14 @@ CHECKLIST
   - [ ] (add) New specs use shared `page` fixture + org-scoped slug URLs + scaffolding rules
   - [ ] (both) Failures categorized, infra auto-recovered, spec-design failures reported not auto-fixed
   - [ ] Report includes follow-ups + coverage notes
+  - [ ] (both) Cleanup ran ONLY for services we auto-started — pre-existing services left untouched (Step R5 / A8 dispatch table)
 
 ---
 
 ## Integration
 
 - **Called by:** human or `implement` skill (after a user-facing feature lands)
-- **Calls:** `platform/scripts/e2e.sh` (auto-start FE+BE when missing, idempotent), chrome-devtools MCP (via `mcp__chrome-devtools__*` tools, for live inspection), `sync-seed-data.js` via `bun run sync-seed`
+- **Calls:** `platform/scripts/e2e.sh` (auto-start FE+BE when missing; selective `--stop-backend` / `--stop-frontend` / `--stop` for end-of-mode cleanup of only services this skill put up), chrome-devtools MCP (via `mcp__chrome-devtools__*` tools, for live inspection), `sync-seed-data.js` via `bun run sync-seed`
 - **Delegates to:** `verify-ui` (when user wants visual coverage alongside specs), `test-e2e` (when user asks about scaffolding a fresh e2e setup for a different package)
 - **Reads:** `platform/e2e/CLAUDE.md`, `platform/e2e/README.md`, `platform/e2e/E2E-GUIDE.md`, existing specs under `platform/e2e/specs/**`
 
