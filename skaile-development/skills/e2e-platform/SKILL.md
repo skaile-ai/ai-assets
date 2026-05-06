@@ -184,21 +184,27 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
    [ -f "$LOCK" ] && [ -f "$MARK" ] && [ "$LOCK" -nt "$MARK" ] && echo STALE_DEPS
    ```
 
-   (b) Critical workspace symlinks missing — the mtime check above cannot detect the case where a package was relocated within the workspace tree (e.g. `theme/` → `agent-framework/theme/`). Neither file's mtime moves, but `node_modules/@skaile/*` is missing entirely. Verify directly:
+   (b) Critical workspace symlinks missing — the mtime check above cannot detect the case where a package was relocated within the workspace tree (e.g. `theme/` → `agent-framework/theme/`). Neither file's mtime moves, but the consumer-package `node_modules/@skaile/*` symlinks are missing entirely.
+
+   **Important:** this Bun workspace does NOT hoist `@skaile/*` to the repo-root `node_modules/`. Workspace symlinks live in *per-package* `node_modules/` (e.g. `platform/frontend/node_modules/@skaile/theme`, `platform/backend/node_modules/@skaile/agent-sdk`). Checking `skaile-dev/node_modules/@skaile/` always reports missing on this layout — it's a false positive. Spot-check the consumer packages directly:
    ```bash
-   # If the @skaile namespace is gone, the workspace is catastrophically out of sync.
-   [ -d skaile-dev/node_modules/@skaile ] || echo MISSING_SKAILE_NS
-   # Spot-check a few critical packages that platform/frontend imports.
-   for pkg in @skaile/theme @skaile/agent-core @skaile/agent-types; do
-     [ -e "skaile-dev/node_modules/$pkg" ] || echo "MISSING_$pkg"
+   # Spot-check critical workspace symlinks where they actually live.
+   # Adjust the prefix if running from a subfolder.
+   for entry in \
+     platform/frontend/node_modules/@skaile/theme \
+     platform/frontend/node_modules/@skaile/agent-types \
+     platform/backend/node_modules/@skaile/agent-sdk \
+   ; do
+     [ -e "$entry" ] || echo "MISSING_$entry"
    done
    ```
-   (Path-adjust if running from a subfolder.)
 
-   IF `STALE_DEPS` OR any `MISSING_*`:
+   IF `STALE_DEPS` OR any `MISSING_*` from (b):
      Report:
-       > "Dependencies out of sync — run `bun install` from the skaile-dev root before tests, or this run will surface as opaque module-resolution errors (e.g. Vite '[Internal server error] Can't resolve @skaile/<pkg>'). The mtime check (a) and the symlink-existence check (b) catch different failure modes — either firing requires `bun install`."
+       > "Dependencies out of sync — run `bun install` from the skaile-dev root before tests, or this run will surface as opaque module-resolution errors (e.g. Vite '[Internal server error] Can't resolve @skaile/<pkg>'). The mtime check (a) and the per-package symlink check (b) catch different failure modes — either firing requires `bun install`."
      STOP unless the user has already authorized auto-install elsewhere. Do not run `bun install` without explicit permission.
+
+     IF the user authorizes `bun install`: run it from the skaile-dev root, then re-run BOTH (a) and (b). If `bun install` reports "no changes" AND (b) is still red on the same paths, treat that as catastrophic (the workspace topology has changed in a way `bun install` won't fix on its own — escalate to the user with the failing paths verbatim, do NOT loop).
 
 6. Kill stale `skaile serve` subprocesses (cheap hygiene):
    ```bash
