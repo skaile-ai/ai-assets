@@ -4,18 +4,23 @@ MCP server (stdio) that gives an AI agent first-class ability to **create, modif
 
 ## Quick Start
 
-Build and run locally:
+**Platform-deployed sessions** — no build step needed. Built and pinned by the platform Nix flake
+(`platform/nix/flake.nix`'s `mcps.ppt` derivation). At session start the runner resolves
+`${recipe:ppt}` to the closure's `/nix/store` path.
 
-```bash
-./mvnw verify                              # Compile, test, coverage gate, produces fat jar
-java -jar target/ppt-mcp-server-all.jar    # Run the server
-```
-
-Or test via Docker:
+**Local standalone testing** — build the Docker image and override `command`/`args` in
+`skaile.yaml`'s `mcp_servers:` block:
 
 ```bash
 docker build -t ppt-mcp:dev .
 docker run --rm -i ppt-mcp:dev
+```
+
+For host-side development (compile + test without Docker):
+
+```bash
+./mvnw verify                              # Compile, test, coverage gate, produces fat jar
+java -jar target/ppt-mcp-server-all.jar    # Run the server on stdio
 ```
 
 For interactive testing with the MCP Inspector, see "Manual testing with the MCP Inspector" below.
