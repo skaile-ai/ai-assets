@@ -112,6 +112,7 @@ REFERENCES
 
 MUST  read the target package(s) CLAUDE.md before writing any code
 MUST  identify the correct prog-expert for the tech stack and note it in the plan
+MUST  invoke the `postxl` skill before any change to platform/backend, platform/frontend, or store/backend that touches generated paths, the schema, or custom blocks
 MUST  run tests after implementation (via test skill)
 MUST  run audit scope=diff after tests pass (gate Phase 5 on audit ≠ fail)
 MUST  run doc --mode update after any public API or structure change
@@ -155,13 +156,24 @@ STEP 2: Load context
   | Package | Stack | Prog Expert |
   |---------|-------|-------------|
   | forge/L4-project, forge/L5-concept | Nuxt 4, drizzle-orm, SQLite, UnoCSS | prog-expert-nuxt |
-  | platform/backend | NestJS, Fastify, Prisma, tRPC, Jest | (read platform/CLAUDE.md) |
-  | platform/frontend | React 19, Vite, TanStack, Tailwind CSS 4, Vitest | (read platform/CLAUDE.md) |
+  | platform/backend | NestJS, Fastify, Prisma, tRPC, Jest (PostXL-generated) | postxl + (read platform/CLAUDE.md) |
+  | platform/frontend | React 19, Vite, TanStack, Tailwind CSS 4, Vitest (PostXL-generated) | postxl + (read platform/CLAUDE.md) |
+  | store/backend | NestJS, Prisma (PostXL-generated, in progress) | postxl + (read store/CLAUDE.md) |
   | agent-framework/* | TypeScript, Bun, OMP | prog-expert-omp |
   | agent-framework/cli | TypeScript, Bun, Commander | (read package CLAUDE.md) |
   | ai-assets/<domain> | Markdown, YAML (skill conventions) | (follow CLAUDE.md skill conventions) |
   | docs/ | Astro, Starlight | (follow doc) |
-  | agent-framework/cli | TypeScript, Bun | (read package CLAUDE.md) |
+
+STEP 2a: PostXL gate (conditional)
+  IF any target package is platform/backend, platform/frontend, or store/backend
+    AND the change touches a generated path, the schema, custom blocks, or anything tracked in postxl-lock.json
+    - Invoke the `postxl` skill before writing any code — it carries the mode-selection
+      logic (schema / custom block / new module), the dual-typecheck verify loop, and the
+      Skaile cross-cutting rules that constrain PostXL output (Frontend Action Pattern,
+      no-Biome, barrel-file exception, submodule commit workflow).
+  IF the change is in platform/ or store/ but stays in non-generated paths (e.g.,
+      platform/backend/apps/api/src/main.ts, ad-hoc utility modules outside libs/)
+    - postxl is optional; still read platform/CLAUDE.md or store/CLAUDE.md.
 
 STEP 3: Find relevant expert skills
   - Search dev-implementation-experts-* for skills matching the identified stack
