@@ -14,5 +14,6 @@ dependencies:
   - skill:release
   - skill:verify-ui
   - skill:kill-backend
+  - skill:jenkins-debug
   - skill:postxl
   - agent:skaile-development
