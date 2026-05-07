@@ -140,6 +140,8 @@ NEVER create a worktree for sequential (non-parallel) work — use branch mode i
 NEVER write commit messages without reading the diff first
 NEVER omit the scope or type fields in a commit message title
 NEVER remove a worktree that contains unpushed submodule commits - they will be permanently lost
+NEVER allow format/lint to silently mutate workspace-root files (`bun.lock`, root `package.json`, `.skaile/lock` files). After STEP 1c, run `git status` and revert any side-effect mutations that weren't in the original staged set — they belong in separate, deliberate commits
+NEVER stage a submodule pointer bump without first running `git -C <submodule> fetch origin && git -C <submodule> log HEAD..origin/main --oneline` — if that output is non-empty, the bump would silently regress upstream commits
 
 EMIT [git] started mode=<mode>
 
@@ -205,11 +207,32 @@ IF mode = commit
     NEVER run Biome on `platform/` — it uses Prettier + ESLint exclusively.
     Only run the commands for areas that have staged changes.
 
+    Before running format/lint, snapshot files that lint chains can mutate as
+    a side effect (typecheck → bun install → re-resolve):
+      $ cp bun.lock /tmp/bun.lock.before    (only if it exists)
+
     IF formatting/linting modified any staged files:
       $ git add <modified files>
       > "Formatted <N> files in <areas> — re-staged."
     IF linting reports unfixable errors:
       STOP: "Lint errors found. Fix them before committing."
+
+    Lint side-effect guard — check for unintended workspace mutations:
+      $ git status --short    (compare against the original dirty set)
+      IF bun.lock changed AND was NOT in the original staged/dirty set:
+        > "Lint side effect: bun.lock was rewritten by typecheck → bun install.
+        >  Reverting — this belongs in a separate, deliberate commit."
+        $ diff /tmp/bun.lock.before bun.lock || git checkout -- bun.lock
+        Note in the commit report which side-effect files were reverted.
+      IF any package.json was modified that was NOT in the original staged set:
+        $ git checkout -- <those package.json files>
+        Note the revert in the commit report.
+
+    This guard exists because lint chains in a Bun workspace silently rewrite
+    the root `bun.lock` (a single workspace-wide lockfile) when run from inside
+    a submodule. The submodule's commit comes out clean while the parent gains
+    an unrelated lockfile delta — observed concretely with a zod 4.4.3 → 4.3.6
+    re-resolution during a one-line walkDir fix.
 
   STEP 2: Write the Message
     Follow this exact structure:
