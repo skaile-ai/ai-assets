@@ -4,7 +4,7 @@ description: 'Day-to-day development workflow for the skaile-dev monorepo — im
 type: domain
 building_blocks:
   agents: 'skaile-development — routes tasks to the right skills, maintains session context.'
-  skills: 'git, implement, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, e2e-platform, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, session-review, session-analysis, verify-ui'
+  skills: 'git, implement, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, e2e-platform, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, jenkins-debug, session-review, session-analysis, verify-ui'
   references: 'Branch naming, worktree patterns, test stack map, audit checklists, readiness criteria, devlog entry formats, documentation tier roles, commit spec.'
 stage: beta
 ---
@@ -60,6 +60,7 @@ Reach for `skaile-development` when you are:
 | `skills/faq/`                      | `faq` — FAQ curation for all monorepo packages                                                                         |
 | `skills/release/`                  | `release` — changelog, semantic versioning, and git tagging                                                            |
 | `skills/kill-backend/`             | `kill-backend` — kills the platform backend process chain cleanly (port 3001, nest, bun, dotenvx)                      |
+| `skills/jenkins-debug/`            | `jenkins-debug` — read-only Jenkins debug for failed `skaile_platform` deploys via the local SSH tunnel                |
 | `skills/session-review/`           | `session-review` — end-of-session analysis: token usage, cost, workflow adherence, optimization tips                    |
 | `skills/session-analysis/`         | `session-analysis` — session pattern analysis and workflow optimization recommendations                                |
 | `skills/verify-ui/`                | `verify-ui` — UI verification and visual regression checks                                                             |
@@ -93,6 +94,7 @@ Reach for `skaile-development` when you are:
 | `faq`              | After resolving a question — curates FAQ entries with user approval                            |
 | `release`          | Preparing a release — changelog generation, version bumps, and git tagging                     |
 | `kill-backend`     | Killing the platform backend and its full process chain (port 3001, nest, bun, dotenvx)        |
+| `jenkins-debug`    | Debugging a failed `skaile_platform` Jenkins deploy via the local SSH tunnel (read-only)       |
 | `session-review`    | At the end of an implementation session — token cost, workflow grade, and improvement tips     |
 | `session-analysis` | Session pattern analysis and workflow optimization recommendations                             |
 | `verify-ui`        | UI verification and visual regression checks                                                   |
