@@ -1,6 +1,6 @@
 ---
 name: use-skills-sh
-description: "Use when discovering, researching, or installing agent skills from the open skills.sh ecosystem. Handles discovery via npx skills find, quality verification, and workspace integration via skaile repo add / skaile skill add."
+description: "Use when discovering, researching, or installing agent skills from the open skills.sh ecosystem. Handles discovery via npx skills find, quality verification, and workspace integration via skaile source add / skaile install."
 metadata:
   stage: alpha
   source: MIGRATED
@@ -71,37 +71,39 @@ Present 2–3 curated options with:
 Once the user selects a skill, install it in two steps:
 
 ```bash
-# 1. Register the skill's source repository
-skaile repo add <github-url> <alias>
+# 1. Clone the source repo locally, then register the clone as a Library Source
+git clone <github-url> ~/skills/<alias>
+skaile source add ~/skills/<alias>
 
-# 2. Deploy the skill into the active workspace
-skaile skill add <skill-name>
+# 2. Deploy the specific skill into the active workspace
+skaile install skill:<skill-name>
 ```
+
+For remote URLs, the `skaile npx skills add <url> --skill <name>` shortcut does
+the clone-and-register-and-install in one step (clones to
+`~/.skaile/clones/<host>/<owner>/<repo>` automatically).
 
 **Example — installing a "markdown-to-pdf" skill:**
 
 ```bash
-# Register the repo
-skaile repo add https://github.com/example-org/pdf-skills pdf-skills
-
-# Install the specific skill
-skaile skill add markdown-to-pdf
+# One-shot: clone, register, install
+skaile npx skills add https://github.com/example-org/pdf-skills --skill markdown-to-pdf
 ```
 
 **Check what is now available:**
 
 ```bash
-skaile skill list
+skaile list skill
 ```
 
 **Keep skills up to date:**
 
 ```bash
-# Check for updates across registered repos
-skaile repo status <alias>
+# Re-discover assets across all registered Library Sources
+skaile source sync
 
-# Pull latest from a repo
-skaile repo sync <alias>
+# Or sync a single source (prefix-match on Library Source ID)
+skaile source sync <id>
 ```
 
 ## Fallback Strategy

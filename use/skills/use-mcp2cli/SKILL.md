@@ -134,7 +134,7 @@ uvx mcp2cli --mcp https://mcp.example.com/sse --search "task"
 uvx mcp2cli @myapi --list
 ```
 
-## Integration with skaile repo management
+## Integration with skaile source management
 
 mcp2cli can also be managed as an external resource via the `skaile` CLI. This is useful for:
 
@@ -142,52 +142,30 @@ mcp2cli can also be managed as an external resource via the `skaile` CLI. This i
 - Tracking upstream updates to mcp2cli
 - Managing mcp2cli as a fork with local additions
 
-### Register mcp2cli as a resource
+> **Note:** The legacy `skaile repo *` and `skaile contrib *` command trees were
+> retired on 2026-05-12. Source registration now flows through the Library
+> (`skaile source add`); contribution push-back is being re-introduced under
+> the Phase 4 `skaile publish` / `skaile preset push` workflow. Until then,
+> commit and push directly in the cloned source repository's working tree.
+
+### Register mcp2cli as a Library Source
 
 ```bash
-# Register the upstream repo
-skaile repo add https://github.com/knowsuchagency/mcp2cli mcp2cli
+# Clone the upstream repo locally
+git clone https://github.com/knowsuchagency/mcp2cli ~/skills/mcp2cli
 
-# Sync to discover any skills shipped with mcp2cli
-skaile repo sync mcp2cli
-```
-
-### Check for updates
-
-```bash
-# See if your cached clone is behind the remote
-skaile repo status mcp2cli
-
-# Compare your fork against upstream
-skaile contrib compare mcp2cli
-
-# See what you've added locally
-skaile contrib additions mcp2cli
+# Register the clone as a Library Source (auto-syncs assets)
+skaile source add ~/skills/mcp2cli
 ```
 
 ### Keep up to date
 
 ```bash
-# Pull latest (preserves local edits via stash)
-skaile contrib sync-with-stash mcp2cli
+# Pull upstream changes in the working tree
+git -C ~/skills/mcp2cli pull
 
-# Or re-sync and re-index
-skaile repo sync mcp2cli
-```
-
-### Contribute changes back
-
-```bash
-# Check what you've changed
-skaile contrib changes mcp2cli
-skaile contrib diff mcp2cli
-
-# Commit and push to your fork
-skaile contrib commit mcp2cli -m "add: new skill for X" -b feature-branch
-skaile contrib push mcp2cli https://github.com/youruser/mcp2cli feature-branch
-
-# Open a PR
-skaile contrib pr https://github.com/knowsuchagency/mcp2cli --title "Add X" --body "..." --head youruser:feature-branch
+# Re-sync the Library cache
+skaile source sync
 ```
 
 ### Pin a specific version via lock file

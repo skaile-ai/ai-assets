@@ -28,20 +28,20 @@ Never guess what skills exist. Always query the catalog. The catalog is the grou
 
 ## Setup: Register the Resource
 
-Before any catalog operations, ensure `ai-assets` is registered as a source:
+Before any catalog operations, ensure `ai-assets` is registered as a Library Source:
 
 ```bash
-skaile repo list
+skaile source list
 ```
 
 If `ai-assets` is not listed, register it:
 ```bash
-skaile repo add <path-to-ai-assets> ai-assets
+skaile source add <path-to-ai-assets>
 ```
 
 To sync after changes:
 ```bash
-skaile repo sync ai-assets
+skaile source sync
 ```
 
 ---
@@ -107,11 +107,11 @@ Deploy targets:
 ### Goal: Keep assets up to date
 
 ```bash
-# Sync all registered resources
-skaile repo sync
+# Sync all registered sources
+skaile source sync
 
-# Sync a specific resource
-skaile repo sync <name>
+# Sync a specific source (prefix-match on Library Source ID)
+skaile source sync <id>
 ```
 
 ### Goal: List what's installed
@@ -144,7 +144,7 @@ skaile add <name>
 
 ### "Check if all dependencies are met after a sync"
 ```bash
-skaile repo sync ai-assets
+skaile source sync
 skaile doctor
 ```
 
@@ -174,7 +174,7 @@ Installed assets are deployed to agent config directories (e.g. `~/.claude/skill
 
 - Do not read or write `~/.skaile/assets/` directly — always go through `skaile` commands
 - Do not install assets from untrusted sources without user confirmation
-- Always run `skaile repo sync` before presenting catalog results if the user is looking for recently added skills
+- Always run `skaile source sync` before presenting catalog results if the user is looking for recently added skills
 
 ## Related Skills
 

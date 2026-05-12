@@ -24,7 +24,7 @@ skaile skill list skaileup-conceptualization             # browse skills
 ### Via skaile asset management (recommended for installing/deploying skills)
 
 ```bash
-skaile repo add <path-to-ai-assets> ai-assets
+skaile source add <path-to-ai-assets>
 skaile explore ai-assets
 skaile add cf_concept_overview
 ```
