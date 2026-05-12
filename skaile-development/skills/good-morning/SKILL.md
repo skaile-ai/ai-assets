@@ -1,6 +1,6 @@
 ---
 name: "good-morning"
-description: "The morning startup ritual for skaile-dev — opens with a cheeky \"what did Peter do last night\" investigation of the repo state, then syncs the shell repo + submodules, pulls the current branch, reinstalls workspace deps, builds the platform backend, and launches platform frontend + backend in dev mode. Use when Peter says \"good morning\", \"/good-morning\", \"let's start the day\", \"fire up the platform\", \"boot me up\", or any other morning kick-off phrase."
+description: "The morning startup ritual for skaile-dev — opens with a cheeky \"what did Peter do last night\" investigation of the repo state, syncs the shell repo + submodules (reattaching any that landed detached at origin/main), reinstalls workspace deps, and builds the platform backend so frontend + backend are ready to start. Does NOT launch dev servers — Peter starts those himself. Use when Peter says \"good morning\", \"/good-morning\", \"let's start the day\", \"fire up the platform\", \"boot me up\", or any other morning kick-off phrase."
 metadata:
   version: "1.0.0"
   tags:
@@ -22,15 +22,15 @@ metadata:
         description: "Must run from the skaile-dev shell repo root (Bun workspace)."
       - path: "platform/backend/package.json"
         gate: hard
-        description: "Platform backend must exist — Step 5 builds it and Step 6 launches it."
+        description: "Platform backend must exist — Step 5 builds it; the sign-off points Peter at `bun run dev`."
       - path: "platform/frontend/package.json"
         gate: hard
-        description: "Platform frontend must exist — Step 6 launches its dev server."
+        description: "Platform frontend must exist — the sign-off points Peter at its `bun run dev`."
 ---
 
 # good-morning — The Morning Startup Routine
 
-A semi-serious morning ritual: peek at what Peter changed overnight, sync the monorepo, refresh submodules, reinstall the workspace, build the platform backend, and launch the platform frontend + backend so everyone can drop straight back into work.
+A semi-serious morning ritual: peek at what Peter changed overnight, sync the monorepo, refresh submodules (reattaching any that landed detached at origin/main), reinstall the workspace, and build the platform backend so Peter can drop straight into `bun run dev` himself. The skill does **not** launch the dev servers — that's a Peter action.
 
 ## When to Use
 
@@ -60,10 +60,7 @@ Run these steps in order. Stop and report on any failure unless explicitly noted
 Establish what Peter touched recently across the shell repo and submodules. This is the "investigation" tone — keep it short and slightly amused.
 
 ```bash
-# Resolve the shell-repo absolute path once — every later step (especially the
-# background launches in Step 6) MUST use this. Background bash invocations do
-# NOT inherit the harness's persisted CWD, so any relative `cd ./platform/...`
-# pattern is silently wrong and falls through to the wrong package's scripts.
+# Resolve the shell-repo absolute path once — used in Step 5 (backend build).
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
 # Shell repo: current branch + last 3 commits + dirty status
@@ -71,7 +68,7 @@ git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD
 git -C "$REPO_ROOT" log --oneline -3
 git -C "$REPO_ROOT" status --short
 
-# Capture the user's git identity for the Step 7 sign-off (first word, fallback to Peter)
+# Capture the user's git identity for the Step 6 sign-off (first word, fallback to Peter)
 USER_NAME="$(git -C "$REPO_ROOT" config user.name | awk '{print $1}')"
 USER_NAME="${USER_NAME:-Peter}"
 echo "USER_NAME=$USER_NAME"
@@ -84,9 +81,9 @@ git -C "$REPO_ROOT" submodule status
 ```
 
 Capture three values for later steps:
-- `<repo-root>` — absolute path to the shell repo (use it in **every** background command)
+- `<repo-root>` — absolute path to the shell repo (used in Step 5)
 - `<branch>` — current shell-repo branch (used in Step 2)
-- `<user-name>` — first word of `git config user.name`, fallback `Peter` (used in Step 7 sign-off only)
+- `<user-name>` — first word of `git config user.name`, fallback `Peter` (used in Step 6 sign-off only)
 
 Summarise findings to Peter in 2–3 lines, e.g.:
 
@@ -107,7 +104,15 @@ If `pull --ff-only` rejects (branch has diverged), **STOP**:
 
 > Peter, your `<branch>` has diverged from origin. I won't auto-merge — handle it manually then call `/good-morning` again.
 
-### Step 3 — Realign submodule pointers, then update each submodule's branch
+### Step 3 — Realign submodules, pull each submodule's branch, reattach detached HEADs
+
+This step has **three phases**:
+
+1. Move every submodule's working tree to the SHA the shell repo records (`git submodule update --init --recursive`). This always lands in **detached-HEAD** state.
+2. For submodules already on a branch matching the shell repo's branch, fast-forward that branch from origin.
+3. For submodules still detached *but pointing at origin/main*, reattach them to `main` so subsequent commits don't land on a detached HEAD. This catches the very common case where the shell repo's pull bumped a submodule pointer to a new SHA on origin/main — phase 1 leaves the submodule detached at that SHA, and without this phase it stays detached.
+
+#### Phase 1 — Realign submodule pointers
 
 First, pull submodule pointers to match the now-current shell repo. Try `--recursive` first; if a nested submodule reference is broken (not uncommon in `forge/`), fall back to a non-recursive update so the top-level pointers still align:
 
@@ -118,7 +123,9 @@ git -C "$REPO_ROOT" submodule update --init --recursive 2>/tmp/submodule-update.
        git -C "$REPO_ROOT" submodule update --init; }
 ```
 
-Then, for every submodule whose checked-out branch is the **same name** as the shell repo's branch, fast-forward it. Detached-HEAD submodules and submodules on a different branch are skipped (and reported).
+#### Phase 2 — Fast-forward submodules that are on a matching branch
+
+For every submodule whose checked-out branch is the **same name** as the shell repo's branch, fast-forward it. Detached-HEAD submodules and submodules on a different branch are skipped here — phase 3 picks up the detached ones.
 
 ```bash
 BRANCH=$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD)
@@ -150,7 +157,61 @@ for sub in agent-framework agent-plugin ai-assets ai-assets-skaileup forge infra
 done
 ```
 
-Continue past warnings — the shell-repo pointers are already aligned.
+#### Phase 3 — Reattach detached HEADs that already match origin/main
+
+When the shell repo's pull bumped a submodule pointer to a new SHA on `origin/main`, phase 1 leaves that submodule **detached** at the new SHA and phase 2 skips it (because its branch is `HEAD`, not `main`). The submodule is fully pulled — it just isn't on the `main` branch ref. Reattach it so a subsequent commit doesn't go to a detached HEAD.
+
+Reattach rules:
+- Only act on submodules in detached-HEAD state.
+- Fetch `origin/main` first (phase 2 didn't fetch for detached submodules).
+- Only reattach if `HEAD == origin/main`. If detached at any other SHA, the user deliberately pinned it (a tag, an older commit, a feature SHA) — leave alone.
+- If a local `main` ref already exists, only reattach when local `main` has **zero commits ahead of HEAD** (no unpushed local-only work to lose). If it has unpushed commits, leave detached and flag.
+- If no local `main` ref exists, create it at HEAD.
+
+```bash
+for sub in agent-framework agent-plugin ai-assets ai-assets-skaileup forge infra marketing platform store; do
+  if [ ! -e "$REPO_ROOT/$sub/.git" ]; then
+    continue
+  fi
+  cur=$(git -C "$REPO_ROOT/$sub" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+  # Only act on detached HEADs; phase 2 already handled on-branch submodules.
+  [ "$cur" != "HEAD" ] && continue
+
+  # Phase 2 didn't fetch this one — refresh remote refs before comparing.
+  git -C "$REPO_ROOT/$sub" fetch origin --prune >/dev/null 2>&1
+
+  cur_head=$(git -C "$REPO_ROOT/$sub" rev-parse HEAD)
+  origin_main=$(git -C "$REPO_ROOT/$sub" rev-parse origin/main 2>/dev/null || echo "")
+
+  if [ -z "$origin_main" ]; then
+    echo "  • $sub: detached, no origin/main reachable — leaving detached"
+    continue
+  fi
+
+  if [ "$cur_head" != "$origin_main" ]; then
+    # Detached at some non-main SHA (tag, older commit, feature pin) — leave alone.
+    echo "  • $sub: detached at ${cur_head:0:8} (≠ origin/main, leaving detached)"
+    continue
+  fi
+
+  # Detached at origin/main tip — safe to reattach if no local-only commits would be lost.
+  local_main=$(git -C "$REPO_ROOT/$sub" rev-parse main 2>/dev/null || echo "")
+  if [ -z "$local_main" ]; then
+    git -C "$REPO_ROOT/$sub" checkout -b main >/dev/null 2>&1 \
+      && echo "  ↪ $sub: created local main at ${cur_head:0:8}"
+    continue
+  fi
+  ahead=$(git -C "$REPO_ROOT/$sub" rev-list --count "$cur_head..$local_main" 2>/dev/null || echo "?")
+  if [ "$ahead" = "0" ]; then
+    git -C "$REPO_ROOT/$sub" checkout -B main HEAD >/dev/null 2>&1 \
+      && echo "  ↪ $sub: reattached to main (was detached at origin/main tip)"
+  else
+    echo "  ⚠ $sub: detached at origin/main but local main has $ahead unpushed commits — leaving detached"
+  fi
+done
+```
+
+Continue past warnings — the shell-repo pointers are already aligned, and any "leaving detached" line is informational (the submodule is at exactly the SHA the shell repo records).
 
 ### Step 3.5 — Pulled-commits summary
 
@@ -252,70 +313,65 @@ Always use the absolute path so this works regardless of the harness's persisted
 cd "$REPO_ROOT/platform/backend" && bun run build
 ```
 
-If the build fails: **STOP**. Show the first compile error block. Do not proceed to launching dev servers — they'll only fail again.
+If the build fails: **STOP**. Show the first compile error block. Do not sign off as "ready to start" — Peter would just hit the same build error the moment he ran `bun run dev`.
 
-### Step 6 — Launch platform backend + frontend in dev mode
+### Step 6 — Sign off (services are ready to start)
 
-Both run as background processes so Peter regains the prompt immediately and can keep working.
+The skill does **not** launch the dev servers — Peter starts them himself, typically in two terminal panes so he can see the logs.
 
-> **Critical — absolute paths only.** Background bash invocations start with a fresh CWD; they do **not** inherit `cd` from earlier synchronous commands. Running `bun run dev` from anywhere except `platform/backend` will silently invoke the **wrong** script: a prod-built backend with no `--watch` loop, leaving an orphan `node main.js` process bound to port 3001 that has to be hunted down with the `kill-backend` skill. Always interpolate the absolute path you captured in Step 1.
-
-**Backend** (NestJS via `dotenvx + nest start --watch`, port 3001):
-
-Substitute the literal absolute path for `<repo-root>` (it is the value you captured into `REPO_ROOT` in Step 1, e.g. `/Users/henk/Work/Projects/PostXL/skaile-dev`). Run via Bash with `run_in_background=true`:
+Before signing off, do a courtesy check that ports 3000 and 3001 aren't already bound by stale processes from a previous session — if they are, mention it so Peter knows he'll need to run `kill-backend` or kill the vite zombie before `bun run dev`.
 
 ```bash
-cd <repo-root>/platform/backend && bun run dev
+# Courtesy port check — informational only, do NOT kill anything from inside this skill.
+lsof -i :3001 -sTCP:LISTEN -t 2>/dev/null \
+  && echo "  ⚠ port 3001 already bound — run \`kill-backend\` before \`bun run dev\` in platform/backend" \
+  || echo "  ✓ port 3001 free"
+lsof -i :3000 -sTCP:LISTEN -t 2>/dev/null \
+  && echo "  ⚠ port 3000 already bound — kill the stale process before \`bun run dev\` in platform/frontend" \
+  || echo "  ✓ port 3000 free"
 ```
 
-**Frontend** (Vite):
+Then wrap up with the sign-off. Substitute `<user-name>` with the value captured in Step 1 (the first word of `git config user.name`, fallback `Peter`):
 
-```bash
-cd <repo-root>/platform/frontend && bun run dev
-```
-
-After launching, wait ~5 seconds and tail each background log to confirm:
-- Backend log contains `Skaile Platform API is running` AND the parent process tree shows `nest start --watch` (proves the dev/watch loop, not a prod build).
-- Frontend log contains `VITE v… ready` and a `Local: http://localhost:3000/` line.
-
-If the backend log is missing `nest start --watch` in the process tree (`ps -ef | grep nest`), the wrong script ran — kill the chain via `kill-backend` and retry with the correct absolute path.
-
-Capture both background-shell IDs and report them to Peter in Step 7.
-
-### Step 7 — Sign off
-
-Wrap up with a single status line. Substitute `<user-name>` with the value captured in Step 1 (the first word of `git config user.name`, fallback `Peter`):
-
-> ☕ Good morning, `<user-name>`. Backend is booting (bg `<id>`, port 3001). Frontend is starting (bg `<id>`). You're up — go build something.
+> ☕ Good morning, `<user-name>`. Workspace synced, deps installed, backend built clean. Backend and frontend are ready to start when you are:
+>
+> - `cd platform/backend && bun run dev` — NestJS API (port 3001)
+> - `cd platform/frontend && bun run dev` — Vite dev server (port 3000)
+>
+> Go build something.
 
 Concrete examples:
 - git user is "Henk Blankenberg" → "☕ Good morning, Henk."
 - git user.name unset → "☕ Good morning, Peter."
 
-If any step earlier flagged a warning (skipped submodule, uncommitted changes, etc.), include a one-line "Heads-up" before the sign-off.
+If any step earlier flagged a warning (skipped submodule, uncommitted changes, port already bound, detached submodule left alone, etc.), include a one-line "Heads-up" before the sign-off.
 
-**Note on naming:** Only the Step 7 sign-off uses `<user-name>`. The opening line in Step 1 (`First let me check, what Peter did last night...`) and any in-skill "Peter" references stay hardcoded — that's the personality of the skill regardless of who's running it.
+**Note on naming:** Only the Step 6 sign-off uses `<user-name>`. The opening line in Step 1 (`First let me check, what Peter did last night...`) and any in-skill "Peter" references stay hardcoded — that's the personality of the skill regardless of who's running it.
 
 ## Failure Handling
 
 | Step | Failure mode                                                                | Action                                                                                                            |
 | ---- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | 2    | `pull --ff-only` rejects                                                    | STOP — branch has diverged from origin                                                                            |
-| 3    | recursive submodule update fails (broken nested ref, e.g. `forge/`)         | fall back to `submodule update --init` (top-level only); continue and flag in Step 7 heads-up                     |
-| 3    | a submodule cannot ff                                                       | continue, flag in Step 7 heads-up                                                                                 |
-| 3    | a submodule directory is missing on disk                                    | continue, flag in Step 7 heads-up (do not attempt to clone)                                                       |
+| 3.1  | recursive submodule update fails (broken nested ref, e.g. `forge/`)         | fall back to `submodule update --init` (top-level only); continue and flag in Step 6 heads-up                     |
+| 3.2  | a submodule cannot ff                                                       | continue, flag in Step 6 heads-up                                                                                 |
+| 3    | a submodule directory is missing on disk                                    | continue, flag in Step 6 heads-up (do not attempt to clone)                                                       |
+| 3.3  | submodule detached at non-main SHA (tag, older commit, feature pin)         | leave detached — that's a deliberate pin; do not reattach                                                         |
+| 3.3  | submodule detached at origin/main but local `main` has unpushed commits     | leave detached, flag in Step 6 heads-up so Peter can decide whether to merge/push                                 |
 | 3.5  | `/tmp/good-morning-pulls.log` empty                                         | print "Nothing new pulled — already up to date." and skip the table                                               |
 | 3.5  | `git log <old>..<cur>` errors (e.g. shallow clone)                          | skip that row, continue with the others — informational step, never stops the skill                               |
 | 4    | `bun i` fails                                                               | STOP — likely lockfile / registry issue                                                                           |
 | 4    | `bun install:global` fails                                                  | continue if `bun i` succeeded; flag for follow-up                                                                 |
-| 5    | backend build fails                                                         | STOP — do not start dev servers                                                                                   |
-| 6    | port 3001 already bound                                                     | run the `kill-backend` skill, then retry Step 6                                                                   |
-| 6    | backend log shows `running … in prod mode` and process tree lacks `nest`    | the wrong script ran (relative `cd` failed) — `kill-backend`, then retry Step 6 with the **absolute** repo path   |
-| 6    | background command fails immediately with `cd: no such file or directory`   | a relative `cd` was used; replace with `cd <repo-root>/platform/...` and re-launch                                |
+| 5    | backend build fails                                                         | STOP — do not sign off as "ready to start"; Peter needs to fix the build first                                    |
+| 6    | port 3001 or 3000 already bound                                             | flag in heads-up so Peter runs `kill-backend` or kills the stale vite before `bun run dev` — do NOT kill from here |
 
 ## What This Skill Never Does
 
-- Never switches branches — Peter stays on whatever branch he ended yesterday on
+- Never starts `bun run dev` for backend or frontend — Peter starts those himself so he controls the terminals and sees the logs directly
+- Never kills processes — even when ports 3000/3001 are already bound, the skill only reports it and lets Peter run `kill-backend` himself
+- Never switches branches in the shell repo — Peter stays on whatever branch he ended yesterday on
+- Never reattaches a submodule that is detached at a non-`origin/main` SHA — that's treated as a deliberate pin (tag, older commit, feature SHA) and left alone
+- Never reattaches a submodule when local `main` has unpushed commits ahead of the detached HEAD — those commits would be silently lost; the skill flags instead
 - Never force-pulls, rebases, or stashes — divergence and dirty trees are stop signals
 - Never commits, pushes, or opens PRs
 - Never seeds, migrates, or wipes the database — that's a separate concern
