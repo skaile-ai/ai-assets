@@ -4,7 +4,7 @@ description: 'Day-to-day development workflow for the skaile-dev monorepo — im
 type: domain
 building_blocks:
   agents: 'skaile-development — routes tasks to the right skills, maintains session context.'
-  skills: 'git, implement, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, e2e-platform, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, jenkins-debug, session-review, session-analysis, verify-ui'
+  skills: 'git, implement, bug-fix, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, e2e-platform, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, jenkins-debug, session-review, session-analysis, verify-ui'
   references: 'Branch naming, worktree patterns, test stack map, audit checklists, readiness criteria, devlog entry formats, documentation tier roles, commit spec.'
 stage: beta
 ---
@@ -43,6 +43,7 @@ Reach for `skaile-development` when you are:
 | `skills/proposal/`                 | `proposal` — design specs and proposals with structured frontmatter, review tracking, and alternatives analysis     |
 | `skills/review/`                   | `review` — local code review for staged/committed changes (quality, security, scope)                              |
 | `skills/implement/`                | `implement` — monorepo-aware implementation orchestrator                                                               |
+| `skills/bug-fix/`                  | `bug-fix` — end-to-end platform bug-fix orchestrator: worktree → issues.md row → plan → implement → review → PR        |
 | `skills/test/`                     | `test` — test runner: executes suites across the monorepo; triages failures                                            |
 | `skills/test-plan/`                | `test-plan` — per-package test plan from CLAUDE.md + source tree (feeds test-unit/-integration/-e2e)                   |
 | `skills/test-unit/`                | `test-unit` — unit test setup + generation (vitest/jest-aware, per package)                                            |
@@ -77,6 +78,7 @@ Reach for `skaile-development` when you are:
 | `proposal`      | Creating, reviewing, or updating design specs for new features or architectural changes        |
 | `review`      | Before committing or pushing — local quality/security review of changes                        |
 | `implement`        | Starting any non-trivial implementation task in the monorepo                                   |
+| `bug-fix`          | End-to-end platform bug-fix in one shot: worktree, issues.md row, plan, implement, review, PR |
 | `test`             | Running an existing test suite and triaging failures                                           |
 | `test-plan`        | Generating or refreshing a per-package `TEST_PLAN.md`                                          |
 | `test-unit`        | Setting up unit-test infra and generating unit tests for one package                           |
