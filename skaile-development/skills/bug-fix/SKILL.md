@@ -16,23 +16,23 @@ metadata:
   user_inputs:
     dialog:
       - id: "bug_description"
-        label: "Describe the bug (plain language — the skill will refine it for issues.md)"
+        label: "Describe the bug (plain language — the skill refines the wording, picks the category, and files it without asking)"
         type: "text"
         required: true
       - id: "category"
-        label: "Issue category in platform/issues.md"
+        label: "Issue category override (rarely needed — auto-derived from description)"
         type: "select"
         options:
           - "B"
           - "I"
           - "UI"
         required: false
-        default: "B"
-        hint: "B = Bugs (default) | I = Issues (general functionality / quality) | UI = UI/UX issues"
+        hint: "Only set this to override the auto-classification (B=Bug, I=Issue, UI=cosmetic). Leave empty in the typical case."
       - id: "branch_slug"
-        label: "Optional branch slug (auto-derived from bug_description if empty)"
+        label: "Branch slug override (auto-derived from description)"
         type: "text"
         required: false
+        hint: "Only set if you want a specific branch name. Leave empty in the typical case."
       - id: "complexity"
         label: "Complexity hint"
         type: "select"
@@ -41,7 +41,7 @@ metadata:
           - "standard"
         required: false
         default: "standard"
-        hint: "small = obvious, contained fix | standard = needs investigation + review cycle"
+        hint: "small = obvious, contained fix (skips the review-subagent step) | standard = needs review cycle"
     files: []
 ---
 
@@ -57,15 +57,16 @@ cleans up, and opens a PR on `skaile-ai/skaile-platform`.
 
 | Phase | What Happens |
 |-------|--------------|
-| 0 | Read inputs, resolve current git user, choose ID + branch name |
-| 1 | Create the worktree + branch (outside the platform/ tree to avoid polluting it) |
-| 2 | Register the bug in `platform/issues.md` (status=testing, owner=git user) and commit that change to main first |
+| 0 | Read inputs, resolve current git user, auto-classify category, allocate next ID |
+| 1 | Pre-flight platform main, derive branch name |
+| 2 | Create the worktree + branch (outside `platform/` tree, branched from `origin/main`) |
+| 2b | Stage the bug row in `issues.md` **on the branch** (not on main) |
 | 3 | Investigate: load relevant files, identify root cause |
 | 4 | Write an **uncommitted** plan markdown into the worktree |
 | 5 | Dispatch a fresh subagent to implement the plan (gets only the plan + context — no parent history) |
 | 6 | Dispatch a fresh subagent to review the diff |
 | 7 | Triage review findings, apply valid fixes inline |
-| 8 | Delete the plan file, commit, push the branch |
+| 8 | Delete the plan file; commit (fix + issues.md row together); push the branch |
 | 9 | Fetch latest `origin/main`, merge it into the branch, resolve conflicts, re-push |
 | 10 | Remove the worktree |
 | 11 | Open a PR against `main` and report the link |
@@ -82,6 +83,37 @@ cleans up, and opens a PR on `skaile-ai/skaile-platform`.
 - Bugs outside the `platform/` submodule (e.g., `agent-framework/`, `forge/`) — adapt manually or extend this skill
 - Anything that needs design discussion before code — file a proposal first
 - Something already on a branch — this skill expects a clean start
+
+---
+
+## Operating Principle — Autonomy by Default
+
+**Run end-to-end without asking the user.** The user already gave you the bug report;
+they expect a PR link back, not a flurry of checkpoint prompts. Decisions you can make
+on your own based on the evidence — classification (B / I / UI), description wording,
+branch name, plan structure, which review findings to apply, conflict resolutions where
+one side is a strict superset — you make. The user does not need to approve those.
+
+Only stop and ask when continuing would require a judgment call the evidence cannot
+settle on its own. The complete list of legitimate stop-and-ask gates is:
+
+1. **`git config user.name` is unset** — the Owner column would be empty.
+2. **Working tree is dirty** — the issues.md commit on main would mix in unrelated work.
+3. **Investigation inconclusive** — root cause cannot be located; report findings and stop.
+4. **A review finding is "apply-large"** — spawning a second implementation subagent is
+   a meaningful escalation; confirm the scope first.
+5. **A merge conflict on source code is genuinely mutually-exclusive** — the fix and
+   main's incoming change cannot both stand; the user must pick.
+6. **Push fails for a non-trivial reason** — e.g., branch was rewritten remotely.
+
+Everything else — refining the bug description, picking the category, choosing the
+branch slug, writing the plan, dispatching the implementer, applying nit-level review
+findings, deferring out-of-scope findings, merging main when one side is a strict
+subset, opening the PR — you do silently. Print short progress notes (`> "Filing as
+B-54 (auto-classified as Bug)"`, `> "Plan written, dispatching implementer..."`) but
+do NOT solicit confirmation.
+
+The user can always interrupt; they will if they want to redirect.
 
 ---
 
@@ -103,9 +135,10 @@ WRITES (in the worktree only, except step 2 which commits to platform main)
   PR on skaile-ai/skaile-platform                 — opened at the end
 
 MUST  refine the user's bug description before filing it — 1-3 sentences, technical but specific, no marketing fluff
+MUST  auto-classify the category (B / I / UI) from the description without asking the user; the `category` user input only overrides the auto-classification
 MUST  resolve the next free ID in the chosen category by scanning the existing table (highest +1)
 MUST  set Status=testing and Owner=`git config user.name` in the new row
-MUST  commit the issues.md row to platform main FIRST, then branch from updated main — keeps the row alive even if the fix is later abandoned
+MUST  write the issues.md row INSIDE the worktree, on the feature branch — never commit it to platform main directly; the row reaches main only when the PR is merged
 MUST  create the worktree outside platform/ (e.g., /tmp/platform-<id>-worktree) so the parent platform/ stays clean
 MUST  write the plan file in the worktree and treat it as ephemeral — never commit it, delete it before the final commit
 MUST  dispatch implementation as a fresh subagent with a self-contained prompt (MVC: paste the plan + relevant file paths + acceptance criteria; do NOT pass parent conversation)
@@ -119,7 +152,9 @@ MUST  re-push the branch after the main-sync merge completes
 MUST  remove the worktree only after both the initial push AND the post-sync push succeed — never before
 MUST  use `gh pr create --base main --head <branch>` from the platform repo to open the PR
 MUST  report back to the user with: branch name, PR URL, 1-2 line summary of what changed, any deferred review findings
-NEVER  modify the main platform/ checkout while the worktree exists (except the initial issues.md commit on main)
+NEVER  modify the main platform/ checkout while the worktree exists
+NEVER  commit the issues.md row to platform main directly — it lives on the branch and travels via the PR
+NEVER  ask the user to confirm the refined description, the category, the branch name, the plan, or the triage table — those are decisions you make; the user gave you the bug report and expects a PR back
 NEVER  commit the plan file
 NEVER  pass the parent conversation transcript to the implementation or review subagent — both must be fresh and self-contained
 NEVER  open a PR before the branch is pushed
@@ -133,21 +168,30 @@ EMIT [bug-fix] started description="<short>"
 
 STEP 0: Resolve inputs
   - Read bug_description (required)
-  - Read category (default "B")
   - Read complexity (default "standard")
   - $ git config user.name → owner_name
   IF owner_name is empty
     STOP: "git config user.name is not set. Set it before running this skill."
 
-  - Map category → section label in platform/issues.md:
-    | category | section heading           | ID prefix |
-    |----------|---------------------------|-----------|
-    | B        | ## Bugs                   | B-        |
-    | I        | ## Issues                 | I-        |
-    | UI       | ## UI / UX Issues *(or similar — match the actual heading)* | UI- |
+  Auto-classify the category from the bug_description (do NOT ask the user):
 
-  IF category heading does not exist in platform/issues.md
-    STOP: "issues.md has no section matching category=<category>. Pick another category or add the section manually first."
+  | Signal in description | category | section heading | ID prefix |
+  |-----------------------|----------|-----------------|-----------|
+  | Broken feature, error message, data loss, security, wrong result, crash, regression in functionality | B | `## Bugs` | B- |
+  | Missing functionality, behavior that should change but isn't strictly broken, design-level "should also" | I | `## Issues` | I- |
+  | Purely visual: layout, spacing, color, font, alignment, tooltip wording, hover state, icon | UI | `## UI / UX Issues` (match the actual heading in the file) | UI- |
+
+  Tie-breakers:
+  - Behavior breakage trumps visual concern → B
+  - "Should also be able to X" with no current breakage → I
+  - Cosmetic-only with no functional impact → UI
+
+  IF the `category` user input is provided, it OVERRIDES the auto-classification.
+  Otherwise use the auto-classification silently and print one line:
+    > "Auto-classified as <category> (<one-word reason>)."
+
+  IF the chosen category's section heading does not exist in platform/issues.md
+    STOP: "issues.md has no section matching category=<category>. The section needs to be added manually first."
 
 # ── Phase 1: Refine Description + Allocate ID ─────────────────────
 
@@ -164,7 +208,10 @@ STEP 1: Refine the description
   - "Long inline-code URLs in agent chat messages don't wrap when they contain no `-`, causing horizontal scroll on narrow chat panes."
   - "Project Settings tabs lose data when the URL uses the project slug instead of the UUID — tabs query by id only. **open question for Peter**: should slug-form URLs be canonical?"
 
-  Show the refined wording to the user for one quick confirmation before writing it.
+  **Do NOT ask the user to approve the wording.** Write it directly. The user will see
+  it in the resulting issues.md row and in the PR body — minor wording tweaks can be
+  made later by editing the row. Only stop if the user's input is too vague to refine
+  (in which case ask one targeted clarification question, not a yes/no on a proposal).
 
 STEP 2: Pick the next free ID
   Scan platform/issues.md for all rows matching ID prefix `<category>-`.
@@ -173,56 +220,24 @@ STEP 2: Pick the next free ID
 
 EMIT [bug-fix] id_allocated id=<full_id> owner=<owner_name>
 
-# ── Phase 2: Commit issues.md Row to Platform Main ────────────────
+# ── Phase 2: Pre-flight + Branch + Worktree ───────────────────────
 
-STEP 3: Add the row in platform main (NOT in a branch)
-  This commit goes to platform's main directly so the row exists in the
-  issue tracker even if the fix is later abandoned. Standard pattern from
-  recent bug cycles (B-52, B-48, UI-29).
+STEP 3: Pre-flight against platform main
+  Working dir: <skaile-dev-root>/platform
 
-  Working dir: /home/kolja/skaile/skaile-dev/platform (or wherever the
-  user is — verify the platform submodule is on `main` and clean).
+  $ cd <skaile-dev-root>/platform
+  $ git fetch origin
+  $ git status --short
+  IF dirty:
+    STOP: "platform/ has uncommitted changes. Stash or commit them before running bug-fix."
+    (Legitimate stop-and-ask gate #2 — the dirty state would either travel into
+    the worktree or block the worktree creation; either way the user must decide.)
 
-  PRE-FLIGHT:
-    $ cd <skaile-dev-root>/platform
-    $ git fetch origin
-    $ git status --short
-    IF dirty:
-      STOP: "platform/ has uncommitted changes. Stash or commit them before running bug-fix."
-    $ git rev-parse --abbrev-ref HEAD
-    IF branch ≠ main:
-      ASK:
-        > "platform/ is on '<branch>', not main. Switch to main? (y/n)"
-      IF yes: $ git checkout main && $ git pull --rebase origin main
-      IF no:  STOP
-
-  EDIT platform/issues.md:
-    - Append a new row to the section matching `category` (match the
-      pipe-padded column widths in the existing table — look at the
-      surrounding rows for column widths and pad accordingly)
-    - Row format: `| <full_id> | <refined_description> | testing | <owner_name> |`
-
-  COMMIT to platform main:
-    $ git add issues.md
-    $ git commit -m "$(cat <<EOF
-docs(issues): add <full_id> — <short summary, ≤60 chars>
-
-<one-line context: where the bug shows up + assigned to <owner_name>>
-EOF
-)"
-    $ git push origin main
-    IF push rejected:
-      $ git pull --rebase origin main
-      $ git push origin main
-      IF still rejected:
-        STOP: "Could not push issues.md row to main — resolve and re-run."
-
-EMIT [bug-fix] issue_filed id=<full_id>
-
-# ── Phase 3: Create Worktree + Branch ─────────────────────────────
+  We do NOT need to checkout main here — the worktree below branches off
+  origin/main regardless of which branch the parent checkout currently points at.
 
 STEP 4: Branch name
-  Derive slug:
+  Derive silently:
     IF branch_slug provided:
       slug = branch_slug
     ELSE:
@@ -242,6 +257,36 @@ STEP 5: Worktree
   All subsequent file operations until Phase 9 happen INSIDE <worktree_path>.
 
 EMIT [bug-fix] worktree_ready path=<worktree_path> branch=<branch_name>
+
+# ── Phase 3b: File the Bug Row on the Branch ──────────────────────
+
+STEP 5b: Write the issues.md row inside the worktree
+  The row lands on the feature branch and travels to main when the PR is
+  merged. It does NOT go to platform main directly — keeps main free of
+  rows for fixes that never ship.
+
+  $ cd <worktree_path>
+
+  EDIT issues.md:
+    - Locate the section heading matching the auto-classified category
+      (`## Bugs` / `## Issues` / `## UI / UX Issues`).
+    - Append a new row at the end of that section's table.
+    - Match the surrounding rows' column padding (look at the longest
+      existing row in the section and align to the same pipe positions).
+    - Row format: `| <full_id> | <refined_description> | testing | <owner_name> |`
+
+  STAGE the change but do NOT commit yet — the row lands in the same
+  commit as the actual fix at the end (Phase 9), keeping the branch
+  to a single commit when the diff is small. (If the fix grows, the
+  row can be split into its own commit during Phase 9 — but never two
+  commits for the same row+fix.)
+
+  $ git add issues.md
+
+  Print a one-line status:
+    > "Filed <full_id> as <category> (testing / <owner_name>) on branch <branch_name>."
+
+EMIT [bug-fix] issue_filed id=<full_id> location=branch
 
 # ── Phase 4: Investigate ─────────────────────────────────────────
 
@@ -307,9 +352,8 @@ STEP 7: Write the plan
 
   DO NOT commit this file. It lives only in the worktree's working dir.
 
-  CHECKPOINT plan_ready
-    > "Plan written to <plan_path>. Dispatching implementation subagent.
-    >  (Plan file is intentionally uncommitted and will be deleted before the final commit.)"
+  Print a one-line status (NOT a prompt — do not wait for input):
+    > "Plan written. Dispatching implementer."
 
 # ── Phase 6: Implementation Dispatch (fresh subagent) ─────────────
 
@@ -353,7 +397,8 @@ STEP 8: Dispatch implementation
     orchestrator will commit after review.
   - Do NOT push the branch.
   - Do NOT open a PR.
-  - Do NOT touch issues.md — it was already updated on main.
+  - Do NOT touch issues.md — its row is already staged in the worktree;
+    the orchestrator will commit it together with your fix at the end.
 
   ## Output
   When done, report:
@@ -436,24 +481,30 @@ EMIT [bug-fix] review_done important=<N> nits=<N>
 # ── Phase 8: Triage + Apply ───────────────────────────────────────
 
 STEP 10: Triage review findings
-  For each finding in review_findings, decide:
+  For each finding in review_findings, decide silently:
 
   | Verdict | When | Action |
   |---------|------|--------|
   | apply   | Important + the finding is real + fix is ≤ 20 LOC | Implement inline in this orchestrator |
-  | apply-large | Important + fix needs ≥ 20 LOC or new abstraction | Dispatch a second implementation subagent with a focused sub-prompt |
+  | apply-large | Important + fix needs ≥ 20 LOC or new abstraction | ASK user before dispatching a second implementation subagent (legitimate stop-and-ask gate #4) |
   | defer   | Nit OR not blocking OR out of scope for this PR | Note it in the PR description under "Deferred follow-ups" |
   | reject  | Disagreement with the reviewer | Note it in the PR description with one-line reasoning |
 
-  Present the triage table to the user before applying:
-    > "Review found <N> findings. Triage:
-    >  - apply: <list>
-    >  - apply-large: <list>
-    >  - defer: <list> (will go in PR body)
-    >  - reject: <list> (will go in PR body with reasoning)
-    >  Proceed? (yes / change)"
+  Default behavior: do NOT ask the user. Apply the `apply` items immediately; record
+  `defer` and `reject` items for the PR body; proceed.
 
-  IF user approves: apply the apply + apply-large fixes inside the worktree.
+  ASK the user only when:
+    (a) At least one finding triages as `apply-large` (would spawn another subagent), OR
+    (b) You are rejecting an `important` severity finding (judgment call — record the
+        reasoning in the PR but flag it to the user first)
+
+  IF asking is warranted, present the relevant subset only (not the full table):
+    > "Review flagged <N>:
+    >  apply-large: <finding summary> — proceed with another implementation pass? (yes/skip)
+    >  rejecting important: <finding summary> — reason: <one line>. Override and apply instead? (no/yes)"
+
+  Otherwise print a one-line status:
+    > "Triaged: <N applied> / <N deferred> / <N rejected>. Continuing."
 
 EMIT [bug-fix] triage_done applied=<N> deferred=<N> rejected=<N>
 
@@ -477,12 +528,18 @@ STEP 11: Drop the plan, lint, commit, push
     IF any plan file appears in status:
       STOP: "Plan file still tracked — abort and investigate."
 
+    The staged set now contains BOTH the fix changes AND the issues.md row
+    (staged earlier in STEP 5b). They go into one commit so the row and
+    the fix arrive on main together via the PR.
+
     Commit message (platform repo conventional-commits format, no
     skaile-dev agent block since this is a submodule):
     ```
     fix(<scope>): <title — what the fix does> (<full_id>)
 
     <1-3 sentence explanation: root cause + fix approach + acceptance>
+
+    Adds <full_id> row to issues.md (status: testing, owner: <owner_name>).
     ```
 
     $ git commit -m "<message>"
@@ -528,7 +585,7 @@ STEP 11b: Fetch main and merge into the branch
 
     | File pattern | Default resolution |
     |--------------|-------------------|
-    | `issues.md` | If HEAD's diff is a strict subset/equal of origin/main's (i.e., main has wider column padding or extra rows that include HEAD's row), prefer `git checkout --theirs issues.md`. If HEAD has the only row for `<full_id>`, blend: keep HEAD's row + take main's column format. |
+    | `issues.md` | Blend automatically: keep HEAD's `<full_id>` row, take main's column padding + any other rows main added or status-bumped. The HEAD row is unique to this branch and must survive; main's other changes are unrelated and must also survive. Use `--theirs` only if main contains a row for the SAME `<full_id>` (concurrent fix — escalate to user). |
     | Generated PostXL files (in `postxl-lock.json`) | `git checkout --theirs` — let main's regen win; rerun `bun run generate` if needed |
     | Lockfiles (`bun.lock`, `package-lock.json`) | `git checkout --theirs` then `bun install` to re-resolve |
     | Source code touched by both this fix and main | **Blend manually** — keep HEAD's fix logic + integrate main's new behavior. Never blindly take one side. |
@@ -705,12 +762,12 @@ PROCEDURE triage_finding(finding)
 
 CHECKLIST
   - [ ] git config user.name resolved
+  - [ ] Category auto-classified from description (or user override applied)
   - [ ] Category section exists in platform/issues.md
-  - [ ] Description refined (1-3 sentences, ≤280 chars)
+  - [ ] Description refined (1-3 sentences, ≤280 chars) WITHOUT asking the user
   - [ ] Next free ID allocated
-  - [ ] Row committed to platform main BEFORE branching
-  - [ ] Worktree created outside platform/ tree
-  - [ ] Worktree branch is fresh off origin/main (post-issues.md commit)
+  - [ ] Worktree created outside platform/ tree, branched off origin/main
+  - [ ] Issues.md row staged inside the worktree (on the branch, not on main)
   - [ ] Plan written inside worktree, never staged
   - [ ] Implementation dispatched with self-contained MVC prompt
   - [ ] Review dispatched (or explicitly skipped for trivial fixes)
@@ -731,7 +788,8 @@ CHECKLIST
 
 | Mistake | What to do instead |
 |---------|-------------------|
-| Filing the bug in issues.md AFTER fixing it | File first, then branch — keeps the row alive if the fix is abandoned |
+| Committing the issues.md row to platform main | Stage the row inside the worktree (on the branch); it arrives on main only when the PR merges. Keeps main clean of rows for fixes that never ship. |
+| Asking the user to confirm the refined description / category / branch name / plan | Decide silently. Print one-line status updates. Only ask on the 6 legitimate stop-and-ask gates listed in "Operating Principle". |
 | Creating the worktree inside platform/ | Use `/tmp/platform-<id>-worktree` so the parent checkout stays clean |
 | Committing the plan file | Delete it in STEP 11 before `git add -A` |
 | Passing parent conversation to the implementer | Build a self-contained MVC prompt — the implementer must never read this chat |
