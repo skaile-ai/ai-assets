@@ -66,8 +66,9 @@ cleans up, and opens a PR on `skaile-ai/skaile-platform`.
 | 6 | Dispatch a fresh subagent to review the diff |
 | 7 | Triage review findings, apply valid fixes inline |
 | 8 | Delete the plan file, commit, push the branch |
-| 9 | Remove the worktree |
-| 10 | Open a PR against `main` and report the link |
+| 9 | Fetch latest `origin/main`, merge it into the branch, resolve conflicts, re-push |
+| 10 | Remove the worktree |
+| 11 | Open a PR against `main` and report the link |
 
 ## When to Use
 
@@ -112,7 +113,10 @@ MUST  dispatch review as a fresh subagent that only sees the diff + review focus
 MUST  triage review findings explicitly: each finding gets a verdict (apply / defer / reject) with a one-line reason
 MUST  apply valid findings inline in the orchestrator (no second implementation dispatch unless the finding is large enough to warrant a sub-plan)
 MUST  push the branch to origin before opening the PR (worktree-only commits are local-only)
-MUST  remove the worktree only after the push succeeds — never before
+MUST  fetch origin/main and merge it into the branch (inside the worktree) BEFORE removing the worktree — keeps the PR diff clean and resolves any conflicts while the full local context is available
+MUST  resolve merge conflicts that arise from the main-sync merge: prefer policy-based resolution (issues.md, generated files, lockfiles) but blend manually for source-code conflicts in the fix's blast radius; ASK the user only on genuinely mutually-exclusive intents
+MUST  re-push the branch after the main-sync merge completes
+MUST  remove the worktree only after both the initial push AND the post-sync push succeed — never before
 MUST  use `gh pr create --base main --head <branch>` from the platform repo to open the PR
 MUST  report back to the user with: branch name, PR URL, 1-2 line summary of what changed, any deferred review findings
 NEVER  modify the main platform/ checkout while the worktree exists (except the initial issues.md commit on main)
@@ -490,6 +494,101 @@ STEP 11: Drop the plan, lint, commit, push
 
 EMIT [bug-fix] pushed branch=<branch_name>
 
+# ── Phase 9b: Sync Branch with Main ───────────────────────────────
+
+STEP 11b: Fetch main and merge into the branch
+  Origin/main may have advanced since the worktree was created (other PRs
+  landed during investigation, implementation, or review). Merging main
+  in NOW — inside the worktree, while we still have the full local
+  context — keeps the eventual PR diff clean and avoids surprising the
+  reviewer with a non-fast-forward state. Conflicts are also easier to
+  resolve here than in the GitHub UI.
+
+  $ cd <worktree_path>
+
+  Fetch latest main:
+    $ git fetch origin main
+
+  Check if anything moved:
+    $ git log HEAD..origin/main --oneline → incoming_commits
+    IF incoming_commits is empty:
+      > "Branch is already up-to-date with origin/main. Skipping merge."
+      Continue to STEP 12.
+
+  Merge:
+    $ git merge origin/main --no-edit
+
+  IF merge succeeds without conflict:
+    Continue to "After-merge verification" below.
+
+  IF merge has conflicts:
+    $ git status --short | grep '^UU' → conflicted_files
+
+    Conflict resolution policy (per file):
+
+    | File pattern | Default resolution |
+    |--------------|-------------------|
+    | `issues.md` | If HEAD's diff is a strict subset/equal of origin/main's (i.e., main has wider column padding or extra rows that include HEAD's row), prefer `git checkout --theirs issues.md`. If HEAD has the only row for `<full_id>`, blend: keep HEAD's row + take main's column format. |
+    | Generated PostXL files (in `postxl-lock.json`) | `git checkout --theirs` — let main's regen win; rerun `bun run generate` if needed |
+    | Lockfiles (`bun.lock`, `package-lock.json`) | `git checkout --theirs` then `bun install` to re-resolve |
+    | Source code touched by both this fix and main | **Blend manually** — keep HEAD's fix logic + integrate main's new behavior. Never blindly take one side. |
+
+    FOR EACH conflicted file:
+      Read both sides of the conflict markers.
+      Decide: theirs / ours / blend.
+
+      IF the file is on the policy table above AND policy is unambiguous:
+        Apply the policy decision directly.
+        Note the resolution: "<file>: <theirs|ours|blend> — <one-line reason>"
+
+      IF the conflict is in code the fix actually touches (source files in the
+         fix's blast radius) OR the policy is ambiguous:
+         The orchestrator MUST resolve manually:
+           - Read both sides carefully
+           - Identify what HEAD's diff was trying to achieve (the bug fix)
+           - Identify what main's incoming change is trying to achieve
+           - Produce a blend that preserves BOTH intents
+           - If genuinely conflicting (the fix and main's change are
+             mutually exclusive), ASK the user:
+             > "<file>: HEAD does <X>, main does <Y>. They conflict.
+             >  Choose: 1=keep HEAD, 2=take main, 3=I'll explain a blend."
+
+      Verify no markers remain:
+         $ grep -nE '^(<<<<<<<|=======|>>>>>>>)' <file>; echo "(empty = clean)"
+         IF markers remain → STOP, fix and re-check.
+
+      $ git add <file>
+
+    Run lint on resolved files in the fix's blast radius:
+      IF backend/ files changed in the merge: $ cd backend && bun run lint
+      IF frontend/ files changed in the merge: $ cd frontend && bun run lint
+      IF a formatter rewrites a resolved file: $ git add <file>
+
+    Complete the merge:
+      $ git commit --no-edit
+      IF pre-commit hook fails on formatting (Prettier check):
+        $ cd <pkg> && bun prettier --write <files-the-hook-complained-about>
+        $ git add <those files>
+        $ git commit --no-edit
+
+  After-merge verification:
+    $ grep -rnE '^(<<<<<<<|=======|>>>>>>>)' --include='*.ts' --include='*.tsx' --include='*.md' .
+    IF any output → STOP: "Conflict markers still present — abort and investigate."
+
+  Push the merge:
+    $ git push origin <branch_name>
+    IF push fails (e.g., non-fast-forward because main moved AGAIN during merge resolution):
+      $ git fetch origin main
+      Repeat the merge loop above against the new origin/main.
+      $ git push origin <branch_name>
+    IF push fails for any other reason:
+      STOP: "Push failed after sync — worktree preserved at <worktree_path>. Investigate."
+
+  Report a one-line summary of what landed:
+    > "Synced with main: <N> incoming commits merged. Conflicts: <list of files + resolution>. Pushed."
+
+EMIT [bug-fix] synced_with_main incoming=<N> conflicts=<N>
+
 # ── Phase 10: Remove Worktree ─────────────────────────────────────
 
 STEP 12: Remove worktree
@@ -618,8 +717,11 @@ CHECKLIST
   - [ ] Triage table shown to user; user approved
   - [ ] Plan file deleted before final commit
   - [ ] Lint passed in every affected platform package
-  - [ ] Branch pushed
-  - [ ] Worktree removed only after push confirmed
+  - [ ] Branch pushed (initial push, before main-sync)
+  - [ ] origin/main fetched and merged into the branch
+  - [ ] Merge conflicts (if any) resolved with blend-not-overwrite for source code
+  - [ ] Branch re-pushed after main-sync merge
+  - [ ] Worktree removed only after both pushes confirmed
   - [ ] PR opened with link, deferred findings noted
   - [ ] Final report printed
 
@@ -635,6 +737,8 @@ CHECKLIST
 | Passing parent conversation to the implementer | Build a self-contained MVC prompt — the implementer must never read this chat |
 | Skipping the review dispatch on a non-trivial fix | Only skip review when `complexity=small` AND ≤ 2 files AND ≤ 30 LOC |
 | Removing the worktree before pushing | Worktrees contain LOCAL commits — push first, remove second |
+| Skipping the main-sync merge before opening the PR | Main may have advanced during investigation/implementation; merge it now so the PR diff is clean and conflicts are resolved while local context is still available — not later in the GitHub UI |
+| Resolving merge conflicts by blindly taking one side on source files | For source code in the fix's blast radius, both sides usually carry intent — blend them. Policy-based `--theirs` is only for issues.md, generated files, and lockfiles. |
 | Running Biome inside the worktree | Platform uses Prettier + ESLint. `bun run lint` inside `backend/` or `frontend/` |
 | Verbatim-copying the user's bug wording into issues.md | Refine it (1-3 sentences) — but preserve user-stated open questions verbatim, in bold |
 | Opening the PR before the branch is pushed | `gh pr create` will fail; push first |
