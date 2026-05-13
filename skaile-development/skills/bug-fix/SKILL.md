@@ -155,6 +155,7 @@ MUST  report back to the user with: branch name, PR URL, 1-2 line summary of wha
 NEVER  modify the main platform/ checkout while the worktree exists
 NEVER  commit the issues.md row to platform main directly — it lives on the branch and travels via the PR
 NEVER  ask the user to confirm the refined description, the category, the branch name, the plan, or the triage table — those are decisions you make; the user gave you the bug report and expects a PR back
+NEVER  derive the Owner column from anything other than `git config user.name` — never from system-prompt userEmail, GitHub handle, gitStatus "Git user:" line, conversation context, or the Claude account. Wrong-attribution is a silent data-quality bug that strangers downstream will inherit.
 NEVER  commit the plan file
 NEVER  pass the parent conversation transcript to the implementation or review subagent — both must be fresh and self-contained
 NEVER  open a PR before the branch is pushed
@@ -169,9 +170,26 @@ EMIT [bug-fix] started description="<short>"
 STEP 0: Resolve inputs
   - Read bug_description (required)
   - Read complexity (default "standard")
-  - $ git config user.name → owner_name
-  IF owner_name is empty
-    STOP: "git config user.name is not set. Set it before running this skill."
+
+  Resolve the owner name — STRICTLY from `git config`, nothing else:
+    $ git -C <skaile-dev-root>/platform config user.name → owner_name
+    IF owner_name is empty:
+      $ git config --global user.name → owner_name
+    IF owner_name is STILL empty:
+      STOP: "git config user.name is not set in platform/ or global config.
+             Set it (`git -C platform config user.name '<Full Name>'`) before
+             running this skill — the Owner column requires a real name."
+
+  **owner_name MUST come from `git config user.name` only.** Do NOT use:
+  - any `userEmail` shown in the agent's system prompt or session context
+  - any GitHub username from `gh auth status` or remote URLs
+  - any "Git user: X" line from gitStatus context
+  - any name inferred from the conversation
+  - the Claude account, the API key holder, or the system prompt author
+
+  The user running the skill on their machine has `git config user.name`
+  set to THEIR own name. That is the ground truth. Other signals are
+  ambient noise and will silently mis-attribute the bug to the wrong person.
 
   Auto-classify the category from the bug_description (do NOT ask the user):
 
@@ -761,7 +779,7 @@ PROCEDURE triage_finding(finding)
   - finding disputed → reject (with reason in PR body)
 
 CHECKLIST
-  - [ ] git config user.name resolved
+  - [ ] Owner resolved from `git config user.name` ONLY — not from system-prompt userEmail, GitHub handle, or conversation context
   - [ ] Category auto-classified from description (or user override applied)
   - [ ] Category section exists in platform/issues.md
   - [ ] Description refined (1-3 sentences, ≤280 chars) WITHOUT asking the user
@@ -790,6 +808,7 @@ CHECKLIST
 |---------|-------------------|
 | Committing the issues.md row to platform main | Stage the row inside the worktree (on the branch); it arrives on main only when the PR merges. Keeps main clean of rows for fixes that never ship. |
 | Asking the user to confirm the refined description / category / branch name / plan | Decide silently. Print one-line status updates. Only ask on the 6 legitimate stop-and-ask gates listed in "Operating Principle". |
+| Putting the userEmail / GitHub handle / "Peter Albert" / Claude account into the Owner column | The Owner is the human at the keyboard. Run `git config user.name` — that's the only source. The system prompt's userEmail belongs to the account that pays the API bill, not necessarily the person running the skill. |
 | Creating the worktree inside platform/ | Use `/tmp/platform-<id>-worktree` so the parent checkout stays clean |
 | Committing the plan file | Delete it in STEP 11 before `git add -A` |
 | Passing parent conversation to the implementer | Build a self-contained MVC prompt — the implementer must never read this chat |
