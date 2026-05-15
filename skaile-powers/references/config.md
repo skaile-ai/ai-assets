@@ -6,8 +6,6 @@
 
 Forked from: **obra/superpowers v5.0.6**
 
-Manual sync process: when upstream ships a worthwhile update, diff the affected SKILL.md against the new upstream version and cherry-pick changes that don't conflict with skaile adaptations. Then update the version above.
-
 ## Artifact Paths
 
 | Artifact | Path |
