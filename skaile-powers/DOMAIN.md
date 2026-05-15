@@ -46,10 +46,10 @@ Every meaningful development session follows this arc. Start at `using-skaile-po
             │
             ▼
   ┌─────────────────────────────────────────────────────────────────┐
-  │  Execution mode selection (see chart below)                     │
+  │  subagent-driven-development                                    │
+  │  (fresh subagent per task; each task uses TDD)                  │
+  │  — or dispatching-parallel-agents for true parallel sessions —  │
   └─────────────────┬───────────────────────────────────────────────┘
-                    │
-                    │  (each task follows test-driven-development)
                     │
                     ▼
   ┌──────────────────────────────────────────┐
@@ -76,7 +76,7 @@ Every meaningful development session follows this arc. Start at `using-skaile-po
 
 ## Choosing an Execution Mode
 
-Once you have a written plan, choose how to execute it:
+Once you have a written plan, always execute it with subagents — never inline in the current session.
 
 ```
   Have a written plan?
@@ -85,29 +85,19 @@ Once you have a written plan, choose how to execute it:
          │
         yes
          │
-    Are the tasks mostly independent of each other?
+    Do the tasks need to run in parallel across sessions?
          │
-    no ──┴──► executing-plans
-    (tightly     (inline execution with review checkpoints)
-    coupled)
-         │
-        yes
-         │
-    Stay in this session?
-         │
-    yes ─┴──► subagent-driven-development
-    │         (fresh subagent per task + spec + quality review)
+    yes ─┴──► dispatching-parallel-agents
+    │         (spawn independent parallel sessions)
     │
-    no ──────► dispatching-parallel-agents
-               (run tasks in parallel across sessions)
+    no ──────► subagent-driven-development
+               (fresh subagent per task, same session,
+                spec compliance + code quality review per task)
 ```
 
-**Rule of thumb:**
-- Most feature work → `subagent-driven-development` (best quality gates)
-- Tightly coupled multi-step flows → `executing-plans`
-- Independent bulk tasks → `dispatching-parallel-agents`
+**Default:** always `subagent-driven-development`. Use `dispatching-parallel-agents` only when tasks are genuinely independent and you want true parallelism across separate sessions.
 
-Each individual task inside any execution mode should follow `test-driven-development`.
+Each task inside either mode follows `test-driven-development`.
 
 ---
 
@@ -213,8 +203,7 @@ using-skaile-powers → brainstorming (design the skill)
 
 ### Execute an existing plan
 ```
-using-skaile-powers → [pick execution mode]
-  → subagent-driven-development  or  executing-plans
+using-skaile-powers → subagent-driven-development
   → verification-before-completion
   → finishing-a-development-branch
 ```
@@ -231,9 +220,9 @@ using-skaile-powers → [pick execution mode]
 | `writing-skills` | planning | When creating or editing skills in ai-assets |
 | `systematic-debugging` | execution | On any bug, test failure, or unexpected behavior |
 | `test-driven-development` | execution | When implementing features or fixing bugs |
-| `executing-plans` | execution | Inline execution of a written plan with review checkpoints |
-| `dispatching-parallel-agents` | execution | 2+ independent tasks that can run in parallel sessions |
-| `subagent-driven-development` | execution | Executing a plan with fresh subagents per task + two-stage review |
+| `subagent-driven-development` | execution | **Default execution mode** — fresh subagent per task + spec compliance + code quality review |
+| `dispatching-parallel-agents` | execution | Tasks that need to run in parallel across independent sessions |
+| `executing-plans` | execution | Available but not preferred — use subagent-driven-development instead |
 | `using-git-worktrees` | execution | Before starting isolated feature work (submodule-aware) |
 | `requesting-code-review` | review | After completing tasks or features |
 | `receiving-code-review` | review | When responding to code review feedback |
@@ -253,9 +242,9 @@ using-skaile-powers → [pick execution mode]
 | `skills/planning/writing-skills/` | `writing-skills` | New skill authoring (skaile SKILL.md frontmatter) |
 | `skills/execution/systematic-debugging/` | `systematic-debugging` | Root-cause-first debugging |
 | `skills/execution/test-driven-development/` | `test-driven-development` | TDD with Vitest + Playwright (no Jest) |
-| `skills/execution/executing-plans/` | `executing-plans` | Inline plan execution with checkpoints |
-| `skills/execution/dispatching-parallel-agents/` | `dispatching-parallel-agents` | Parallel agent dispatch |
-| `skills/execution/subagent-driven-development/` | `subagent-driven-development` | Subagent-per-task execution with spec + quality review |
+| `skills/execution/subagent-driven-development/` | `subagent-driven-development` | **Default execution** — fresh subagent per task with spec + quality review |
+| `skills/execution/dispatching-parallel-agents/` | `dispatching-parallel-agents` | Parallel agent dispatch across independent sessions |
+| `skills/execution/executing-plans/` | `executing-plans` | Inline execution (available; prefer subagent-driven-development) |
 | `skills/execution/using-git-worktrees/` | `using-git-worktrees` | Isolated worktree setup (submodule-aware) |
 | `skills/review/requesting-code-review/` | `requesting-code-review` | Code review dispatch (escalates to skaile `audit`) |
 | `skills/review/receiving-code-review/` | `receiving-code-review` | Code review response |
