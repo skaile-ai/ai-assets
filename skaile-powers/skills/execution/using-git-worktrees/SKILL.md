@@ -45,7 +45,7 @@ If no directory exists and no CLAUDE.md preference:
 No worktree directory found. Where should I create worktrees?
 
 1. .worktrees/ (project-local, hidden)
-2. ~/.config/superpowers/worktrees/<project-name>/ (global location)
+2. ~/.config/skaile-powers/worktrees/<project-name>/ (global location)
 
 Which would you prefer?
 ```
@@ -61,16 +61,14 @@ Which would you prefer?
 git check-ignore -q .worktrees 2>/dev/null || git check-ignore -q worktrees 2>/dev/null
 ```
 
-**If NOT ignored:**
-
-Per Jesse's rule "Fix broken things immediately":
+**If NOT ignored:** fix it immediately —
 1. Add appropriate line to .gitignore
 2. Commit the change
 3. Proceed with worktree creation
 
 **Why critical:** Prevents accidentally committing worktree contents to repository.
 
-### For Global Directory (~/.config/superpowers/worktrees)
+### For Global Directory (~/.config/skaile-powers/worktrees)
 
 No .gitignore verification needed - outside project entirely.
 
@@ -90,8 +88,8 @@ case $LOCATION in
   .worktrees|worktrees)
     path="$LOCATION/$BRANCH_NAME"
     ;;
-  ~/.config/superpowers/worktrees/*)
-    path="~/.config/superpowers/worktrees/$project/$BRANCH_NAME"
+  ~/.config/skaile-powers/worktrees/*)
+    path="~/.config/skaile-powers/worktrees/$project/$BRANCH_NAME"
     ;;
 esac
 
@@ -105,8 +103,10 @@ cd "$path"
 Auto-detect and run appropriate setup:
 
 ```bash
-# Bun (skaile-dev monorepo)
-if [ -f bun.lock ] || [ -f package.json ]; then bun install; fi
+# Node / Bun — use the project's package manager (see config.md)
+if [ -f bun.lock ]; then bun install
+elif [ -f package-lock.json ]; then npm install
+elif [ -f pnpm-lock.yaml ]; then pnpm install; fi
 
 # Rust
 if [ -f Cargo.toml ]; then cargo build; fi
@@ -118,14 +118,7 @@ if [ -f pyproject.toml ]; then poetry install; fi
 
 ### 4. Verify Clean Baseline
 
-Run tests to ensure worktree starts clean:
-
-```bash
-# Use project-appropriate command:
-bun x --bun vitest run      # workspaces/* packages
-cargo test                   # Rust
-pytest                       # Python
-```
+Run the project's test command (see `config.md` → Project Bindings) to ensure the worktree starts clean.
 
 **If tests fail:** Report failures, ask whether to proceed or investigate.
 
@@ -181,28 +174,28 @@ You: I'm using the using-git-worktrees skill to set up an isolated workspace.
 [Check .worktrees/ - exists]
 [Verify ignored - git check-ignore confirms .worktrees/ is ignored]
 [Create worktree: git worktree add .worktrees/auth -b feature/auth]
-[Run bun install]
-[Run bun x --bun vitest run - 47 passing]
+[Run the project install command]
+[Run the project test command - 47 passing]
 
-Worktree ready at /Users/jesse/myproject/.worktrees/auth
+Worktree ready at <project>/.worktrees/auth
 Tests passing (47 tests, 0 failures)
 Ready to implement auth feature
 ```
 
-## Submodule Awareness
+## Submodule-Aware Repos
 
-The skaile-dev shell repo aggregates submodules (`workspaces/`, `platform/`, `store/`, etc.). When creating a worktree for work that spans the shell repo and a submodule:
+If `config.md` → Project Bindings notes a submodule monorepo structure, work may span the shell repo and a submodule. When creating a worktree for such work:
 
 ```bash
 # Shell repo worktree (standard)
 git worktree add .worktrees/feat-name -b feat/feat-name
 
-# If the work also touches a submodule (e.g. workspaces/):
-cd .worktrees/feat-name/workspaces
+# If the work also touches a submodule:
+cd .worktrees/feat-name/<submodule-path>
 git checkout -b feat/feat-name
 ```
 
-When finishing, commit the submodule first, then commit the submodule pointer bump in the shell repo as a separate commit.
+Follow the repo-structure note in `config.md` when finishing — typically: commit the submodule first, then commit the submodule pointer bump in the shell repo as a separate commit.
 
 ## Red Flags
 

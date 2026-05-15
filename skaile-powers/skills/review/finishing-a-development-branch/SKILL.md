@@ -19,14 +19,7 @@ Guide completion of development work by presenting clear options and handling ch
 
 ### Step 1: Verify Tests
 
-**Before presenting options, verify tests pass:**
-
-```bash
-# Run project's test suite — use project-appropriate command:
-bun x --bun vitest run   # workspaces/* packages
-cargo test               # Rust
-pytest                   # Python
-```
+**Before presenting options, verify tests pass.** Run the project's test command (see `config.md` → Project Bindings).
 
 **If tests fail:**
 ```
@@ -81,29 +74,13 @@ git pull
 # Merge feature branch
 git merge <feature-branch>
 
-# Verify tests on merged result
-bun x --bun vitest run
+# Verify tests on the merged result — project test command (see config.md)
 
 # If tests pass
 git branch -d <feature-branch>
-
-# If changes touched a submodule, commit the pointer bump separately:
-# (only needed if git status shows a modified submodule pointer)
-git add <submodule-path>
-git commit -m "chore(<submodule>): bump to post-merge commit
-
-Bump <submodule> submodule pointer after merging feat/feat-name.
-
----agent---
-scope: [<submodule-path>]
-type: chore
-breaking: false
-affects: []
-
-changes:
-- Bump submodule pointer to post-merge commit
-"
 ```
+
+**Submodule-aware repos:** if `config.md` → Project Bindings notes a submodule structure and `git status` shows a modified submodule pointer, commit the pointer bump as a separate commit using the project's commit format (see `config.md`).
 
 Then: Cleanup worktree (Step 5)
 
@@ -119,7 +96,7 @@ gh pr create --title "<title>" --body "$(cat <<'EOF'
 <2-3 bullets of what changed>
 
 ## Test Plan
-- [ ] bun x --bun vitest run — all passing
+- [ ] Project test suite — all passing
 EOF
 )"
 ```

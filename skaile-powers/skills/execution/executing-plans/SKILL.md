@@ -9,27 +9,32 @@ description: Use when you have a written implementation plan to execute in a sep
 
 ## Overview
 
-Load plan, review critically, execute all tasks, report when complete.
+Load the plan overview, review critically, execute the beads in dependency order, report when complete.
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
-**Note:** Tell your human partner that Superpowers works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (such as Claude Code or Codex). If subagents are available, use skaile-powers:subagent-driven-development instead of this skill.
+**Note:** This skill works much better with subagent support. If subagents are available, use `skaile-powers:subagent-driven-development` (the default execution mode) instead of this skill. Use `executing-plans` only for inline same-session execution without subagents.
 
 ## The Process
 
-### Step 1: Load and Review Plan
-1. Read plan file
-2. Review critically - identify any questions or concerns about the plan
-3. If concerns: Raise them with your human partner before starting
-4. If no concerns: Create TodoWrite and proceed
+### Step 1: Load and Review the Plan
+1. Read `overview.md` for the bead list and dependency graph (see `writing-plans` / `config.md`)
+2. Read every bead file
+3. Review critically — identify any questions or concerns
+4. If concerns: raise them with your human partner before starting
+5. If no concerns: create a TodoWrite entry per bead and proceed
 
-### Step 2: Execute Tasks
+### Step 2: Execute Beads
 
-For each task:
-1. Mark as in_progress
-2. Follow each step exactly (plan has bite-sized steps)
-3. Run verifications as specified
-4. Mark as completed
+Work beads in dependency order. For each bead:
+1. Confirm every `depends_on` bead has `status: done` — skip beads with unmet dependencies until their blockers finish
+2. **HITL beads** (`type: HITL`) — pause and hand off to the user rather than executing
+3. Set the bead's frontmatter `status: in-progress`; mark its TodoWrite entry in_progress
+4. Follow each step exactly (beads have bite-sized steps)
+5. Run verifications as specified
+6. Set the bead's frontmatter `status: done`; update its row in `overview.md`; mark the TodoWrite entry completed
+
+**Follow-up work discovered mid-bead:** don't expand the current bead. Write a new follow-up bead — next free sub-number, `status: pending`, honest `depends_on`, a note that it was discovered during implementation — and link it into `overview.md`.
 
 ### Step 3: Complete Development
 
@@ -57,10 +62,12 @@ After all tasks complete and verified:
 **Don't force through blockers** - stop and ask.
 
 ## Remember
-- Review plan critically first
-- Follow plan steps exactly
+- Review the plan critically first
+- Follow bead steps exactly
+- Respect the `depends_on` order; never start a bead with unmet dependencies
+- Keep each bead's `status` frontmatter current
 - Don't skip verifications
-- Reference skills when plan says to
+- Reference skills when a bead says to
 - Stop when blocked, don't guess
 - Never start implementation on main/master branch without explicit user consent
 

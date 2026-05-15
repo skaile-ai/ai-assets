@@ -7,37 +7,43 @@ description: Use when executing implementation plans with independent tasks in t
 
 # Subagent-Driven Development
 
-Execute plan by dispatching fresh subagent per task, with two-stage review after each: spec compliance review first, then code quality review.
+Execute a plan by dispatching a fresh subagent per **bead** (task file), with two-stage review after each: spec compliance review first, then code quality review.
 
-**Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
+**Why subagents:** You delegate beads to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
 
-**Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
+**Core principle:** Fresh subagent per bead + two-stage review (spec then quality) = high quality, fast iteration
+
+## Bead Execution
+
+A plan is a directory of **beads** — one task file per vertical slice — plus an `overview.md` (see `writing-plans` and `config.md`). Drive execution off the beads, not a monolithic plan file:
+
+1. **Read `overview.md`** to get the bead list and dependency graph. Create a TodoWrite entry per bead.
+2. **Pick a ready bead** — one whose `status` is `pending` and whose every `depends_on` bead is `done`. Never start a bead with unmet dependencies.
+3. **Read that bead file**, set its frontmatter `status: in-progress`, and dispatch the implementer subagent with the bead's full text + scene-setting context.
+4. **On completion** (both reviews ✅): set the bead's frontmatter `status: done` and update its row in `overview.md`'s Status column.
+5. **Follow-up work discovered mid-bead:** when a subagent surfaces necessary work outside the current bead's scope, do NOT expand the bead. Write a **new follow-up bead** — next free sub-number (`NNNN.M`), frontmatter `status: pending`, `depends_on` set honestly, a note that it was discovered during implementation — and link it into `overview.md`. Decide whether it blocks the current run or is deferred.
+6. Repeat until every bead is `done`.
+
+**HITL beads** (frontmatter `type: HITL`) need the user — pause and hand off rather than dispatching a subagent.
 
 ## When to Use
 
 ```dot
 digraph when_to_use {
     "Have implementation plan?" [shape=diamond];
-    "Tasks mostly independent?" [shape=diamond];
-    "Stay in this session?" [shape=diamond];
+    "Need parallel sessions?" [shape=diamond];
     "subagent-driven-development" [shape=box];
-    "executing-plans" [shape=box];
+    "dispatching-parallel-agents" [shape=box];
     "Manual execution or brainstorm first" [shape=box];
 
-    "Have implementation plan?" -> "Tasks mostly independent?" [label="yes"];
+    "Have implementation plan?" -> "Need parallel sessions?" [label="yes"];
     "Have implementation plan?" -> "Manual execution or brainstorm first" [label="no"];
-    "Tasks mostly independent?" -> "Stay in this session?" [label="yes"];
-    "Tasks mostly independent?" -> "Manual execution or brainstorm first" [label="no - tightly coupled"];
-    "Stay in this session?" -> "subagent-driven-development" [label="yes"];
-    "Stay in this session?" -> "executing-plans" [label="no - parallel session"];
+    "Need parallel sessions?" -> "dispatching-parallel-agents" [label="yes"];
+    "Need parallel sessions?" -> "subagent-driven-development" [label="no - default"];
 }
 ```
 
-**vs. Executing Plans (parallel session):**
-- Same session (no context switch)
-- Fresh subagent per task (no context pollution)
-- Two-stage review after each task: spec compliance first, then code quality
-- Faster iteration (no human-in-loop between tasks)
+`subagent-driven-development` is the **default** execution mode. Use `dispatching-parallel-agents` only when beads are genuinely independent and you want true parallelism across separate sessions.
 
 ## The Process
 
@@ -60,12 +66,12 @@ digraph process {
         "Mark task complete in TodoWrite" [shape=box];
     }
 
-    "Read plan, extract all tasks with full text, note context, create TodoWrite" [shape=box];
-    "More tasks remain?" [shape=diamond];
+    "Read overview.md + all bead files, note context, create TodoWrite" [shape=box];
+    "More beads remain?" [shape=diamond];
     "Dispatch final code reviewer subagent for entire implementation" [shape=box];
     "Use skaile-powers:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
 
-    "Read plan, extract all tasks with full text, note context, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
+    "Read overview.md + all bead files, note context, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
     "Dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer subagent asks questions?";
     "Implementer subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
     "Answer questions, provide context" -> "Dispatch implementer subagent (./implementer-prompt.md)";
@@ -79,9 +85,9 @@ digraph process {
     "Code quality reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
     "Implementer subagent fixes quality issues" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="re-review"];
     "Code quality reviewer subagent approves?" -> "Mark task complete in TodoWrite" [label="yes"];
-    "Mark task complete in TodoWrite" -> "More tasks remain?";
-    "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
-    "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
+    "Mark task complete in TodoWrite" -> "More beads remain?";
+    "More beads remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
+    "More beads remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
     "Dispatch final code reviewer subagent for entire implementation" -> "Use skaile-powers:finishing-a-development-branch";
 }
 ```
@@ -130,14 +136,14 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 ```
 You: I'm using Subagent-Driven Development to execute this plan.
 
-[Read plan file once: docs/devlog/plans/feature-plan.md]
-[Extract all 5 tasks with full text and context]
-[Create TodoWrite with all tasks]
+[Read overview.md: <artifact-root>/plans/0007-hooks/overview.md]
+[Read all 5 bead files; create TodoWrite, one entry per bead]
 
-Task 1: Hook installation script
+Bead 0007.1: Hook installation script
 
-[Get Task 1 text and context (already extracted)]
-[Dispatch implementation subagent with full task text + context]
+[Pick 0007.1 — pending, no unmet depends_on]
+[Set 0007.1 frontmatter status: in-progress]
+[Dispatch implementation subagent with the full bead text + context]
 
 Implementer: "Before I begin - should the hook be installed at user or system level?"
 
@@ -156,12 +162,12 @@ Spec reviewer: ✅ Spec compliant - all requirements met, nothing extra
 [Get git SHAs, dispatch code quality reviewer]
 Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
 
-[Mark Task 1 complete]
+[Set 0007.1 frontmatter status: done; update overview.md Status column]
 
-Task 2: Recovery modes
+Bead 0007.2: Recovery modes
 
-[Get Task 2 text and context (already extracted)]
-[Dispatch implementation subagent with full task text + context]
+[Pick 0007.2 — pending, depends_on 0007.1 which is now done]
+[Set 0007.2 status: in-progress; dispatch implementer with full bead text + context]
 
 Implementer: [No questions, proceeds]
 Implementer:
@@ -190,7 +196,7 @@ Implementer: Extracted PROGRESS_INTERVAL constant
 [Code reviewer reviews again]
 Code reviewer: ✅ Approved
 
-[Mark Task 2 complete]
+[Set 0007.2 status: done; update overview.md]
 
 ...
 
@@ -273,7 +279,7 @@ Done!
 - **skaile-powers:finishing-a-development-branch** - Complete development after all tasks
 
 **Subagents should use:**
-- **skaile-powers:test-driven-development** - Subagents follow TDD for each task
+- **skaile-powers:test-driven-development** - Subagents follow TDD for each bead
 
 **Alternative workflow:**
-- **skaile-powers:executing-plans** - Use for parallel session instead of same-session execution
+- **skaile-powers:dispatching-parallel-agents** - For genuinely independent beads run across parallel sessions

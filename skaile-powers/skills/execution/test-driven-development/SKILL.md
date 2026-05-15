@@ -30,16 +30,11 @@ Write the test first. Watch it fail. Write minimal code to pass.
 
 Thinking "skip TDD just this once"? Stop. That's rationalization.
 
-## Test Stack (skaile-dev)
+## Test Stack
 
-| Scope | Runner | Command |
-|---|---|---|
-| Unit / integration (workspaces) | Vitest | `bun x --bun vitest run <file>` |
-| E2E | Playwright | `bun x playwright test <file>` |
+The unit and E2E test commands are project-specific — read them from `config.md` → Project Bindings. The code examples below use TypeScript/Vitest syntax for illustration; substitute your project's framework.
 
-For the authoritative per-package runner map, read `ai-assets/skaile-development/references/test_stack_map.md`.
-
-No Jest. No `platform/` paths.
+When you explore the codebase, read the project's glossary first so test names and interface vocabulary match the project's ubiquitous language.
 
 ## The Iron Law
 
@@ -127,9 +122,7 @@ Vague name, tests mock not code
 
 **MANDATORY. Never skip.**
 
-```bash
-bun x --bun vitest run path/to/test.test.ts
-```
+Run the project's test command (see `config.md`) against the new test file.
 
 Confirm:
 - Test fails (not errors)
@@ -182,9 +175,7 @@ Don't add features, refactor other code, or "improve" beyond the test.
 
 **MANDATORY.**
 
-```bash
-bun x --bun vitest run path/to/test.test.ts
-```
+Run the project's test command (see `config.md`) again.
 
 Confirm:
 - Test passes
@@ -313,8 +304,8 @@ test('rejects empty email', async () => {
 ```
 
 **Verify RED**
-```bash
-$ bun x --bun vitest run
+```
+$ <project test command — see config.md>
 FAIL: expected 'Email required', got undefined
 ```
 
@@ -329,8 +320,8 @@ function submitForm(data: FormData) {
 ```
 
 **Verify GREEN**
-```bash
-$ bun x --bun vitest run
+```
+$ <project test command — see config.md>
 PASS
 ```
 

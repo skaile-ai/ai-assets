@@ -1,6 +1,6 @@
 ---
 name: writing-plans
-description: Use when you have a spec or requirements for a multi-step task, before touching code
+description: Use when you have an approved spec and need an implementation plan. Produces a plan overview plus a set of small, dependency-tracked task "beads" — one file per vertical slice.
 ---
 
 > Read `skaile-powers/references/config.md` before proceeding.
@@ -9,160 +9,182 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 
 ## Overview
 
-Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
+Turn an approved spec into an implementation plan: an **overview** that maps the work, plus a set of small **task beads** — one file per task, strung on a numbered thread, each declaring its dependencies and status.
 
-Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
+Assume the engineer (or subagent) executing a bead is skilled but knows almost nothing about this codebase. Each bead must be self-contained: complete file paths, complete code, exact commands. DRY, YAGNI, TDD, frequent commits.
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** This should be run in a dedicated worktree (created by brainstorming skill).
+## The Numbering Thread
 
-**Save plans to:** `docs/devlog/plans/YYYY-MM-DD-<feature-name>.md`
-- (User preferences for plan location override this default)
+A plan reuses its spec's number (see `config.md` → Numbering). Spec `0007-foo.md` produces:
 
-## Scope Check
-
-If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
-
-## File Structure
-
-Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
-
-- Design units with clear boundaries and well-defined interfaces. Each file should have one clear responsibility.
-- You reason best about code you can hold in context at once, and your edits are more reliable when files are focused. Prefer smaller, focused files over large ones that do too much.
-- Files that change together should live together. Split by responsibility, not by technical layer.
-- In existing codebases, follow established patterns. If the codebase uses large files, don't unilaterally restructure - but if a file you're modifying has grown unwieldy, including a split in the plan is reasonable.
-
-This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.
-
-## Bite-Sized Task Granularity
-
-**Each step is one action (2-5 minutes):**
-- "Write the failing test" - step
-- "Run it to make sure it fails" - step
-- "Implement the minimal code to make the test pass" - step
-- "Run the tests and make sure they pass" - step
-- "Commit" - step
-
-## Plan Document Header
-
-**Every plan MUST start with this header:**
-
-```markdown
-# [Feature Name] Implementation Plan
-
-> **For agentic workers:** REQUIRED SUB-SKILL: Use skaile-powers:subagent-driven-development (recommended) or skaile-powers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
-**Goal:** [One sentence describing what this builds]
-
-**Architecture:** [2-3 sentences about approach]
-
-**Tech Stack:** [Key technologies/libraries]
-
----
+```
+<artifact-root>/plans/0007-foo/
+├── overview.md          ← maps the work, lists the bead dependency graph
+├── 0007.1-<slug>.md     ← task bead
+├── 0007.2-<slug>.md
+└── 0007.3-<slug>.md
 ```
 
-## Task Structure
+Beads are numbered `0007.1`, `0007.2`, … in dependency order.
+
+## Step 1 — Scope Check
+
+If the spec covers multiple independent subsystems, it should have been decomposed during brainstorming. If it wasn't, stop and suggest one plan per subsystem. Each plan must produce working, testable software on its own.
+
+## Step 2 — Map the Files
+
+Before defining beads, map which files will be created or modified and what each is responsible for. This locks in decomposition decisions.
+
+- Design units with clear boundaries and one responsibility each. Favor **deep modules** — a lot of behavior behind a small, stable interface.
+- Files that change together live together. Split by responsibility, not by technical layer.
+- In existing codebases, follow established patterns. Use the glossary's vocabulary for module and concept names.
+
+## Step 3 — Decompose Into Beads (Vertical Slices)
+
+Break the plan into **tracer-bullet** beads. Each bead is a thin **vertical slice** that cuts through every layer end-to-end (schema → logic → API → UI → tests) — NOT a horizontal slice of one layer.
+
+```
+Bead rules:
+- Each bead delivers a narrow but COMPLETE path through every layer it touches
+- A completed bead is independently demoable or verifiable
+- Prefer many thin beads over few thick ones
+- Each bead is sized at roughly one focused work session
+```
+
+Classify each bead:
+
+- **AFK** — an agent can implement and complete it unattended.
+- **HITL** — needs the user (an architectural decision, a design review, a credentials step). Prefer AFK; mark HITL only when human interaction is genuinely required.
+
+Assign `depends_on` honestly — a bead lists every other bead that must finish before it can start.
+
+## Step 4 — Write the Overview
+
+Save `overview.md` in the plan directory:
 
 ````markdown
-### Task N: [Component Name]
+# <Topic> — Implementation Plan
 
-**Files:**
-- Create: `exact/path/to/file.py`
-- Modify: `exact/path/to/existing.py:123-145`
-- Test: `tests/exact/path/to/test.py`
+> Spec: `../../specs/NNNN-<topic>.md`
+> Execute with `skaile-powers:subagent-driven-development` (default) or `skaile-powers:dispatching-parallel-agents` for parallel sessions.
 
-- [ ] **Step 1: Write the failing test**
+**Goal:** <one sentence — what this builds>
 
-```python
-def test_specific_behavior():
-    result = function(input)
-    assert result == expected
+**Architecture:** <2-3 sentences — the approach>
+
+## Beads
+
+| Bead | Title | Depends on | Type | Status |
+|---|---|---|---|---|
+| NNNN.1 | <title> | — | AFK | pending |
+| NNNN.2 | <title> | NNNN.1 | AFK | pending |
+| NNNN.3 | <title> | NNNN.1 | HITL | pending |
+
+## Dependency graph
+
+```
+NNNN.1 ──┬──► NNNN.2
+         └──► NNNN.3
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+## File map
 
-Run: `pytest tests/path/test.py::test_name -v`
-Expected: FAIL with "function not defined"
+- `path/to/file` — created by NNNN.1, extended by NNNN.2
+- `path/to/other` — created by NNNN.2
+````
 
-- [ ] **Step 3: Write minimal implementation**
+The `Status` column mirrors each bead's frontmatter `status`; execution skills keep it current.
 
-```python
-def function(input):
-    return expected
+## Step 5 — Write Each Bead
+
+One file per bead: `NNNN.M-<slug>.md`. Frontmatter schema is in `config.md`.
+
+````markdown
+---
+id: NNNN.M
+spec: NNNN
+title: <short imperative title>
+depends_on: [NNNN.1]
+status: pending
+type: AFK
+---
+
+# <title>
+
+## What to build
+
+A concise description of this vertical slice — the end-to-end behavior, not a
+layer-by-layer implementation log. Use the glossary's vocabulary.
+
+## Files
+
+- Create: `exact/path/to/file`
+- Modify: `exact/path/to/existing` (lines if known)
+- Test: `exact/path/to/test`
+
+## Steps
+
+- [ ] **Write the failing test**
+
+```
+<actual test code>
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Run the test, verify it fails**
 
-Run: `pytest tests/path/test.py::test_name -v`
+Run: `<exact test command — see config.md>`
+Expected: FAIL with `<expected message>`
+
+- [ ] **Write the minimal implementation**
+
+```
+<actual implementation code>
+```
+
+- [ ] **Run the test, verify it passes**
+
+Run: `<exact test command>`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [ ] **Commit** using the project commit format (see `config.md`)
 
-```bash
-git add tests/path/test.py src/path/file.py
-git commit -m "$(cat <<'COMMIT'
-feat(scope): add specific feature
+## Acceptance criteria
 
-One sentence explaining what changed and why.
-
----agent---
-scope: [path/to/package]
-type: feat
-breaking: false
-affects: []
-
-changes:
-- Add specific feature
-COMMIT
-)"
-```
+- [ ] <observable criterion 1>
+- [ ] <observable criterion 2>
 ````
+
+Each step is one action (2-5 minutes). Write the failing test → run it → implement → run it → commit.
 
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
-- "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
-- Steps that describe what to do without showing how (code blocks required for code steps)
-- References to types, functions, or methods not defined in any task
-
-## Remember
-- Exact file paths always
-- Complete code in every step — if a step changes code, show the code
-- Exact commands with expected output
-- DRY, YAGNI, TDD, frequent commits
+- "Similar to bead N" — repeat the code; beads may be executed out of order
+- Steps that describe what to do without showing how
+- References to types, functions, or methods not defined in any bead
 
 ## Self-Review
 
-After writing the complete plan, look at the spec with fresh eyes and check the plan against it. This is a checklist you run yourself — not a subagent dispatch.
+After writing every bead, review the whole plan with fresh eyes:
 
-**1. Spec coverage:** Skim each section/requirement in the spec. Can you point to a task that implements it? List any gaps.
+1. **Spec coverage** — skim each spec requirement. Can you point to a bead that implements it? Add beads for any gaps.
+2. **Placeholder scan** — search for the red flags above. Fix them.
+3. **Type consistency** — do types, signatures, and names match across beads? `clearLayers()` in one bead and `clearFullLayers()` in another is a bug.
+4. **Dependency sanity** — does the `depends_on` graph have no cycles? Can the AFK beads actually run unattended?
+5. **Language check** — do bead titles and descriptions use the glossary's canonical terms?
 
-**2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
-
-**3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
-
-If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
+Fix issues inline.
 
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After saving the overview and all beads:
 
-**"Plan complete and saved to `docs/devlog/plans/<filename>.md`. Two execution options:**
+> "Plan complete — overview and N beads saved to `<plan-dir>/`. Recommended: execute with `skaile-powers:subagent-driven-development` (fresh subagent per bead, review between beads). For independent beads across parallel sessions, use `skaile-powers:dispatching-parallel-agents`. Which approach?"
 
-**1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
-
-**2. Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints
-
-**Which approach?"**
-
-**If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use skaile-powers:subagent-driven-development
-- Fresh subagent per task + two-stage review
-
-**If Inline Execution chosen:**
-- **REQUIRED SUB-SKILL:** Use skaile-powers:executing-plans
-- Batch execution with checkpoints for review
+**REQUIRED SUB-SKILL:** `skaile-powers:subagent-driven-development` is the default execution mode.

@@ -71,9 +71,9 @@ Way of thinking about problems (flatten-with-flags, test-invariants)
 ### Reference
 API docs, syntax guides, tool documentation (office docs)
 
-## Directory Structure in skaile-dev
+## Directory Structure
 
-Skills live in `ai-assets/<domain>/skills/<skill-name>/`:
+`writing-skills` authors skills for a skill system; the layout below is this project's (skaile-dev / ai-assets). Skills live in `ai-assets/<domain>/skills/<skill-name>/`:
 
 ```
 ai-assets/<domain>/skills/

@@ -15,6 +15,8 @@ Random fixes waste time and create new bugs. Quick patches mask underlying issue
 
 **Violating the letter of this process is violating the spirit of debugging.**
 
+When exploring the codebase, read the project's glossary (see `config.md`) for a clear mental model of the relevant concepts, and check any ADRs in the area you're touching — they record decisions you should not re-litigate while debugging.
+
 ## The Iron Law
 
 ```

@@ -50,8 +50,8 @@ Skip any step = lying, not verifying
 | Regression test works | Red-green cycle verified | Test passes once |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
 | Requirements met | Line-by-line checklist | Tests passing |
-| Format clean | `bun run format` exits 0 | "Code looks formatted" |
-| Quality gate passed | `quality mode=quick` no blockers | "Tests pass, should be fine" |
+| Format clean | Project format command exits 0 | "Code looks formatted" |
+| Quality gate passed | Project quality gate reports no blockers | "Tests pass, should be fine" |
 
 ## Red Flags - STOP
 
@@ -128,14 +128,11 @@ From 24 failure memories:
 - Moving to next task
 - Delegating to agents
 
-**Skaile-specific gates — run before any completion claim:**
-```bash
-bun run format          # Biome formatting (never on platform/)
-bun x --bun vitest run  # unit tests for affected workspaces/* package
-# verify exit code 0 before claiming "tests pass"
-```
+**Project quality gates — run before any completion claim.** Read `config.md` → Project Bindings for the exact commands. The gates always include, at minimum:
 
-For pre-merge verification, run `skaile skill run quality mode=quick` and confirm no blockers.
+- The **format command** — verify exit code 0
+- The **test command** for the affected package(s) — verify 0 failures
+- The **quality gate** (if the project defines one) — confirm no blockers before a pre-merge claim
 
 **Rule applies to:**
 - Exact phrases

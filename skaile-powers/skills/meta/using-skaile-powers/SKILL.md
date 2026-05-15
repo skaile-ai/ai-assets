@@ -1,6 +1,6 @@
 ---
 name: using-skaile-powers
-description: Use when starting any conversation in the skaile-dev monorepo - establishes how to find and use skaile-powers skills, requiring Skill tool invocation before ANY response including clarifying questions
+description: Use when starting any conversation in a project that uses skaile-powers - establishes how to find and use skaile-powers skills, requiring Skill tool invocation before ANY response including clarifying questions
 ---
 
 > Read `skaile-powers/references/config.md` before proceeding.
@@ -39,19 +39,25 @@ The `obra/superpowers` plugin (`superpowers:*`) is a **fallback only** — use i
 
 | Skill | When to Invoke |
 |---|---|
-| `skaile-powers:brainstorming` | Before any creative work — creating features, building components, adding functionality |
-| `skaile-powers:writing-plans` | After brainstorming, when you have a spec and need a step-by-step plan |
+| `skaile-powers:brainstorming` | Before any creative work — a grilling session that turns an idea into an approved, numbered spec |
+| `skaile-powers:grill-me` | To stress-test a plan or harden terminology in a discussion — updates the glossary/ADRs, produces no spec |
+| `skaile-powers:writing-plans` | After brainstorming, when you have a spec and need a plan of task beads |
 | `skaile-powers:writing-skills` | When creating or editing skills in ai-assets |
 | `skaile-powers:systematic-debugging` | On any bug, test failure, or unexpected behavior — before proposing fixes |
 | `skaile-powers:test-driven-development` | Before writing implementation code |
-| `skaile-powers:executing-plans` | When executing a written plan inline with review checkpoints |
+| `skaile-powers:executing-plans` | When executing a plan's beads inline with review checkpoints |
 | `skaile-powers:dispatching-parallel-agents` | When facing 2+ independent tasks with no shared state |
-| `skaile-powers:subagent-driven-development` | When executing plans with fresh subagents per task |
+| `skaile-powers:subagent-driven-development` | Default execution mode — execute a plan's beads with a fresh subagent per bead |
 | `skaile-powers:using-git-worktrees` | Before starting isolated feature work or executing implementation plans |
-| `skaile-powers:requesting-code-review` | After completing tasks, implementing major features, or before merging |
+| `skaile-powers:requesting-code-review` | After completing beads, implementing major features, or before merging |
 | `skaile-powers:receiving-code-review` | When receiving code review feedback |
 | `skaile-powers:verification-before-completion` | Before claiming work is complete, fixed, or passing |
 | `skaile-powers:finishing-a-development-branch` | When implementation is complete and tests pass |
+
+**Workflow artifacts** — `brainstorming` and `grill-me` maintain two living documents the other skills read (locations in `config.md`):
+
+- **Glossary** — the project's ubiquitous language. Every skill that explores the codebase reads it and uses its vocabulary.
+- **Decisions (ADRs)** — categorized records of hard-to-reverse design/architecture/code-style choices.
 
 # Using Skills
 

@@ -15,6 +15,8 @@ When you have multiple unrelated failures (different test files, different subsy
 
 **Core principle:** Dispatch one agent per independent problem domain. Let them work concurrently.
 
+**Executing plan beads in parallel:** when used as the execution mode for a plan, give each parallel agent one bead whose `depends_on` list is fully satisfied. Only dispatch beads with no unmet dependencies and no shared files in the same wave; set each bead's `status` frontmatter as it completes.
+
 ## When to Use
 
 ```dot
