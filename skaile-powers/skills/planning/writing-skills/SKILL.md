@@ -71,62 +71,20 @@ Way of thinking about problems (flatten-with-flags, test-invariants)
 ### Reference
 API docs, syntax guides, tool documentation (office docs)
 
-## Directory Structure
+## Directory Structure & Frontmatter
 
-`writing-skills` authors skills for a skill system; the layout below is this project's (skaile-dev / ai-assets). Skills live in `ai-assets/<domain>/skills/<skill-name>/`:
+The skill directory layout, the SKILL.md frontmatter schema, and how to register a new skill are **host-specific** — read `config.md` → Skill Authoring for this project's rules. In short: each skill is a directory with a required `SKILL.md`; the frontmatter always has `name` and `description`, plus whatever fields the host skill system defines.
 
-```
-ai-assets/<domain>/skills/
-  skill-name/
-    SKILL.md          # Main reference (required)
-    CLI.md            # Optional: CLI invocation docs
-    references/       # Optional: reference material
-    validator.py      # Optional: output validation
-```
+`name` and `description` are universal:
 
-Skill names are always flat (no group prefix) when referenced in DOMAIN.md or invoked via the Skill tool, even when the filesystem uses group subdirectories.
+- `name`: kebab-case — letters, numbers, hyphens only
+- `description`: third person, starts with "Use when…" — triggering conditions only, never a workflow summary
 
-## SKILL.md Structure
+## SKILL.md Body Structure
 
-**Frontmatter (YAML) — skaile SKILL.md structure:**
-
-Required fields:
-- `name`: Kebab-case, letters/numbers/hyphens only
-- `description`: Third-person, starts with "Use when..." — triggering conditions only, never workflow summary
-
-Skaile-specific fields:
-- `source`: `CF` | `SAXE` | `MERGED` | `MIGRATED` — skill lineage
-- `version`: Semantic version string (e.g. `1.0.0`)
-- `keywords`: Array of discovery terms
-- `user_inputs`: Array of `{key, prompt, required}` objects
-- `reads_from`: Array of file/path patterns this skill reads
-- `writes_to`: Array of file/path patterns this skill writes
-
-Max 1024 characters total in frontmatter.
-
-Example:
-```yaml
----
-name: my-skill
-description: Use when [specific triggering conditions]
-source: MERGED
-version: 1.0.0
-keywords: [discovery, overview, brief]
-user_inputs:
-  - key: PROJECT_NAME
-    prompt: 'What is the project name?'
-    required: true
-reads_from: []
-writes_to: [_devlog/DEVLOG.md]
----
-```
+Below the frontmatter, a good SKILL.md body follows this shape:
 
 ```markdown
----
-name: Skill-Name-With-Hyphens
-description: Use when [specific triggering conditions and symptoms]
----
-
 # Skill Name
 
 ## Overview
@@ -648,7 +606,7 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 - [ ] Supporting files only for tools or heavy reference
 
 **Deployment:**
-- [ ] Commit skill using skaile commit-spec format and update DOMAIN.md skills inventory table
+- [ ] Commit the skill using the project commit format (see `config.md`) and register it in the domain's `DOMAIN.md` inventory table
 - [ ] Consider contributing back via PR (if broadly useful)
 
 ## Discovery Workflow

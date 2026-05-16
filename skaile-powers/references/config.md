@@ -147,6 +147,33 @@ decisions:                  # omit if no ADR-worthy choices; else mirror accepte
 
 Types: `feat` (new feature), `fix` (bug fix), `refactor`, `docs`, `test`, `chore`, `perf`, `build`.
 
+### Skill Authoring
+
+> Consumed by `writing-skills`. Project-specific — rewrite for another skill host.
+
+**Skill location:** skills live at `ai-assets/<domain>/skills/<skill-name>/`. Each skill directory contains:
+
+- `SKILL.md` — required; YAML frontmatter + markdown body
+- `CLI.md` — optional; CLI invocation docs
+- `references/` — optional; reference material
+- `validator.py` — optional; output validation
+
+Skill names are flat (no group prefix) when referenced in `DOMAIN.md` or invoked via the `Skill` tool, even when the filesystem uses group subdirectories.
+
+**SKILL.md frontmatter** — max 1024 characters total:
+
+| Field | Required | Purpose |
+|---|---|---|
+| `name` | yes | kebab-case identifier (letters, numbers, hyphens) |
+| `description` | yes | third-person, starts with "Use when…" — triggering conditions only |
+| `source` | project | lineage: `CF` \| `SAXE` \| `MERGED` \| `MIGRATED` |
+| `version` | project | semantic version string |
+| `keywords` | project | array of discovery terms |
+| `user_inputs` | project | array of `{key, prompt, required}` objects |
+| `reads_from` / `writes_to` | project | arrays of file/path patterns |
+
+**Registration:** add a new skill to its domain's `DOMAIN.md` inventory table.
+
 ---
 
 ## Skill Inventory
