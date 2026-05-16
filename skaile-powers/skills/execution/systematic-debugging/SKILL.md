@@ -61,19 +61,24 @@ You MUST complete each phase before proceeding to the next.
    - Read stack traces completely
    - Note line numbers, file paths, error codes
 
-2. **Reproduce Consistently**
+2. **Zoom Out First**
+   - Before diving into one file, go up a layer of abstraction
+   - Map the relevant modules and their callers, in glossary vocabulary
+   - Understand how the broken area fits the bigger picture
+
+3. **Reproduce Consistently**
    - Can you trigger it reliably?
    - What are the exact steps?
    - Does it happen every time?
    - If not reproducible → gather more data, don't guess
 
-3. **Check Recent Changes**
+4. **Check Recent Changes**
    - What changed that could cause this?
    - Git diff, recent commits
    - New dependencies, config changes
    - Environmental differences
 
-4. **Gather Evidence in Multi-Component Systems**
+5. **Gather Evidence in Multi-Component Systems**
 
    **WHEN system has multiple components (CI → build → signing, API → service → database):**
 
@@ -111,7 +116,7 @@ You MUST complete each phase before proceeding to the next.
 
    **This reveals:** Which layer fails (secrets → workflow ✓, workflow → build ✗)
 
-5. **Trace Data Flow**
+6. **Trace Data Flow**
 
    **WHEN error is deep in call stack:**
 

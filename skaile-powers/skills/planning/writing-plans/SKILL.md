@@ -53,6 +53,11 @@ Bead rules:
 - Each bead is sized at roughly one focused work session
 ```
 
+**Beads are vertical slices.** Each bead should be independently shippable —
+a thin slice through all the layers it needs (data, logic, interface), not a
+horizontal layer that only becomes useful once a later bead lands. If a bead
+cannot be demoed or tested on its own, re-slice it.
+
 Classify each bead:
 
 - **AFK** — an agent can implement and complete it unattended.

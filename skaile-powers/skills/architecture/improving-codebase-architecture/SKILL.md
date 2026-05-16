@@ -27,6 +27,8 @@ This skill is _informed_ by the project's domain model. The domain language give
 
 Read the project's domain glossary (`glossary/glossary.md` — see config.md) and any ADRs in `decisions/<category>/` (see config.md) in the area you're touching first.
 
+Zoom out first — go up a layer of abstraction and map the relevant modules and callers in glossary vocabulary before noting friction.
+
 Then use the Agent tool with `subagent_type=Explore` to walk the codebase. Don't follow rigid heuristics — explore organically and note where you experience friction:
 
 - Where does understanding one concept require bouncing between many small modules?
