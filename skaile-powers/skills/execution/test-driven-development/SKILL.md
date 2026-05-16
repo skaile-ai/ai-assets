@@ -195,6 +195,8 @@ After green only:
 
 Keep tests green. Don't add behavior.
 
+For deeper guidance see `references/refactoring.md`, `references/deep-modules.md`, and `references/interface-design.md`.
+
 ### Repeat
 
 Next failing test for next feature.
@@ -360,7 +362,7 @@ Never fix bugs without a test.
 
 ## Testing Anti-Patterns
 
-When adding mocks or test utilities, read @testing-anti-patterns.md to avoid common pitfalls:
+When adding mocks or test utilities, read references/testing-anti-patterns.md to avoid common pitfalls:
 - Testing mock behavior instead of real behavior
 - Adding test-only methods to production classes
 - Mocking without understanding dependencies
