@@ -202,7 +202,7 @@ Skill names are flat (no group prefix) when referenced in `DOMAIN.md` or invoked
 
 ## Skill Inventory
 
-15 skills, by flat name — use these names when invoking via the `Skill` tool or skaile CLI.
+17 skills, by flat name — use these names when invoking via the `Skill` tool or skaile CLI.
 
 | Skill | Group | Path |
 |---|---|---|
@@ -211,6 +211,8 @@ Skill names are flat (no group prefix) when referenced in `DOMAIN.md` or invoked
 | `grill-me` | planning | `skills/planning/grill-me/` |
 | `writing-plans` | planning | `skills/planning/writing-plans/` |
 | `writing-skills` | planning | `skills/planning/writing-skills/` |
+| `prototype` | planning | `skills/planning/prototype/` |
+| `improving-codebase-architecture` | architecture | `skills/architecture/improving-codebase-architecture/` |
 | `systematic-debugging` | execution | `skills/execution/systematic-debugging/` |
 | `test-driven-development` | execution | `skills/execution/test-driven-development/` |
 | `executing-plans` | execution | `skills/execution/executing-plans/` |
@@ -221,3 +223,11 @@ Skill names are flat (no group prefix) when referenced in `DOMAIN.md` or invoked
 | `receiving-code-review` | review | `skills/review/receiving-code-review/` |
 | `verification-before-completion` | review | `skills/review/verification-before-completion/` |
 | `finishing-a-development-branch` | review | `skills/review/finishing-a-development-branch/` |
+
+### Shared References
+
+| File | Purpose |
+|---|---|
+| `references/config.md` | This file — the single project adapter |
+| `references/architecture-language.md` | Shared Module/Interface/Depth/Seam/Adapter/Leverage/Locality vocabulary |
+| `references/upstream-integration-decisions.md` | Per-item adopt/skip rationale for mattpocock/skills items |

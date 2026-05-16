@@ -3,15 +3,18 @@ name: skaile-powers
 description: Project-agnostic development workflow skills — a fork of obra/superpowers v5.0.6 with mattpocock/skills techniques (grilling, ubiquitous language, ADRs) integrated. Covers the full arc from grilling an idea through Domain-Driven design, numbered specs, bead-based plans, execution, and review.
 type: domain
 building_blocks:
-  references: 'config.md — the single project adapter: artifact layout, numbering, glossary/decision formats, project bindings, skill inventory'
-  skills: 'using-skaile-powers, brainstorming, grill-me, writing-plans, writing-skills, systematic-debugging, test-driven-development, executing-plans, dispatching-parallel-agents, subagent-driven-development, using-git-worktrees, requesting-code-review, receiving-code-review, verification-before-completion, finishing-a-development-branch'
+  references: 'config.md — the single project adapter: artifact layout, numbering, glossary/decision formats, project bindings, skill inventory; architecture-language.md — shared Module/Interface/Depth/Seam vocabulary'
+  skills: 'using-skaile-powers, brainstorming, grill-me, writing-plans, writing-skills, improving-codebase-architecture, prototype, systematic-debugging, test-driven-development, executing-plans, dispatching-parallel-agents, subagent-driven-development, using-git-worktrees, requesting-code-review, receiving-code-review, verification-before-completion, finishing-a-development-branch'
+  agent: 'agents/skaile-powers/ — orchestrator agent driving the full workflow end-to-end'
 stage: beta
 upstream: obra/superpowers v5.0.6 + mattpocock/skills
 ---
 
 # Skaile Powers
 
-A development workflow skill set: 15 composable skills covering the full arc from idea to merged branch. Forked from [obra/superpowers](https://github.com/obra/superpowers) v5.0.6, with the grilling, ubiquitous-language, and ADR techniques from [mattpocock/skills](https://github.com/mattpocock/skills) integrated.
+A development workflow skill set: 17 composable skills covering the full arc from idea to merged branch. Forked from [obra/superpowers](https://github.com/obra/superpowers) v5.0.6, with the grilling, ubiquitous-language, and ADR techniques from [mattpocock/skills](https://github.com/mattpocock/skills) integrated.
+
+**The `skaile-powers` orchestrator agent** (`agents/skaile-powers/`) drives the full workflow — routing from idea to merged branch using all 17 skills. Source lives at `agents/skaile-powers/SOUL.md` + `agent.yaml`; install a copy under `.claude/agents/` for Claude Code discoverability.
 
 **The skills are project-agnostic.** The workflow techniques apply to any codebase. A single file — `references/config.md` — is the **project adapter**: it binds the generic skills to one project's paths, commands, and conventions. To use skaile-powers elsewhere, rewrite the *Project Bindings* section of `config.md`; nothing in the skills themselves is hard-coded to a project.
 
@@ -21,7 +24,7 @@ The workflow is oriented around **Domain-Driven Design**: a shared ubiquitous la
 
 ## The Artifact Model
 
-skaile-powers produces four kinds of durable artifact, all under one **artifact root** (set in `config.md`):
+skaile-powers produces five kinds of durable artifact, all under one **artifact root** (set in `config.md`):
 
 ```
 <artifact-root>/
@@ -31,10 +34,11 @@ skaile-powers produces four kinds of durable artifact, all under one **artifact 
 │   ├── design/NNNN-<slug>.md
 │   └── code-style/NNNN-<slug>.md
 ├── specs/NNNN-<topic>.md            ← design spec, sequential 4-digit number
-└── plans/NNNN-<topic>/              ← plan dir, SAME number as its spec
-    ├── overview.md                  ← links + dependency graph of the beads
-    ├── NNNN.1-<slug>.md             ← task "bead"
-    └── NNNN.2-<slug>.md
+├── plans/NNNN-<topic>/              ← plan dir, SAME number as its spec
+│   ├── overview.md                  ← links + dependency graph of the beads
+│   ├── NNNN.1-<slug>.md             ← task "bead"
+│   └── NNNN.2-<slug>.md
+└── devlog/DEVLOG.md                 ← chronological narrative log; newest-first; links specs, decisions, beads, and shipped capabilities
 ```
 
 **The numbering thread.** A spec gets a sequential number (`0007`). Its implementation plan reuses that number (`plans/0007-…/`). The plan's tasks are **beads** strung on that thread — `0007.1`, `0007.2`, … Each bead is a small file with frontmatter declaring `depends_on` and `status`. Work discovered mid-implementation becomes a new follow-up bead on the same thread.
@@ -54,26 +58,28 @@ Every meaningful session follows this arc. Start at `using-skaile-powers`, ident
   │  Session start — using-skaile-powers     │
   └─────────────────┬────────────────────────┘
                     │
-        ┌───────────▼────────────┐
-        │  What kind of work?    │
-        └──┬────┬────┬───────┬───┘
-           │    │    │       │
-     new idea  bug  just    authoring
-   /feature  /fail  talking  a skill
-           │    │   it through │
-           ▼    ▼      │        ▼
-   brainstorming │   grill-me   writing-skills ──► done
-   (grill →      │   (grill →
-    numbered     │    glossary +
-    spec)        │    ADRs, no spec)
-           │     ▼
-           │  systematic-debugging
+        ┌───────────▼──────────────────┐
+        │  What kind of work?          │
+        └──┬────┬────┬───────┬──────┬──┘
+           │    │    │       │      │
+     new idea  bug  just    autho-  messy
+   /feature  /fail  talking  ring   code
+           │    │   it through a skill │
+           ▼    ▼      │        ▼      ▼
+   brainstorming │   grill-me   writing-skills  improving-
+   (grill →      │   (grill →             ──► done  codebase-
+    numbered     │    glossary +               architecture
+    spec)        │    ADRs, no spec)       (surface friction,
+           │     ▼                         hand off to
+           │  systematic-debugging         brainstorming)
            │     │
            │  test-driven-development
            ▼     │  (fix, commit)
    writing-plans │
    (overview +   │
     bead files)  │
+           │     │
+        [design question? → prototype → de-risk → resume]
            │     │
            ▼     │
   ┌──────────────────────────────────────────────────┐
@@ -242,6 +248,22 @@ using-skaile-powers → subagent-driven-development
   → finishing-a-development-branch
 ```
 
+### Improve messy code / architecture
+```
+using-skaile-powers → improving-codebase-architecture (surface friction, zoom out, identify deep-module candidates)
+  → brainstorming (grill the chosen refactor → numbered spec)
+  → writing-plans → subagent-driven-development
+  → verification-before-completion → finishing-a-development-branch
+```
+
+### De-risk a design question
+```
+using-skaile-powers → brainstorming (grill idea → unresolved design question)
+  → prototype (throwaway terminal app or UI variants)
+  → brainstorming (resume with answer → numbered spec)
+  → writing-plans → subagent-driven-development
+```
+
 ---
 
 ## Skill Reference
@@ -253,6 +275,8 @@ using-skaile-powers → subagent-driven-development
 | `grill-me` | planning | Grilling discussion that hardens terminology + decisions; produces no spec |
 | `writing-plans` | planning | Turn a spec into a plan overview + dependency-tracked task beads |
 | `writing-skills` | planning | When creating or editing skills in ai-assets |
+| `prototype` | planning | Build throwaway terminal apps or UI variants to answer a design question before committing |
+| `improving-codebase-architecture` | architecture | Surface architectural friction, identify deep-module opportunities, and hand off to brainstorming/writing-plans |
 | `systematic-debugging` | execution | On any bug, test failure, or unexpected behavior |
 | `test-driven-development` | execution | When implementing features or fixing bugs |
 | `subagent-driven-development` | execution | **Default execution mode** — fresh subagent per bead + spec + code-quality review |
@@ -271,11 +295,15 @@ using-skaile-powers → subagent-driven-development
 | Path | Skill | Purpose |
 |---|---|---|
 | `references/config.md` | — | The single project adapter: artifact layout, numbering, glossary/ADR formats, project bindings, skill inventory |
+| `references/architecture-language.md` | — | Shared Module/Interface/Depth/Seam/Adapter vocabulary (from mattpocock/skills `LANGUAGE.md`) |
+| `agents/skaile-powers/` | — | Orchestrator agent (SOUL.md + agent.yaml) driving the full 17-skill workflow |
 | `skills/meta/using-skaile-powers/` | `using-skaile-powers` | Session-start skill |
 | `skills/planning/brainstorming/` | `brainstorming` | Grill an idea → numbered spec; maintains glossary + ADRs |
 | `skills/planning/grill-me/` | `grill-me` | Grill a plan/concept → glossary + ADR updates, no spec |
 | `skills/planning/writing-plans/` | `writing-plans` | Plan overview + bead task files |
 | `skills/planning/writing-skills/` | `writing-skills` | New skill authoring |
+| `skills/planning/prototype/` | `prototype` | Throwaway terminal app or UI variants to de-risk a design question |
+| `skills/architecture/improving-codebase-architecture/` | `improving-codebase-architecture` | Surface friction, identify deep-module opportunities, hand off to brainstorming/writing-plans |
 | `skills/execution/systematic-debugging/` | `systematic-debugging` | Root-cause-first debugging |
 | `skills/execution/test-driven-development/` | `test-driven-development` | Red-green-refactor TDD |
 | `skills/execution/subagent-driven-development/` | `subagent-driven-development` | **Default execution** — fresh subagent per bead with spec + quality review |
@@ -291,14 +319,14 @@ using-skaile-powers → subagent-driven-development
 
 ## The Project Adapter (`config.md`)
 
-All 15 skills read `references/config.md` at the start of every invocation. It is the **only** project-specific file — everything else is generic. It defines:
+All 17 skills read `references/config.md` at the start of every invocation. It is the **only** project-specific file — everything else is generic. It defines:
 
 - **Artifact layout & numbering** — the `docs/devlog`-style tree, sequential spec numbers, bead sub-numbers
 - **Glossary format** — the ubiquitous-language table structure
 - **Decision (ADR) format** — categories, the 3-criteria offer test, the decision-log integration
 - **Bead frontmatter schema** — `id`, `spec`, `depends_on`, `status`, `type`
 - **Project Bindings** — package manager, test/format/quality commands, commit format, repo structure. *This is the section you rewrite to use skaile-powers in another project.*
-- **Skill inventory** — the 15 flat skill names
+- **Skill inventory** — the 17 flat skill names
 
 To change a path or convention, edit `config.md` only — all skills pick it up.
 
