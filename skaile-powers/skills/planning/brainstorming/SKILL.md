@@ -112,7 +112,7 @@ Once you understand what you're building, present the design:
 
 After the user approves the design, write the spec to the specs path in `config.md`, numbered: `NNNN-<topic>.md`. Scan the specs directory for the highest existing number and increment.
 
-Commit the spec to git.
+Commit the spec to git. After committing, append an entry to `devlog/DEVLOG.md` (see `config.md` → Devlog) linking the new spec and any accepted ADRs.
 
 **Spec self-review** — read it with fresh eyes:
 

@@ -44,7 +44,7 @@ This is what makes `grill-me` more than a conversation — it leaves the project
 
 - When the grill produces a decision that is **hard to reverse, surprising without context, and a real trade-off**, offer to record an ADR in the right category (`architecture`, `design`, `code-style`).
 - If any of the three criteria is missing, skip it.
-- When an ADR is accepted, note it must be mirrored into the decision log when related work lands (see `config.md`).
+- When an ADR is accepted, note it must be mirrored into the decision log when related work lands (see `config.md`). Also append an entry to `devlog/DEVLOG.md` (see `config.md` → Devlog) linking the ADR.
 
 ## Ending the Session
 

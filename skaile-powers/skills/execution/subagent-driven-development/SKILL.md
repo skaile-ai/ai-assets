@@ -20,7 +20,7 @@ A plan is a directory of **beads** — one task file per vertical slice — plus
 1. **Read `overview.md`** to get the bead list and dependency graph. Create a TodoWrite entry per bead.
 2. **Pick a ready bead** — one whose `status` is `pending` and whose every `depends_on` bead is `done`. Never start a bead with unmet dependencies.
 3. **Read that bead file**, set its frontmatter `status: in-progress`, and dispatch the implementer subagent with the bead's full text + scene-setting context.
-4. **On completion** (both reviews ✅): set the bead's frontmatter `status: done` and update its row in `overview.md`'s Status column.
+4. **On completion** (both reviews ✅): set the bead's frontmatter `status: done` and update its row in `overview.md`'s Status column. When a bead reaches `status: done`, append (or extend the current day's entry in) `devlog/DEVLOG.md` (see `config.md` → Devlog) listing the completed bead.
 5. **Follow-up work discovered mid-bead:** when a subagent surfaces necessary work outside the current bead's scope, do NOT expand the bead. Write a **new follow-up bead** — next free sub-number (`NNNN.M`), frontmatter `status: pending`, `depends_on` set honestly, a note that it was discovered during implementation — and link it into `overview.md`. Decide whether it blocks the current run or is deferred.
 6. Repeat until every bead is `done`.
 

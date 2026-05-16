@@ -188,7 +188,7 @@ Fix issues inline.
 
 ## Execution Handoff
 
-After saving the overview and all beads:
+After saving the overview and all beads, append an entry to `devlog/DEVLOG.md` (see `config.md` → Devlog) noting the plan and bead count.
 
 > "Plan complete — overview and N beads saved to `<plan-dir>/`. Recommended: execute with `skaile-powers:subagent-driven-development` (fresh subagent per bead, review between beads). For independent beads across parallel sessions, use `skaile-powers:dispatching-parallel-agents`. Which approach?"
 

@@ -20,11 +20,13 @@ All workflow artifacts live under one root — the **artifact root** (see Projec
 │   └── code-style/NNNN-<slug>.md
 ├── specs/
 │   └── NNNN-<topic>.md              ← design spec, sequential number
-└── plans/
-    └── NNNN-<topic>/                ← plan directory, SAME number as its spec
-        ├── overview.md              ← links + dependency graph of the task beads
-        ├── NNNN.1-<slug>.md         ← task "bead"
-        └── NNNN.2-<slug>.md
+├── plans/
+│   └── NNNN-<topic>/                ← plan directory, SAME number as its spec
+│       ├── overview.md              ← links + dependency graph of the task beads
+│       ├── NNNN.1-<slug>.md         ← task "bead"
+│       └── NNNN.2-<slug>.md
+└── devlog/
+    └── DEVLOG.md                    ← chronological narrative log
 ```
 
 ## Numbering
@@ -85,6 +87,28 @@ Format — a single paragraph is enough:
 ```
 
 **Decision-log integration:** when an ADR is accepted, the commit that lands the related work also records the decision through the project's decision-log mechanism (see Project Bindings). The ADR file holds the full rationale; the decision log holds the index entry. The two stay in sync.
+
+## Devlog
+
+A chronological narrative log at `<artifact-root>/devlog/DEVLOG.md`. Newest
+entry first. Each entry records one meaningful step and links the artifacts it
+produced.
+
+Format — one block per entry:
+
+    ## YYYY-MM-DD — <one-line what happened>
+
+    <1-2 plain sentences.>
+
+    - Spec: [NNNN-topic](../specs/NNNN-topic.md)
+    - Decisions: [<category>/NNNN](../decisions/<category>/NNNN-slug.md)
+    - Beads: NNNN.1, NNNN.2 (done)
+    - New functionality: <user-facing capability added>
+
+Omit a bullet when it does not apply. Every skill that produces a durable
+artifact appends an entry: `brainstorming` (spec + ADRs), `grill-me` (ADRs),
+`improving-codebase-architecture` (ADRs), `writing-plans` (plan), the execution
+skills (per bead done), and `finishing-a-development-branch` (shipped feature).
 
 ## Task Bead Frontmatter
 

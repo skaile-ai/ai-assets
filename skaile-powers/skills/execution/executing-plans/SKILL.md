@@ -32,7 +32,7 @@ Work beads in dependency order. For each bead:
 3. Set the bead's frontmatter `status: in-progress`; mark its TodoWrite entry in_progress
 4. Follow each step exactly (beads have bite-sized steps)
 5. Run verifications as specified
-6. Set the bead's frontmatter `status: done`; update its row in `overview.md`; mark the TodoWrite entry completed
+6. Set the bead's frontmatter `status: done`; update its row in `overview.md`; mark the TodoWrite entry completed. When a bead reaches `status: done`, append (or extend the current day's entry in) `devlog/DEVLOG.md` (see `config.md` → Devlog) listing the completed bead.
 
 **Follow-up work discovered mid-bead:** don't expand the current bead. Write a new follow-up bead — next free sub-number, `status: pending`, honest `depends_on`, a note that it was discovered during implementation — and link it into `overview.md`.
 

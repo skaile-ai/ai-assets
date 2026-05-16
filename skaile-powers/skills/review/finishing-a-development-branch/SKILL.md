@@ -82,7 +82,7 @@ git branch -d <feature-branch>
 
 **Submodule-aware repos:** if `config.md` → Project Bindings notes a submodule structure and `git status` shows a modified submodule pointer, commit the pointer bump as a separate commit using the project's commit format (see `config.md`).
 
-Then: Cleanup worktree (Step 5)
+Then: Cleanup worktree (Step 6)
 
 #### Option 2: Push and Create PR
 
@@ -101,7 +101,7 @@ EOF
 )"
 ```
 
-Then: Cleanup worktree (Step 5)
+Then: Cleanup worktree (Step 6)
 
 #### Option 3: Keep As-Is
 
@@ -129,9 +129,13 @@ git checkout <base-branch>
 git branch -D <feature-branch>
 ```
 
-Then: Cleanup worktree (Step 5)
+Then: Cleanup worktree (Step 6)
 
-### Step 5: Cleanup Worktree
+### Step 5: Log the Shipped Work
+
+Append a closing entry to `devlog/DEVLOG.md` (see `config.md` → Devlog) summarizing the shipped capability under "New functionality."
+
+### Step 6: Cleanup Worktree
 
 **For Options 1, 2, 4:**
 
