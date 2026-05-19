@@ -123,7 +123,7 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
      **Record which services were down at preflight** — the cleanup steps at end-of-mode (R5 / A8) only tear down services we auto-started here. Services already up belong to whatever process started them (parallel dev session, another tool) and must be left alone. Track per-service: `WE_STARTED_BACKEND = BE_DOWN`, `WE_STARTED_FRONTEND = FE_DOWN`.
      EMIT   [e2e-platform] auto_starting backend=<true|false> frontend=<true|false>
 
-     Run the bundled service helper. It is idempotent — only starts what's missing (backend in `e2e:stateless` mode, frontend in `dev:noAuth` mode), reuses already-running services, detaches via `nohup` so services survive after the script exits, and writes logs to `platform/.e2e-backend.log` / `platform/.e2e-frontend.log`. It also runs `bun run build` in `platform/backend` first when the e2e entry-point trampoline (`dist/apps/api/apps/api/src/e2e.js`) is missing **or stale relative to `tsconfig.json`** — `bun run e2e:stateless` does not generate or regenerate it on its own (only `bun run build` does), so without this step the backend either crashes with `Cannot find module .../dist/apps/api/apps/api/src/e2e.js` (missing) or with an `ERR_MODULE_NOT_FOUND` for a `@skaile/*` workspace package whose path alias was added after the trampoline was last built (stale — the runtime falls through to the workspace's TS source via `package.json` `exports` and dies on a `.js`-extension relative import that has no compiled sibling):
+     Run the bundled service helper. It is idempotent — only starts what's missing (backend in `e2e:stateless` mode, frontend in `dev:noAuth` mode), reuses already-running services, detaches via `nohup` so services survive after the script exits, and writes logs to `platform/.e2e-backend.log` / `platform/.e2e-frontend.log`. It also runs a **clean** backend rebuild (`rm -rf dist && bun run build` in `platform/backend`) whenever `dist/` is stale — detected by any of: the e2e entry-point trampoline (`dist/apps/api/apps/api/src/e2e.js`) is missing; the trampoline is older than `tsconfig.json`; or any backend source file is newer than the trampoline (the post-pull case). The clean build is required because `nest build` is incremental and never deletes orphaned `.js` files — after a pull that renames a workspace package (e.g. `@skaile/agent-sdk` → `@skaile/workspaces`) or restructures directories, stale output survives every incremental rebuild and the backend crashes at boot with `Cannot find module '@skaile/agent-sdk/...'`. `bun run e2e:stateless` never rebuilds anything on its own:
      ```bash
      cd platform && ./scripts/e2e.sh
      ```
@@ -134,7 +134,7 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
    NOTE: This is *auto-start* (spawn what's missing). It is **not** *auto-fix stale* (kill+restart already-running services to clear out-of-date code) — that's Step 3 below, more destructive (drops in-flight state, may break other dev work), and still requires explicit user authorization.
 
-   NOTE: If you ever need to bring up the backend manually (bypassing `./scripts/e2e.sh`), run `bun run build` in `platform/backend` first whenever the trampoline is absent **or older than `tsconfig.json`** — `bun run e2e:stateless` itself never produces or refreshes it. After a pull that adds `@skaile/*` path aliases, the trampoline file still exists but is stale, and the existence check is not enough.
+   NOTE: If you ever need to bring up the backend manually (bypassing `./scripts/e2e.sh`), run a **clean** `rm -rf dist && bun run build` in `platform/backend` first whenever `dist/` may be stale — `bun run e2e:stateless` never rebuilds. A plain incremental `bun run build` is not enough: `nest build` leaves orphaned `.js` files behind, so after a package rename or directory restructure the backend still crashes on the stale output. The existence/mtime checks alone are not enough to detect this.
 
 3. **Stale-service check (post-pull guard).** A backend or frontend started before the latest commit on `platform/main` is serving pre-pull code; the suite will mass-fail with UI-drift-looking errors that are actually stale-bundle errors. Compare each service's process start time against the platform submodule HEAD commit time:
    ```bash
@@ -154,26 +154,31 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
        >   1. cd skaile-dev && bun install                                  ← always run, even if deps look clean
        >   2. invoke /kill-backend skill (kills the whole backend chain cleanly)
        >   3. pkill -f 'vite preview'
-       >   4. cd platform/backend && bun run build && bun run e2e:stateless    ← `bun run build` regenerates the trampoline; `nest start --watch` does not
+       >   4. cd platform/backend && rm -rf dist && bun run build && bun run e2e:stateless    ← clean rebuild; incremental `bun run build` leaves orphaned `.js` files, `nest start --watch` rebuilds nothing
        >   5. cd platform/frontend && bun run build && bun run preview --port 3000
        > Then re-invoke this skill."
      STOP. Auto-start of *missing* services (Step 2) is fine; killing and restarting *already-running* services to clear staleness is destructive (drops in-flight requests, may interrupt parallel dev work) and requires explicit user authorization.
 
-4. **Stale-trampoline check (post-pull guard #2).** A trampoline file regenerated by `bun run build` registers the runtime tsconfig-paths registry for `@skaile/*` workspace aliases. `nest start --watch` re-emits the per-file `.js` outputs but does **not** rebuild the trampoline, so when a pull adds new path aliases (typical for `@skaile/agent-connectors/*` Phase 7 work) the trampoline silently goes stale: the file exists, the existence check passes, but the in-memory alias map at process start is missing entries. The runtime falls through to the workspace symlink → `package.json` `exports` pointing at TS source → `ERR_MODULE_NOT_FOUND` on a `.js`-extension relative import inside that source (e.g. `Cannot find module .../agent-framework/connectors/src/port-pool.js`).
+4. **Stale-dist check (post-pull guard #2).** The backend serves compiled output from `dist/`. `nest build` is **incremental** — it re-emits changed files but **never deletes orphaned output**. Three distinct staleness modes, all crashing the backend at boot:
 
-   Compare the trampoline file's mtime against `tsconfig.json`:
+   - **Missing trampoline.** `nest start --watch` expects `dist/apps/api/apps/api/src/e2e.js`, generated by `postbuild-trampoline.js` (runs only inside `bun run build`). Crash: `Cannot find module .../e2e.js`.
+   - **Stale trampoline.** The tsconfig-paths registry compiled into the trampoline misses path aliases added after it was last built. Crash: `ERR_MODULE_NOT_FOUND` on a `.js`-extension relative import (e.g. `.../agent-framework/connectors/src/port-pool.js`).
+   - **Orphaned output.** After a pull that renames a workspace package (e.g. `@skaile/agent-sdk` → `@skaile/workspaces`) or restructures directories, old `.js` files survive every incremental rebuild. Crash: `Cannot find module '@skaile/agent-sdk/session'`. The mtime-vs-`tsconfig` check **cannot** detect this — a package rename does not touch `tsconfig.json`.
+
+   Detect all three by comparing the trampoline against `tsconfig.json` **and** against backend source:
    ```bash
    TRAMP=platform/backend/dist/apps/api/apps/api/src/e2e.js
    TSCONF=platform/backend/tsconfig.json
-   [ -f "$TRAMP" ] && [ "$TSCONF" -nt "$TRAMP" ] && echo "STALE_TRAMPOLINE"
-   [ -f "$TRAMP" ] || echo "MISSING_TRAMPOLINE"
+   [ -f "$TRAMP" ] || echo "MISSING_DIST"
+   [ -f "$TRAMP" ] && [ "$TSCONF" -nt "$TRAMP" ] && echo "STALE_DIST (tsconfig)"
+   [ -f "$TRAMP" ] && [ -n "$(find platform/backend/apps platform/backend/libs -name '*.ts' -newer "$TRAMP" -print -quit)" ] && echo "STALE_DIST (source)"
    ```
-   IF `STALE_TRAMPOLINE` or `MISSING_TRAMPOLINE`:
-     This is non-destructive — `bun run build` only writes to `dist/`, no service kill or in-flight state loss. Run it without prompting for authorization, then proceed:
+   IF any `MISSING_DIST` / `STALE_DIST`:
+     This is non-destructive (only `dist/` is touched). Run a **clean** rebuild without prompting — a plain incremental `bun run build` does not prune orphaned files and will not fix the rename case:
      ```bash
-     cd platform/backend && bun run build
+     cd platform/backend && rm -rf dist && bun run build
      ```
-     If services were already running with the stale trampoline (the dangerous case the stale-service check at Step 3 misses when the process started recently but loaded a stale registry), the running backend still has the stale alias map in memory — fixing the file isn't enough. After `bun run build`, also restart the backend (treat as a stale-service event: route through the recovery recipe in Step 3 with explicit user authorization, since restarting drops in-flight state).
+     If services were already running against the stale `dist/`, the running backend still has the stale code/alias map in memory — fixing `dist/` isn't enough. After the rebuild, also restart the backend (treat as a stale-service event: route through the recovery recipe in Step 3 with explicit user authorization, since restarting drops in-flight state).
 
 5. **Stale-deps check.** Two independent failure modes — both produce the same opaque module-resolution errors at runtime, so check both:
 
@@ -501,7 +506,7 @@ CHECKLIST
 
 | Mistake | Instead |
 |---|---|
-| Running `bun run e2e:stateless` directly when the trampoline is missing | Backend crashes at boot with `Cannot find module .../dist/apps/api/apps/api/src/e2e.js`. Use `./scripts/e2e.sh` (it runs `bun run build` once when the trampoline is absent), or run `cd platform/backend && bun run build` first. |
+| Running `bun run e2e:stateless` against a stale `dist/` | Backend crashes at boot — `Cannot find module .../e2e.js` (missing trampoline) or `Cannot find module '@skaile/...'` (orphaned output from a package rename). Use `./scripts/e2e.sh` (it clean-rebuilds when `dist/` is stale), or run `cd platform/backend && rm -rf dist && bun run build` first. A plain incremental `bun run build` does not prune orphaned files. |
 | Writing specs without live-verifying selectors | Use chrome-devtools MCP first; UI drifts faster than specs |
 | `browser.newContext()` for impersonation | `page.addInitScript` on the shared `page` fixture (coverage depends on it) |
 | Asserting on `getByText('Dashboard')` etc. | Use `getByRole('heading', { name: ... })` or enabled interactive elements — sidebar links match text before page body loads |
