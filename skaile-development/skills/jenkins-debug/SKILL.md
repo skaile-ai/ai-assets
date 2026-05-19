@@ -1,6 +1,6 @@
 ---
 name: "jenkins-debug"
-description: "[skaile-development] Debug a recently failed Skaile platform deployment on Jenkins. Reads the `skaile_platform` job over the local SSH tunnel (http://localhost:8090, anonymous read), finds the relevant build (last failed by default, or current/explicit), extracts the failure region from the console log, cross-references recent commits in skaile-dev around the build timestamp, and reports a structured summary with a fix hypothesis. Use when the user says \"why did the deploy fail\", \"debug the jenkins failure\", \"what broke on jenkins\", \"the platform deploy is red\", \"check the last platform-deploy\", or otherwise asks about a Jenkins deployment failure."
+description: "[skaile-development] Debug a recently failed Skaile deployment on Jenkins. Defaults to the `skaile_platform` job; pass `target=store` to debug the `skaile_store` job instead. Reads the job over the local SSH tunnel (http://localhost:8090, anonymous read), finds the relevant build (last failed by default, or current/explicit), extracts the failure region from the console log, cross-references recent commits in skaile-dev around the build timestamp, and reports a structured summary with a fix hypothesis. Use when the user says \"why did the deploy fail\", \"debug the jenkins failure\", \"what broke on jenkins\", \"the platform deploy is red\", \"the store deploy is red\", \"check the last platform-deploy\", or otherwise asks about a Jenkins deployment failure."
 metadata:
   version: "1.0.0"
   tags:
@@ -19,6 +19,14 @@ metadata:
         gate: hard
         description: "Must run from the skaile-dev shell repo (used for commit cross-reference)."
     inputs_optional:
+      - id: target
+        label: "Deployment to debug"
+        type: select
+        options:
+          - "platform"
+          - "store"
+        default: "platform"
+        hint: "platform = the `skaile_platform` job | store = the `skaile_store` job"
       - id: mode
         label: "Build selection mode"
         type: select
@@ -32,15 +40,21 @@ metadata:
         type: text
         hint: "If set, overrides `mode` and inspects exactly this build (e.g. 252)."
     reads:
-      - path: "http://localhost:8090/job/skaile_platform/api/json"
-        description: "Recent build list for the deploy job (anonymous Jenkins read)."
-      - path: "http://localhost:8090/job/skaile_platform/<n>/consoleText"
+      - path: "http://localhost:8090/job/<skaile_platform|skaile_store>/api/json"
+        description: "Recent build list for the selected deploy job (anonymous Jenkins read)."
+      - path: "http://localhost:8090/job/<skaile_platform|skaile_store>/<n>/consoleText"
         description: "Console log of the target build."
       - path: ".git/logs"
         description: "Local git history for ±2h commit cross-reference (skaile-dev shell + submodules)."
     produces: []
   user_inputs:
     dialog:
+      - id: "target"
+        label: "Deployment to debug (platform | store)"
+        type: "select"
+        options: ["platform", "store"]
+        required: false
+        default: "platform"
       - id: "mode"
         label: "Build selection mode"
         type: "select"
@@ -56,9 +70,16 @@ metadata:
 
 ## Overview
 
-Investigates a failed Skaile platform deployment by reading the `skaile_platform` Jenkins job
-over the local SSH tunnel and producing a structured failure summary the user (or another
-agent) can act on without copy-pasting from the Jenkins UI.
+Investigates a failed Skaile deployment by reading a Jenkins job over the local SSH tunnel
+and producing a structured failure summary the user (or another agent) can act on without
+copy-pasting from the Jenkins UI.
+
+Two jobs are supported, selected by the `target` input:
+
+| `target`           | Jenkins job       | Deploys                        |
+| ------------------ | ----------------- | ------------------------------ |
+| `platform` (default) | `skaile_platform` | the enterprise platform        |
+| `store`            | `skaile_store`    | the public AI Asset Catalog    |
 
 The tunnel forwards the Jenkins controller's port 8080 to `localhost:8090`. Anonymous read is
 enabled, so this skill never needs credentials. It is strictly read-only — it never triggers
@@ -72,6 +93,7 @@ Invoke when the user wants to know what broke on Jenkins, including phrases like
 - "debug the jenkins failure"
 - "what broke on jenkins"
 - "the platform deploy is red"
+- "the store deploy is red" (pass `target=store`)
 - "check the last platform-deploy"
 - "show me the jenkins error"
 
@@ -79,26 +101,38 @@ Invoke when the user wants to know what broke on Jenkins, including phrases like
 
 - **The user wants to retrigger a build.** This skill is read-only. Use the Jenkins UI (or a
   separate skill purpose-built for that) to re-run jobs.
-- **The failure is in a non-deploy job.** Hardcoded for `skaile_platform`. Other jobs
-  (`portfolex`, `alma`, etc.) are not in scope.
+- **The failure is in a non-deploy job.** Only `skaile_platform` and `skaile_store` are
+  supported. Other jobs (`portfolex`, `alma`, etc.) are not in scope.
 - **The user is debugging a local `bun run dev` or test failure.** Use `test`, `kill-backend`,
   or the relevant package's diagnostic skill instead — Jenkins is not involved.
 - **The SSH tunnel is not up.** Step 1 fails fast and tells the user; do not attempt to start
   the tunnel automatically.
-- **The user wants the Jenkins UI.** Direct them to `http://localhost:8090/job/skaile_platform/`
+- **The user wants the Jenkins UI.** Direct them to `http://localhost:8090/job/<job>/`
   in a browser.
 
 ## Configuration
 
 Hardcoded for this monorepo:
 
-| Setting          | Value                            |
-| ---------------- | -------------------------------- |
-| Jenkins base URL | `http://localhost:8090`          |
-| Job name         | `skaile_platform`                |
-| Repo for commits | `.` (the skaile-dev shell repo)  |
+| Setting          | Value                                                         |
+| ---------------- | ------------------------------------------------------------- |
+| Jenkins base URL | `http://localhost:8090`                                       |
+| Job name         | `skaile_platform` (default) or `skaile_store` (`target=store`) |
+| Repo for commits | `.` (the skaile-dev shell repo)                               |
 
-If the tunnel uses a different port or the job is renamed, edit this section before running.
+Resolve the job name from the `target` input at the start of the procedure:
+
+```bash
+case "${TARGET_DEPLOY:-platform}" in
+  store)    JOB="skaile_store"    ;;
+  platform) JOB="skaile_platform" ;;
+  *) echo "[fail] unknown target '${TARGET_DEPLOY}' (expected platform|store)"; exit 1 ;;
+esac
+echo "[ok] debugging job: $JOB"
+```
+
+Use `$JOB` everywhere a job name appears below. If the tunnel uses a different port or a job
+is renamed, edit this section before running.
 
 ## Procedure
 
@@ -120,8 +154,11 @@ automatically.
 
 Set `BUILD` (the build number to inspect) based on inputs:
 
+Note: the `target` input is read into `TARGET_DEPLOY` (the `JOB` resolver above); `TARGET`
+below is the build *number*. Do not conflate them.
+
 ```bash
-BASE='http://localhost:8090/job/skaile_platform'
+BASE="http://localhost:8090/job/$JOB"
 
 if [ -n "$BUILD" ]; then
   TARGET="$BUILD"
@@ -212,7 +249,9 @@ UNTIL=$(date -u -r $((TS_S + 7200)) +'%Y-%m-%dT%H:%M:%SZ')
 
 git log --since="$SINCE" --until="$UNTIL" --pretty=format:'%h %ai %s' -n 20
 git -C platform log --since="$SINCE" --until="$UNTIL" --pretty=format:'%h %ai %s' -n 20 2>/dev/null
-git -C agent-framework log --since="$SINCE" --until="$UNTIL" --pretty=format:'%h %ai %s' -n 20 2>/dev/null
+git -C workspaces log --since="$SINCE" --until="$UNTIL" --pretty=format:'%h %ai %s' -n 20 2>/dev/null
+# For target=store, the store submodule is the most likely culprit:
+git -C store log --since="$SINCE" --until="$UNTIL" --pretty=format:'%h %ai %s' -n 20 2>/dev/null
 ```
 
 If the build metadata included a SHA1, also run `git log -1 <sha>` to identify the exact
@@ -223,11 +262,11 @@ commit Jenkins tried to build.
 Print a single structured summary to chat in this exact shape (markdown):
 
 ```markdown
-## Jenkins `skaile_platform` — Build #<N> <RESULT>
+## Jenkins `<JOB>` — Build #<N> <RESULT>
 
 **When:** <ISO-8601 UTC> (<duration>s)
 **Stage:** <stage name or "pre-pipeline / SCM checkout" if before any stage>
-**URL:** http://localhost:8090/job/skaile_platform/<N>/console
+**URL:** http://localhost:8090/job/<JOB>/<N>/console
 **Commit attempted:** <sha if known, else "—">
 
 ### Error
@@ -308,8 +347,8 @@ user (or the orchestrating agent) decide the next step.
 
 ## Known Limitations
 
-- **Single-job scope.** Hardcoded for `skaile_platform`. Multi-job triage requires a separate
-  skill or generalisation.
+- **Two-job scope.** Supports `skaile_platform` and `skaile_store` via the `target` input.
+  Other jobs require generalisation.
 - **Anonymous read only.** Cannot fetch build artifacts that are credential-gated, cannot
   trigger builds, cannot read job config. None of these are needed for the debug use case.
 - **Pre-pipeline failures show no `wfapi` stages.** When checkout fails before any pipeline
