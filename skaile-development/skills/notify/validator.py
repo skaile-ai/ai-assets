@@ -8,7 +8,23 @@ skip() calls with structural checks.
 """
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "skaileup-shared" / "scripts"))
+
+_VLIB = None
+for _base in (Path(__file__).resolve(), *Path(__file__).resolve().parents):
+    for _rel in (
+        ("ai-assets-skaileup", "contracts", "scripts"),
+        ("ai-assets-skaileup", "skaileup-contracts", "scripts"),
+        ("skaileup-shared", "scripts"),
+    ):
+        _cand = _base.joinpath(*_rel)
+        if (_cand / "validator_lib.py").exists():
+            _VLIB = str(_cand)
+            break
+    if _VLIB:
+        break
+if _VLIB:
+    sys.path.insert(0, _VLIB)
+
 from validator_lib import Validator, main
 
 SKILL = "notify"

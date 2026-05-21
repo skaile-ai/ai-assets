@@ -18,17 +18,24 @@ import re
 import sys
 from pathlib import Path
 
-# The shared validator_lib is in ai-assets-skaileup/skaileup-contracts/scripts.
-# We try the current location first, then a legacy fallback for older trees.
-_HERE = Path(__file__).resolve()
-_CANDIDATES = [
-    _HERE.parents[4] / "ai-assets-skaileup" / "skaileup-contracts" / "scripts",
-    _HERE.parents[3] / "skaileup-shared" / "scripts",  # legacy fallback
-]
-for _p in _CANDIDATES:
-    if (_p / "validator_lib.py").exists():
-        sys.path.insert(0, str(_p))
+# Locate the shared validator_lib by walking up from this file's location and
+# probing known relative paths. Location-independent so the same file works
+# whether run from the ai-assets source tree or the .claude/skills copy.
+_VLIB = None
+for _base in (Path(__file__).resolve(), *Path(__file__).resolve().parents):
+    for _rel in (
+        ("ai-assets-skaileup", "contracts", "scripts"),
+        ("ai-assets-skaileup", "skaileup-contracts", "scripts"),
+        ("skaileup-shared", "scripts"),
+    ):
+        _cand = _base.joinpath(*_rel)
+        if (_cand / "validator_lib.py").exists():
+            _VLIB = str(_cand)
+            break
+    if _VLIB:
         break
+if _VLIB:
+    sys.path.insert(0, _VLIB)
 
 from validator_lib import Validator, main  # noqa: E402
 

@@ -10,15 +10,22 @@ producing structured JSON artifacts, replace the skip() calls with structural ch
 import sys
 from pathlib import Path
 
-_HERE = Path(__file__).resolve()
-for _cand in (
-    _HERE.parents[4] / "ai-assets-skaileup" / "contracts" / "scripts",           # current
-    _HERE.parents[4] / "ai-assets-skaileup" / "skaileup-contracts" / "scripts",  # legacy fallback
-    _HERE.parents[3] / "skaileup-shared" / "scripts",                            # legacy fallback
-):
-    if (_cand / "validator_lib.py").exists():
-        sys.path.insert(0, str(_cand))
+_VLIB = None
+for _base in (Path(__file__).resolve(), *Path(__file__).resolve().parents):
+    for _rel in (
+        ("ai-assets-skaileup", "contracts", "scripts"),
+        ("ai-assets-skaileup", "skaileup-contracts", "scripts"),
+        ("skaileup-shared", "scripts"),
+    ):
+        _cand = _base.joinpath(*_rel)
+        if (_cand / "validator_lib.py").exists():
+            _VLIB = str(_cand)
+            break
+    if _VLIB:
         break
+if _VLIB:
+    sys.path.insert(0, _VLIB)
+
 from validator_lib import Validator, main
 
 SKILL = "git"
