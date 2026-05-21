@@ -57,7 +57,7 @@ def validate(cwd: str) -> dict:
            reason="semantic — generated code style")
     v.skip("mark every semantic/subjective rule with v.skip()", rule_type="MUST",
            reason="semantic — classification correctness")
-    v.skip("use sys.path depth = 3 for flat skills", rule_type="MUST",
+    v.skip("locate validator_lib with the walk-up resolver (no hardcoded parents[N])", rule_type="MUST",
            reason="semantic — generated code correctness")
     v.skip("test every generated validator runs without errors", rule_type="MUST",
            reason="runtime — subprocess invocation")
@@ -81,7 +81,7 @@ def validate(cwd: str) -> dict:
            reason="semantic — classification")
     v.skip("Every CHECKLIST item is either structural or skipped", rule_type="CHECKLIST",
            reason="semantic — classification")
-    v.skip("Correct sys.path depth (parents[3])", rule_type="CHECKLIST",
+    v.skip("validator_lib located via the walk-up resolver (no hardcoded parents[N]); runs from both ai-assets and .claude/skills copies", rule_type="CHECKLIST",
            reason="semantic — generated code correctness")
     v.skip("Each generated validator imports and runs without error", rule_type="CHECKLIST",
            reason="runtime — subprocess")

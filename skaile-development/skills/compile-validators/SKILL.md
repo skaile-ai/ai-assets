@@ -22,7 +22,7 @@ metadata:
     reads:
       - path: "ai-assets/skaile-development/skills/<skill>/SKILL.md"
         description: "Skill definition with MUST/NEVER/CHECKLIST rules"
-      - path: "ai-assets/skaileup-shared/scripts/validator_lib.py"
+      - path: "ai-assets-skaileup/contracts/scripts/validator_lib.py"
         description: "Shared validation library API"
     produces:
       - path: "ai-assets/skaile-development/skills/<skill>/validator.py"
@@ -62,7 +62,7 @@ ROLE  Validator compiler for skaile-development skills. Reads a SKILL.md, classi
 
 READS
   ! ai-assets/skaile-development/skills/<skill>/SKILL.md
-  ! ai-assets/skaileup-shared/scripts/validator_lib.py   — shared validator API (referenced, not copied)
+  ! ai-assets-skaileup/contracts/scripts/validator_lib.py   — shared validator API (referenced, not copied)
 
 WRITES
   ai-assets/skaile-development/skills/<skill>/validator.py
@@ -70,7 +70,7 @@ WRITES
 MUST  read validator_lib.py before generating any validator (for the full API)
 MUST  handle missing files gracefully — check existence before reading content
 MUST  mark every semantic/subjective rule with v.skip() and a clear reason
-MUST  use sys.path depth = 3 (flat skills under ai-assets/skaile-development/skills/<skill>/)
+MUST  locate validator_lib with the walk-up resolver (never a hardcoded parents[N]) so the validator runs from both the ai-assets source tree and the .claude/skills copy
 MUST  test every generated validator runs without errors
 NEVER use external dependencies beyond Python stdlib + validator_lib
 NEVER generate validators that call an LLM, subprocess, or network
@@ -130,7 +130,25 @@ STEP 4: Write validator.py
   """
   import sys
   from pathlib import Path
-  sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "skaileup-shared" / "scripts"))
+
+  # Locate the shared validator_lib by walking up from this file and probing
+  # known relative paths. Location-independent: the same file works whether run
+  # from the ai-assets source tree or the .claude/skills copy (different depths).
+  _VLIB = None
+  for _base in (Path(__file__).resolve(), *Path(__file__).resolve().parents):
+      for _rel in (
+          ("ai-assets-skaileup", "contracts", "scripts"),
+          ("ai-assets-skaileup", "skaileup-contracts", "scripts"),
+          ("skaileup-shared", "scripts"),
+      ):
+          _cand = _base.joinpath(*_rel)
+          if (_cand / "validator_lib.py").exists():
+              _VLIB = str(_cand)
+              break
+      if _VLIB:
+          break
+  if _VLIB:
+      sys.path.insert(0, _VLIB)
   from validator_lib import Validator, main
 
   SKILL = "<skill-name>"
@@ -156,9 +174,14 @@ STEP 4: Write validator.py
       main(validate)
   ```
 
-  **Path depth:** skaile-development skills live at
-  `ai-assets/skaile-development/skills/<skill>/validator.py` → 3 parents from validator.py = `ai-assets/`.
-  Use `parents[3]` in the sys.path.insert.
+  **Locating validator_lib:** never hardcode a single `parents[N]` — the shared
+  `validator_lib.py` lives in the sibling submodule at
+  `ai-assets-skaileup/contracts/scripts/`, and the validator must also run from the
+  shallower `.claude/skills/<skill>/` copy. Use the walk-up resolver shown in the
+  template above: it ascends from the validator's own directory through every
+  ancestor, probing each candidate relative path, so it resolves correctly from any
+  copy/depth. `("ai-assets-skaileup", "skaileup-contracts", "scripts")` and
+  `("skaileup-shared", "scripts")` are kept only as legacy fallbacks.
 
 # ── Phase 5: Test ────────────────────────────────────────────────
 
@@ -166,7 +189,8 @@ STEP 5: Verify every generated validator runs
   $ python3 ai-assets/skaile-development/skills/<skill>/validator.py --cwd <test-cwd> --json
   - Verify no import errors
   - Verify JSON output has expected keys (must, never, checklist, skipped)
-  - If import fails, fix sys.path depth or module reference
+  - If import fails, confirm the walk-up resolver's candidate paths still match where validator_lib.py actually lives
+  - Run the same check on the .claude/skills/<skill>/ copy too — the resolver must work from both depths
 
 # ── Phase 6: Report ──────────────────────────────────────────────
 
@@ -186,7 +210,7 @@ CHECKLIST
   - [ ] Every MUST rule is either structural or skipped
   - [ ] Every NEVER rule is either structural or skipped
   - [ ] Every CHECKLIST item is either structural or skipped
-  - [ ] Correct sys.path depth (parents[3])
+  - [ ] validator_lib located via the walk-up resolver (no hardcoded parents[N]); runs from both ai-assets and .claude/skills copies
   - [ ] Each generated validator imports and runs without error
   - [ ] Semantic rules carry a clear skip reason
   - [ ] No external dependencies beyond stdlib + validator_lib
