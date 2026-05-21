@@ -693,6 +693,32 @@ IF mode = deploy
       IF stashed: $ git stash pop
       STOP: "✗ Merge conflict between main and deploy. Resolve on deploy branch manually."
 
+  STEP 5b: Normalize submodule URLs to HTTPS (CI cannot use SSH)
+    The Jenkins executors authenticate to GitHub over HTTPS via a GIT_ASKPASS
+    credential and have NO SSH deploy key. `main` tracks submodules with SSH URLs
+    (git@github.com:...), so any submodule newly merged into deploy arrives as SSH
+    and its checkout fails with "Permission denied (publickey)" — observed when the
+    `brand` submodule was first added. The deploy branch therefore keeps every
+    submodule URL on HTTPS. Re-apply that invariant after every merge so newly-added
+    submodules are converted automatically, not just the ones fixed by hand once.
+
+    Rewrite all SSH GitHub remotes in .gitmodules to HTTPS:
+      $ sed -i '' -E 's#git@github\.com:#https://github.com/#' .gitmodules    # macOS
+      # Linux/CI shells: $ sed -i -E 's#git@github\.com:#https://github.com/#' .gitmodules
+
+    Verify none remain (this must succeed):
+      $ ! grep -q 'git@github.com:' .gitmodules
+
+    IF .gitmodules changed (git diff --quiet .gitmodules returns non-zero):
+      $ git add .gitmodules
+      $ git commit -m "fix(gitmodules): normalize submodule URLs to HTTPS for CI checkout"
+      > "Converted <N> submodule URL(s) to HTTPS on deploy: <names>."
+    ELSE:
+      > "All submodule URLs already HTTPS — no normalization needed."
+
+    NOTE: this commit lives only on the deploy branch. `main` intentionally keeps
+    SSH URLs for local developer clones; never merge this normalization back to main.
+
   STEP 6: Push deploy
     $ git push origin deploy
     IF push fails:
@@ -721,6 +747,7 @@ CHECKLIST
   - [ ] git-state.json written/updated
   - [ ] deploy mode only runs from main (or after explicit merge-to-main)
   - [ ] all submodules and shell repo pushed before deploy merge
+  - [ ] submodule URLs normalized to HTTPS on deploy after merge (no `git@github.com:` remains in .gitmodules)
   - [ ] stash popped after deploy (even on failure)
   - [ ] Backend start verified (or explicitly skipped) when structural platform/backend changes are present
   - [ ] Formatting and linting run on all affected packages before commit (Biome for agent-framework/forge/docs/theme; Prettier+ESLint for platform)
