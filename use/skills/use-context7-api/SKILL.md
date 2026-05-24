@@ -11,7 +11,7 @@ metadata:
   stage: "alpha"
   source: "MIGRATED"
   requires:
-    - "use-contract"
+    - "contract:use-contract"
   env_vars:
     CONTEXT7_API_KEY: "Optional. Increases rate limits and provides access to private repositories."
 ---

@@ -5,7 +5,7 @@ metadata:
   stage: "alpha"
   source: "MIGRATED"
   requires:
-    - "use-contract"
+    - "contract:use-contract"
   env_vars:
     ELEVENLABS_API_KEY: "Required. Your ElevenLabs API key for authentication."
 ---

@@ -7,7 +7,7 @@ metadata:
   stage: "alpha"
   source: "MIGRATED"
   requires:
-    - "use-contract"
+    - "contract:use-contract"
   author: "sanjay3290"
 ---
 

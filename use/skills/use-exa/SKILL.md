@@ -5,7 +5,7 @@ metadata:
   stage: "alpha"
   source: "MIGRATED"
   requires:
-    - "use-contract"
+    - "contract:use-contract"
 ---
 
 # Use Exa

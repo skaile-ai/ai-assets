@@ -5,7 +5,7 @@ metadata:
   stage: "alpha"
   source: "MIGRATED"
   requires:
-    - "use-contract"
+    - "contract:use-contract"
 keywords: [slidev, slides, presentation, deck, sli.dev, markdown]
 reads_from: []
 writes_to: ["slides.md", "style.css", "package.json"]

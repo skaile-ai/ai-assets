@@ -5,7 +5,7 @@ metadata:
   stage: "alpha"
   source: "MIGRATED"
   requires:
-    - "use-contract"
+    - "contract:use-contract"
 keywords: [revealjs, reveal.js, slides, presentation, deck, html]
 reads_from: []
 writes_to: ["index.html", "skaile-theme.css"]

@@ -5,7 +5,7 @@ metadata:
   stage: "alpha"
   source: "MIGRATED"
   requires:
-    - "use-contract"
+    - "contract:use-contract"
   env_vars:
     OPENROUTER_API_KEY: "Required. API key for OpenRouter to access Perplexity models."
 ---

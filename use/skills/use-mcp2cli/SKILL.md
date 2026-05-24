@@ -5,7 +5,7 @@ metadata:
   stage: alpha
   source: MIGRATED
   requires:
-    - use-contract
+    - contract:use-contract
   env_vars:
     MCP2CLI_CACHE_DIR: "Optional. Override cache directory (default: ~/.cache/mcp2cli)"
 version: 1.0.0
