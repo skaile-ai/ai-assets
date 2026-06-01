@@ -38,6 +38,39 @@ my-skill/
 └── validator.py    ← Optional: output validation script
 ```
 
+## Manifest Schema
+
+Every asset shipped from this repo is identified by the canonical tuple
+`(publisher, kind, name, version)`:
+
+| Field | Source of truth | Notes |
+|---|---|---|
+| `publisher` | `skaile.yaml` at the repo root | `skaile-ai` for everything here |
+| `kind` | `<domain>/skills/<name>/SKILL.md` (skill), `<domain>/<domain>.bundle.yaml` (bundle) | filename convention |
+| `name` | SKILL.md frontmatter `name:` (must match parent directory) | per-asset |
+| `version` | `git describe --tags --abbrev=0` of the resolved commit | repo-wide; cut a tag to release |
+
+Per-asset `metadata.version:` in SKILL.md frontmatter is **ignored** by the
+workspaces parser. Do not add it back.
+
+Consumer projects pull from this repo via a `sources:` entry in their own
+`skaile.yaml`:
+
+```yaml
+sources:
+  - url: https://github.com/skaile-ai/ai-assets
+    pin: v1.4.0     # branch | tag | 40-char sha; defaults to HEAD of default branch
+dependencies:
+  - bundle:skaile-development@skaile-ai#^2.0
+  - skill:audit@skaile-ai#~1.4
+```
+
+Full schema:
+[`workspaces/.../specs/2026-05-31-manifest-canonical-identity.md`](https://github.com/skaile-ai/workspaces/blob/main/packages/workspaces/_devlog/specs/2026-05-31-manifest-canonical-identity.md)
+(canonical) and the migration skill at
+`skaile-development/skills/migrate-skaile-manifest/` (for converting legacy
+`repositories:` / `ai_resources:` manifests).
+
 ## How This Is Consumed
 
 The skaile CLI and platform consume these at **runtime** by reading SKILL.md files from disk. Configure the path via `SKAILE_RESOURCES_PATH` env var or `skaile.yaml`.
