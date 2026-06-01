@@ -125,3 +125,19 @@ the three ambiguity cases.
 When the user hits a pain point the rules don't cover, capture it in
 `resources/improvement_ideas.md` for next-iteration triage (standard
 `skill-builder` pattern).
+
+## Smoke Test
+
+Verify the script end-to-end:
+
+```bash
+cd .../migrate-skaile-manifest
+uv run scripts/migrate.py \
+  --in scripts/smoke_fixture/skaile.legacy.yaml \
+  --out /tmp/migrated.yaml \
+  --publisher-map '{...see fixture comment...}'
+diff -u scripts/smoke_fixture/expected.yaml /tmp/migrated.yaml
+```
+
+Empty diff = green. Update `expected.yaml` only when the spec's mapping
+rules change; never to paper over a regression.

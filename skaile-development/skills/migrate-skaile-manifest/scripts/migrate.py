@@ -111,7 +111,7 @@ def _scoped_dep(ref: str, publisher: str) -> str:
 def migrate(in_path: str, pub_map: dict) -> str:
     yaml = YAML()
     yaml.preserve_quotes = True
-    yaml.indent(mapping=2, sequence=2, offset=0)
+    yaml.indent(mapping=2, sequence=4, offset=2)
     with open(in_path) as f:
         doc = yaml.load(f)
     if doc is None:
