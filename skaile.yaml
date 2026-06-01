@@ -1,0 +1,69 @@
+# skaile.yaml — publication half for skaile-ai/ai-assets
+#
+# Implements the canonical-identity architecture from
+# workspaces/.../_devlog/specs/2026-05-31-manifest-canonical-identity.md
+#
+# This file declares THE canonical publisher for every asset shipped from this
+# repo. Consumer projects that resolve `<kind>:<name>@skaile-ai` end up here.
+#
+# Version is omitted: the resolver derives it from `git describe --tags`. Cut
+# a new git tag to publish a new version of every asset in this repo.
+
+publisher: skaile-ai
+
+# `assets:` is exhaustive for the two largest, most-depended-on domains so
+# their canonical identity is locked even if the directory layout drifts.
+# Other domains rely on the agentskills.io filename convention
+# (<domain>/skills/<name>/SKILL.md) — the workspaces walker discovers them
+# automatically.
+assets:
+
+  # ── skaile-development ────────────────────────────────────────────────────
+  - { kind: skill,  name: audit, root: skaile-development/skills/audit }
+  - { kind: skill,  name: bug-fix, root: skaile-development/skills/bug-fix }
+  - { kind: skill,  name: compile-validators, root: skaile-development/skills/compile-validators }
+  - { kind: skill,  name: component-builder, root: skaile-development/skills/component-builder }
+  - { kind: skill,  name: devlog, root: skaile-development/skills/devlog }
+  - { kind: skill,  name: doc, root: skaile-development/skills/doc }
+  - { kind: skill,  name: e2e-platform, root: skaile-development/skills/e2e-platform }
+  - { kind: skill,  name: faq, root: skaile-development/skills/faq }
+  - { kind: skill,  name: git, root: skaile-development/skills/git }
+  - { kind: skill,  name: good-morning, root: skaile-development/skills/good-morning }
+  - { kind: skill,  name: implement, root: skaile-development/skills/implement }
+  - { kind: skill,  name: jenkins-debug, root: skaile-development/skills/jenkins-debug }
+  - { kind: skill,  name: kill-backend, root: skaile-development/skills/kill-backend }
+  - { kind: skill,  name: migrate-skaile-manifest, root: skaile-development/skills/migrate-skaile-manifest }
+  - { kind: skill,  name: notify, root: skaile-development/skills/notify }
+  - { kind: skill,  name: postxl, root: skaile-development/skills/postxl }
+  - { kind: skill,  name: proposal, root: skaile-development/skills/proposal }
+  - { kind: skill,  name: quality, root: skaile-development/skills/quality }
+  - { kind: skill,  name: ready, root: skaile-development/skills/ready }
+  - { kind: skill,  name: release, root: skaile-development/skills/release }
+  - { kind: skill,  name: review, root: skaile-development/skills/review }
+  - { kind: skill,  name: session-analysis, root: skaile-development/skills/session-analysis }
+  - { kind: skill,  name: session-review, root: skaile-development/skills/session-review }
+  - { kind: skill,  name: skaile-stack-decide, root: skaile-development/skills/skaile-stack-decide }
+  - { kind: skill,  name: sync-docs, root: skaile-development/skills/sync-docs }
+  - { kind: skill,  name: test-e2e, root: skaile-development/skills/test-e2e }
+  - { kind: skill,  name: test-integration, root: skaile-development/skills/test-integration }
+  - { kind: skill,  name: test-plan, root: skaile-development/skills/test-plan }
+  - { kind: skill,  name: test-unit, root: skaile-development/skills/test-unit }
+  - { kind: skill,  name: test, root: skaile-development/skills/test }
+  - { kind: skill,  name: verify-ui, root: skaile-development/skills/verify-ui }
+  - { kind: bundle, name: skaile-development, root: skaile-development, files: [skaile-development.bundle.yaml] }
+
+  # ── ai-asset-management ───────────────────────────────────────────────────
+  - { kind: skill,  name: agent-builder, root: ai-asset-management/skills/agent-builder }
+  - { kind: skill,  name: ai-resource-navigator, root: ai-asset-management/skills/ai-resource-navigator }
+  - { kind: skill,  name: domain-builder, root: ai-asset-management/skills/domain-builder }
+  - { kind: skill,  name: skill-builder, root: ai-asset-management/skills/skill-builder }
+  - { kind: skill,  name: source-deps-analyzer, root: ai-asset-management/skills/source-deps-analyzer }
+  - { kind: skill,  name: source-manifest-builder, root: ai-asset-management/skills/source-manifest-builder }
+  - { kind: skill,  name: source-sidecar-curator, root: ai-asset-management/skills/source-sidecar-curator }
+  - { kind: skill,  name: uv-cli-implementer, root: ai-asset-management/skills/uv-cli-implementer }
+  - { kind: bundle, name: ai-asset-management, root: ai-asset-management, files: [ai-asset-management.bundle.yaml] }
+
+# Other domains (dev-implementation-experts*, forge-project, knowledge-research,
+# use, testing, skaile-platform, github-ops, external) rely on the
+# agentskills.io filename convention and are discovered by the workspaces walker.
+# Move them into the `assets:` block if/when their identity needs locking.
