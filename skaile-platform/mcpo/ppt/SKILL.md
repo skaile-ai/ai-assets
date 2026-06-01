@@ -1,24 +1,34 @@
 ---
 name: ppt
-description: "Use when an agent needs to author, modify, review, render, or export PowerPoint (.pptx / .pptm) decks — create/open/close documents, add/duplicate/delete/reorder slides, edit text (with run/paragraph/shape scope + styling), insert images with picture effects, add/edit tables (incl. merge + per-cell borders), draw shapes (solid/gradient/pattern fills), update chart data in existing charts, render slides to PNG/JPG/SVG at low or high fidelity, and export to PPTX/PDF/HTML/PNG-batch/JPG-batch/SVG-batch/outline-text. Invoke via the `ppt-mcp:dev` Docker MCP server over stdio."
+description: "Use when an agent needs to author, modify, review, render, or export
+  PowerPoint (.pptx / .pptm) decks — create/open/close documents, add/duplicate/delete/reorder
+  slides, edit text (with run/paragraph/shape scope + styling), insert images with
+  picture effects, add/edit tables (incl. merge + per-cell borders), draw shapes (solid/gradient/pattern
+  fills), update chart data in existing charts, render slides to PNG/JPG/SVG at low
+  or high fidelity, and export to PPTX/PDF/HTML/PNG-batch/JPG-batch/SVG-batch/outline-text.
+  Invoke via the `ppt-mcp:dev` Docker MCP server over stdio."
 metadata:
-  version: "1.0.0"
   stage: "stable"
   tags: [powerpoint, pptx, mcp, rendering, apache-poi, libreoffice]
   env_vars:
-    MCPO_ALLOWED_ROOT: "Required inside Docker. Sandbox root under which every path argument must resolve. Default in the shipped image: /workspace/resources."
-    MCPO_TEMPLATE_DIR: "Optional. Template store for ppt.upload_template. Default: <allowed_root>/.mcpo-ppt/templates."
-    MCPO_DEFAULT_TEMPLATE_CONFIG: "Optional. Persisted default-template pointer. Default: <allowed_root>/.mcpo-ppt/default-template.json."
+    MCPO_ALLOWED_ROOT: "Required inside Docker. Sandbox root under which every path
+      argument must resolve. Default in the shipped image: /workspace/resources."
+    MCPO_TEMPLATE_DIR: "Optional. Template store for ppt.upload_template. Default:
+      <allowed_root>/.mcpo-ppt/templates."
+    MCPO_DEFAULT_TEMPLATE_CONFIG: "Optional. Persisted default-template pointer. Default:
+      <allowed_root>/.mcpo-ppt/default-template.json."
     MCPO_MAX_OPEN_DOCS: "Optional. Concurrent open-session cap. Default: 100."
-    SOFFICE_PATH: "Optional. LibreOffice binary path. Default: /usr/bin/soffice (set in the shipped image). If missing, soffice-dependent tools return SOFFICE_UNAVAILABLE."
-    LOG_LEVEL: "Optional. Logback root level: ERROR | WARN | INFO | DEBUG. Default: INFO."
+    SOFFICE_PATH: "Optional. LibreOffice binary path. Default: /usr/bin/soffice (set
+      in the shipped image). If missing, soffice-dependent tools return SOFFICE_UNAVAILABLE."
+    LOG_LEVEL: "Optional. Logback root level: ERROR | WARN | INFO | DEBUG. Default:
+      INFO."
 transport: stdio
 recipe:
   attr: mcps.ppt
 command: ${recipe:ppt:bin}/java
 args:
-  - -jar
-  - ${recipe:ppt:lib}/ppt-mcp.jar
+- -jar
+- ${recipe:ppt:lib}/ppt-mcp.jar
 env:
   MCPO_ALLOWED_ROOT: /workspace/resources
   SOFFICE_PATH: ${recipe:ppt:bin}/soffice

@@ -1,53 +1,57 @@
 ---
 name: 'verify-ui'
-description: 'Visual verification of Skaile platform UI changes using browser automation. After implementing a UI feature, run this skill to systematically check that pages render correctly, navigation works, and key interactive elements are present. Uses agent-browser CLI and chrome-devtools MCP tools.'
+description: 'Visual verification of Skaile platform UI changes using browser automation.
+  After implementing a UI feature, run this skill to systematically check that pages
+  render correctly, navigation works, and key interactive elements are present. Uses
+  agent-browser CLI and chrome-devtools MCP tools.'
 metadata:
-  version: '1.0.0'
   tags:
-    - 'verification'
-    - 'ui'
-    - 'browser'
-    - 'visual'
-    - 'skaile-development'
+  - 'verification'
+  - 'ui'
+  - 'browser'
+  - 'visual'
+  - 'skaile-development'
   source: 'MERGED'
   stage: 'beta'
   prerequisites:
     files:
-      - path: 'platform/frontend/package.json'
-        gate: hard
-        description: 'Platform frontend must exist'
+    - path: 'platform/frontend/package.json'
+      gate: hard
+      description: 'Platform frontend must exist'
   user_inputs:
     dialog:
-      - id: 'scope'
-        label: 'What to verify'
-        type: 'select'
-        options:
-          - 'smoke'
-          - 'all'
-          - 'dashboard'
-          - 'project-creation'
-          - 'workspace'
-          - 'settings'
-          - 'admin'
-          - 'flow-execution'
-        required: true
-        default: 'smoke'
-        hint: "'smoke' = quick pass through main pages; 'all' = comprehensive check of every area; 'flow-execution' = end-to-end test-echo flow run (creates a real session, sends real LLM calls — opt-in only)"
-      - id: 'base_url'
-        label: 'Frontend URL'
-        type: 'text'
-        required: false
-        default: 'http://localhost:3000'
-      - id: 'tool_preference'
-        label: 'Browser tool'
-        type: 'select'
-        options:
-          - 'auto'
-          - 'agent-browser'
-          - 'chrome-devtools'
-        required: false
-        default: 'auto'
-        hint: "'auto' tries chrome-devtools MCP first, falls back to agent-browser CLI"
+    - id: 'scope'
+      label: 'What to verify'
+      type: 'select'
+      options:
+      - 'smoke'
+      - 'all'
+      - 'dashboard'
+      - 'project-creation'
+      - 'workspace'
+      - 'settings'
+      - 'admin'
+      - 'flow-execution'
+      required: true
+      default: 'smoke'
+      hint: "'smoke' = quick pass through main pages; 'all' = comprehensive check
+        of every area; 'flow-execution' = end-to-end test-echo flow run (creates a
+        real session, sends real LLM calls — opt-in only)"
+    - id: 'base_url'
+      label: 'Frontend URL'
+      type: 'text'
+      required: false
+      default: 'http://localhost:3000'
+    - id: 'tool_preference'
+      label: 'Browser tool'
+      type: 'select'
+      options:
+      - 'auto'
+      - 'agent-browser'
+      - 'chrome-devtools'
+      required: false
+      default: 'auto'
+      hint: "'auto' tries chrome-devtools MCP first, falls back to agent-browser CLI"
     files: []
 ---
 

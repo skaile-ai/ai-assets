@@ -1,70 +1,81 @@
 ---
 name: "jenkins-debug"
-description: "[skaile-development] Debug a recently failed Skaile deployment on Jenkins. Defaults to the `skaile_platform` job; pass `target=store` to debug the `skaile_store` job instead. Reads the job over the local SSH tunnel (http://localhost:8090, anonymous read), finds the relevant build (last failed by default, or current/explicit), extracts the failure region from the console log, cross-references recent commits in skaile-dev around the build timestamp, and reports a structured summary with a fix hypothesis. Use when the user says \"why did the deploy fail\", \"debug the jenkins failure\", \"what broke on jenkins\", \"the platform deploy is red\", \"the store deploy is red\", \"check the last platform-deploy\", or otherwise asks about a Jenkins deployment failure."
+description: "[skaile-development] Debug a recently failed Skaile deployment on Jenkins.
+  Defaults to the `skaile_platform` job; pass `target=store` to debug the `skaile_store`
+  job instead. Reads the job over the local SSH tunnel (http://localhost:8090, anonymous
+  read), finds the relevant build (last failed by default, or current/explicit), extracts
+  the failure region from the console log, cross-references recent commits in skaile-dev
+  around the build timestamp, and reports a structured summary with a fix hypothesis.
+  Use when the user says \"why did the deploy fail\", \"debug the jenkins failure\"\
+  , \"what broke on jenkins\", \"the platform deploy is red\", \"the store deploy
+  is red\", \"check the last platform-deploy\", or otherwise asks about a Jenkins
+  deployment failure."
 metadata:
-  version: "1.0.0"
   tags:
-    - "jenkins"
-    - "deploy"
-    - "ci"
-    - "failure"
-    - "debug"
-    - "platform"
-    - "skaile-development"
+  - "jenkins"
+  - "deploy"
+  - "ci"
+  - "failure"
+  - "debug"
+  - "platform"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: ".git"
-        gate: hard
-        description: "Must run from the skaile-dev shell repo (used for commit cross-reference)."
+    - path: ".git"
+      gate: hard
+      description: "Must run from the skaile-dev shell repo (used for commit cross-reference)."
     inputs_optional:
-      - id: target
-        label: "Deployment to debug"
-        type: select
-        options:
-          - "platform"
-          - "store"
-        default: "platform"
-        hint: "platform = the `skaile_platform` job | store = the `skaile_store` job"
-      - id: mode
-        label: "Build selection mode"
-        type: select
-        options:
-          - "last-failed"
-          - "current"
-        default: "last-failed"
-        hint: "last-failed = walk recent builds backward until a FAILURE is found | current = inspect lastBuild only and report green if green"
-      - id: build
-        label: "Explicit build number"
-        type: text
-        hint: "If set, overrides `mode` and inspects exactly this build (e.g. 252)."
+    - id: target
+      label: "Deployment to debug"
+      type: select
+      options:
+      - "platform"
+      - "store"
+      default: "platform"
+      hint: "platform = the `skaile_platform` job | store = the `skaile_store` job"
+    - id: mode
+      label: "Build selection mode"
+      type: select
+      options:
+      - "last-failed"
+      - "current"
+      default: "last-failed"
+      hint: "last-failed = walk recent builds backward until a FAILURE is found |
+        current = inspect lastBuild only and report green if green"
+    - id: build
+      label: "Explicit build number"
+      type: text
+      hint: "If set, overrides `mode` and inspects exactly this build (e.g. 252)."
     reads:
-      - path: "http://localhost:8090/job/<skaile_platform|skaile_store>/api/json"
-        description: "Recent build list for the selected deploy job (anonymous Jenkins read)."
-      - path: "http://localhost:8090/job/<skaile_platform|skaile_store>/<n>/consoleText"
-        description: "Console log of the target build."
-      - path: ".git/logs"
-        description: "Local git history for ±2h commit cross-reference (skaile-dev shell + submodules)."
+    - path: "http://localhost:8090/job/<skaile_platform|skaile_store>/api/json"
+      description: "Recent build list for the selected deploy job (anonymous Jenkins
+        read)."
+    - path: "http://localhost:8090/job/<skaile_platform|skaile_store>/<n>/consoleText"
+      description: "Console log of the target build."
+    - path: ".git/logs"
+      description: "Local git history for ±2h commit cross-reference (skaile-dev shell
+        + submodules)."
     produces: []
   user_inputs:
     dialog:
-      - id: "target"
-        label: "Deployment to debug (platform | store)"
-        type: "select"
-        options: ["platform", "store"]
-        required: false
-        default: "platform"
-      - id: "mode"
-        label: "Build selection mode"
-        type: "select"
-        options: ["last-failed", "current"]
-        required: false
-        default: "last-failed"
-      - id: "build"
-        label: "Explicit build number (overrides mode)"
-        type: "text"
-        required: false
+    - id: "target"
+      label: "Deployment to debug (platform | store)"
+      type: "select"
+      options: ["platform", "store"]
+      required: false
+      default: "platform"
+    - id: "mode"
+      label: "Build selection mode"
+      type: "select"
+      options: ["last-failed", "current"]
+      required: false
+      default: "last-failed"
+    - id: "build"
+      label: "Explicit build number (overrides mode)"
+      type: "text"
+      required: false
     files: []
 ---
 

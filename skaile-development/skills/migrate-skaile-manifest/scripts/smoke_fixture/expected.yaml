@@ -1,0 +1,12 @@
+name: smoke-test
+sources:
+  - url: https://github.com/skaile-ai/ai-assets
+    pin: main
+  - url: https://github.com/mortegro/ai-assets-fork
+  - url: https://github.com/some-author/some-assets
+    pin: v1.2.0
+dependencies:
+  - bundle:skaile-development@skaile-ai
+  - skill:audit@skaile-ai
+  - skill:notify@skaile-ai
+  - skill:legacy-thing@some-author

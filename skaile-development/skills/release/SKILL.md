@@ -1,42 +1,43 @@
 ---
 name: "release"
-description: "Changelog management, semantic versioning, and git tagging for skaile-dev domains and packages. Three modes: status (show current version + unreleased changes), bump (update version + CHANGELOG.md), tag (create annotated git tag)."
+description: "Changelog management, semantic versioning, and git tagging for skaile-dev
+  domains and packages. Three modes: status (show current version + unreleased changes),
+  bump (update version + CHANGELOG.md), tag (create annotated git tag)."
 metadata:
-  version: "1.0.0"
   tags:
-    - "release"
-    - "changelog"
-    - "semver"
-    - "versioning"
-    - "tagging"
-    - "skaile-development"
+  - "release"
+  - "changelog"
+  - "semver"
+  - "versioning"
+  - "tagging"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   user_inputs:
     dialog:
-      - id: "mode"
-        label: "Release mode"
-        type: "select"
-        options:
-          - "status"
-          - "bump"
-          - "tag"
-        required: true
-        default: "status"
-      - id: "target"
-        label: "Target package or domain (defaults to skaile-development)"
-        type: "text"
-        required: false
-      - id: "bump_override"
-        label: "Override version bump (major/minor/patch)"
-        type: "select"
-        options:
-          - "auto"
-          - "major"
-          - "minor"
-          - "patch"
-        required: false
-        default: "auto"
+    - id: "mode"
+      label: "Release mode"
+      type: "select"
+      options:
+      - "status"
+      - "bump"
+      - "tag"
+      required: true
+      default: "status"
+    - id: "target"
+      label: "Target package or domain (defaults to skaile-development)"
+      type: "text"
+      required: false
+    - id: "bump_override"
+      label: "Override version bump (major/minor/patch)"
+      type: "select"
+      options:
+      - "auto"
+      - "major"
+      - "minor"
+      - "patch"
+      required: false
+      default: "auto"
     files: []
 ---
 

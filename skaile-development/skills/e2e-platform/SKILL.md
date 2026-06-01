@@ -1,51 +1,65 @@
 ---
 name: 'e2e-platform'
-description: 'Run or extend the Skaile platform e2e suite. Two modes: `run` executes the existing suite with pre-flight checks (stale-service guard for post-pull stale bundles, stale-deps guard for lockfile drift, seed sync, proxy slot health), failure-mode diagnosis, and auto-recovery (kill stale skaile-serve subprocesses, sync seed data, restart stuck proxy slots); `add` analyzes a git diff, proposes a test plan, waits for explicit user approval, lives-inspects the UI via chrome-devtools MCP, then writes new specs against the existing `platform/e2e/` harness. Use when the user says "run e2e tests", "fix e2e failures", "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
+description: 'Run or extend the Skaile platform e2e suite. Two modes: `run` executes
+  the existing suite with pre-flight checks (stale-service guard for post-pull stale
+  bundles, stale-deps guard for lockfile drift, seed sync, proxy slot health), failure-mode
+  diagnosis, and auto-recovery (kill stale skaile-serve subprocesses, sync seed data,
+  restart stuck proxy slots); `add` analyzes a git diff, proposes a test plan, waits
+  for explicit user approval, lives-inspects the UI via chrome-devtools MCP, then
+  writes new specs against the existing `platform/e2e/` harness. Use when the user
+  says "run e2e tests", "fix e2e failures", "add e2e coverage for <feature>", "write
+  e2e tests for my PR", or similar.'
 metadata:
-  version: '1.1.0'
   tags:
-    - 'testing'
-    - 'e2e'
-    - 'playwright'
-    - 'platform'
-    - 'skaile-development'
+  - 'testing'
+  - 'e2e'
+  - 'playwright'
+  - 'platform'
+  - 'skaile-development'
   source: 'MERGED'
   stage: 'beta'
   prerequisites:
     files:
-      - path: 'platform/e2e/playwright.config.ts'
-        gate: hard
-        description: 'Existing platform e2e harness must be in place (this skill extends it, does not scaffold it — see `test-e2e` for initial scaffolding).'
-      - path: 'platform/e2e/CLAUDE.md'
-        gate: soft
-        description: 'Recommended knowledge source. The skill references its failure-mode table and scaffolding rules.'
+    - path: 'platform/e2e/playwright.config.ts'
+      gate: hard
+      description: 'Existing platform e2e harness must be in place (this skill extends
+        it, does not scaffold it — see `test-e2e` for initial scaffolding).'
+    - path: 'platform/e2e/CLAUDE.md'
+      gate: soft
+      description: 'Recommended knowledge source. The skill references its failure-mode
+        table and scaffolding rules.'
   user_inputs:
     dialog:
-      - id: 'mode'
-        label: 'Mode'
-        type: 'select'
-        options: ['run', 'add']
-        required: true
-        hint: "'run' executes the suite with auto-recovery; 'add' analyzes a diff and proposes new specs with a user approval gate"
-      - id: 'scope'
-        label: 'Scope'
-        type: 'text'
-        required: false
-        hint: "'run' mode: spec file path or test name filter (default: full suite). 'add' mode: feature area to focus analysis on (default: git diff main…HEAD)"
-      - id: 'session_mode_hint'
-        label: 'Session mode'
-        type: 'select'
-        options: ['auto', 'mock', 'local']
-        required: false
-        default: 'auto'
-        hint: "'add' mode only. 'auto' picks based on change kind (local for session-lifecycle or flow tests, mock otherwise)"
-      - id: 'live_inspect'
-        label: 'Live-inspect UI before writing'
-        type: 'select'
-        options: ['true', 'false']
-        required: false
-        default: 'true'
-        hint: "'add' mode only. Uses chrome-devtools MCP to verify selectors against the actual DOM before committing them to a spec. Disable only if the MCP is unavailable."
+    - id: 'mode'
+      label: 'Mode'
+      type: 'select'
+      options: ['run', 'add']
+      required: true
+      hint: "'run' executes the suite with auto-recovery; 'add' analyzes a diff and
+        proposes new specs with a user approval gate"
+    - id: 'scope'
+      label: 'Scope'
+      type: 'text'
+      required: false
+      hint: "'run' mode: spec file path or test name filter (default: full suite).
+        'add' mode: feature area to focus analysis on (default: git diff main…HEAD)"
+    - id: 'session_mode_hint'
+      label: 'Session mode'
+      type: 'select'
+      options: ['auto', 'mock', 'local']
+      required: false
+      default: 'auto'
+      hint: "'add' mode only. 'auto' picks based on change kind (local for session-lifecycle
+        or flow tests, mock otherwise)"
+    - id: 'live_inspect'
+      label: 'Live-inspect UI before writing'
+      type: 'select'
+      options: ['true', 'false']
+      required: false
+      default: 'true'
+      hint: "'add' mode only. Uses chrome-devtools MCP to verify selectors against
+        the actual DOM before committing them to a spec. Disable only if the MCP is
+        unavailable."
     files: []
 ---
 

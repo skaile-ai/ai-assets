@@ -1,54 +1,61 @@
 ---
 name: "test"
-description: "Test construction and execution for the skaile-dev monorepo. Two modes: 'run' executes the test suite for one or more packages and reports results; 'construct' generates new tests for recently implemented code. Knows the full test stack: Vitest 3.2.4 (agent-framework + forge/L4-project + forge/L4-assistant + _scripts), Vitest 4.1 (forge/L5-concept), Jest (platform backend), Vitest (platform frontend), Playwright (E2E), and how to run each via the Bun workspace. Coverage is collected under Bun with @vitest/coverage-istanbul (not v8) and ratcheted against the committed baseline via _scripts/check-coverage-ratchet.ts."
+description: "Test construction and execution for the skaile-dev monorepo. Two modes:
+  'run' executes the test suite for one or more packages and reports results; 'construct'
+  generates new tests for recently implemented code. Knows the full test stack: Vitest
+  3.2.4 (agent-framework + forge/L4-project + forge/L4-assistant + _scripts), Vitest
+  4.1 (forge/L5-concept), Jest (platform backend), Vitest (platform frontend), Playwright
+  (E2E), and how to run each via the Bun workspace. Coverage is collected under Bun
+  with @vitest/coverage-istanbul (not v8) and ratcheted against the committed baseline
+  via _scripts/check-coverage-ratchet.ts."
 metadata:
-  version: "1.2.0"
   tags:
-    - "testing"
-    - "vitest"
-    - "jest"
-    - "playwright"
-    - "bun"
-    - "monorepo"
-    - "skaile-development"
+  - "testing"
+  - "vitest"
+  - "jest"
+  - "playwright"
+  - "bun"
+  - "monorepo"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "package.json"
-        gate: hard
-        description: "Monorepo root package.json required"
+    - path: "package.json"
+      gate: hard
+      description: "Monorepo root package.json required"
   user_inputs:
     dialog:
-      - id: "mode"
-        label: "Mode: 'run' (execute tests) or 'construct' (generate new tests)"
-        type: "select"
-        options:
-          - "run"
-          - "construct"
-        required: true
-        default: "run"
-      - id: "scope"
-        label: "Package(s) to test (comma-separated, or 'all' for full suite)"
-        type: "text"
-        required: false
-        default: "all"
-        hint: "e.g. 'forge/L4-project', 'platform/backend', 'agent-framework/cli'"
-      - id: "filter"
-        label: "Test name filter (for 'run' mode — runs only matching tests)"
-        type: "text"
-        required: false
-      - id: "level"
-        label: "Level (for 'construct' mode)"
-        type: "select"
-        options:
-          - "unit"
-          - "integration"
-          - "e2e"
-          - "auto"
-        required: false
-        default: "auto"
-        hint: "auto = infer from changed files; else delegates to test-unit / test-integration / test-e2e"
+    - id: "mode"
+      label: "Mode: 'run' (execute tests) or 'construct' (generate new tests)"
+      type: "select"
+      options:
+      - "run"
+      - "construct"
+      required: true
+      default: "run"
+    - id: "scope"
+      label: "Package(s) to test (comma-separated, or 'all' for full suite)"
+      type: "text"
+      required: false
+      default: "all"
+      hint: "e.g. 'forge/L4-project', 'platform/backend', 'agent-framework/cli'"
+    - id: "filter"
+      label: "Test name filter (for 'run' mode — runs only matching tests)"
+      type: "text"
+      required: false
+    - id: "level"
+      label: "Level (for 'construct' mode)"
+      type: "select"
+      options:
+      - "unit"
+      - "integration"
+      - "e2e"
+      - "auto"
+      required: false
+      default: "auto"
+      hint: "auto = infer from changed files; else delegates to test-unit / test-integration
+        / test-e2e"
     files: []
 ---
 

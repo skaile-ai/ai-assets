@@ -1,0 +1,18 @@
+# Synthetic legacy manifest covering the three migration shapes.
+name: smoke-test
+repositories:
+  skaile-assets:
+    url: https://github.com/skaile-ai/ai-assets
+    branch: main
+  forked:
+    url: https://github.com/mortegro/ai-assets-fork
+ai_resources:
+  - name: legacy-ai-res
+    path: https://github.com/some-author/some-assets
+    branch: v1.2.0
+    dependencies:
+      - skill:legacy-thing
+dependencies:
+  - bundle:skaile-development@skaile     # legacy curated namespace
+  - skill:audit                          # bare dep — ambiguous (3 sources)
+  - skill:notify@skaile-ai               # already canonical, passes through

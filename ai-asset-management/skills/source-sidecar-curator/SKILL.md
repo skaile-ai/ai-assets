@@ -1,25 +1,29 @@
 ---
 name: source-sidecar-curator
-description: "Use when a user wants to refine a sidecar manifest under ~/.skaile/sources/ for a registered asset source. Walks the sidecar's auto-generated `assets:` block, interviews the user on publisher mapping, version, file filters, requires-graph, then verifies and commits. Trigger when the user says 'refine my sidecar', 'curate the manifest for source X', 'review sidecar assets', or asks how to clean up an auto-generated source manifest."
+description: "Use when a user wants to refine a sidecar manifest under ~/.skaile/sources/
+  for a registered asset source. Walks the sidecar's auto-generated `assets:` block,
+  interviews the user on publisher mapping, version, file filters, requires-graph,
+  then verifies and commits. Trigger when the user says 'refine my sidecar', 'curate
+  the manifest for source X', 'review sidecar assets', or asks how to clean up an
+  auto-generated source manifest."
 metadata:
-  version: 1.0.0
   source: MERGED
   tags: [asset-store, manifest, sidecar, source, discovery, curator]
   prerequisites:
     files:
-      - path: ~/.skaile/sources
-        gate: hard
-        description: "Sidecar root must exist (created by `skaile source add --sidecar`)"
+    - path: ~/.skaile/sources
+      gate: hard
+      description: "Sidecar root must exist (created by `skaile source add --sidecar`)"
     inputs_required:
-      - id: slug
-        label: "Sidecar slug (subdirectory under ~/.skaile/sources/)"
-        type: text
+    - id: slug
+      label: "Sidecar slug (subdirectory under ~/.skaile/sources/)"
+      type: text
     reads:
-      - path: agent-framework/discovery/CLAUDE.md
-      - path: agent-framework/discovery/docs/author-manifest.md
-      - path: _devlog/specs/2026-05-12-source-sidecar-manifests.md
+    - path: agent-framework/discovery/CLAUDE.md
+    - path: agent-framework/discovery/docs/author-manifest.md
+    - path: _devlog/specs/2026-05-12-source-sidecar-manifests.md
     writes:
-      - path: ~/.skaile/sources/<slug>/.skaile-source.yaml
+    - path: ~/.skaile/sources/<slug>/.skaile-source.yaml
 keywords: [asset-store, manifest, sidecar, source, discovery, curator]
 ---
 

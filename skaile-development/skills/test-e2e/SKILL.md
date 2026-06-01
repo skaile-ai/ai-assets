@@ -1,96 +1,101 @@
 ---
 name: "test-e2e"
-description: "[skaile-development] Set up and generate end-to-end tests for skaile-dev packages: forge apps, platform/frontend, and the agent-framework CLI. Scaffolds Playwright for web apps (forge + platform) including config, global setup/teardown, sandbox, and fixtures. For CLI packages, generates shell-based end-to-end tests that invoke the bin and assert stdout/artifacts. Verifies tests run against a real dev server or real process."
+description: "[skaile-development] Set up and generate end-to-end tests for skaile-dev
+  packages: forge apps, platform/frontend, and the agent-framework CLI. Scaffolds
+  Playwright for web apps (forge + platform) including config, global setup/teardown,
+  sandbox, and fixtures. For CLI packages, generates shell-based end-to-end tests
+  that invoke the bin and assert stdout/artifacts. Verifies tests run against a real
+  dev server or real process."
 metadata:
-  version: "1.2.0"
   tags:
-    - "testing"
-    - "e2e"
-    - "playwright"
-    - "browser"
-    - "cli"
-    - "ct"
-    - "setup"
-    - "generation"
-    - "journey"
-    - "skaile-development"
+  - "testing"
+  - "e2e"
+  - "playwright"
+  - "browser"
+  - "cli"
+  - "ct"
+  - "setup"
+  - "generation"
+  - "journey"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "package.json"
-        gate: hard
-        description: "Monorepo root package.json required"
+    - path: "package.json"
+      gate: hard
+      description: "Monorepo root package.json required"
     inputs_required:
-      - id: target
-        label: "Package path"
-        type: text
-        hint: "forge app, platform/frontend, or agent-framework/cli"
+    - id: target
+      label: "Package path"
+      type: text
+      hint: "forge app, platform/frontend, or agent-framework/cli"
     inputs_optional:
-      - id: mode
-        label: "Mode"
-        type: select
-        options:
-          - "setup"
-          - "generate"
-          - "both"
-        default: "both"
-      - id: kind
-        label: "E2E kind"
-        type: select
-        options:
-          - "auto"
-          - "web"
-          - "cli"
-          - "ct"
-        default: "auto"
-        hint: "auto = infer from package type | web = Playwright | cli = shell | ct = Playwright Component Testing"
+    - id: mode
+      label: "Mode"
+      type: select
+      options:
+      - "setup"
+      - "generate"
+      - "both"
+      default: "both"
+    - id: kind
+      label: "E2E kind"
+      type: select
+      options:
+      - "auto"
+      - "web"
+      - "cli"
+      - "ct"
+      default: "auto"
+      hint: "auto = infer from package type | web = Playwright | cli = shell | ct
+        = Playwright Component Testing"
     reads:
-      - path: "<target>/CLAUDE.md"
-      - path: "<target>/TEST_PLAN.md"
-      - path: "<target>/package.json"
-      - path: "<target>/app/pages"
-      - path: "<target>/server/api"
-      - path: "<target>/server/utils/auth.ts"
-      - path: "<target>/src/commands"
-      - path: "ai-assets/skaile-development/references/test_stack_map.md"
-      - path: "_devlog/specs/2026-04-22-test-concept-design.md"
-      - path: "_devlog/plans/2026-04-22-test-gap-fill.md"
-      - path: "docs/src/content/docs/testing.md"
-      - path: "agent-framework/test-utils/src/index.ts"
+    - path: "<target>/CLAUDE.md"
+    - path: "<target>/TEST_PLAN.md"
+    - path: "<target>/package.json"
+    - path: "<target>/app/pages"
+    - path: "<target>/server/api"
+    - path: "<target>/server/utils/auth.ts"
+    - path: "<target>/src/commands"
+    - path: "ai-assets/skaile-development/references/test_stack_map.md"
+    - path: "_devlog/specs/2026-04-22-test-concept-design.md"
+    - path: "_devlog/plans/2026-04-22-test-gap-fill.md"
+    - path: "docs/src/content/docs/testing.md"
+    - path: "agent-framework/test-utils/src/index.ts"
     produces:
-      - path: "<target>/playwright.config.ts"
-      - path: "<target>/tests/e2e/*.spec.ts (forge/L5-concept uses test/e2e/)"
-      - path: "<target>/tests/e2e/fixtures.ts"
-      - path: "<target>/tests/e2e/sandbox.ts"
-      - path: "<target>/tests/e2e/global-setup.ts"
-      - path: "<target>/tests/e2e/global-teardown.ts"
-      - path: "<target>/tests/cli-e2e/setup.ts (L4 CLI)"
-      - path: "<target>/tests/cli-e2e/<group>.test.ts (L4 CLI)"
-      - path: "<target>/tests/_setup/h3-event.ts (L5 Nitro integration)"
-      - path: "<target>/tests/_setup/nitro-globals.ts (L5 Nitro integration)"
-      - path: "<target>/tests/api-<route>.test.ts (L5 Nitro integration)"
-      - path: "<target>/tests/_setup/spawn-server.ts (L5 spawn-harness, optional)"
-      - path: "<target>/tests/api-server-harness.test.ts (L5 spawn-harness, gated)"
-      - path: "<target>/vitest.config.ts (adds happy-dom + setupFiles if missing)"
+    - path: "<target>/playwright.config.ts"
+    - path: "<target>/tests/e2e/*.spec.ts (forge/L5-concept uses test/e2e/)"
+    - path: "<target>/tests/e2e/fixtures.ts"
+    - path: "<target>/tests/e2e/sandbox.ts"
+    - path: "<target>/tests/e2e/global-setup.ts"
+    - path: "<target>/tests/e2e/global-teardown.ts"
+    - path: "<target>/tests/cli-e2e/setup.ts (L4 CLI)"
+    - path: "<target>/tests/cli-e2e/<group>.test.ts (L4 CLI)"
+    - path: "<target>/tests/_setup/h3-event.ts (L5 Nitro integration)"
+    - path: "<target>/tests/_setup/nitro-globals.ts (L5 Nitro integration)"
+    - path: "<target>/tests/api-<route>.test.ts (L5 Nitro integration)"
+    - path: "<target>/tests/_setup/spawn-server.ts (L5 spawn-harness, optional)"
+    - path: "<target>/tests/api-server-harness.test.ts (L5 spawn-harness, gated)"
+    - path: "<target>/vitest.config.ts (adds happy-dom + setupFiles if missing)"
   user_inputs:
     dialog:
-      - id: "target"
-        label: "Package path"
-        type: "text"
-        required: true
-      - id: "mode"
-        label: "Mode"
-        type: "select"
-        options: ["setup", "generate", "both"]
-        required: false
-        default: "both"
-      - id: "kind"
-        label: "Kind"
-        type: "select"
-        options: ["auto", "web", "cli", "ct"]
-        required: false
-        default: "auto"
+    - id: "target"
+      label: "Package path"
+      type: "text"
+      required: true
+    - id: "mode"
+      label: "Mode"
+      type: "select"
+      options: ["setup", "generate", "both"]
+      required: false
+      default: "both"
+    - id: "kind"
+      label: "Kind"
+      type: "select"
+      options: ["auto", "web", "cli", "ct"]
+      required: false
+      default: "auto"
     files: []
 ---
 

@@ -1,40 +1,46 @@
 ---
 name: "skaile-stack-decide"
-description: "[skaile-development] Use when reasoning about whether and how to build an app idea on the Skaile/PostXL stack -- choosing between platform skills+flows, forge integration tiers, the agent runtime, or PostXL alone. Loads the four context packs (agent framework, ecosystem, platform, PostXL) on demand and routes the question to the relevant doc(s). Trigger when the user asks 'should we build X with Skaile?', 'where in the stack does this fit?', 'platform or standalone app?', 'PostXL or just NestJS?', or any architectural orientation question across the Skaile/PostXL surface."
+description: "[skaile-development] Use when reasoning about whether and how to build
+  an app idea on the Skaile/PostXL stack -- choosing between platform skills+flows,
+  forge integration tiers, the agent runtime, or PostXL alone. Loads the four context
+  packs (agent framework, ecosystem, platform, PostXL) on demand and routes the question
+  to the relevant doc(s). Trigger when the user asks 'should we build X with Skaile?',
+  'where in the stack does this fit?', 'platform or standalone app?', 'PostXL or just
+  NestJS?', or any architectural orientation question across the Skaile/PostXL surface."
 metadata:
-  version: "1.0.0"
   tags:
-    - "skaile"
-    - "postxl"
-    - "architecture"
-    - "app-design"
-    - "stack-decision"
-    - "orientation"
-    - "decision-rubric"
-    - "skaile-development"
+  - "skaile"
+  - "postxl"
+  - "architecture"
+  - "app-design"
+  - "stack-decision"
+  - "orientation"
+  - "decision-rubric"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     inputs_required:
-      - id: idea
-        label: "What is the app idea or architectural question?"
-        type: text
-        hint: "Plain-language description of the app or the decision you're trying to make"
+    - id: idea
+      label: "What is the app idea or architectural question?"
+      type: text
+      hint: "Plain-language description of the app or the decision you're trying to
+        make"
     inputs_optional:
-      - id: scope
-        label: "Decision scope (helps narrow which references to load)"
-        type: select
-        options:
-          - "auto"
-          - "agent-runtime"
-          - "ecosystem"
-          - "platform"
-          - "postxl"
-          - "all"
-        default: "auto"
-        hint: "auto = pick references from the question; all = load every pack"
+    - id: scope
+      label: "Decision scope (helps narrow which references to load)"
+      type: select
+      options:
+      - "auto"
+      - "agent-runtime"
+      - "ecosystem"
+      - "platform"
+      - "postxl"
+      - "all"
+      default: "auto"
+      hint: "auto = pick references from the question; all = load every pack"
   reads_from:
-    - "references/"
+  - "references/"
   writes_to: []
 ---
 

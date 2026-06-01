@@ -1,55 +1,62 @@
 ---
 name: "git"
-description: "Git operations for the skaile-dev monorepo. Seven modes: commit (structured commit messages), branch (create/switch feature branches), worktree (parallel work in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard branch), sync (two-way sync: pull + push shell repo and all submodules, print per-repo summary of commits pulled and pushed), deploy (merge main into deploy branch and push)."
+description: "Git operations for the skaile-dev monorepo. Seven modes: commit (structured
+  commit messages), branch (create/switch feature branches), worktree (parallel work
+  in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard
+  branch), sync (two-way sync: pull + push shell repo and all submodules, print per-repo
+  summary of commits pulled and pushed), deploy (merge main into deploy branch and
+  push)."
 metadata:
-  version: "1.4.0"
   tags:
-    - "git"
-    - "commit"
-    - "branch"
-    - "worktree"
-    - "pull-request"
-    - "submodule"
-    - "monorepo"
-    - "skaile-development"
-    - "deploy"
+  - "git"
+  - "commit"
+  - "branch"
+  - "worktree"
+  - "pull-request"
+  - "submodule"
+  - "monorepo"
+  - "skaile-development"
+  - "deploy"
   source: "MERGED"
   stage: "beta"
   user_inputs:
     dialog:
-      - id: "mode"
-        label: "Git operation mode"
-        type: "select"
-        options:
-          - "commit"
-          - "branch"
-          - "worktree"
-          - "pr"
-          - "finish"
-          - "sync"
-          - "deploy"
-        required: true
-        hint: "commit = structured commit message | branch = create/switch feature branch | worktree = isolated checkout | pr = open pull request | finish = merge/PR/keep/discard | sync = update submodules | deploy = merge main into deploy branch and push"
-      - id: "description"
-        label: "Change description (plain language) — used to derive branch name and commit message"
-        type: "text"
-        required: false
-      - id: "branch_type"
-        label: "Branch type (for branch/worktree mode)"
-        type: "select"
-        options:
-          - "feature"
-          - "fix"
-          - "refactor"
-          - "docs"
-          - "skill"
-          - "chore"
-        required: false
-        default: "feature"
-      - id: "target_packages"
-        label: "Target package(s)"
-        type: "text"
-        required: false
+    - id: "mode"
+      label: "Git operation mode"
+      type: "select"
+      options:
+      - "commit"
+      - "branch"
+      - "worktree"
+      - "pr"
+      - "finish"
+      - "sync"
+      - "deploy"
+      required: true
+      hint: "commit = structured commit message | branch = create/switch feature branch
+        | worktree = isolated checkout | pr = open pull request | finish = merge/PR/keep/discard
+        | sync = update submodules | deploy = merge main into deploy branch and push"
+    - id: "description"
+      label: "Change description (plain language) — used to derive branch name and
+        commit message"
+      type: "text"
+      required: false
+    - id: "branch_type"
+      label: "Branch type (for branch/worktree mode)"
+      type: "select"
+      options:
+      - "feature"
+      - "fix"
+      - "refactor"
+      - "docs"
+      - "skill"
+      - "chore"
+      required: false
+      default: "feature"
+    - id: "target_packages"
+      label: "Target package(s)"
+      type: "text"
+      required: false
     files: []
 ---
 

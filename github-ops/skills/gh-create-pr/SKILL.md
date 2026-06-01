@@ -1,22 +1,22 @@
 ---
 name: gh-create-pr
-description: Use when all changes for a task are committed on a feature branch and you are ready to open a GitHub pull request for human review.
+description: Use when all changes for a task are committed on a feature branch 
+  and you are ready to open a GitHub pull request for human review.
 license: MIT
 metadata:
-  version: "1.0.0"
   tags: [github, pr, pull-request, git, review, gh-cli]
   stage: stable
   source: CF
   prerequisites:
     inputs_optional:
-      - id: pr_title
-        label: "PR title"
-        type: text
-        required: true
-      - id: pr_body
-        label: "PR description (What / Why / Testing)"
-        type: textarea
-        required: true
+    - id: pr_title
+      label: "PR title"
+      type: text
+      required: true
+    - id: pr_body
+      label: "PR description (What / Why / Testing)"
+      type: textarea
+      required: true
 ---
 
 ## Overview

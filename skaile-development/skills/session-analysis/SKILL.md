@@ -1,26 +1,30 @@
 ---
 name: "session-analysis"
-description: "[skaile-development] Cross-session analysis of Claude Code session data for the skaile-dev monorepo. Reads a pre-computed digest (≤10KB) from the Python pipeline, triages improvement opportunities, reads implicated SKILL.md files, and proposes concrete diffs to reduce token waste and improve workflow adherence. Run after ./run.sh in _scripts/session-analysis/."
+description: "[skaile-development] Cross-session analysis of Claude Code session data
+  for the skaile-dev monorepo. Reads a pre-computed digest (≤10KB) from the Python
+  pipeline, triages improvement opportunities, reads implicated SKILL.md files, and
+  proposes concrete diffs to reduce token waste and improve workflow adherence. Run
+  after ./run.sh in _scripts/session-analysis/."
 metadata:
-  version: "1.0.0"
   tags:
-    - "session"
-    - "analysis"
-    - "tokens"
-    - "optimization"
-    - "skill-improvement"
-    - "skaile-development"
+  - "session"
+  - "analysis"
+  - "tokens"
+  - "optimization"
+  - "skill-improvement"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   produces:
-    - path: "_devlog/reports/session-analysis-<date>.md"
-      description: "Structured analysis report with proposed SKILL.md diffs"
+  - path: "_devlog/reports/session-analysis-<date>.md"
+    description: "Structured analysis report with proposed SKILL.md diffs"
   user_inputs:
     dialog:
-      - id: "focus"
-        label: "Focus area (leave blank for full triage): prompt-bloat | workflow | redundancy | subagents"
-        type: "text"
-        required: false
+    - id: "focus"
+      label: "Focus area (leave blank for full triage): prompt-bloat | workflow |
+        redundancy | subagents"
+      type: "text"
+      required: false
     files: []
 ---
 

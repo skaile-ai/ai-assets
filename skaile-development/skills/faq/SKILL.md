@@ -1,48 +1,49 @@
 ---
 name: "faq"
-description: "[skaile-development] Evaluates resolved questions about the skaile-dev monorepo for FAQ-worthiness and curates entries. Broadened to all monorepo packages."
+description: "[skaile-development] Evaluates resolved questions about the skaile-dev
+  monorepo for FAQ-worthiness and curates entries. Broadened to all monorepo packages."
 metadata:
-  version: "1.0.0"
   tags:
-    - "faq"
-    - "documentation"
-    - "curation"
-    - "skaile-development"
+  - "faq"
+  - "documentation"
+  - "curation"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     inputs_required:
-      - key: QUESTION
-        prompt: "What was the user's question?"
-        description: "The original question"
-      - key: ANSWER
-        prompt: "What was the resolved answer?"
-        description: "The answer that was provided to the user"
+    - key: QUESTION
+      prompt: "What was the user's question?"
+      description: "The original question"
+    - key: ANSWER
+      prompt: "What was the resolved answer?"
+      description: "The answer that was provided to the user"
     inputs_optional:
-      - key: CONTEXT
-        prompt: "Which packages or areas did this question touch?"
-        description: "Package names or areas relevant to the question (e.g., bridge, runner, flow-engine, forge, platform)"
+    - key: CONTEXT
+      prompt: "Which packages or areas did this question touch?"
+      description: "Package names or areas relevant to the question (e.g., bridge,
+        runner, flow-engine, forge, platform)"
     reads:
-      - "*/docs/faq.md"
-      - "**/docs/**/*.md"
-      - "*/README.md"
+    - "*/docs/faq.md"
+    - "**/docs/**/*.md"
+    - "*/README.md"
     produces:
-      - path: "<area>/docs/faq.md"
-        description: "FAQ page with curated Q&A entries appended"
+    - path: "<area>/docs/faq.md"
+      description: "FAQ page with curated Q&A entries appended"
   user_inputs:
     dialog:
-      - id: "question"
-        label: "The user's original question"
-        type: "text"
-        required: true
-      - id: "answer"
-        label: "The resolved answer"
-        type: "text"
-        required: true
-      - id: "context"
-        label: "Packages or areas the question touched (comma-separated)"
-        type: "text"
-        required: false
+    - id: "question"
+      label: "The user's original question"
+      type: "text"
+      required: true
+    - id: "answer"
+      label: "The resolved answer"
+      type: "text"
+      required: true
+    - id: "context"
+      label: "Packages or areas the question touched (comma-separated)"
+      type: "text"
+      required: false
     files: []
 ---
 

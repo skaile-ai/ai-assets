@@ -1,97 +1,99 @@
 ---
 name: "component-builder"
-description: "[skaile-development] Scaffold a new dynamic web component for the Agent App Protocol. Generates COMPONENT.md, web component JS, agent-usage.md, and test harness in the components directory."
+description: "[skaile-development] Scaffold a new dynamic web component for the Agent
+  App Protocol. Generates COMPONENT.md, web component JS, agent-usage.md, and test
+  harness in the components directory."
 metadata:
-  version: "1.0.0"
   tags:
-    - "component"
-    - "scaffold"
-    - "web-component"
-    - "agent-app-protocol"
+  - "component"
+  - "scaffold"
+  - "web-component"
+  - "agent-app-protocol"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "ai-assets/skaile-development/references/component-authoring.md"
-        gate: hard
-        description: "Component authoring guide - read to understand conventions and checklist"
-      - path: "ai-assets/skaile-development/references/component-template.js"
-        gate: hard
-        description: "Web component starter template with placeholders"
-      - path: "ai-assets/skaile-development/references/component-test-harness.html"
-        gate: hard
-        description: "Test harness template with placeholders"
+    - path: "ai-assets/skaile-development/references/component-authoring.md"
+      gate: hard
+      description: "Component authoring guide - read to understand conventions and
+        checklist"
+    - path: "ai-assets/skaile-development/references/component-template.js"
+      gate: hard
+      description: "Web component starter template with placeholders"
+    - path: "ai-assets/skaile-development/references/component-test-harness.html"
+      gate: hard
+      description: "Test harness template with placeholders"
     inputs_required:
-      - id: component_name
-        label: "Component name (lowercase, hyphenated, e.g. 'data-chart')"
-        type: text
-      - id: description
-        label: "One-line description of what this component does"
-        type: text
+    - id: component_name
+      label: "Component name (lowercase, hyphenated, e.g. 'data-chart')"
+      type: text
+    - id: description
+      label: "One-line description of what this component does"
+      type: text
     inputs_optional:
-      - id: targets
-        label: "Render targets (comma-separated)"
-        type: text
-        default: "preview"
-      - id: interactions
-        label: "Interaction action names (comma-separated, e.g. 'create,update,export')"
-        type: text
-        default: ""
-      - id: has_input_extension
-        label: "Does this have an input extension trigger? (yes/no)"
-        type: text
-        default: "no"
-      - id: input_extension_prefix
-        label: "Input extension prefix trigger (e.g. '/search'). Only if has_input_extension=yes"
-        type: text
-      - id: custom_message_type
-        label: "Custom message type name (blank if none, e.g. 'gif')"
-        type: text
-      - id: props
-        label: "Component props (comma-separated key:type pairs, e.g. 'items:array,title:string')"
-        type: text
+    - id: targets
+      label: "Render targets (comma-separated)"
+      type: text
+      default: "preview"
+    - id: interactions
+      label: "Interaction action names (comma-separated, e.g. 'create,update,export')"
+      type: text
+      default: ""
+    - id: has_input_extension
+      label: "Does this have an input extension trigger? (yes/no)"
+      type: text
+      default: "no"
+    - id: input_extension_prefix
+      label: "Input extension prefix trigger (e.g. '/search'). Only if has_input_extension=yes"
+      type: text
+    - id: custom_message_type
+      label: "Custom message type name (blank if none, e.g. 'gif')"
+      type: text
+    - id: props
+      label: "Component props (comma-separated key:type pairs, e.g. 'items:array,title:string')"
+      type: text
   produces:
-    - path: "ai-assets/skaile-development/components/<name>/COMPONENT.md"
-      description: "Component manifest with YAML frontmatter"
-    - path: "ai-assets/skaile-development/components/<name>/<name>.js"
-      description: "Web component ES module"
-    - path: "ai-assets/skaile-development/components/<name>/agent-usage.md"
-      description: "Agent rendering reference"
-    - path: "ai-assets/skaile-development/components/<name>/test-harness.html"
-      description: "Standalone browser test page"
+  - path: "ai-assets/skaile-development/components/<name>/COMPONENT.md"
+    description: "Component manifest with YAML frontmatter"
+  - path: "ai-assets/skaile-development/components/<name>/<name>.js"
+    description: "Web component ES module"
+  - path: "ai-assets/skaile-development/components/<name>/agent-usage.md"
+    description: "Agent rendering reference"
+  - path: "ai-assets/skaile-development/components/<name>/test-harness.html"
+    description: "Standalone browser test page"
   user_inputs:
     dialog:
-      - id: "component_name"
-        label: "Component name (lowercase, hyphenated)"
-        type: "text"
-        required: true
-      - id: "description"
-        label: "One-line description"
-        type: "text"
-        required: true
-      - id: "targets"
-        label: "Render targets"
-        type: "text"
-        required: false
-        default: "preview"
-      - id: "interactions"
-        label: "Interaction action names"
-        type: "text"
-        required: false
-      - id: "has_input_extension"
-        label: "Has input extension trigger?"
-        type: "select"
-        options: ["no", "yes"]
-        required: false
-        default: "no"
-      - id: "custom_message_type"
-        label: "Custom message type name (blank if none)"
-        type: "text"
-        required: false
-      - id: "props"
-        label: "Props (key:type pairs, e.g. 'items:array,title:string')"
-        type: "text"
-        required: false
+    - id: "component_name"
+      label: "Component name (lowercase, hyphenated)"
+      type: "text"
+      required: true
+    - id: "description"
+      label: "One-line description"
+      type: "text"
+      required: true
+    - id: "targets"
+      label: "Render targets"
+      type: "text"
+      required: false
+      default: "preview"
+    - id: "interactions"
+      label: "Interaction action names"
+      type: "text"
+      required: false
+    - id: "has_input_extension"
+      label: "Has input extension trigger?"
+      type: "select"
+      options: ["no", "yes"]
+      required: false
+      default: "no"
+    - id: "custom_message_type"
+      label: "Custom message type name (blank if none)"
+      type: "text"
+      required: false
+    - id: "props"
+      label: "Props (key:type pairs, e.g. 'items:array,title:string')"
+      type: "text"
+      required: false
     files: []
 ---
 

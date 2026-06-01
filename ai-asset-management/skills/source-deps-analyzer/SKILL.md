@@ -1,24 +1,31 @@
 ---
 name: source-deps-analyzer
-description: "Use when a sidecar manifest under ~/.skaile/sources/ needs its `requires:` graph filled in or refined. Scans asset bodies, manifest references, and code imports across the source; runs an LLM batch over the corpus to propose cross-asset requires-edges; writes proposals to a draft commit on a `deps-analysis-<timestamp>` branch for review. Trigger when the user says 'analyze deps for sidecar X', 'fill in the requires-graph', 'find missing dependencies in my sidecar', or asks how to extract cross-asset references automatically."
+description: "Use when a sidecar manifest under ~/.skaile/sources/ needs its `requires:`
+  graph filled in or refined. Scans asset bodies, manifest references, and code imports
+  across the source; runs an LLM batch over the corpus to propose cross-asset requires-edges;
+  writes proposals to a draft commit on a `deps-analysis-<timestamp>` branch for review.
+  Trigger when the user says 'analyze deps for sidecar X', 'fill in the requires-graph',
+  'find missing dependencies in my sidecar', or asks how to extract cross-asset references
+  automatically."
 metadata:
-  version: 1.0.0
   source: MERGED
-  tags: [asset-store, manifest, sidecar, dependencies, ai-analysis, requires-graph]
+  tags: [asset-store, manifest, sidecar, dependencies, ai-analysis, 
+      requires-graph]
   prerequisites:
     files:
-      - path: ~/.skaile/sources
-        gate: hard
+    - path: ~/.skaile/sources
+      gate: hard
     inputs_required:
-      - id: slug
-        label: "Sidecar slug"
-        type: text
+    - id: slug
+      label: "Sidecar slug"
+      type: text
   reads:
-    - path: agent-framework/bridge/CLAUDE.md
-    - path: _devlog/specs/2026-05-12-source-sidecar-manifests.md
+  - path: agent-framework/bridge/CLAUDE.md
+  - path: _devlog/specs/2026-05-12-source-sidecar-manifests.md
   writes:
-    - path: ~/.skaile/sources/<slug>/.skaile-source.yaml
-keywords: [asset-store, manifest, sidecar, dependencies, ai-analysis, requires-graph]
+  - path: ~/.skaile/sources/<slug>/.skaile-source.yaml
+keywords: [asset-store, manifest, sidecar, dependencies, ai-analysis, 
+    requires-graph]
 ---
 
 # Source Deps Analyzer

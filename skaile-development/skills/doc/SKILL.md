@@ -5,43 +5,42 @@ description: >
   or checking documentation status in the skaile-dev monorepo. Covers all five
   doc tiers: README.md, CLAUDE.md, Starlight docs, DOMAIN.md/SKILL.md, and _devlog.
 metadata:
-  version: "1.0.0"
   tags:
-    - documentation
-    - starlight
-    - readme
-    - claude-md
-    - domain-md
-    - skill-md
-    - docs-sync
-    - docs-audit
-    - docs-coverage
+  - documentation
+  - starlight
+  - readme
+  - claude-md
+  - domain-md
+  - skill-md
+  - docs-sync
+  - docs-audit
+  - docs-coverage
   stage: beta
   source: MERGED
   prerequisites:
     inputs_required:
-      - key: MODE
-        prompt: "Which mode? (write | update | audit | status)"
-        description: "Determines the operation to perform"
+    - key: MODE
+      prompt: "Which mode? (write | update | audit | status)"
+      description: "Determines the operation to perform"
     inputs_optional:
-      - key: SCOPE
-        prompt: "Scope to a specific package? (e.g., agent-framework/cli)"
-        description: "Monorepo-relative path prefix to limit operations"
-      - key: TARGET
-        prompt: "Target files or topic for write mode"
-        description: "Source files to document or topic to write about (write mode only)"
+    - key: SCOPE
+      prompt: "Scope to a specific package? (e.g., agent-framework/cli)"
+      description: "Monorepo-relative path prefix to limit operations"
+    - key: TARGET
+      prompt: "Target files or topic for write mode"
+      description: "Source files to document or topic to write about (write mode only)"
     reads:
-      - docs/
-      - "*/README.md"
-      - "*/CLAUDE.md"
-      - ai-assets/**/DOMAIN.md
-      - ai-assets/**/SKILL.md
+    - docs/
+    - "*/README.md"
+    - "*/CLAUDE.md"
+    - ai-assets/**/DOMAIN.md
+    - ai-assets/**/SKILL.md
     produces:
-      - docs/src/content/docs/**/*.md
-      - "*/README.md"
-      - "*/CLAUDE.md"
-      - ai-assets/**/DOMAIN.md
-      - ai-assets/**/SKILL.md
+    - docs/src/content/docs/**/*.md
+    - "*/README.md"
+    - "*/CLAUDE.md"
+    - ai-assets/**/DOMAIN.md
+    - ai-assets/**/SKILL.md
 ---
 
 # doc — Skaile Dev Documentation Skill

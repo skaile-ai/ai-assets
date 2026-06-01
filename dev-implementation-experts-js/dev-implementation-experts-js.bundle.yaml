@@ -1,6 +1,5 @@
 name: dev-implementation-experts-js
 description: Deep implementation expertise for JavaScript and TypeScript frameworks
-version: 0.1.0
 dependencies:
   - contract:impl-experts-js-contract
   - skill:prog-expert-nuxt

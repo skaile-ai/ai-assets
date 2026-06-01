@@ -1,32 +1,37 @@
 ---
 name: source-manifest-builder
-description: "Use when an AI-asset repo author wants to ship a deterministic, author-curated asset inventory in `.skaile-source.yaml`. Walks the repo, builds the `assets:` block via `skaile source build-manifest`, reviews entries with the author (publisher mapping, requires-graph, file filter), computes hashes, and writes the result back. Trigger when the user says 'create a source manifest', 'lock down my asset versions', 'pre-pack my repo for the Catalog', or asks how to publish a repo to skaile.store without admin curation."
+description: "Use when an AI-asset repo author wants to ship a deterministic, author-curated
+  asset inventory in `.skaile-source.yaml`. Walks the repo, builds the `assets:` block
+  via `skaile source build-manifest`, reviews entries with the author (publisher mapping,
+  requires-graph, file filter), computes hashes, and writes the result back. Trigger
+  when the user says 'create a source manifest', 'lock down my asset versions', 'pre-pack
+  my repo for the Catalog', or asks how to publish a repo to skaile.store without
+  admin curation."
 metadata:
-  version: 1.0.0
   source: MERGED
   tags: [asset-store, manifest, source, discovery, repo-author, catalog]
   prerequisites:
     files:
-      - path: .skaile-source.yaml
-        gate: soft
-        description: "Existing source config; created if absent"
+    - path: .skaile-source.yaml
+      gate: soft
+      description: "Existing source config; created if absent"
     inputs_optional:
-      - id: repo_path
-        label: "Path to the asset repo"
-        type: text
-        default: "."
-        hint: "Repo root - the directory containing .skaile-source.yaml"
-      - id: write
-        label: "Write directly vs preview"
-        type: boolean
-        default: false
-        hint: "If false, prints the proposed block; if true, edits the file"
+    - id: repo_path
+      label: "Path to the asset repo"
+      type: text
+      default: "."
+      hint: "Repo root - the directory containing .skaile-source.yaml"
+    - id: write
+      label: "Write directly vs preview"
+      type: boolean
+      default: false
+      hint: "If false, prints the proposed block; if true, edits the file"
     reads:
-      - path: agent-framework/discovery/CLAUDE.md
-      - path: agent-framework/discovery/docs/author-manifest.md
-      - path: _devlog/plans/2026-05-11-author-shipped-inventory-manifest.md
+    - path: agent-framework/discovery/CLAUDE.md
+    - path: agent-framework/discovery/docs/author-manifest.md
+    - path: _devlog/plans/2026-05-11-author-shipped-inventory-manifest.md
     writes:
-      - path: .skaile-source.yaml
+    - path: .skaile-source.yaml
 keywords: [asset-store, manifest, source, discovery, repo-author]
 ---
 

@@ -1,15 +1,17 @@
 ---
 name: skill-builder
-description: "Analyzes requirements, scaffolds directory structures, and implements new Agent skills. Use when you need to create a new agentic workflow or encapsulate custom tools into a reusable skill. Supports domain folders (ai-assets), local project skill folders (.claude/skills, .agents/skills), and global skill folders (~/.claude/skills)."
+description: "Analyzes requirements, scaffolds directory structures, and implements
+  new Agent skills. Use when you need to create a new agentic workflow or encapsulate
+  custom tools into a reusable skill. Supports domain folders (ai-assets), local project
+  skill folders (.claude/skills, .agents/skills), and global skill folders (~/.claude/skills)."
 license: MIT
 compatibility: "Requires Python 3.12+ and uv for scaffold scripts"
 metadata:
-  version: "1.0.0"
   author: skaile
   tags: [skill, scaffold, build, create-skill, new-skill, agent-skill, workflow]
   stage: alpha
   requires:
-    - skill-builder-contract
+  - skill-builder-contract
 ---
 
 # Skill Builder Pro

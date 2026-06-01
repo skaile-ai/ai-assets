@@ -1,39 +1,42 @@
 ---
 name: "compile-validators"
-description: "Compiles MUST/NEVER/CHECKLIST rules from skaile-development SKILL.md files into fast, deterministic Python validators. Generates a validator.py alongside each SKILL.md. Replaces slow LLM-based validation with sub-second structural checks. Run after editing any skill in ai-assets/skaile-development/skills/."
+description: "Compiles MUST/NEVER/CHECKLIST rules from skaile-development SKILL.md
+  files into fast, deterministic Python validators. Generates a validator.py alongside
+  each SKILL.md. Replaces slow LLM-based validation with sub-second structural checks.
+  Run after editing any skill in ai-assets/skaile-development/skills/."
 metadata:
-  version: "1.0.0"
   tags:
-    - "validation"
-    - "rules"
-    - "compilation"
-    - "deterministic"
-    - "linting"
-    - "skaile-development"
+  - "validation"
+  - "rules"
+  - "compilation"
+  - "deterministic"
+  - "linting"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     inputs_optional:
-      - id: target
-        label: "Skill to compile (or 'all')"
-        type: text
-        default: "all"
-        hint: "e.g. audit, test-plan, test-unit, or 'all' for every skaile-development skill"
+    - id: target
+      label: "Skill to compile (or 'all')"
+      type: text
+      default: "all"
+      hint: "e.g. audit, test-plan, test-unit, or 'all' for every skaile-development
+        skill"
     reads:
-      - path: "ai-assets/skaile-development/skills/<skill>/SKILL.md"
-        description: "Skill definition with MUST/NEVER/CHECKLIST rules"
-      - path: "ai-assets-skaileup/contracts/scripts/validator_lib.py"
-        description: "Shared validation library API"
+    - path: "ai-assets/skaile-development/skills/<skill>/SKILL.md"
+      description: "Skill definition with MUST/NEVER/CHECKLIST rules"
+    - path: "ai-assets-skaileup/contracts/scripts/validator_lib.py"
+      description: "Shared validation library API"
     produces:
-      - path: "ai-assets/skaile-development/skills/<skill>/validator.py"
-        description: "Generated deterministic validator"
+    - path: "ai-assets/skaile-development/skills/<skill>/validator.py"
+      description: "Generated deterministic validator"
   user_inputs:
     dialog:
-      - id: "target"
-        label: "Skill name (or 'all')"
-        type: "text"
-        required: false
-        default: "all"
+    - id: "target"
+      label: "Skill name (or 'all')"
+      type: "text"
+      required: false
+      default: "all"
     files: []
 ---
 
