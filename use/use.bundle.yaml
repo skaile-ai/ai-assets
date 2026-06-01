@@ -1,6 +1,5 @@
 name: use
 description: External service integrations — each skill wraps one service with an agent-friendly interface
-version: 0.1.0
 dependencies:
   - contract:use-contract
   - skill:use-exa

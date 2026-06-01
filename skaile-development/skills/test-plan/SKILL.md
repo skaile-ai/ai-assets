@@ -1,66 +1,71 @@
 ---
 name: "test-plan"
-description: "Generates a per-package test plan for any skaile-dev package. Reads CLAUDE.md (architecture, public API), the source tree, and existing tests; produces <package>/TEST_PLAN.md listing untested units, coverage gaps, integration seams, and recommended scenarios per layer (unit/integration/e2e). Used as the input for test-unit, test-integration, and test-e2e."
+description: "Generates a per-package test plan for any skaile-dev package. Reads
+  CLAUDE.md (architecture, public API), the source tree, and existing tests; produces
+  <package>/TEST_PLAN.md listing untested units, coverage gaps, integration seams,
+  and recommended scenarios per layer (unit/integration/e2e). Used as the input for
+  test-unit, test-integration, and test-e2e."
 metadata:
-  version: "1.2.0"
   tags:
-    - "testing"
-    - "test-plan"
-    - "coverage"
-    - "scenarios"
-    - "scaffolding"
-    - "skaile-development"
+  - "testing"
+  - "test-plan"
+  - "coverage"
+  - "scenarios"
+  - "scaffolding"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "package.json"
-        gate: hard
-        description: "Monorepo root package.json required"
+    - path: "package.json"
+      gate: hard
+      description: "Monorepo root package.json required"
     inputs_required:
-      - id: target
-        label: "Package path"
-        type: text
-        hint: "e.g. forge/L4-project, agent-framework/runner, platform/backend"
+    - id: target
+      label: "Package path"
+      type: text
+      hint: "e.g. forge/L4-project, agent-framework/runner, platform/backend"
     inputs_optional:
-      - id: layers
-        label: "Layers to plan (comma-separated)"
-        type: text
-        default: "unit,integration,e2e"
-        hint: "Choose subset when some layers don't apply (libraries have no e2e)"
+    - id: layers
+      label: "Layers to plan (comma-separated)"
+      type: text
+      default: "unit,integration,e2e"
+      hint: "Choose subset when some layers don't apply (libraries have no e2e)"
     reads:
-      - path: "<target>/CLAUDE.md"
-        description: "Package architecture + public API source of truth"
-      - path: "<target>/package.json"
-        description: "Scripts, entry points, exported bins"
-      - path: "<target>/src"
-        description: "Source tree for testable unit discovery"
-      - path: "ai-assets/skaile-development/references/test_stack_map.md"
-        description: "Framework + run commands for the package"
-      - path: "_devlog/specs/2026-04-22-test-concept-design.md"
-        description: "Canonical layer taxonomy (L0-L5), shared infrastructure, coverage policy"
-      - path: "_devlog/plans/2026-04-22-test-gap-fill.md"
-        description: "Phase plan with per-package targets"
-      - path: "_devlog/reports/coverage-baseline-2026-04-22/summary.json"
-        description: "Per-package baseline line/branch/function pct used to measure gap-to-target"
-      - path: "_devlog/reports/coverage-ci/coverage-summary.json"
-        description: "Optional: latest CI coverage-summary used to diff against baseline"
-      - path: "docs/src/content/docs/testing.md"
-        description: "User-facing Starlight overview of the layered test strategy"
+    - path: "<target>/CLAUDE.md"
+      description: "Package architecture + public API source of truth"
+    - path: "<target>/package.json"
+      description: "Scripts, entry points, exported bins"
+    - path: "<target>/src"
+      description: "Source tree for testable unit discovery"
+    - path: "ai-assets/skaile-development/references/test_stack_map.md"
+      description: "Framework + run commands for the package"
+    - path: "_devlog/specs/2026-04-22-test-concept-design.md"
+      description: "Canonical layer taxonomy (L0-L5), shared infrastructure, coverage
+        policy"
+    - path: "_devlog/plans/2026-04-22-test-gap-fill.md"
+      description: "Phase plan with per-package targets"
+    - path: "_devlog/reports/coverage-baseline-2026-04-22/summary.json"
+      description: "Per-package baseline line/branch/function pct used to measure
+        gap-to-target"
+    - path: "_devlog/reports/coverage-ci/coverage-summary.json"
+      description: "Optional: latest CI coverage-summary used to diff against baseline"
+    - path: "docs/src/content/docs/testing.md"
+      description: "User-facing Starlight overview of the layered test strategy"
     produces:
-      - path: "<target>/TEST_PLAN.md"
-        description: "Structured per-layer test plan, consumed by test-unit/-integration/-e2e"
+    - path: "<target>/TEST_PLAN.md"
+      description: "Structured per-layer test plan, consumed by test-unit/-integration/-e2e"
   user_inputs:
     dialog:
-      - id: "target"
-        label: "Package path"
-        type: "text"
-        required: true
-      - id: "layers"
-        label: "Layers (comma-separated)"
-        type: "text"
-        required: false
-        default: "unit,integration,e2e"
+    - id: "target"
+      label: "Package path"
+      type: "text"
+      required: true
+    - id: "layers"
+      label: "Layers (comma-separated)"
+      type: "text"
+      required: false
+      default: "unit,integration,e2e"
     files: []
 ---
 

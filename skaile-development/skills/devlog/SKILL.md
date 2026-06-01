@@ -1,50 +1,54 @@
 ---
 name: "devlog"
-description: "Maintains the human-readable _devlog for the skaile-dev monorepo. Writes short plain-language entries to _devlog/DEVLOG.md after every meaningful change. Generates detailed reports in _devlog/reports/ when architectural concepts, shared contracts, or core patterns change. Run after completing any implementation work."
+description: "Maintains the human-readable _devlog for the skaile-dev monorepo. Writes
+  short plain-language entries to _devlog/DEVLOG.md after every meaningful change.
+  Generates detailed reports in _devlog/reports/ when architectural concepts, shared
+  contracts, or core patterns change. Run after completing any implementation work."
 metadata:
-  version: "1.0.0"
   tags:
-    - "devlog"
-    - "changelog"
-    - "documentation"
-    - "institutional-memory"
-    - "plain-language"
-    - "reports"
-    - "skaile-development"
+  - "devlog"
+  - "changelog"
+  - "documentation"
+  - "institutional-memory"
+  - "plain-language"
+  - "reports"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   produces:
-    - path: "_devlog/entries/<date>-<slug>.md"
-      description: "Individual devlog entry file (one per change)"
-    - path: "_devlog/DEVLOG.md"
-      description: "Index file linking to all entries (newest first)"
-    - path: "_devlog/reports/<date>-<topic>.md"
-      description: "Detailed report for conceptual/architectural changes (only when needed)"
+  - path: "_devlog/entries/<date>-<slug>.md"
+    description: "Individual devlog entry file (one per change)"
+  - path: "_devlog/DEVLOG.md"
+    description: "Index file linking to all entries (newest first)"
+  - path: "_devlog/reports/<date>-<topic>.md"
+    description: "Detailed report for conceptual/architectural changes (only when
+      needed)"
   user_inputs:
     dialog:
-      - id: "what_changed"
-        label: "What changed? (plain language, 1–2 sentences)"
-        type: "text"
-        required: true
-      - id: "why"
-        label: "Why was this change made?"
-        type: "text"
-        required: true
-      - id: "packages"
-        label: "Affected packages (comma-separated)"
-        type: "text"
-        required: false
-      - id: "implications"
-        label: "Any implications, breaking changes, or follow-up needed?"
-        type: "text"
-        required: false
-      - id: "report_needed"
-        label: "Does this change warrant a detailed report? (yes/no)"
-        type: "select"
-        options: ["no", "yes"]
-        required: false
-        default: "no"
-        hint: "yes = architectural or conceptual change that affects how the system works broadly"
+    - id: "what_changed"
+      label: "What changed? (plain language, 1–2 sentences)"
+      type: "text"
+      required: true
+    - id: "why"
+      label: "Why was this change made?"
+      type: "text"
+      required: true
+    - id: "packages"
+      label: "Affected packages (comma-separated)"
+      type: "text"
+      required: false
+    - id: "implications"
+      label: "Any implications, breaking changes, or follow-up needed?"
+      type: "text"
+      required: false
+    - id: "report_needed"
+      label: "Does this change warrant a detailed report? (yes/no)"
+      type: "select"
+      options: ["no", "yes"]
+      required: false
+      default: "no"
+      hint: "yes = architectural or conceptual change that affects how the system
+        works broadly"
     files: []
 ---
 

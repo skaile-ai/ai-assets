@@ -1,63 +1,68 @@
 ---
 name: "quality"
-description: "[skaile-development] Umbrella quality-gate orchestrator for the skaile-dev monorepo. Runs typecheck → test (with coverage + ratchet when the mode requires it) → audit → doc-audit → ready in sequence, early-outing on the first hard failure. Produces a consolidated health snapshot that contributors look at before opening a PR and release uses as its pre-flight check. Supports quick (diff-scoped), package (one package deep), and full (whole monorepo, mirrors test-full.yml CI lane) modes."
+description: "[skaile-development] Umbrella quality-gate orchestrator for the skaile-dev
+  monorepo. Runs typecheck → test (with coverage + ratchet when the mode requires
+  it) → audit → doc-audit → ready in sequence, early-outing on the first hard failure.
+  Produces a consolidated health snapshot that contributors look at before opening
+  a PR and release uses as its pre-flight check. Supports quick (diff-scoped), package
+  (one package deep), and full (whole monorepo, mirrors test-full.yml CI lane) modes."
 metadata:
-  version: "1.1.0"
   tags:
-    - "quality"
-    - "umbrella"
-    - "orchestrator"
-    - "gate"
-    - "pre-pr"
-    - "pre-release"
-    - "skaile-development"
+  - "quality"
+  - "umbrella"
+  - "orchestrator"
+  - "gate"
+  - "pre-pr"
+  - "pre-release"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "package.json"
-        gate: hard
-        description: "Monorepo root"
+    - path: "package.json"
+      gate: hard
+      description: "Monorepo root"
     inputs_optional:
-      - id: mode
-        label: "Mode"
-        type: select
-        options:
-          - "quick"
-          - "package"
-          - "full"
-        default: "quick"
-        hint: "quick = diff-scoped fast gate | package = deep one package | full = whole monorepo"
-      - id: target
-        label: "Package path (mode=package)"
-        type: text
-      - id: skip
-        label: "Steps to skip (comma-separated from: typecheck, test, audit, doc, ready)"
-        type: text
+    - id: mode
+      label: "Mode"
+      type: select
+      options:
+      - "quick"
+      - "package"
+      - "full"
+      default: "quick"
+      hint: "quick = diff-scoped fast gate | package = deep one package | full = whole
+        monorepo"
+    - id: target
+      label: "Package path (mode=package)"
+      type: text
+    - id: skip
+      label: "Steps to skip (comma-separated from: typecheck, test, audit, doc, ready)"
+      type: text
     reads:
-      - path: "ai-assets/skaile-development/references/test_stack_map.md"
-      - path: "ai-assets/skaile-development/references/readiness_criteria.md"
+    - path: "ai-assets/skaile-development/references/test_stack_map.md"
+    - path: "ai-assets/skaile-development/references/readiness_criteria.md"
     produces:
-      - path: "_devlog/reports/quality-<date>.md"
-        description: "Consolidated health snapshot"
-      - path: "_devlog/reports/quality-<date>.json"
-        description: "Structured consolidated result"
+    - path: "_devlog/reports/quality-<date>.md"
+      description: "Consolidated health snapshot"
+    - path: "_devlog/reports/quality-<date>.json"
+      description: "Structured consolidated result"
   user_inputs:
     dialog:
-      - id: "mode"
-        label: "Mode"
-        type: "select"
-        options: ["quick", "package", "full"]
-        required: false
-        default: "quick"
-      - id: "target"
-        label: "Package path"
-        type: "text"
-        required: false
-      - id: "skip"
-        label: "Steps to skip"
-        type: "text"
-        required: false
+    - id: "mode"
+      label: "Mode"
+      type: "select"
+      options: ["quick", "package", "full"]
+      required: false
+      default: "quick"
+    - id: "target"
+      label: "Package path"
+      type: "text"
+      required: false
+    - id: "skip"
+      label: "Steps to skip"
+      type: "text"
+      required: false
     files: []
 ---
 

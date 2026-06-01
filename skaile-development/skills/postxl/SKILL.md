@@ -1,49 +1,61 @@
 ---
 name: "postxl"
-description: "[skaile-development] Use when building, modifying, or extending a PostXL-generated app inside skaile-dev — `platform/backend`, `platform/frontend`, and (in progress) `store/backend`. Covers schema authoring (`postxl-schema.json`, `schema/*.model.json`, `schema/*.enum.json`), the regenerate workflow (`bun run generate` → `pxl generate` + `tsr generate`), the three modes for code changes (schema edit / custom blocks / new module), `postxl-lock.json` and ejection semantics, the dual backend+frontend verify loop, the `pxl doctor`/`status`/`info` toolkit, and the `@postxl/ui-components` primitives. Activates whenever you see `postxl-schema.json`, `postxl-lock.json`, `generate.ts`, or `// @custom-start` markers, or when the user mentions PostXL, regenerate, eject, or custom block."
+description: "[skaile-development] Use when building, modifying, or extending a PostXL-generated
+  app inside skaile-dev — `platform/backend`, `platform/frontend`, and (in progress)
+  `store/backend`. Covers schema authoring (`postxl-schema.json`, `schema/*.model.json`,
+  `schema/*.enum.json`), the regenerate workflow (`bun run generate` → `pxl generate`
+  + `tsr generate`), the three modes for code changes (schema edit / custom blocks
+  / new module), `postxl-lock.json` and ejection semantics, the dual backend+frontend
+  verify loop, the `pxl doctor`/`status`/`info` toolkit, and the `@postxl/ui-components`
+  primitives. Activates whenever you see `postxl-schema.json`, `postxl-lock.json`,
+  `generate.ts`, or `// @custom-start` markers, or when the user mentions PostXL,
+  regenerate, eject, or custom block."
 metadata:
-  version: "1.2.0"
   tags:
-    - "postxl"
-    - "code-generation"
-    - "schema"
-    - "nestjs"
-    - "react"
-    - "prisma"
-    - "typescript"
-    - "scaffolding"
-    - "platform"
-    - "store"
-    - "skaile-development"
+  - "postxl"
+  - "code-generation"
+  - "schema"
+  - "nestjs"
+  - "react"
+  - "prisma"
+  - "typescript"
+  - "scaffolding"
+  - "platform"
+  - "store"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "postxl-schema.json"
-        gate: soft
-        description: "Project-root schema (PostXL-generated app). When present, this skill applies."
-      - path: "postxl-lock.json"
-        gate: soft
-        description: "Tracks per-file checksums and ejection status for generated outputs."
-      - path: "schema/"
-        gate: soft
-        description: "Optional split-schema directory with per-model / per-enum JSON files."
-      - path: "platform/CLAUDE.md"
-        gate: soft
-        description: "Read first when working inside platform/ — it owns the project-specific conventions on top of PostXL (Frontend Action Pattern, dev modes, lint stack)."
-      - path: "store/CLAUDE.md"
-        gate: soft
-        description: "Read first when working inside store/ — store/backend is being scaffolded onto PostXL."
+    - path: "postxl-schema.json"
+      gate: soft
+      description: "Project-root schema (PostXL-generated app). When present, this
+        skill applies."
+    - path: "postxl-lock.json"
+      gate: soft
+      description: "Tracks per-file checksums and ejection status for generated outputs."
+    - path: "schema/"
+      gate: soft
+      description: "Optional split-schema directory with per-model / per-enum JSON
+        files."
+    - path: "platform/CLAUDE.md"
+      gate: soft
+      description: "Read first when working inside platform/ — it owns the project-specific
+        conventions on top of PostXL (Frontend Action Pattern, dev modes, lint stack)."
+    - path: "store/CLAUDE.md"
+      gate: soft
+      description: "Read first when working inside store/ — store/backend is being
+        scaffolded onto PostXL."
   produces: []
   reads:
-    - path: "postxl-schema.json"
-    - path: "schema/*.model.json"
-    - path: "schema/*.enum.json"
-    - path: "postxl-lock.json"
-    - path: "generate.ts"
-    - path: "platform/CLAUDE.md"
-    - path: "store/CLAUDE.md"
-    - path: "node_modules/@postxl/ui-components/CLAUDE.md"
+  - path: "postxl-schema.json"
+  - path: "schema/*.model.json"
+  - path: "schema/*.enum.json"
+  - path: "postxl-lock.json"
+  - path: "generate.ts"
+  - path: "platform/CLAUDE.md"
+  - path: "store/CLAUDE.md"
+  - path: "node_modules/@postxl/ui-components/CLAUDE.md"
 ---
 
 # PostXL App Development

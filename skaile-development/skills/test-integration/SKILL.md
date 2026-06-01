@@ -1,86 +1,91 @@
 ---
 name: "test-integration"
-description: "Set up and generate integration tests for any skaile-dev package. Covers API routes, DB operations, and cross-module flows. Knows the storage backends: SQLite + drizzle for forge apps, PostgreSQL + Prisma for platform/backend, temp-dir state for agent-framework. Scaffolds test DB isolation (in-memory SQLite / ephemeral test DB / temp workspaces), auth helpers, seed fixtures, then generates tests. Verifies tests run."
+description: "Set up and generate integration tests for any skaile-dev package. Covers
+  API routes, DB operations, and cross-module flows. Knows the storage backends: SQLite
+  + drizzle for forge apps, PostgreSQL + Prisma for platform/backend, temp-dir state
+  for agent-framework. Scaffolds test DB isolation (in-memory SQLite / ephemeral test
+  DB / temp workspaces), auth helpers, seed fixtures, then generates tests. Verifies
+  tests run."
 metadata:
-  version: "1.1.0"
   tags:
-    - "testing"
-    - "integration-tests"
-    - "api"
-    - "database"
-    - "drizzle"
-    - "prisma"
-    - "setup"
-    - "generation"
-    - "skaile-development"
+  - "testing"
+  - "integration-tests"
+  - "api"
+  - "database"
+  - "drizzle"
+  - "prisma"
+  - "setup"
+  - "generation"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "package.json"
-        gate: hard
-        description: "Monorepo root package.json required"
+    - path: "package.json"
+      gate: hard
+      description: "Monorepo root package.json required"
     inputs_required:
-      - id: target
-        label: "Package path"
-        type: text
-        hint: "e.g. forge/L4-project, platform/backend, agent-framework/runner"
+    - id: target
+      label: "Package path"
+      type: text
+      hint: "e.g. forge/L4-project, platform/backend, agent-framework/runner"
     inputs_optional:
-      - id: mode
-        label: "Mode"
-        type: select
-        options:
-          - "setup"
-          - "generate"
-          - "both"
-        default: "both"
-      - id: storage
-        label: "Storage backend override"
-        type: select
-        options:
-          - "auto"
-          - "sqlite-memory"
-          - "sqlite-tempfile"
-          - "postgres-testdb"
-          - "temp-dir"
-          - "none"
-        default: "auto"
-        hint: "auto = infer from package.json dependencies"
+    - id: mode
+      label: "Mode"
+      type: select
+      options:
+      - "setup"
+      - "generate"
+      - "both"
+      default: "both"
+    - id: storage
+      label: "Storage backend override"
+      type: select
+      options:
+      - "auto"
+      - "sqlite-memory"
+      - "sqlite-tempfile"
+      - "postgres-testdb"
+      - "temp-dir"
+      - "none"
+      default: "auto"
+      hint: "auto = infer from package.json dependencies"
     reads:
-      - path: "<target>/CLAUDE.md"
-      - path: "<target>/TEST_PLAN.md"
-      - path: "<target>/package.json"
-      - path: "<target>/server"
-      - path: "<target>/src"
-      - path: "<target>/drizzle.config.ts or <target>/prisma/schema.prisma"
-      - path: ".env.example"
-      - path: "ai-assets/skaile-development/references/test_stack_map.md"
+    - path: "<target>/CLAUDE.md"
+    - path: "<target>/TEST_PLAN.md"
+    - path: "<target>/package.json"
+    - path: "<target>/server"
+    - path: "<target>/src"
+    - path: "<target>/drizzle.config.ts or <target>/prisma/schema.prisma"
+    - path: ".env.example"
+    - path: "ai-assets/skaile-development/references/test_stack_map.md"
     produces:
-      - path: "<target>/tests/integration/**/*.test.ts"
-      - path: "<target>/tests/integration/setup.ts"
-      - path: "<target>/tests/fixtures/**/*"
-      - path: "<target>/tests/fixtures/fake-*.mjs (for subprocess-driver packages)"
-      - path: "<target>/tests/integration/auth.ts"
-      - path: "<target>/vitest.config.ts (if missing or needs happy-dom)"
-      - path: "<target>/package.json (adds @skaile/test-utils devDep if missing)"
+    - path: "<target>/tests/integration/**/*.test.ts"
+    - path: "<target>/tests/integration/setup.ts"
+    - path: "<target>/tests/fixtures/**/*"
+    - path: "<target>/tests/fixtures/fake-*.mjs (for subprocess-driver packages)"
+    - path: "<target>/tests/integration/auth.ts"
+    - path: "<target>/vitest.config.ts (if missing or needs happy-dom)"
+    - path: "<target>/package.json (adds @skaile/test-utils devDep if missing)"
   user_inputs:
     dialog:
-      - id: "target"
-        label: "Package path"
-        type: "text"
-        required: true
-      - id: "mode"
-        label: "Mode"
-        type: "select"
-        options: ["setup", "generate", "both"]
-        required: false
-        default: "both"
-      - id: "storage"
-        label: "Storage backend"
-        type: "select"
-        options: ["auto", "sqlite-memory", "sqlite-tempfile", "postgres-testdb", "temp-dir", "none"]
-        required: false
-        default: "auto"
+    - id: "target"
+      label: "Package path"
+      type: "text"
+      required: true
+    - id: "mode"
+      label: "Mode"
+      type: "select"
+      options: ["setup", "generate", "both"]
+      required: false
+      default: "both"
+    - id: "storage"
+      label: "Storage backend"
+      type: "select"
+      options: ["auto", "sqlite-memory", "sqlite-tempfile", "postgres-testdb", "temp-dir",
+        "none"]
+      required: false
+      default: "auto"
     files: []
 ---
 

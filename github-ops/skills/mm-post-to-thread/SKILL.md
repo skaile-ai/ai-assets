@@ -1,22 +1,23 @@
 ---
 name: mm-post-to-thread
-description: Use when you have completed significant work and need to post a structured progress update or completion summary to the Mattermost thread that initiated this session.
+description: Use when you have completed significant work and need to post a 
+  structured progress update or completion summary to the Mattermost thread that
+  initiated this session.
 license: MIT
 metadata:
-  version: "1.0.0"
   tags: [mattermost, reporting, completion, progress, thread, communication]
   stage: stable
   source: CF
   prerequisites:
     inputs_optional:
-      - id: pr_url
-        label: "PR URL (if a PR was created)"
-        type: text
-        required: false
-      - id: summary
-        label: "Summary of what was accomplished"
-        type: textarea
-        required: true
+    - id: pr_url
+      label: "PR URL (if a PR was created)"
+      type: text
+      required: false
+    - id: summary
+      label: "Summary of what was accomplished"
+      type: textarea
+      required: true
 ---
 
 ## Overview

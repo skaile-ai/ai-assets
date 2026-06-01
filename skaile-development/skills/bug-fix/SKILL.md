@@ -1,53 +1,68 @@
 ---
 name: "bug-fix"
-description: "[skaile-development] End-to-end work-item orchestrator for the Skaile platform. Drives any single work item — bug, feature, UI fix, chore, or issue — from 'just reported' to 'PR is open' in one flow: isolated worktree + branch, files the item at platform/issues/<ID>.md (status=testing, owner=current git user, bumps nextIds in categories.yaml), investigates, writes an uncommitted plan, dispatches a fresh agent to implement, dispatches a fresh agent to review, fixes valid review concerns, cleans up the plan, commits + pushes the branch, removes the worktree, opens a PR into main, and reports the PR link. Use when the user reports a platform bug, requests a small feature, asks for a UI fix or chore, and wants the whole cycle done in one shot."
+description: "[skaile-development] End-to-end work-item orchestrator for the Skaile
+  platform. Drives any single work item — bug, feature, UI fix, chore, or issue —
+  from 'just reported' to 'PR is open' in one flow: isolated worktree + branch, files
+  the item at platform/issues/<ID>.md (status=testing, owner=current git user, bumps
+  nextIds in categories.yaml), investigates, writes an uncommitted plan, dispatches
+  a fresh agent to implement, dispatches a fresh agent to review, fixes valid review
+  concerns, cleans up the plan, commits + pushes the branch, removes the worktree,
+  opens a PR into main, and reports the PR link. Use when the user reports a platform
+  bug, requests a small feature, asks for a UI fix or chore, and wants the whole cycle
+  done in one shot."
 metadata:
-  version: "2.0.0"
   tags:
-    - "bug-fix"
-    - "feature"
-    - "ui-fix"
-    - "chore"
-    - "work-item"
-    - "platform"
-    - "orchestrator"
-    - "worktree"
-    - "issues"
-    - "pr"
-    - "skaile-development"
+  - "bug-fix"
+  - "feature"
+  - "ui-fix"
+  - "chore"
+  - "work-item"
+  - "platform"
+  - "orchestrator"
+  - "worktree"
+  - "issues"
+  - "pr"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   user_inputs:
     dialog:
-      - id: "description"
-        label: "Describe the work item (bug, feature, UI fix, chore, or issue) — plain language; the skill refines the wording, picks the category, and files it without asking"
-        type: "text"
-        required: true
-      - id: "category"
-        label: "Category override (rarely needed — auto-derived from description)"
-        type: "select"
-        options:
-          - "bug"
-          - "issue"
-          - "ui"
-          - "chore"
-          - "feature"
-        required: false
-        hint: "Override the auto-classification. bug=broken behavior, issue=existing thing should do more, ui=cosmetic only, chore=maintenance/refactor with no behavior change, feature=genuinely new capability. Leave empty in the typical case."
-      - id: "branch_slug"
-        label: "Branch slug override (auto-derived from description)"
-        type: "text"
-        required: false
-        hint: "Only set if you want a specific branch name. Leave empty in the typical case."
-      - id: "complexity"
-        label: "Complexity hint"
-        type: "select"
-        options:
-          - "small"
-          - "standard"
-        required: false
-        default: "standard"
-        hint: "small = obvious, contained change (skips the review-subagent step) | standard = needs review cycle"
+    - id: "description"
+      label: "Describe the work item (bug, feature, UI fix, chore, or issue) — plain
+        language; the skill refines the wording, picks the category, and files it
+        without asking"
+      type: "text"
+      required: true
+    - id: "category"
+      label: "Category override (rarely needed — auto-derived from description)"
+      type: "select"
+      options:
+      - "bug"
+      - "issue"
+      - "ui"
+      - "chore"
+      - "feature"
+      required: false
+      hint: "Override the auto-classification. bug=broken behavior, issue=existing
+        thing should do more, ui=cosmetic only, chore=maintenance/refactor with no
+        behavior change, feature=genuinely new capability. Leave empty in the typical
+        case."
+    - id: "branch_slug"
+      label: "Branch slug override (auto-derived from description)"
+      type: "text"
+      required: false
+      hint: "Only set if you want a specific branch name. Leave empty in the typical
+        case."
+    - id: "complexity"
+      label: "Complexity hint"
+      type: "select"
+      options:
+      - "small"
+      - "standard"
+      required: false
+      default: "standard"
+      hint: "small = obvious, contained change (skips the review-subagent step) |
+        standard = needs review cycle"
     files: []
 ---
 

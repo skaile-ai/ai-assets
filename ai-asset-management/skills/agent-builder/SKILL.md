@@ -1,15 +1,17 @@
 ---
 name: agent-builder
-description: "Scaffolds and implements GitAgent definitions (agent.yaml + SOUL.md + RULES.md). Use when you need to create a new AI agent identity with model configuration, delegation rules, and composable sub-agents. Supports domain agents (ai-assets), local project agents (.claude/agents, .omp/agents), and global agents."
+description: "Scaffolds and implements GitAgent definitions (agent.yaml + SOUL.md
+  + RULES.md). Use when you need to create a new AI agent identity with model configuration,
+  delegation rules, and composable sub-agents. Supports domain agents (ai-assets),
+  local project agents (.claude/agents, .omp/agents), and global agents."
 license: MIT
 compatibility: "Git required for version-controlled agent definitions"
 metadata:
-  version: "1.0.0"
   author: skaile
   tags: [agent, gitagent, scaffold, create-agent, identity, soul, rules]
   stage: alpha
   requires:
-    - asset_frontmatter
+  - asset_frontmatter
 ---
 
 # Agent Builder

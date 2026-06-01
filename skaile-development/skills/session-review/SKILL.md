@@ -1,28 +1,31 @@
 ---
 name: "session-review"
-description: "[skaile-development] Reviews the current Claude Code implementation session for the skaile-dev monorepo: reads the session JSONL to report token usage, cache efficiency, estimated cost, and workflow adherence against the skaile-development skill sequence. Outputs optimization tips and skillset improvement suggestions. Run at the end of any implementation session."
+description: "[skaile-development] Reviews the current Claude Code implementation
+  session for the skaile-dev monorepo: reads the session JSONL to report token usage,
+  cache efficiency, estimated cost, and workflow adherence against the skaile-development
+  skill sequence. Outputs optimization tips and skillset improvement suggestions.
+  Run at the end of any implementation session."
 metadata:
-  version: "1.0.0"
   tags:
-    - "session"
-    - "review"
-    - "tokens"
-    - "cost"
-    - "workflow"
-    - "optimization"
-    - "retrospective"
-    - "skaile-development"
+  - "session"
+  - "review"
+  - "tokens"
+  - "cost"
+  - "workflow"
+  - "optimization"
+  - "retrospective"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   produces:
-    - path: "_devlog/reports/session-review-<date>-<slug>.json"
-      description: "Structured session report (optional, on user request)"
+  - path: "_devlog/reports/session-review-<date>-<slug>.json"
+    description: "Structured session report (optional, on user request)"
   user_inputs:
     dialog:
-      - id: "session_id"
-        label: "Session ID (leave blank to use the most recent session for this project)"
-        type: "text"
-        required: false
+    - id: "session_id"
+      label: "Session ID (leave blank to use the most recent session for this project)"
+      type: "text"
+      required: false
     files: []
 ---
 

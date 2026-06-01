@@ -1,60 +1,63 @@
 ---
 name: "implement"
-description: "Monorepo-aware implementation orchestrator for the skaile-dev codebase. Reads the affected package CLAUDE.md files, identifies the tech stack, routes to the right prog-experts, produces a plan, executes with supervised dispatch, then triggers test, doc, and devlog on completion. Use for any non-trivial change to the skaile-dev monorepo."
+description: "Monorepo-aware implementation orchestrator for the skaile-dev codebase.
+  Reads the affected package CLAUDE.md files, identifies the tech stack, routes to
+  the right prog-experts, produces a plan, executes with supervised dispatch, then
+  triggers test, doc, and devlog on completion. Use for any non-trivial change to
+  the skaile-dev monorepo."
 metadata:
-  version: "1.0.0"
   tags:
-    - "implement"
-    - "skaile-development"
-    - "monorepo"
-    - "orchestrator"
-    - "plan"
-    - "supervised"
-    - "routing"
+  - "implement"
+  - "skaile-development"
+  - "monorepo"
+  - "orchestrator"
+  - "plan"
+  - "supervised"
+  - "routing"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "skaile-dev/CLAUDE.md"
-        gate: soft
-        description: "Monorepo CLAUDE.md for conventions — read before starting"
+    - path: "skaile-dev/CLAUDE.md"
+      gate: soft
+      description: "Monorepo CLAUDE.md for conventions — read before starting"
     inputs_required:
-      - id: task_description
-        label: "What needs to be implemented? (plain language)"
-        type: text
+    - id: task_description
+      label: "What needs to be implemented? (plain language)"
+      type: text
     inputs_optional:
-      - id: target_package
-        label: "Target package(s) if known (e.g., forge/L4-project, platform/backend/libs/session-manager)"
-        type: text
-      - id: complexity
-        label: "Complexity hint"
-        type: select
-        options:
-          - "small"
-          - "standard"
-          - "large"
-        default: "standard"
+    - id: target_package
+      label: "Target package(s) if known (e.g., forge/L4-project, platform/backend/libs/session-manager)"
+      type: text
+    - id: complexity
+      label: "Complexity hint"
+      type: select
+      options:
+      - "small"
+      - "standard"
+      - "large"
+      default: "standard"
   produces:
-    - path: "_implementation/skaile-plan.md"
-      description: "Structured plan for this implementation task"
-    - path: "_devlog/DEVLOG.md"
-      description: "Devlog entry added after completion"
+  - path: "_implementation/skaile-plan.md"
+    description: "Structured plan for this implementation task"
+  - path: "_devlog/DEVLOG.md"
+    description: "Devlog entry added after completion"
   user_inputs:
     dialog:
-      - id: "task_description"
-        label: "What needs to be implemented?"
-        type: "text"
-        required: true
-      - id: "target_package"
-        label: "Target package(s) if known"
-        type: "text"
-        required: false
-      - id: "complexity"
-        label: "Complexity"
-        type: "select"
-        options: ["small", "standard", "large"]
-        required: false
-        default: "standard"
+    - id: "task_description"
+      label: "What needs to be implemented?"
+      type: "text"
+      required: true
+    - id: "target_package"
+      label: "Target package(s) if known"
+      type: "text"
+      required: false
+    - id: "complexity"
+      label: "Complexity"
+      type: "select"
+      options: ["small", "standard", "large"]
+      required: false
+      default: "standard"
     files: []
 ---
 

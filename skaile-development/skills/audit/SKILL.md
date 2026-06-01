@@ -1,78 +1,83 @@
 ---
 name: "audit"
-description: "[skaile-development] Monorepo-aware code quality audit for the skaile-dev codebase. Verifies build (lint + typecheck + build) and tests pass, then dispatches three parallel sub-agents for logic, security, and UI/UX findings. Three scopes: diff (staged or last-commit), package (one package deep), full (whole monorepo). Produces _devlog/reports/audit-<date>.json. Use before opening a PR or cutting a release."
+description: "[skaile-development] Monorepo-aware code quality audit for the skaile-dev
+  codebase. Verifies build (lint + typecheck + build) and tests pass, then dispatches
+  three parallel sub-agents for logic, security, and UI/UX findings. Three scopes:
+  diff (staged or last-commit), package (one package deep), full (whole monorepo).
+  Produces _devlog/reports/audit-<date>.json. Use before opening a PR or cutting a
+  release."
 metadata:
-  version: "1.0.0"
   tags:
-    - "audit"
-    - "code-quality"
-    - "security"
-    - "static-analysis"
-    - "build"
-    - "tests"
-    - "parallel"
-    - "adversarial"
-    - "skaile-development"
+  - "audit"
+  - "code-quality"
+  - "security"
+  - "static-analysis"
+  - "build"
+  - "tests"
+  - "parallel"
+  - "adversarial"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "package.json"
-        gate: hard
-        description: "Monorepo root package.json required"
+    - path: "package.json"
+      gate: hard
+      description: "Monorepo root package.json required"
     inputs_required:
-      - id: scope
-        label: "Audit scope"
-        type: select
-        options:
-          - "diff"
-          - "package"
-          - "full"
-        default: "diff"
-        hint: "diff = staged/last-commit (fast) | package = one package deep | full = whole monorepo (slow)"
+    - id: scope
+      label: "Audit scope"
+      type: select
+      options:
+      - "diff"
+      - "package"
+      - "full"
+      default: "diff"
+      hint: "diff = staged/last-commit (fast) | package = one package deep | full
+        = whole monorepo (slow)"
     inputs_optional:
-      - id: target
-        label: "Package path (required for scope=package)"
-        type: text
-        hint: "e.g. forge/L4-project, agent-framework/runner, platform/backend"
-      - id: diff_source
-        label: "Diff source (only for scope=diff)"
-        type: select
-        options:
-          - "staged"
-          - "last-commit"
-          - "branch"
-        default: "staged"
+    - id: target
+      label: "Package path (required for scope=package)"
+      type: text
+      hint: "e.g. forge/L4-project, agent-framework/runner, platform/backend"
+    - id: diff_source
+      label: "Diff source (only for scope=diff)"
+      type: select
+      options:
+      - "staged"
+      - "last-commit"
+      - "branch"
+      default: "staged"
     reads:
-      - path: "ai-assets/skaile-development/references/audit_checklists.md"
-        description: "Sub-agent checklists (must read before dispatch)"
-      - path: "ai-assets/skaile-development/references/test_stack_map.md"
-        description: "Package → test framework mapping"
-      - path: "<package>/CLAUDE.md"
-        description: "Per-package architecture and conventions"
-      - path: "<package>/REVIEW.md"
-        description: "Repo-specific review rules if present"
+    - path: "ai-assets/skaile-development/references/audit_checklists.md"
+      description: "Sub-agent checklists (must read before dispatch)"
+    - path: "ai-assets/skaile-development/references/test_stack_map.md"
+      description: "Package → test framework mapping"
+    - path: "<package>/CLAUDE.md"
+      description: "Per-package architecture and conventions"
+    - path: "<package>/REVIEW.md"
+      description: "Repo-specific review rules if present"
     produces:
-      - path: "_devlog/reports/audit-<date>.json"
-        description: "Structured audit result with verdict and findings"
+    - path: "_devlog/reports/audit-<date>.json"
+      description: "Structured audit result with verdict and findings"
   user_inputs:
     dialog:
-      - id: "scope"
-        label: "Audit scope"
-        type: "select"
-        options: ["diff", "package", "full"]
-        required: true
-        default: "diff"
-      - id: "target"
-        label: "Package path (for scope=package)"
-        type: "text"
-        required: false
-      - id: "diff_source"
-        label: "Diff source (for scope=diff)"
-        type: "select"
-        options: ["staged", "last-commit", "branch"]
-        required: false
-        default: "staged"
+    - id: "scope"
+      label: "Audit scope"
+      type: "select"
+      options: ["diff", "package", "full"]
+      required: true
+      default: "diff"
+    - id: "target"
+      label: "Package path (for scope=package)"
+      type: "text"
+      required: false
+    - id: "diff_source"
+      label: "Diff source (for scope=diff)"
+      type: "select"
+      options: ["staged", "last-commit", "branch"]
+      required: false
+      default: "staged"
     files: []
 ---
 

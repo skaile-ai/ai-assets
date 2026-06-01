@@ -1,37 +1,38 @@
 ---
 name: "notify"
-description: "Team notifications and messaging for skaile-dev. Supports free-form Mattermost messages plus structured templates for plans, breaking changes, releases, and devlog summaries."
+description: "Team notifications and messaging for skaile-dev. Supports free-form
+  Mattermost messages plus structured templates for plans, breaking changes, releases,
+  and devlog summaries."
 metadata:
-  version: "1.0.0"
   tags:
-    - "mattermost"
-    - "messaging"
-    - "notifications"
-    - "team-communication"
-    - "skaile-development"
+  - "mattermost"
+  - "messaging"
+  - "notifications"
+  - "team-communication"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   dependencies:
     tools:
-      - "mcp2cli @mattermost (baked tool, requires uvx mcp2cli + baked config)"
+    - "mcp2cli @mattermost (baked tool, requires uvx mcp2cli + baked config)"
   user_inputs:
     dialog:
-      - id: "channel"
-        label: "Channel name (e.g. town-square)"
-        type: "text"
-        required: false
-        default: "town-square"
-      - id: "message"
-        label: "Message content (markdown supported)"
-        type: "textarea"
-        required: false
-        hint: "Leave empty if posting from a file or generating from context"
-      - id: "template"
-        label: "Notification template (optional)"
-        type: "select"
-        options: ["plan", "breaking-change", "release", "devlog-summary"]
-        required: false
-        hint: "Structured notification. Leave empty for free-form messages."
+    - id: "channel"
+      label: "Channel name (e.g. town-square)"
+      type: "text"
+      required: false
+      default: "town-square"
+    - id: "message"
+      label: "Message content (markdown supported)"
+      type: "textarea"
+      required: false
+      hint: "Leave empty if posting from a file or generating from context"
+    - id: "template"
+      label: "Notification template (optional)"
+      type: "select"
+      options: ["plan", "breaking-change", "release", "devlog-summary"]
+      required: false
+      hint: "Structured notification. Leave empty for free-form messages."
     files: []
 ---
 

@@ -1,6 +1,5 @@
 name: knowledge-writing
 description: Content generation from research — podcast scripts, book chapters, and audio productions
-version: 0.1.0
 dependencies:
   - contract:knowledge-writing-contract
   - skill:book-writer

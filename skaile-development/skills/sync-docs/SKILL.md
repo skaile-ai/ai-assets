@@ -1,71 +1,74 @@
 ---
 name: "sync-docs"
-description: "Cross-document reference repair across the skaile-dev monorepo. Scans README ↔ CLAUDE.md ↔ docs/<pkg>/ ↔ DOMAIN.md ↔ monorepo CLAUDE.md and finds broken links, missing back-references, orphan Starlight pages, stale _sources frontmatter, and drift between the monorepo domain table and actual ai-assets/*/DOMAIN.md files. Shows a complete diff of proposed changes before applying — non-destructive."
+description: "Cross-document reference repair across the skaile-dev monorepo. Scans
+  README ↔ CLAUDE.md ↔ docs/<pkg>/ ↔ DOMAIN.md ↔ monorepo CLAUDE.md and finds broken
+  links, missing back-references, orphan Starlight pages, stale _sources frontmatter,
+  and drift between the monorepo domain table and actual ai-assets/*/DOMAIN.md files.
+  Shows a complete diff of proposed changes before applying — non-destructive."
 metadata:
-  version: "1.0.0"
   tags:
-    - "docs"
-    - "cross-reference"
-    - "sync"
-    - "starlight"
-    - "frontmatter"
-    - "maintenance"
-    - "skaile-development"
+  - "docs"
+  - "cross-reference"
+  - "sync"
+  - "starlight"
+  - "frontmatter"
+  - "maintenance"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "package.json"
-        gate: hard
-        description: "Monorepo root"
+    - path: "package.json"
+      gate: hard
+      description: "Monorepo root"
     inputs_optional:
-      - id: scope
-        label: "Scope"
-        type: select
-        options:
-          - "all"
-          - "package"
-        default: "all"
-      - id: target
-        label: "Package path (scope=package)"
-        type: text
-      - id: apply
-        label: "Apply fixes automatically (still shows diff first)"
-        type: select
-        options:
-          - "false"
-          - "interactive"
-          - "true"
-        default: "interactive"
+    - id: scope
+      label: "Scope"
+      type: select
+      options:
+      - "all"
+      - "package"
+      default: "all"
+    - id: target
+      label: "Package path (scope=package)"
+      type: text
+    - id: apply
+      label: "Apply fixes automatically (still shows diff first)"
+      type: select
+      options:
+      - "false"
+      - "interactive"
+      - "true"
+      default: "interactive"
     reads:
-      - path: "<package>/README.md"
-      - path: "<package>/CLAUDE.md"
-      - path: "<package>/docs"
-      - path: "ai-assets/**/DOMAIN.md"
-      - path: "ai-assets/**/SKILL.md"
-      - path: "docs/src/content/config.ts"
-      - path: "docs/astro.config.mjs"
-      - path: "CLAUDE.md"
+    - path: "<package>/README.md"
+    - path: "<package>/CLAUDE.md"
+    - path: "<package>/docs"
+    - path: "ai-assets/**/DOMAIN.md"
+    - path: "ai-assets/**/SKILL.md"
+    - path: "docs/src/content/config.ts"
+    - path: "docs/astro.config.mjs"
+    - path: "CLAUDE.md"
     produces:
-      - path: "Repaired files across the monorepo"
+    - path: "Repaired files across the monorepo"
   user_inputs:
     dialog:
-      - id: "scope"
-        label: "Scope"
-        type: "select"
-        options: ["all", "package"]
-        required: false
-        default: "all"
-      - id: "target"
-        label: "Package path"
-        type: "text"
-        required: false
-      - id: "apply"
-        label: "Apply mode"
-        type: "select"
-        options: ["false", "interactive", "true"]
-        required: false
-        default: "interactive"
+    - id: "scope"
+      label: "Scope"
+      type: "select"
+      options: ["all", "package"]
+      required: false
+      default: "all"
+    - id: "target"
+      label: "Package path"
+      type: "text"
+      required: false
+    - id: "apply"
+      label: "Apply mode"
+      type: "select"
+      options: ["false", "interactive", "true"]
+      required: false
+      default: "interactive"
     files: []
 ---
 

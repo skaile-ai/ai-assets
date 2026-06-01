@@ -1,6 +1,5 @@
 name: dev-implementation-experts-python
 description: Deep implementation expertise for Python frameworks
-version: 0.1.0
 dependencies:
   - contract:impl-experts-python-contract
   - skill:prog-expert-python

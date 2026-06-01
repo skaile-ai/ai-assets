@@ -1,62 +1,65 @@
 ---
 name: "ready"
-description: "Pre-release readiness gate for the skaile-dev monorepo. Verifies every package has README + CLAUDE.md with required sections, tests passing, build clean, typecheck clean, CHANGELOG present, and Starlight registration for packages with docs/. Produces a blocker/warning table and exits non-zero on any hard failure. Called by release as Phase 0."
+description: "Pre-release readiness gate for the skaile-dev monorepo. Verifies every
+  package has README + CLAUDE.md with required sections, tests passing, build clean,
+  typecheck clean, CHANGELOG present, and Starlight registration for packages with
+  docs/. Produces a blocker/warning table and exits non-zero on any hard failure.
+  Called by release as Phase 0."
 metadata:
-  version: "1.0.0"
   tags:
-    - "readiness"
-    - "preflight"
-    - "checklist"
-    - "release"
-    - "gate"
-    - "quality"
-    - "skaile-development"
+  - "readiness"
+  - "preflight"
+  - "checklist"
+  - "release"
+  - "gate"
+  - "quality"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "package.json"
-        gate: hard
-        description: "Monorepo root"
+    - path: "package.json"
+      gate: hard
+      description: "Monorepo root"
     inputs_optional:
-      - id: scope
-        label: "Scope"
-        type: select
-        options:
-          - "all"
-          - "package"
-          - "domain"
-        default: "all"
-        hint: "all = every package | package = one path | domain = one ai-assets/<domain>"
-      - id: target
-        label: "Target (for scope=package or domain)"
-        type: text
+    - id: scope
+      label: "Scope"
+      type: select
+      options:
+      - "all"
+      - "package"
+      - "domain"
+      default: "all"
+      hint: "all = every package | package = one path | domain = one ai-assets/<domain>"
+    - id: target
+      label: "Target (for scope=package or domain)"
+      type: text
     reads:
-      - path: "ai-assets/skaile-development/references/readiness_criteria.md"
-        description: "Per-package and global criteria table"
-      - path: "<package>/README.md"
-      - path: "<package>/CLAUDE.md"
-      - path: "<package>/package.json"
-      - path: "<package>/CHANGELOG.md"
-      - path: "docs/astro.config.mjs"
-      - path: "docs/src/content/config.ts"
+    - path: "ai-assets/skaile-development/references/readiness_criteria.md"
+      description: "Per-package and global criteria table"
+    - path: "<package>/README.md"
+    - path: "<package>/CLAUDE.md"
+    - path: "<package>/package.json"
+    - path: "<package>/CHANGELOG.md"
+    - path: "docs/astro.config.mjs"
+    - path: "docs/src/content/config.ts"
     produces:
-      - path: "_devlog/reports/readiness-<date>.md"
-        description: "Human report"
-      - path: "_devlog/reports/readiness-<date>.json"
-        description: "Structured result for CI / release to consume"
+    - path: "_devlog/reports/readiness-<date>.md"
+      description: "Human report"
+    - path: "_devlog/reports/readiness-<date>.json"
+      description: "Structured result for CI / release to consume"
   user_inputs:
     dialog:
-      - id: "scope"
-        label: "Scope"
-        type: "select"
-        options: ["all", "package", "domain"]
-        required: false
-        default: "all"
-      - id: "target"
-        label: "Target path"
-        type: "text"
-        required: false
+    - id: "scope"
+      label: "Scope"
+      type: "select"
+      options: ["all", "package", "domain"]
+      required: false
+      default: "all"
+    - id: "target"
+      label: "Target path"
+      type: "text"
+      required: false
     files: []
 ---
 

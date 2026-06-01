@@ -1,33 +1,35 @@
 ---
 name: "review"
-description: "[skaile-development] Code review for staged or committed changes in the skaile-dev monorepo. Checks quality, security, performance, scope, and repo-specific rules. Works locally without CI - designed for direct-to-main workflows."
+description: "[skaile-development] Code review for staged or committed changes in
+  the skaile-dev monorepo. Checks quality, security, performance, scope, and repo-specific
+  rules. Works locally without CI - designed for direct-to-main workflows."
 metadata:
-  version: "1.0.0"
   tags:
-    - "review"
-    - "quality"
-    - "security"
-    - "code-review"
-    - "skaile-development"
+  - "review"
+  - "quality"
+  - "security"
+  - "code-review"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   user_inputs:
     dialog:
-      - id: "target"
-        label: "What to review"
-        type: "select"
-        options:
-          - "staged"
-          - "last-commit"
-          - "branch"
-        required: false
-        default: "staged"
-        hint: "staged = git diff --cached | last-commit = last commit's diff | branch = all commits since main"
-      - id: "focus"
-        label: "Review focus (optional, comma-separated)"
-        type: "text"
-        required: false
-        hint: "e.g. security,performance - leave empty for full review"
+    - id: "target"
+      label: "What to review"
+      type: "select"
+      options:
+      - "staged"
+      - "last-commit"
+      - "branch"
+      required: false
+      default: "staged"
+      hint: "staged = git diff --cached | last-commit = last commit's diff | branch
+        = all commits since main"
+    - id: "focus"
+      label: "Review focus (optional, comma-separated)"
+      type: "text"
+      required: false
+      hint: "e.g. security,performance - leave empty for full review"
     files: []
 ---
 

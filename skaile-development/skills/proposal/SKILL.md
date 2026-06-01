@@ -1,48 +1,50 @@
 ---
 name: "proposal"
-description: "Create, review, or update a design spec / proposal for new features, architectural changes, or cross-package work in the skaile-dev monorepo. Use when work is too complex to jump straight into code — the spec captures the problem, design, alternatives, and approval status before implementation begins."
+description: "Create, review, or update a design spec / proposal for new features,
+  architectural changes, or cross-package work in the skaile-dev monorepo. Use when
+  work is too complex to jump straight into code — the spec captures the problem,
+  design, alternatives, and approval status before implementation begins."
 metadata:
-  version: "1.0.0"
   tags:
-    - "proposal"
-    - "spec"
-    - "design"
-    - "architecture"
-    - "rfc"
-    - "skaile-development"
+  - "proposal"
+  - "spec"
+  - "design"
+  - "architecture"
+  - "rfc"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "skaile-dev/CLAUDE.md"
-        gate: soft
-        description: "Monorepo CLAUDE.md for context on package structure and conventions"
+    - path: "skaile-dev/CLAUDE.md"
+      gate: soft
+      description: "Monorepo CLAUDE.md for context on package structure and conventions"
     inputs_required:
-      - id: topic
-        label: "What is the proposal about? (plain language)"
-        type: text
-      - id: mode
-        label: "Mode"
-        type: select
-        options:
-          - "create"
-          - "review"
-          - "update"
-        default: "create"
+    - id: topic
+      label: "What is the proposal about? (plain language)"
+      type: text
+    - id: mode
+      label: "Mode"
+      type: select
+      options:
+      - "create"
+      - "review"
+      - "update"
+      default: "create"
     inputs_optional:
-      - id: spec_path
-        label: "Path to existing spec (for review/update mode)"
-        type: text
-      - id: affected_packages
-        label: "Affected packages if known"
-        type: text
+    - id: spec_path
+      label: "Path to existing spec (for review/update mode)"
+      type: text
+    - id: affected_packages
+      label: "Affected packages if known"
+      type: text
   produces:
-    - path: "docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md"
-      description: "The design spec with structured frontmatter"
-    - path: "_devlog/reports/YYYY-MM-DD-<topic>.md"
-      description: "Detailed devlog report (for architectural proposals)"
-    - path: "_devlog/DEVLOG.md"
-      description: "Short devlog entry linking to spec and report"
+  - path: "docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md"
+    description: "The design spec with structured frontmatter"
+  - path: "_devlog/reports/YYYY-MM-DD-<topic>.md"
+    description: "Detailed devlog report (for architectural proposals)"
+  - path: "_devlog/DEVLOG.md"
+    description: "Short devlog entry linking to spec and report"
 ---
 
 ROLE  Design spec author — creates well-structured proposals that capture the problem,

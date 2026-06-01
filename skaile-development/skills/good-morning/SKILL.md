@@ -1,31 +1,38 @@
 ---
 name: "good-morning"
-description: "The morning startup ritual for skaile-dev — opens with a cheeky \"what did Peter do last night\" investigation of the repo state, syncs the shell repo + submodules (reattaching any that landed detached at origin/main), reinstalls workspace deps, and builds the platform backend so frontend + backend are ready to start. Does NOT launch dev servers — Peter starts those himself. Use when Peter says \"good morning\", \"/good-morning\", \"let's start the day\", \"fire up the platform\", \"boot me up\", or any other morning kick-off phrase."
+description: "The morning startup ritual for skaile-dev — opens with a cheeky \"what
+  did Peter do last night\" investigation of the repo state, syncs the shell repo
+  + submodules (reattaching any that landed detached at origin/main), reinstalls workspace
+  deps, and builds the platform backend so frontend + backend are ready to start.
+  Does NOT launch dev servers — Peter starts those himself. Use when Peter says \"\
+  good morning\", \"/good-morning\", \"let's start the day\", \"fire up the platform\"\
+  , \"boot me up\", or any other morning kick-off phrase."
 metadata:
-  version: "1.0.0"
   tags:
-    - "morning"
-    - "startup"
-    - "sync"
-    - "dev"
-    - "bootstrap"
-    - "daily"
-    - "routine"
-    - "kickoff"
-    - "skaile-development"
+  - "morning"
+  - "startup"
+  - "sync"
+  - "dev"
+  - "bootstrap"
+  - "daily"
+  - "routine"
+  - "kickoff"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "package.json"
-        gate: hard
-        description: "Must run from the skaile-dev shell repo root (Bun workspace)."
-      - path: "platform/backend/package.json"
-        gate: hard
-        description: "Platform backend must exist — Step 5 builds it; the sign-off points Peter at `bun run dev`."
-      - path: "platform/frontend/package.json"
-        gate: hard
-        description: "Platform frontend must exist — the sign-off points Peter at its `bun run dev`."
+    - path: "package.json"
+      gate: hard
+      description: "Must run from the skaile-dev shell repo root (Bun workspace)."
+    - path: "platform/backend/package.json"
+      gate: hard
+      description: "Platform backend must exist — Step 5 builds it; the sign-off points
+        Peter at `bun run dev`."
+    - path: "platform/frontend/package.json"
+      gate: hard
+      description: "Platform frontend must exist — the sign-off points Peter at its
+        `bun run dev`."
 ---
 
 # good-morning — The Morning Startup Routine

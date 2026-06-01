@@ -1,81 +1,85 @@
 ---
 name: "test-unit"
-description: "Set up and generate unit tests for any skaile-dev package (forge apps, agent-framework libraries, platform frontend/backend). Reads TEST_PLAN.md when present, otherwise discovers testable units from source. Scaffolds missing test infra (vitest.config.ts, test harness), then generates one test file per module with test cases mapped to CLAUDE.md Architecture. Verifies tests run before completing."
+description: "Set up and generate unit tests for any skaile-dev package (forge apps,
+  agent-framework libraries, platform frontend/backend). Reads TEST_PLAN.md when present,
+  otherwise discovers testable units from source. Scaffolds missing test infra (vitest.config.ts,
+  test harness), then generates one test file per module with test cases mapped to
+  CLAUDE.md Architecture. Verifies tests run before completing."
 metadata:
-  version: "1.2.0"
   tags:
-    - "testing"
-    - "unit-tests"
-    - "vitest"
-    - "jest"
-    - "setup"
-    - "generation"
-    - "tdd"
-    - "skaile-development"
+  - "testing"
+  - "unit-tests"
+  - "vitest"
+  - "jest"
+  - "setup"
+  - "generation"
+  - "tdd"
+  - "skaile-development"
   source: "MERGED"
   stage: "beta"
   prerequisites:
     files:
-      - path: "package.json"
-        gate: hard
-        description: "Monorepo root package.json required"
+    - path: "package.json"
+      gate: hard
+      description: "Monorepo root package.json required"
     inputs_required:
-      - id: target
-        label: "Package path"
-        type: text
-        hint: "e.g. forge/L4-project, agent-framework/runner, platform/backend"
+    - id: target
+      label: "Package path"
+      type: text
+      hint: "e.g. forge/L4-project, agent-framework/runner, platform/backend"
     inputs_optional:
-      - id: mode
-        label: "Mode"
-        type: select
-        options:
-          - "setup"
-          - "generate"
-          - "both"
-        default: "both"
-        hint: "setup = test infra only | generate = tests only | both = setup then generate"
-      - id: scope
-        label: "Scope within package"
-        type: text
-        hint: "Glob of source paths to cover (defaults to entire src/)"
+    - id: mode
+      label: "Mode"
+      type: select
+      options:
+      - "setup"
+      - "generate"
+      - "both"
+      default: "both"
+      hint: "setup = test infra only | generate = tests only | both = setup then generate"
+    - id: scope
+      label: "Scope within package"
+      type: text
+      hint: "Glob of source paths to cover (defaults to entire src/)"
     reads:
-      - path: "<target>/CLAUDE.md"
-        description: "Architecture + public API — source of truth for what to test"
-      - path: "<target>/TEST_PLAN.md"
-        description: "Optional plan from test-plan skill"
-      - path: "<target>/src"
-        description: "Source to analyze for testable units"
-      - path: "ai-assets/skaile-development/references/test_stack_map.md"
-        description: "Package → framework + run command"
-      - path: "_devlog/specs/2026-04-22-test-concept-design.md"
-        description: "Canonical layer taxonomy (L0-L5) + shared infrastructure"
-      - path: "_devlog/plans/2026-04-22-test-gap-fill.md"
-        description: "Phase plan with per-package targets"
-      - path: "agent-framework/test-utils/CLAUDE.md"
-        description: "Shared helpers (makeTempDir, makeInMemoryTransport, MockWebSocket, ...)"
-      - path: "docs/src/content/docs/testing.md"
-        description: "User-facing Starlight overview"
+    - path: "<target>/CLAUDE.md"
+      description: "Architecture + public API — source of truth for what to test"
+    - path: "<target>/TEST_PLAN.md"
+      description: "Optional plan from test-plan skill"
+    - path: "<target>/src"
+      description: "Source to analyze for testable units"
+    - path: "ai-assets/skaile-development/references/test_stack_map.md"
+      description: "Package → framework + run command"
+    - path: "_devlog/specs/2026-04-22-test-concept-design.md"
+      description: "Canonical layer taxonomy (L0-L5) + shared infrastructure"
+    - path: "_devlog/plans/2026-04-22-test-gap-fill.md"
+      description: "Phase plan with per-package targets"
+    - path: "agent-framework/test-utils/CLAUDE.md"
+      description: "Shared helpers (makeTempDir, makeInMemoryTransport, MockWebSocket,
+        ...)"
+    - path: "docs/src/content/docs/testing.md"
+      description: "User-facing Starlight overview"
     produces:
-      - path: "<target>/vitest.config.ts"
-        description: "Test config (scaffolded if missing)"
-      - path: "<target>/tests/**/*.test.ts"
-        description: "Generated unit test files"
+    - path: "<target>/vitest.config.ts"
+      description: "Test config (scaffolded if missing)"
+    - path: "<target>/tests/**/*.test.ts"
+      description: "Generated unit test files"
   user_inputs:
     dialog:
-      - id: "target"
-        label: "Package path"
-        type: "text"
-        required: true
-      - id: "mode"
-        label: "Mode"
-        type: "select"
-        options: ["setup", "generate", "both"]
-        required: false
-        default: "both"
-      - id: "scope"
-        label: "Source glob (optional)"
-        type: "text"
-        required: false
+    - id: "target"
+      label: "Package path"
+      type: "text"
+      required: true
+    - id: "mode"
+      label: "Mode"
+      type: "select"
+      options: ["setup", "generate", "both"]
+      required: false
+      default: "both"
+    - id: "scope"
+      label: "Source glob (optional)"
+      type: "text"
+      required: false
     files: []
 ---
 
