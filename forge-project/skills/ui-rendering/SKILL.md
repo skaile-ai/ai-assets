@@ -1,5 +1,5 @@
 ---
-name: UI Rendering
+name: ui-rendering
 description: Emit typed UI components into the chat stream using the Agent UI Protocol
 source: MIGRATED
 version: 1.0.0

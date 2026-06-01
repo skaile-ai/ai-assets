@@ -1,5 +1,5 @@
 ---
-name: 'skaileup-prog-expert-skill-system'
+name: 'skailup-prog-expert-skill-system'
 description: 'Use when you need to design, build, or refine LLM agent skill systems with pipeline orchestration, artifact-based gates, cross-references, profiles, and UI integration. Expert-level skill architecture and pattern management.'
 metadata:
   stage: 'alpha'

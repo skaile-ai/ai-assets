@@ -1,5 +1,5 @@
 ---
-name: 'skaileup-prog-expert-integration-ai-agents'
+name: 'skailup-prog-expert-integration-ai-agents'
 description: 'Use when integrating LLM agent sidecars (omp RPC) into a web frontend. Covers the Typed Action Protocol: SkillAction/ConsumerResponse bidirectional events, skill state machine, adapter layer, structured input/approval flows, API key resolution, and default model selection. Expert-level programming and pattern management.'
 metadata:
   stage: 'alpha'
