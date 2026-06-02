@@ -179,7 +179,7 @@ MUST  resolve the next free ID from `nextIds[<category_id>]` in `categories.yaml
 MUST  set `status: testing` and `owner: <git config user.name>` in the new file's frontmatter
 MUST  increment `nextIds[<category_id>]` in `categories.yaml` by 1 in the same staged set as the new work-item file — the high-water mark must stay monotonic
 MUST  write the new `issues/<full_id>.md` and the `categories.yaml` bump INSIDE the worktree, on the feature branch — never commit them to platform main directly; both reach main only when the PR is merged
-MUST  create the worktree outside platform/ (e.g., /tmp/platform-<id>-worktree) so the parent platform/ stays clean
+MUST  create the worktree at <skaile-dev-root>/.worktrees/platform-<id> (gitignored) — outside platform/ so the parent checkout stays clean, but INSIDE the skaile-dev tree so dispatched subagents auto-load the platform CLAUDE.md (+ nested per-package CLAUDE.md) via on-demand memory discovery; a /tmp path is outside the tree and the subagent never sees platform conventions (e.g. the ≤3-line comment rule)
 MUST  write the plan file in the worktree and treat it as ephemeral — never commit it, delete it before the final commit
 MUST  dispatch implementation as a fresh subagent with a self-contained prompt (MVC: paste the plan + relevant file paths + acceptance criteria; do NOT pass parent conversation)
 MUST  dispatch review as a fresh subagent that only sees the diff + review focus — not the plan
@@ -341,7 +341,12 @@ STEP 4: Branch name
       "feat/f-48-screens-as-tabs"
 
 STEP 5: Worktree
-  worktree_path = "/tmp/platform-<full_id_lowercase>-worktree"
+  # INSIDE the skaile-dev tree (NOT /tmp), gitignored via skaile-dev/.gitignore
+  # `.worktrees/`. Living under the tree is what lets a dispatched subagent
+  # auto-load the platform CLAUDE.md (+ nested per-package CLAUDE.md) through
+  # on-demand memory discovery — a /tmp path sits outside the tree and the
+  # subagent loads no platform conventions at all (e.g. the ≤3-line comment rule).
+  worktree_path = "<skaile-dev-root>/.worktrees/platform-<full_id_lowercase>"
 
   $ cd <skaile-dev-root>/platform
   $ git worktree add <worktree_path> -b <branch_name> origin/main
@@ -913,7 +918,7 @@ CHECKLIST
   - [ ] Category exists in `platform/issues/categories.yaml` (validated, not assumed)
   - [ ] Description refined (1-3 sentences for bug/issue/ui/chore, ≤5 short for feature) WITHOUT asking the user
   - [ ] Next free ID allocated from `nextIds[<category_id>]` (or file-scan fallback)
-  - [ ] Worktree created outside platform/ tree, branched off origin/main
+  - [ ] Worktree created at <skaile-dev-root>/.worktrees/platform-<id> (gitignored, inside the skaile-dev tree for CLAUDE.md discovery), branched off origin/main
   - [ ] `issues/<full_id>.md` written and staged inside the worktree (on the branch, not on main)
   - [ ] `nextIds[<category_id>]` incremented by 1 in `categories.yaml` and staged in the same set
   - [ ] Plan written inside worktree, never staged
@@ -944,7 +949,7 @@ CHECKLIST
 | Renaming `issues/<full_id>.md` or changing its `id:` frontmatter field after creation | The filename and the `id:` field are the issue's identity — they're referenced by URL and external links. The only time a rename happens is the rare same-ID add/add merge conflict, and that is operator-driven. |
 | Asking the user to confirm the refined description / category / branch name / plan | Decide silently. Print one-line status updates. Only ask on the 7 legitimate stop-and-ask gates listed in "Operating Principle". |
 | Putting the userEmail / GitHub handle / "Peter Albert" / Claude account into the `owner` field | The owner is the human at the keyboard. Run `git config user.name` — that's the only source. The system prompt's userEmail belongs to the account that pays the API bill, not necessarily the person running the skill. |
-| Creating the worktree inside platform/ | Use `/tmp/platform-<id>-worktree` so the parent checkout stays clean |
+| Creating the worktree inside platform/ — or in /tmp | Use `<skaile-dev-root>/.worktrees/platform-<id>` (gitignored): keeps the parent checkout clean AND keeps the worktree inside the skaile-dev tree so dispatched subagents auto-load the platform CLAUDE.md. A /tmp path is outside the memory tree, so the subagent never sees platform conventions (e.g. the ≤3-line comment rule) and silently violates them |
 | Committing the plan file | Delete it in STEP 11 before `git add -A` |
 | Passing parent conversation to the implementer | Build a self-contained MVC prompt — the implementer must never read this chat |
 | Skipping the review dispatch on a non-trivial change | Only skip review when `complexity=small` AND ≤ 2 files AND ≤ 30 LOC |
