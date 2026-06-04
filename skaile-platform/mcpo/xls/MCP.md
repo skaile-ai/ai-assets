@@ -10,7 +10,15 @@ args:
   - -jar
   - ${recipe:excel:lib}/excel-mcp.jar
 env:
-  EXCEL_MCP_ROOT: /workspace
+  # EXCEL_MCP_ROOT is the path-sandbox root. The server validates it exists at
+  # startup (fail-closed), so it must be a path that is present in every session
+  # container regardless of where the workspace is mounted. We use `/` rather
+  # than a session-specific path (`/skaile/workspace`, `/workspace`) because the
+  # asset cannot know the host's mount layout; the per-session container is
+  # already the isolation boundary. Operators can override per session via env.
+  # TODO(workspaces): once the runner exposes a ${workspace} substitution token,
+  # set this to ${workspace} for a true per-session sandbox.
+  EXCEL_MCP_ROOT: /
   JAVA_HOME: ${recipe:excel}
 keywords:
   - excel
