@@ -78,7 +78,9 @@
         set -euo pipefail
         test -x ${excel-mcp}/bin/java
         test -f ${excel-mcp}/lib/excel-mcp.jar
-        ${excel-mcp}/bin/java -jar ${excel-mcp}/lib/excel-mcp.jar --help 2>&1 | head -5 || true
+        # Exercise the bundled JRE symlink with a command that reliably exits 0
+        # (java -jar ... --help exits non-zero for this server, masking real failures).
+        ${excel-mcp}/bin/java -version
         mkdir -p $out
         echo "excel-mcp smoke test passed" > $out/result.txt
       '';
