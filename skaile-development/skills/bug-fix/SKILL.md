@@ -136,12 +136,18 @@ settle on its own. The complete list of legitimate stop-and-ask gates is:
 5. **A merge conflict on source code is genuinely mutually-exclusive** — the change and
    main's incoming change cannot both stand; the user must pick.
 6. **Push fails for a non-trivial reason** — e.g., branch was rewritten remotely.
-7. **Same-ID add/add conflict on `issues/<full_id>.md`** — both branches allocated the same ID; the operator must approve the re-allocation to a fresh ID.
+
+A **same-ID add/add conflict on `issues/<full_id>.md`** (both branches allocated the
+same ID) is NOT a stop-and-ask gate — resolve it automatically by re-allocating *your*
+work item to the next fresh ID: take main's `issues/<full_id>.md` verbatim, `git mv`
+your item to the new ID (update the `id:` frontmatter + filename), bump `nextIds` to
+`max(HEAD, main) + 1` for that category, and update the PR title to the new ID. Pushed
+commit messages keep the original ID as historical references (no force-push).
 
 Everything else — refining the description, picking the category, choosing the
 branch slug, writing the plan, dispatching the implementer, applying nit-level review
 findings, deferring out-of-scope findings, merging main when one side is a strict
-subset, opening the PR — you do silently. Print short progress notes (`> "Filing as
+subset, re-allocating a colliding work-item ID, opening the PR — you do silently. Print short progress notes (`> "Filing as
 B-84 (auto-classified as bug)"`, `> "Plan written, dispatching implementer..."`) but
 do NOT solicit confirmation.
 
@@ -729,7 +735,7 @@ STEP 11b: Fetch main and merge into the branch
 
     | File pattern | Default resolution |
     |--------------|-------------------|
-    | `issues/<full_id>.md` (add/add conflict) | Both branches allocated the same ID — **escalate to user** (legitimate stop-and-ask gate #7). The branch must re-allocate to a fresh ID: pick a new `nextIds[<category_id>]` (typically `max(HEAD, main) + 1`), `git mv issues/<full_id>.md issues/<new_full_id>.md`, update the `id:` frontmatter field to match, and amend the commit message + PR title with the new ID. The branch name keeps its original slug (renaming a branch mid-flight breaks the PR). |
+    | `issues/<full_id>.md` (add/add conflict) | Both branches allocated the same ID — **re-allocate automatically (do not ask)**. Take main's `issues/<full_id>.md` verbatim, then move *your* item to a fresh ID: pick a new `nextIds[<category_id>]` (typically `max(HEAD, main) + 1`), `git mv issues/<full_id>.md issues/<new_full_id>.md`, update the `id:` frontmatter field to match, bump `nextIds[<category_id>]` accordingly, and update the PR title with the new ID. Pushed commit messages keep the original ID as historical references (no force-push). The branch name keeps its original slug (renaming a branch mid-flight breaks the PR). |
     | `issues/categories.yaml` | Blend automatically: for each entry in `nextIds`, take `max(HEAD, main)`. Preserve the `categories` list and `statuses` list verbatim from whichever side changed them (main's changes win if both sides edited those — categories/statuses are infrastructure that travels via main, not via work-item branches). |
     | Other `issues/<other_id>.md` (modify/modify) | Concurrent edit to an unrelated work item — **escalate to user**. A work-item branch should not normally edit other work-item files; if it did, the operator must decide. |
     | Generated PostXL files (in `postxl-lock.json`) | `git checkout --theirs` — let main's regen win; rerun `bun run generate` if needed |
@@ -946,8 +952,8 @@ CHECKLIST
 | Committing the new work-item file or `categories.yaml` bump to platform main | Stage both inside the worktree (on the branch); they arrive on main only when the PR merges. Keeps main clean of items whose changes never ship. |
 | Forgetting to bump `nextIds[<category_id>]` in `categories.yaml` | The counter is a monotonic high-water mark. If you skip the bump and the item you just created is later deleted, the next allocator can reuse its id and silently overwrite history. Bump it. |
 | Resetting or decrementing `nextIds` | Never. The only allowed mutation is +1 for the category you just allocated in. |
-| Renaming `issues/<full_id>.md` or changing its `id:` frontmatter field after creation | The filename and the `id:` field are the issue's identity — they're referenced by URL and external links. The only time a rename happens is the rare same-ID add/add merge conflict, and that is operator-driven. |
-| Asking the user to confirm the refined description / category / branch name / plan | Decide silently. Print one-line status updates. Only ask on the 7 legitimate stop-and-ask gates listed in "Operating Principle". |
+| Renaming `issues/<full_id>.md` or changing its `id:` frontmatter field after creation | The filename and the `id:` field are the issue's identity — they're referenced by URL and external links. The only time a rename happens is the rare same-ID add/add merge conflict, which is re-allocated automatically (take main's verbatim, move yours to a fresh ID — no force-push). |
+| Asking the user to confirm the refined description / category / branch name / plan | Decide silently. Print one-line status updates. Only ask on the 6 legitimate stop-and-ask gates listed in "Operating Principle". |
 | Putting the userEmail / GitHub handle / "Peter Albert" / Claude account into the `owner` field | The owner is the human at the keyboard. Run `git config user.name` — that's the only source. The system prompt's userEmail belongs to the account that pays the API bill, not necessarily the person running the skill. |
 | Creating the worktree inside platform/ — or in /tmp | Use `<skaile-dev-root>/.worktrees/platform-<id>` (gitignored): keeps the parent checkout clean AND keeps the worktree inside the skaile-dev tree so dispatched subagents auto-load the platform CLAUDE.md. A /tmp path is outside the memory tree, so the subagent never sees platform conventions (e.g. the ≤3-line comment rule) and silently violates them |
 | Committing the plan file | Delete it in STEP 11 before `git add -A` |
