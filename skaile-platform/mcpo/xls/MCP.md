@@ -1,7 +1,7 @@
 ---
 name: excel
-description: "Read/write Excel workbooks (.xlsx/.xlsm/.xls) via Apache POI. 26 tools: workbook lifecycle, range I/O, sheet management, tables, named ranges, VBA extraction."
-version: 0.1.0
+description: "Read/write Excel workbooks (.xlsx/.xlsm/.xls) via Apache POI. 28 tools: workbook lifecycle, range I/O (incl. cell styling), sheet management and presentation, tables, named ranges, VBA extraction."
+version: 0.2.0
 transport: stdio
 recipe:
   attr: mcps.excel
@@ -35,8 +35,9 @@ keywords:
 
 Docker-based MCP server for Excel file operations, built on Apache POI 5.5.1.
 
-Provides 26 tools across workbook lifecycle, range I/O, sheet management,
-row/column mutation, tables, named ranges, and read-only VBA module extraction.
+Provides 28 tools across workbook lifecycle, range I/O (incl. cell styling), sheet
+management and presentation, row/column mutation, tables, named ranges, and read-only
+VBA module extraction.
 
 ## Runtime
 

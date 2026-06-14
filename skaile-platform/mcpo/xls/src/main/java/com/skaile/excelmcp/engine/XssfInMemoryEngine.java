@@ -7,6 +7,7 @@ import com.skaile.excelmcp.engine.poi.PoiCellReader;
 import com.skaile.excelmcp.engine.poi.PoiCellWriter;
 import com.skaile.excelmcp.engine.poi.PoiFormulaEvaluation;
 import com.skaile.excelmcp.engine.poi.PoiSizeGuard;
+import com.skaile.excelmcp.engine.poi.PoiStyleApplier;
 import com.skaile.excelmcp.engine.poi.PoiVbaExtractor;
 import com.skaile.excelmcp.error.ErrorCode;
 import com.skaile.excelmcp.error.McpException;
@@ -16,10 +17,12 @@ import com.skaile.excelmcp.handles.OpenWorkbook;
 import com.skaile.excelmcp.path.FormatWhitelist;
 import com.skaile.excelmcp.shape.CapabilitiesReportShape;
 import com.skaile.excelmcp.shape.CellShape;
+import com.skaile.excelmcp.shape.CellStyleSpec;
 import com.skaile.excelmcp.shape.NamedRangeGetShape;
 import com.skaile.excelmcp.shape.NamedRangeRef;
 import com.skaile.excelmcp.shape.RangeAddress;
 import com.skaile.excelmcp.shape.RangeShape;
+import com.skaile.excelmcp.shape.SheetFormatSpec;
 import com.skaile.excelmcp.shape.SheetShape;
 import com.skaile.excelmcp.shape.TableGetShape;
 import com.skaile.excelmcp.shape.TableRef;
@@ -654,6 +657,65 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
       }
     }
     return cleared;
+  }
+
+  @Override
+  public int applyStyle(HandleId id, String sheetName, String rangeA1, CellStyleSpec spec)
+      throws McpException {
+    Workbook wb = requireOpen(id);
+    Sheet sheet = requireSheet(wb, sheetName);
+    if (!(wb instanceof XSSFWorkbook xwb) || !(sheet instanceof XSSFSheet xsheet)) {
+      throw new McpException(
+          ErrorCode.STYLE_INVALID,
+          "styling is only supported on .xlsx/.xlsm (XSSF) workbooks, not .xls (HSSF)",
+          Map.of("sheet", sheetName));
+    }
+    RangeAddress addr = clampToFormat(sheet, RangeAddress.parse(rangeA1));
+    assertWithinFormatBounds(sheet, addr);
+    // Reject full-column / full-row ranges outright (independent of the cell cap): styling
+    // materialises every cell, and a full column is ~1M cells. The cell-count guard below alone
+    // wouldn't catch this when EXCEL_MCP_MAX_CELLS is raised above the format's row count.
+    SpreadsheetVersion ver = sheet.getWorkbook().getSpreadsheetVersion();
+    boolean fullColumn = addr.startRow() == 0 && addr.endRow() >= ver.getLastRowIndex();
+    boolean fullRow = addr.startCol() == 0 && addr.endCol() >= ver.getLastColumnIndex();
+    if (fullColumn || fullRow) {
+      throw new McpException(
+          ErrorCode.STYLE_INVALID,
+          "full-column/full-row ranges are not supported for styling; pass a bounded range like"
+              + " A1:N1 (got "
+              + addr.toA1()
+              + ")",
+          Map.of("range", addr.toA1()));
+    }
+    // Materialising a very large (but bounded) range would blow memory and the 64k-style cap;
+    // bound it to the same cell budget as reads.
+    if (addr.cellCount() > config.maxCells()) {
+      throw new McpException(
+          ErrorCode.STYLE_INVALID,
+          "range "
+              + addr.toA1()
+              + " spans "
+              + addr.cellCount()
+              + " cells, over the "
+              + config.maxCells()
+              + "-cell styling cap; use a smaller range",
+          Map.of("range", addr.toA1(), "cells", addr.cellCount(), "max_cells", config.maxCells()));
+    }
+    return PoiStyleApplier.applyStyle(xwb, xsheet, addr, spec);
+  }
+
+  @Override
+  public void applySheetFormat(HandleId id, String sheetName, SheetFormatSpec spec)
+      throws McpException {
+    Workbook wb = requireOpen(id);
+    Sheet sheet = requireSheet(wb, sheetName);
+    if (!(wb instanceof XSSFWorkbook) || !(sheet instanceof XSSFSheet xsheet)) {
+      throw new McpException(
+          ErrorCode.STYLE_INVALID,
+          "sheet formatting is only supported on .xlsx/.xlsm (XSSF) workbooks, not .xls (HSSF)",
+          Map.of("sheet", sheetName));
+    }
+    PoiStyleApplier.applyFormat(xsheet, spec);
   }
 
   @Override

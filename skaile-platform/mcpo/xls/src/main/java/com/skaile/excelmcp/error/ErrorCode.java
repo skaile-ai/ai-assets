@@ -31,6 +31,9 @@ public enum ErrorCode {
   ROW_INDEX_INVALID,
   COLUMN_INDEX_INVALID,
 
+  // Styling / presentation (range.set_style, sheet.set_format)
+  STYLE_INVALID,
+
   // Formulas
   FORMULA_INVALID,
   FORMULA_EVAL_FAILED,
