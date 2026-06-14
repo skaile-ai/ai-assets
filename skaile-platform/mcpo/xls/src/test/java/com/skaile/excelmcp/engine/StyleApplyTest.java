@@ -17,10 +17,17 @@ import com.skaile.excelmcp.shape.SheetFormatSpec;
 import com.skaile.excelmcp.shape.SheetFormatSpec.ColumnWidth;
 import com.skaile.excelmcp.shape.SheetFormatSpec.FreezePane;
 import com.skaile.excelmcp.shape.SheetFormatSpec.RowHeight;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
@@ -142,6 +149,124 @@ class StyleApplyTest {
         assertThat(sheet.getPaneInformation().getHorizontalSplitPosition()).isEqualTo((short) 1);
         assertThat(sheet.getTabColor().getARGBHex()).endsWith("7300FF");
       }
+    }
+  }
+
+  @Test
+  void fontMergePreservesUnderlineAndStrikeoutWhenChangingColor(@TempDir Path tmp)
+      throws Exception {
+    Path dest = tmp.resolve("underline.xlsx");
+    HandleRegistry registry = new HandleRegistry();
+    try (WorkbookEngine engine = new XssfInMemoryEngine(CFG, registry)) {
+      HandleId id = engine.create(Optional.of(dest));
+
+      // Pre-style A1 with an underlined, struck-through, bold font.
+      XSSFWorkbook wb = openWorkbookField(engine, id);
+      XSSFFont uf = wb.createFont();
+      uf.setUnderline(Font.U_SINGLE);
+      uf.setStrikeout(true);
+      uf.setBold(true);
+      XSSFCellStyle base = wb.createCellStyle();
+      base.setFont(uf);
+      var cell = wb.getSheetAt(0).createRow(0).createCell(0);
+      cell.setCellValue("x");
+      cell.setCellStyle(base);
+
+      // Change ONLY the font color — underline/strikeout/bold must survive the merge.
+      engine.applyStyle(
+          id,
+          "Sheet1",
+          "A1",
+          new CellStyleSpec(
+              null, new FontSpec(null, null, null, null, "#FF0000"), null, null, null, null, null));
+
+      engine.save(id, Optional.empty());
+      engine.close(id);
+
+      try (XSSFWorkbook re = new XSSFWorkbook(dest.toString())) {
+        XSSFFont font = (XSSFFont) re.getSheetAt(0).getRow(0).getCell(0).getCellStyle().getFont();
+        assertThat(font.getUnderline()).isEqualTo(Font.U_SINGLE);
+        assertThat(font.getStrikeout()).isTrue();
+        assertThat(font.getBold()).isTrue();
+        assertThat(font.getXSSFColor().getARGBHex()).endsWith("FF0000");
+      }
+    }
+  }
+
+  @Test
+  void appliesBordersThatRoundTrip(@TempDir Path tmp) throws Exception {
+    Path dest = tmp.resolve("borders.xlsx");
+    HandleRegistry registry = new HandleRegistry();
+    try (WorkbookEngine engine = new XssfInMemoryEngine(CFG, registry)) {
+      HandleId id = engine.create(Optional.of(dest));
+      engine.writeRange(id, "Sheet1", 0, 0, List.of(List.of("x")), null);
+      engine.applyStyle(
+          id,
+          "Sheet1",
+          "A1",
+          new CellStyleSpec(
+              null,
+              null,
+              new BorderSpec(
+                  new BorderEdge("thin", "#000000"),
+                  new BorderEdge("medium", "#7300FF"),
+                  null,
+                  null),
+              null,
+              null,
+              null,
+              null));
+      engine.save(id, Optional.empty());
+      engine.close(id);
+
+      try (XSSFWorkbook re = new XSSFWorkbook(dest.toString())) {
+        XSSFCellStyle st = re.getSheetAt(0).getRow(0).getCell(0).getCellStyle();
+        assertThat(st.getBorderTop()).isEqualTo(BorderStyle.THIN);
+        assertThat(st.getBorderBottom()).isEqualTo(BorderStyle.MEDIUM);
+      }
+    }
+  }
+
+  @Test
+  void rejectsStylingOnHssfWorkbook(@TempDir Path tmp) throws Exception {
+    Path xls = tmp.resolve("legacy.xls");
+    try (HSSFWorkbook wb = new HSSFWorkbook();
+        OutputStream os = Files.newOutputStream(xls)) {
+      wb.createSheet("Sheet1").createRow(0).createCell(0).setCellValue("x");
+      wb.write(os);
+    }
+    HandleRegistry registry = new HandleRegistry();
+    try (WorkbookEngine engine = new XssfInMemoryEngine(CFG, registry)) {
+      HandleId id = engine.open(xls);
+      McpException ex =
+          assertThrows(
+              McpException.class,
+              () ->
+                  engine.applyStyle(
+                      id,
+                      "Sheet1",
+                      "A1",
+                      new CellStyleSpec("#FFFFFF", null, null, null, null, null, null)));
+      assertThat(ex.code().name()).isEqualTo("STYLE_INVALID");
+      engine.close(id);
+    }
+  }
+
+  @Test
+  void rejectsExcessiveColumnWidth(@TempDir Path tmp) throws Exception {
+    HandleRegistry registry = new HandleRegistry();
+    try (WorkbookEngine engine = new XssfInMemoryEngine(CFG, registry)) {
+      HandleId id = engine.create(Optional.empty());
+      McpException ex =
+          assertThrows(
+              McpException.class,
+              () ->
+                  engine.applySheetFormat(
+                      id,
+                      "Sheet1",
+                      new SheetFormatSpec(List.of(new ColumnWidth("A", 300)), null, null, null)));
+      assertThat(ex.code().name()).isEqualTo("STYLE_INVALID");
+      engine.close(id);
     }
   }
 

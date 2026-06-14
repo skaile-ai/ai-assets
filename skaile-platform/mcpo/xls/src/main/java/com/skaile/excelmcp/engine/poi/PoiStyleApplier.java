@@ -39,6 +39,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *       call, every cell sharing the same <i>base</i> style collapses to a single new style (and
  *       likewise for fonts), so a uniform range costs exactly one new style.
  * </ol>
+ *
+ * <p>Dedup is <b>per call</b> only: two separate {@code range.set_style} calls with identical specs
+ * create two identical styles. This is well within the 64k cap for realistic workbooks, but an
+ * agent that issues thousands of tiny per-cell style calls could accumulate redundant styles —
+ * prefer styling whole ranges in one call.
  */
 public final class PoiStyleApplier {
 
@@ -85,8 +90,14 @@ public final class PoiStyleApplier {
         } catch (IllegalArgumentException ex) {
           throw styleInvalid("invalid column letter: " + cw.column(), "column", cw.column());
         }
-        if (cw.width() < 0) {
-          throw styleInvalid("column width must be >= 0: " + cw.width(), "width", cw.width());
+        // Excel caps column width at 255 characters; POI's setColumnWidth throws
+        // IllegalArgumentException past that, which would otherwise surface as an opaque
+        // INTERNAL_ERROR. Validate up front so the caller gets an actionable STYLE_INVALID.
+        if (cw.width() < 0 || cw.width() > 255) {
+          throw styleInvalid(
+              "column width must be between 0 and 255 characters: " + cw.width(),
+              "width",
+              cw.width());
         }
         // POI column width is in 1/256th of a character. Round to the nearest unit.
         sheet.setColumnWidth(col, (int) Math.round(cw.width() * 256));
@@ -97,8 +108,12 @@ public final class PoiStyleApplier {
         if (rh.row() < 1) {
           throw styleInvalid("row must be >= 1: " + rh.row(), "row", rh.row());
         }
-        if (rh.height() < 0) {
-          throw styleInvalid("row height must be >= 0: " + rh.height(), "height", rh.height());
+        // Excel caps row height at 409.5 points.
+        if (rh.height() < 0 || rh.height() > 409.5) {
+          throw styleInvalid(
+              "row height must be between 0 and 409.5 points: " + rh.height(),
+              "height",
+              rh.height());
         }
         Row row = sheet.getRow(rh.row() - 1);
         if (row == null) {
@@ -250,11 +265,18 @@ public final class PoiStyleApplier {
   private static XSSFFont mergeFont(XSSFWorkbook wb, int baseFontIndex, Resolved rs) {
     XSSFFont base = wb.getFontAt(baseFontIndex);
     XSSFFont nf = wb.createFont();
-    // Inherit the base font, then override only the specified attributes.
+    // Inherit the FULL base font, then override only the specified attributes. Every base
+    // attribute must be copied — name/size/bold/italic are the ones callers usually touch, but
+    // underline/strikeout/typeOffset/charset are easy to forget and silently dropping them would
+    // break the "merge, don't replace" contract for a cell that was e.g. underlined.
     nf.setFontName(base.getFontName());
     nf.setFontHeightInPoints(base.getFontHeightInPoints());
     nf.setBold(base.getBold());
     nf.setItalic(base.getItalic());
+    nf.setUnderline(base.getUnderline());
+    nf.setStrikeout(base.getStrikeout());
+    nf.setTypeOffset(base.getTypeOffset());
+    nf.setCharSet(base.getCharSet());
     XSSFColor baseColor = base.getXSSFColor();
     if (baseColor != null) {
       nf.setColor(baseColor);
