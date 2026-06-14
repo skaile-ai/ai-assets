@@ -271,6 +271,26 @@ class StyleApplyTest {
   }
 
   @Test
+  void rejectsFullColumnStyling(@TempDir Path tmp) throws Exception {
+    HandleRegistry registry = new HandleRegistry();
+    try (WorkbookEngine engine = new XssfInMemoryEngine(CFG, registry)) {
+      HandleId id = engine.create(Optional.empty());
+      McpException ex =
+          assertThrows(
+              McpException.class,
+              () ->
+                  engine.applyStyle(
+                      id,
+                      "Sheet1",
+                      "A:A",
+                      new CellStyleSpec("#FFFFFF", null, null, null, null, null, null)));
+      assertThat(ex.code().name()).isEqualTo("STYLE_INVALID");
+      assertThat(ex.getMessage()).contains("full-column/full-row");
+      engine.close(id);
+    }
+  }
+
+  @Test
   void rejectsMalformedColor(@TempDir Path tmp) throws Exception {
     HandleRegistry registry = new HandleRegistry();
     try (WorkbookEngine engine = new XssfInMemoryEngine(CFG, registry)) {

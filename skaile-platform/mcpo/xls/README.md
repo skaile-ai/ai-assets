@@ -1,6 +1,6 @@
 # Excel MCP Server
 
-MCP server (stdio) that gives an AI agent first-class ability to **create, modify, review, and summarize Excel files** with real fidelity — typed formulas distinct from cached values on every read, named ranges and tables as first-class objects, and read-only VBA module source extraction. Built on Apache POI in a single Java process; 26 tools across workbook lifecycle, range I/O, sheet and row/column management, tables, named ranges, and VBA. Every read surfaces a cell's type, value, and (if any) typed formula so the agent can tell a stale cached `0` from a real `0` — a recalc is an explicit tool call, never implicit.
+MCP server (stdio) that gives an AI agent first-class ability to **create, modify, review, and summarize Excel files** with real fidelity — typed formulas distinct from cached values on every read, named ranges and tables as first-class objects, and read-only VBA module source extraction. Built on Apache POI in a single Java process; 28 tools across workbook lifecycle, range I/O (incl. cell styling), sheet management and presentation, row/column mutation, tables, named ranges, and VBA. Every read surfaces a cell's type, value, and (if any) typed formula so the agent can tell a stale cached `0` from a real `0` — a recalc is an explicit tool call, never implicit.
 
 **Session-scoped by design.** One process per agent session; workbooks stay in memory across many tool calls so reads and edits don't pay a reload cost between turns. Typical flow: `workbook.open` → many reads / writes / `workbook.recalculate` → `workbook.save` → `workbook.close`. When the agent disconnects the process exits and any still-open handles are released. No HTTP, no multi-tenant sharing, no cross-session state — the session is the state.
 
@@ -36,7 +36,7 @@ config/, log/ — env-var parsing and Logback setup (stderr routing).
 
 ## Tools
 
-v1 ships 26 tools across workbook lifecycle, range I/O, sheet management, row/col mutation, tables, named ranges, and read-only VBA — no charts, pivots, formatting writes, Power Query, or DAX (see future-work doc).
+v1 ships 28 tools across workbook lifecycle, range I/O (incl. `range.set_style`), sheet management and presentation (incl. `sheet.set_format`), row/col mutation, tables, named ranges, and read-only VBA — no charts, pivots, conditional formatting, Power Query, or DAX (see future-work doc).
 
 Column **LLM-optimized description** is the string returned by `ToolDefinition.description()` — what the calling LLM sees when deciding whether and how to use the tool. All 26 rows below follow the three-part effect / prerequisite / gotcha template documented in `excel-mcp-server-future-work.md` → "Authoring conventions"; the tool source and this table are kept in lockstep during the Phase 10 audit.
 

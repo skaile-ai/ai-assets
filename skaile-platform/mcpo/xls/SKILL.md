@@ -1,9 +1,10 @@
 ---
 name: xls
 description: "Use when an agent needs to read, modify, or inspect .xlsx / .xlsm /
-  .xls workbooks. Wraps the Excel MCP stdio server (Java / Apache POI) exposing 26
-  tools across workbook lifecycle, range I/O, sheet management, row/column mutation,
-  tables, named ranges, and read-only VBA module extraction. Every cell read surfaces
+  .xls workbooks. Wraps the Excel MCP stdio server (Java / Apache POI) exposing 28
+  tools across workbook lifecycle, range I/O (incl. cell styling), sheet management
+  and presentation, row/column mutation, tables, named ranges, and read-only VBA
+  module extraction. Every cell read surfaces
   type, value, and (if present) typed formula — so the agent can distinguish a stale
   cached value from a real one."
 metadata:

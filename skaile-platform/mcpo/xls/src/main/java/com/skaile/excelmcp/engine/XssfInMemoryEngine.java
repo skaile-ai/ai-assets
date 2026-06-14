@@ -672,8 +672,23 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
     }
     RangeAddress addr = clampToFormat(sheet, RangeAddress.parse(rangeA1));
     assertWithinFormatBounds(sheet, addr);
-    // Styling materialises every cell in the range; a full-column/full-row sentinel would create
-    // ~1M cells and blow both memory and the style cap. Bound it to the same cell budget as reads.
+    // Reject full-column / full-row ranges outright (independent of the cell cap): styling
+    // materialises every cell, and a full column is ~1M cells. The cell-count guard below alone
+    // wouldn't catch this when EXCEL_MCP_MAX_CELLS is raised above the format's row count.
+    SpreadsheetVersion ver = sheet.getWorkbook().getSpreadsheetVersion();
+    boolean fullColumn = addr.startRow() == 0 && addr.endRow() >= ver.getLastRowIndex();
+    boolean fullRow = addr.startCol() == 0 && addr.endCol() >= ver.getLastColumnIndex();
+    if (fullColumn || fullRow) {
+      throw new McpException(
+          ErrorCode.STYLE_INVALID,
+          "full-column/full-row ranges are not supported for styling; pass a bounded range like"
+              + " A1:N1 (got "
+              + addr.toA1()
+              + ")",
+          Map.of("range", addr.toA1()));
+    }
+    // Materialising a very large (but bounded) range would blow memory and the 64k-style cap;
+    // bound it to the same cell budget as reads.
     if (addr.cellCount() > config.maxCells()) {
       throw new McpException(
           ErrorCode.STYLE_INVALID,
@@ -683,7 +698,7 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
               + addr.cellCount()
               + " cells, over the "
               + config.maxCells()
-              + "-cell styling cap; use a bounded range (full-column/full-row not supported)",
+              + "-cell styling cap; use a smaller range",
           Map.of("range", addr.toA1(), "cells", addr.cellCount(), "max_cells", config.maxCells()));
     }
     return PoiStyleApplier.applyStyle(xwb, xsheet, addr, spec);
@@ -694,13 +709,13 @@ public final class XssfInMemoryEngine implements WorkbookEngine {
       throws McpException {
     Workbook wb = requireOpen(id);
     Sheet sheet = requireSheet(wb, sheetName);
-    if (!(wb instanceof XSSFWorkbook xwb) || !(sheet instanceof XSSFSheet xsheet)) {
+    if (!(wb instanceof XSSFWorkbook) || !(sheet instanceof XSSFSheet xsheet)) {
       throw new McpException(
           ErrorCode.STYLE_INVALID,
           "sheet formatting is only supported on .xlsx/.xlsm (XSSF) workbooks, not .xls (HSSF)",
           Map.of("sheet", sheetName));
     }
-    PoiStyleApplier.applyFormat(xwb, xsheet, spec);
+    PoiStyleApplier.applyFormat(xsheet, spec);
   }
 
   @Override

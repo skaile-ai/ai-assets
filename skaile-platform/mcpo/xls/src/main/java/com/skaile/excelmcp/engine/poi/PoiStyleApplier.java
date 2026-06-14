@@ -80,8 +80,7 @@ public final class PoiStyleApplier {
   }
 
   /** Applies sheet-level presentation. Idempotent; only the supplied groups are touched. */
-  public static void applyFormat(XSSFWorkbook wb, XSSFSheet sheet, SheetFormatSpec spec)
-      throws McpException {
+  public static void applyFormat(XSSFSheet sheet, SheetFormatSpec spec) throws McpException {
     if (spec.columnWidths() != null) {
       for (SheetFormatSpec.ColumnWidth cw : spec.columnWidths()) {
         int col;
