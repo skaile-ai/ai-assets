@@ -44,7 +44,7 @@ skaile-platform/
 
 | Skill | Source | Stage | Purpose |
 |---|---|---|---|
-| [excel-mcp-server](mcpo/xls/SKILL.md) | `skaile-platform/mcpo/xls` | alpha (v0.1.0) | Excel (.xlsx/.xlsm/.xls) read/write via Apache POI, 28 tools over stdio (incl. cell styling & sheet presentation). |
+| [excel-mcp-server](mcpo/xls/SKILL.md) | `skaile-platform/mcpo/xls` | alpha (v0.2.0) | Excel (.xlsx/.xlsm/.xls) read/write via Apache POI, 28 tools over stdio (incl. cell styling & sheet presentation). |
 | [ppt-mcp-server](mcpo/ppt/SKILL.md) | `skaile-platform/mcpo/ppt` | stable (v1.0.0) | PowerPoint (.pptx/.pptm) authoring, rendering, export via Apache POI + LibreOffice, 52 tools over stdio. |
 
 ## Agents in this domain

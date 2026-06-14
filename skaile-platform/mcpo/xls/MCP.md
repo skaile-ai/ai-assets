@@ -1,7 +1,7 @@
 ---
 name: excel
-description: "Read/write Excel workbooks (.xlsx/.xlsm/.xls) via Apache POI. 26 tools: workbook lifecycle, range I/O, sheet management, tables, named ranges, VBA extraction."
-version: 0.1.0
+description: "Read/write Excel workbooks (.xlsx/.xlsm/.xls) via Apache POI. 28 tools: workbook lifecycle, range I/O (incl. cell styling), sheet management and presentation, tables, named ranges, VBA extraction."
+version: 0.2.0
 transport: stdio
 recipe:
   attr: mcps.excel

@@ -35,7 +35,7 @@
 
       excel-mcp = pkgs.maven.buildMavenPackage rec {
         pname = "excel-mcp";
-        version = "0.1.0-SNAPSHOT";
+        version = "0.2.0-SNAPSHOT";
         src = excel-src;
 
         # Fixed-output hash of the resolved Maven dependency tree — identical to
