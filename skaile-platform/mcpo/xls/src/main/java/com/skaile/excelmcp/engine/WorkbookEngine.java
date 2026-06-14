@@ -4,9 +4,11 @@ import com.skaile.excelmcp.error.McpException;
 import com.skaile.excelmcp.handles.HandleId;
 import com.skaile.excelmcp.handles.OpenWorkbook;
 import com.skaile.excelmcp.shape.CapabilitiesReportShape;
+import com.skaile.excelmcp.shape.CellStyleSpec;
 import com.skaile.excelmcp.shape.NamedRangeGetShape;
 import com.skaile.excelmcp.shape.NamedRangeRef;
 import com.skaile.excelmcp.shape.RangeShape;
+import com.skaile.excelmcp.shape.SheetFormatSpec;
 import com.skaile.excelmcp.shape.SheetShape;
 import com.skaile.excelmcp.shape.TableGetShape;
 import com.skaile.excelmcp.shape.TableRef;
@@ -109,6 +111,21 @@ public interface WorkbookEngine extends AutoCloseable {
 
   /** Remove every non-null cell in the given range. Styling and merged regions are untouched. */
   int clearRange(HandleId id, String sheet, String rangeA1) throws McpException;
+
+  /**
+   * Apply a {@link CellStyleSpec} to every cell in the A1 range, merging onto each cell's existing
+   * style so unspecified attributes are preserved. Empty cells in the range are materialised so the
+   * style applies. XSSF (.xlsx/.xlsm) only — HSSF (.xls) fails with {@code STYLE_INVALID}. Returns
+   * the number of cells styled. In-memory until {@code workbook.save}.
+   */
+  int applyStyle(HandleId id, String sheet, String rangeA1, CellStyleSpec spec) throws McpException;
+
+  /**
+   * Apply sheet-level presentation ({@link SheetFormatSpec}: column widths, row heights, freeze
+   * pane, tab color). Only the supplied groups are changed. XSSF only. In-memory until {@code
+   * workbook.save}.
+   */
+  void applySheetFormat(HandleId id, String sheet, SheetFormatSpec spec) throws McpException;
 
   /**
    * Walk every formula cell and refresh its cached result via POI's evaluator. Returns the number

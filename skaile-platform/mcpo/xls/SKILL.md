@@ -43,7 +43,8 @@ workbook.open (or workbook.create)
   → workbook.capabilities_report       # check for unsupported modern functions before editing
   → workbook.metadata / list_sheets    # orient
   → range.get / named_range.get        # read
-  → range.set / sheet.insert_rows …    # write
+  → range.set / sheet.insert_rows …    # write values & formulas
+  → range.set_style / sheet.set_format # style cells & sheet presentation
   → workbook.recalculate               # refresh cached formula results
   → workbook.save                      # flush to disk (atomic temp-file + rename)
   → workbook.close                     # release in-memory state
@@ -59,6 +60,7 @@ The process is **session-scoped**: one container per agent session, workbooks st
 - **Handles are session-local.** `workbook.open` / `workbook.create` return `wb-<hex>` handles that live for the process lifetime. A second `docker run` starts fresh.
 - **Paths are container-local.** If the image mounts the host at `/data`, all `path` arguments must be `/data/...`, not host paths.
 - **Sandbox is fail-closed.** The server refuses to start without `EXCEL_MCP_ROOT` unless `EXCEL_MCP_ALLOW_UNSANDBOXED=true` is explicitly set.
+- **Style through the MCP, never a second library.** Use `range.set_style` (fills, fonts, borders, number formats, alignment, wrap) and `sheet.set_format` (column widths, row heights, freeze panes, tab color) for all presentation. Do **not** post-process the saved file with openpyxl / exceljs / a second writer — two serializers over one file is exactly what produces the "Excel repaired records" corruption. `range.set_style` merges onto existing styles, so layer it in any order; styling is `.xlsx`/`.xlsm` only and rejects full-column/row ranges (pass a bounded range like `A1:N1`).
 
 ## Reference documents (in this folder)
 
