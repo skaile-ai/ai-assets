@@ -35,8 +35,9 @@ keywords:
 
 Docker-based MCP server for Excel file operations, built on Apache POI 5.5.1.
 
-Provides 26 tools across workbook lifecycle, range I/O, sheet management,
-row/column mutation, tables, named ranges, and read-only VBA module extraction.
+Provides 28 tools across workbook lifecycle, range I/O (incl. cell styling), sheet
+management and presentation, row/column mutation, tables, named ranges, and read-only
+VBA module extraction.
 
 ## Runtime
 

@@ -38,7 +38,7 @@ config/, log/ — env-var parsing and Logback setup (stderr routing).
 
 v1 ships 28 tools across workbook lifecycle, range I/O (incl. `range.set_style`), sheet management and presentation (incl. `sheet.set_format`), row/col mutation, tables, named ranges, and read-only VBA — no charts, pivots, conditional formatting, Power Query, or DAX (see future-work doc).
 
-Column **LLM-optimized description** is the string returned by `ToolDefinition.description()` — what the calling LLM sees when deciding whether and how to use the tool. All 26 rows below follow the three-part effect / prerequisite / gotcha template documented in `excel-mcp-server-future-work.md` → "Authoring conventions"; the tool source and this table are kept in lockstep during the Phase 10 audit.
+Column **LLM-optimized description** is the string returned by `ToolDefinition.description()` — what the calling LLM sees when deciding whether and how to use the tool. All 28 rows below follow the three-part effect / prerequisite / gotcha template documented in `excel-mcp-server-future-work.md` → "Authoring conventions"; the tool source and this table are kept in lockstep during the Phase 10 audit.
 
 | Category | Tool | Parameters | LLM-optimized description |
 |---|---|---|---|
