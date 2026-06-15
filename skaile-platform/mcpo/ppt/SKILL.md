@@ -251,7 +251,7 @@ See `README.md` → "Error/Response Model" for the complete table.
 
 > **Deployment note:** `MCPO_ALLOWED_ROOT` differs by deployment. On the **Skaile platform** the runner sets it to the session workspace root (`/skaile/workspace`, from `MCP.md`), so pass paths under the session workspace. The **standalone Docker image** defaults it to `/workspace/resources` — the value used throughout the examples below.
 
-Every path argument is resolved inside `MCPO_ALLOWED_ROOT` (set to `/workspace/resources` in the shipped image). Paths outside the sandbox return `PATH_NOT_ALLOWED, retriable=false`. This applies to all of:
+Every path argument is resolved inside `MCPO_ALLOWED_ROOT` (see the deployment note above for its value). Paths outside the sandbox return `PATH_NOT_ALLOWED, retriable=false`. This applies to all of:
 
 - `ppt.open_document` (input `path`)
 - `ppt.export_document` (`output_path`)
