@@ -122,7 +122,7 @@ Folder-per-case harness patterned after xlport. Each subdirectory of `src/test/r
 The server speaks MCP over **stdio only** in v1. No HTTP. Launched via the shaded jar:
 
 ```bash
-java -jar target/excel-mcp-0.1.0-SNAPSHOT.jar
+java -jar target/excel-mcp-0.2.1.jar
 ```
 
 Or via Docker:
