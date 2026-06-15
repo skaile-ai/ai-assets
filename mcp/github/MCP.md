@@ -1,6 +1,13 @@
 ---
 name: github
-description: "GitHub's official remote MCP server (api.githubcopilot.com/mcp). Repos, issues, pull requests, Actions, code search and more, scoped by the connected GitHub identity. Hosted by GitHub - no local runtime to build or deploy."
+description: "Use when an agent needs to act on GitHub - read or open issues and
+  pull requests, inspect or edit repository contents, trigger or read GitHub
+  Actions, or run code/issue/PR search across repos the connected identity can
+  reach. Wraps GitHub's official hosted remote MCP server
+  (api.githubcopilot.com/mcp), so tools are scoped to the user's GitHub
+  permissions. Reach for this over raw REST/GraphQL when the task spans several
+  GitHub operations or you want typed, permission-scoped tools rather than
+  hand-rolled API calls."
 version: 0.1.0
 transport: http
 url: https://api.githubcopilot.com/mcp/
@@ -22,6 +29,33 @@ GitHub's official, GitHub-hosted MCP server. This is a **remote** asset: there i
 no binary or Docker image to package - the runner opens a streamable-HTTP
 connection straight to `https://api.githubcopilot.com/mcp/`. Tools are scoped to
 whatever the connected GitHub identity is allowed to do.
+
+## When to reach for this
+
+- The user asks to read, comment on, open, or update GitHub issues or pull requests.
+- The agent needs to inspect or edit repository contents, branches, or files on GitHub.
+- The task involves GitHub Actions - listing workflow runs, reading logs, or triggering a workflow.
+- The agent needs to search code, issues, or PRs across repositories the user can access.
+- Prefer this over ad-hoc `curl`/REST when the work spans multiple GitHub operations or benefits from permission-scoped tools.
+
+For a single, simple file fetch from a public repo, plain HTTP is fine - reach
+for this when the work is genuinely GitHub-shaped and multi-step.
+
+## Non-obvious gotchas the agent must respect
+
+- **Permission-scoped, not omnipotent.** Every tool runs as the connected GitHub
+  identity. A 403/404 usually means the user's token lacks access, not that the
+  resource is missing - surface that distinction instead of retrying blindly.
+- **Network egress required.** The session sandbox must be able to reach
+  `api.githubcopilot.com`. Under locked-down session networking the connection
+  fails fast; that is a config issue, not a tool bug.
+- **Read-only / toolset scoping is endpoint-selected.** The hosted server exposes
+  scoped variants via URL path (e.g. a read-only endpoint). To restrict
+  capabilities, the operator overrides the instance `url` - the agent cannot
+  widen its own scope at call time.
+- **Write actions are real.** Opening issues/PRs, pushing edits, or dispatching
+  workflows takes effect immediately against live GitHub. Confirm intent on
+  destructive or outward-facing actions.
 
 ## Transport
 
