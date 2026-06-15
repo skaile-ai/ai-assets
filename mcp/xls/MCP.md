@@ -39,7 +39,7 @@ Docker-based MCP server for Excel file operations, built on Apache POI 5.5.1.
 > `mvnw`), smoke tests, and implementation docs live in their own repo,
 > [`skaile-ai/excel-mcp`](https://github.com/skaile-ai/excel-mcp) (a submodule at
 > the workspace root as `excel-mcp/`). This directory is the **catalog entry
-> only** — `MCP.md` + `SKILL.md`. Versioning/PRs/issues happen in that repo;
+> only** — `MCP.md`. Versioning/PRs/issues happen in that repo;
 > bump `version:` here when adopting a new release.
 
 ## When to reach for this
