@@ -23,6 +23,7 @@ metadata:
   - named-range
   - vba
   stage: alpha
+  version: 0.2.0
 ---
 
 # Excel MCP
