@@ -1,7 +1,7 @@
 ---
 name: excel
 description: "A stateful, formula-aware Excel engine an agent can actually drive - not a file it has to parse by hand. Opens existing .xlsx/.xlsm/.xls workbooks (or creates new ones) entirely in memory, then queries and richly edits them across a whole session without reloading: cell values, typed formulas, styling, sheet structure, rows and columns, tables, and named ranges - flushed to disk with an atomic, corruption-safe save. Its standout capability is headless recalculation: Apache POI evaluates ~280 Excel functions in place, so the agent works with real computed results instead of the stale cached zeros that code-based approaches (openpyxl/pandas, or Claude's built-in spreadsheet handling) leave behind - and every read distinguishes a genuine value from an as-yet-uncomputed formula. Because all edits flow through one POI writer, it never triggers the 'Excel repaired records' corruption that second-writer libraries cause. 28 tools across workbook lifecycle, range I/O (incl. cell styling), sheet management and presentation, tables, named ranges, and read-only VBA extraction."
-version: 0.2.1
+version: 0.2.1 # mcp-catalog-version
 transport: stdio
 recipe:
   attr: mcps.excel
@@ -35,6 +35,13 @@ keywords:
 
 Docker-based MCP server for Excel file operations, built on Apache POI 5.5.1.
 
+> **Source code:** the server source, build (`pom.xml`, `flake.nix`, `Dockerfile`,
+> `mvnw`), smoke tests, and implementation docs live in their own repo,
+> [`skaile-ai/excel-mcp`](https://github.com/skaile-ai/excel-mcp) (a submodule at
+> the workspace root as `excel-mcp/`). This directory is the **catalog entry
+> only** — `MCP.md` + `SKILL.md`. Versioning/PRs/issues happen in that repo;
+> bump `version:` here when adopting a new release.
+
 ## Capabilities
 
 28 tools over stdio, grouped by area:
@@ -63,9 +70,10 @@ Built and pinned by the platform Nix flake (`platform/nix/flake.nix`'s `mcps.exc
 At session start the runner resolves `${recipe:excel}` to the closure's `/nix/store` path. No
 `docker build` step required for platform-deployed sessions.
 
-For local standalone testing without the platform: build the docker image
-(`docker build -t excel-mcp:dev .`) and override `command`/`args` in `skaile.yaml`'s
-`mcp_servers:` block.
+For local standalone testing without the platform: clone
+[`skaile-ai/excel-mcp`](https://github.com/skaile-ai/excel-mcp), build the docker
+image there (`docker build -t excel-mcp:dev .`), and override `command`/`args` in
+`skaile.yaml`'s `mcp_servers:` block.
 
 ## Override examples
 

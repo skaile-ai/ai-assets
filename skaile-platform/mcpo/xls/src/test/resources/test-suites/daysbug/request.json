@@ -1,7 +1,0 @@
-{
-  "description": "Writes 7 into A4 and recalculates; the template's B7 holds '=A4*3', so recalc refreshes its cached result to 21. The xlport expected stores B7 as a plain numeric (xlport's exporter drops the formula), but the comparator compares rendered strings so a formula cell with the same cached value passes.",
-  "operations": [
-    { "tool": "range.set", "arguments": { "sheet": "Deal", "start": "A4", "values": [[7]] } },
-    { "tool": "workbook.recalculate", "arguments": {} }
-  ]
-}

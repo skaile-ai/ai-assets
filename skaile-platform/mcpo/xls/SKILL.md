@@ -28,12 +28,18 @@ metadata:
   - named-range
   - vba
   stage: alpha
-  version: 0.2.1
+  version: 0.2.1 # mcp-catalog-version
 ---
 
 # Excel MCP
 
 An MCP server that gives an agent first-class ability to create, modify, review, and summarize Excel files with real fidelity. Built on Apache POI, shipped as a Docker image, stdio transport.
+
+> **Source code lives in [`skaile-ai/excel-mcp`](https://github.com/skaile-ai/excel-mcp)**
+> (a submodule at the workspace root as `excel-mcp/`). This directory is the
+> catalog entry only (`MCP.md` + `SKILL.md`); every in-repo file referenced below
+> (`README.md`, `pom.xml`, `Dockerfile`, `mvnw`, `src/`, the implementation docs)
+> is in that repo.
 
 ## When to reach for this skill
 
@@ -86,7 +92,7 @@ Constraints worth remembering:
 - `range.set_style` styles a **bounded** range only — full-column (`A:A`) / full-row (`1:1`) are rejected; pass `A1:A200`.
 - Styling is `.xlsx`/`.xlsm` only and never triggers recalculation — it is orthogonal to `workbook.recalculate`.
 
-## Reference documents (in this folder)
+## Reference documents (in the [`excel-mcp`](https://github.com/skaile-ai/excel-mcp) repo)
 
 - `README.md` — full tool inventory with parameters and descriptions, env-var reference, run / deploy instructions, MCP Inspector walkthrough.
 - `excel-mcp-server-implementation-plan.md` — contract: every tool shape, error code, and architectural decision.
