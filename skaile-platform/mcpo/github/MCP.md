@@ -25,11 +25,15 @@ whatever the connected GitHub identity is allowed to do.
 
 ## Transport
 
-`transport: http` maps to the runner's `StreamableHTTPClientTransport`
-(`workspaces/.../runner/src/external-mcp.ts`). The manifest Zod enum currently
-spells this `streamable-http`, but the runtime only recognises the literal
-`http`; discovery does not validate the manifest against the enum, so `http`
-flows through verbatim. See the workspaces follow-up note below.
+`transport: http` is the runtime literal the runner branches on to open a
+`StreamableHTTPClientTransport`
+(`workspaces/packages/workspaces/runner/src/external-mcp.ts`). The `MCP.md`
+manifest schema accepts `http` and normalizes the MCP-spec alias
+`streamable-http` to it as of skaile-ai/workspaces#174
+(`workspaces/packages/workspaces/types/src/manifests/mcp-server.ts` +
+`core/src/workspace-config.ts`). Publish this asset only once that change is
+released; against an older resolver, `http` fails manifest validation and
+`streamable-http` connects to nothing.
 
 ## Authentication (bound per organization, not here)
 
@@ -39,25 +43,27 @@ platform when the asset instance is enabled, not baked into the shared catalog
 entry:
 
 - The platform sets `auth: backend` + a GitHub OAuth `providerLinkId` on the
-  `McpServerEntry` (`platform/.../session/src/skaile-config.types.ts`).
+  `McpServerEntry`
+  (`platform/backend/libs/session/src/skaile-config.types.ts`).
 - At session start, `mintAndProvisionMcpCredentials`
-  (`platform/.../session/src/mcp-credential-provision.ts`) mints the user's
-  GitHub token via `CredentialMediatorService.mintAccessToken`, provisions it
-  off-disk as `MCP__github__AUTH`, and rewrites the request header to
+  (`platform/backend/libs/session/src/mcp-credential-provision.ts`) mints the
+  user's GitHub token via `CredentialMediatorService.mintAccessToken`, provisions
+  it off-disk as `MCP__github__AUTH`, and rewrites the request header to
   `Authorization: env:MCP__github__AUTH`.
 
 To wire the org side:
 
-1. Create a GitHub OAuth app and set `SKAILE_OAUTH_GITHUB_CLIENT_ID` /
-   `SKAILE_OAUTH_GITHUB_CLIENT_SECRET` on the backend (or supply per-link
-   credentials when creating the ProviderLink).
-2. Create a `ProviderLink` with `providerType: GitHub`,
-   `credentialMechanism: UserDelegation` (tRPC `providerLinkActions.create`).
+1. Configure the platform's GitHub OAuth app credentials - either per-link
+   (`oauthClientId` / `oauthClientSecret` on the ProviderLink) or the
+   platform-wide GitHub OAuth app in `gitProviderConfig`.
+2. Create a `ProviderLink` with `category: Git`, `providerType: GitHub`,
+   `credentialMechanism: UserDelegation` (tRPC
+   `providerLinkActions.createProviderLink`).
 3. Have each user connect their GitHub account
    (`providerLinkActions.startOAuthFlow` / `completeOAuthFlow`).
 4. Bind this MCP instance to that link in the remote-MCP widget
-   (`frontend/.../configure-instance/remote-mcp-widget.tsx`) - it writes
-   `auth: backend` + `providerLinkId` into the session config.
+   (`platform/frontend/src/components/ui/configure-instance/remote-mcp-widget.tsx`)
+   - it writes `auth: backend` + `providerLinkId` into the session config.
 
 The remote endpoint accepts the GitHub user OAuth token as
 `Authorization: Bearer <token>`; the backend-auth flow supplies exactly that.
