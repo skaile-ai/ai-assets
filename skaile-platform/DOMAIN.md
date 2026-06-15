@@ -24,20 +24,12 @@ skaile-platform/
 │       ├── RULES.md
 │       └── SOUL.md
 └── mcpo/                  <- MCP servers (one subfolder per server)
-    ├── xls/               <- excel-mcp-server
+    ├── xls/               <- excel catalog entry (code: skaile-ai/excel-mcp)
     │   ├── SKILL.md       <- skill descriptor for agents
-    │   ├── MCP.md         <- catalog manifest for mcp:excel resolution
-    │   ├── README.md      <- tool catalog + run instructions
-    │   ├── Dockerfile     <- shipped runtime image (excel-mcp:dev)
-    │   ├── pom.xml        <- Maven (Java 21, Apache POI 5.5.1)
-    │   └── src/
-    ├── ppt/               <- ppt-mcp-server
+    │   └── MCP.md         <- catalog manifest for mcp:excel resolution
+    ├── ppt/               <- ppt catalog entry (code: skaile-ai/powerpoint-mcp)
     │   ├── SKILL.md       <- skill descriptor for agents
-    │   ├── README.md      <- tool catalog + JSON-RPC examples
-    │   ├── CLAUDE.md      <- engineering notes for contributors
-    │   ├── Dockerfile     <- shipped runtime image (ppt-mcp:dev)
-    │   ├── pom.xml        <- Maven (Java 17, Apache POI + LibreOffice)
-    │   └── src/
+    │   └── MCP.md         <- catalog manifest for mcp:ppt resolution
     └── github/            <- GitHub hosted remote MCP (no image - api.githubcopilot.com)
         ├── SKILL.md       <- skill descriptor for agents
         └── MCP.md         <- catalog manifest for mcp:github resolution (transport: http)
@@ -61,7 +53,7 @@ skaile-platform/
 
 - Every MCP server under `mcpo/` has its own `SKILL.md` at the project root describing when and how agents should use its tools.
 - Each MCP server that supports catalog resolution also has an `MCP.md` with default runtime config (transport, command, args, env) so users can add `mcp:<name>` to skaile.yaml dependencies.
-- Implementation docs (plans, deferral logs, skill notes) stay next to the code. SKILL.md points at them rather than duplicating content.
-- Locally-run services are self-contained (own Dockerfile, own dependency graph) and expose self-describe tools so agents can branch on feature flags without hard-coding server versions. Hosted remote servers (e.g. `github/`) ship no image - their `MCP.md` declares only the endpoint (`transport: http` + `url`), and auth is bound per-org at the platform layer.
+- Implementation docs (plans, deferral logs, engineering notes) live with the code in the standalone MCP repos; the `SKILL.md`/`MCP.md` here link to them rather than duplicating content.
+- Locally-run services are self-contained (own Dockerfile, own dependency graph) and expose self-describe tools so agents can branch on feature flags without hard-coding server versions. Their **code and build now live in standalone repos** (`xls` -> `skaile-ai/excel-mcp`, `ppt` -> `skaile-ai/powerpoint-mcp`); only the `SKILL.md` + `MCP.md` catalog entry stays here, and the platform Nix flake (`mcps.*`) sources the build from those repos. Hosted remote servers (e.g. `github/`) ship no image - their `MCP.md` declares only the endpoint (`transport: http` + `url`), and auth is bound per-org at the platform layer.
 - Paths in tool arguments are sandboxed to the server's data root env var. Host paths must be translated to container-local paths by the agent before tool invocation. (Remote servers have no local path sandbox - they are scoped by the connected identity's permissions instead.)
-- Versioning: each locally-built MCP carries its own version in source (pom.xml) and mirrors it into the SKILL.md/MCP.md `version`. Remote servers with no source build (e.g. `github/`) carry their version directly in `MCP.md` / SKILL.md frontmatter.
+- Versioning: each locally-built MCP carries its own version in source (`pom.xml`, in its standalone repo) and mirrors it into the SKILL.md/MCP.md `version` here (synced on release via the `mcp-release` dispatch, or bump manually). Remote servers with no source build (e.g. `github/`) carry their version directly in `MCP.md` / SKILL.md frontmatter.
