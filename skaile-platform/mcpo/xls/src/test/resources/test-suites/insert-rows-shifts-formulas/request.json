@@ -1,7 +1,0 @@
-{
-  "description": "Inserts two empty rows at the top of Sheet1; POI shifts A1/A2 data down to A3/A4 and rewrites the A3-formula reference to 'A3+A4'. Recalc refreshes the cached value (must still be 30).",
-  "operations": [
-    { "tool": "sheet.insert_rows", "arguments": { "sheet": "Sheet1", "start_row": 1, "count": 2 } },
-    { "tool": "workbook.recalculate", "arguments": {} }
-  ]
-}

@@ -8,6 +8,7 @@ description: "Use when an agent needs to author, modify, review, render, or expo
   or high fidelity, and export to PPTX/PDF/HTML/PNG-batch/JPG-batch/SVG-batch/outline-text.
   Invoke via the `ppt-mcp:dev` Docker MCP server over stdio."
 metadata:
+  version: 1.0.0 # mcp-catalog-version
   stage: "stable"
   tags: [powerpoint, pptx, mcp, rendering, apache-poi, libreoffice]
   env_vars:
@@ -37,6 +38,12 @@ env:
 
 # PPT MCP Server
 
+> **Source code lives in [`skaile-ai/powerpoint-mcp`](https://github.com/skaile-ai/powerpoint-mcp)**
+> (a submodule at the workspace root as `powerpoint-mcp/`). This directory is the
+> catalog entry only (`MCP.md` + `SKILL.md`); every in-repo file referenced below
+> (`README.md`, `CLAUDE.md`, `TEST_SCENARIOS.md`, `pom.xml`, `Dockerfile`, `mvnw`,
+> `src/`) is in that repo.
+
 ## Overview
 
 Stateful MCP server that exposes **52 tools** for manipulating PowerPoint decks through JSON-RPC over stdio. An agent opens or creates a `.pptx`, receives a `document_id` handle, drives mutations through that handle, and exports the result — all within one container session.
@@ -63,7 +70,7 @@ Invoke this skill when the agent's task involves any of:
 
 ## Prerequisites
 
-- The `ppt-mcp:dev` Docker image must be built and available on the host (`docker build -t ppt-mcp:dev skaile-platform/mcpo/ppt/`).
+- The `ppt-mcp:dev` Docker image must be built and available on the host (clone [`skaile-ai/powerpoint-mcp`](https://github.com/skaile-ai/powerpoint-mcp) and run `docker build -t ppt-mcp:dev .`).
 - The agent's MCP config must register this server and bind-mount a host directory into `/workspace/resources` so paths in tool arguments resolve inside the sandbox.
 - The host user must have write permission to the bind-mounted directory. The recommended invocation uses `--user 1000:1000` so `ppt.export_document` can atomically replace files in the mount.
 

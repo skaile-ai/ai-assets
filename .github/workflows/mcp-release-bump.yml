@@ -1,0 +1,48 @@
+name: MCP Catalog Version Bump
+
+# Triggered by a repository_dispatch from excel-mcp / powerpoint-mcp when they cut
+# a release. Bumps the catalog `version:` in the matching MCP.md + SKILL.md (the
+# lines carrying the `# mcp-catalog-version` marker) and opens a PR.
+on:
+  repository_dispatch:
+    types: [mcp-release]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bump catalog version
+        env:
+          MCP: ${{ github.event.client_payload.mcp }}
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          set -euo pipefail
+          case "$MCP" in
+            excel) DIR=skaile-platform/mcpo/xls ;;
+            ppt)   DIR=skaile-platform/mcpo/ppt ;;
+            *) echo "::error::unknown mcp '$MCP'"; exit 1 ;;
+          esac
+          if [ -z "${VERSION:-}" ]; then echo "::error::empty version"; exit 1; fi
+          for f in "$DIR/MCP.md" "$DIR/SKILL.md"; do
+            sed -i -E "s/^([[:space:]]*version:[[:space:]]*).*(# mcp-catalog-version)/\1${VERSION} \2/" "$f"
+            echo "bumped $f -> $VERSION"
+            grep -nE "version:.*# mcp-catalog-version" "$f"
+          done
+
+      - name: Open PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: mcp-release/${{ github.event.client_payload.mcp }}-${{ github.event.client_payload.version }}
+          title: "chore: bump ${{ github.event.client_payload.mcp }} MCP catalog to v${{ github.event.client_payload.version }}"
+          commit-message: "chore: bump ${{ github.event.client_payload.mcp }} catalog version to ${{ github.event.client_payload.version }}"
+          body: |
+            Automated catalog version bump triggered by the **${{ github.event.client_payload.mcp }}** MCP release **v${{ github.event.client_payload.version }}**.
+
+            Updates the `version:` frontmatter in `MCP.md` + `SKILL.md` for this MCP. Review and merge to publish the new catalog version.
+          delete-branch: true
