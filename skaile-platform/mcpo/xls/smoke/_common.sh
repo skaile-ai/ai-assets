@@ -11,6 +11,6 @@ export EXCEL_MCP_ALLOW_UNSANDBOXED=true
 
 SMOKE_DIR="$(cd "$(dirname "${BASH_SOURCE[1]}")" && pwd)"
 ROOT="$(cd "$SMOKE_DIR/.." && pwd)"
-JAR="$ROOT/target/excel-mcp-0.2.0.jar"
+JAR="$ROOT/target/excel-mcp-0.2.1.jar"
 [[ -f "$JAR" ]] || { echo "jar not found: $JAR" >&2; exit 2; }
 export SMOKE_DIR ROOT JAR

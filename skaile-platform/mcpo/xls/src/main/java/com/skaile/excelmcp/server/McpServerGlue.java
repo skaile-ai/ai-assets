@@ -20,7 +20,7 @@ public final class McpServerGlue {
   private static final Logger log = LoggerFactory.getLogger(McpServerGlue.class);
 
   public static final String SERVER_NAME = "excel-mcp";
-  public static final String SERVER_VERSION = "0.2.0";
+  public static final String SERVER_VERSION = "0.2.1";
 
   private final ObjectMapper jsonMapper;
   private final ToolRegistry registry;

@@ -1,12 +1,17 @@
 ---
 name: xls
-description: "Use when an agent needs to read, modify, or inspect .xlsx / .xlsm /
-  .xls workbooks. Wraps the Excel MCP stdio server (Java / Apache POI) exposing 28
-  tools across workbook lifecycle, range I/O (incl. cell styling), sheet management
-  and presentation, row/column mutation, tables, named ranges, and read-only VBA
-  module extraction. Every cell read surfaces
-  type, value, and (if present) typed formula — so the agent can distinguish a stale
-  cached value from a real one."
+description: "Use when an agent needs to read, modify, create, or inspect .xlsx /
+  .xlsm / .xls workbooks. A stateful, formula-aware Excel engine (Java / Apache POI,
+  stdio MCP): open an existing workbook or create one in memory, richly edit it across
+  a whole session without reloading — values, typed formulas, cell styling, sheet
+  structure, rows/columns, tables, named ranges — then recalculate formulas headlessly
+  and save atomically. 28 tools across workbook lifecycle, range I/O (incl. cell
+  styling), sheet management and presentation, row/column mutation, tables, named
+  ranges, and read-only VBA extraction. Unlike code-based editing (openpyxl/pandas or
+  Claude's built-in spreadsheet handling), it evaluates ~280 Excel functions in place
+  so formula results are real not stale, every read separates a genuine value from an
+  uncomputed formula, and a single POI writer avoids the 'Excel repaired records'
+  corruption that second-writer libraries cause."
 metadata:
   tags:
   - excel
@@ -23,7 +28,7 @@ metadata:
   - named-range
   - vba
   stage: alpha
-  version: 0.2.0
+  version: 0.2.1
 ---
 
 # Excel MCP
