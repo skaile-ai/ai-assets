@@ -20,6 +20,7 @@ metadata:
   - mcp
   - remote
   stage: alpha
+version: 0.1.0
 ---
 
 # GitHub MCP
