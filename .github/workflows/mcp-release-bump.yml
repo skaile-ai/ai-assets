@@ -1,8 +1,8 @@
 name: MCP Catalog Version Bump
 
 # Triggered by a repository_dispatch from excel-mcp / powerpoint-mcp when they cut
-# a release. Bumps the catalog `version:` in the matching MCP.md + SKILL.md (the
-# lines carrying the `# mcp-catalog-version` marker) and opens a PR.
+# a release. Bumps the catalog `version:` in the matching MCP.md (the line
+# carrying the `# mcp-catalog-version` marker) and opens a PR.
 on:
   repository_dispatch:
     types: [mcp-release]
@@ -35,11 +35,9 @@ jobs:
           if ! printf '%s' "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+([-.+][0-9A-Za-z.-]+)?$'; then
             echo "::error::version '$VERSION' is not semver-shaped"; exit 1
           fi
-          for f in "$DIR/MCP.md" "$DIR/SKILL.md"; do
-            sed -i -E "s/^([[:space:]]*version:[[:space:]]*).*(# mcp-catalog-version)/\1${VERSION} \2/" "$f"
-            echo "bumped $f -> $VERSION"
-            grep -nE "version:.*# mcp-catalog-version" "$f"
-          done
+          sed -i -E "s/^([[:space:]]*version:[[:space:]]*).*(# mcp-catalog-version)/\1${VERSION} \2/" "$DIR/MCP.md"
+          echo "bumped $DIR/MCP.md -> $VERSION"
+          grep -nE "version:.*# mcp-catalog-version" "$DIR/MCP.md"
 
       - name: Open PR
         uses: peter-evans/create-pull-request@v6
@@ -50,5 +48,5 @@ jobs:
           body: |
             Automated catalog version bump triggered by the **${{ github.event.client_payload.mcp }}** MCP release **v${{ github.event.client_payload.version }}**.
 
-            Updates the `version:` frontmatter in `MCP.md` + `SKILL.md` for this MCP. Review and merge to publish the new catalog version.
+            Updates the `version:` frontmatter in `MCP.md` for this MCP. Review and merge to publish the new catalog version.
           delete-branch: true
