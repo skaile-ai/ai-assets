@@ -12,8 +12,10 @@ metadata:
   stage: "stable"
   tags: [powerpoint, pptx, mcp, rendering, apache-poi, libreoffice]
   env_vars:
-    MCPO_ALLOWED_ROOT: "Required inside Docker. Sandbox root under which every path
-      argument must resolve. Default in the shipped image: /workspace/resources."
+    MCPO_ALLOWED_ROOT: "Sandbox root under which every path argument must resolve.
+      On the Skaile platform this is the session workspace root (/skaile/workspace),
+      set by the runner from MCP.md; the standalone Docker image defaults to
+      /workspace/resources."
     MCPO_TEMPLATE_DIR: "Optional. Template store for ppt.upload_template. Default:
       <allowed_root>/.mcpo-ppt/templates."
     MCPO_DEFAULT_TEMPLATE_CONFIG: "Optional. Persisted default-template pointer. Default:
@@ -23,17 +25,6 @@ metadata:
       in the shipped image). If missing, soffice-dependent tools return SOFFICE_UNAVAILABLE."
     LOG_LEVEL: "Optional. Logback root level: ERROR | WARN | INFO | DEBUG. Default:
       INFO."
-transport: stdio
-recipe:
-  attr: mcps.ppt
-command: ${recipe:ppt:bin}/java
-args:
-- -jar
-- ${recipe:ppt:lib}/ppt-mcp.jar
-env:
-  MCPO_ALLOWED_ROOT: /workspace/resources
-  SOFFICE_PATH: ${recipe:ppt:bin}/soffice
-  JAVA_HOME: ${recipe:ppt}
 ---
 
 # PPT MCP Server
@@ -258,7 +249,9 @@ See `README.md` → "Error/Response Model" for the complete table.
 
 ## Sandbox and paths
 
-Every path argument is resolved inside `MCPO_ALLOWED_ROOT` (set to `/workspace/resources` in the shipped image). Paths outside the sandbox return `PATH_NOT_ALLOWED, retriable=false`. This applies to all of:
+> **Deployment note:** `MCPO_ALLOWED_ROOT` differs by deployment. On the **Skaile platform** the runner sets it to the session workspace root (`/skaile/workspace`, from `MCP.md`), so pass paths under the session workspace. The **standalone Docker image** defaults it to `/workspace/resources` — the value used throughout the examples below.
+
+Every path argument is resolved inside `MCPO_ALLOWED_ROOT` (see the deployment note above for its value). Paths outside the sandbox return `PATH_NOT_ALLOWED, retriable=false`. This applies to all of:
 
 - `ppt.open_document` (input `path`)
 - `ppt.export_document` (`output_path`)
