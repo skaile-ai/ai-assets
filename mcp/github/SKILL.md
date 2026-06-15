@@ -79,5 +79,5 @@ A local stdio variant exists (`ghcr.io/github/github-mcp-server`, run as
 `github-mcp-server stdio`, PAT in `GITHUB_PERSONAL_ACCESS_TOKEN`, with
 `--toolsets` / `--read-only` / `--lockdown-mode` flags). If data residency or
 locked-down egress later rules out the hosted endpoint, package the Go binary as
-a Nix recipe (`mcps.github`) mirroring `mcpo/xls` and ship a second manifest with
+a Nix recipe (`mcps.github`) mirroring `mcp/xls` and ship a second manifest with
 `transport: stdio` + `recipe: { attr: mcps.github }`. See `MCP.md` for details.

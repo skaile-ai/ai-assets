@@ -24,8 +24,8 @@ jobs:
         run: |
           set -euo pipefail
           case "$MCP" in
-            excel) DIR=skaile-platform/mcpo/xls ;;
-            ppt)   DIR=skaile-platform/mcpo/ppt ;;
+            excel) DIR=mcp/xls ;;
+            ppt)   DIR=mcp/ppt ;;
             *) echo "::error::unknown mcp '$MCP'"; exit 1 ;;
           esac
           if [ -z "${VERSION:-}" ]; then echo "::error::empty version"; exit 1; fi
