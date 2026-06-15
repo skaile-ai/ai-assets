@@ -1,6 +1,6 @@
 ---
 name: excel
-description: "Read/write Excel workbooks (.xlsx/.xlsm/.xls) via Apache POI. 28 tools: workbook lifecycle, range I/O (incl. cell styling), sheet management and presentation, tables, named ranges, VBA extraction."
+description: "A stateful, formula-aware Excel engine an agent can actually drive - not a file it has to parse by hand. Opens existing .xlsx/.xlsm/.xls workbooks (or creates new ones) entirely in memory, then queries and richly edits them across a whole session without reloading: cell values, typed formulas, styling, sheet structure, rows and columns, tables, and named ranges - flushed to disk with an atomic, corruption-safe save. Its standout capability is headless recalculation: Apache POI evaluates ~280 Excel functions in place, so the agent works with real computed results instead of the stale cached zeros that code-based approaches (openpyxl/pandas, or Claude's built-in spreadsheet handling) leave behind - and every read distinguishes a genuine value from an as-yet-uncomputed formula. Because all edits flow through one POI writer, it never triggers the 'Excel repaired records' corruption that second-writer libraries cause. 28 tools across workbook lifecycle, range I/O (incl. cell styling), sheet management and presentation, tables, named ranges, and read-only VBA extraction."
 version: 0.2.0
 transport: stdio
 recipe:
