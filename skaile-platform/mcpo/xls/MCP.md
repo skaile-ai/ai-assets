@@ -1,7 +1,7 @@
 ---
 name: excel
-description: "Read/write Excel workbooks (.xlsx/.xlsm/.xls) via Apache POI. 28 tools: workbook lifecycle, range I/O (incl. cell styling), sheet management and presentation, tables, named ranges, VBA extraction."
-version: 0.2.0
+description: "A stateful, formula-aware Excel engine an agent can actually drive - not a file it has to parse by hand. Opens existing .xlsx/.xlsm/.xls workbooks (or creates new ones) entirely in memory, then queries and richly edits them across a whole session without reloading: cell values, typed formulas, styling, sheet structure, rows and columns, tables, and named ranges - flushed to disk with an atomic, corruption-safe save. Its standout capability is headless recalculation: Apache POI evaluates ~280 Excel functions in place, so the agent works with real computed results instead of the stale cached zeros that code-based approaches (openpyxl/pandas, or Claude's built-in spreadsheet handling) leave behind - and every read distinguishes a genuine value from an as-yet-uncomputed formula. Because all edits flow through one POI writer, it never triggers the 'Excel repaired records' corruption that second-writer libraries cause. 28 tools across workbook lifecycle, range I/O (incl. cell styling), sheet management and presentation, tables, named ranges, and read-only VBA extraction."
+version: 0.2.1
 transport: stdio
 recipe:
   attr: mcps.excel
@@ -35,9 +35,27 @@ keywords:
 
 Docker-based MCP server for Excel file operations, built on Apache POI 5.5.1.
 
-Provides 28 tools across workbook lifecycle, range I/O (incl. cell styling), sheet
-management and presentation, row/column mutation, tables, named ranges, and read-only
-VBA module extraction.
+## Capabilities
+
+28 tools over stdio, grouped by area:
+
+- **Workbook lifecycle & state (9)** — `workbook.open`, `workbook.create`, `workbook.save`, `workbook.close`, `workbook.list_sheets`, `workbook.metadata`, `workbook.recalculate`, `workbook.capabilities_report`, `workbook.list_handles`
+- **Range I/O (4)** — `range.get`, `range.set`, `range.clear`, `range.set_style`
+- **Sheet management & presentation (9)** — `sheet.create`, `sheet.delete`, `sheet.rename`, `sheet.merged_regions`, `sheet.set_format`, `sheet.insert_rows`, `sheet.delete_rows`, `sheet.insert_cols`, `sheet.delete_cols`
+- **Tables (2)** — `table.list`, `table.get`
+- **Named ranges (2)** — `named_range.list`, `named_range.get`
+- **VBA, read-only (2)** — `vba.list_modules`, `vba.get_module`
+
+Highlights: in-memory open/create behind a session handle; typed-cell reads that separate a real value from an uncomputed formula; **headless formula recalculation** (~280 of Excel's functions evaluated in place — uncommon for an agent-drivable spreadsheet tool); native cell styling and sheet presentation through a single POI writer (no second-writer corruption); atomic temp-file-and-rename saves.
+
+## Limitations
+
+- **VBA is read-only.** Modules and their source can be listed and extracted; macros cannot be created, edited, or executed.
+- **Modern / dynamic-array functions are not recalculated.** The `LAMBDA` family, dynamic-array spills (`FILTER`, `SORT`, `UNIQUE`, `XLOOKUP` spill), `LET`, linked data types, `IMAGE`, `PY`, and ~220 of Excel's 500+ functions are not evaluated by the headless engine. Their formula text is preserved, but the cached result stays stale until Excel/LibreOffice reopens the file. Call `workbook.capabilities_report` to see which cells are affected before editing.
+- **No Power Query / DAX / data model / pivot tables.** Not introspected or editable.
+- **No charts or conditional-formatting authoring.** Merged regions and data validation are read-only (reported, not writable).
+- **Rich / linked data types are preserve-only.** Stock/geo and other rich-data parts survive a round-trip but cannot be read or modified.
+- **`.xlsb` (binary) is rejected at open.** `.xlsx`, `.xlsm`, `.xls` are supported; styling is `.xlsx`/`.xlsm` only.
 
 ## Runtime
 

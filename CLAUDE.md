@@ -48,10 +48,20 @@ Every asset shipped from this repo is identified by the canonical tuple
 | `publisher` | `skaile.yaml` at the repo root | `skaile-ai` for everything here |
 | `kind` | `<domain>/skills/<name>/SKILL.md` (skill), `<domain>/<domain>.bundle.yaml` (bundle) | filename convention |
 | `name` | SKILL.md frontmatter `name:` (must match parent directory) | per-asset |
-| `version` | `git describe --tags --abbrev=0` of the resolved commit | repo-wide; cut a tag to release |
+| `version` | `git describe --tags --abbrev=0` of the resolved commit (repo-wide default); a per-asset frontmatter `version:` **overrides** it for that asset | cut a tag to release, or pin per-asset (see below) |
 
-Per-asset `metadata.version:` in SKILL.md frontmatter is **ignored** by the
-workspaces parser. Do not add it back.
+A per-asset version **may** be declared in SKILL.md frontmatter — as top-level
+`version:` **or** `metadata.version:`. The workspaces parser reads both
+(`packages/workspaces/core/src/manifest.ts` → `extractVersion()` checks
+top-level then `metadata.version`; `CommonMetadataSchema` in
+`types/.../manifests/_shared.ts` allows `metadata.version`), uses it for the
+catalog entry and flow-node version pins, and it **overrides** the repo-wide
+git-tag version for that asset (`core/src/publish-manifest.ts`: "`version:`
+overrides the manifest-level version"). Prefer `metadata.version` for skaile
+extensions (the agentskills.io convention the parser follows). Platform MCPs
+under `skaile-platform/` source their version from `pom.xml` and mirror it into
+`metadata.version` (SKILL.md) and `version` (MCP.md) — see
+`skaile-platform/DOMAIN.md`.
 
 Consumer projects pull from this repo via a `sources:` entry in their own
 `skaile.yaml`:
