@@ -2,14 +2,14 @@
 name: "bug-fix"
 description: "[skaile-development] End-to-end work-item orchestrator for the Skaile
   platform. Drives any single work item — bug, feature, UI fix, chore, or issue —
-  from 'just reported' to 'PR is open' in one flow: isolated worktree + branch, files
-  the item at platform/issues/<ID>.md (status=testing, owner=current git user, bumps
-  nextIds in categories.yaml), investigates, writes an uncommitted plan, dispatches
-  a fresh agent to implement, dispatches a fresh agent to review, fixes valid review
-  concerns, cleans up the plan, commits + pushes the branch, removes the worktree,
-  opens a PR into main, and reports the PR link. Use when the user reports a platform
-  bug, requests a small feature, asks for a UI fix or chore, and wants the whole cycle
-  done in one shot."
+  from 'just reported' to 'PR is open' in one flow: opens a GitHub issue on
+  skaile-ai/platform (category label, assigned to the current gh user), creates an
+  isolated worktree + branch named after the issue number, investigates, writes an
+  uncommitted plan, dispatches a fresh agent to implement, dispatches a fresh agent
+  to review, fixes valid review concerns, cleans up the plan, commits + pushes the
+  branch, removes the worktree, opens a PR into main that closes the issue, and
+  reports the PR link. Use when the user reports a platform bug, requests a small
+  feature, asks for a UI fix or chore, and wants the whole cycle done in one shot."
 metadata:
   tags:
   - "bug-fix"
@@ -20,7 +20,7 @@ metadata:
   - "platform"
   - "orchestrator"
   - "worktree"
-  - "issues"
+  - "github-issues"
   - "pr"
   - "skaile-development"
   source: "MERGED"
@@ -29,8 +29,8 @@ metadata:
     dialog:
     - id: "description"
       label: "Describe the work item (bug, feature, UI fix, chore, or issue) — plain
-        language; the skill refines the wording, picks the category, and files it
-        without asking"
+        language; the skill refines the wording, picks the category, and opens the
+        GitHub issue without asking"
       type: "text"
       required: true
     - id: "category"
@@ -70,40 +70,58 @@ metadata:
 
 > Despite the historical name, this skill handles **any single platform work item** —
 > bug, feature, UI fix, chore, or issue. The workflow is identical across categories;
-> only the issue prefix, branch prefix, and commit type vary. Trigger it whenever you
+> only the GitHub label, branch prefix, and commit type vary. Trigger it whenever you
 > have one item that fits a single PR cycle.
+
+## Tracking moved to GitHub Issues
+
+Work items are tracked as **GitHub issues on `skaile-ai/platform`** — not in the old
+`platform/issues/` markdown folder. That folder was a standalone file-backed tracker
+(the local Kanban app reads/writes it directly via the filesystem); it has **no sync
+to GitHub in either direction**. Its contents were bulk-migrated into GitHub Issues
+in a one-time cutover, after which the folder is **legacy/read-only**. This skill
+therefore:
+
+- **Opens a real GitHub issue** via `gh issue create` and uses the **native GitHub
+  issue number** (`#836`) as the work item's identity — for the branch name, the
+  commit reference, and the PR.
+- **Never writes** `platform/issues/<ID>.md`, **never bumps** `nextIds` in
+  `platform/issues/categories.yaml`, and **never allocates** a `<PREFIX>-<n>` id.
+  The category is carried as a **GitHub label**, not as an id prefix.
+- Lets GitHub assign the number atomically, so there is **no same-id collision** to
+  resolve and **no counter** to keep monotonic.
 
 ## Overview
 
 Drives a single platform work item from "user just reported it" to "PR is open" without
 leaving the main session dirty. The skill works exclusively against the **`platform/`
-submodule** — it creates a worktree of that submodule, branches off main, files the item
-at `platform/issues/<ID>.md` (and bumps the counter in `platform/issues/categories.yaml`),
-investigates, plans, dispatches implementation + review subagents, lands the change on the
-branch, cleans up, and opens a PR on `skaile-ai/skaile-platform`.
+submodule** — it opens a GitHub issue, creates a worktree of that submodule, branches
+off main, investigates, plans, dispatches implementation + review subagents, lands the
+change on the branch, cleans up, and opens a PR on `skaile-ai/platform` that closes the
+issue.
 
 | Phase | What Happens |
 |-------|--------------|
-| 0 | Read inputs, resolve current git user, auto-classify category, allocate next ID from `nextIds` |
-| 1 | Pre-flight platform main, derive branch name |
-| 2 | Create the worktree + branch (outside `platform/` tree, branched from `origin/main`) |
-| 2b | Stage `issues/<full_id>.md` + `categories.yaml` bump **on the branch** (not on main) |
-| 3 | Investigate: load relevant files, identify root cause (bugs/issues/ui) or design surface (features/chore) |
-| 4 | Write an **uncommitted** plan markdown into the worktree |
-| 5 | Dispatch a fresh subagent to implement the plan (gets only the plan + context — no parent history) |
-| 6 | Dispatch a fresh subagent to review the diff |
-| 7 | Triage review findings, apply valid fixes inline |
-| 8 | Delete the plan file; commit (work + `issues/<full_id>.md` + `categories.yaml` together); push the branch |
-| 9 | Fetch latest `origin/main`, merge it into the branch, resolve conflicts, re-push |
+| 0 | Read inputs, verify `gh` auth, resolve git user (for attribution), auto-classify category |
+| 1 | Pre-flight platform main (fetch + clean-tree check) |
+| 2 | Refine the description; open the GitHub issue → capture issue **number** + URL |
+| 3 | Derive branch name from the issue number; create the worktree + branch (off `origin/main`) |
+| 4 | Investigate: load relevant files, identify root cause (bugs/issues/ui) or design surface (features/chore) |
+| 5 | Write an **uncommitted** plan markdown into the worktree |
+| 6 | Dispatch a fresh subagent to implement the plan (gets only the plan + context — no parent history) |
+| 7 | Dispatch a fresh subagent to review the diff |
+| 8 | Triage review findings, apply valid fixes inline |
+| 9 | Delete the plan file; lint; commit (work only); push the branch |
+| 9b | Fetch latest `origin/main`, merge it into the branch, resolve conflicts, re-push |
 | 10 | Remove the worktree |
-| 11 | Open a PR against `main` and report the link |
+| 11 | Open a PR against `main` that `Closes #<number>`, and report the link |
 
 ## When to Use
 
 - The user describes a platform work item: a bug, a missing capability ("issue"), a cosmetic
   fix ("UI"), a maintenance task ("chore"), or a small/medium new feature
-- You want the item to land at `platform/issues/<ID>.md` (with a refined description) and
-  reach a PR in one continuous flow
+- You want the item filed as a GitHub issue (with a refined description) and to reach a PR
+  in one continuous flow
 - The item is contained enough that one implementation pass + one review pass is plausible —
   not a multi-week refactor
 
@@ -128,64 +146,57 @@ approve those.
 Only stop and ask when continuing would require a judgment call the evidence cannot
 settle on its own. The complete list of legitimate stop-and-ask gates is:
 
-1. **`git config user.name` is unset** — the `owner` frontmatter would be empty.
+1. **`gh` is not authenticated** — the GitHub issue cannot be opened. Tell the user to run `gh auth login`.
 2. **Working tree is dirty** — would either contaminate the branch or block the worktree creation; the user must decide.
-3. **Investigation inconclusive** — root cause / design surface cannot be located; report findings and stop.
+3. **Investigation inconclusive** — root cause / design surface cannot be located; report findings (the GitHub issue stays open, labelled `needs-info`) and stop.
 4. **A review finding is "apply-large"** — spawning a second implementation subagent is
    a meaningful escalation; confirm the scope first.
 5. **A merge conflict on source code is genuinely mutually-exclusive** — the change and
    main's incoming change cannot both stand; the user must pick.
 6. **Push fails for a non-trivial reason** — e.g., branch was rewritten remotely.
 
-A **same-ID add/add conflict on `issues/<full_id>.md`** (both branches allocated the
-same ID) is NOT a stop-and-ask gate — resolve it automatically by re-allocating *your*
-work item to the next fresh ID: take main's `issues/<full_id>.md` verbatim, `git mv`
-your item to the new ID (update the `id:` frontmatter + filename), bump `nextIds` to
-`max(HEAD, main) + 1` for that category, and update the PR title to the new ID. Pushed
-commit messages keep the original ID as historical references (no force-push).
-
 Everything else — refining the description, picking the category, choosing the
 branch slug, writing the plan, dispatching the implementer, applying nit-level review
 findings, deferring out-of-scope findings, merging main when one side is a strict
-subset, re-allocating a colliding work-item ID, opening the PR — you do silently. Print short progress notes (`> "Filing as
-B-84 (auto-classified as bug)"`, `> "Plan written, dispatching implementer..."`) but
-do NOT solicit confirmation.
+subset, opening the issue, opening the PR — you do silently. Print short progress notes
+(`> "Opened #836 (auto-classified as bug)"`, `> "Plan written, dispatching
+implementer..."`) but do NOT solicit confirmation.
 
 The user can always interrupt; they will if they want to redirect.
 
 ---
 
-ROLE  Platform work-item orchestrator for the `platform/` submodule. Owns the full cycle: worktree → `issues/<full_id>.md` + `categories.yaml` bump → plan → implement → review → triage → commit → push → cleanup → PR. Handles any category (bug / issue / ui / chore / feature) identically; the category only influences the ID prefix, branch prefix, and commit type.
+ROLE  Platform work-item orchestrator for the `platform/` submodule. Owns the full cycle: GitHub issue → worktree → plan → implement → review → triage → commit → push → cleanup → PR. Handles any category (bug / issue / ui / chore / feature) identically; the category only influences the GitHub label, branch prefix, and commit type.
 
 READS
-  platform/issues/categories.yaml                 — category registry + `nextIds` counter
-  platform/issues/CLAUDE.md                       — tracker invariants (per-file format, nextIds rules)
-  platform/issues/<*.md>                          — existing items (only when nextIds fallback is needed, or to avoid duplicate filenames)
   platform/CLAUDE.md                              — platform architecture, conventions
   platform/<files-relevant-to-work-item>          — for investigation
   skaile-dev/CLAUDE.md                            — monorepo conventions
   skills/git/references/branch_naming.md          — branch naming
   skills/git/references/commit-spec.md            — commit message format for platform submodule
-  git config user.name                            — for the `owner` frontmatter field
+  gh label list --repo skaile-ai/platform         — to map category → an existing label
+  gh issue list --repo skaile-ai/platform         — optional: detect an obvious duplicate before filing
+  git config user.name                            — for human attribution in the issue body (soft, optional)
 
-WRITES (in the worktree only — nothing ever goes to platform main outside of a merged PR)
-  <worktree>/issues/<full_id>.md                  — new work-item file (frontmatter + body), staged on the feature branch
-  <worktree>/issues/categories.yaml               — `nextIds[<category_id>]` incremented by 1, staged on the feature branch
+WRITES
+  GitHub issue on skaile-ai/platform              — opened up front (category label + `agent` label, assigned to @me)
   <worktree>/<plan-file>.md                       — uncommitted plan (deleted before the final commit)
   <worktree>/<target-source-files>                — the actual fix / implementation
-  PR on skaile-ai/skaile-platform                 — opened at the end
+  PR on skaile-ai/platform                         — opened at the end, body contains `Closes #<number>`
 
 NEVER WRITES
-  platform/issues.md                              — legacy snapshot, superseded by `platform/issues/`. The folder is the source of truth.
+  platform/issues/<*.md>                          — the markdown issue folder is decommissioned (no GitHub sync). Tracking lives in GitHub Issues now.
+  platform/issues/categories.yaml                 — no `nextIds` bump, no counter mutation; GitHub assigns numbers.
+  platform/issues.md                              — legacy snapshot, superseded long ago.
 
 MUST  refine the user's description before filing it — 1-3 sentences for bug/issue/ui/chore (up to 5 short sentences for features that need framing), technical but specific, no marketing fluff
 MUST  auto-classify the category (bug / issue / ui / chore / feature) from the description without asking the user; the `category` user input only overrides the auto-classification
-MUST  validate the resolved category exists in `platform/issues/categories.yaml` before proceeding
-MUST  resolve the next free ID from `nextIds[<category_id>]` in `categories.yaml` (fallback: max numeric suffix of `platform/issues/<PREFIX>-*.md` + 1 when the counter is missing)
-MUST  set `status: testing` and `owner: <git config user.name>` in the new file's frontmatter
-MUST  increment `nextIds[<category_id>]` in `categories.yaml` by 1 in the same staged set as the new work-item file — the high-water mark must stay monotonic
-MUST  write the new `issues/<full_id>.md` and the `categories.yaml` bump INSIDE the worktree, on the feature branch — never commit them to platform main directly; both reach main only when the PR is merged
-MUST  create the worktree at <skaile-dev-root>/.worktrees/platform-<id> (gitignored) — outside platform/ so the parent checkout stays clean, but INSIDE the skaile-dev tree so dispatched subagents auto-load the platform CLAUDE.md (+ nested per-package CLAUDE.md) via on-demand memory discovery; a /tmp path is outside the tree and the subagent never sees platform conventions (e.g. the ≤3-line comment rule)
+MUST  verify `gh auth status` succeeds before attempting to open the issue
+MUST  open the work item as a GitHub issue on `skaile-ai/platform` via `gh issue create`, capturing the returned issue **number** and URL
+MUST  apply the category's GitHub label (bug→`bug`, issue→`issue`, ui→`ui`, chore→`chore`, feature→`enhancement`) plus the `agent` label, and assign the issue to `@me`
+MUST  derive the work item's identity from the GitHub issue **number** (`#<n>`) — used in the branch name, the commit title reference, and the PR
+MUST  open the GitHub issue BEFORE creating the worktree (the branch name needs the number), but AFTER the clean-tree pre-flight (so a dirty tree never leaves a dangling issue)
+MUST  create the worktree at <skaile-dev-root>/.worktrees/platform-<number> (gitignored) — outside platform/ so the parent checkout stays clean, but INSIDE the skaile-dev tree so dispatched subagents auto-load the platform CLAUDE.md (+ nested per-package CLAUDE.md) via on-demand memory discovery; a /tmp path is outside the tree and the subagent never sees platform conventions (e.g. the ≤3-line comment rule)
 MUST  write the plan file in the worktree and treat it as ephemeral — never commit it, delete it before the final commit
 MUST  dispatch implementation as a fresh subagent with a self-contained prompt (MVC: paste the plan + relevant file paths + acceptance criteria; do NOT pass parent conversation)
 MUST  dispatch review as a fresh subagent that only sees the diff + review focus — not the plan
@@ -193,21 +204,16 @@ MUST  triage review findings explicitly: each finding gets a verdict (apply / de
 MUST  apply valid findings inline in the orchestrator (no second implementation dispatch unless the finding is large enough to warrant a sub-plan)
 MUST  push the branch to origin before opening the PR (worktree-only commits are local-only)
 MUST  fetch origin/main and merge it into the branch (inside the worktree) BEFORE removing the worktree — keeps the PR diff clean and resolves any conflicts while the full local context is available
-MUST  resolve merge conflicts per the policy table (categories.yaml blends `nextIds` as `max(HEAD, main)`; generated files / lockfiles take theirs; source-code in the change's blast radius is blended manually; same-ID add/add on `issues/<full_id>.md` escalates to the user)
+MUST  resolve merge conflicts per the policy table (generated files / lockfiles take theirs; source-code in the change's blast radius is blended manually; genuinely mutually-exclusive source conflicts escalate to the user)
 MUST  re-push the branch after the main-sync merge completes
 MUST  remove the worktree only after both the initial push AND the post-sync push succeed — never before
-MUST  use `gh pr create --base main --head <branch>` from the platform repo to open the PR
+MUST  use `gh pr create --base main --head <branch>` from the platform repo to open the PR, with `Closes #<number>` in the body so merging auto-closes the issue
 MUST  pick the conventional-commit type (and the matching PR title prefix) from the category: bug/issue/ui → `fix`, chore → `chore`, feature → `feat`
-MUST  report back to the user with: full_id, branch name, PR URL, 1-2 line summary of what changed, any deferred review findings
+MUST  report back to the user with: issue number + URL, branch name, PR URL, 1-2 line summary of what changed, any deferred review findings
 NEVER  modify the main platform/ checkout while the worktree exists
-NEVER  commit the new `issues/<full_id>.md` or the `categories.yaml` bump to platform main directly — both live on the branch and travel via the PR
-NEVER  read, write, or reference `platform/issues.md` (the legacy snapshot). The `platform/issues/` folder is the source of truth.
+NEVER  write to `platform/issues/` (the decommissioned markdown folder), bump `nextIds`, or allocate a `<PREFIX>-<n>` id — tracking is GitHub Issues now
+NEVER  read, write, or reference `platform/issues.md` (the legacy snapshot)
 NEVER  ask the user to confirm the refined description, the category, the branch name, the plan, or the triage table — those are decisions you make; the user gave you the work item and expects a PR back
-NEVER  derive the `owner` field from anything other than `git config user.name` — never from system-prompt userEmail, GitHub handle, gitStatus "Git user:" line, conversation context, or the Claude account. Wrong-attribution is a silent data-quality bug that strangers downstream will inherit.
-NEVER  reset, decrement, or skip past free counters in `nextIds` — the only allowed mutation is incrementing `nextIds[<category_id>]` by 1 in the same set as the new file
-NEVER  rename the new `issues/<full_id>.md` file or mutate its `id:` frontmatter field after creation (filename and id field must match)
-NEVER  commit the plan file
-NEVER  pass the parent conversation transcript to the implementation or review subagent — both must be fresh and self-contained
 NEVER  open a PR before the branch is pushed
 NEVER  remove the worktree if `git -C <worktree> status` shows unpushed commits
 NEVER  force-push, rewrite history, or commit to platform main from inside the worktree
@@ -222,35 +228,32 @@ STEP 0: Resolve inputs
   - Read `complexity` (default "standard")
   - Read `category` (optional override)
 
-  Resolve the owner name — STRICTLY from `git config`, nothing else:
+  Verify GitHub auth — the issue cannot be opened without it:
+    $ gh auth status
+    IF it reports "not logged in" / fails:
+      STOP: "gh is not authenticated. Run `gh auth login` (with repo + issue
+             scope on skaile-ai/platform) before running this skill."
+      (Legitimate stop-and-ask gate #1.)
+
+  Resolve the human's name for attribution in the issue body (SOFT — optional):
     $ git -C <skaile-dev-root>/platform config user.name → owner_name
-    IF owner_name is empty:
-      $ git config --global user.name → owner_name
-    IF owner_name is STILL empty:
-      STOP: "git config user.name is not set in platform/ or global config.
-             Set it (`git -C platform config user.name '<Full Name>'`) before
-             running this skill — the owner frontmatter field requires a real name."
+    IF empty: $ git config --global user.name → owner_name
+    IF still empty: leave owner_name unset (omit the attribution footer).
 
-  **owner_name MUST come from `git config user.name` only.** Do NOT use:
-  - any `userEmail` shown in the agent's system prompt or session context
-  - any GitHub username from `gh auth status` or remote URLs
-  - any "Git user: X" line from gitStatus context
-  - any name inferred from the conversation
-  - the Claude account, the API key holder, or the system prompt author
-
-  The user running the skill on their machine has `git config user.name`
-  set to THEIR own name. That is the ground truth. Other signals are
-  ambient noise and will silently mis-attribute the work item to the wrong person.
+  This name is only a courtesy footer in the issue body ("Filed by …"). The
+  GitHub **assignee** is `@me` (the authenticated gh account — the actual actor
+  on GitHub). There is no longer a free-text `owner` field to get wrong, so the
+  old hard gate on `git config user.name` is gone.
 
   Auto-classify the category from `description` (do NOT ask the user):
 
-  | Signal in description | category | category id | ID prefix |
-  |-----------------------|----------|-------------|-----------|
-  | Broken behavior, error message, data loss, security, wrong result, crash, regression in existing functionality | Bug | `bug` | `B-` |
-  | Existing functionality is incomplete; "should also be able to X"; design-level gap with no current breakage | Issue | `issue` | `I-` |
-  | Purely visual: layout, spacing, color, font, alignment, tooltip wording, hover state, icon | UI | `ui` | `UI-` |
-  | Maintenance: dependency bump, refactor with no behavior change, code cleanup, infra/tooling adjustment | Chore | `chore` | `C-` |
-  | Genuinely new capability: a screen / endpoint / data shape / interaction that did not exist before | Feature | `feature` | `F-` |
+  | Signal in description | category | GitHub label |
+  |-----------------------|----------|--------------|
+  | Broken behavior, error message, data loss, security, wrong result, crash, regression in existing functionality | Bug | `bug` |
+  | Existing functionality is incomplete; "should also be able to X"; design-level gap with no current breakage | Issue | `issue` |
+  | Purely visual: layout, spacing, color, font, alignment, tooltip wording, hover state, icon | UI | `ui` |
+  | Maintenance: dependency bump, refactor with no behavior change, code cleanup, infra/tooling adjustment | Chore | `chore` |
+  | Genuinely new capability: a screen / endpoint / data shape / interaction that did not exist before | Feature | `enhancement` |
 
   Tie-breakers (apply in this order):
   - Broken behavior → `bug` (trumps visual concern)
@@ -263,56 +266,15 @@ STEP 0: Resolve inputs
   Otherwise use the auto-classification silently and print one line:
     > "Auto-classified as <category> (<one-word reason>)."
 
-  Validate against the registry:
-    Read `platform/issues/categories.yaml`.
-    IF the chosen `category_id` is not present in the `categories` list:
-      STOP: "categories.yaml has no entry with id=<category_id>. Add the category
-             there first (see platform/issues/CLAUDE.md § To add a new category)."
+  Confirm the label exists (labels are pre-created on the repo):
+    $ gh label list --repo skaile-ai/platform | grep -i '<label>'
+    IF the mapped label is missing:
+      File the issue WITHOUT that label (gh errors on unknown labels) and note it
+      in the final report — do not invent a label.
 
-# ── Phase 1: Refine Description + Allocate ID ─────────────────────
+# ── Phase 1: Pre-flight against platform main ─────────────────────
 
-STEP 1: Refine the description
-  Treat the user's input as a draft, not the final wording.
-  Produce a refined description that:
-  - Is 1-3 sentences total (hard cap for bug / issue / ui / chore — up to 5 short
-    sentences acceptable for features that need framing)
-  - Names the affected surface explicitly (e.g., "workspace chat panel", "project settings page")
-  - States the observed behavior and, if relevant, the expected behavior — or, for
-    features, names the new behavior the work item introduces
-  - Drops filler ("I noticed that", "sometimes maybe")
-  - Preserves any user-stated constraint verbatim (e.g., "open question for Peter: <question>") — wrap such constraints in **bold** so they are visually distinct
-
-  Examples (style reference — adapt to the actual work item):
-  - Bug: "Long inline-code URLs in agent chat messages don't wrap when they contain no `-`, causing horizontal scroll on narrow chat panes."
-  - Issue: "Project Settings tabs lose data when the URL uses the project slug instead of the UUID — tabs query by id only. **open question for Peter**: should slug-form URLs be canonical?"
-  - UI: "Sidebar project tree doesn't refresh after a session is deleted — the deleted row remains visible until manual reload."
-  - Chore: "Bump `@nestjs/common` from 10.4.x to 10.5.x and adapt the two deprecation warnings surfaced in the test logs."
-  - Feature: "Turn all top-level screens (admin panes, project settings, session settings) into tabs in the workspace header so navigation stays in-context."
-
-  **Do NOT ask the user to approve the wording.** Write it directly. The user will see
-  it as the body of `issues/<full_id>.md` and in the PR body — minor wording tweaks can
-  be made later by editing the file. Only stop if the user's input is too vague to refine
-  (in which case ask one targeted clarification question, not a yes/no on a proposal).
-
-STEP 2: Pick the next free ID from `categories.yaml`
-  Read `platform/issues/categories.yaml`.
-  - Look up the `prefix` from the matching entry in the `categories` list (e.g.
-    `bug → B`, `feature → F`).
-  - Look up `nextIds[<category_id>]` — the numeric counter.
-    IF the counter is present: `n = nextIds[<category_id>]`.
-    ELSE (counter missing): scan `platform/issues/<PREFIX>-*.md`, take
-    `max(numeric suffix) + 1`.
-  - `full_id = "<PREFIX>-<n_zero_padded_to_2_digits>"` e.g. `B-84`, `F-48`, `UI-50`.
-
-  REMEMBER to increment `nextIds[<category_id>]` from `n` to `n+1` when staging
-  `categories.yaml` in STEP 5b — the counter is a monotonic high-water mark, and
-  STEP 5b commits the bump in the same staged set as the new file.
-
-EMIT [bug-fix] id_allocated id=<full_id> owner=<owner_name>
-
-# ── Phase 2: Pre-flight + Branch + Worktree ───────────────────────
-
-STEP 3: Pre-flight against platform main
+STEP 1: Pre-flight (BEFORE opening the issue — a dirty tree must not leave a dangling issue)
   Working dir: <skaile-dev-root>/platform
 
   $ cd <skaile-dev-root>/platform
@@ -325,6 +287,67 @@ STEP 3: Pre-flight against platform main
 
   We do NOT need to checkout main here — the worktree below branches off
   origin/main regardless of which branch the parent checkout currently points at.
+
+# ── Phase 2: Refine Description + Open the GitHub Issue ────────────
+
+STEP 2: Refine the description
+  Treat the user's input as a draft, not the final wording.
+  Produce a refined description that:
+  - Is 1-3 sentences total (hard cap for bug / issue / ui / chore — up to 5 short
+    sentences acceptable for features that need framing)
+  - Names the affected surface explicitly (e.g., "workspace chat panel", "project settings page")
+  - States the observed behavior and, if relevant, the expected behavior — or, for
+    features, names the new behavior the work item introduces
+  - Drops filler ("I noticed that", "sometimes maybe")
+  - Preserves any user-stated constraint verbatim (e.g., "open question for Peter: <question>") — wrap such constraints in **bold** so they are visually distinct
+
+  Also derive a concise **issue title** (≤ 72 chars) — an imperative one-liner
+  naming the surface and the change. The full refined description is the issue body.
+
+  Examples (style reference — adapt to the actual work item):
+  - Bug: "Long inline-code URLs in agent chat messages don't wrap when they contain no `-`, causing horizontal scroll on narrow chat panes."
+  - Issue: "Project Settings tabs lose data when the URL uses the project slug instead of the UUID — tabs query by id only. **open question for Peter**: should slug-form URLs be canonical?"
+  - UI: "Sidebar project tree doesn't refresh after a session is deleted — the deleted row remains visible until manual reload."
+  - Chore: "Bump `@nestjs/common` from 10.4.x to 10.5.x and adapt the two deprecation warnings surfaced in the test logs."
+  - Feature: "Turn all top-level screens (admin panes, project settings, session settings) into tabs in the workspace header so navigation stays in-context."
+
+  **Do NOT ask the user to approve the wording.** Write it directly. The user will see
+  it as the GitHub issue body and in the PR — minor wording tweaks can be made later by
+  editing the issue. Only stop if the user's input is too vague to refine (in which case
+  ask one targeted clarification question, not a yes/no on a proposal).
+
+  Optional duplicate check (cheap, do NOT block on it):
+    $ gh issue list --repo skaile-ai/platform --state open --search "<2-3 key terms>"
+    IF an obviously-identical open issue exists, mention it in the final report —
+    but still proceed unless the user said otherwise.
+
+STEP 3: Open the GitHub issue
+  Build the issue body: the refined description, plus an optional attribution footer:
+
+    <refined description from STEP 2 — free-form markdown, may contain code,
+    links, multiple paragraphs, **bolded user-stated open questions**>
+
+    ---
+    Filed via the bug-fix skill[ by <owner_name>].   ← omit "by …" if owner_name unset
+
+  Create it (capture BOTH the number and the URL from gh output):
+
+    $ gh issue create \
+        --repo skaile-ai/platform \
+        --title "<issue title from STEP 2>" \
+        --body "<issue body above>" \
+        --label <category_label> --label agent \
+        --assignee @me
+
+  `gh issue create` prints the new issue URL (e.g. `…/platform/issues/836`).
+  Parse the trailing number → `issue_number` (e.g. `836`). Keep `issue_url` too.
+
+  Print a one-line status:
+    > "Opened #<issue_number> (<category>, labels: <label>,agent, assigned @me) — <issue_url>."
+
+EMIT [bug-fix] issue_opened number=<issue_number> url=<issue_url> category=<category>
+
+# ── Phase 3: Branch + Worktree ────────────────────────────────────
 
 STEP 4: Branch name
   Derive silently:
@@ -339,12 +362,12 @@ STEP 4: Branch name
     chore            → "chore/"
     feature          → "feat/"
 
-  branch_name = "<branch_prefix><full_id_lowercase>-<slug>"
+  branch_name = "<branch_prefix><issue_number>-<slug>"
     Examples:
-      "fix/b-84-chat-link-wrap"
-      "fix/ui-49-sidebar-refresh-on-delete"
-      "chore/c-04-nestjs-bump"
-      "feat/f-48-screens-as-tabs"
+      "fix/836-chat-link-wrap"
+      "fix/842-sidebar-refresh-on-delete"
+      "chore/848-nestjs-bump"
+      "feat/851-screens-as-tabs"
 
 STEP 5: Worktree
   # INSIDE the skaile-dev tree (NOT /tmp), gitignored via skaile-dev/.gitignore
@@ -352,62 +375,15 @@ STEP 5: Worktree
   # auto-load the platform CLAUDE.md (+ nested per-package CLAUDE.md) through
   # on-demand memory discovery — a /tmp path sits outside the tree and the
   # subagent loads no platform conventions at all (e.g. the ≤3-line comment rule).
-  worktree_path = "<skaile-dev-root>/.worktrees/platform-<full_id_lowercase>"
+  worktree_path = "<skaile-dev-root>/.worktrees/platform-<issue_number>"
 
   $ cd <skaile-dev-root>/platform
   $ git worktree add <worktree_path> -b <branch_name> origin/main
   > "Worktree created at <worktree_path> on branch <branch_name> (based on origin/main)."
 
-  All subsequent file operations until Phase 9 happen INSIDE <worktree_path>.
+  All subsequent file operations until Phase 9b happen INSIDE <worktree_path>.
 
 EMIT [bug-fix] worktree_ready path=<worktree_path> branch=<branch_name>
-
-# ── Phase 3b: File the Work-Item File on the Branch ───────────────
-
-STEP 5b: Write `issues/<full_id>.md` and bump `categories.yaml` inside the worktree
-  Both files land on the feature branch and travel to main only when the
-  PR is merged. They do NOT go to platform main directly — keeps main free
-  of work items for changes that never ship.
-
-  $ cd <worktree_path>
-
-  Safety check: `issues/<full_id>.md` must not already exist on the branch
-  (the worktree was just created from `origin/main`, so this only fails if
-  someone allocated the same ID concurrently or `nextIds` was incorrect).
-    IF `ls issues/<full_id>.md` returns the file → STOP:
-      "issues/<full_id>.md already exists at HEAD — re-allocate the ID by
-       re-reading categories.yaml or scanning the directory."
-
-  Create `issues/<full_id>.md` with this exact shape (YAML frontmatter + body):
-    ---
-    id: <full_id>
-    category: <category_id>
-    status: testing
-    owner: <owner_name>
-    ---
-
-    <refined description from STEP 1, verbatim, as the body — free-form
-    markdown, may contain code, links, multiple paragraphs, **bolded
-    user-stated open questions**>
-
-  Edit `issues/categories.yaml`:
-    - Increment `nextIds.<category_id>` from `<n>` to `<n+1>`.
-    - Do not change the `categories` list or the `statuses` list.
-    - Do not touch other categories' counters.
-    - Do not reset or decrement anything.
-
-  STAGE both files but do NOT commit yet — they land in the same commit as
-  the actual work changes at the end (Phase 9). This keeps the branch to a
-  single commit when the work is small. (If the work grows, the work-item
-  file + bump can be split into their own commit during Phase 9 — but
-  always one commit per logical unit.)
-
-  $ git add issues/<full_id>.md issues/categories.yaml
-
-  Print a one-line status:
-    > "Filed <full_id> (<category>, status=testing, owner=<owner_name>) on branch <branch_name>."
-
-EMIT [bug-fix] issue_filed id=<full_id> category=<category_id> location=branch
 
 # ── Phase 4: Investigate ─────────────────────────────────────────
 
@@ -434,23 +410,28 @@ STEP 6: Investigate
     - `chosen_approach`: which design candidate to apply, with one-line justification
 
   IF the root cause / design surface cannot be located with confidence:
-    REPORT to user: "Investigation inconclusive. <what I checked>. <what would help>."
-    STOP — do not proceed to plan.
+    Add the `needs-info` label to the issue (it stays open as a real backlog item):
+      $ gh issue edit <issue_number> --repo skaile-ai/platform --add-label needs-info
+    Remove the worktree (no commits were made) to leave the tree clean:
+      $ cd <skaile-dev-root>/platform && git worktree remove <worktree_path> --force
+    REPORT to user: "Investigation inconclusive. Opened #<issue_number> (labelled
+      needs-info). <what I checked>. <what would help>."
+    STOP — do not proceed to plan. (Legitimate stop-and-ask gate #3.)
 
 EMIT [bug-fix] investigated note="<short>"
 
 # ── Phase 5: Write Plan (uncommitted) ─────────────────────────────
 
 STEP 7: Write the plan
-  plan_path = "<worktree_path>/<full_id>-plan.md"
+  plan_path = "<worktree_path>/<issue_number>-plan.md"
 
   Write a plan with this structure:
 
   ```
-  # <full_id> — <work-item-title> — Implementation Plan
+  # #<issue_number> — <work-item-title> — Implementation Plan
 
   ## Summary
-  <refined description from STEP 1, verbatim>
+  <refined description from STEP 2, verbatim>
 
   ## Category
   <bug | issue | ui | chore | feature>
@@ -494,16 +475,16 @@ STEP 8: Dispatch implementation
   Build an MVC prompt for the implementer. The prompt MUST be self-contained:
 
   ```
-  # Task: Implement <full_id> in the platform submodule
+  # Task: Implement #<issue_number> in the platform submodule
 
   ## Working Directory
   <worktree_path>
 
   All file paths below are relative to that directory. The branch
-  <branch_name> is already checked out — make commits there.
+  <branch_name> is already checked out — make changes there.
 
   ## Work Item
-  <refined description from STEP 1>
+  <refined description from STEP 2>
 
   ## Category
   <bug | issue | ui | chore | feature>
@@ -533,10 +514,9 @@ STEP 8: Dispatch implementation
     orchestrator will commit after review.
   - Do NOT push the branch.
   - Do NOT open a PR.
-  - Do NOT touch `issues/<full_id>.md` or `issues/categories.yaml` — both
-    are already staged in the worktree; the orchestrator will commit them
-    together with your changes at the end. NEVER read or write
-    `platform/issues.md` (legacy snapshot).
+  - Do NOT write anything under `platform/issues/` — that markdown folder is
+    decommissioned (tracking is GitHub Issues now). The orchestrator already
+    opened the GitHub issue; you only touch source + tests.
 
   ## Output
   When done, report:
@@ -548,7 +528,7 @@ STEP 8: Dispatch implementation
   DISPATCH via Agent tool:
     Agent({
       subagent_type: "implement",   // or "general-purpose" if implement is not appropriate for this scope
-      description: "Implement <full_id>",
+      description: "Implement #<issue_number>",
       prompt: "<the MVC prompt above>"
     })
 
@@ -574,7 +554,7 @@ STEP 9: Dispatch review
   <worktree_path>
 
   ## Context
-  This worktree contains the implementation of <full_id> (<category>):
+  This worktree contains the implementation of #<issue_number> (<category>):
   <refined description>.
 
   ## What to Review
@@ -612,7 +592,7 @@ STEP 9: Dispatch review
   DISPATCH:
     Agent({
       subagent_type: "review",
-      description: "Review <full_id>",
+      description: "Review #<issue_number>",
       prompt: "<the MVC prompt above>"
     })
 
@@ -655,7 +635,7 @@ EMIT [bug-fix] triage_done applied=<N> deferred=<N> rejected=<N>
 STEP 11: Drop the plan, lint, commit, push
   $ cd <worktree_path>
 
-  $ rm -f <full_id>-plan.md
+  $ rm -f <issue_number>-plan.md
 
   Lint affected areas:
     IF backend/ files changed: $ cd backend && bun run lint
@@ -666,14 +646,12 @@ STEP 11: Drop the plan, lint, commit, push
 
   Stage and commit:
     $ git add -A
-    $ git status --short    (verify <full_id>-plan.md is gone)
+    $ git status --short    (verify <issue_number>-plan.md is gone)
     IF any plan file appears in status:
       STOP: "Plan file still tracked — abort and investigate."
 
-    The staged set now contains the work changes AND the new
-    `issues/<full_id>.md` AND the `categories.yaml` `nextIds` bump (both
-    staged earlier in STEP 5b). They go into one commit so everything
-    arrives on main together via the PR.
+    The staged set contains ONLY the work changes (source + tests). There is
+    no issue file and no categories.yaml bump — tracking is on GitHub now.
 
     Conventional-commit type follows the category:
       bug / issue / ui → `fix`
@@ -683,14 +661,15 @@ STEP 11: Drop the plan, lint, commit, push
     Commit message (platform repo conventional-commits format, no
     skaile-dev agent block since this is a submodule):
     ```
-    <type>(<scope>): <title — what the change does> (<full_id>)
+    <type>(<scope>): <title — what the change does> (#<issue_number>)
 
     <1-3 sentence explanation: root cause + fix approach + acceptance for
     bug/issue/ui; motivation + implementation outline for chore/feature>
-
-    Adds platform/issues/<full_id>.md (status: testing, owner: <owner_name>)
-    and bumps nextIds.<category_id> in categories.yaml.
     ```
+    (Reference `#<issue_number>` in the title so GitHub cross-links the commit
+    to the issue. The actual auto-close keyword `Closes #<issue_number>` goes in
+    the PR body in STEP 13, not here — that way the issue closes exactly once,
+    when the PR merges.)
 
     $ git commit -m "<message>"
 
@@ -735,12 +714,14 @@ STEP 11b: Fetch main and merge into the branch
 
     | File pattern | Default resolution |
     |--------------|-------------------|
-    | `issues/<full_id>.md` (add/add conflict) | Both branches allocated the same ID — **re-allocate automatically (do not ask)**. Take main's `issues/<full_id>.md` verbatim, then move *your* item to a fresh ID: pick a new `nextIds[<category_id>]` (typically `max(HEAD, main) + 1`), `git mv issues/<full_id>.md issues/<new_full_id>.md`, update the `id:` frontmatter field to match, bump `nextIds[<category_id>]` accordingly, and update the PR title with the new ID. Pushed commit messages keep the original ID as historical references (no force-push). The branch name keeps its original slug (renaming a branch mid-flight breaks the PR). |
-    | `issues/categories.yaml` | Blend automatically: for each entry in `nextIds`, take `max(HEAD, main)`. Preserve the `categories` list and `statuses` list verbatim from whichever side changed them (main's changes win if both sides edited those — categories/statuses are infrastructure that travels via main, not via work-item branches). |
-    | Other `issues/<other_id>.md` (modify/modify) | Concurrent edit to an unrelated work item — **escalate to user**. A work-item branch should not normally edit other work-item files; if it did, the operator must decide. |
     | Generated PostXL files (in `postxl-lock.json`) | `git checkout --theirs` — let main's regen win; rerun `bun run generate` if needed |
     | Lockfiles (`bun.lock`, `package-lock.json`) | `git checkout --theirs` then `bun install` to re-resolve |
     | Source code touched by both this work item and main | **Blend manually** — keep HEAD's change logic + integrate main's new behavior. Never blindly take one side. |
+
+    (Note: there is no longer any `platform/issues/*` or `categories.yaml`
+    conflict to resolve — that folder is decommissioned and the skill writes
+    nothing into it. GitHub assigns issue numbers atomically, so same-id
+    add/add conflicts cannot occur.)
 
     FOR EACH conflicted file:
       Read both sides of the conflict markers.
@@ -823,7 +804,7 @@ STEP 13: Open the PR
   $ gh pr create \
       --base main \
       --head <branch_name> \
-      --title "<type>(<scope>): <title> (<full_id>)" \
+      --title "<type>(<scope>): <title> (#<issue_number>)" \
       --body "$(cat <<'EOF'
 ## What
 
@@ -831,7 +812,7 @@ STEP 13: Open the PR
 
 ## Why
 
-Implements <full_id> (`platform/issues/<full_id>.md`): <refined description>
+Closes #<issue_number>: <refined description>
 
 ## Root Cause / Design Note
 
@@ -858,7 +839,8 @@ Implements <full_id> (`platform/issues/<full_id>.md`): <refined description>
 EOF
 )"
 
-  Capture the PR URL from gh output.
+  Capture the PR URL from gh output. The `Closes #<issue_number>` line auto-closes
+  the GitHub issue when the PR merges into main.
 
 EMIT [bug-fix] pr_opened url=<pr_url>
 
@@ -870,9 +852,10 @@ STEP 14: Final report to user
   ```
   ── Work Item Complete ─────────────────────────────────────────
 
-  Item:    <full_id> (<category>) — <short title>
+  Issue:   #<issue_number> (<category>) — <short title>
+           <issue_url>
   Branch:  <branch_name>
-  PR:      <pr_url>
+  PR:      <pr_url>  (Closes #<issue_number> on merge)
 
   What changed:
   <1-2 sentence plain-language summary>
@@ -890,7 +873,7 @@ STEP 14: Final report to user
   ────────────────────────────────────────────────────────────────
   ```
 
-EMIT [bug-fix] complete id=<full_id> url=<pr_url>
+EMIT [bug-fix] complete number=<issue_number> url=<pr_url>
 
 # ── Procedures ────────────────────────────────────────────────────
 
@@ -902,14 +885,16 @@ PROCEDURE refine_description(raw_description, category)
   - Preserve user-stated constraints verbatim (bold them if they
     require human follow-up — e.g., "**open question for Peter**: …")
   - No emojis, no hedging adverbs, no "the user reports that"
-  - Return: refined_text
+  - Return: refined_text + a ≤72-char issue title
 
-PROCEDURE next_id_for_category(category_id)
-  - Read `platform/issues/categories.yaml`
-  - prefix = categories[?id == category_id].prefix
-  - IF `nextIds[<category_id>]` is set: n = nextIds[<category_id>]
-    ELSE: n = max(numeric suffix of `platform/issues/<PREFIX>-*.md` files) + 1
-  - Return `<PREFIX>-<n_zero_padded_to_2_digits>`
+PROCEDURE category_label(category)
+  - bug     → `bug`
+  - issue   → `issue`
+  - ui      → `ui`
+  - chore   → `chore`
+  - feature → `enhancement`
+  - Always add `agent` alongside the category label.
+  - Verify the label exists via `gh label list`; if missing, file without it and note it.
 
 PROCEDURE triage_finding(finding)
   - severity=important + scope=in-diff + fix-size ≤ 20 LOC → apply
@@ -919,27 +904,28 @@ PROCEDURE triage_finding(finding)
   - finding disputed → reject (with reason in PR body)
 
 CHECKLIST
-  - [ ] Owner resolved from `git config user.name` ONLY — not from system-prompt userEmail, GitHub handle, or conversation context
+  - [ ] `gh auth status` verified before opening the issue
   - [ ] Category auto-classified from description (or user override applied)
-  - [ ] Category exists in `platform/issues/categories.yaml` (validated, not assumed)
+  - [ ] Category mapped to an existing GitHub label (verified, not assumed)
   - [ ] Description refined (1-3 sentences for bug/issue/ui/chore, ≤5 short for feature) WITHOUT asking the user
-  - [ ] Next free ID allocated from `nextIds[<category_id>]` (or file-scan fallback)
-  - [ ] Worktree created at <skaile-dev-root>/.worktrees/platform-<id> (gitignored, inside the skaile-dev tree for CLAUDE.md discovery), branched off origin/main
-  - [ ] `issues/<full_id>.md` written and staged inside the worktree (on the branch, not on main)
-  - [ ] `nextIds[<category_id>]` incremented by 1 in `categories.yaml` and staged in the same set
+  - [ ] Clean-tree pre-flight done BEFORE opening the issue (no dangling issue on a dirty tree)
+  - [ ] GitHub issue opened on skaile-ai/platform (category label + `agent`, assigned @me); number + URL captured
+  - [ ] Worktree created at <skaile-dev-root>/.worktrees/platform-<number> (gitignored, inside the skaile-dev tree for CLAUDE.md discovery), branched off origin/main
+  - [ ] Branch name uses the GitHub issue number (`fix/<n>-…` etc.)
+  - [ ] Nothing written under `platform/issues/`; no `nextIds` bump; no `<PREFIX>-<n>` id allocated
   - [ ] Plan written inside worktree, never staged
   - [ ] Implementation dispatched with self-contained MVC prompt
   - [ ] Review dispatched (or explicitly skipped for trivial work items)
   - [ ] Triage decisions silent (apply / defer / reject) unless apply-large or rejecting an "important" finding
   - [ ] Plan file deleted before final commit
   - [ ] Lint passed in every affected platform package
-  - [ ] Commit type matches category (`fix` for bug/issue/ui, `chore` for chore, `feat` for feature)
+  - [ ] Commit type matches category (`fix` for bug/issue/ui, `chore` for chore, `feat` for feature); title references `#<number>`
   - [ ] Branch pushed (initial push, before main-sync)
   - [ ] origin/main fetched and merged into the branch
-  - [ ] Merge conflicts (if any) resolved per the policy table; same-ID add/add escalated
+  - [ ] Merge conflicts (if any) resolved per the policy table
   - [ ] Branch re-pushed after main-sync merge
   - [ ] Worktree removed only after both pushes confirmed
-  - [ ] PR opened with type derived from category, link reported, deferred findings noted
+  - [ ] PR opened with type derived from category, body contains `Closes #<number>`, link reported, deferred findings noted
   - [ ] Final report printed
 
 ---
@@ -948,14 +934,15 @@ CHECKLIST
 
 | Mistake | What to do instead |
 |---------|-------------------|
-| Reading or writing `platform/issues.md` | That file is a legacy snapshot. The source of truth is the `platform/issues/` folder (one file per item) + `categories.yaml`. Never touch `issues.md`. |
-| Committing the new work-item file or `categories.yaml` bump to platform main | Stage both inside the worktree (on the branch); they arrive on main only when the PR merges. Keeps main clean of items whose changes never ship. |
-| Forgetting to bump `nextIds[<category_id>]` in `categories.yaml` | The counter is a monotonic high-water mark. If you skip the bump and the item you just created is later deleted, the next allocator can reuse its id and silently overwrite history. Bump it. |
-| Resetting or decrementing `nextIds` | Never. The only allowed mutation is +1 for the category you just allocated in. |
-| Renaming `issues/<full_id>.md` or changing its `id:` frontmatter field after creation | The filename and the `id:` field are the issue's identity — they're referenced by URL and external links. The only time a rename happens is the rare same-ID add/add merge conflict, which is re-allocated automatically (take main's verbatim, move yours to a fresh ID — no force-push). |
+| Writing `platform/issues/<ID>.md` or bumping `nextIds` in `categories.yaml` | That folder is decommissioned and has no GitHub sync. Open a GitHub issue with `gh issue create` instead. The category is a label; the identity is the native GitHub number. |
+| Allocating a `<PREFIX>-<n>` id or prefixing the issue title with `[B-84]` | Native GitHub numbers are the identity now. Plain issue title; category travels as a label. |
+| Reading or writing `platform/issues.md` | Legacy snapshot — never touch it. |
+| Opening the GitHub issue before the clean-tree pre-flight | If the tree is dirty you'd STOP with a dangling open issue. Pre-flight first (STEP 1), then open the issue (STEP 3). |
+| Opening the worktree before the issue | The branch name needs the issue number. Open the issue first, then name the branch `<prefix>/<number>-<slug>`. |
+| Putting `Closes #<n>` in BOTH the commit and the PR body | Keep the auto-close keyword in the PR body only; reference `#<n>` (no keyword) in the commit title. The issue then closes exactly once, on merge. |
 | Asking the user to confirm the refined description / category / branch name / plan | Decide silently. Print one-line status updates. Only ask on the 6 legitimate stop-and-ask gates listed in "Operating Principle". |
-| Putting the userEmail / GitHub handle / "Peter Albert" / Claude account into the `owner` field | The owner is the human at the keyboard. Run `git config user.name` — that's the only source. The system prompt's userEmail belongs to the account that pays the API bill, not necessarily the person running the skill. |
-| Creating the worktree inside platform/ — or in /tmp | Use `<skaile-dev-root>/.worktrees/platform-<id>` (gitignored): keeps the parent checkout clean AND keeps the worktree inside the skaile-dev tree so dispatched subagents auto-load the platform CLAUDE.md. A /tmp path is outside the memory tree, so the subagent never sees platform conventions (e.g. the ≤3-line comment rule) and silently violates them |
+| Assigning the issue to a guessed GitHub handle | Use `--assignee @me` — the authenticated gh account is the actor on GitHub. The human's `git config user.name` is only an optional courtesy footer in the body. |
+| Creating the worktree inside platform/ — or in /tmp | Use `<skaile-dev-root>/.worktrees/platform-<number>` (gitignored): keeps the parent checkout clean AND keeps the worktree inside the skaile-dev tree so dispatched subagents auto-load the platform CLAUDE.md. A /tmp path is outside the memory tree, so the subagent never sees platform conventions (e.g. the ≤3-line comment rule) and silently violates them. |
 | Committing the plan file | Delete it in STEP 11 before `git add -A` |
 | Passing parent conversation to the implementer | Build a self-contained MVC prompt — the implementer must never read this chat |
 | Skipping the review dispatch on a non-trivial change | Only skip review when `complexity=small` AND ≤ 2 files AND ≤ 30 LOC |
@@ -963,7 +950,7 @@ CHECKLIST
 | Skipping the main-sync merge before opening the PR | Main may have advanced during investigation/implementation; merge it now so the PR diff is clean and conflicts are resolved while local context is still available — not later in the GitHub UI |
 | Resolving merge conflicts by blindly taking one side on source files | For source code in the change's blast radius, both sides usually carry intent — blend them. Policy-based `--theirs` is only for generated files and lockfiles. |
 | Running Biome inside the worktree | Platform uses Prettier + ESLint. `bun run lint` inside `backend/` or `frontend/` |
-| Verbatim-copying the user's wording into the work-item file | Refine it (1-3 sentences for bug/issue/ui/chore; up to 5 for feature) — but preserve user-stated open questions verbatim, in bold |
+| Verbatim-copying the user's wording into the issue | Refine it (1-3 sentences for bug/issue/ui/chore; up to 5 for feature) — but preserve user-stated open questions verbatim, in bold |
 | Opening the PR before the branch is pushed | `gh pr create` will fail; push first |
 | Picking the wrong commit type for a non-bug | Map category → type: bug/issue/ui → `fix`, chore → `chore`, feature → `feat`. The PR title prefix and commit type must match. |
 
@@ -971,7 +958,7 @@ CHECKLIST
 
 - **Called by:** `skaile-development` agent when the user reports a platform bug, requests a small feature, asks for a UI fix, files a chore, or raises an issue
 - **Calls (via Agent tool):** `implement` (or `general-purpose`) for the change; `review` for the diff review
-- **Uses:** `gh` CLI for the PR; `git` directly for branch / worktree / commit / push (does NOT call the `git` skill because the flow is too tightly choreographed)
-- **Reads:** `platform/issues/categories.yaml`, `platform/issues/CLAUDE.md`, `platform/CLAUDE.md`, affected source files
-- **Writes:** new `platform/issues/<full_id>.md` (on the branch), `nextIds[<category_id>]` bump in `platform/issues/categories.yaml` (on the branch), implementation commits on the branch, a transient plan file (deleted), a PR on `skaile-ai/skaile-platform`
-- **Never reads or writes:** `platform/issues.md` (legacy snapshot — superseded by the `issues/` folder)
+- **Uses:** `gh` CLI for the GitHub issue + the PR; `git` directly for branch / worktree / commit / push (does NOT call the `git` skill because the flow is too tightly choreographed)
+- **Reads:** `platform/CLAUDE.md`, affected source files, `gh label list` / `gh issue list`
+- **Writes:** a GitHub issue on `skaile-ai/platform`, implementation commits on the branch, a transient plan file (deleted), a PR on `skaile-ai/platform` that closes the issue
+- **Never reads or writes:** `platform/issues/` (decommissioned markdown folder) or `platform/issues.md` (legacy snapshot) — tracking is GitHub Issues now
