@@ -4,7 +4,7 @@ dependencies:
   - skill:git
   - skill:review
   - skill:implement
-  - skill:bug-fix
+  - skill:ship
   - skill:test
   - skill:e2e-platform
   - skill:doc

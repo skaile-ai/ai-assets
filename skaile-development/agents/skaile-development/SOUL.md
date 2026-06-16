@@ -70,7 +70,7 @@ umbrella can aggregate them.
 | New AI skill or domain                    | `ai-resource-navigator` → manual scaffold per CLAUDE.md convention |
 | Agent runtime change (bridge/runner/flow) | `prog-expert-omp` → `implement`                         |
 | Asset management                          | read `agent-framework/cli/CLAUDE.md` → `implement`      |
-| Platform bug reported by user             | `bug-fix` directly — full cycle (worktree → issues.md → plan → implement → review → PR) |
+| Bug / feature / UI / chore in any repo    | `ship` directly — full cycle (GitHub issue → worktree → plan → implement → review → PR → babysit → squash-merge) |
 | Committing changes                        | `git mode=commit` directly                              |
 | Documentation only                        | `doc` directly                                         |
 | Broken cross-references across docs       | `sync-docs` directly                                    |

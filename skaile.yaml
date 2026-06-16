@@ -20,7 +20,7 @@ assets:
 
   # ── skaile-development ────────────────────────────────────────────────────
   - { kind: skill,  name: audit, root: skaile-development/skills/audit }
-  - { kind: skill,  name: bug-fix, root: skaile-development/skills/bug-fix }
+  - { kind: skill,  name: ship, root: skaile-development/skills/ship }
   - { kind: skill,  name: compile-validators, root: skaile-development/skills/compile-validators }
   - { kind: skill,  name: component-builder, root: skaile-development/skills/component-builder }
   - { kind: skill,  name: devlog, root: skaile-development/skills/devlog }
