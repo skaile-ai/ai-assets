@@ -21,8 +21,10 @@ mcp/                      <- MCP servers (one subfolder per server)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:excel resolution
 ├── ppt/               <- ppt catalog entry (code: skaile-ai/powerpoint-mcp)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:ppt resolution
-└── github/            <- GitHub hosted remote MCP (no image - api.githubcopilot.com)
-    └── MCP.md         <- catalog manifest + guidance for mcp:github resolution (transport: http)
+├── github/            <- GitHub hosted remote MCP (no image - api.githubcopilot.com)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:github resolution (transport: http)
+└── sql/               <- sql catalog entry (code: skaile-ai/sql-mcp)
+    └── MCP.md         <- catalog manifest + guidance for mcp:sql resolution (command: node + release payload)
 ```
 
 ## Servers in this domain

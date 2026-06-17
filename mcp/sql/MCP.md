@@ -5,7 +5,7 @@ version: 0.1.0
 transport: stdio
 command: node
 args:
-  - ${workspace}/.skaile/assets/mcp-server/sql/server.js
+  - "${workspace}/.skaile/assets/mcp-server/sql/server.js"
 payload:
   url: https://github.com/skaile-ai/sql-mcp/releases/download/v0.1.0/server.js
   sha256: 07438c66f52bcb5247aa08c7afa4a4ed269575cfe15b247495eb5129eb8bf4c1
