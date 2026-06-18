@@ -7,7 +7,7 @@ description: "Use when an agent needs ALMA scorecard data - regions, scorecards,
   connected Personal Access Token's role + region scope. Reach for this over raw
   REST/OpenAPI when the task spans several ALMA reads or you want typed,
   permission-scoped tools (e.g. joining indicator time series against weather)."
-version: 1.0.0
+version: 0.1.0
 transport: http
 url: https://alma-next-<slug>-api.demoscorecard.org/mcp
 keywords:
