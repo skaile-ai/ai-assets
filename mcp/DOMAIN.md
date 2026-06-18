@@ -3,7 +3,7 @@ name: mcp
 description: "MCP server catalog entries - MCP.md recipes that give agents typed tool access to external systems (Excel, PowerPoint, GitHub)."
 type: domain
 building_blocks:
-  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle)."
+  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo)."
 stage: alpha
 ---
 
@@ -23,8 +23,10 @@ mcp/                      <- MCP servers (one subfolder per server)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:ppt resolution
 ├── github/            <- GitHub hosted remote MCP (no image - api.githubcopilot.com)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:github resolution (transport: http)
-└── sql/               <- sql catalog entry (code: skaile-ai/sql-mcp)
-    └── MCP.md         <- catalog manifest + guidance for mcp:sql resolution (command: node + release payload)
+├── sql/               <- sql catalog entry (code: skaile-ai/sql-mcp)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:sql resolution (command: node + release payload)
+└── alma/              <- ALMA per-tenant hosted remote MCP (no image - per-slug API host)
+    └── MCP.md         <- catalog manifest + guidance for mcp:alma resolution (transport: http, url per tenant)
 ```
 
 ## Servers in this domain
@@ -35,6 +37,7 @@ mcp/                      <- MCP servers (one subfolder per server)
 | [ppt](ppt/MCP.md) | `mcp/ppt` | stable (v1.0.0) | PowerPoint (.pptx/.pptm) authoring, rendering, export via Apache POI + LibreOffice, 52 tools over stdio. |
 | [github](github/MCP.md) | `mcp/github` | alpha (v0.1.0) | GitHub hosted remote MCP (api.githubcopilot.com) over streamable HTTP - repos, issues, PRs, Actions, code search; permission-scoped to the connected GitHub identity. |
 | [sql](sql/MCP.md) | `mcp/sql` | alpha (v0.1.0) | Dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, permission-scoped, stdio. Bundle shipped as a sha256-verified GitHub release asset, run on baseline `node` (first `command: node` entry). |
+| [alma](alma/MCP.md) | `mcp/alma` | alpha (v1.0.0) | ALMA per-tenant hosted remote MCP over streamable HTTP - read-only scorecards, indicators, regions, period maps, time series, geo; permission- and region-scoped to a PAT. URL is per-slug; auth is a static PAT bound per-org at the platform. |
 
 ## Conventions
 
