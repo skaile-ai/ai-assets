@@ -103,7 +103,7 @@ remote MCP key is bound, not GitHub-style OAuth):
 
 ## Tools & resources
 
-Call `whoami` first. Read tools: `list_regions`, `get_regions_by_ids`,
+Call `whoami` first. Read tools: `whoami`, `list_regions`, `get_regions_by_ids`,
 `get_region_ancestors`, `list_scorecards`, `get_scorecard`, `list_indicators`,
 `list_periods`, `get_indicator_timeseries`, `get_scorecard_data`,
 `get_region_geo`, `get_stats`. Resources: `almatools://openapi` (tenant OpenAPI
