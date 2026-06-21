@@ -9,6 +9,7 @@ dependencies:
   - skill:use-outline-cli
   - skill:use-docling
   - skill:use-elevenlabs
+  - skill:ideogram-image
   - skill:use-context7-api
   - skill:use-mcp2cli
   - skill:agent-browser
