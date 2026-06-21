@@ -5,7 +5,7 @@ type: domain
 building_blocks:
   contracts: 'Integration skill conventions: output format (always JSON-compatible), error handling protocol, authentication patterns, and when to use CLI vs API variant.'
   docs: 'Service capability matrix, authentication setup guides, and rate-limit notes.'
-  skills: 'One skill per service: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), docling (document conversion), elevenlabs (TTS), ideogram-image (image generation via REST), outline (wiki API), outline-cli (wiki CLI), revealjs (presentation decks, zero-install), slidev (presentation decks, markdown).'
+  skills: 'One skill per service: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), docling (document conversion), elevenlabs (TTS), use-ideogram-image (image generation via REST), outline (wiki API), outline-cli (wiki CLI), revealjs (presentation decks, zero-install), slidev (presentation decks, markdown).'
   agents: 'TBD'
   prompts: 'TBD'
   tools: 'TBD'
@@ -36,7 +36,7 @@ This separation means service-specific knowledge (API quirks, rate limits, auth 
 | `use-context7-api` | Context7                    | Library documentation lookup by package name              |
 | `use-docling`      | Docling                     | Document conversion (PDF, DOCX → markdown)                |
 | `use-elevenlabs`   | ElevenLabs                  | Text-to-speech audio generation                           |
-| `ideogram-image`   | Ideogram                    | Image generation/editing via REST API (central org key)   |
+| `use-ideogram-image` | Ideogram                  | Image generation/editing via REST API (central org key)   |
 | `use-outline`      | Outline                     | Wiki management via REST API                              |
 | `use-outline-cli`  | Outline                     | Wiki management via CLI                                   |
 | `use-slidev`       | Slidev (sli.dev)            | Build slide decks in Skaile brand design                  |

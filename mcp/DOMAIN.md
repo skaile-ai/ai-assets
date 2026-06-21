@@ -40,7 +40,7 @@ mcp/                      <- MCP servers (one subfolder per server)
 | [github](github/MCP.md) | `mcp/github` | alpha (v0.1.0) | GitHub hosted remote MCP (api.githubcopilot.com) over streamable HTTP - repos, issues, PRs, Actions, code search; permission-scoped to the connected GitHub identity. |
 | [sql](sql/MCP.md) | `mcp/sql` | alpha (v0.1.0) | Dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, permission-scoped, stdio. Bundle shipped as a sha256-verified GitHub release asset, run on baseline `node` (first `command: node` entry). |
 | [alma](alma/MCP.md) | `mcp/alma` | alpha (v1.0.0) | ALMA per-tenant hosted remote MCP over streamable HTTP - read-only scorecards, indicators, regions, period maps, time series, geo; permission- and region-scoped to a PAT. URL is per-slug; auth is a static PAT bound per-org at the platform. |
-| [ideogram](ideogram/MCP.md) | `mcp/ideogram` | alpha (v0.1.0) | Ideogram official hosted remote MCP over streamable HTTP - generate (incl. typography), edit/inpaint, reframe/outpaint, upscale. Per-user OAuth: each user signs in to their own Ideogram account and draws on their own subscription credits. (Central org-key route is the `ideogram-image` skill in `use/`.) |
+| [ideogram](ideogram/MCP.md) | `mcp/ideogram` | alpha (v0.1.0) | Ideogram official hosted remote MCP over streamable HTTP - generate (incl. typography), edit/inpaint, reframe/outpaint, upscale. Per-user OAuth: each user signs in to their own Ideogram account and draws on their own subscription credits. (Central org-key route is the `use-ideogram-image` skill in `use/`.) |
 
 ## Conventions
 
@@ -73,7 +73,7 @@ auth:
 - `type` - the credential kind the UI collects (`api-key`, `bearer`, `basic`).
 - `inject` - where the platform places the resolved secret:
   - `env` - provisioned as an **environment variable** named by `env:`; this is how a
-    **skill** receives a key (e.g. the `ideogram-image` skill reads
+    **skill** receives a key (e.g. the `use-ideogram-image` skill reads
     `$IDEOGRAM_API_KEY`).
   - `header` - written into a request **header** named by `header:`; this is how a
     **keyed remote MCP** (the `alma`-style static-PAT shape) receives a credential

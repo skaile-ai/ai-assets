@@ -8,7 +8,7 @@ description: "Use when an agent needs to create or transform images with Ideogra
   in to their own Ideogram account on first connect), so generations draw on the
   connected user's own Ideogram subscription and credits. Reach for this when image
   work should bill to each user's personal Ideogram plan; for a central, org-billed
-  API key use the `ideogram-image` skill instead."
+  API key use the `use-ideogram-image` skill instead."
 version: 0.1.0
 transport: http
 url: https://mcp.ideogram.ai/mcp
@@ -40,7 +40,7 @@ Ideogram account and consume that account's plan credits.
   than a shared org account.
 
 For a central, org-billed key (one Ideogram API account, central billing) reach for
-the **`ideogram-image`** skill instead - it calls the REST API with a
+the **`use-ideogram-image`** skill instead - it calls the REST API with a
 platform-injected key and does not require each user to hold an Ideogram login.
 
 ## Tool surface
@@ -94,7 +94,7 @@ browser sign-in on first connect and provisions the resulting token off-disk, th
 rewrites the request header. There is no static key to bake into this shared catalog
 entry.
 
-This is the key contrast with the `ideogram-image` skill: that route is a single,
+This is the key contrast with the `use-ideogram-image` skill: that route is a single,
 central **API key** (`auth: { type: api-key, inject: env, env: IDEOGRAM_API_KEY }`)
 collected once by an admin and billed to one org-wide Ideogram API account. See
 `mcp/DOMAIN.md` ("Authentication declarations") for how the two `inject` modes differ.
