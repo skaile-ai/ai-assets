@@ -25,6 +25,7 @@ metadata:
 | `use-outline` | Outline wiki (API) | REST API |
 | `use-outline-cli` | Outline wiki (CLI) | CLI subprocess |
 | `use-elevenlabs` | ElevenLabs TTS | REST API |
+| `use-ideogram-image` | Ideogram image generation | REST API (BYO-key) |
 | `use-docling` | Document conversion | CLI subprocess |
 
 ## API Key Handling
@@ -41,6 +42,12 @@ env_vars:
     description: "Exa API key"
     required: false   # false if MCP endpoint used without auth
 ```
+
+**Platform-injected keys (BYO-key).** A skill may instead declare a top-level `auth`
+block so the platform collects the key once and injects it as the named env var (see
+`mcp/DOMAIN.md` → "Authentication declarations"). The skill still reads the key from
+the env var and never hardcodes or echoes it — only the *source* of the variable
+differs. `use-ideogram-image` uses this path (`auth: { inject: env, env: IDEOGRAM_API_KEY }`).
 
 ## MCP vs Direct API
 
