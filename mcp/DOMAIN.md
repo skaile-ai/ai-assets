@@ -3,7 +3,7 @@ name: mcp
 description: "MCP server catalog entries - MCP.md recipes that give agents typed tool access to external systems (Excel, PowerPoint, GitHub)."
 type: domain
 building_blocks:
-  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo)."
+  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale)."
 stage: alpha
 ---
 
@@ -25,8 +25,10 @@ mcp/                      <- MCP servers (one subfolder per server)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:github resolution (transport: http)
 ├── sql/               <- sql catalog entry (code: skaile-ai/sql-mcp)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:sql resolution (command: node + release payload)
-└── alma/              <- ALMA per-tenant hosted remote MCP (no image - per-slug API host)
-    └── MCP.md         <- catalog manifest + guidance for mcp:alma resolution (transport: http, url per tenant)
+├── alma/              <- ALMA per-tenant hosted remote MCP (no image - per-slug API host)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:alma resolution (transport: http, url per tenant)
+└── ideogram/          <- Ideogram official hosted remote MCP (no image - per-user OAuth)
+    └── MCP.md         <- catalog manifest + guidance for mcp:ideogram resolution (transport: http, per-user OAuth)
 ```
 
 ## Servers in this domain

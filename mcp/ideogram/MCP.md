@@ -82,10 +82,8 @@ adds and renames tools (e.g. describe/remix variants).
 `transport: http` is the runtime literal the runner branches on to open a
 `StreamableHTTPClientTransport`
 (`workspaces/packages/workspaces/runner/src/external-mcp.ts`). The `MCP.md` manifest
-schema accepts `http` and normalizes the MCP-spec alias `streamable-http` to it as of
-skaile-ai/workspaces#174. Publish this asset only once that change is released;
-against an older resolver `http` fails manifest validation and `streamable-http`
-connects to nothing.
+schema accepts `http` and normalizes the MCP-spec alias `streamable-http` to it
+(skaile-ai/workspaces#174) - the same path `github/` already ships on.
 
 ## Authentication (per-user OAuth, bound by the platform)
 
