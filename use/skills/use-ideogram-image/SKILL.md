@@ -121,7 +121,7 @@ curl -s -X POST "https://api.ideogram.ai/v1/ideogram-v3/generate" \
 | `prompt` | **Required.** The text prompt. |
 | `aspect_ratio` | Optional, default `1x1`. `WxH` form: `1x1`, `16x9`, `9x16`, `3x2`, `2x3`, `4x3`, `3x4`, `16x10`, `10x16`, `3x1`, `1x3`. Mutually exclusive with `resolution`. |
 | `resolution` | Optional explicit pixel size (e.g. `1024x1024`). Use instead of `aspect_ratio`, not both. |
-| `rendering_speed` | Optional, default `DEFAULT`. `TURBO`, `DEFAULT`, `QUALITY`. |
+| `rendering_speed` | Optional, default `DEFAULT`. `FLASH`, `TURBO`, `DEFAULT`, `QUALITY` (v3 accepts `FLASH`; v4 does not yet). |
 | `style_type` | Optional. `AUTO`, `GENERAL`, `REALISTIC`, `DESIGN`. |
 | `magic_prompt` | Optional. `AUTO`, `ON`, `OFF` - Ideogram's prompt-expansion. |
 | `num_images` | Optional, default `1` (1-8). Each image is a billed generation - keep small unless the user asks for options. |
