@@ -31,3 +31,9 @@ skaile-platform/
 | Agent | Source | Purpose |
 |---|---|---|
 | assistant | `skaile-platform/agents/assistant` | Default assistant persona - rules and voice consumed at runtime. |
+
+## Skills in this domain
+
+| Skill | Source | Purpose |
+|---|---|---|
+| platform-guide | `skaile-platform/skills/platform-guide` | On-demand platform UI + conceptual-model guide for the assistant (progressive disclosure; no live-capability enumeration). |

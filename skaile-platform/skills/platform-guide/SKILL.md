@@ -6,10 +6,19 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   or asks about projects, sessions, workspaces, flows, previews, sharing, inviting people,
   connecting a data source, enabling a skill/asset, scoped sessions, agent-to-agent, roles
   and permissions, hibernation, or any platform surface. Load on demand, not always-on."
-license: "Apache-2.0"
 metadata:
   stage: "alpha"
-  author: "skaile-ai"
+  source: "ORIGINAL"
+keywords:
+  - platform-guide
+  - platform
+  - ui
+  - navigation
+  - workspace
+  - session
+  - project
+  - flow
+  - sharing
 ---
 
 # Skaile Platform Guide
@@ -47,7 +56,7 @@ Speak in user-facing business terms (project / session / project data), not inte
 | File | Use when the user asks... |
 | ---- | -------------------------- |
 | `ui/navigation.md` | "Where is...", "how do I get to...", project/session/org settings, creating a project, connecting a data source — the app shell, sidebar, command palette, settings hierarchy. |
-| `ui/workspace.md` | Anything about the workspace itself: chat composer, file/resource explorer, preview pane, right-sidebar tabs (Assistant/AI Assets/Share/Config/Debug), presence, mobile, common in-workspace click-paths. |
+| `ui/workspace.md` | Anything about the workspace itself: chat composer, file/resource explorer, preview pane, right-sidebar tabs (Assistant/Preview/AI Assets/Share/Summary/Config/Debug), presence, mobile, common in-workspace click-paths. |
 
 ## Hard rules
 

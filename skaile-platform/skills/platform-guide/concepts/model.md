@@ -88,7 +88,7 @@ Other notable rules:
 - **Private sessions** are visible only to the Session Owner and explicit session members
   — not even to the Project Owner or PlatformAdmin.
 - A **Shared** project/session is visible to Org Users/Owners and project/session members.
-- Only **Project Owners** create sessions (including scoped sessions). **Forking** a
-  session requires **Org Owner**.
+- Only **Project Owners** create sessions (including scoped sessions). **Forking,
+  reopening, or discarding** a session requires **Org Owner**.
 
 Full matrix: `platform/docs/roles-permissions-matrix.md`.
