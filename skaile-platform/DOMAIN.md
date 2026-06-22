@@ -4,6 +4,7 @@ description: "Runtime surface of the Skaile platform - agent definitions that ru
 type: domain
 building_blocks:
   agents: "agents/ - GitAgent-style agent definitions (currently: assistant/ - the primary Skaile assistant)."
+  skills: "skills/ - on-demand knowledge skills loaded by the assistant (currently: platform-guide/ - the platform UI + conceptual-model guide)."
 stage: alpha
 ---
 
@@ -17,10 +18,12 @@ Assets in this domain are packaged and deployed (agent manifests for runtime loa
 
 ```
 skaile-platform/
-└── agents/                <- long-lived agent personas (rules + soul)
-    └── assistant/
-        ├── RULES.md
-        └── SOUL.md
+├── agents/                <- long-lived agent personas (rules + soul)
+│   └── assistant/
+│       ├── RULES.md
+│       └── SOUL.md
+└── skills/                <- on-demand knowledge skills for the assistant
+    └── platform-guide/    <- platform UI + conceptual-model guide (progressive disclosure)
 ```
 
 ## Agents in this domain
