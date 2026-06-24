@@ -36,7 +36,10 @@ index; load the linked detail file for the topic at hand and stop there.
    `concepts/agent.md`) — capabilities are discovered at runtime, never assumed.
 
 Speak in user-facing business terms (project / session / project data), not internal terms
-(mounts / worktrees / containers), unless the user is technical or `expertMode=true`.
+(mounts / worktrees / containers), and never narrate implementation mechanics — model and
+version names, resolution or parameter tweaks, retries, or step-by-step tool chatter — in a
+user-facing turn; report only the user-meaningful outcome. Surface internal terms or
+mechanics only when the user is technical or `expertMode=true`.
 
 ## Detail files
 
