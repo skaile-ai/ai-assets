@@ -14,7 +14,7 @@ description: 'Run, fix, or extend the Skaile platform e2e suite. Three modes: `r
   the user says "run e2e tests", "fix the failing e2e tests", "the e2e suite is red",
   "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
-  version: '1.2.0'
+  version: '1.3.0'
   tags:
   - 'testing'
   - 'e2e'
@@ -49,7 +49,8 @@ metadata:
       required: false
       hint: "'run' mode: spec file path or test name filter (default: full suite).
         'fix' mode: failing spec file or test name filter (default: full failing suite).
-        'add' mode: feature area to focus analysis on (default: git diff main…HEAD)"
+        'add' mode: feature area / merged PRs to focus on (default: git diff main…HEAD;
+        falls back to gap-discovery over recently-merged features when the diff is empty)"
     - id: 'session_mode_hint'
       label: 'Session mode'
       type: 'select'
@@ -452,7 +453,9 @@ IF mode = add
     NOT that coverage is complete. Instead, discover recently-merged features and
     cross-reference them against existing specs to find gaps:
     ```bash
-    # 1. enumerate recently-merged feature commits (tune the window / scope)
+    # 1. enumerate recently-merged feature commits (tune the window / scope; if the
+    #    window is dry, widen it — `--since="6 weeks ago"` — or report "no recent
+    #    feat commits found" rather than silently concluding there are no gaps)
     git -C platform log origin/main --since="2 weeks ago" --pretty='%h %ad %s' --date=short \
       | grep -iE 'feat|^[0-9a-f]+ [0-9-]+ (Add|Support)'
     # 2. read each candidate feature's surface (selectors, routes, testids, PR #)
@@ -529,9 +532,11 @@ IF mode = add
         panels, onboarding *conversation*, anything asserting an echo round-trip.
         Cold-wake is the #1 flakiness source. Assert **routing / URL / shell render
         that settles BEFORE the wake**, never the reply.
-      - **Unreachable hydrated state**: seed sessions are Closed/Hibernated with no
-        live writable mount, so resource-tree files, file-viewer edit, HTML preview,
-        and "list the uploaded file" can't be reached deterministically.
+      - **Unreachable hydrated state** (a *stateless-seed* limitation, not a
+        categorical impossibility): seed sessions are Closed/Hibernated with no live
+        writable mount, so resource-tree files, file-viewer edit, HTML preview, and
+        "list the uploaded file" can't be reached deterministically here. (A future
+        stateful-mode harness could cover these.)
       - **Browser-intercepted input**: `Ctrl+Shift+W`, `Ctrl+P` (Chromium swallows
         them); HTML5 native drag-and-drop (Playwright can't drive it reliably).
       - **Visual-only / external**: avatars, spinners, OG cards, native Web Share
@@ -539,7 +544,7 @@ IF mode = add
     For a feature that's mostly in these classes, propose only its deterministic
     UI slice (e.g. the route renders, a control is present) and say what's deferred.
 
-    **Determinism guards for the slices you DO write:**
+    **Determinism guards — keep these in mind here, apply them when writing in STEP A5:**
       - After a mutation whose `waitForResponse` returns 200, a follow-up reload may
         still not see the write (SSE broadcast + commit run in parallel) — add
         `await page.waitForTimeout(500)` before the reload (per E2E-GUIDE).
