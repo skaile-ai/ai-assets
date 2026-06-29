@@ -1,15 +1,20 @@
 ---
 name: 'e2e-platform'
-description: 'Run or extend the Skaile platform e2e suite. Two modes: `run` executes
-  the existing suite with pre-flight checks (stale-service guard for post-pull stale
-  bundles, stale-deps guard for lockfile drift, seed sync, proxy slot health), failure-mode
-  diagnosis, and auto-recovery (kill stale skaile-serve subprocesses, sync seed data,
-  restart stuck proxy slots); `add` analyzes a git diff, proposes a test plan, waits
-  for explicit user approval, lives-inspects the UI via chrome-devtools MCP, then
-  writes new specs against the existing `platform/e2e/` harness. Use when the user
-  says "run e2e tests", "fix e2e failures", "add e2e coverage for <feature>", "write
-  e2e tests for my PR", or similar.'
+description: 'Run, fix, or extend the Skaile platform e2e suite. Three modes: `run`
+  executes the existing suite with pre-flight checks (stale-service guard for post-pull
+  stale bundles, stale-deps guard for lockfile drift, seed sync, proxy slot health),
+  failure-mode diagnosis, and auto-recovery (kill stale skaile-serve subprocesses,
+  sync seed data, restart stuck proxy slots); `fix` triages each failing test as a
+  stale test (the product changed on purpose) vs a real regression (the product broke),
+  then repairs stale tests (rewrite to the new shape / delete a removed feature / skip
+  with a reason) while STOPPING and escalating regressions to the human — never
+  weakening an assertion to force green; `add` analyzes a git diff, proposes a test
+  plan, waits for explicit user approval, lives-inspects the UI via chrome-devtools
+  MCP, then writes new specs against the existing `platform/e2e/` harness. Use when
+  the user says "run e2e tests", "fix the failing e2e tests", "the e2e suite is red",
+  "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
+  version: '1.2.0'
   tags:
   - 'testing'
   - 'e2e'
@@ -33,15 +38,17 @@ metadata:
     - id: 'mode'
       label: 'Mode'
       type: 'select'
-      options: ['run', 'add']
+      options: ['run', 'fix', 'add']
       required: true
-      hint: "'run' executes the suite with auto-recovery; 'add' analyzes a diff and
-        proposes new specs with a user approval gate"
+      hint: "'run' executes the suite with auto-recovery; 'fix' triages failing tests
+        stale-vs-regression and repairs stale ones while escalating regressions; 'add'
+        analyzes a diff and proposes new specs with a user approval gate"
     - id: 'scope'
       label: 'Scope'
       type: 'text'
       required: false
       hint: "'run' mode: spec file path or test name filter (default: full suite).
+        'fix' mode: failing spec file or test name filter (default: full failing suite).
         'add' mode: feature area to focus analysis on (default: git diff main…HEAD)"
     - id: 'session_mode_hint'
       label: 'Session mode'
@@ -76,7 +83,7 @@ Covers the workflows missing from the sibling skills:
 Invoke when the user says:
 
 - "run the e2e tests" / "run e2e" — `mode=run`
-- "fix the failing e2e tests" — `mode=run` (auto-recovery handles infra-level failures)
+- "fix the failing e2e tests" / "the e2e suite is red" / "these tests have been failing on Jenkins" — `mode=fix` (triage stale-vs-regression, then repair stale / escalate regressions). Use `mode=run` only when the failure is purely infra/flaky (recovery, no spec edits).
 - "add e2e tests for <feature>" — `mode=add`
 - "write e2e tests for my PR" — `mode=add`
 - "propose e2e coverage for these changes" — `mode=add`
@@ -102,9 +109,12 @@ READS
   ! platform/e2e/fixtures/{test-fixtures,handle-backend}.ts — auto-fixtures + startBackend/getTestHeaders
   git diff main...HEAD                        — for `add` mode analysis
   (add mode) frontend routes + tRPC routes   — to derive URL patterns + selectors
+  (fix mode) test-results/**/error-context.md — the failing run's assertion + stack
+  (fix mode) the PR/commit that last changed the asserted behavior (git log -S / blame)
+  (fix mode) source + live UI (chrome-devtools MCP) — to prove stale-vs-regression
 
 WRITES
-  (add mode)
+  (add + fix modes)
     platform/e2e/specs/**/<new-or-edited>.spec.ts
 
 MUST   read platform/e2e/CLAUDE.md before executing or writing anything
@@ -114,10 +124,14 @@ MUST   use org-scoped slug-based URLs (`/acme/projects/<slug>/main/...`)
 MUST   use `page.addInitScript` for impersonation (pxl-mock-user + optional pxl-mock-roles)
 MUST   (add mode) gate writing behind explicit user approval of the proposed plan
 MUST   (add mode) live-inspect UI via chrome-devtools MCP before committing selectors (when live_inspect=true)
+MUST   (fix mode) classify EVERY failure as stale-test or regression WITH EVIDENCE (the commit/PR that changed behavior, the source, and a live-UI inspection for selector drift) BEFORE editing any spec
+MUST   (fix mode) confirm the FEATURE still works before calling a test "stale" — a passing sibling test, the control actually performing its action, the API returning data when called correctly. Burden of proof is on "stale"; if unproven, treat as a suspected regression
+MUST   (fix mode) STOP and report a confirmed/suspected regression to the human — never edit, weaken, or skip the test to pass over it
+MUST   (fix mode) gate any spec DELETION or `.skip` behind explicit user approval; prefer rewriting to preserve coverage
 MUST   delegate execution to `bunx playwright test` / the existing npm scripts — do not re-invent runners
 MUST   follow the stale-service / stale-deps recovery recipes verbatim and in order — even if an earlier check reported "clean", later steps may still be needed (e.g. workspace topology changes evade the lockfile-mtime check). Do NOT skip steps based on side checks.
 NEVER  write to `platform/e2e/playwright.config.ts` or global fixtures — those belong to `test-e2e`
-NEVER  auto-fix assertions to make a test pass — report the drift for user review
+NEVER  make a test lie: weaken/loosen an assertion, add a blind wait, or broaden a selector just to force green. In `fix` mode, triage stale-vs-regression first (see Mode: fix); a real regression is reported to the human, never silenced by editing the test.
 NEVER  use `page.waitForLoadState('networkidle')` (SSE subscriptions never idle)
 NEVER  hardcode project IDs in URLs — always slugs
 NEVER  (add mode) bypass the user approval gate
@@ -279,8 +293,8 @@ IF mode = run
     | Infra: `beforeAll timeout` / `ERR_CONNECTION_REFUSED` / `provision_secrets timed out` | Yes | Apply recipe from table, retry once |
     | Seed drift: `teamAdmin.list returns []` / similar empty-list surprise | Yes | `sync-seed`, retry once |
     | Coverage warning: `MCR: must be Array(V8)` | No | Report — test design issue (see scaffolding rules) |
-    | UI drift: `heading "Foo" not found` | No | Report — spec needs updating; suggest `mode=add` to re-propose |
-    | Persistence race / ambiguous selector / `toHaveCount(0)` false-green | No | Report with diagnosis category; suggest `mode=add` or manual fix |
+    | UI / API drift: `heading "Foo" not found`, `expected object, received null` | No | Report — spec asserts the old shape; suggest `mode=fix` to triage stale-vs-regression and repair |
+    | Persistence race / ambiguous selector / `toHaveCount(0)` false-green | No | Report with diagnosis category; suggest `mode=fix` |
     | Unknown (not in table) | No | Report verbatim — do not guess |
 
   STEP R3: Apply recoveries and retry once
@@ -296,8 +310,8 @@ IF mode = run
 
     ### Failures (after auto-recovery)
     | # | Spec | Test | Category | Suggested action |
-    | 1 | <spec.ts:line> | <test name> | UI drift | Run `e2e-platform mode=add` to re-propose selectors |
-    | 2 | <spec.ts:line> | <test name> | Persistence race | Add `waitForTimeout(500)` after confirming event, before reload |
+    | 1 | <spec.ts:line> | <test name> | UI/API drift | Run `e2e-platform mode=fix` to triage stale-vs-regression + repair |
+    | 2 | <spec.ts:line> | <test name> | Persistence race | Run `e2e-platform mode=fix` (or add a wait after the confirming event, before reload) |
 
     ### Recoveries applied
     - Killed N stale `skaile serve` subprocesses
@@ -321,6 +335,101 @@ IF mode = run
     | false | false | Skip — services were already up at preflight; leave them. |
 
     Print the script's output verbatim into the report so the user sees what was torn down. If the script reports a port "still up" after stopping, do NOT escalate (broader pkill could kill the user's parallel processes); just include the warning in the report's "Next steps" so the user can decide.
+    EMIT   [e2e-platform] cleanup_complete
+
+# ── Mode: fix ────────────────────────────────────────────────────
+
+IF mode = fix
+
+  A failing e2e test is a question, not a problem to silence. The job is to
+  restore the suite's truth: update the tests the product intentionally
+  outgrew, and raise the alarm on the tests that caught a real bug. The fix is
+  OPPOSITE for the two cases, so the triage in F2 is the whole skill — never
+  skip it, never make a test lie to get green.
+
+  STEP F1: Reproduce on FRESH services, no retries
+    - Pre-flight (Step 0) MUST have reported fresh, non-stale backend +
+      frontend. A stale bundle fakes BOTH failures and passes — refuse to
+      triage against it (re-run Step 0's stale-service guard if unsure).
+    - Run the failing scope with `--retries=0 --workers=1` (the real failure
+      mode, not retry-masked). Read the exact error and the per-test
+      `test-results/**/error-context.md` (it carries the assertion + stack).
+    - If a failure does NOT reproduce locally on fresh services, it is flaky /
+      infra, not a spec bug — handle via `mode=run` recovery and do NOT rewrite
+      a spec that actually passes (that would be making a test lie in reverse).
+
+  STEP F2: Classify each failure — STALE vs REGRESSION (with evidence)
+    For EVERY failing test, decide which it is and PROVE it:
+
+    | Verdict | Means | Evidence to gather |
+    |---|---|---|
+    | STALE | The product changed on purpose; the test still asserts the old shape (moved selector, renamed label, changed route, new required input) | The PR/commit that changed it (`git log -S "<symbol>"`, blame), a design spec/CLAUDE.md note, the current source, and — for selector/UI drift — a live chrome-devtools MCP inspection |
+    | REGRESSION | The product broke; the red test is correct and is doing its job | The feature genuinely fails for a real user — not merely that a selector moved |
+
+    Burden of proof is on STALE. Before declaring a test stale, CONFIRM THE
+    FEATURE STILL WORKS — e.g. a sibling test still passes, the control still
+    performs its action, the API still returns data when called correctly. If
+    you cannot prove the feature works, treat it as a SUSPECTED REGRESSION (F4),
+    not stale. A plausible-looking selector change is the most common way a real
+    bug gets silently rewritten away.
+
+  STEP F3: Fix STALE tests — preserve coverage, never loosen
+    Pick the narrowest correct repair:
+    - Behaviour still exists, shape moved → REWRITE to the new selector / URL /
+      flow. Keep — or TIGHTEN — the assertion; never weaken it to pass.
+    - Feature permanently removed → DELETE the spec (git keeps the history).
+      Note the resulting coverage gap in the report. Requires approval (F5).
+    - Behaviour temporarily unverifiable but returning → `.skip` WITH a reason +
+      a tracking note. Requires approval (F5). NEVER `.skip` as a cop-out for a
+      selector you could not get working — delete-and-note the gap, or fix it.
+    Re-run the rewritten test on fresh services with `--retries=0` until green;
+    the passing run is the proof, not the reasoning.
+
+  STEP F4: Handle a REGRESSION — STOP; do not touch the test
+    A confirmed (or strongly suspected) regression is NOT a test problem.
+    - Do NOT edit, weaken, or `.skip` the test to make CI green.
+    - Report it to the human with: the failing test, the user-visible symptom,
+      the suspected commit/PR, and the evidence. Recommend a PRODUCT fix.
+    - Leave the test red (it is doing its job) unless the user directs otherwise.
+
+  STEP F5: Approval gate — deletions, skips, regressions
+    Before DELETING a spec, adding `.skip`, or concluding "regression — needs a
+    product fix", present the verdict + evidence and get EXPLICIT user approval.
+    Plain rewrites that preserve coverage do not need the gate, but their green
+    re-run (F6) is mandatory.
+
+  STEP F6: Verify + lint
+    - Re-run every TOUCHED spec on fresh services, `--retries=0 --workers=1`,
+      until green. Re-run the whole affected spec FILE too, to catch sibling
+      breakage your edit may have introduced.
+    - `bunx tsc --noEmit -p tsconfig.json` in `platform/e2e`; then prettier +
+      eslint the changed files. Platform uses Prettier + ESLint — NEVER Biome.
+    - e2e-only changes need no changeset (only `backend/`+`frontend/` source do).
+
+  STEP F7: Report
+    ```
+    ## E2E Fix — <timestamp>
+
+    ### Triage
+    | # | Spec:line | Test | Verdict | Root cause (PR/commit) | Action |
+    | 1 | <spec.ts:line> | <name> | STALE | #<pr> relabelled X→Y | rewrote selector |
+    | 2 | <spec.ts:line> | <name> | REGRESSION | suspected #<pr> | REPORTED — needs product fix |
+
+    ### Regressions found (NOT fixed here — left red on purpose)
+    - <test> — <user-visible symptom> — suspected <commit/PR> — recommend <product fix>
+
+    ### Verification
+    - <N> rewritten specs green on fresh services (--retries=0); affected files green
+
+    ### Coverage / follow-ups
+    - <deleted specs + the gap left>, <unrelated flakes left alone>, <skips + reason>
+    ```
+
+  EMIT   [e2e-platform] fix_complete stale=<N> regressions=<N> rewritten=<N> deleted=<N>
+
+  STEP F8: Cleanup services we auto-started (if any)
+    Same dispatch as run mode's STEP R5 — refer to that step's table. Print the
+    script's output verbatim; do NOT escalate beyond the script's pkill patterns.
     EMIT   [e2e-platform] cleanup_complete
 
 # ── Mode: add ────────────────────────────────────────────────────
@@ -492,14 +601,19 @@ IF mode = add
 # ── End modes ────────────────────────────────────────────────────
 
 CHECKLIST
-  - [ ] Pre-flight ran (both modes)
+  - [ ] Pre-flight ran (all modes) — services confirmed FRESH (stale guards green)
   - [ ] (add) Plan was presented BEFORE any file was written
   - [ ] (add) User explicitly approved the plan
   - [ ] (add) Live UI inspection caught selector drift before write (when live_inspect=true)
   - [ ] (add) New specs use shared `page` fixture + org-scoped slug URLs + scaffolding rules
-  - [ ] (both) Failures categorized, infra auto-recovered, spec-design failures reported not auto-fixed
+  - [ ] (fix) EVERY failure classified stale-vs-regression WITH evidence before any edit
+  - [ ] (fix) "Stale" verdicts proved the feature still works (not just a moved selector)
+  - [ ] (fix) Regressions reported to the human + left red — never edited/skipped to pass
+  - [ ] (fix) Deletions / `.skip` got explicit user approval; rewrites preserved/tightened assertions
+  - [ ] (fix) Touched specs AND their full files re-run green on fresh services (--retries=0)
+  - [ ] (run) Failures categorized, infra auto-recovered, spec-design failures reported not auto-fixed
   - [ ] Report includes follow-ups + coverage notes
-  - [ ] (both) Cleanup ran ONLY for services we auto-started — pre-existing services left untouched (Step R5 / A8 dispatch table)
+  - [ ] (all) Cleanup ran ONLY for services we auto-started — pre-existing services left untouched (Step R5 / F8 / A8 dispatch table)
 
 ---
 
@@ -507,7 +621,7 @@ CHECKLIST
 
 - **Called by:** human or `implement` skill (after a user-facing feature lands)
 - **Calls:** `platform/scripts/e2e.sh` (auto-start FE+BE when missing; selective `--stop-backend` / `--stop-frontend` / `--stop` for end-of-mode cleanup of only services this skill put up), chrome-devtools MCP (via `mcp__chrome-devtools__*` tools, for live inspection), `sync-seed-data.js` via `bun run sync-seed`
-- **Delegates to:** `verify-ui` (when user wants visual coverage alongside specs), `test-e2e` (when user asks about scaffolding a fresh e2e setup for a different package)
+- **Delegates to:** `verify-ui` (when user wants visual coverage alongside specs), `test-e2e` (when user asks about scaffolding a fresh e2e setup for a different package), **the human** (`fix` mode escalates a confirmed/suspected regression instead of editing the test to pass)
 - **Reads:** `platform/e2e/CLAUDE.md`, `platform/e2e/README.md`, `platform/e2e/E2E-GUIDE.md`, existing specs under `platform/e2e/specs/**`
 
 ## Known limitations
@@ -527,4 +641,7 @@ CHECKLIST
 | Hardcoding `proj-1` / `proj-2` / `proj-3` in URLs | Use slugs: `inventory-tracker`, `hr-onboarding`, `expense-reports` |
 | Assuming `PlatformAdmin` sees all projects | Default mock user (`test`) owns no seed projects. Use `user-bu-1` / `user-bu-2` to see content. |
 | Skipping the approval gate in `add` mode | The gate is the entire point — it prevents spec sprawl |
-| Auto-fixing a failing assertion to make it pass | Report the drift; the test is telling you something real |
+| Rewriting a failing spec to green without triage | `mode=fix` STEP F2: classify stale-vs-regression with evidence FIRST; a moved selector and a real bug look identical until you check the feature works |
+| Weakening an assertion / adding a blind wait to pass | Never make a test lie. Rewrite to the new shape (keep/tighten the assertion), or report the regression |
+| `.skip`-ing a test you couldn't get working | That's a cop-out. Delete-and-note the gap (feature gone) or fix it; `.skip` is only for temporarily-unverifiable-but-returning behaviour, with a reason |
+| Triaging against a stale backend/frontend | Re-run Step 0's stale guards; a stale bundle fakes both failures AND passes |
