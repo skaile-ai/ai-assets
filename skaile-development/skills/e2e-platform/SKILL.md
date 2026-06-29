@@ -48,6 +48,7 @@ metadata:
       type: 'text'
       required: false
       hint: "'run' mode: spec file path or test name filter (default: full suite).
+        'fix' mode: failing spec file or test name filter (default: full failing suite).
         'add' mode: feature area to focus analysis on (default: git diff main…HEAD)"
     - id: 'session_mode_hint'
       label: 'Session mode'
@@ -429,6 +430,7 @@ IF mode = fix
   STEP F8: Cleanup services we auto-started (if any)
     Same dispatch as run mode's STEP R5 — refer to that step's table. Print the
     script's output verbatim; do NOT escalate beyond the script's pkill patterns.
+    EMIT   [e2e-platform] cleanup_complete
 
 # ── Mode: add ────────────────────────────────────────────────────
 
