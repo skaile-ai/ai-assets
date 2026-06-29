@@ -14,7 +14,7 @@ description: 'Run, fix, or extend the Skaile platform e2e suite. Three modes: `r
   the user says "run e2e tests", "fix the failing e2e tests", "the e2e suite is red",
   "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
-  version: '1.2.0'
+  version: '1.3.0'
   tags:
   - 'testing'
   - 'e2e'
@@ -49,7 +49,8 @@ metadata:
       required: false
       hint: "'run' mode: spec file path or test name filter (default: full suite).
         'fix' mode: failing spec file or test name filter (default: full failing suite).
-        'add' mode: feature area to focus analysis on (default: git diff main…HEAD)"
+        'add' mode: feature area / merged PRs to focus on (default: git diff main…HEAD;
+        falls back to gap-discovery over recently-merged features when the diff is empty)"
     - id: 'session_mode_hint'
       label: 'Session mode'
       type: 'select'
@@ -436,15 +437,42 @@ IF mode = fix
 
 IF mode = add
 
-  STEP A1: Analyze changes
+  STEP A1: Analyze changes — TWO sources; pick by what's actually present
+
+    (a) **Branch-diff mode** (default — "add tests for my unmerged PR"):
     ```bash
     git diff main...HEAD --name-only        # full branch diff
     git diff --name-only                    # unstaged
     git diff --staged --name-only           # staged
     ```
-    IF `scope` input was provided: focus analysis on that area (filter the diff, or read named files directly).
 
-    Categorize each changed file:
+    (b) **Gap-discovery mode** — use when the branch diff above is EMPTY (you're on
+    `main`, or the features already merged) OR the user asks "what recent features
+    need e2e?" / names merged PRs. **Do NOT conclude "nothing to add" just because
+    `main...HEAD` is empty** — an empty branch diff means there's no *unmerged* work,
+    NOT that coverage is complete. Instead, discover recently-merged features and
+    cross-reference them against existing specs to find gaps:
+    ```bash
+    # 1. enumerate recently-merged feature commits (tune the window / scope; if the
+    #    window is dry, widen it — `--since="6 weeks ago"` — or report "no recent
+    #    feat commits found" rather than silently concluding there are no gaps)
+    git -C platform log origin/main --since="2 weeks ago" --pretty='%h %ad %s' --date=short \
+      | grep -iE 'feat|^[0-9a-f]+ [0-9-]+ (Add|Support)'
+    # 2. read each candidate feature's surface (selectors, routes, testids, PR #)
+    git -C platform show <sha>
+    # 3. inventory current specs + the specs the team recently ADDED
+    git ls-tree -r --name-only origin/main -- e2e/specs | grep '\.spec\.ts$'
+    git -C platform log origin/main --since="2 weeks ago" --diff-filter=A --name-only --pretty=format: -- e2e/specs
+    ```
+    Then grep `platform/e2e/specs/**` for each feature's keywords / PR number — the
+    features with NO matching spec are the gaps to propose. (The team often adds
+    specs alongside a feature wave, so many recent features are already covered —
+    surface only the genuine gaps.)
+
+    IF a `scope`/feature input was provided: focus on that area in either mode
+    (filter the diff, or `git show` the named PR commits directly).
+
+    Categorize each changed file (or each merged feature's touched files):
 
     | Category | Path pattern | Test shape to consider |
     |---|---|---|
@@ -495,6 +523,40 @@ IF mode = add
       - Does an existing spec already cover this flow? → SKIP, note in "Skipped" section.
       - Is this a component-level concern better tested by Storybook? → SKIP, note why.
       - Is this a backend concern better tested by `test-integration`? → SKIP, note why.
+
+    **Feasibility gate — DROP (don't force) anything in these categories; note in
+    the proposal that it's unit-tested instead.** The stateless harness + Playwright
+    make several feature classes infeasible or irreducibly flaky:
+      - **Agent / LLM-driven** (needs a live assistant/agent turn → container
+        cold-wake + a model response): @mention routing, chat replies, assistant
+        panels, onboarding *conversation*, anything asserting an echo round-trip.
+        Cold-wake is the #1 flakiness source. Assert **routing / URL / shell render
+        that settles BEFORE the wake**, never the reply.
+      - **Unreachable hydrated state** (a *stateless-seed* limitation, not a
+        categorical impossibility): seed sessions are Closed/Hibernated with no live
+        writable mount, so resource-tree files, file-viewer edit, HTML preview, and
+        "list the uploaded file" can't be reached deterministically here. (A future
+        stateful-mode harness could cover these.)
+      - **Browser-intercepted input**: `Ctrl+Shift+W`, `Ctrl+P` (Chromium swallows
+        them); HTML5 native drag-and-drop (Playwright can't drive it reliably).
+      - **Visual-only / external**: avatars, spinners, OG cards, native Web Share
+        sheet, SharePoint/Office embeds.
+    For a feature that's mostly in these classes, propose only its deterministic
+    UI slice (e.g. the route renders, a control is present) and say what's deferred.
+
+    **Determinism guards — keep these in mind here, apply them when writing in STEP A5:**
+      - After a mutation whose `waitForResponse` returns 200, a follow-up reload may
+        still not see the write (SSE broadcast + commit run in parallel) — add
+        `await page.waitForTimeout(500)` before the reload (per E2E-GUIDE).
+      - Prefer `locator(...).filter({ has })` row scoping over `xpath=..` parent hops.
+      - Live-verify selectors via chrome-devtools — but it hits the *shared* `:4000`
+        backend (state may be polluted), NOT a clean per-spec backend.
+
+    **Onboarding/assistant gotcha:** e2e users default `onboardingCompleted: true`
+    (`NODE_ENV === 'test'`), so the first-run welcome-session is suppressed. To test
+    it, flip a user unboarded via the PlatformAdmin `userAdmin.setOnboardingCompleted`
+    procedure (or `resetAssistantOnboarding`) in `beforeEach`. Avoid non-Latin-1
+    glyphs (e.g. `✕`) in test titles — they break the `x-test-test-title` HTTP header.
 
   STEP A3: User approval gate
     > "Review this plan. Reply with one of:
