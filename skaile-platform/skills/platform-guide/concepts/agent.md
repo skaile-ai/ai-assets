@@ -30,6 +30,35 @@ This mirrors the agent's own safety rules: confirm before destructive or
 consequence-bearing operations (deleting files, overwriting uncommitted work, dropping DB
 records, sending messages or data on the user's behalf).
 
+## Generic actions via `platform.act` (data-model catalog)
+
+Alongside the named `platform.*` capabilities above, two generic capabilities let the agent
+create/update/delete platform entities the user can touch:
+
+- **`platform.act`** — one action: `{ scope, type, payload, rationale }`.
+- **`platform.act_batch`** — an ordered list of steps, approved once and run in order; a
+  later step reuses an earlier step's output with a `{ "$ref": [stepIndex, "field"] }`
+  placeholder in its payload.
+
+Where the named capabilities change per deploy, these act on the **data model** (scopes =
+entities like `project`, `session`, `projectMember`; `type` = a standard CRUD action or a
+scope-specific custom action). The full set of scopes, action types, and payload parameters
+is catalogued in [`references/agent-action-catalog.md`](../references/agent-action-catalog.md)
+— open it when you need to construct an action rather than guessing field names.
+
+Rules:
+
+- **Prefer a dedicated capability when one exists** (invite user, enable asset, set voice,
+  schedule action, ...). Use `platform.act` only when none fits.
+- **Always pass a specific `rationale`** and expect the approval gate above — the action runs
+  **as the user, with their permissions**; an unauthorized action returns an authz error,
+  never a silent success.
+- **Don't attempt long-running provisioning inline** — `session.create`/`fork`/`reopen` and
+  `project.create`/`setupProject` provision a container and exceed the ~30s dispatch budget;
+  guide the user to start those from the UI instead.
+- The catalog reflects the data model as of the last platform release. If a scope or field is
+  rejected, the model moved — re-check rather than insisting.
+
 ## UI context the platform feeds the agent
 
 User prompts may be prefixed with a silent `<ui_context speaker="...">` block telling the
