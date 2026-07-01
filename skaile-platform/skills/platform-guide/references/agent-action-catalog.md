@@ -82,8 +82,9 @@ carry their own roles inline (e.g. `session.fork` needs `Owner`).
 How it resolves (so the listed role is accurate):
 
 - A **standard CRUD** action type checks the entity's effective **write** role —
-  the scope's own override, else its schema-group default (`Workspace`:
-  User/Owner/PlatformAdmin; `Config`, `Runtime`, `PXL`: Owner/PlatformAdmin).
+  the scope's own override, else its schema-group default (the **Workspace**
+  group: User/Owner/PlatformAdmin; the **Config**, **Runtime**, and **Platform**
+  groups: Owner/PlatformAdmin).
 - A **custom** action type checks that action's specific rule.
 - Some scopes add a **row-level** gate on top: a non-Owner may only write their
   **own** row (their dashboard pins, notification prefs, own credentials...).
