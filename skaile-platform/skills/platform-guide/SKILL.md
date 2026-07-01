@@ -52,7 +52,13 @@ mechanics only when the user is technical or `expertMode=true`.
 | `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels. |
 | `concepts/collaboration.md` | Multi-user sessions (mentions/reactions/threading/presence), sharing with people, public file-preview links, agent-to-agent (A2A). |
 | `concepts/previews.md` | Running and viewing an app preview; what makes a workspace previewable. |
-| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates, UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
+| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates, `platform.act` generic actions, UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
+
+### Reference (load only when constructing an action)
+
+| File | Use when... |
+| ---- | ----------- |
+| `references/agent-action-catalog.md` | You are about to call `platform.act`/`platform.act_batch` and need the exact scope, action type, and payload parameters. A large data-model dump — open the relevant scope, do not read end-to-end. |
 
 ### UI (where things live, click-paths)
 
@@ -63,8 +69,10 @@ mechanics only when the user is technical or `expertMode=true`.
 
 ## Hard rules
 
-- Never enumerate a fixed list of platform actions from memory — the action catalog changes
-  every deploy. Reference capabilities by concept and consult the live registry (`concepts/agent.md`).
+- Never enumerate the named `platform.*` capabilities from memory — that set changes every
+  deploy. Reference them by concept and consult the live registry (`concepts/agent.md`). The
+  generic `platform.act` data-model catalog (`references/agent-action-catalog.md`) is the one
+  documented exception; even so, treat it as last-known and re-check if an action is rejected.
 - Never invent UI labels, paths, or platform facts. If a detail file does not cover it, say
   so or check the live UI/capabilities rather than guess.
 - Respect approval gates and access levels (read-only connectors/mounts, role restrictions).
