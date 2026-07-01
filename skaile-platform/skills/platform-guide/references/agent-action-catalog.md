@@ -2,12 +2,14 @@
 
 > Reference for `platform-guide` (see `concepts/agent.md`). Lists every
 > state-changing action you can take on the user's behalf via `platform.act` —
-> scope, action type, and payload parameters. Load on demand, when constructing
-> an action; do not read it end-to-end for a guiding answer.
+> scope, action type, payload parameters, and the role the user must have. Load
+> on demand, when constructing an action; do not read it end-to-end for a
+> guiding answer.
 >
-> Generated from the platform data model (`platform/schema/*.model.json`) as of
-> the last release; authorization is enforced at runtime against the approving
-> human. If a scope or field here is rejected, the model moved — re-check.
+> Generated from the platform data model (`platform/schema/*.model.json`) and
+> authorization policy as of the last release; the runtime auth check against the
+> approving human is the real gate. If a scope, field, or role here is rejected,
+> the model moved — re-check.
 
 ## How acting on behalf of the user works
 
@@ -69,11 +71,37 @@ fields are optional except `id`.
 > and a non-admin approver will be denied. They are listed for completeness; the
 > runtime auth check is the real gate.
 
+## Authorization — which role the user needs
+
+The action runs as the **approving human**, and their **organization role**
+(`Owner`, `User`, `Viewer`, or the cross-org `PlatformAdmin`) is what's checked.
+Each scope below lists **Role for create / update / delete** — the roles allowed
+to run a standard CRUD action on that entity via `platform.act`. Custom actions
+carry their own roles inline (e.g. `session.fork` needs `Owner`).
+
+How it resolves (so the listed role is accurate):
+
+- A **standard CRUD** action type checks the entity's effective **write** role —
+  the scope's own override, else its schema-group default (`Workspace`:
+  User/Owner/PlatformAdmin; `Config`, `Runtime`, `PXL`: Owner/PlatformAdmin).
+- A **custom** action type checks that action's specific rule.
+- Some scopes add a **row-level** gate on top: a non-Owner may only write their
+  **own** row (their dashboard pins, notification prefs, own credentials...).
+- A few entities note "app UI is stricter" — the product's own screens restrict,
+  say, project `delete` to Owner even though the generic write role is broader;
+  row-level ownership enforces the same intent for `platform.act`.
+
+If an action returns an authorization error, the approver lacks the role — tell
+them what role is required rather than retrying.
+
 ## Scope catalog
 
 ### Workspace — projects, sessions, messages, collaboration
 
 #### `a2AExchange`
+
+**Role for create / update / delete:** PlatformAdmin
+- Normally written by the platform system user; direct agent CRUD is effectively admin-only.
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -84,6 +112,9 @@ fields are optional except `id`.
 | `status` | enum | no | one of: open | answered | timed_out | closed; default open. Status |
 
 #### `compaction`
+
+**Role for create / update / delete:** User, Owner, PlatformAdmin
+- Normally written by the platform system user; direct agent CRUD is effectively admin-only.
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -109,12 +140,16 @@ fields are optional except `id`.
 
 #### `conversation`
 
+**Role for create / update / delete:** User, Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `title` | string | yes | Title |
 | `sessionId` | id | yes | references Session. Session |
 
 #### `excelExtraction`
+
+**Role for create / update / delete:** User, Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -126,6 +161,8 @@ fields are optional except `id`.
 | `acceptedElements` | json | no | Accepted Elements |
 
 #### `featureTask`
+
+**Role for create / update / delete:** User, Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -139,6 +176,8 @@ fields are optional except `id`.
 
 #### `iteration`
 
+**Role for create / update / delete:** User, Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `sessionId` | id | yes | references Session. Session |
@@ -147,6 +186,8 @@ fields are optional except `id`.
 | `status` | enum | yes | one of: Requested | InProgress | Complete. Status |
 
 #### `message`
+
+**Role for create / update / delete:** User, Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -162,12 +203,16 @@ fields are optional except `id`.
 
 #### `messagePrivateRecipient`
 
+**Role for create / update / delete:** User, Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `messageId` | id | yes | references Message. The private message this recipient row belongs to. |
 | `userId` | string | yes | Recipient user id, or the literal '__agent__' sentinel when the agent is a private recipient (via @agent_). Stored as String, not as a User foreign key, to allow the sentinel. |
 
 #### `messageReaction`
+
+**Role for create / update / delete:** User, Viewer, Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -177,6 +222,9 @@ fields are optional except `id`.
 | `userName` | string | yes | Display name at reaction time. |
 
 #### `previewShare`
+
+**Role for create / update / delete:** Owner, PlatformAdmin
+- Normally written by the platform system user; direct agent CRUD is effectively admin-only.
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -199,6 +247,9 @@ fields are optional except `id`.
 | `lastAccessedAt` | datetime | no | Last Accessed |
 
 #### `project`
+
+**Role for create / update / delete:** User, Owner, PlatformAdmin
+- Stricter on the app UI: `update` needs Owner, PlatformAdmin; `delete` needs Owner, PlatformAdmin.
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -227,6 +278,8 @@ fields are optional except `id`.
 
 #### `projectMember`
 
+**Role for create / update / delete:** User, Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `projectId` | id | yes | references Project. Project |
@@ -244,6 +297,8 @@ fields are optional except `id`.
 
 #### `projectTeamAccess`
 
+**Role for create / update / delete:** User, Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `teamId` | id | yes | references Team. Team |
@@ -252,6 +307,8 @@ fields are optional except `id`.
 | `grantedById` | id | no | references User. Granted By |
 
 #### `session`
+
+**Role for create / update / delete:** User, Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -306,6 +363,9 @@ fields are optional except `id`.
 
 #### `sessionLink`
 
+**Role for create / update / delete:** PlatformAdmin
+- Normally written by the platform system user; direct agent CRUD is effectively admin-only.
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `callerSessionId` | id | yes | references Session. Caller Session |
@@ -313,6 +373,8 @@ fields are optional except `id`.
 | `createdById` | id | yes | references User. Created By |
 
 #### `sessionMember`
+
+**Role for create / update / delete:** User, Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -333,6 +395,9 @@ fields are optional except `id`.
 
 #### `usageRecord`
 
+**Role for create / update / delete:** User, Owner, PlatformAdmin
+- Normally written by the platform system user; direct agent CRUD is effectively admin-only.
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `messageId` | string | no | Message Id |
@@ -352,6 +417,8 @@ fields are optional except `id`.
 ### Config — organizations, teams, assets, providers, credentials
 
 #### `aIProviderConfig`
+
+**Role for create / update / delete:** Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -377,6 +444,8 @@ fields are optional except `id`.
 
 #### `assetShare`
 
+**Role for create / update / delete:** Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `organizationId` | id | yes | references Organization. Organization |
@@ -389,6 +458,9 @@ fields are optional except `id`.
 | `decidedAt` | datetime | no | Decided At |
 
 #### `dashboardPin`
+
+**Role for create / update / delete:** User, Viewer, Owner, PlatformAdmin
+- Row-level: a non-Owner may only write their **own** row.
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -404,6 +476,8 @@ fields are optional except `id`.
 
 #### `deploymentTarget`
 
+**Role for create / update / delete:** Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `organizationId` | id | yes | references Organization. Organization |
@@ -415,6 +489,9 @@ fields are optional except `id`.
 | `lastTestedAt` | datetime | no | Last Tested |
 
 #### `instanceSecret`
+
+**Role for create / update / delete:** PlatformAdmin
+- Normally written by the platform system user; direct agent CRUD is effectively admin-only.
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -430,6 +507,8 @@ fields are optional except `id`.
 
 #### `libraryAssignment`
 
+**Role for create / update / delete:** Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `organizationId` | id | yes | references Organization. Organization |
@@ -442,6 +521,8 @@ fields are optional except `id`.
 | `credentialTrust` | boolean | no | default False. When true, this assignment's sessions may receive a Shared InstanceSecret. Default false: ad-hoc/self-serve sessions never silently inherit an org key. |
 
 #### `libraryInstance`
+
+**Role for create / update / delete:** Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -458,6 +539,9 @@ fields are optional except `id`.
 
 #### `notificationOverride`
 
+**Role for create / update / delete:** User, Owner, PlatformAdmin
+- Row-level: a non-Owner may only write their **own** row.
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `userId` | id | yes | references User. User |
@@ -469,6 +553,9 @@ fields are optional except `id`.
 | `notifyBrowser` | boolean | yes | Notify Browser |
 
 #### `oAuthFlowState`
+
+**Role for create / update / delete:** PlatformAdmin
+- Normally written by the platform system user; direct agent CRUD is effectively admin-only.
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -484,6 +571,8 @@ fields are optional except `id`.
 
 #### `orgCatalogConfig`
 
+**Role for create / update / delete:** Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `organizationId` | id | yes | references Organization. Organization |
@@ -496,6 +585,8 @@ fields are optional except `id`.
 | `selfServeCatalog` | boolean | no | default True. Self-Serve Catalog |
 
 #### `orgMembership`
+
+**Role for create / update / delete:** Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -515,6 +606,8 @@ fields are optional except `id`.
 
 #### `organization`
 
+**Role for create / update / delete:** Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `name` | string | yes | Name |
@@ -527,6 +620,9 @@ fields are optional except `id`.
 | `defaultDeploymentTargetId` | id | no | references DeploymentTarget. Default Deployment Target |
 
 #### `providerLink`
+
+**Role for create / update / delete:** Owner, PlatformAdmin
+- Stricter on the app UI: `create` needs Owner, PlatformAdmin.
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -545,6 +641,8 @@ fields are optional except `id`.
 | `lastValidatedAt` | datetime | no | Last Validated |
 
 #### `scopedAsset`
+
+**Role for create / update / delete:** Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -569,6 +667,8 @@ fields are optional except `id`.
 
 #### `serviceAccountCredential`
 
+**Role for create / update / delete:** Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `providerLinkId` | id | yes | references ProviderLink. Provider Link |
@@ -580,6 +680,9 @@ fields are optional except `id`.
 
 #### `skaileConfig`
 
+**Role for create / update / delete:** User, Owner, PlatformAdmin
+- Row-level: a non-Owner may only write their **own** row.
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `name` | string | no | Name |
@@ -589,6 +692,8 @@ fields are optional except `id`.
 
 #### `team`
 
+**Role for create / update / delete:** Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `name` | string | yes | Name |
@@ -597,6 +702,8 @@ fields are optional except `id`.
 | `organizationId` | id | yes | references Organization. Organization |
 
 #### `teamMember`
+
+**Role for create / update / delete:** Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -613,6 +720,9 @@ fields are optional except `id`.
 
 #### `userNotificationPreference`
 
+**Role for create / update / delete:** User, Owner, PlatformAdmin
+- Row-level: a non-Owner may only write their **own** row.
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `userId` | id | yes | references User. User |
@@ -621,6 +731,9 @@ fields are optional except `id`.
 | `notifyBrowser` | boolean | yes | Notify Browser |
 
 #### `userProviderCredential`
+
+**Role for create / update / delete:** User, Owner, PlatformAdmin
+- Row-level: a non-Owner may only write their **own** row.
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -637,6 +750,8 @@ fields are optional except `id`.
 
 #### `deployment`
 
+**Role for create / update / delete:** Owner, PlatformAdmin
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `label` | string | yes | Label |
@@ -651,6 +766,8 @@ fields are optional except `id`.
 | `errorDetails` | string | no | Error Details |
 
 #### `scheduledAction`
+
+**Role for create / update / delete:** Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
@@ -668,6 +785,9 @@ fields are optional except `id`.
 
 #### `sessionContainer`
 
+**Role for create / update / delete:** Owner, PlatformAdmin
+- Normally written by the platform system user; direct agent CRUD is effectively admin-only.
+
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
 | `sessionId` | id | yes | references Session. Session |
@@ -681,6 +801,8 @@ fields are optional except `id`.
 ### Platform — users
 
 #### `user`
+
+**Role for create / update / delete:** Owner, PlatformAdmin
 
 | Field | Type | Req | Notes |
 |-------|------|-----|-------|
