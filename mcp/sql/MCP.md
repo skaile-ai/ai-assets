@@ -13,6 +13,22 @@ payload:
 env:
   SQL_MCP_DIALECT: postgres
   SQL_MCP_ACCESS: readonly
+# Configure-form fields (platform schema widget). Keys are the env var names;
+# values fold into the server env via the instance config / secret path.
+fields:
+  - key: SQL_MCP_DSN
+    label: Connection string (DSN)
+    type: password
+    required: true
+    sensitive: true
+  - key: SQL_MCP_DIALECT
+    label: "Dialect (postgres | mysql | sqlite | mssql)"
+    type: text
+    default: postgres
+  - key: SQL_MCP_ACCESS
+    label: "Access scope (readonly | dml | full)"
+    type: text
+    default: readonly
 keywords:
   - sql
   - postgres
