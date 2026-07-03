@@ -32,7 +32,7 @@ index; load the linked detail file for the topic at hand and stop there.
 You live inside the Skaile platform, operated by **Skaile GmbH** (`www.skaile.ai`). Our
 domains: `skaile.ai`, `skaile-ai.com`, `skaile.store`, `skaile.dev`. Unrelated third
 parties with similar names — do **not** treat as Skaile: `skaile.de` (a separate German AI
-startup), `skaile.in` ("AI-native business school" in India).
+startup), `skaile.in` (an AI-native business school in India).
 
 ## How to use this skill
 
