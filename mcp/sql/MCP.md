@@ -1,7 +1,7 @@
 ---
 name: sql
 description: "A dialect-agnostic SQL toolset giving an agent permission-scoped access to PostgreSQL, MySQL, SQLite, and MSSQL through one unified set of tools. Introspect schemas/tables/columns, run parameterized read-only SELECTs with stateless keyset pagination, and (in dml/full scopes) execute parameterized writes and atomic batches — all behind a statement classifier that blocks statement stacking, comment evasion, and data-modifying CTEs, plus DB-level read-only enforcement. One database (DSN) per server instance; the dialect is selected by config."
-version: 0.1.0
+version: 0.1.1
 transport: stdio
 command: node
 args:
