@@ -4,7 +4,7 @@ description: 'Day-to-day development workflow for the skaile-dev monorepo — im
 type: domain
 building_blocks:
   agents: 'skaile-development — routes tasks to the right skills, maintains session context.'
-  skills: 'git, implement, ship, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, e2e-platform, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, jenkins-debug, session-review, session-analysis, verify-ui'
+  skills: 'git, implement, ship, meat, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, e2e-platform, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, jenkins-debug, session-review, session-analysis, verify-ui'
   references: 'Branch naming, worktree patterns, test stack map, audit checklists, readiness criteria, devlog entry formats, documentation tier roles, commit spec.'
 stage: beta
 ---
@@ -44,6 +44,7 @@ Reach for `skaile-development` when you are:
 | `skills/review/`                   | `review` — local code review for staged/committed changes (quality, security, scope)                              |
 | `skills/implement/`                | `implement` — monorepo-aware implementation orchestrator                                                               |
 | `skills/ship/`                     | `ship` — implement & ship a work item end-to-end in any repo: GitHub issue → worktree → plan → implement → review → PR → babysit CI/reviews → squash-merge |
+| `skills/meat/`                     | `meat` — distill a git diff into a human "reading diff" (judgment calls surfaced, mechanical noise collapsed); optional preview at ship's merge gate |
 | `skills/test/`                     | `test` — test runner: executes suites across the monorepo; triages failures                                            |
 | `skills/test-plan/`                | `test-plan` — per-package test plan from CLAUDE.md + source tree (feeds test-unit/-integration/-e2e)                   |
 | `skills/test-unit/`                | `test-unit` — unit test setup + generation (vitest/jest-aware, per package)                                            |

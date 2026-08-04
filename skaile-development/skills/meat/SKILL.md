@@ -16,7 +16,6 @@ metadata:
   - "reading-diff"
   - "diff"
   - "comprehension"
-  - "code-review"
   - "skaile-development"
   source: "NEW"
   stage: "alpha"
