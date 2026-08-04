@@ -15,7 +15,10 @@ real UI strings.
     submenu (Light/Dark/System), a **Platform** admin submenu (admins only), and **Sign Out**.
   - Toggle the sidebar with **B**.
 - **Top header** — a breadcrumb with inline **org / project / session switchers**, the page
-  title, a row of open **session tabs**, and the right-sidebar toggle.
+  title, a row of open **session tabs**, a **Send feedback to the Skaile team** button
+  (report a bug / suggest an idea / ask a question — routes to the personal assistant when
+  available, else opens a form; reports reach the Skaile team directly), and the
+  right-sidebar toggle.
 - **Command palette (Cmd+K)** — global fuzzy search and action launcher across sessions,
   projects, settings, and registered actions. This is the primary "how do I do X" entry
   point — most features have a command. Right sidebar toggles with **.** (period).
@@ -27,7 +30,8 @@ real UI strings.
 | **Dashboard**     | `/<org>/dashboard`            | See all projects + recent activity; create a project; switch org. |
 | **Account**       | `/account`                    | Edit name, email, profile picture. |
 | **Preferences**   | `/<org>/preferences`          | Notification mode (All / Mentions / Direct / Off), sound, browser notifications. |
-| **My Connections**| `/<org>/my-connections`       | Personal **Connect** flows for GitHub, GitLab, SharePoint, Google Drive, NextCloud, Dropbox (OAuth/PAT). |
+| **My Connections**| `/<org>/my-connections`       | Personal **Connect** flows for GitHub, GitLab, SharePoint, Google Drive, NextCloud, Dropbox, Box (OAuth/PAT). |
+| **Flows**         | `/<org>/flows`                | Browse and author flow definitions; open a flow's graph view/editor. Feature-flagged (`ff_flows`) — may be hidden on a deployment. See `concepts/flows.md`. |
 
 ## Creating a project (wizard)
 
@@ -75,7 +79,9 @@ Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner).
 Path: `/<org>/settings` (admin only). Tabs: **Organization** (branding), **Users**
 (invite/roles/revoke), **Teams**, **Providers** (org-level connectors: Git / Files / Transport,
 with UserDelegation or ServiceAccount credentials), **AI Providers** (model endpoints:
-Anthropic/OpenAI/Azure/Custom, scoped Global/Org/Project), **Costs**, **Deployment Targets**,
+Anthropic/OpenAI/Custom, scoped Global/Org/Project, delivered direct or via a cloud
+transport — AWS Bedrock, GCP Vertex, Azure AI Foundry, custom gateway — with per-config
+health checks), **Costs**, **Deployment Targets**,
 and **Catalog** (manage reusable assets/skills, assign to teams/projects).
 
 ## Where to connect a data source (cheat sheet)
