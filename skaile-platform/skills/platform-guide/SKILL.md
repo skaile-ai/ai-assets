@@ -3,7 +3,8 @@ name: "platform-guide"
 description: "Deep knowledge of the Skaile platform's UI and conceptual model so the
   assistant can guide users and act on their behalf. Use when the user asks 'how do I...',
   'where is...', 'where do I find...', 'walk me through...', or 'help me with the platform';
-  or asks about projects, sessions, workspaces, flows, previews, sharing, inviting people,
+  or asks about projects, sessions, workspaces, flows, run groups, batch runs, recipes,
+  webhooks, previews, agent-controlled apps (Skailify), sharing, inviting people,
   connecting a data source, enabling a skill/asset, scoped sessions, agent-to-agent, roles
   and permissions, hibernation, or any platform surface. Load on demand, not always-on."
 metadata:
@@ -18,6 +19,9 @@ keywords:
   - session
   - project
   - flow
+  - run-group
+  - webhook
+  - skailify
   - sharing
 ---
 
@@ -49,6 +53,7 @@ mechanics only when the user is technical or `expertMode=true`.
 | ---- | -------------------------------- |
 | `concepts/model.md` | The big picture: org/project/session/workspace, source types, mounts vs connectors, assets/skills, flows, roles & permissions. Start here for orientation. |
 | `concepts/sessions.md` | Session lifecycle (hibernate/wake/close), multiple sessions, **scoped sessions**, forking/renaming. |
+| `concepts/flows.md` | Flows and the Flows page/editor, runs and gates, **run groups** (batch / unattended processing), recipes, webhook triggers and the session webhook inbox. |
 | `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels. |
 | `concepts/collaboration.md` | Multi-user sessions (mentions/reactions/threading/presence), sharing with people, public file-preview links, agent-to-agent (A2A). |
 | `concepts/previews.md` | Running and viewing an app preview; what makes a workspace previewable. |

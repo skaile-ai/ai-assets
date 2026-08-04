@@ -20,6 +20,16 @@ check, and optionally a `skaile.preview.json` declaring the app(s). If the user 
 can't I preview this", the answer is usually that the workspace does not yet meet the
 contract — the agent can help create the missing pieces.
 
+## Agent-controllable apps (Skailify)
+
+An app in the workspace can opt into the Skailify protocol (`protocol: true` in
+`skaile.preview.json`). It then opens a secure back-connection to the platform and
+registers its own actions as capabilities — the session agent can read the app's state
+and operate it (move a card, create a record, change a view) on the user's behalf,
+through the same approval flow as any other capability. To the user this means: "ask the
+agent to do it in the app" works for Skailify-enabled apps. Whether a given app supports
+this is discovered at runtime like all capabilities — never assume it.
+
 ## Practical notes for guiding users
 
 - A preview runs against a **snapshot or live mount** of the session files — it is a

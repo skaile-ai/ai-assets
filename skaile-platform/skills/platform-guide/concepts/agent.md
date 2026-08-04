@@ -15,8 +15,11 @@ at runtime**, never assumed from memory.
   it (e.g. via `ToolSearch` or the driver equivalent) before concluding it is unavailable.
 - Capabilities cover, conceptually: listing the project's sessions and users, inviting a
   user, enabling/searching/listing assets, opening a file in the user's UI, searching
-  GIFs/images, A2A (list peers / ask / send), setting an avatar, and more. Treat these as
-  *categories* — confirm the exact action against the live registry.
+  GIFs/images, A2A (list peers / ask / send), setting an avatar, scheduling future/recurring
+  actions, run-group operations (create / append inputs / read state), creating a session
+  webhook inbox, and — in Skailify-enabled sessions — actions registered by an embedded
+  app itself. Treat these as *categories* — confirm the exact action against the live
+  registry.
 
 ## Approval-gated actions
 
@@ -29,6 +32,12 @@ returns a real result.
 This mirrors the agent's own safety rules: confirm before destructive or
 consequence-bearing operations (deleting files, overwriting uncommitted work, dropping DB
 records, sending messages or data on the user's behalf).
+
+Some approval-gated capabilities can be **pre-approved** by configuration: an owner grants
+a specific capability against a specific target (e.g. "append inputs to this one run
+group"), and matching calls then dispatch without a card, acting as the granting user.
+Whether a call is covered is decided by the platform — invoke normally and handle either
+outcome; never assume a grant exists.
 
 ## Generic actions via `platform.act` (data-model catalog)
 

@@ -66,6 +66,9 @@ A **flow** is a multi-step pipeline (a DAG of steps) the agent can run on the us
 behalf — for repeatable, structured work rather than a single chat turn. A running flow
 has a panel in the workspace and survives session hibernation: on wake it is rehydrated
 in the same state and the next user action (approval, input, message) resumes it.
+Flows are assets with five-scope ownership, have an org-level Flows page with a visual
+editor, and can be fanned out over many inputs as a **run group** — see
+`concepts/flows.md` for the full model (editing, gates, run groups, recipes, webhooks).
 
 The `session` state store tracks pipeline context (`activePhase`, `phaseStatus`,
 `pipelineProgress`, `mode`) when a session is running a pipeline.

@@ -13,7 +13,7 @@ description: "[skaile-development] Implement AND ship a single work item end-to-
   clean up, clean up only, or stop (optional meat reading diff).
   Use when the user reports a bug, requests a feature,
   asks for a UI fix or chore in any repo, and wants the whole cycle done in one shot."
-version: 1.1.0
+version: 1.2.0
 metadata:
   tags:
   - "ship"
@@ -225,6 +225,7 @@ MUST  babysit the PR (Phase 12): watch CI to completion (this also waits for aut
 MUST  fix only items RELATED to the change (e.g. lint/type/test failures the change caused, review nits on the diff); for unrelated/pre-existing/architectural problems, REPORT them to the user and do NOT fix them
 MUST  converge the babysit loop — cap fix rounds, and if CI stays red on something unrelated or a review item recurs after a good-faith fix, stop and ask (gate #8)
 MUST  ask the user at the end (Phase 13) to choose: squash-merge + cleanup | cleanup only | stop here — and execute exactly that
+MUST  after a MERGE of user-visible platform work, sync the capability docs (Phase 13b) — `platform/features/SKAILE-PLATFORM-CAPABILITIES.md` is the LEADING copy and is always updated; the business doc mirror and the platform-guide skill only when their paths are accessible on this machine
 MUST  use squash-and-merge (`gh pr merge <n> --squash`) when merging
 MUST  on cleanup: remove the worktree and delete the local branch; on merge+cleanup also delete the remote branch
 MUST  report back with: repo, issue number + URL, branch, PR URL + final state (merged / open), 1-2 line summary, deferred/unrelated items
@@ -747,6 +748,37 @@ STEP 15: Ask the user how to finish (gate #9)
 
 EMIT [ship] finished disposition=<merge+cleanup|cleanup|stop>
 
+# ── Phase 13b: Capability-Docs Sync (conditional) ─────────────────
+
+STEP 15b: Sync the platform capability docs
+  Run ONLY if BOTH hold:
+    - disposition = merge+cleanup (the change is on main)
+    - repo = platform AND the change adds/alters a USER-VISIBLE capability
+      (new feature, new provider/connector/integration, new agent capability, new UI
+      surface — NOT internal refactors, bug fixes without behavior change, CI/chores)
+  Otherwise print > "Capability docs: skipped (<not merged | not platform | not user-visible>)." and continue.
+
+  1. Platform capabilities doc — the LEADING copy, always available (it lives in the repo):
+     `platform/features/SKAILE-PLATFORM-CAPABILITIES.md`
+     — add or extend the matching section in its business/use-case voice (What it does /
+     Capabilities / Business value; no code-level detail); bump the `updated:` frontmatter
+     date. Also add/refresh the matching feature doc under `platform/features/<NN-section>/`.
+  2. Business mirror (SharePoint-synced; edit = publish) — ONLY if accessible
+     (`test -e <path>`; absent on most machines, skip with a one-line note):
+     `/mnt/c/Users/peter/Skaile GmbH/Management - Documents/General/concept/SKAILE-PLATFORM-CAPABILITIES.md`
+     — copy the updated leading doc there verbatim.
+  3. Platform-guide skill — ONLY if the ai-assets checkout is accessible:
+     `<skaile-dev-root>/ai-assets/skaile-platform/skills/platform-guide/`
+     — update the matching `concepts/` or `ui/` detail file (and the SKILL.md index +
+     keywords only if a new topic area appeared). Honor its hard rules: real UI labels in
+     **bold**, never enumerate live `platform.*` capabilities from memory. If the
+     ai-assets checkout is clean, commit there with a one-line message; else leave the
+     edit uncommitted and note it.
+
+  Print: > "Capability docs: <updated all | updated <X>, skipped <Y> (not accessible)>."
+
+EMIT [ship] capability_docs_synced targets=<N>
+
 # ── Phase 14: Final Report ────────────────────────────────────────
 
 STEP 16: Print the final block
@@ -829,6 +861,7 @@ CHECKLIST
   - [ ] PR opened (Closes #<number>; PR template honored); implementation summary reported
   - [ ] Babysit loop run: CI green / bots finished / related items (incl. nits) fixed; unrelated items reported, not fixed; loop converged
   - [ ] Final disposition asked (merge+cleanup / cleanup / stop; reading-diff option offered iff the `meat` skill is available) and executed; squash used for merge
+  - [ ] Capability docs synced after a merged user-visible platform change: `platform/features/` leading doc always; business mirror + platform-guide skill skipped gracefully when not accessible
   - [ ] Cleanup (when chosen) removed worktree + local branch (+ remote branch on merge); worktree/branches kept on "stop"
   - [ ] Final report printed
 
@@ -861,4 +894,5 @@ CHECKLIST
 - **Uses:** `gh` CLI for issue + PR + CI/review state + merge; `git` directly for repo/worktree/branch/commit/push
 - **Reads:** the target repo's `CLAUDE.md` + `package.json`, the root `skaile-dev/CLAUDE.md` Formatting/Testing tables, affected source, `gh label/issue/pr` state
 - **Writes:** a GitHub issue + a PR on the target repo, implementation + babysit commits on the branch, a transient plan file (deleted); on merge, a squashed commit on the repo's main
+- **Writes (conditional, Phase 13b):** after merging user-visible platform work — `platform/features/SKAILE-PLATFORM-CAPABILITIES.md` (the leading copy, always) plus its `features/<NN-section>/` doc; mirrored to the business doc (`/mnt/c/.../concept/`) and reflected in the ai-assets `platform-guide` skill only when those paths are accessible
 - **Never writes:** any repo's legacy markdown issue folder — tracking is GitHub Issues
