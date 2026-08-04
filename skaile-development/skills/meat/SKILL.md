@@ -127,7 +127,7 @@ STEP 2: Abridge the substantive files ($ git diff -M <range>)
      NOTHING - say so instead of padding.
 
 STEP 3: Emit the reading diff
-  ```
+  ````
   ── Reading diff: <range> (<N> files, +<A>/-<D>) ─────────────────
   TL;DR: <2-4 sentences: what this change does, conceptually>
 
@@ -144,7 +144,7 @@ STEP 3: Emit the reading diff
   <the abridged diff: verbatim retained lines, `...` fold rows, headers per rule 6>
   ```
   ─────────────────────────────────────────────────────────────────
-  ```
+  ````
   Omit an empty prose section rather than writing "none" (except Surprises - state
   "none" explicitly there; its absence is information). The diff body carries the
   behavior changes; do not restate them as prose.
