@@ -10,9 +10,10 @@ description: "[skaile-development] Implement AND ship a single work item end-to-
   reports the implementation summary, then BABYSITS the PR — watching CI to green,
   waiting for automated review bots, and fixing every change-request related to the
   work (including style nits) in a loop — and finally asks whether to squash-merge +
-  clean up, clean up only, or stop. Use when the user reports a bug, requests a feature,
+  clean up, clean up only, or stop (optional meat reading diff).
+  Use when the user reports a bug, requests a feature,
   asks for a UI fix or chore in any repo, and wants the whole cycle done in one shot."
-version: 1.0.0
+version: 1.1.0
 metadata:
   tags:
   - "ship"
@@ -127,7 +128,7 @@ metadata:
 | 10 | Open a PR against `main` that `Closes #<number>` (respect PR template + changeset rules) |
 | 11 | **Report the implementation summary** to the user |
 | 12 | **Babysit the PR**: watch CI to green, wait for review bots, fix every related change-request (incl. nits) in a loop; report unrelated/architectural problems without fixing them |
-| 13 | Ask the user: **squash-merge + clean up** \| **clean up only** \| **stop here** — then execute the choice |
+| 13 | Ask the user: **squash-merge + clean up** \| **clean up only** \| **stop here** (plus **reading diff first** via the `meat` skill, if installed) — then execute the choice |
 | 14 | Final report |
 
 The worktree and local branch **persist** through phases 9–12 (they are where babysit
@@ -687,6 +688,9 @@ EMIT [ship] babysit_done rounds=<R> fixed=<N> unrelated=<M>
 # ── Phase 13: Final Disposition (the one planned checkpoint) ───────
 
 STEP 15: Ask the user how to finish (gate #9)
+  Optional reading-diff preview: IF a `meat` skill is available in this session's
+  skill list, offer it as a 4th option below. If absent, ask with the three
+  disposition options only — never fail or warn about it.
   Present concise state, then ask (use the AskUserQuestion tool):
     Context line: "PR <pr_url> — CI <green|no-checks|blocked: …>, reviews <addressed|none yet|N blessed-nits>.
                    <if reviewDecision requires approval and none is present: 'Note: branch
@@ -696,6 +700,12 @@ STEP 15: Ask the user how to finish (gate #9)
       - "Squash-merge + clean up" — squash-merge the PR, delete the remote branch, remove the worktree, delete the local branch.
       - "Clean up only" — leave the PR open; remove the worktree + delete the local branch (keep the remote branch + PR).
       - "Stop here" — leave everything as-is (worktree, branches, PR all intact).
+      - [only if the meat skill is available] "Reading diff first" — distill the PR's
+        diff into a reading diff before deciding.
+  IF the user picks "Reading diff first":
+    Invoke the `meat` skill from inside <worktree_path> with
+    range = origin/<default_branch>...HEAD, print its reading diff, then re-ask the
+    question with the three disposition options only.
 
   EXECUTE the choice:
     SQUASH-MERGE + CLEANUP:
@@ -818,7 +828,7 @@ CHECKLIST
   - [ ] origin/<default_branch> merged into the branch; conflicts resolved; re-pushed
   - [ ] PR opened (Closes #<number>; PR template honored); implementation summary reported
   - [ ] Babysit loop run: CI green / bots finished / related items (incl. nits) fixed; unrelated items reported, not fixed; loop converged
-  - [ ] Final disposition asked (merge+cleanup / cleanup / stop) and executed; squash used for merge
+  - [ ] Final disposition asked (merge+cleanup / cleanup / stop; reading-diff option offered iff the `meat` skill is available) and executed; squash used for merge
   - [ ] Cleanup (when chosen) removed worktree + local branch (+ remote branch on merge); worktree/branches kept on "stop"
   - [ ] Final report printed
 
@@ -847,6 +857,7 @@ CHECKLIST
 
 - **Called by:** the `skaile-development` agent when the user reports a bug, requests a feature, asks for a UI fix, files a chore, or raises an issue in any skaile-dev repo
 - **Calls (via Agent tool):** `implement` (or `general-purpose`) for the change; `review` for the diff review
+- **Calls (optional, soft dependency):** the `meat` skill for a reading diff at the Phase 13 gate — only offered when it is installed; ship works unchanged without it
 - **Uses:** `gh` CLI for issue + PR + CI/review state + merge; `git` directly for repo/worktree/branch/commit/push
 - **Reads:** the target repo's `CLAUDE.md` + `package.json`, the root `skaile-dev/CLAUDE.md` Formatting/Testing tables, affected source, `gh label/issue/pr` state
 - **Writes:** a GitHub issue + a PR on the target repo, implementation + babysit commits on the branch, a transient plan file (deleted); on merge, a squashed commit on the repo's main
