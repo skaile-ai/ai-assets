@@ -5,6 +5,7 @@ dependencies:
   - skill:review
   - skill:implement
   - skill:ship
+  - skill:meat
   - skill:test
   - skill:e2e-platform
   - skill:doc
