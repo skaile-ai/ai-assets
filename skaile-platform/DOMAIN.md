@@ -4,7 +4,7 @@ description: "Runtime surface of the Skaile platform - agent definitions that ru
 type: domain
 building_blocks:
   agents: "agents/ - GitAgent-style agent definitions (currently: assistant/ - the primary Skaile assistant)."
-  skills: "skills/ - on-demand knowledge skills loaded by the assistant (currently: platform-guide/ - the platform UI + conceptual-model guide)."
+  skills: "skills/ - on-demand knowledge skills loaded by the assistant (currently: platform-guide/ - the platform UI + conceptual-model guide; auto-ship/ - the auto-ship flow operator)."
 stage: alpha
 ---
 
@@ -23,7 +23,8 @@ skaile-platform/
 │       ├── RULES.md
 │       └── SOUL.md
 └── skills/                <- on-demand knowledge skills for the assistant
-    └── platform-guide/    <- platform UI + conceptual-model guide (progressive disclosure)
+    ├── platform-guide/    <- platform UI + conceptual-model guide (progressive disclosure)
+    └── auto-ship/         <- operator skill for the auto-ship flow (issue -> merged PR)
 ```
 
 ## Agents in this domain
@@ -37,3 +38,4 @@ skaile-platform/
 | Skill | Source | Purpose |
 |---|---|---|
 | platform-guide | `skaile-platform/skills/platform-guide` | On-demand platform UI + conceptual-model guide for the assistant (progressive disclosure; no live-capability enumeration). |
+| auto-ship | `skaile-platform/skills/auto-ship` | Operator skill for the auto-ship flow: one GitHub issue to a merged PR, request_input for every question, mandatory human gate on merge. |
