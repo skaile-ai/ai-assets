@@ -8,9 +8,15 @@ description: "Use when an agent needs to act on GitHub - read or open issues and
   permissions. Reach for this over raw REST/GraphQL when the task spans several
   GitHub operations or you want typed, permission-scoped tools rather than
   hand-rolled API calls."
-version: 0.1.0
+version: 0.1.1
 transport: http
 url: https://api.githubcopilot.com/mcp/
+fields:
+  - key: GITHUB_MCP_PAT
+    label: GitHub personal access token (fine-grained)
+    type: password
+    required: false
+    sensitive: true
 keywords:
   - github
   - git
