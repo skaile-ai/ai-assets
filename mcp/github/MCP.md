@@ -8,9 +8,15 @@ description: "Use when an agent needs to act on GitHub - read or open issues and
   permissions. Reach for this over raw REST/GraphQL when the task spans several
   GitHub operations or you want typed, permission-scoped tools rather than
   hand-rolled API calls."
-version: 0.1.0
+version: 0.1.1
 transport: http
 url: https://api.githubcopilot.com/mcp/
+fields:
+  - key: GITHUB_MCP_PAT
+    label: GitHub personal access token (fine-grained)
+    type: password
+    required: false
+    sensitive: true
 keywords:
   - github
   - git
@@ -75,6 +81,12 @@ This manifest deliberately carries **no** `Authorization` header and **no**
 `auth` / `providerLinkId`. Those are install-specific and are applied by the
 platform when the asset instance is enabled, not baked into the shared catalog
 entry:
+
+The optional `GITHUB_MCP_PAT` field enables the Configure UI to store an
+org-shared fine-grained PAT fallback. It is not yet injected into this remote
+HTTP transport, so setting it does not affect requests until
+[`skaile-ai/platform#2031`](https://github.com/skaile-ai/platform/issues/2031)
+lands. Use the OAuth/provider-link path below in the meantime.
 
 - The platform sets `auth: backend` + a GitHub OAuth `providerLinkId` on the
   `McpServerEntry`
