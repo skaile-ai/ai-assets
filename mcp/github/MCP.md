@@ -82,6 +82,12 @@ This manifest deliberately carries **no** `Authorization` header and **no**
 platform when the asset instance is enabled, not baked into the shared catalog
 entry:
 
+The optional `GITHUB_MCP_PAT` field enables the Configure UI to store an
+org-shared fine-grained PAT fallback. It is not yet injected into this remote
+HTTP transport, so setting it does not affect requests until
+[`skaile-ai/platform#2031`](https://github.com/skaile-ai/platform/issues/2031)
+lands. Use the OAuth/provider-link path below in the meantime.
+
 - The platform sets `auth: backend` + a GitHub OAuth `providerLinkId` on the
   `McpServerEntry`
   (`platform/backend/libs/session/src/skaile-config.types.ts`).
