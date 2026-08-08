@@ -61,7 +61,8 @@ Reach for this when the agent's task involves any of:
 
 - **Animations, transitions, slide-master / theme editing, SmartArt, comments, embedded video/audio, VBA inspection** — not in scope for v1.
 - **Creating charts from scratch** — only `ppt.list_charts` + `ppt.update_chart_data` are supported in v1 (re-data an existing chart). Authoring new charts is v2.
-- **Legacy `.ppt` (binary) or `.odp` input** — not supported.
+- **Legacy `.ppt` (binary) or `.odp` input** — not supported. `use-anydoc` reads both to Markdown for read-only extraction (text and tables only — no shapes, styling, images, or rendering).
+- **Read-only extraction of an existing deck** — if the task is only to read, summarize, or pull data out of a `.pptx`, `use-anydoc` converts it to Markdown far more cheaply than opening a session here. Reach for this server once the task involves editing, rendering, or exporting.
 - **Batch document processing without session affinity** — this is a stateful, one-agent-per-process server. For parallel processing of many decks, run multiple containers.
 
 ## Runtime

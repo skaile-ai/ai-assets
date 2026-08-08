@@ -48,6 +48,16 @@ Docker-based MCP server for Excel file operations, built on Apache POI 5.5.1.
 - The agent needs to evaluate formulas, edit cells, insert or delete rows/columns, rename or reorder sheets, manage named ranges, or extract VBA source.
 - The task involves structured spreadsheet data where formula correctness and cell-type fidelity matter — not quick-and-dirty CSV work (use plain file tools for that).
 
+## When NOT to reach for this
+
+- **`.xlsb` (binary workbooks)** — rejected at open; POI has no binary-workbook reader. Convert with `use-anydoc` for read-only extraction.
+- **The file isn't a spreadsheet** (`.docx`, `.pdf`, `.odt`, `.rtf`, `.epub`, `.csv`) — `use-anydoc` reads all of these to Markdown; `use-docling` if it needs OCR.
+
+Both are **read-only extraction paths, not a shortcut for editing**. Two traps if you use `use-anydoc` to orient before editing here:
+
+- **Its grid has no A1 addresses**, and it starts at the sheet's *used range*, not at A1 — a sheet whose data begins at D11 yields a table whose first column is D, with nothing in the output saying so. Never translate a position in anydoc output into an A1 address for a `range.set`. Re-locate the cell with `range.get` / `table.list` / `named_range.list` first.
+- **It reads cached values only**, so cells this server left as `type: "formula_uncomputed"` come through as *blank*. Call `workbook.recalculate` and `workbook.save` before converting a file this server wrote.
+
 ## Capabilities
 
 28 tools over stdio, grouped by area:
@@ -68,7 +78,7 @@ Highlights: in-memory open/create behind a session handle; typed-cell reads that
 - **No Power Query / DAX / data model / pivot tables.** Not introspected or editable.
 - **No charts or conditional-formatting authoring.** Merged regions and data validation are read-only (reported, not writable).
 - **Rich / linked data types are preserve-only.** Stock/geo and other rich-data parts survive a round-trip but cannot be read or modified.
-- **`.xlsb` (binary) is rejected at open.** `.xlsx`, `.xlsm`, `.xls` are supported; styling is `.xlsx`/`.xlsm` only.
+- **`.xlsb` (binary) is rejected at open.** `.xlsx`, `.xlsm`, `.xls` are supported; styling is `.xlsx`/`.xlsm` only. The `FORMAT_UNSUPPORTED` message routes the caller to `use-anydoc` for read-only extraction — see **When NOT to reach for this** above for the two traps that come with it.
 
 ## Runtime
 

@@ -12,6 +12,7 @@ suggested_taxonomy:
       - "knowledge-research/knowledge-paper-research"
   - label: "Documents"
     assets:
+      - "use/use-anydoc"
       - "use/use-docling"
       - "use/use-outline"
       - "use/use-outline-cli"
