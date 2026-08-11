@@ -26,7 +26,8 @@ metadata:
 | `use-outline-cli` | Outline wiki (CLI) | CLI subprocess |
 | `use-elevenlabs` | ElevenLabs TTS | REST API |
 | `use-ideogram-image` | Ideogram image generation | REST API (BYO-key) |
-| `use-docling` | Document conversion | CLI subprocess |
+| `use-anydoc` | Office doc → Markdown (no OCR) | CLI subprocess |
+| `use-docling` | Document conversion (OCR/VLM/ASR) | CLI subprocess |
 
 ## API Key Handling
 

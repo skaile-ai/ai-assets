@@ -7,6 +7,7 @@ dependencies:
   - skill:use-searxng
   - skill:use-outline
   - skill:use-outline-cli
+  - skill:use-anydoc
   - skill:use-docling
   - skill:use-elevenlabs
   - skill:use-ideogram-image

@@ -5,7 +5,7 @@ type: domain
 building_blocks:
   contracts: 'Integration skill conventions: output format (always JSON-compatible), error handling protocol, authentication patterns, and when to use CLI vs API variant.'
   docs: 'Service capability matrix, authentication setup guides, and rate-limit notes.'
-  skills: 'One skill per service: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), docling (document conversion), elevenlabs (TTS), use-ideogram-image (image generation via REST), outline (wiki API), outline-cli (wiki CLI), revealjs (presentation decks, zero-install), slidev (presentation decks, markdown).'
+  skills: 'One skill per service: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), anydoc (fast office-doc to Markdown, no OCR), docling (document conversion incl. OCR/VLM/ASR), elevenlabs (TTS), use-ideogram-image (image generation via REST), outline (wiki API), outline-cli (wiki CLI), revealjs (presentation decks, zero-install), slidev (presentation decks, markdown).'
   agents: 'TBD'
   prompts: 'TBD'
   tools: 'TBD'
@@ -34,7 +34,8 @@ This separation means service-specific knowledge (API quirks, rate limits, auth 
 | `use-perplexity`   | Perplexity (via OpenRouter) | Research-focused web search with citations                |
 | `use-searxng`      | SearXNG                     | Privacy-first local web search (self-hosted)              |
 | `use-context7-api` | Context7                    | Library documentation lookup by package name              |
-| `use-docling`      | Docling                     | Document conversion (PDF, DOCX → markdown)                |
+| `use-anydoc`       | anydoc (Firecrawl)          | Fast read-only office-doc → markdown; no OCR, no ML       |
+| `use-docling`      | Docling                     | Document conversion (PDF, DOCX → markdown); OCR/VLM/ASR   |
 | `use-elevenlabs`   | ElevenLabs                  | Text-to-speech audio generation                           |
 | `use-ideogram-image` | Ideogram                  | Image generation/editing via REST API (central org key)   |
 | `use-outline`      | Outline                     | Wiki management via REST API                              |
@@ -48,3 +49,4 @@ This separation means service-specific knowledge (API quirks, rate limits, auth 
 - Authentication credentials are read from environment variables — never hardcoded
 - Skills handle pagination and rate limits internally; callers see a flat result set
 - When a service has both API and CLI variants (`outline`), prefer the API variant for agent use and the CLI variant for human-interactive use
+- Document conversion has two skills: reach for `use-anydoc` on digital-native office documents (fast, pure Rust, no ML), and `use-docling` when the input needs OCR, a vision model, or speech transcription. Neither replaces `mcp:excel` / `mcp:ppt` for tasks that **modify** a document - both are read-only and drop formulas, cell addresses, and styling
