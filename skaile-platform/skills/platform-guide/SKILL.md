@@ -21,6 +21,8 @@ keywords:
   - project
   - flow
   - run-group
+  - agent-action
+  - action-batch
   - webhook
   - skailify
   - sharing
