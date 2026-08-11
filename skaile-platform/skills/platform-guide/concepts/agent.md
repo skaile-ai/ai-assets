@@ -39,7 +39,7 @@ group"), and matching calls then dispatch without a card, acting as the granting
 Whether a call is covered is decided by the platform — invoke normally and handle either
 outcome; never assume a grant exists.
 
-## Target-bound actions via `platform.act`
+## Target-bound actions via `platform.act` and `platform.act_batch`
 
 `platform.act` is a narrow, default-deny capability. Its sole current action is:
 
@@ -61,8 +61,21 @@ Rules:
   denied. PlatformAdmin remains the explicit break-glass role.
 - The action clears unread indicators for every member of every session in the target
   project. Describe that consequence accurately when proposing it.
-- `platform.act_batch` is a separate legacy capability. This guide does not provide or
-  imply a broad batch-action catalog.
+
+`platform.act_batch` can run an ordered, bounded list of that same action. It is not a
+broad CRUD or lifecycle escape hatch. The platform validates every step, exact target,
+compatible action family, and typed symbolic dependency before showing one approval
+proposal. A step may set its `payload.id` to `{ "$ref": [earlierStepIndex, "id"] }` to
+reuse the canonical project id produced by an earlier step; forward, missing, malformed,
+or type-incompatible references are rejected before any effect.
+
+Batch execution is ordered and best-effort. The platform reloads and reauthorizes each
+target immediately before that step, stops on the first failure, and reports exactly
+which steps completed, failed, and remain unexecuted. Completed effects are never rolled
+back; retrying is a new batch. To keep that receipt truthful, the platform waits for each
+authoritative dispatcher result instead of declaring a non-cancelling timeout a failure,
+so a slow step can keep the batch pending. The batch currently always requires an explicit
+approval card; a wildcard or standing grant cannot suppress it.
 
 ## UI context the platform feeds the agent
 
