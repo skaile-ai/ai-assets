@@ -39,34 +39,30 @@ group"), and matching calls then dispatch without a card, acting as the granting
 Whether a call is covered is decided by the platform — invoke normally and handle either
 outcome; never assume a grant exists.
 
-## Generic actions via `platform.act` (data-model catalog)
+## Target-bound actions via `platform.act`
 
-Alongside the named `platform.*` capabilities above, two generic capabilities let the agent
-create/update/delete platform entities the user can touch:
+`platform.act` is a narrow, default-deny capability. Its sole current action is:
 
-- **`platform.act`** — one action: `{ scope, type, payload, rationale }`.
-- **`platform.act_batch`** — an ordered list of steps, approved once and run in order; a
-  later step reuses an earlier step's output with a `{ "$ref": [stepIndex, "field"] }`
-  placeholder in its payload.
+`{ scope: "project", type: "markAllSessionsRead", payload: { id: "<projectId>" }, rationale }`
 
-Where the named capabilities change per deploy, these act on the **data model** (scopes =
-entities like `project`, `session`, `projectMember`; `type` = a standard CRUD action or a
-scope-specific custom action). The full set of scopes, action types, and payload parameters
-is catalogued in [`references/agent-action-catalog.md`](../references/agent-action-catalog.md)
-— open it when you need to construct an action rather than guessing field names.
+The platform parses the request, resolves the canonical target project, and checks the
+session owner's effective role on that target **before** showing an approval card. Unknown,
+malformed, lifecycle, membership, credential/provider, runtime, and destructive actions
+fail without a card. If approved, the platform reloads the current owner and target and
+reauthorizes immediately before execution. The human who clicks Approve supplies consent;
+they do not replace the session owner as the action actor.
 
 Rules:
 
-- **Prefer a dedicated capability when one exists** (invite user, enable asset, set voice,
-  schedule action, ...). Use `platform.act` only when none fits.
-- **Always pass a specific `rationale`** and expect the approval gate above — the action runs
-  **as the user, with their permissions**; an unauthorized action returns an authz error,
-  never a silent success.
-- **Don't attempt long-running provisioning inline** — `session.create`/`fork`/`reopen` and
-  `project.create`/`setupProject` provision a container and exceed the ~30s dispatch budget;
-  guide the user to start those from the UI instead.
-- The catalog reflects the data model as of the last platform release. If a scope or field is
-  rejected, the model moved — re-check rather than insisting.
+- **Prefer a dedicated capability when one exists.** Never infer a `platform.act` scope,
+  type, or payload from the data model.
+- **Always pass a specific `rationale`** and wait for the real result.
+- Target-project `User` and `Owner` roles are allowed; `Viewer` and no-access roles are
+  denied. PlatformAdmin remains the explicit break-glass role.
+- The action clears unread indicators for every member of every session in the target
+  project. Describe that consequence accurately when proposing it.
+- `platform.act_batch` is a separate legacy capability. This guide does not provide or
+  imply a broad batch-action catalog.
 
 ## UI context the platform feeds the agent
 
