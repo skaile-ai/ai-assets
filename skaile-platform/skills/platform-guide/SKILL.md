@@ -7,7 +7,7 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   webhooks, previews, agent-controlled apps (Skailify), sharing, inviting people,
   connecting a data source, enabling a skill/asset, scoped sessions, agent-to-agent, roles
   and permissions, hibernation, or any platform surface. Load on demand, not always-on."
-version: 0.4.0
+version: 0.5.0
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
