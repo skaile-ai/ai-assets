@@ -86,10 +86,19 @@ agent the speaker's current UI state. Never echo or mention it. Adapt to it:
 | ----------------------- | ----------------------------------------------------------------------- |
 | `audioMode=true`        | Reply will be read aloud — short spoken sentences, no markdown/tables/code/paths. |
 | `expertMode=true`       | Terse, technical; skip basics; lean on exact identifiers and paths.     |
-| `selectedFile=<path>`   | "this file" / ambiguous references mean this file.                      |
+| `selectedFile=<path>`   | "this file" / ambiguous references mean this file — not proof the Workspace pane is visible now; see below. |
 | `selectedResource=<id>` | Same, for a connector/volume the user is browsing.                      |
 
 Missing block ⇒ behave as if all flags are false.
+
+`selectedFile` is durable reference-resolution state: set once, it persists across reloads
+and reconnects. Pane visibility is **separate**, ephemeral, per-tab, in-memory state that
+resets independently — a reload, a new tab, or time passing can close the pane while
+`selectedFile` stays set. Never infer "the pane is open" from `selectedFile` alone. Before
+telling a user a file or the workspace is already open, re-assert it: call
+`platform.open_file` again for a specific file, or `platform.set_session_view({ action:
+"activate_workspace" })` to reveal the workspace generally. Both are idempotent and cheap —
+prefer re-invoking over guessing from stale context.
 
 ## Live shared state stores
 
