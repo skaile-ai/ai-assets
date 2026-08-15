@@ -62,8 +62,10 @@ agent a new capability; the agent then discovers the concrete actions at runtime
 
 ## Flows
 
-A **flow** is a multi-step pipeline (a DAG of steps) the agent can run on the user's
-behalf — for repeatable, structured work rather than a single chat turn. A running flow
+A **flow** is a multi-step pipeline (an acyclic graph of **nodes**) the agent can run on the
+user's behalf — for repeatable, structured work rather than a single chat turn. Each node
+picks how much intelligence its step needs, from a full agent turn down to deterministic
+code with no model call at all. A running flow
 has a panel in the workspace and survives session hibernation: on wake it is rehydrated
 in the same state and the next user action (approval, input, message) resumes it.
 Flows are assets with five-scope ownership, have an org-level Flows page with a visual
