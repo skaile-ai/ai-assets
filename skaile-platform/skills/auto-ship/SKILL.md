@@ -42,10 +42,10 @@ instructions assume rather than restate.
 - **Never complete a node on an unknown outcome.** Unknown CI, an unanswered question, an
   ambiguity you cannot resolve from the issue and the repo — all of those are a gate, not
   a guess.
-- **Escalate before code exists** when the work touches a database schema or migration, an
-  auth / secret / network surface, or a breaking public or cross-repo API, or when the
-  scope is ambiguous or covers more than one distinct change. This is your judgment; the
-  graph does not enforce it.
+- **Escalate before code exists** — `request_approval` on the proposed approach, not
+  `request_input` — when the work touches a database schema or migration, an auth / secret /
+  network surface, or a breaking public or cross-repo API, or when the scope is ambiguous or
+  covers more than one distinct change. This is your judgment; the graph does not enforce it.
 - Respect the repo's own `CLAUDE.md` / `AGENTS.md` conventions over anything here.
 
 ## Deterministic names
