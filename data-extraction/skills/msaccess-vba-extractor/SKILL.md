@@ -5,6 +5,7 @@ license: MIT
 compatibility: "Python 3.8+ stdlib only. No external dependencies."
 metadata:
   author: skaile
+  source: ORIGINAL
   tags: [vba, msaccess, accdb, mdb, ace, extract, decompile, ms-ovba, legacy-data]
   stage: alpha
 ---

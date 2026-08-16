@@ -178,6 +178,9 @@ def extract(path: str):
         name = m.group(1).decode("latin-1")
         if name.startswith("FA"):            # XMP/image false positive guard
             return
+        name = os.path.basename(name.replace("\\", "/"))
+        if not name or name in (".", ".."):  # untrusted VB_Name: block path traversal
+            return
         valid = _is_valid(src)
         text = src.decode("latin-1")
         complete = valid and natural_end and _is_complete(text)
