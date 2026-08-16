@@ -73,6 +73,23 @@ normally. Using the REST API sidesteps the block entirely and needs no proxy.
   list or star favourites.
 - A saved **route** needs exporting as GPX or TCX.
 
+## Capabilities
+
+25 tools over stdio, all scoped to the connected athlete:
+
+- **Activities** - `get-recent-activities`, `get-all-activities`,
+  `get-activity-details`, `get-activity-laps`, `get-activity-streams`,
+  `get-activity-photos`.
+- **Athlete** - `get-athlete-profile`, `get-athlete-stats`, `get-athlete-zones`,
+  `list-athlete-clubs`.
+- **Segments** - `explore-segments`, `get-segment`, `get-segment-effort`,
+  `list-segment-efforts`, `list-starred-segments`, `star-segment`.
+- **Routes** - `list-athlete-routes`, `get-route`, `export-route-gpx`,
+  `export-route-tcx`, `format-workout-file`.
+- **Session/meta** - `check-strava-connection`, `get-server-version`,
+  `connect-strava`, `disconnect-strava` (the last two are not the intended auth
+  path here - see Setup).
+
 ## Scope: personal only
 
 Strava's API Agreement states that data provided by a specific user may only be
@@ -98,6 +115,19 @@ browser-based OAuth flow. Those are **not** the path here - they assume an
 interactive desktop and write credentials to a file that does not survive a
 container restart. Supply the tokens as configuration instead; environment values
 take priority over any stored file.
+
+## Delivery
+
+This is the domain's first `command: npx` entry. Unlike the release-asset shape
+(`sql/`), which pins a `payload.sha256` the platform verifies at materialization,
+`npx` re-resolves the package from the npm registry on every session start and
+there is **no integrity check**. The version is therefore pinned exactly
+(`@r-huijts/strava-mcp-server@1.2.1`) and acts as the closest available
+substitute: it stops a new upstream release from silently entering customer
+containers, but it does not protect against a republished tag or a compromised
+registry account. That is a deliberate, accepted tradeoff for a third-party npm
+package with no release-asset bundle - not an oversight. Bump `version` and the
+pin in `args` together.
 
 ## Known ceiling
 
