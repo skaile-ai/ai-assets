@@ -3,7 +3,7 @@ name: mcp
 description: "MCP server catalog entries - MCP.md recipes that give agents typed tool access to external systems (Excel, PowerPoint, GitHub)."
 type: domain
 building_blocks:
-  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale)."
+  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only)."
 stage: alpha
 ---
 
@@ -27,8 +27,10 @@ mcp/                      <- MCP servers (one subfolder per server)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:sql resolution (command: node + release payload)
 ├── alma/              <- ALMA per-tenant hosted remote MCP (no image - per-slug API host)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:alma resolution (transport: http, url per tenant)
-└── ideogram/          <- Ideogram official hosted remote MCP (no image - per-user OAuth)
-    └── MCP.md         <- catalog manifest + guidance for mcp:ideogram resolution (transport: http, per-user OAuth)
+├── ideogram/          <- Ideogram official hosted remote MCP (no image - per-user OAuth)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:ideogram resolution (transport: http, per-user OAuth)
+└── strava/            <- Strava catalog entry (code: r-huijts/strava-mcp on npm)
+    └── MCP.md         <- catalog manifest + guidance for mcp:strava resolution (command: npx + pinned version)
 ```
 
 ## Servers in this domain
@@ -41,6 +43,7 @@ mcp/                      <- MCP servers (one subfolder per server)
 | [sql](sql/MCP.md) | `mcp/sql` | alpha (v0.1.0) | Dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, permission-scoped, stdio. Bundle shipped as a sha256-verified GitHub release asset, run on baseline `node` (first `command: node` entry). |
 | [alma](alma/MCP.md) | `mcp/alma` | alpha (v1.0.0) | ALMA per-tenant hosted remote MCP over streamable HTTP - read-only scorecards, indicators, regions, period maps, time series, geo; permission- and region-scoped to a PAT. URL is per-slug; auth is a static PAT bound per-org at the platform. |
 | [ideogram](ideogram/MCP.md) | `mcp/ideogram` | alpha (v0.1.0) | Ideogram official hosted remote MCP over streamable HTTP - generate (incl. typography), edit/inpaint, reframe/outpaint, upscale. Per-user OAuth: each user signs in to their own Ideogram account and draws on their own subscription credits. (Central org-key route is the `use-ideogram-image` skill in `use/`.) |
+| [strava](strava/MCP.md) | `mcp/strava` | alpha (v0.1.0) | Strava REST API (`api/v3`) over stdio - activities, laps, streams, athlete profile/stats/zones, segments, routes, GPX/TCX export; 25 tools. Runs the third-party `@r-huijts/strava-mcp-server` npm package at a pinned version (first `command: npx` entry). Deliberately **not** Strava's hosted MCP, which refuses our egress IP range. Per-user credentials; **personal scope only** (Strava's API terms allow an athlete's data to be shown to that athlete alone). |
 
 ## Conventions
 
@@ -49,6 +52,7 @@ mcp/                      <- MCP servers (one subfolder per server)
 - Locally-run services are self-contained (own Dockerfile, own dependency graph) and expose self-describe tools so agents can branch on feature flags without hard-coding server versions. Their **code and build live in standalone repos** (`xls` -> `skaile-ai/excel-mcp`, `ppt` -> `skaile-ai/powerpoint-mcp`); only the `MCP.md` catalog entry stays here, and the platform Nix flake (`mcps.*`) sources the build from those repos. Hosted remote servers (e.g. `github/`) ship no image - their `MCP.md` declares only the endpoint (`transport: http` + `url`), and auth is bound per-org at the platform layer.
 - Paths in tool arguments are sandboxed to the server's data root env var. Host paths must be translated to container-local paths by the agent before tool invocation. (Remote servers have no local path sandbox - they are scoped by the connected identity's permissions instead.)
 - **Release-asset (`command: node`) servers.** A pure-JS server may ship its bundle as a public GitHub **release** asset instead of a Nix recipe or a remote endpoint. Its `MCP.md` declares `command: node`, `args: ["${workspace}/.skaile/assets/mcp-server/<name>/server.js"]`, and a `payload: { url, sha256, dest }` block. At session materialization the platform fetches the payload (https + GitHub host-allowlist), **verifies the sha256**, and writes it next to `MCP.md`; the runner substitutes `${workspace}` → the session workspace root. The bundle must be **publicly** fetchable (the catalog fetch path is unauthenticated) even when the source repo is private. `sql/` is the first such entry; bump `version` + `payload.url` + `payload.sha256` together on each release.
+- **npm-based (`command: npx`) servers.** A third-party server published only to npm, with no release-asset bundle to hash, may be declared as `command: npx`, `args: ["-y", "<pkg>@<exact-version>"]`. Unlike the release-asset shape there is **no integrity verification**: `npx` re-resolves the package from the registry on every session start. The version must therefore be pinned exactly — that stops a new upstream release from silently entering customer containers, but it does not protect against a republished tag or a compromised registry account, so prefer a sha256-verified release asset whenever the upstream offers one. `strava/` is the first such entry; bump `version` and the pin in `args` together.
 - Versioning: each locally-built MCP carries its own version in source (`pom.xml`, in its standalone repo) and mirrors it into the `MCP.md` `version` here (synced on release via the `mcp-release` dispatch, or bump manually). Remote servers with no source build (e.g. `github/`) carry their version directly in `MCP.md` frontmatter.
 
 ## Authentication declarations (the `auth` block)
