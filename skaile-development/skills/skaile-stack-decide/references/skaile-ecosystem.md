@@ -275,7 +275,7 @@ Cross-cutting: `concept-ops` (review/eval/drift/sync), `contracts` (shared
 schemas referenced by every skill).
 
 When useful: any time you want an AI to design and build (or audit) an app
-end-to-end. The flows are JSON definitions consumable by the runner's flow
+end-to-end. The flows are `<id>.flow.yaml` definitions consumable by the runner's flow
 engine.
 
 ---
@@ -373,7 +373,7 @@ Documented at `platform/docs/protocol-extensions.md`:
 
 ### "Multi-step content pipeline (research -> draft -> review -> publish)"
 
-- Define a flow JSON with skill nodes + edges.
+- Define a flow (`<id>.flow.yaml`) with skill nodes + edges.
 - Each step is a SKILL.md with `reads_from` / `writes_to` declared.
 - Approval gate between draft and publish.
 - Stream `state_changed` events to a progress UI.

@@ -17,7 +17,7 @@ ai-assets/
 ├── skaileup-conceptualization/
 │   ├── agents/orchestrator/   ← concept pipeline agent
 │   ├── contracts/             ← domain-specific contracts
-│   ├── flows/                 ← *.json flow definitions
+│   ├── flows/                 ← flow definitions, `<id>.flow.yaml`
 │   ├── skills/                ← organized by phase (10_, 20_, 30_)
 │   └── DOMAIN.md
 ├── skaileup-implementation/        ← same structure as skaileup-conceptualization
@@ -83,6 +83,9 @@ CF and SAXE variants **coexist** under the same skill directory until they are m
 2. Add `DOMAIN.md` (name, purpose, key skills)
 3. Add `skills/` subdirectory with at least one skill
 4. Add `package.yaml` for dependency declarations (optional)
-5. If the domain has flows, add `flows/*.json`
+5. If the domain has flows, add `flows/<id>.flow.yaml` — or `flows/<id>/<id>.flow.yaml` for a flow
+   with sidecar files. Prefer `.flow.yaml` over `.flow.json`: both are discovered, but only YAML is
+   resolvable by `skaile resume`, by a sub-flow `run.flow` target, and by `skaile serve`
+   (skaile-ai/platform#2655). See [flows.md](../flows.md) for the full layout rules.
 6. If the domain has agents, add `agents/<name>/` with `agent.yaml` + `SOUL.md`
 7. Register the domain in the root `ai-assets/README.md` domains table

@@ -22,7 +22,7 @@ Every domain follows the same layout (not all folders are present in every domai
 ├── package.yaml    ← Dependency declarations for arm
 ├── skills/         ← Invocable skills (each in its own subdirectory)
 ├── agents/         ← GitAgent definitions
-├── flows/          ← Flow JSON definitions
+├── flows/          ← Flow definitions — `<id>.flow.yaml` (see docs/flows.md)
 ├── prompts/        ← Reusable prompt fragments
 ├── contracts/      ← Domain-specific shared specs
 └── docs/           ← Domain documentation

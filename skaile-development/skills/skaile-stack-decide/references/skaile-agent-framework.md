@@ -363,7 +363,7 @@ isolation. Switch by config (`driver:` in `skaile.yaml` or env
 
 ### "Multi-step content pipeline (research -> draft -> review -> publish)"
 
-- Define a flow JSON with skill nodes and edges.
+- Define a flow (`<id>.flow.yaml`) with skill nodes and edges.
 - Each step is a SKILL.md with `reads_from` / `writes_to` declarations.
 - Approval gates between draft and publish.
 - Stream `state_changed` events to a progress UI.
