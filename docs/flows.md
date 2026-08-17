@@ -7,7 +7,51 @@ sidebar:
 
 A **flow** is a definition file — an acyclic graph of **nodes** connected by typed edges. The flow engine computes which nodes are ready to run; the runner executes them and parks at gates for a human.
 
-Flow files live in a `flows/` directory, either flat (`<root>/flows/`) or domain-nested (`<root>/<domain>/flows/`), and are named after the flow's `id`: `<id>.flow.yaml`, `<id>.flow.json`, or legacy `<id>.json`. Files whose name starts with `_` are skipped (drafts / disabled). The `id` is what you pass to `skaile run <id>`.
+A flow's identity is the `id` it declares — never its filename. `skaile run <id>` and `skaile flow list` resolve that same declared `id` over the same enumeration, so across the roots they share, what is listed is what can be started. (`run` searches one root that `list` does not — see below.)
+
+## Where flow files live
+
+A flow file lives in a `flows/` directory. Two independent axes decide whether discovery reaches it: how the flow is laid out inside that `flows/` directory, and where the `flows/` directory itself sits.
+
+### Inside a `flows/` directory
+
+Two tiers, and nothing else:
+
+| Tier | Path | Use it for |
+|---|---|---|
+| Single file | `flows/<name>.flow.yaml` | a flow that is one file |
+| Per-flow directory | `flows/<name>/<name>.flow.yaml` | a flow that carries sibling assets — README, fixtures, prompts |
+
+Extensions, in probe order: `.flow.yaml`, `.flow.yml`, `.flow.json`, and the legacy bare `.json`, which stays last so an explicit `.flow.json` wins a tie.
+
+The per-flow directory tier is **not recursion**. Discovery descends exactly one level, and the file must be named after its directory — that is what lets a flow keep siblings next to it without them being parsed as flows. `ai-assets-skaileup` uses this tier for every one of its flows, each flow file sitting beside a `.md` companion.
+
+A misnamed flow is not dropped in silence. Where discovery does look, a subdirectory holding a file named `flow.yaml` or `<anything>.flow.yaml` — or the `.yml` / `.json` equivalents — but none named after itself is reported on stderr:
+
+```
+[agent-flow-engine] ignoring <path>: a flow directory must hold <dir>.flow.yaml (or .flow.yml / .flow.json / .json)
+```
+
+A file that fails to parse is warned about the same way and skipped, never thrown.
+
+Silence, though, is not proof of reachability. `_`-prefixed entries of a `flows/` directory are the deliberate opt-out for a draft; a stray *bare* `.json` inside a per-flow directory stays quiet so a sibling `package.json` does not earn a warning; dot-directories and `node_modules` are never walked; and the stray scan reaches only three levels down. Name a flow file with the `.flow.` infix and put it where discovery looks, and you will hear about it when it cannot be reached.
+
+So the loader, not this page, is the authority on what is reachable — and where it can speak, it does. If a flow is missing from `skaile flow list`, read that command's stderr before you re-read this section. The rule lives in `loadFlowEntriesFromDir`, in `@skaile/workspaces` → `factory-assets/connectors/flow/engine/loader.ts`.
+
+### The content roots discovery walks
+
+Within a content root, a `flows/` directory is found both flat (`<root>/flows/`) and domain-nested (`<root>/<domain>/flows/`).
+
+Discovery walks these roots in order, skips any that do not exist on disk, and de-duplicates by declared `id` with the first root winning:
+
+1. `<project>/.skaile/` — the project-local install target; `skaile install` / `skaile add` land a flow in `<project>/.skaile/flows/` whichever driver target is selected. It leads because the deployed copy carries any `patches:`, which makes it the project's effective flow rather than the factory original.
+2. The first-party `factory-assets/` tree bundled with `@skaile/workspaces`, with `SKAILE_FACTORY_ASSETS_DIR` layered ahead of it when set.
+3. `~/.skaile/libraries/` — the user libraries created by `skaile library init` / `skaile library link` (`SKAILE_LIBRARIES_DIR` overrides the location).
+4. `~/.skaile/` — the user-global install target (`~/.skaile/flows/`).
+
+The list is `aiResourceRoots` in `@skaile/workspaces` → `cli/src/paths.ts`.
+
+`skaile run` additionally searches a project-local `ai-assets/` tree, found by walking up from `--project-dir`, ahead of all four — so a workspace can override a built-in flow. `skaile flow list` does not, so a flow living only there is runnable but unlisted, a known gap recorded in `cli/src/flow-discovery.ts`. Pass the same `--project-dir` to both commands, or "listed" and "runnable" become different sets.
 
 ## The contract
 
@@ -198,7 +242,7 @@ skaile run obligation-review --project-dir ./my-project --driver omp --model cla
 skaile run obligation-review --project-dir ./my-project --dry-run
 ```
 
-1. `findFlowFile` locates `<id>.flow.yaml` / `.flow.json` / `.json` across every content root.
+1. `findFlowFile` locates the file whose **declared `id`** matches, across every content root and both layout tiers. It probes the conventional paths first — a hit only counts once the file confirms its id — and otherwise falls back to the same full enumeration `skaile flow list` uses.
 2. `loadFlow` reads and parses it through the published contract; a parse failure names the path that caused it.
 3. `runFlow` starts a session and drives the flow through the orchestrator, autonomous by default.
 4. `computeFlowState(flow, completedIds, runningIds, skippedIds)` decides which nodes are available at each step.
@@ -213,7 +257,7 @@ This repo ships one flow, the test fixture `testing/flows/test-echo.flow.yaml`. 
 
 ## Writing a new flow
 
-1. Create `<domain>/flows/<id>.flow.yaml` (or `.flow.json`). The file name must match the flow's `id`.
+1. Create `<domain>/flows/<id>.flow.yaml` (or `.flow.json`) — or, when the flow carries sibling assets, `<domain>/flows/<id>/<id>.flow.yaml`. In a per-flow directory the file must be named after its **directory**; naming directory and file after the flow's `id` is the convention that keeps the fast conventional probe hitting.
 2. Declare `schemaVersion: 2` and point `$schema` at `https://skaile.ai/schemas/flow/v2.json`.
 3. Required fields: `schemaVersion`, `id`, `version`, `name`, `nodes`, `edges`.
 4. Key rules:
@@ -222,7 +266,7 @@ This repo ships one flow, the test fixture `testing/flows/test-echo.flow.yaml`. 
    - `edges[].source` and `edges[].target` must reference existing node ids, and the graph must be acyclic.
    - Declare the assets a node needs as references in `run.assets`; never inline asset content.
    - Only add a `contract.output` schema where something downstream consumes it.
-   - Files starting with `_` are skipped by `loadAllFlows`.
+   - Files **and directories** starting with `_` are skipped by `loadAllFlows`.
 5. Validate by loading it: `skaile run <id> --project-dir <dir> --dry-run` parses through the contract and prints the available nodes without executing.
 
 If a flow is authored by an agent through the platform's flow-authoring capabilities rather than by hand, the `schemaVersion` declaration is mandatory: those capabilities refuse a definition without it, precisely so the v1 normalizer cannot turn the definition into inert placeholders that run nothing.

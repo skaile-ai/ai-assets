@@ -252,6 +252,34 @@ The validator refuses these, so do not author them:
   marked **mandatory** always stops for a human; the engine enforces this and the agent
   cannot skip it. Live per-node state on the graph is not yet available.
 
+## Flow files on disk
+
+On the platform a flow is a stored asset. On disk — in a workspace, where the session
+container ships the `skaile` CLI — a flow is a file, and there its identity is the `id` it
+declares, never its filename; `skaile run <id>` and `skaile flow list` resolve that same
+declared `id`. A flow file sits in a `flows/` directory in one of exactly two layouts:
+
+- `flows/<name>.flow.yaml` — a flow that is one file.
+- `flows/<name>/<name>.flow.yaml` — a flow that carries sibling assets (README, fixtures,
+  prompts). Discovery descends exactly one level and the file must be named after its
+  directory. This is not recursion.
+
+Extensions, in probe order: `.flow.yaml`, `.flow.yml`, `.flow.json`, legacy `.json`. The CLI
+walks the project install target `<project>/.skaile/` (`skaile install` lands a flow in
+`<project>/.skaile/flows/`), then the bundled `factory-assets/` tree, `~/.skaile/libraries/`,
+then the user-global `~/.skaile/` (`~/.skaile/flows/`) — de-duplicating by declared `id` with
+the first root winning, and reading both `<root>/flows/` and `<root>/<domain>/flows/` inside
+each. That list and its order are `aiResourceRoots`; read it rather than trusting this
+sentence to age well.
+
+A misnamed flow is not dropped in silence: where discovery looks, a directory holding a
+`flow.yaml` or `<anything>.flow.yaml` file but none named after itself is reported on stderr, as
+is a file that fails to parse. Silence is not proof of reachability, though — `_`-prefixed
+entries are the deliberate opt-out, a stray bare `.json` inside a per-flow directory stays quiet
+so sibling `package.json` files do not earn warnings, and dot-directories and `node_modules` are
+never walked. So trust the stderr of `skaile flow list` over any page, including this one.
+Fuller treatment: `ai-assets/docs/flows.md`.
+
 ## Run groups (batch / unattended processing)
 
 - A run group = one flow + one **recipe** + a list of inputs. Each input runs in its own
@@ -280,4 +308,6 @@ it is managed via the API/agent.
 Source of truth: the published contract
 (`@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.schema.json`),
 `platform/docs/flow-authoring-v2.md`, `platform/features/09-flow-execution/`,
-`platform/features/31-run-groups/`.
+`platform/features/31-run-groups/`. For on-disk discovery: `loadFlowEntriesFromDir` in
+`@skaile/workspaces` → `factory-assets/connectors/flow/engine/loader.ts`, and `aiResourceRoots`
+in `cli/src/paths.ts`.
