@@ -34,5 +34,7 @@ similar items" in the summary instead of posting them inline.
 
 - Skill prompts use imperative mood and the ROLE/READS/WRITES/MUST/NEVER pattern
 - user_inputs have clear prompts and sensible required/optional flags
-- Flow definitions (flows/*.json) validate against flow.schema.json
+- Flow definitions (`flows/<id>.flow.yaml` or `flows/<id>/<id>.flow.yaml`; also `.flow.yml`,
+  `.flow.json`, legacy bare `.json`) validate against the published Flow v2 contract,
+  `@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.schema.json`
 - Contract changes include a note in MIGRATION.md if they rename or remove fields
