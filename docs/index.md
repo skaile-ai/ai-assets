@@ -9,7 +9,7 @@ sidebar:
   order: 1
 ---
 
-`ai-assets` is the skill library that powers all Skaile agent workflows. It contains `SKILL.md` prompt manifests organized into focused domain directories, `flow.json` state machine definitions, GitAgent definitions, and shared contracts.
+`ai-assets` is the skill library that powers all Skaile agent workflows. It contains `SKILL.md` prompt manifests organized into focused domain directories, `<id>.flow.yaml` flow definitions, GitAgent definitions, and shared contracts.
 
 ## Two Ways to Use
 
@@ -33,7 +33,7 @@ skaile add cf_concept_overview
 
 **[Skills](./skills)** — The atomic unit. A `SKILL.md` file containing YAML frontmatter (metadata, inputs, outputs) plus a Markdown prompt body the agent follows when activated. Skills are discovered by directory name and executed by the runner as flow nodes.
 
-**[Flows](./flows)** — The execution plan. A `flow.json` directed graph of skill nodes connected by typed edges. The flow engine computes which nodes are ready to run; the runner executes them in order or in parallel.
+**[Flows](./flows)** — The execution plan. A `<id>.flow.yaml` directed graph of skill nodes connected by typed edges. The flow engine computes which nodes are ready to run; the runner executes them in order or in parallel.
 
 **[Agents](./agents)** — The identity layer. A GitAgent definition directory (`agent.yaml` + `SOUL.md` + `RULES.md` + `knowledge/`) that is assembled into a system prompt before any flow starts. Agents give the LLM its persona, constraints, and domain knowledge.
 
@@ -46,7 +46,7 @@ skaile add cf_concept_overview
 ## In This Section
 
 - [Skills](./skills) — SKILL.md format, frontmatter reference, body sections, resolution, optional files
-- [Flows](./flows) — flow.json structure, nodes, edges, globals, execution model, available flows
+- [Flows](./flows) — flow definition structure, nodes, edges, globals, execution model, available flows
 - [Agents](./agents) — GitAgent format, agent.yaml fields, imprint assembly
 - [Prompts](./prompts) — prompt format, prompts vs skills, usage
 - [Domains](./domains) — domain structure, types, relationships
