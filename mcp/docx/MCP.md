@@ -1,7 +1,7 @@
 ---
 name: word
-description: "A stateful Word (.docx) engine an agent edits in place - not a file it regenerates. Opens an existing .docx behind a handle and mutates it through addressable Blocks (paragraphs, headings, tables) instead of the 'emit a whole new file' pattern that discards a document's template, headers, footers, page numbering and images on every edit. Every Block gets an opaque id plus its own computed Number (resolved by walking numId/ilvl through the style chain, never guessed from run text), so 'the last table' or 'section 13.2' addresses one Block, not the whole document. Named styles are the primary text operation - an undefined style name fails STYLE_NOT_FOUND with the document's real style inventory rather than a fuzzy match or an invented style; direct formatting (bold/size/color/font) is reachable only through one explicitly-named escape hatch. document.save backs up, writes to temp, verifies against the source by Part list and uncompressed content (never file size, which zip recompression alone shifts by design), then atomically renames - a failed verification leaves the original untouched. 14 tools across document lifecycle, outline/addressing, text, style, tables, Revision/Comment reading, and Template discovery."
-version: 0.1.0-SNAPSHOT # mcp-catalog-version
+description: "A stateful Word (.docx) engine an agent edits in place - not a file it regenerates. Opens an existing .docx behind a handle and mutates it through addressable Blocks (paragraphs, headings, tables) instead of the 'emit a whole new file' pattern that discards a document's template, headers, footers, page numbering and images on every edit. Every Block gets an opaque id plus its own computed Number (resolved by walking numId/ilvl through the style chain, never guessed from run text), so 'the last table' or 'section 13.2' addresses one Block, not the whole document. Named styles are the primary text operation - an undefined style name fails STYLE_NOT_FOUND with the document's real style inventory rather than a fuzzy match or an invented style; direct formatting (bold/size/color/font) is reachable only through one explicitly-named escape hatch. document.save backs up, writes to temp, verifies against the source by Part list and uncompressed content (never file size, which zip recompression alone shifts by design), then atomically renames - a failed verification leaves the original untouched. 18 tools across document lifecycle, outline/addressing, text, style, tables, headers/footers, media inventory, and Revision/Comment reading."
+version: 0.2.0 # mcp-catalog-version
 transport: stdio
 recipe:
   attr: mcps.word
@@ -64,20 +64,31 @@ Docker/Nix-based MCP server for Word document operations, built on Apache POI XW
 
 ## Capabilities
 
-14 tools over stdio, grouped by area:
+18 tools over stdio, grouped by area:
 
-- **Document lifecycle (3)** — `document.open` (handle + `allow_convert` for OOXML Strict),
-  `document.save` (backup → temp → Part-list/content verify → atomic rename),
-  `document.create_from` (byte-for-byte copy into scratch, no save target — the from-scratch path)
+- **Document lifecycle (4)** — `document.open` (handle + `allow_convert` for OOXML Strict),
+  `document.save` (backup → temp → Part-list/content verify → atomic rename, skipped entirely
+  as a no-op when nothing changed since open), `document.create_from` (byte-for-byte copy into
+  scratch, no save target — the from-scratch path), `document.close` (releases a handle before
+  process exit; closing never implicitly saves — unsaved edits are discarded, always stated in
+  the response)
 - **Outline / addressing (1)** — `outline.get` (every Block in order: `block_id`, `kind`,
-  `style`, `label`, computed `number`)
+  `style`, `label`, computed `number`; text-box paragraphs surface as real Blocks with their
+  actual text, other non-text-box shapes/drawings carry a `null` label as an explicit
+  "unreadable, not empty" marker)
 - **Text (3)** — `text.find` (literal matches with Block id + context), `text.replace`
   (scoped to an explicit Block/Section, never whole-document), `text.set_direct_format` (the
   one bold/size/color/font escape hatch)
 - **Style (2)** — `style.apply` (Named style by id, `STYLE_NOT_FOUND` with the real inventory
-  on a miss), `style.list`
+  on a miss, and a no-op guard so reapplying a Block's current style never arms a save), `style.list`
 - **Tables (2)** — `table.get` (rows/cells/merges as structure), `table.edit`
   (`set_cell_text` / `delete_row`, fenced to one table's Block id)
+- **Headers / footers (2)** — `header.get` / `footer.get` enumerate a document's header/footer
+  content (including distinct first-page/even-page/odd-page variants) as ordinary Blocks — no
+  separate write tool exists; `text.replace`, `style.apply`, and `text.set_direct_format`
+  already work against a header/footer Block id the same way they do for the body
+- **Media, read-only (1)** — `media.list` (every embedded media Part's name, content type,
+  size, and referencing Block id(s); no byte extraction)
 - **Revision / Comment, read-only (2)** — `revision.list` (`w:ins`/`w:del`/`w:moveFrom`/
   `w:moveTo`/`w:rPrChange`), `comment.list` (anchored ranges) — both preserved unchanged
   through a save; neither is authored
@@ -99,17 +110,23 @@ save-time Part-loss guard that only a tool's own declared removals can satisfy �
   inventory attached, never invented or fuzzy-matched.
 - **`text.find`/`text.replace` don't reach table-cell text.** Only paragraph Blocks; edit table
   content through `table.edit` instead.
-- **No image insertion, header/footer editing, or numbering-definition authoring.** Reading
-  and in-place text/style/table edits only.
+- **No text-box editing.** `outline.get`/`header.get`/`footer.get` read text-box content as
+  real Blocks, but every write tool refuses a text-box (or other drawing/shape) Block by name —
+  Apache POI 5.5.1 doesn't type the two DrawingML text-box forms Word actually produces (only
+  the legacy VML form is writable through POI's object model); see
+  [`skaile-ai/word-mcp#36`](https://github.com/skaile-ai/word-mcp/issues/36) for the full
+  feasibility finding.
+- **No image insertion or numbering-definition authoring.** `media.list` is read-only
+  discovery; no tool extracts, writes, or replaces media bytes.
 - **No rendering or export** to image/PDF — unlike the `ppt` sibling, `soffice` here exists
   solely for the OOXML Strict conversion fallback below.
 - **OOXML Strict documents cannot be opened directly** (POI bug #57699). `document.open` fails
   `OOXML_STRICT_UNSUPPORTED` unless `allow_convert: true` is passed, which opens a
   `soffice`-converted scratch copy instead; that handle carries no save target, so it can never
   be renamed over the Strict original.
-- **Handle registry is process-local, no idle-TTL eviction.** A handle lives for the server
-  process's lifetime; past `DOCX_MCP_MAX_OPEN_HANDLES` (default 8) a further `document.open`
-  fails `HANDLE_LIMIT_REACHED`.
+- **Handle registry is process-local, no idle-TTL eviction.** A handle lives until
+  `document.close` or the server process exits; past `DOCX_MCP_MAX_OPEN_HANDLES` (default 8) a
+  further `document.open` fails `HANDLE_LIMIT_REACHED` unless a handle is closed first.
 
 ## Runtime
 
@@ -149,6 +166,7 @@ document.open (path, or allow_convert:true for OOXML Strict)
   → text.replace / style.apply /         # write, fenced to an explicit Block or Section
     table.edit / text.set_direct_format
   → document.save                        # backup, temp, verify, atomic rename
+  → document.close                       # optional — frees the handle before session end
 ```
 
 Producing a fresh document from an org Template instead of editing an upload:
@@ -188,6 +206,20 @@ template.find                            # discover the org Template via DOCX_MC
 - **Sandbox is fail-closed.** The server refuses to start without `DOCX_MCP_ROOT` unless
   `DOCX_MCP_ALLOW_UNSANDBOXED=true` is explicitly set — an opt-in with no default, logged
   loudly at startup when active, for local development only.
+- **A picture in the body can be reported two ways, and both are correct.** `media.list`
+  reports it under the referencing paragraph's Block id (`p-N`); `outline.get` also emits a
+  separate drawing Block (`d-N`) for the same shape as the honesty marker for unreadable
+  content. They're naming the same picture from two different Block-model angles, not
+  disagreeing.
+- **`document.close` never saves.** Closing a handle with unsaved edits discards them — always
+  stated in the tool's response, never silent. Call `document.save` first if the edits matter.
+- **Backups land in `.docx-backups/` at the root of `DOCX_MCP_ROOT`**, not next to the file
+  being saved — last 3 per file, timestamped, openable. Deliberate (ADR-0005: a backup that
+  dies with the container can't serve the recovery case it exists for), but visible as
+  workspace-root clutter in a synced workspace if not anticipated.
+- **`document.open`'s returned path can differ from the input path.** Symlink-safe
+  canonicalization (`Path#toRealPath()`), not a bug — expect it before reporting a path back to
+  a user verbatim.
 
 ## Reference documents (in the [`word-mcp`](https://github.com/skaile-ai/word-mcp) repo)
 
