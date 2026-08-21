@@ -149,6 +149,7 @@ The pairings that matter:
 | creating a session | the owner's projects | you need a project id, and the owner's live role on it |
 | inviting to a project | the owner's projects, then that project's members | an `Active` or `Invited` row means do not re-invite; `Expired`/`Revoked` is not a live invitation |
 | inviting to a session | the owner's sessions | you need a session id; access to *read* a session does not allow inviting into it |
+| inviting to an organization | the owner's organizations | you need an organization id — but **nothing lists an organization's members**, so ask the owner whether the person is already one before proposing it |
 | starting a connector setup | that organization's connectors | if one already reports `usable: true`, you do not need the setup at all |
 | re-pointing a project's source | that organization's connectors | only a connector that is already `usable` can be pointed at |
 
