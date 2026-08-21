@@ -31,7 +31,7 @@ real UI strings.
 | **Account**       | `/account`                    | Edit name, email, profile picture. |
 | **Preferences**   | `/<org>/preferences`          | Notification mode (All / Mentions / Direct / Off), sound, browser notifications. |
 | **My Connections**| `/<org>/my-connections`       | Personal **Connect** flows for GitHub, GitLab, SharePoint, Google Drive, NextCloud, Dropbox, Box (OAuth/PAT). |
-| **Flows**         | `/<org>/flows`                | Browse and author flow definitions; open a flow's graph view/editor. Feature-flagged (`ff_flows`) — may be hidden on a deployment. See `concepts/flows.md`. |
+| **Flows**         | `/<org>/flows`                | Browse and author flow definitions; open a flow's graph view/editor. See `concepts/flows.md`. |
 
 ## Creating a project (wizard)
 
