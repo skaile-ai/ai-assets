@@ -178,8 +178,9 @@ themselves approved — and it is narrow by construction:
   organization, or everything of that kind the owner can reach. Only the scopes a capability
   declares, and its own target's ancestry supports, are ever offered.
 - **A named window.** The owner picks a duration by name from a server-owned list; the expiry is
-  computed on the server. The one-click default alongside "approve once" is deliberately small —
-  time-boxed, that exact target, ten minutes, with both effect opt-ins off.
+  computed on the server. The one-click option alongside "approve once" is deliberately narrow —
+  time-boxed, that exact target, both effect opt-ins off — and its length is server-chosen per
+  capability, so do not quote a number at the owner.
 - **Optional use and budget caps**, clamped down to the server's own ceilings.
 - **Effect opt-ins.** Because the safe default leaves both off, an `external` or `privileged`
   effect has no one-click option at all — the owner has to widen it deliberately. An effect
