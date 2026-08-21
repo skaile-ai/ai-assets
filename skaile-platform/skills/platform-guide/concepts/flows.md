@@ -17,8 +17,6 @@ checkpoints.
   revision by an agent, no exception; unlocking is a deliberate human act. Each stored
   definition also carries a content hash, so "which definition did this run execute" is
   always answerable.
-- The Flows page is currently feature-flagged (`ff_flows`) — if a user cannot see it, the
-  flag is off for their deployment; don't present it as missing functionality.
 
 ## The shape of a definition
 
