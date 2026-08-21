@@ -19,23 +19,25 @@ Owner-scoped, query-only, and available only where the platform resolves the cal
 as the owner's own assistant. They never create approvals, grants, operations, invitations,
 or connector configuration.
 
-| Capability | Gives you |
+| Call | Gives you |
 | --- | --- |
-| `platform.list_my_organizations` | `organizationId`, the owner's live role, a permissions summary |
-| `platform.list_my_projects` | `projectId`, `organizationId`, status, visibility, source type, live role. The assistant's own workspace is never listed. |
-| `platform.list_my_sessions` | `sessionId` with full ancestry (organization → project → session), live role |
-| `platform.get_session_context` | one session's ancestry plus the owner's effective role at each level. Not paged. |
-| `platform.list_project_members` | every membership *and invitation* row for a project, with `status`: `Active`, `Invited`, `Expired`, `Revoked` |
-| `platform.list_session_resources` | the project source plus every library asset in effect on a session, with provenance |
-| `platform.list_connector_options` | an organization's connectors, redacted to identity and readiness — `usable`, and when false, `requiredHandoff` |
+| `platform.list_my_organizations({ search?, cursor?, limit? })` | `organizationId`, the owner's live role, a permissions summary |
+| `platform.list_my_projects({ organizationId?, search?, cursor?, limit? })` | `projectId`, `organizationId`, status, visibility, source type, live role. The assistant's own workspace is never listed. |
+| `platform.list_my_sessions({ organizationId?, projectId?, archived?, search?, cursor?, limit? })` | `sessionId` with full ancestry (organization → project → session), live role. Omit `archived` for both. |
+| `platform.get_session_context({ sessionId })` | one session's ancestry plus the owner's effective role at each level. Not paged. |
+| `platform.list_project_members({ projectId, search?, cursor?, limit? })` | every membership *and invitation* row, with `status`: `Active`, `Invited`, `Expired`, `Revoked` |
+| `platform.list_session_resources({ sessionId, search?, cursor?, limit? })` | the project source plus every library asset in effect, with provenance |
+| `platform.list_connector_options({ organizationId, projectId?, search?, cursor?, limit? })` | an organization's connectors, redacted to identity and readiness — `usable`, and when false, `requiredHandoff` |
 
-`platform.search_my_sessions` sits alongside these for finding a session by content rather
-than by listing.
+Shared shape for the seven above: `{ cursor?, limit? }` in (limit 1–50), `{ items, nextCursor }`
+out. `nextCursor` is non-null only when more rows exist. A cursor replayed after you change a
+filter or `limit` is rejected — restart paging without one. Results are already redacted to safe
+identity, role and status fields.
 
-Shared shape: `{ cursor?, limit? }` in (limit 1–50), `{ items, nextCursor }` out. `nextCursor`
-is non-null only when more rows exist. A cursor replayed after you change a filter or `limit`
-is rejected — restart paging without one. Results are already redacted to safe identity, role
-and status fields.
+`platform.search_my_sessions({ query, limit? })` sits alongside these for finding a session by
+content rather than by listing. It has its **own** shape: no cursor, `limit` up to 100, and it
+returns `hits` plus `truncated` — `truncated: true` means a cap was reached, not that nothing
+else matched.
 
 Reading connector readiness is the one that most often ends the task early:
 
@@ -48,26 +50,28 @@ Reading connector readiness is the one that most often ends the task early:
 
 ### Effects — each returns a receipt, not a result
 
-Every capability below hands the work to a durable background worker once the owner consents,
-and returns `{ operationId, status: "Queued", target, instruction }`. None of them returns the
-thing it made. None of them may appear in a batch.
+Every capability in the table below hands the work to a durable background worker once the
+owner consents, and returns `{ operationId, status: "Queued", target, instruction }`. None of
+them returns the thing it made. None of them may appear in a batch. The **effect class** is
+what decides whether an autonomy grant can ever cover it (see *Consent and autonomy* below).
 
-| Capability | Effect | Risk | Autonomy class | How far a grant may reach |
-| --- | --- | --- | --- | --- |
-| `platform.create_organization` | a new organization | high | `privileged` | everything the owner can reach only |
-| `platform.create_project` | a new project in an organization | medium | `routine` | that target, its organization, or everything reachable |
-| `platform.create_session` | a new session in a project | medium | `routine` | that target, its project, its organization, or everything reachable |
-| `platform.invite_to_organization` | an invitation email | high | `external` | that target, its organization, or everything reachable |
-| `platform.invite_to_project` | an invitation email | high | `external` | that target, its project, its organization, or everything reachable |
-| `platform.invite_to_session` | an invitation email; the invitee can read that session's whole history | high | `external` | that target, its project, its organization, or everything reachable |
-| `platform.begin_connector_setup` | starts connecting a provider; parks on the owner | medium | `routine` | that target, its organization, or everything reachable |
-| `platform.configure_project_source` | re-points a project at a different, already-usable connector | medium | `routine` | that target, its project, its organization, or everything reachable |
+| Call | Effect | Effect class | Grant may reach |
+| --- | --- | --- | --- |
+| `platform.create_organization({ name, slug?, logoUrl?, iconSvg? })` | a new organization | `privileged` | only the widest scope: every target of that kind the owner can reach |
+| `platform.create_project({ organizationId, name, sourceType, description?, visibility?, agentName?, agentAvatarUrl?, initialMessage? })` | a new project. `sourceType` is `Empty` or `OnSkaile`; `visibility` `Private` (default) or `Shared`. | `routine` | that target, its organization, or everything reachable |
+| `platform.create_session({ projectId, name, slug?, followMain?, visibility? })` | a new session | `routine` | that target, its project, its organization, or everything reachable |
+| `platform.invite_to_organization({ organizationId, email, role? })` | an invitation email | `external` | that target, its organization, or everything reachable |
+| `platform.invite_to_project({ projectId, email, role? })` | an invitation email | `external` | that target, its project, its organization, or everything reachable |
+| `platform.invite_to_session({ sessionId, email, role? })` | an invitation email; the invitee can then read that session's whole history | `external` | that target, its project, its organization, or everything reachable |
+| `platform.begin_connector_setup({ organizationId, providerType, providerLinkId? })` | reuses an already-usable connector, otherwise parks on the owner. `result.payload.reused` says which happened. | `routine` | that target, its organization, or everything reachable |
+| `platform.configure_project_source({ projectId, providerLinkId })` | re-points a project at an already-usable connector. `result.payload.changed` says whether anything actually had to move; re-pointing at the current one is a no-op, not an error. | `routine` | that target, its project, its organization, or everything reachable |
 
-`platform.delegate_to_session` delivers one message into another session as the owner. It is
-also approval-gated and classed `external`, with a grant reaching **that one target and nothing
-else** — but it is not durable: it returns its own result rather than an operation. The delivered
-message always shows it was sent by the owner via their Personal Assistant; it is never
-attributed to the assistant.
+`platform.delegate_to_session({ sessionId, message, visibility: "Public" })` delivers one
+message into another session as the owner. It is also approval-gated and classed `external`,
+with a grant reaching **that one target and nothing else** — but it is **not durable**: it
+returns its own result rather than an operation receipt, so there is no `operationId` to poll.
+The delivered message always shows it was sent by the owner via their Personal Assistant; it
+is never attributed to the assistant.
 
 ### Boundaries that are real, not conservatism
 
@@ -77,19 +81,28 @@ These are refusals by design — proposing around them wastes the owner's approv
   (Git, SharePoint, Google Drive, Box, NextCloud) is created from the web app. Re-pointing only
   moves a project that *already has* a Git source onto a different, already-usable connector —
   it cannot add a source, create a connector, or create a project.
-- **Roles on invite.** `Viewer` (default) or `User`. `Owner` is not assignable through any of
-  these. No personal note, personal message, or display name can be attached — the human adds
-  those from the web app.
+- **Roles on invite.** `Viewer` (default) or `User`, at all three levels. `Owner` is not
+  assignable through any of these. Note that a **session** invite uses this same
+  `Viewer`/`User` vocabulary through the capability — not the Owner/Participant labels the
+  Share tab shows (`concepts/collaboration.md`). No personal note, personal message, or
+  display name can be attached — the human adds those from the web app.
 - **Personal workspaces.** A personal-assistant project or session cannot be invited into, and
   a personal organization cannot be invited into. Pick a shared one.
 - **Credentials.** No capability in this family accepts a token, password, personal access
   token, OAuth code, client secret, repository URL, or branch. Every such field is rejected.
   Never ask for one, and never accept one if offered.
 - **Batches.** None of these is batch-eligible, and none is grantable through a batch.
+- **Creating an organization is PlatformAdmin-only.** The server verifies the owner currently
+  holds PlatformAdmin — membership, however senior, is not enough. Do not offer it to an owner
+  who is not one.
+- **Nothing lists an organization's members.** `platform.list_project_members` covers projects
+  only. Before an organization invite, *ask the owner* whether the person is already a member:
+  an existing member is refused only **after** their approval has been spent.
 
 ## The operation lifecycle
 
-`platform.get_operation({ operationId })` reads one operation. Its lifecycle is `Queued` →
+`platform.get_operation` reads one operation. It takes **either** `{ operationId }` **or**
+`{ invocationId }` — one key, never both. The operation lifecycle is `Queued` →
 `Running` → one of `Succeeded` / `Failed` / `Cancelled`, with `AwaitingUser` as a park in the
 middle.
 
@@ -108,7 +121,8 @@ Reading a status reply:
 - `instruction` restates the next step for the status you just read. It changes with the
   status, so re-read it each time rather than caching the first one.
 - `attempts` counts claimed executions, including recovery of an attempt whose worker died.
-  A rising count is the system being reliable, not the effect happening twice.
+  For these effects a recovered attempt resumes from a checkpoint rather than repeating the
+  write, so a rising count is not the effect happening twice.
 - A `Failed` reply may carry a `result.payload` reporting **partial progress**. Those steps
   really happened and were not rolled back — report them rather than a bare failure.
 - An unknown, malformed, or someone-else's operation id answers the same way as a missing one,
@@ -156,7 +170,8 @@ Every effect here is approval-gated. Per call, the platform either cards it, dis
 an existing autonomy grant, or refuses it — **you do not choose, and cannot predict, which**. Never
 promise the owner a card.
 
-A grant is minted only by the owner, only from a card, and it is narrow by construction:
+A grant is minted only by a human — an owner of the assistant session, from a card they
+themselves approved — and it is narrow by construction:
 
 - **One capability.** A grant never spans a family.
 - **One scope** — that exact target, everything under its project, everything under its
@@ -165,27 +180,32 @@ A grant is minted only by the owner, only from a card, and it is narrow by const
 - **A named window.** The owner picks a duration by name from a server-owned list; the expiry is
   computed on the server. The one-click default alongside "approve once" is deliberately small —
   time-boxed, that exact target, ten minutes, with both effect opt-ins off.
-- **Optional use and budget caps**, clamped down to the organization's own ceilings.
+- **Optional use and budget caps**, clamped down to the server's own ceilings.
 - **Effect opt-ins.** Because the safe default leaves both off, an `external` or `privileged`
   effect has no one-click option at all — the owner has to widen it deliberately. An effect
-  classed `never` is ungrantable, and so is any batch.
+  classed `never` is ungrantable, and so is any batch. Ungrantable means it can only be carded
+  or refused — never dispatched silently.
 
 Revocation is immediate, and the platform re-checks the owner's live authorization, the limits
 and the budget right before the effect. **A call that dispatched silently a minute ago can come
 back parked on approval** — that means it is no longer covered, not that something failed.
 
 You see grants only on turns a human sent, in the `<AUTONOMY>` block: which capability, how far
-it reaches, until when, and what is left of any caps, plus notice when one that was in force has
-stopped. A schedule firing, a peer agent, or a webhook carries no such block — **its absence
-there tells you nothing.** And nothing agent-facing can create, extend, or widen a grant.
+it reaches, until when, and what is left of any caps, plus notice when one has been **revoked**.
+Expiry produces no notice at all — the row simply stops appearing — so a grant vanishing from the
+block is not evidence of revocation. A schedule firing, a peer agent, or a webhook carries no
+block at all, and **its absence there tells you nothing.** And nothing agent-facing can create, extend, or widen a grant.
 
 ## What this family is not
 
-It is not generic CRUD over the data model, and it is not a lifecycle escape hatch. At the time
-of writing it carries nothing for deleting an organization, project, or session; for changing or
-removing a membership; for editing an organization's settings; or for handling a credential — but
-that is a statement about this file, not a promise about the product. **Check the live registry
-before telling the owner something is impossible**, and if it genuinely is not there, guide them
-to the UI. What you must not do is reach for `platform.act` / `platform.act_batch` to synthesize
-one: that surface is default-deny and documented separately in `references/agent-action-catalog.md`,
-and every unlisted scope/type pair is blocked there too.
+It is not generic CRUD over the data model, and it is not a lifecycle escape hatch. This file
+lists nothing for deleting an organization, project, or session; for changing or removing a
+membership; for editing an organization's settings; or for handling a credential.
+**Check the live registry before telling the owner any of those is impossible** — this file is
+a map, and the registry moves. If it genuinely is not there, guide them to the UI. What you
+must not do is reach for `platform.act` / `platform.act_batch` to synthesize one: that surface
+is default-deny and documented separately in `references/agent-action-catalog.md`, where every
+unlisted scope/type pair is blocked too.
+
+Grounded in: `platform/docs/protocol-v2-capabilities.md` and
+`platform/backend/libs/capabilities/`.

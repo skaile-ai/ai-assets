@@ -20,14 +20,14 @@ at runtime**, never assumed from memory.
   those three levels; starting a connector setup; re-pointing a project's source connector;
   delivering a message into another session as the owner); **reading a durable operation's
   status**; and the session-level actions — enabling/searching/listing assets, opening a
-  file in the user's UI, searching GIFs/images, A2A (list peers / ask / send), setting an
+  file in the user's UI, searching GIFs, A2A (list peers / ask / send), setting an
   avatar, scheduling future/recurring actions, run-group operations, creating a session
   webhook inbox, and — in Skailify-enabled sessions — actions registered by an embedded app
   itself. Treat these as *categories* — confirm the exact action against the live registry.
-- Most of the control-plane and discovery capabilities are **personal-assistant only**: they
-  are advertised and accepted only in the session the platform resolves as the owner's own
-  assistant. In an ordinary project session they simply are not there, which is another
-  reason to read the live set rather than a remembered one.
+- The control-plane and discovery capabilities are **personal-assistant only**: advertised and
+  accepted only in the session the platform resolves as the owner's own assistant. In an
+  ordinary project session they are simply not there — another reason to read the live set
+  rather than a remembered one.
 
 **The corollary matters as much as the rule: never tell a user you cannot do something
 because you do not remember a capability for it.** Look first. Saying "I can't connect that
@@ -46,20 +46,15 @@ the platform decides — per call, itself — between exactly three outcomes:
 You do not choose which, and you cannot tell in advance. So **never promise the user that a
 confirmation card will appear.** Say what you are about to do, then read the real result.
 
-The person who clicks Approve supplies *consent only* — they never replace the session owner
-as the actor. Immediately before the effect runs, the platform reloads the owner and the
-target and re-authorizes both, so consent given a minute ago is not a licence that outlives
-the owner's live access.
-
 This mirrors the agent's own safety rules: confirm before destructive or
 consequence-bearing operations (deleting files, overwriting uncommitted work, dropping DB
 records, sending messages or data on the user's behalf).
 
 ## Autonomy grants — what "already approved" means
 
-An **autonomy grant** is the owner pre-authorizing one exact capability so matching calls
-dispatch without a card. Only the owner can create one, and only from an approval card.
-**No capability lets you create, extend, or widen a grant, and asking for one is not a
+An **autonomy grant** is a human pre-authorizing one exact capability so matching calls dispatch
+without a card. Only a human can mint one — an owner of this session, from a card they themselves
+approved. **No capability lets you create, extend, or widen a grant, and asking for one is not a
 thing you can do.**
 
 Each capability declares an **effect class** that decides how far a grant may reach:
@@ -69,13 +64,11 @@ Each capability declares an **effect class** that decides how far a grant may re
 | `routine` | Effect stays inside the owner's own platform surface. | Yes — this is what an ordinary grant covers. |
 | `external` | Reaches a person outside this conversation (an invitation email, a message delivered into someone else's session). | Only if the owner **explicitly widened** the grant to external communication. |
 | `privileged` | Administrative — changes who or what exists at organization level. | Only if the owner **explicitly widened** the grant to privileged administration. |
-| `never` | Never auto-approvable. | No. Always carded. |
+| `never` | Never auto-approvable. | No — it is carded, or refused outright. Never dispatched silently. |
 
-A grant is also bounded by everything else about it: it names **one capability** (never a
-family), a **target scope** (just that target / everything under its project / everything
-under its organization / everything of that kind the owner can reach), an **absolute
-expiry**, and optionally a use count and a budget. Batch requests are ungrantable outright —
-`platform.act_batch` always requires a card.
+A grant is narrow: it names **one capability**, one target scope, and an absolute expiry, and
+may carry use and budget caps. Batch requests are ungrantable outright — `platform.act_batch`
+always requires a card.
 
 Two consequences you must actually act on:
 
@@ -86,118 +79,83 @@ Two consequences you must actually act on:
   call is no longer covered.
 - **You only see grants on turns a human sent.** When the owner sends a turn you are also
   shown an `<AUTONOMY>` block listing each grant in force — the capability, how far it
-  reaches, until when, and what is left of any use and budget caps — and telling you when
-  one that was in force has just stopped. Turns nobody sent (a schedule firing, a peer
-  agent, a webhook) carry no such block, so **its absence there tells you nothing**. Never
-  infer "I have no autonomy" from a missing block.
+  reaches, until when, and what is left of any use and budget caps — and naming any that have
+  been **revoked**. A grant that merely expired produces no notice; it just stops appearing.
+  Turns nobody sent (a schedule firing, a peer agent, a webhook) carry no block at all, so
+  **its absence there tells you nothing**. Never infer "I have no autonomy" from a missing
+  block.
 
 ## Durable operations — the receipt, not the result
 
-The control-plane capabilities that change something do **not** return the thing they
-created. Once the owner consents, each returns a **receipt**:
+Most control-plane capabilities that change something do **not** return the thing they
+created. Once the owner consents, they hand the work to a background worker and return a
+**receipt** — `{ operationId, status: "Queued", target, instruction }` — and the effect
+happens afterwards. (Delivering a message into another session is the exception: it returns
+its own result. Read the receipt you actually get rather than assuming either shape.)
 
-```
-{ operationId, status: "Queued", target, instruction }
-```
+`platform.get_operation` is how you find out what happened. It takes either an `operationId`
+or, before an operation exists, the `invocationId` of a call still parked on approval.
 
-and the effect happens afterwards, in the background, in a worker that survives restarts.
-`platform.get_operation({ operationId })` is how you find out what actually happened. The
-receipt is deliberately immutable — it describes the handoff, not live progress, so re-reading
-it tells you nothing new.
+Four rules carry the whole model:
 
-`platform.create_project`, `platform.create_session`, `platform.create_organization`,
-`platform.invite_to_project`, `platform.invite_to_session`, `platform.invite_to_organization`,
-`platform.begin_connector_setup` and `platform.configure_project_source` all behave this way —
-but confirm the set against the live registry rather than this sentence, and load
-`references/control-plane-capabilities.md` when you are about to construct one of these calls.
+- **Six states, three of them terminal.** `Queued` and `Running` mean keep waiting;
+  `Succeeded`, `Failed` and `Cancelled` will never change again, so stop polling and report.
+  `AwaitingUser` is the odd one — non-terminal, but you cannot advance it yourself.
+- **Follow `instruction`, do not cache it.** It restates the next step for the status you
+  just read and changes with the status.
+- **Poll sparingly.** Every few seconds at most, a handful of times, then tell the owner it
+  is still running rather than blocking the turn on it.
+- **Retrying is not free.** Calling the capability again is a new invocation, so it creates a
+  **second operation that repeats the whole effect** — a second project, or a second email to
+  someone outside the conversation. Read the operation you already have first: if it is live,
+  wait; if it failed, say so and let the owner decide. Never re-issue one whose outcome you
+  could not read.
 
-An operation is in exactly one of six states:
-
-| Status | Terminal? | What to do |
-| --- | --- | --- |
-| `Queued` | no | Waiting to run. Check again shortly. |
-| `Running` | no | Running now. Check again in a few seconds. |
-| `AwaitingUser` | **no** | Parked until a human acts — see below. |
-| `Succeeded` | yes | Finished. `result.payload` holds the outcome. Stop polling. |
-| `Failed` | yes | Finished unsuccessfully. `error.code` / `error.message` say why. Stop polling. |
-| `Cancelled` | yes | Stopped before finishing. Stop polling. |
-
-Reading the reply:
-
-- `terminal: true` means it will never change again. `instruction` restates the next step for
-  the status you just read — it changes with the status, so re-read it rather than caching it.
-- While `Queued` or `Running`, poll every few seconds at most and only a handful of times. If
-  it has not moved, tell the owner it is still running instead of blocking on it.
-- A `Queued` reply with `retryDueAt` set is a **scheduled retry** after a transient failure;
-  `lastAttemptError` says why. That is normal — keep waiting, do not report a failure.
-- A `Failed` reply may still carry a `result.payload` describing **partial progress** a
-  multi-step effect made before failing. Those steps really happened and were **not rolled
-  back**. Report them rather than a bare failure.
-- If a capability call returns `{ status: "awaiting_approval", invocationId }` instead of a
-  receipt, no operation exists yet — the owner has not answered. Poll *that invocation id*
-  to learn whether it became an operation, or was denied or expired. **Do not re-issue the
-  capability.**
-
-**Retrying is not free.** An operation is idempotent only within itself. Calling the
-capability again is a new invocation with a new id, so it creates a **second operation that
-repeats the whole effect** — a second project, or a second email to someone outside the
-conversation. Before re-proposing anything, read the operation you already have: if it is
-still live, wait; if it failed, say so and let the owner decide. Never re-issue an operation
-whose outcome you could not read.
+Field-level detail — the retry and partial-progress fields, the exact refusal codes, which
+capabilities are durable and what each one takes — is in
+`references/control-plane-capabilities.md`. Load it when you are about to construct one of
+these calls.
 
 ## `AwaitingUser` — the handoff contract
 
 `AwaitingUser` is the state that says: *this needs a human in a browser, and you cannot
-finish it.* It is the only non-terminal state you must not poll your way out of. The
-connector setup is the current example — the owner has to complete the provider's own
-sign-in on a trusted Skaile page.
+finish it.* Connector setup is the case in the product today — the owner completes the
+provider's own sign-in on a trusted Skaile page.
 
-When you see it:
+When you see it: give the owner the URL the operation published, **verbatim**, say what it is
+for and that it expires shortly, and then **wait**. Do not poll in a loop and do not retry the
+capability — a retry does not resume this operation, it starts a second one. And **never ask
+for, or accept, a credential in chat**: no token, password, personal access token, OAuth code
+or client secret. The capabilities reject every such field by design, and the credential is
+only ever entered on that page.
 
-1. Give the owner `result.payload.userAction.url` **verbatim**, with what it is for.
-2. Tell them it expires shortly — `result.payload.userAction.expiresAt` is the deadline the
-   platform itself published to them.
-3. **Wait.** Do not poll in a loop, and do not retry the original capability. A retry does
-   not resume this operation; it starts a second one.
-4. **Never ask for, or accept, a credential in chat** — no token, password, personal access
-   token, OAuth code, or client secret. The capabilities reject every such field by design,
-   and the credential is only ever entered on that page.
-
-It has exactly two exits, and you control neither:
-
-- the human completes the real-world step, the platform verifies the condition actually
-  holds — a click alone never resumes it — and the operation returns to `Queued` and
-  continues on its own;
-- the window closes, and the operation ends by itself as `Failed`. That is an abandoned
-  handoff, not a defect: say the step expired and offer to start it again.
+It has exactly two exits and you control neither. Either the human completes the real-world
+step and the platform verifies the condition genuinely holds — a click alone never resumes it
+— and the operation returns to `Queued` and continues on its own; or the window closes and the
+operation ends by itself as `Failed`. The second is an abandoned handoff, not a defect: say
+the step expired and offer to start it again.
 
 ## Discovery first, then propose
 
 The read-only, owner-scoped discovery capabilities are the **id-resolution step**. Resolve an
 id there before proposing any effect that takes one — never ask the owner for an id you can
-look up, and never guess one. (Named below for the pairing; as always, the live registry
-decides what is actually there.)
+look up, and never guess one.
 
 The pairings that matter:
 
-| Before proposing… | Read first | Why |
+| Before proposing... | Read first | Why |
 | --- | --- | --- |
-| `platform.create_project` | `platform.list_my_organizations` | you need an `organizationId` the owner can actually create in |
-| `platform.create_session` | `platform.list_my_projects` | you need a `projectId`, and the owner's live role on it |
-| `platform.invite_to_project` | `platform.list_my_projects`, then `platform.list_project_members` | an `Active` or `Invited` row means do not re-invite; `Expired`/`Revoked` is not a live invitation |
-| `platform.invite_to_session` | `platform.list_my_sessions` or `platform.search_my_sessions` | you need a `sessionId`; access to *read* a session does not allow inviting into it |
-| `platform.begin_connector_setup` | `platform.list_connector_options` | if it already reports `usable: true`, you do not need the setup at all |
-| `platform.configure_project_source` | `platform.list_connector_options` | only a connector that is already `usable` can be pointed at |
+| creating a project | the owner's organizations | you need an organization id the owner can actually create in |
+| creating a session | the owner's projects | you need a project id, and the owner's live role on it |
+| inviting to a project | the owner's projects, then that project's members | an `Active` or `Invited` row means do not re-invite; `Expired`/`Revoked` is not a live invitation |
+| inviting to a session | the owner's sessions | you need a session id; access to *read* a session does not allow inviting into it |
+| starting a connector setup | that organization's connectors | if one already reports `usable: true`, you do not need the setup at all |
+| re-pointing a project's source | that organization's connectors | only a connector that is already `usable` can be pointed at |
 
-Shared shape: these lists are paged (`{ cursor?, limit? }` → `{ items, nextCursor }`), and
-`nextCursor` is non-null only when more rows exist — page until it is null instead of
-concluding the owner has exactly one page. Results are already redacted to safe identity,
-role and status fields.
-
-Their refusals are **terminal**: "not accessible" means the owner cannot see that target —
-tell them, do not retry, and do not go guessing at other ids. Refusals are deliberately
-identical whether the target does not exist or the owner has no standing on it, so retrying
-only guesses.
+These lists are paged: page until the cursor comes back null rather than concluding the owner
+has exactly one page. Their refusals are **terminal** — "not accessible" means the owner cannot
+see that target, so tell them rather than retrying or guessing at other ids. The refusal is
+deliberately identical whether the target does not exist or the owner has no standing on it.
 
 ## Target-bound actions via `platform.act` and `platform.act_batch`
 
@@ -283,10 +241,10 @@ Prefer doing it when the user clearly wants the outcome and a safe capability ex
 prefer guiding when the user wants to learn the UI, or when the capability genuinely is not
 in the live set for this session.
 
-A browser step is no longer automatically a reason to hand the whole task over. Connector
-sign-in is the case that changed: the assistant **starts** the setup and the platform hands
-the owner one expiring link for the part only they can do — see the `AwaitingUser` contract
-above. Do the half you can do, then hand off the half you cannot; do not decline the whole
-thing because part of it needs a browser. Some things still do belong entirely to the UI —
-creating a project backed by a connector source, or a session that shares a git branch, for
-example — and for those, guiding is the right answer.
+A browser step is not by itself a reason to hand the whole task over. Connector sign-in is the
+case to have in mind: the assistant **starts** the setup and the platform hands the owner one
+expiring link for the part only they can do — see the `AwaitingUser` contract above. Do the
+half you can do, then hand off the half you cannot; do not decline the whole thing because
+part of it needs a browser. Some things genuinely do belong entirely to the UI — creating a
+project backed by a connector source, or a session that shares a git branch — and for those,
+guiding is the right answer.

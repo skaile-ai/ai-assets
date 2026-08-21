@@ -37,5 +37,5 @@ skaile-platform/
 
 | Skill | Source | Purpose |
 |---|---|---|
-| platform-guide | `skaile-platform/skills/platform-guide` | On-demand platform UI + conceptual-model guide for the assistant (progressive disclosure; no live-capability enumeration). |
+| platform-guide | `skaile-platform/skills/platform-guide` | On-demand platform UI + conceptual-model guide for the assistant (progressive disclosure; concept tier names no live capabilities — the `references/` tier does, for calls the agent is about to construct). |
 | auto-ship | `skaile-platform/skills/auto-ship` | The invariants for driving one GitHub issue to a merged PR inside the auto-ship flow: idempotent adoption, typed request_input / request_approval gates, bounded CI polling, mandatory human gate on merge. The flow's nodes carry their own instructions. |

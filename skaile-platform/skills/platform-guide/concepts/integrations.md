@@ -19,8 +19,10 @@ declares:
 - **User Delegation** — the user signs in to the provider themselves (OAuth, or supplies a
   PAT). The platform stores that credential per user and injects the **session owner's**
   credential into the container at session start. This is why some connections need the
-  user to click "Connect" and complete an OAuth flow in the browser — the agent cannot do
-  that step for them.
+  user to click "Connect" and complete an OAuth flow in the browser. The assistant cannot
+  enter the credential, but it can **start** the setup and hand the user one expiring link
+  for the part only they can do — see the handoff contract in `concepts/agent.md`. Never
+  ask for or accept a token, password, or OAuth code in chat.
 - **Service Account** — a shared credential registered by IT/admin, used for all access.
   When a session gains multiple members, access can shift from the owner's delegated
   credentials toward a service account (or shared delegation with the owner's

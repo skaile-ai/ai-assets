@@ -86,7 +86,9 @@ and **Catalog** (manage reusable assets/skills, assign to teams/projects).
 
 ## Where to connect a data source (cheat sheet)
 
-- **Personal OAuth for myself** → **My Connections** (`/<org>/my-connections`).
+- **Personal OAuth for myself** → **My Connections** (`/<org>/my-connections`). The
+  assistant can also start this in-conversation and hand over the sign-in link; it is not
+  a UI-only step (see `concepts/agent.md`).
 - **Org-wide provider for everyone / service accounts** → org **Settings > Providers**.
 - **Which provider this project's data uses** → set at **project creation** (Source step).
 - **AI model/endpoint** → org **Settings > AI Providers**.
