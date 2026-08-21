@@ -34,10 +34,29 @@ out. `nextCursor` is non-null only when more rows exist. A cursor replayed after
 filter or `limit` is rejected — restart paging without one. Results are already redacted to safe
 identity, role and status fields.
 
-`platform.search_my_sessions({ query, limit? })` sits alongside these for finding a session by
-content rather than by listing. It has its **own** shape: no cursor, `limit` up to 100, and it
-returns `hits` plus `truncated` — `truncated: true` means a cap was reached, not that nothing
-else matched.
+Two more read the *conversations* rather than the structure. Neither uses the cursor contract
+above:
+
+| Call | Gives you |
+| --- | --- |
+| `platform.search_my_sessions({ query, limit? })` | `hits` — snippet, `sessionId`, `projectId`, `seq`, `createdAt` — across the sessions the owner can read. `limit` caps at 100. |
+| `platform.read_session_history({ sessionId, limit?, beforeSeq? })` | `messages`, newest-first, from one session the owner can reach, plus `hasMore`. `limit` defaults to 50 and caps at 200; `beforeSeq` pages backwards, returning only messages with `seq` strictly below it. |
+
+Use them in that order: search to find the session, then read that session's history. Search
+scans the 50 most-recently-active sessions and returns at most 100 hits, and `truncated: true`
+means it hit one of those two caps — not that nothing else matched. So treat a truncated search
+as "look harder", never as a complete answer.
+
+**These reads are audited.** Four capabilities write a personal-assistant read audit naming the
+owner, the target session's ancestry and how much came back: `platform.search_my_sessions`,
+`platform.read_session_history`, `platform.get_session_context` and
+`platform.list_session_resources`. Reading a colleague's conversation on the owner's behalf
+leaves a record. That is not a reason to avoid it when the owner asks — it is a reason not to
+go trawling sessions speculatively.
+
+Do not confuse `platform.read_session_history` with `platform.read_own_session_history`. The
+latter is **not** part of this family: it is available in ordinary project sessions, always
+targets the calling session, and takes no `sessionId` at all.
 
 Reading connector readiness is the one that most often ends the task early:
 

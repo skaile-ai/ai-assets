@@ -15,7 +15,9 @@ at runtime**, never assumed from memory.
   it (e.g. via `ToolSearch` or the driver equivalent) before concluding it is unavailable.
 - Capabilities cover, conceptually: **owner-scoped discovery** (listing the organizations,
   projects and sessions the owner can reach, resolving a session's ancestry, listing a
-  project's members, a session's resources, or an organization's connectors); **control-plane
+  project's members, a session's resources, or an organization's connectors, and searching
+  or reading the message history of a session the owner can reach — those last reads are
+  audited); **control-plane
   changes** (creating an organization, a project or a session; inviting someone at any of
   those three levels; starting a connector setup; re-pointing a project's source connector;
   delivering a message into another session as the owner); **reading a durable operation's
