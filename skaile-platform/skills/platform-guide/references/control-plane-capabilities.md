@@ -5,7 +5,7 @@ organizations, projects, sessions, memberships, connector wiring — plus the re
 discovery that resolves the ids they take, and the one query that reports what happened.
 
 This file is a **map, not a contract**. The live registry is authoritative: the set changes
-every deploy, and most of this family is advertised only in the owner's own personal-assistant
+every deploy, and this family is advertised only in the owner's own personal-assistant
 session. Consult the capabilities available in the current turn and use the exact schema they
 carry. Read this to know what the family *is* and how consent and completion work in it — not
 to decide whether a capability exists. `concepts/agent.md` carries the model; this is the
