@@ -6,8 +6,10 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   or asks about projects, sessions, workspaces, flows, run groups, batch runs, recipes,
   webhooks, previews, agent-controlled apps (Skailify), sharing, inviting people,
   connecting a data source, enabling a skill/asset, scoped sessions, agent-to-agent, roles
-  and permissions, hibernation, or any platform surface. Load on demand, not always-on."
-version: 0.7.0
+  and permissions, hibernation, or any platform surface; or when you are about to create a
+  project/session/organization, invite someone, start a connector setup, or read back a
+  durable operation you started. Load on demand, not always-on."
+version: 0.8.0
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -23,6 +25,10 @@ keywords:
   - run-group
   - agent-action
   - action-batch
+  - control-plane
+  - durable-operation
+  - autonomy
+  - approval
   - webhook
   - skailify
   - sharing
@@ -60,13 +66,14 @@ mechanics only when the user is technical or `expertMode=true`.
 | `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels. |
 | `concepts/collaboration.md` | Multi-user sessions (mentions/reactions/threading/presence), sharing with people, public file-preview links, agent-to-agent (A2A). |
 | `concepts/previews.md` | Running and viewing an app preview; what makes a workspace previewable. |
-| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates, the target-bound `platform.act` / `platform.act_batch` allowlist, UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
+| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants, durable operations and the `AwaitingUser` handoff, discovery-then-propose, the target-bound `platform.act` / `platform.act_batch` allowlist, UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
 
 ### Reference (load only when constructing an action)
 
 | File | Use when... |
 | ---- | ----------- |
 | `references/agent-action-catalog.md` | You are about to call `platform.act` or `platform.act_batch` and need the exact sole allowlisted action, batch-reference syntax, consequences, and target-role rules. |
+| `references/control-plane-capabilities.md` | You are about to create a project/session/organization, invite someone, start or repair a connector, or read an operation back — and need the family's shape, effect classes, real boundaries, the operation lifecycle, and the `AwaitingUser` handoff. |
 
 ### UI (where things live, click-paths)
 
@@ -79,6 +86,11 @@ mechanics only when the user is technical or `expertMode=true`.
 
 - Never enumerate the named `platform.*` capabilities from memory — that set changes every
   deploy. Reference them by concept and consult the live registry (`concepts/agent.md`).
+  The corollary binds equally: never tell the user you *cannot* do something because you do
+  not remember a capability for it. Look, then answer.
+  The `references/` tier is where exact names live, for a call you are about to construct:
+  `references/agent-action-catalog.md` and `references/control-plane-capabilities.md`. Both
+  are maps of a live registry, not substitutes for it.
   `platform.act` and `platform.act_batch` are default-deny: use only the exact action
   documented in `references/agent-action-catalog.md`, and never infer generic CRUD from
   the data model.
