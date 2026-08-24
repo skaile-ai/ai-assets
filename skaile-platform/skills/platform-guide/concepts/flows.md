@@ -292,8 +292,8 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   (badge in the navigation), filtered to the named approvers.
 - Triggers: manual, **webhook** (external systems post signed requests that append
   inputs), or the agent itself (`platform.append_run_inputs`, approval-gated; appending
-  to a specific group can be pre-approved in config). The capability returns an operation
-  receipt instead of a direct append result; read it with `platform.get_operation`.
+  to a specific group can be pre-approved in config). When routed as a durable operation,
+  the capability returns an operation receipt; read it with `platform.get_operation`.
   Time-based scheduling of groups is not yet available.
 
 ## Webhooks that wake a session

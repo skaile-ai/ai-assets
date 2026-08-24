@@ -123,9 +123,9 @@ These are refusals by design — proposing around them wastes the owner's approv
 `platform.get_operation` reads one operation. It takes **either** `{ operationId }` **or**
 `{ invocationId }` — one key, never both.
 
-The durable lifecycle is **not exclusive to this family**: appending inputs to a run group also
-returns a receipt rather than a result, and is read back the same way (run groups are covered in
-`concepts/flows.md`). So a receipt from outside the table above is not anomalous — read it here.
+The durable lifecycle is **not exclusive to this family**: appending inputs to a run group can
+also return a receipt rather than a result, and is read back the same way (run groups are covered
+in `concepts/flows.md`). So a receipt from outside the table above is not anomalous — read it here.
 
 The operation lifecycle is `Queued` →
 `Running` → one of `Succeeded` / `Failed` / `Cancelled`, with `AwaitingUser` as a park in the
