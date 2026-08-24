@@ -295,7 +295,7 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   to a specific group can be pre-approved in config). When routed as a durable operation,
   the capability returns an operation receipt; read it with `platform.get_operation`.
   Pre-approved card-free appends and rare fallback cases where the approval request cannot
-  be represented for background retry return the direct append result.
+  be represented for the background worker return the direct append result.
   Time-based scheduling of groups is not yet available.
 
 ## Webhooks that wake a session
