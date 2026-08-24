@@ -125,7 +125,9 @@ These are refusals by design — proposing around them wastes the owner's approv
 
 The durable lifecycle is **not exclusive to this family**: appending inputs to a run group can
 also return a receipt rather than a result, and is read back the same way (run groups are covered
-in `concepts/flows.md`). So a receipt from outside the table above is not anomalous — read it here.
+in `concepts/flows.md`). That happens on the approval-card durable path; pre-approved card-free
+appends and fallback sync appends return a direct append result. So a receipt from outside the
+table above is not anomalous — read it here.
 
 The operation lifecycle is `Queued` →
 `Running` → one of `Succeeded` / `Failed` / `Cancelled`, with `AwaitingUser` as a park in the
