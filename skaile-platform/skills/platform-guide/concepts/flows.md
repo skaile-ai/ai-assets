@@ -291,9 +291,10 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   Approvals and input requests raised by unattended runs land in an org-level inbox
   (badge in the navigation), filtered to the named approvers.
 - Triggers: manual, **webhook** (external systems post signed requests that append
-  inputs), or the agent itself (approval-gated capabilities; appending to a specific
-  group can be pre-approved in config). Time-based scheduling of groups is not yet
-  available.
+  inputs), or the agent itself (`platform.append_run_inputs`, approval-gated; appending
+  to a specific group can be pre-approved in config). The capability may return an
+  operation receipt instead of a direct append result; read it with `platform.get_operation`.
+  Time-based scheduling of groups is not yet available.
 
 ## Webhooks that wake a session
 
