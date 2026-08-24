@@ -294,7 +294,8 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   inputs), or the agent itself (`platform.append_run_inputs`, approval-gated; appending
   to a specific group can be pre-approved in config). When routed as a durable operation,
   the capability returns an operation receipt; read it with `platform.get_operation`.
-  Pre-approved card-free appends and fallback sync appends return the direct append result.
+  Pre-approved card-free appends and payloads that cannot be projected onto the durable
+  operation envelope return the direct append result.
   Time-based scheduling of groups is not yet available.
 
 ## Webhooks that wake a session
