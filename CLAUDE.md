@@ -46,9 +46,9 @@ Every asset shipped from this repo is identified by the canonical tuple
 
 | Field | Source of truth | Notes |
 |---|---|---|
-| `publisher` | `skaile.yaml` at the repo root | `skaile-ai` for everything here |
-| `kind` | `<domain>/skills/<name>/SKILL.md` (skill), `<domain>/<domain>.bundle.yaml` (bundle) | filename convention |
-| `name` | SKILL.md frontmatter `name:` (must match parent directory) | per-asset |
+| `publisher` | `skaile.manifest.yaml` at the repo root | `skaile-ai` for everything here |
+| `kind` | `skaile.manifest.yaml` `assets[].kind` | mirrors the filename convention (`<domain>/skills/<name>/SKILL.md`, `<domain>/<domain>.bundle.yaml`) |
+| `name` | `skaile.manifest.yaml` `assets[].name`; SKILL.md frontmatter `name:` must match it | mismatch is an index-time hard error |
 | `version` | `git describe --tags --abbrev=0` of the resolved commit (repo-wide default); a per-asset frontmatter `version:` **overrides** it for that asset | cut a tag to release, or pin per-asset (see below) |
 
 A per-asset version **may** be declared in SKILL.md frontmatter — as top-level
@@ -63,6 +63,23 @@ extensions (the agentskills.io convention the parser follows). MCP servers
 under `mcp/` source their version from `pom.xml` and mirror it into the
 `version` field of their single `MCP.md` — see `mcp/DOMAIN.md`.
 
+### Two files — `skaile.yaml` vs `skaile.manifest.yaml`
+
+Since the 2026-06-03 file split, **publication** keys (`publisher:` / `version:` /
+`assets:`) live ONLY in `skaile.manifest.yaml`; `skaile.yaml` owns the workspace +
+consumption half. Leaving a publication key in `skaile.yaml` is a parse-time
+rejection (`legacy_key_rejected`). `ai-assets` is a pure asset repo, so it carries
+`skaile.manifest.yaml` and **no** `skaile.yaml`.
+
+Two rules that bite when editing the manifest:
+
+- **`assets:` must be exhaustive.** `walker.ts:walkOne` falls back to the
+  agentskills.io filename convention only when *no* manifest declares any asset.
+  Adding a partial `assets:` list silently un-publishes everything it omits.
+- **`files:` globs resolve against the repo root, not against `root:`.** Never
+  combine `root:` and `files:` for a single-file asset (e.g. a bundle) — the
+  `root:` walk pulls the entire directory into the asset.
+
 Consumer projects pull from this repo via a `sources:` entry in their own
 `skaile.yaml`:
 
@@ -71,16 +88,18 @@ sources:
   - url: https://github.com/skaile-ai/ai-assets
     pin: v1.4.0     # branch | tag | 40-char sha; defaults to HEAD of default branch
 dependencies:
-  - bundle:skaile-development@skaile-ai#^2.0
-  - skill:audit@skaile-ai#~1.4
+  - bundle:@skaile-ai/skaile-development#^2.0
+  - skill:@skaile-ai/audit#~1.4
 ```
 
 Full schema:
 [`workspaces/.../specs/2026-05-31-manifest-canonical-identity.md`](https://github.com/skaile-ai/workspaces/blob/main/packages/workspaces/_devlog/specs/2026-05-31-manifest-canonical-identity.md)
-(canonical) and the migration skill at
+(canonical), its file-split amendment
+[`2026-06-03-manifest-file-split.md`](https://github.com/skaile-ai/workspaces/blob/main/packages/workspaces/_devlog/specs/2026-06-03-manifest-file-split.md),
+and the migration skill at
 `skaile-development/skills/migrate-skaile-manifest/` (for converting legacy
 `repositories:` / `ai_resources:` manifests).
 
 ## How This Is Consumed
 
-The skaile CLI and platform consume these at **runtime** by reading SKILL.md files from disk. Configure the path via `SKAILE_RESOURCES_PATH` env var or `skaile.yaml`.
+The skaile CLI and platform consume these at **runtime** by reading SKILL.md files from disk. Configure the path via the `SKAILE_RESOURCES_PATH` env var or the consuming project's `skaile.yaml`.

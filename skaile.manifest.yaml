@@ -1,0 +1,178 @@
+# skaile.manifest.yaml — publication manifest for skaile-ai/ai-assets
+#
+# What this repo PUBLISHES. Split out of `skaile.yaml` per
+# workspaces/.../_devlog/specs/2026-06-03-manifest-file-split.md: `publisher:` /
+# `version:` / `assets:` are rejected at parse time in `skaile.yaml` and live
+# only here. `ai-assets` is a pure asset repo, so this is its only manifest.
+#
+# This file declares THE canonical publisher for every asset shipped from this
+# repo. Consumer projects that resolve `<kind>:@skaile-ai/<name>` end up here.
+#
+# Version is omitted: the resolver derives it from `git describe --tags`. Cut
+# a new git tag to publish a new version of every asset in this repo.
+
+publisher: skaile-ai
+
+# `assets:` MUST be exhaustive. `walker.ts:walkOne` falls back to the
+# agentskills.io filename convention ONLY when no manifest declares any asset —
+# a partial list silently un-publishes everything it omits. Every entry below was
+# generated from that same convention walk, so this list is byte-identical to
+# what the fallback discovered (123 assets).
+#
+# `root:` walks a directory recursively. `files:` globs are resolved against the
+# REPO ROOT, not against `root:` — never combine the two for a single-file asset
+# (that walks the whole `root` dir into the asset).
+assets:
+
+  # ── ai-asset-management ───────────────────────────────────────────────────
+  - { kind: agent,    name: skaile, root: ai-asset-management/agents/skaile }
+  - { kind: bundle,   name: ai-asset-management, files: [ai-asset-management/ai-asset-management.bundle.yaml] }
+  - { kind: contract, name: skill-builder-contract, root: ai-asset-management/contracts/skill-builder-contract }
+  - { kind: skill,    name: agent-builder, root: ai-asset-management/skills/agent-builder }
+  - { kind: skill,    name: ai-resource-navigator, root: ai-asset-management/skills/ai-resource-navigator }
+  - { kind: skill,    name: domain-builder, root: ai-asset-management/skills/domain-builder }
+  - { kind: skill,    name: sidecar-domain-inferrer, root: ai-asset-management/skills/sidecar-domain-inferrer }
+  - { kind: skill,    name: skill-builder, root: ai-asset-management/skills/skill-builder }
+  - { kind: skill,    name: source-deps-analyzer, root: ai-asset-management/skills/source-deps-analyzer }
+  - { kind: skill,    name: source-manifest-builder, root: ai-asset-management/skills/source-manifest-builder }
+  - { kind: skill,    name: source-sidecar-curator, root: ai-asset-management/skills/source-sidecar-curator }
+  - { kind: skill,    name: uv-cli-implementer, root: ai-asset-management/skills/uv-cli-implementer }
+
+  # ── data-extraction ───────────────────────────────────────────────────────
+  - { kind: skill, name: msaccess-vba-extractor, root: data-extraction/skills/msaccess-vba-extractor }
+
+  # ── dev-implementation-experts ────────────────────────────────────────────
+  - { kind: skill, name: prog-expert-git-agent, root: dev-implementation-experts/skills/prog-expert-git-agent }
+
+  # ── dev-implementation-experts-js ─────────────────────────────────────────
+  - { kind: bundle,   name: dev-implementation-experts-js, files: [dev-implementation-experts-js/dev-implementation-experts-js.bundle.yaml] }
+  - { kind: contract, name: impl-experts-js-contract, root: dev-implementation-experts-js/contracts/impl-experts-js-contract }
+  - { kind: skill,    name: prog-expert-directus, root: dev-implementation-experts-js/skills/prog-expert-directus }
+  - { kind: skill,    name: prog-expert-nuxt, root: dev-implementation-experts-js/skills/prog-expert-nuxt }
+  - { kind: skill,    name: prog-expert-omp, root: dev-implementation-experts-js/skills/prog-expert-omp }
+  - { kind: skill,    name: prog-expert-primevue, root: dev-implementation-experts-js/skills/prog-expert-primevue }
+  - { kind: skill,    name: prog-expert-scadcn, root: dev-implementation-experts-js/skills/prog-expert-scadcn }
+  - { kind: skill,    name: prog-expert-tiptap, root: dev-implementation-experts-js/skills/prog-expert-tiptap }
+  - { kind: skill,    name: prog-expert-tts-stt-integration, root: dev-implementation-experts-js/skills/prog-expert-tts-stt-integration }
+  - { kind: skill,    name: prog-expert-una, root: dev-implementation-experts-js/skills/prog-expert-una }
+  - { kind: skill,    name: prog-expert-uno, root: dev-implementation-experts-js/skills/prog-expert-uno }
+  - { kind: skill,    name: prog-expert-vueuse, root: dev-implementation-experts-js/skills/prog-expert-vueuse }
+  - { kind: skill,    name: skailup-prog-expert-integration-ai-agents, root: dev-implementation-experts-js/skills/skailup-prog-expert-integration-ai-agents }
+  - { kind: skill,    name: skailup-prog-expert-skill-system, root: dev-implementation-experts-js/skills/skailup-prog-expert-skill-system }
+
+  # ── dev-implementation-experts-python ─────────────────────────────────────
+  - { kind: bundle,   name: dev-implementation-experts-python, files: [dev-implementation-experts-python/dev-implementation-experts-python.bundle.yaml] }
+  - { kind: contract, name: impl-experts-python-contract, root: dev-implementation-experts-python/contracts/impl-experts-python-contract }
+  - { kind: skill,    name: prog-expert-marimo, root: dev-implementation-experts-python/skills/prog-expert-marimo }
+  - { kind: skill,    name: prog-expert-python, root: dev-implementation-experts-python/skills/prog-expert-python }
+  - { kind: skill,    name: prog-expert-python-pydanticai, root: dev-implementation-experts-python/skills/prog-expert-python-pydanticai }
+
+  # ── dev-implementation-experts-typst ──────────────────────────────────────
+  - { kind: bundle, name: dev-implementation-experts-typst, files: [dev-implementation-experts-typst/dev-implementation-experts-typst.bundle.yaml] }
+  - { kind: skill,  name: prog-expert-advisor, root: dev-implementation-experts-typst/skills/prog-expert-advisor }
+  - { kind: skill,  name: prog-expert-typst, root: dev-implementation-experts-typst/skills/prog-expert-typst }
+
+  # ── forge-mattermost ──────────────────────────────────────────────────────
+  - { kind: agent, name: workspace-orchestrator, root: forge-mattermost/workspace-orchestrator }
+
+  # ── forge-project ─────────────────────────────────────────────────────────
+  - { kind: agent,  name: forge-project-assistant, root: forge-project/agent }
+  - { kind: agent,  name: forge-project-base-orchestrator, root: forge-project/base-orchestrator }
+  - { kind: agent,  name: forge-project-orchestrator, root: forge-project/project-orchestrator }
+  - { kind: bundle, name: forge-project, files: [forge-project/forge-project.bundle.yaml] }
+  - { kind: skill,  name: code-assistance, root: forge-project/agent/skills/code-assistance }
+  - { kind: skill,  name: file-management, root: forge-project/agent/skills/file-management }
+  - { kind: skill,  name: project-exploration, root: forge-project/agent/skills/project-exploration }
+  - { kind: skill,  name: ui-rendering, root: forge-project/skills/ui-rendering }
+
+  # ── github-ops ────────────────────────────────────────────────────────────
+  - { kind: skill, name: gh-create-pr, root: github-ops/skills/gh-create-pr }
+  - { kind: skill, name: mm-post-to-thread, root: github-ops/skills/mm-post-to-thread }
+
+  # ── knowledge-research ────────────────────────────────────────────────────
+  - { kind: bundle,   name: knowledge-research, files: [knowledge-research/knowledge-research.bundle.yaml] }
+  - { kind: bundle,   name: knowledge-writing, files: [knowledge-research/skills/knowledge-writing/knowledge-writing.bundle.yaml] }
+  - { kind: contract, name: knowledge-research-contract, root: knowledge-research/contracts/knowledge-research-contract }
+  - { kind: contract, name: knowledge-writing-contract, root: knowledge-research/skills/knowledge-writing/contracts/knowledge-writing-contract }
+  - { kind: skill,    name: book-writer, root: knowledge-research/skills/knowledge-writing/book-writer }
+  - { kind: skill,    name: deep-research, root: knowledge-research/skills/deep-research }
+  - { kind: skill,    name: knowledge-paper-extractor, root: knowledge-research/skills/knowledge-paper-extractor }
+  - { kind: skill,    name: knowledge-paper-podcast, root: knowledge-research/skills/knowledge-writing/knowledge-paper-podcast }
+  - { kind: skill,    name: knowledge-paper-research, root: knowledge-research/skills/knowledge-paper-research }
+  - { kind: skill,    name: knowledge-writer-podcast, root: knowledge-research/skills/knowledge-writing/knowledge-writer-podcast }
+
+  # ── mcp ───────────────────────────────────────────────────────────────────
+  - { kind: mcp-server, name: alma, root: mcp/alma }
+  - { kind: mcp-server, name: excel, root: mcp/xls }
+  - { kind: mcp-server, name: github, root: mcp/github }
+  - { kind: mcp-server, name: ideogram, root: mcp/ideogram }
+  - { kind: mcp-server, name: ppt, root: mcp/ppt }
+  - { kind: mcp-server, name: sql, root: mcp/sql }
+  - { kind: mcp-server, name: strava, root: mcp/strava }
+  - { kind: mcp-server, name: word, root: mcp/docx }
+
+  # ── skaile-development ────────────────────────────────────────────────────
+  - { kind: agent,  name: skaile-development, root: skaile-development/agents/skaile-development }
+  - { kind: bundle, name: skaile-development, files: [skaile-development/skaile-development.bundle.yaml] }
+  - { kind: skill,  name: audit, root: skaile-development/skills/audit }
+  - { kind: skill,  name: compile-validators, root: skaile-development/skills/compile-validators }
+  - { kind: skill,  name: component-builder, root: skaile-development/skills/component-builder }
+  - { kind: skill,  name: devlog, root: skaile-development/skills/devlog }
+  - { kind: skill,  name: doc, root: skaile-development/skills/doc }
+  - { kind: skill,  name: e2e-platform, root: skaile-development/skills/e2e-platform }
+  - { kind: skill,  name: faq, root: skaile-development/skills/faq }
+  - { kind: skill,  name: git, root: skaile-development/skills/git }
+  - { kind: skill,  name: good-morning, root: skaile-development/skills/good-morning }
+  - { kind: skill,  name: implement, root: skaile-development/skills/implement }
+  - { kind: skill,  name: jenkins-debug, root: skaile-development/skills/jenkins-debug }
+  - { kind: skill,  name: kill-backend, root: skaile-development/skills/kill-backend }
+  - { kind: skill,  name: meat, root: skaile-development/skills/meat }
+  - { kind: skill,  name: migrate-skaile-manifest, root: skaile-development/skills/migrate-skaile-manifest }
+  - { kind: skill,  name: notify, root: skaile-development/skills/notify }
+  - { kind: skill,  name: postxl, root: skaile-development/skills/postxl }
+  - { kind: skill,  name: proposal, root: skaile-development/skills/proposal }
+  - { kind: skill,  name: quality, root: skaile-development/skills/quality }
+  - { kind: skill,  name: ready, root: skaile-development/skills/ready }
+  - { kind: skill,  name: release, root: skaile-development/skills/release }
+  - { kind: skill,  name: review, root: skaile-development/skills/review }
+  - { kind: skill,  name: session-analysis, root: skaile-development/skills/session-analysis }
+  - { kind: skill,  name: session-review, root: skaile-development/skills/session-review }
+  - { kind: skill,  name: ship, root: skaile-development/skills/ship }
+  - { kind: skill,  name: skaile-stack-decide, root: skaile-development/skills/skaile-stack-decide }
+  - { kind: skill,  name: sync-docs, root: skaile-development/skills/sync-docs }
+  - { kind: skill,  name: test, root: skaile-development/skills/test }
+  - { kind: skill,  name: test-e2e, root: skaile-development/skills/test-e2e }
+  - { kind: skill,  name: test-integration, root: skaile-development/skills/test-integration }
+  - { kind: skill,  name: test-plan, root: skaile-development/skills/test-plan }
+  - { kind: skill,  name: test-unit, root: skaile-development/skills/test-unit }
+  - { kind: skill,  name: verify-ui, root: skaile-development/skills/verify-ui }
+
+  # ── skaile-platform ───────────────────────────────────────────────────────
+  - { kind: agent, name: skaile-assistant, root: skaile-platform/agents/assistant }
+  - { kind: skill, name: auto-ship, root: skaile-platform/skills/auto-ship }
+  - { kind: skill, name: platform-guide, root: skaile-platform/skills/platform-guide }
+
+  # ── testing ───────────────────────────────────────────────────────────────
+  - { kind: flow,  name: test-echo-flow, files: [testing/flows/test-echo.flow.yaml] }
+  - { kind: skill, name: test-ask-name, root: testing/skills/test-ask-name }
+  - { kind: skill, name: test-count-artifacts, root: testing/skills/test-count-artifacts }
+  - { kind: skill, name: test-write-greeting, root: testing/skills/test-write-greeting }
+
+  # ── use ───────────────────────────────────────────────────────────────────
+  - { kind: bundle,   name: use, files: [use/use.bundle.yaml] }
+  - { kind: contract, name: use-contract, root: use/contracts/use-contract }
+  - { kind: skill,    name: agent-browser, root: use/skills/agent-browser }
+  - { kind: skill,    name: use-anydoc, root: use/skills/use-anydoc }
+  - { kind: skill,    name: use-context7-api, root: use/skills/use-context7-api }
+  - { kind: skill,    name: use-docling, root: use/skills/use-docling }
+  - { kind: skill,    name: use-elevenlabs, root: use/skills/use-elevenlabs }
+  - { kind: skill,    name: use-exa, root: use/skills/use-exa }
+  - { kind: skill,    name: use-ideogram-image, root: use/skills/use-ideogram-image }
+  - { kind: skill,    name: use-mcp2cli, root: use/skills/use-mcp2cli }
+  - { kind: skill,    name: use-outline, root: use/skills/use-outline }
+  - { kind: skill,    name: use-outline-cli, root: use/skills/use-outline-cli }
+  - { kind: skill,    name: use-perplexity, root: use/skills/use-perplexity }
+  - { kind: skill,    name: use-revealjs, root: use/skills/use-revealjs }
+  - { kind: skill,    name: use-searxng, root: use/skills/use-searxng }
+  - { kind: skill,    name: use-skills-sh, root: use/skills/use-skills-sh }
+  - { kind: skill,    name: use-slidev, root: use/skills/use-slidev }
