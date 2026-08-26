@@ -1,7 +1,7 @@
 ---
 name: word
-description: "A stateful Word (.docx) engine for editing a real document in place instead of regenerating it. Its 37 tools expose identity-bound Blocks across body, headers, footers and text boxes; Named styles and resolved style audits; scoped text, paragraph and table composition; live PDF previews; core properties and Word fields; PNG/JPEG replacement and insertion; and complete Revision/Comment collaboration. document.save backs up, verifies the OOXML Part inventory and content, and atomically replaces the target. Use it when preserving a Template, numbering, review markup, media and package fidelity matter."
-version: 0.5.0 # mcp-catalog-version
+description: "A stateful Word (.docx) engine for source-free document creation, Template composition, and editing a real document in place instead of regenerating it. Its 38 tools expose a neutral blank-package baseline; identity-bound Blocks across body, headers, footers and text boxes; Named styles and resolved style audits; scoped text, paragraph and table composition; live PDF previews; core properties and Word fields; PNG/JPEG replacement and insertion; and complete Revision/Comment collaboration. document.save backs up, verifies the OOXML Part inventory and content, and atomically replaces the target. Use it when creating a new document or preserving a Template, numbering, review markup, media and package fidelity."
+version: 0.6.0 # mcp-catalog-version
 transport: stdio
 recipe:
   attr: mcps.word
@@ -51,14 +51,14 @@ Docker/Nix-based MCP server for Word document operations, built on Apache POI XW
   numbers, or a table's actual row/column/merge shape — not text with the layout fused away.
 - The task needs to compose a Template-derived deliverable by adding/removing paragraphs,
   Sections, table rows/tables, images, properties, or fields while preserving the house document.
+- The user asks to create a genuinely new Word document without a source or Template.
+  `document.create_blank` supplies a valid neutral package with an insertion anchor, baseline Named
+  styles, single-level number/bullet definitions, and a bordered table style.
 - The task needs a reviewable workflow: authored or resolved Word Revisions, threaded Comments,
   field refresh-on-open, or a PDF preview of unsaved changes before the final save.
 
 ## When NOT to reach for this
 
-- **A genuinely blank document with no source or Template to build on.**
-  `document.create_from(<org Template>)` plus structural edits is the intended composition path;
-  there is no blank-package generator by design.
 - **The file isn't a `.docx`** (`.xlsx`, `.pptx`, `.pdf`, `.odt`, `.rtf`) — use the matching
   sibling MCP (`excel`, `ppt`) or `use-anydoc` / `use-docling` for read-only extraction of
   other formats.
@@ -71,15 +71,16 @@ Docker/Nix-based MCP server for Word document operations, built on Apache POI XW
 
 ## Capabilities
 
-37 tools over stdio, grouped by area:
+38 tools over stdio, grouped by area:
 
-- **Document lifecycle, properties and freshness (8)** — `document.open` (handle plus optional
+- **Document lifecycle, properties and freshness (9)** — `document.open` (handle plus optional
   OOXML Strict conversion), `document.save` (backup → temp → Part/content verification → atomic
   rename, with an exact clean-handle no-op), `document.render` (validated PDF of the live unsaved
-  handle), `document.create_from` (byte-copy a Template into scratch), `document.close` (discard
-  unsaved state and free the slot), `document.get_properties`, `document.set_properties` (patch
-  title/subject/creator/description/keywords/category only), and `document.mark_fields_dirty`
-  (`w:updateFields` for Word refresh-on-open)
+  handle), `document.create_blank` (programmatically initialize and reopen a source-free neutral
+  package in scratch), `document.create_from` (byte-copy a Template into scratch),
+  `document.close` (discard unsaved state and free the slot), `document.get_properties`,
+  `document.set_properties` (patch title/subject/creator/description/keywords/category only), and
+  `document.mark_fields_dirty` (`w:updateFields` for Word refresh-on-open)
 - **Outline and structural composition (4)** — `outline.get` returns every body/text-box Block with
   identity-bound id, kind, Named style, literal label and computed number; `block.insert` adds one
   Named-style paragraph after an explicit flow Block, optionally continuing numbering;
@@ -127,10 +128,12 @@ save-time Part-loss guard that only a tool's own declared removals can satisfy �
 
 ## Limitations
 
-- **No blank-package, Named-style, or numbering-definition authoring.** New deliverables start
-  from a real `.docx` Template. An undefined style is always an error with the real inventory,
-  never invented or fuzzy-matched; numbering can be continued from an existing reference but no
-  new numbering definition is synthesized.
+- **Blank creation is a fixed neutral baseline, not a house Template.** `document.create_blank`
+  supplies A4/Arial defaults, a disclosed paragraph/table style inventory, and reusable
+  single-level number/bullet definitions. It deliberately omits branding, theme, headers/footers,
+  organization metadata, automatic heading numbering, and multilevel lists. Use
+  `document.create_from` when those semantics matter. Outside this fixed initializer, an undefined
+  style is still an error and styles/numbering definitions are never invented on demand.
 - **OOXML Strict documents cannot be opened directly** (POI bug #57699). `document.open` fails
   `OOXML_STRICT_UNSUPPORTED` unless `allow_convert: true` opens a LibreOffice-converted scratch
   copy. That handle has no save target and can never overwrite the Strict original.
@@ -212,6 +215,17 @@ template.find                            # discover the org Template via DOCX_MC
   → document.save (path: <new destination>)  # required — a create_from handle has none
 ```
 
+Producing a genuinely new document without a source or Template:
+
+```
+document.create_blank                    # neutral package plus initial Normal paragraph p-1
+  → block.insert / table.insert / image.insert  # insert the first real Block after p-1
+  → block.delete (block_id: p-1)         # remove the ordinary visible leading blank anchor
+  → document.set_properties / block.* / table.* / image.insert / field.insert
+  → document.render                      # approximate visual check before persistence
+  → document.save (path: <new destination>)  # required — a create_blank handle has none
+```
+
 Authoring and completing a review loop are deliberately separate choices:
 
 ```
@@ -227,9 +241,13 @@ comment.list
 
 ## Non-obvious gotchas the agent must respect
 
-- **Regeneration is not a tool.** There is no "rewrite this document" call. A from-scratch
-  document is always `document.create_from(<a real source, usually a Template>)` plus edits —
-  never hand-assembled or produced by another library and handed to this server to "fix up."
+- **Regeneration is not a tool.** There is no "rewrite this existing document" call. Start a new
+  document with `document.create_blank()` for the fixed neutral baseline, or
+  `document.create_from(<a real source, usually a Template>)` when existing package semantics must
+  carry forward. Neither accepts an existing handle or overwrites its source.
+- **The blank document's `p-1` anchor is visible content.** Insert the first real paragraph,
+  table, or image after the returned `initial_block`, then delete `p-1` to avoid a leading blank
+  paragraph. Already-minted Block ids remain bound to their objects after that deletion.
 - **A Number is computed, never text.** A heading whose visible number is `"13.2"` may carry
   that literal text in `label`, or carry bare text with the number resolved from
   `numbering.xml` via the style chain — `outline.get`'s `number` field is `null`, not a guess,
@@ -248,13 +266,14 @@ comment.list
 - **Direct formatting is one call, on purpose.** `text.set_direct_format` is the only place
   bold/size/color/font can be set directly; every other text operation goes through Named
   styles, so bypassing the house style is always a deliberate, visible choice.
-- **A `create_from` (or Strict-converted) handle can't overwrite its source.** `document.save`
-  against one without an explicit destination fails `SAVE_TARGET_MISSING` — it can never
-  resolve to the Template or the Strict original.
+- **A `create_blank`, `create_from`, or Strict-converted handle has no implicit save target.**
+  `document.save` without an explicit destination fails `SAVE_TARGET_MISSING`; creation cannot
+  overwrite a Template or Strict original, and the first blank-document save must name a path.
 - **`table.insert` has two distinct signatures.** Clone mode needs `after_block_id` plus a real
   `clone_block_id`; grid mode needs `rows`, `columns`, and optionally a real table-style id. Grid
   dimensions are capped at 1,000 rows, 63 columns and 10,000 cells. Omitted style means the
-  Template's declared default table style, not an invented `TableNormal` fallback.
+  document's declared default table style, not an invented `TableNormal` fallback. The blank
+  baseline deliberately declares bordered `TableGrid` as its default.
 - **Container-aware does not mean every operation is container-neutral.** Paragraph text, styles,
   keep properties, insertion/deletion and fields reach headers, footers and text boxes. Table and
   image insertion plus `page_break_before` remain body-only. Text-box `AlternateContent` branches
@@ -315,8 +334,8 @@ comment.list
 - `CONTEXT.md` — the domain glossary (Block, Section vs. Layout section, Named style vs.
   Direct formatting, Revision vs. Comment vs. Track-changes mode) the tool surface is named
   after.
-- `docs/adr/0001`–`0006` — the six hard-to-reverse design decisions (engine choice, edit vs.
+- `docs/adr/0001`–`0007` — the seven hard-to-reverse design decisions (engine choice, edit vs.
   regeneration, named styles vs. direct formatting, Block id identity, save protocol,
-  deployment neutrality).
+  deployment neutrality, and the source-free blank-document baseline).
 - `docs/testing.md` — what `mvn verify` gates and the fixture-suite convention.
 - `_devlog/` — one dated entry per landed change, each linking its issue/PR.
