@@ -5,7 +5,7 @@ type: domain
 building_blocks:
   contracts: 'Integration skill conventions: output format (always JSON-compatible), error handling protocol, authentication patterns, and when to use CLI vs API variant.'
   docs: 'Service capability matrix, authentication setup guides, and rate-limit notes.'
-  skills: 'One skill per service: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), anydoc (fast office-doc to Markdown, no OCR), docling (document conversion incl. OCR/VLM/ASR), elevenlabs (TTS), use-ideogram-image (image generation via REST), outline (wiki API), outline-cli (wiki CLI), revealjs (presentation decks, zero-install), slidev (presentation decks, markdown).'
+  skills: 'Service and tool-backed workflows: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), anydoc and docling (document extraction), word-template (template-derived Word production), elevenlabs (TTS), use-ideogram-image (image generation via REST), outline (wiki), revealjs and slidev (presentations).'
   agents: 'TBD'
   prompts: 'TBD'
   tools: 'TBD'
@@ -42,6 +42,7 @@ This separation means service-specific knowledge (API quirks, rate limits, auth 
 | `use-outline-cli`  | Outline                     | Wiki management via CLI                                   |
 | `use-slidev`       | Slidev (sli.dev)            | Build slide decks in Skaile brand design                  |
 | `use-skills-sh`    | skills.sh                   | Discover and install agent skills from the open ecosystem |
+| `word-template`    | Word MCP                    | Produce Word documents from a bundled house template      |
 
 ## Conventions
 
