@@ -264,14 +264,24 @@ def validate(cwd: str) -> dict:
         reason="semantic — requires diff context against lockfile",
     )
     v.skip(
-        "reach for -f or -p to resolve a generate conflict",
+        "treat pxl generate exit 0 as a clean run",
         rule_type="NEVER",
-        reason="runtime — agent command behavior",
+        reason="runtime — requires observing the generate run's own output",
+    )
+    v.skip(
+        "use -f to recover a permanently ejected file",
+        rule_type="NEVER",
+        reason="runtime — agent command behavior; force respects the sentinel",
     )
     v.skip(
         "trust pxl validate as evidence that a constraint was emitted",
         rule_type="NEVER",
         reason="semantic — reasoning about what counts as evidence",
+    )
+    v.skip(
+        "gitignore .postxl/base-snapshot.json",
+        rule_type="NEVER",
+        reason="runtime — git state",
     )
     v.skip(
         "run bunx pxl generate directly in platform/ — use bun run generate",
@@ -354,7 +364,7 @@ def validate(cwd: str) -> dict:
         reason="runtime — execution step",
     )
     v.skip(
-        "Read the generate run's conflict list, if any",
+        "Read the generate run's conflict list — exit 0 does not mean clean",
         rule_type="CHECKLIST",
         reason="runtime — agent reading behavior",
     )

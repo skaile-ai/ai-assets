@@ -40,6 +40,9 @@ metadata:
     - path: "platform/CLAUDE.md"
       gate: soft
       description: "Read first when working inside skaile-dev's platform/."
+    - path: "store/CLAUDE.md"
+      gate: soft
+      description: "Read first when working inside skaile-dev's store/."
   produces: []
   reads:
   - path: "postxl-schema.json"
@@ -51,6 +54,8 @@ metadata:
   - path: "ai-assets/skaile-development/skills/postxl/references/schema-grammar.md"
   - path: "ai-assets/skaile-development/skills/postxl/references/maintain.md"
   - path: "ai-assets/skaile-development/skills/postxl/references/skaile-dev-patterns.md"
+  - path: "platform/CLAUDE.md"
+  - path: "store/CLAUDE.md"
   - path: "node_modules/@postxl/ui-components/CLAUDE.md"
 ---
 
