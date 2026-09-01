@@ -44,8 +44,17 @@ re-parse them off the preserved original (`zRepository.parse(model.source)`,
 `zUpdateActions.parse(model.source)`).
 
 So the rule is: **a model-level key does something if and only if some generator reads it off
-`model.source`.** To check any key you are unsure about, grep the generator packages for it. If
-nothing reads it, it parses clean and emits nothing.
+`model.source`.** To check any key you are unsure about, grep the generator packages for
+`.parse(model.source)` — that gives you the real consumer list rather than a guess. Today there
+are three:
+
+| Consumer | Reads |
+|---|---|
+| `backend-repositories/repositories.generator.js:157` | `zRepository` |
+| `backend-database-prisma/generators/prisma-schema.generator.js:18` | `zRepository` |
+| `backend-update/update.generator.js:182` | `zUpdateActions` |
+
+If nothing reads a key, it parses clean and emits nothing.
 
 ### The live instance: `compositeUnique`
 
@@ -176,7 +185,7 @@ foreign-key rule.
 | Key | Purpose |
 |---|---|
 | `auth` | `read` / `write` / `create` / `update` / `delete` and per-action rules; `auth.adminUi.visibleFor` gates Admin UI visibility |
-| `repository.type` | `DatabaseDirect` \| `DatabaseCached` \| `InMemory` \| `NoRepository`. Read off `model.source` by the generator, **not** resolved by the project decoder — check `zRepository` in the version you resolved rather than assuming a default |
+| `repository.type` | `DatabaseDirect` \| `DatabaseCached` \| `InMemory` \| `NoRepository`. **Defaults to `DatabaseCached`** — see below |
 | `actions` | custom actions; also read off `model.source` |
 | `faker` | `seed` + `items` for count, plus per-field expressions (`lorem.slug`, `internet.email`) |
 | `labelField` / `keyField` | human-readable identifier used by navigation, Excel import, admin views |
@@ -186,6 +195,29 @@ foreign-key rule.
 
 Top-level `standardModels` opts into built-ins: `User`, `Action`, `ActionOperation`, `File`,
 `TableView`, `Comment`, `Config`.
+
+### `repository.type` defaults to `DatabaseCached`
+
+**Omit `repository` and your model silently gets a cached Prisma repository.** The default is
+applied in two layers, in `@postxl/generators/dist/backend-repositories/model.types.js` — one
+on the type enum, one on the whole object — so both "no `repository` key" and
+`"repository": {}` resolve the same way:
+
+| Authored | Resolved |
+|---|---|
+| no `repository` key | `{ type: "DatabaseCached" }` |
+| `"repository": {}` | `{ type: "DatabaseCached" }` |
+| `"repository": { "type": "InMemory" }` | `{ type: "InMemory" }` |
+
+**The default lives in the generators, not in `@postxl/schema`.** So `pxl validate` and any
+schema-level inspection report `repository: undefined` for a model that will in fact get a
+cached repo — the schema layer is not where the answer is. Same shape as the model-level key
+trap above: the decoder's silence is not information.
+
+Visible end-to-end in generated output — a model with no `repository` key emits a repository
+whose comments describe cached reads, while one pinned to `DatabaseDirect` emits the
+uncached form. Note that `model.defaults.js` shows `DatabaseDirect` for `Action` and
+`ActionOperation`; those are per-standard-model overrides, not the general default.
 
 ## Project-level auth and the public route surface
 
