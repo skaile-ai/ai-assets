@@ -14,6 +14,7 @@ Structural checks are limited to the few artifacts the skill writes:
 Everything else is skipped with a clear reason — that is the correct
 shape for a contextual guidance skill (compare with audit/test-plan/etc.).
 """
+import json
 import re
 import sys
 from pathlib import Path
@@ -141,13 +142,33 @@ _SCHEMA_ROOTS = ["", "platform", "store"]
 def _no_composite_unique(v: Validator) -> tuple[bool, str]:
     """`compositeUnique` is not a PostXL schema key.
 
-    The model decoder is `passthrough()`, so the key is retained by the parser and
-    ignored by every generator: no error, no warning, and no emitted constraint.
-    Authors reach for it expecting a composite unique index and silently get none.
-    The supported key is `indexes`.
+    Model-level keys are decoded by a plain `z.object()`, which *strips* anything it
+    does not declare (the original is preserved on `model.source`, which is how real
+    open-extension keys like `repository` and `actions` reach their generators). A
+    key no generator reads therefore parses clean and emits nothing: no error, no
+    warning, no constraint. Authors reach for `compositeUnique` expecting a composite
+    unique index and silently get none. The supported key is `indexes`.
+
+    Matched on actual parsed model keys, not a substring, so the word appearing in a
+    `description` does not trip it.
     """
     problems: list[str] = []
     files_scanned = 0
+
+    def model_objects(doc: object, path: Path) -> list[tuple[str, dict]]:
+        """(label, model_dict) pairs for a schema file's models."""
+        if not isinstance(doc, dict):
+            return []
+        # A split file IS one model; a root schema carries a models collection.
+        if path.name.endswith(".model.json"):
+            return [(path.name.removesuffix(".model.json"), doc)]
+        models = doc.get("models")
+        if isinstance(models, list):
+            return [(m.get("name", f"#{i}"), m) for i, m in enumerate(models) if isinstance(m, dict)]
+        if isinstance(models, dict):
+            return [(k, m) for k, m in models.items() if isinstance(m, dict)]
+        return []
+
     for root in _SCHEMA_ROOTS:
         base = v.cwd / root if root else v.cwd
         candidates = [base / "postxl-schema.json"]
@@ -159,11 +180,14 @@ def _no_composite_unique(v: Validator) -> tuple[bool, str]:
                 continue
             files_scanned += 1
             try:
-                text = f.read_text(encoding="utf-8")
-            except (UnicodeDecodeError, OSError):
-                continue
-            if "compositeUnique" in text:
-                problems.append(f"{f.relative_to(v.cwd)} uses compositeUnique (use indexes)")
+                doc = json.loads(f.read_text(encoding="utf-8"))
+            except (UnicodeDecodeError, OSError, json.JSONDecodeError):
+                continue  # parse failures are reported by the JSON checks
+            for label, model in model_objects(doc, f):
+                if "compositeUnique" in model:
+                    problems.append(
+                        f"{f.relative_to(v.cwd)}:{label} uses compositeUnique (use indexes)"
+                    )
 
     if files_scanned == 0:
         return True, ""  # no PostXL schema in this tree — vacuously OK

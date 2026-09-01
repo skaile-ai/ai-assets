@@ -11,9 +11,16 @@ Portable reference — this is the greenfield path, for a repo that has **no**
 | **pnpm** | `create-project` shells out to `pnpm install` / `pnpm exec` / `pnpm run`. It is not optional and there is no bun fallback. | `pnpm --version` |
 | Network to `registry.npmjs.org` | all `@postxl/*` packages are published public — no token, no `.npmrc` | `npm view @postxl/cli version` |
 
-**If `pnpm` is missing the run fails partway through, after files are already written.**
-Install it first — `corepack enable pnpm`, or `npm i -g pnpm`. In a container image that
-ships only bun, neither node nor pnpm may be present; check both before starting.
+**If `pnpm` is missing, the run does not fail — it succeeds and lies.** Every subprocess
+step (`installDependencies`, `runGenerate`, `generateTanStackRouter`, `generatePrismaClient`,
+`initializeGitRepository`) is `try` / `catch` → log and continue. The run reaches
+`✓ Project "X" created successfully`, prints "Next steps", and **exits 0**, leaving an
+unusable tree with errors scrolled off above.
+
+So the exit code is worth nothing here. **The verification is the backend boot line**, not a
+successful scaffold. Install pnpm first — `corepack enable pnpm`, or `npm i -g pnpm`. In a
+container image that ships only bun, neither node nor pnpm may be present; check both before
+starting.
 
 ## The command
 
@@ -109,11 +116,17 @@ Postgres and `prisma migrate dev`.
 `create-project` emits `skaile.preview.json` already:
 
 ```json
-{ "version": 1,
-  "apps": [ { "id": "frontend", "role": "frontend", "protocol": true },
-            { "id": "backend",  "role": "backend" } ],
-  "defaultAppId": "frontend" }
+{
+  "version": 1,
+  "apps": [
+    { "id": "frontend", "label": "Frontend", "path": "frontend", "role": "frontend", "protocol": true },
+    { "id": "backend",  "label": "Backend",  "path": "backend",  "role": "backend" }
+  ],
+  "defaultAppId": "frontend"
+}
 ```
+
+That is the file verbatim — `label` and `path` are required per app, not decoration.
 
 Two things the generator does **not** yet handle — fix both before relying on a preview:
 
@@ -135,7 +148,7 @@ in `maintain.md`; schema questions go to `schema-grammar.md`.
 
 | Symptom | Cause |
 |---|---|
-| Run dies partway, files already written | `pnpm` (or node) missing — install and re-run into a clean path |
+| "✓ created successfully" but nothing runs | `pnpm` (or node) missing. Every step is catch-and-continue, so the run exits 0 over a failed install. Scroll up for the errors; re-run into a clean path |
 | Hangs with no output | Ran without a TTY and without all required options — it is waiting on a prompt that will never be answered |
 | Custom schema seems ignored | Step 1 always uses the simple schema; the custom one is swapped in at step 5. Only a failure *between* those leaves the simple schema in place |
 | Backend won't boot, DB errors | Something set `STATEFUL=true`; the default `dev` script is stateless |

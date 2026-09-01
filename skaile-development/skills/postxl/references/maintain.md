@@ -76,50 +76,102 @@ your local copy. Resolving means removing the block, regenerating, and re-adding
 
 The generator never touches files outside its known output paths.
 
-## Ejection and drift
+## Drift and ejection — two different things
 
-Editing a generated file outside a `@custom-*` block **ejects** it: the lockfile records
-`"ejected"` instead of a checksum and the generator stops re-emitting it. The file is then
-yours forever and upstream generator fixes never reach it. Eject deliberately, never as a
-workaround.
+These are constantly conflated, and the recovery for one is a no-op for the other.
+
+**Drift** — you edited a generated file on disk. The lockfile still holds the *generated*
+checksum; divergence is found by comparing. The generator will merge or overwrite it, and
+`-f` wins.
+
+**Permanent ejection** — a human hand-replaced that file's checksum in `postxl-lock.json`
+with the literal string `"ejected"`. **The generator never writes this sentinel** — it only
+preserves it (`EJECTED_SENTINEL` in `utils/lockfile.js`; the docstring says outright, "Users
+mark a file as ejected by manually replacing its checksum"). Sync then short-circuits for
+that path: never written, never deleted, never checked for conflict markers.
+
+**`force: true` respects the sentinel.** From `utils/sync.js`: *"Permanently ejected files are
+fully owned by the developer — we must not … force overwrite."* So:
+
+| To recover | Drift | Permanent eject |
+|---|---|---|
+| `-f` (force) | works | **no-op** |
+| Delete the lockfile entry | works | **the only route** — next run treats it as `L:empty` and regenerates |
+
+Editing a generated file outside a `@custom-*` block therefore does *not* silently eject it —
+it drifts, and the next generate will try to merge. Ejection is a deliberate human act. What
+both share: once a file is genuinely ejected, upstream generator fixes never reach it again.
 
 ```bash
-pxl status     # eject/drift state of every generated file
+pxl status     # drift/eject state of every generated file
 pxl doctor     # full preflight: schema + drift + custom blocks + env + migrations
 ```
 
 `pxl doctor` is the single best command when something feels off.
 
-To un-eject: force-regenerate the file (overwriting your edits) or delete its lockfile entry
-and regenerate. Confirm with `pxl status`.
+### `@custom-override:<memberName>`
 
-## Generator flags are not what they look like
+Beyond `@custom-start`/`@custom-end`, the three-way merge supports a member-level keep-mine
+marker: `@custom-override:<memberName>` pins your version of one class member (method or
+property with a body) against regeneration, without ejecting the whole file. Reach for it
+before ejecting — ejection is all-or-nothing and permanent.
 
-Verified against `@postxl/cli` 1.10.3. **Check the version you actually resolved** before
-trusting any of this — the wrong version does not announce itself, it produces a
-plausible-looking mess.
+## Generator flags
 
-| Flag | What it actually does |
+Verified against `@postxl/cli` 1.10.3. **Check which version you actually resolved** before
+trusting flag behaviour — a stale resolution does not announce itself, and several
+long-circulating warnings about these flags are stale-CLI symptoms rather than real semantics.
+
+| Flag | What it does |
 |---|---|
-| `--dry-run` | Preview without writing or touching the lockfile. **Start here, always.** |
-| `-m <Model…>` | Scope generation to models. Safe, and the right scoping flag. |
+| `--dry-run` | Preview without writing. Skips the lockfile *and* the base snapshot. **Start here.** |
+| `-m <Model…>` | Scope generation to models. Aggregate files always rebuild regardless, so a `-m` run still touches them. |
 | `-d` | Show the diff between the on-disk and generated file — the only way to see what a merge would discard. |
-| `-i` | **`--ignore-errors`**, *not* "skip ejected". It swallows schema-verification and formatting errors so a broken run still exits 0. It does **not** suppress the conflict report. |
-| `-f` | `--force`, and it is **repo-wide** — *not* narrowed by `-m` or `-p`. A single `-f` can rewrite hundreds of unrelated files and create stray template files. |
-| `-p '<glob>'` | Filters files but **crashes** the run partway, leaving no base reconstruction. Avoid. |
-| `--no-three-way` | Disables base reconstruction explicitly. |
+| `-p '<glob>'` | Scope to a file glob. Genuinely scoped: the considered set is the pattern-filtered VFS plus lock entries passing `matchesPattern`, and non-matching lock entries are preserved. |
+| `-f` | Force. Overwrites drift — but **not** permanent ejects. Combine with `-p` to narrow it. |
+| `-i` | **`--ignore-errors`**, *not* "skip ejected". It swallows schema-verification and formatting errors so a broken run still exits 0. It does **not** suppress the conflict report. (The framework's own docs get this one wrong.) |
+| `--no-three-way` | Disables base reconstruction; ejected files fall back to a 2-way merge. |
 
-A plain generate run reports `N files with merge conflicts` and writes the **merge result**
-into each — neither the generated content nor your file unchanged. Always read that list. The
-separate "Generation aborted: unresolved merge conflicts" *is* a no-op: markers left on disk
-by an earlier run abort the whole run before anything is written.
+**`-f -p '<glob>'` is the documented remedy for conflict markers**, not something to avoid.
+It is also the *only* way past the "Generation aborted: unresolved merge conflicts" abort —
+`sync()` bails on pre-existing markers unless `force` is set.
 
-The merge base is **reconstructed, not stored** — re-derived from the previous schema using
-the *currently installed* generators. Where the generator itself changed, base and incoming
-already agree, so the change cannot surface. 1.10.2+ verifies the reconstruction against the
-per-file lock checksum and falls back to a 2-way merge on mismatch, listing those files
-separately. On a generator upgrade a **rising** conflict count is the tool working, not a
-regression.
+If a scoped run blows up far outside its glob, suspect the resolved CLI version before you
+conclude the flag is broken.
+
+## Exit codes — the one that will bite a pipeline
+
+`pxl generate` exits **1** when the run left something a human must act on: an aborted sync
+(unresolved markers already on disk), an unverified merge ancestor, or an unparseable merge.
+
+**Conflict markers on their own still exit 0.** That is deliberate and documented in the
+source — flipping it would break pipelines that tolerate conflicts. The consequence:
+
+```bash
+pxl generate && pnpm build     # sails straight through a conflicted file
+```
+
+So "read the conflict list" is not advice, it is the only signal. Do not treat a zero exit as
+evidence that a generate run is clean.
+
+## Base reconstruction and `.postxl/base-snapshot.json`
+
+The three-way merge base is **reconstructed, not stored** — re-derived from the previous
+*schema* using the currently installed generators. The schema snapshot that makes this
+possible lives at `.postxl/base-snapshot.json`.
+
+**Commit that file.** It is explicitly intended to be in git so CI and fresh clones can
+reconstruct the base too. Gitignored — an easy mistake if you do not know what it is — every
+fresh clone and every CI run silently degrades to a 2-way merge, which conflicts far more
+eagerly. The generator prints a note when it merged without a base; that note is the tell.
+
+Reconstruction is **skipped entirely when nothing on disk is edited** — a clean tree pays
+nothing. This is why `-d` output can look inconsistent between runs for no visible reason.
+
+Where the generator itself changed, base and incoming already agree, so the change cannot
+surface. 1.10.2+ verifies the reconstruction against the per-file lock checksum and falls back
+to a 2-way merge on mismatch, listing those files separately. On a generator upgrade a
+**rising** conflict count is the tool working, not a regression.
 
 ## The verify loop
 
@@ -189,4 +241,6 @@ sorting, filtering, inline edit, and saved views via the `TableView` standard mo
 | Custom block with no anchor line | Fragile; lands at the end with a warning after a future regen. |
 | Putting business logic in `generate.ts` | That file only configures *which generators run*. |
 | Trusting `pxl validate` to prove a constraint exists | It validates shape only. Read the migration SQL. |
-| Reaching for `-f` or `-p` to fix a conflict | `-f` is repo-wide; `-p` crashes. Use `-d --dry-run -m <Model>` to inspect, then resolve the custom block. |
+| Treating `pxl generate` exit 0 as "clean" | Conflict markers alone exit 0. Read the conflict list every run. |
+| Using `-f` to recover a permanently ejected file | Force respects the `"ejected"` sentinel. Delete the lockfile entry instead. |
+| Gitignoring `.postxl/base-snapshot.json` | Every fresh clone and CI run silently drops to a 2-way merge. |

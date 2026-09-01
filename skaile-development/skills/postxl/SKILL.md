@@ -74,16 +74,24 @@ This skill routes. The detail lives in `references/` — load only the one you n
 A generated project ships **its own `CLAUDE.md`**. It is regenerated with the project and is
 more current than this skill — read it before changing anything in that app.
 
-## Two failure shapes that define this framework
+## Three things that define this framework
 
-**Generated files are not yours.** Editing one outside a `// @custom-*` block *ejects* it: the
-generator stops re-emitting it and upstream fixes never reach it again. Eject deliberately,
-never as a workaround.
+**Generated files are not yours.** Editing one outside a `// @custom-*` block makes it *drift*,
+and the next generate will try to merge it. *Ejection* is different and is a deliberate human
+act — hand-writing `"ejected"` as that file's lockfile checksum. The generator never writes
+that sentinel, and `-f` does not override it. Full table in `references/maintain.md`.
 
-**Silence is not success.** The model decoder is `passthrough()`, so an unrecognized schema key
-is kept and ignored — no error, no warning, no generated output. `pxl validate` passing proves
-shape, not effect. For anything that should produce a database constraint, read the generated
-migration SQL.
+**Strictness is split, and it fails in opposite directions.** Field-level keys are `.strict()`,
+so a typo is a hard `unrecognized_keys` error. Model-level keys are stripped by a plain
+`z.object()` and preserved on `model.source`, which is how real keys like `repository` and
+`actions` work — generators re-parse them off `source`. So a model-level key does something
+**iff some generator reads it**; an invented one parses clean and emits nothing.
+
+**A zero exit is not a clean run.** `pxl generate` exits 1 on an aborted sync, an unverified
+ancestor, or an unparseable merge — but **conflict markers alone exit 0**, deliberately. So
+`pxl generate && build` sails through conflicts. Read the conflict list; and for anything that
+should produce a database constraint, read the migration SQL, because `pxl validate` proves
+shape, not effect.
 
 ## Package manager
 
@@ -138,10 +146,12 @@ MUST  run the dual verify loop (backend typecheck + frontend typecheck) after an
 MUST  apply the DB migration after any schema change that altered model fields, and read the generated SQL to confirm the constraint exists
 MUST  use `@postxl/ui-components` primitives for any new UI element — never recreate buttons, inputs, dialogs, or tables
 MUST  in skaile-dev, register every new user-facing `platform/frontend/` action as a command palette action (Frontend Action Pattern)
-NEVER edit a file listed in `postxl-lock.json` outside a `// @custom-*` block — that ejects it permanently
-NEVER reach for `-f` or `-p` to resolve a conflict — `-f` is repo-wide and `-p` crashes the run; inspect with `-d --dry-run -m <Model>` instead
+NEVER edit a file listed in `postxl-lock.json` outside a `// @custom-*` block — it drifts, and the next generate merges over it
+NEVER treat `pxl generate` exit 0 as a clean run — conflict markers alone exit 0; read the conflict list
+NEVER use `-f` to recover a permanently ejected file — force respects the `"ejected"` sentinel; delete the lockfile entry instead
 NEVER trust `pxl validate` as evidence that a constraint was emitted — it validates shape only
 NEVER use `compositeUnique` — it is not a PostXL schema key; it parses silently and emits nothing. Use `indexes`
+NEVER gitignore `.postxl/base-snapshot.json` — without it every fresh clone and CI run silently drops to a 2-way merge
 NEVER run `bunx pxl generate` directly in `platform/` — use `bun run generate` so `tsr generate` also runs
 NEVER run Biome inside `platform/` — it is Prettier + ESLint there
 NEVER create a new barrel `index.ts` in `platform/backend/libs/` — import via subpath alias
@@ -154,7 +164,7 @@ CHECKLIST
   - [ ] Used the tree's own package manager (pnpm in a generated app, bun in skaile-dev)
   - [ ] `pxl validate` passed before generating
   - [ ] In `platform/`: used `bun run generate`, not bare `bunx pxl generate`
-  - [ ] Read the generate run's conflict list, if any
+  - [ ] Read the generate run's conflict list — exit 0 does not mean clean
   - [ ] Custom blocks anchored, uniquely named, with matching `@custom-start` / `@custom-end`
   - [ ] Did NOT edit a file listed in `postxl-lock.json` outside a custom block
   - [ ] Migration applied and the generated SQL confirms the intended constraint
