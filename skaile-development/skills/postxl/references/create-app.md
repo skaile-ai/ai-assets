@@ -18,9 +18,32 @@ step (`installDependencies`, `runGenerate`, `generateTanStackRouter`, `generateP
 unusable tree with errors scrolled off above.
 
 So the exit code is worth nothing here. **The verification is the backend boot line**, not a
-successful scaffold. Install pnpm first — `corepack enable pnpm`, or `npm i -g pnpm`. In a
-container image that ships only bun, neither node nor pnpm may be present; check both before
-starting.
+successful scaffold.
+
+### Installing pnpm in a sandboxed container
+
+Agent containers routinely break the obvious install, and each breaks it differently. Check
+before you start, not mid-scaffold — the failure above means you will not be told.
+
+- **Verify node and pnpm separately.** An image may ship one without the other: a bun-only
+  image has neither, and a node image usually has no pnpm.
+- **A read-only runtime store blocks the global install.** Where the toolchain is mounted
+  read-only — a nix store, an immutable image layer — both `npm i -g pnpm` and
+  `corepack enable` fail, because they write into the node prefix inside it. Use a user
+  prefix (`npm config set prefix "$HOME/.local" && npm i -g pnpm`), or
+  `corepack pnpm@<version> …`, which downloads into a writable cache and honours the
+  `packageManager` field the generator writes into the app.
+- **No node at all needs the standalone build.** A normal pnpm is a Node script with a
+  `#!/usr/bin/env node` shebang, so it cannot run without node. The standalone distribution
+  (`@pnpm/exe`, or the `get.pnpm.io` script) bundles its own.
+- **Install where the workspace persists.** If `$HOME` is container-local rather than
+  bind-mounted, a pnpm installed there vanishes when the container is replaced — including
+  on a hibernate/wake cycle. Put it under the persisted workspace instead.
+- **Assume non-root.** Agent containers typically run as an unprivileged user, so `apt` /
+  `apk` is not available as a fallback.
+
+Which of these applies is a property of the host, not of PostXL — check the host's own
+runtime documentation for what its image ships and which paths persist.
 
 ## The command
 
