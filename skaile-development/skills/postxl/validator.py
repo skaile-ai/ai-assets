@@ -14,6 +14,7 @@ Structural checks are limited to the few artifacts the skill writes:
 Everything else is skipped with a clear reason — that is the correct
 shape for a contextual guidance skill (compare with audit/test-plan/etc.).
 """
+import json
 import re
 import sys
 from pathlib import Path
@@ -24,6 +25,7 @@ from pathlib import Path
 _VLIB = None
 for _base in (Path(__file__).resolve(), *Path(__file__).resolve().parents):
     for _rel in (
+        ("ai-assets-skaileup", "skaileup", "contracts", "scripts"),
         ("ai-assets-skaileup", "contracts", "scripts"),
         ("ai-assets-skaileup", "skaileup-contracts", "scripts"),
         ("skaileup-shared", "scripts"),
@@ -132,6 +134,68 @@ def _custom_blocks_balanced(v: Validator) -> tuple[bool, str]:
     return True, ""
 
 
+# Schema files scanned for the `compositeUnique` trap. Covers a generated app at
+# the cwd root and the two skaile-dev PostXL projects.
+_SCHEMA_ROOTS = ["", "platform", "store"]
+
+
+def _no_composite_unique(v: Validator) -> tuple[bool, str]:
+    """`compositeUnique` is not a PostXL schema key.
+
+    Model-level keys are decoded by a plain `z.object()`, which *strips* anything it
+    does not declare (the original is preserved on `model.source`, which is how real
+    open-extension keys like `repository` and `actions` reach their generators). A
+    key no generator reads therefore parses clean and emits nothing: no error, no
+    warning, no constraint. Authors reach for `compositeUnique` expecting a composite
+    unique index and silently get none. The supported key is `indexes`.
+
+    Matched on actual parsed model keys, not a substring, so the word appearing in a
+    `description` does not trip it.
+    """
+    problems: list[str] = []
+    files_scanned = 0
+
+    def model_objects(doc: object, path: Path) -> list[tuple[str, dict]]:
+        """(label, model_dict) pairs for a schema file's models."""
+        if not isinstance(doc, dict):
+            return []
+        # A split file IS one model; a root schema carries a models collection.
+        if path.name.endswith(".model.json"):
+            return [(path.name.removesuffix(".model.json"), doc)]
+        models = doc.get("models")
+        if isinstance(models, list):
+            return [(m.get("name", f"#{i}"), m) for i, m in enumerate(models) if isinstance(m, dict)]
+        if isinstance(models, dict):
+            return [(k, m) for k, m in models.items() if isinstance(m, dict)]
+        return []
+
+    for root in _SCHEMA_ROOTS:
+        base = v.cwd / root if root else v.cwd
+        candidates = [base / "postxl-schema.json"]
+        schema_dir = base / "schema"
+        if schema_dir.is_dir():
+            candidates.extend(sorted(schema_dir.glob("*.model.json")))
+        for f in candidates:
+            if not f.is_file():
+                continue
+            files_scanned += 1
+            try:
+                doc = json.loads(f.read_text(encoding="utf-8"))
+            except (UnicodeDecodeError, OSError, json.JSONDecodeError):
+                continue  # parse failures are reported by the JSON checks
+            for label, model in model_objects(doc, f):
+                if "compositeUnique" in model:
+                    problems.append(
+                        f"{f.relative_to(v.cwd)}:{label} uses compositeUnique (use indexes)"
+                    )
+
+    if files_scanned == 0:
+        return True, ""  # no PostXL schema in this tree — vacuously OK
+    if problems:
+        return False, "; ".join(problems[:8])
+    return True, ""
+
+
 def _json_parses_if_present(v: Validator, rel_path: str) -> tuple[bool, str]:
     """Pass if the file is absent OR parses as JSON. Fail only on present-but-invalid."""
     p = v.cwd / rel_path
@@ -147,7 +211,7 @@ def validate(cwd: str) -> dict:
 
     # ── MUST rules ──
     v.skip(
-        "read platform/CLAUDE.md (or store/CLAUDE.md) before any change",
+        "read the target project's own CLAUDE.md before any edit",
         rule_type="MUST",
         reason="runtime — agent reading behavior, not an artifact",
     )
@@ -163,24 +227,34 @@ def validate(cwd: str) -> dict:
                "marker integrity is checked structurally below",
     )
     v.skip(
+        "use the package manager the tree uses — pnpm in a generated app, bun in skaile-dev",
+        rule_type="MUST",
+        reason="runtime — agent command behavior",
+    )
+    v.skip(
+        "run generate from the project root, not from backend/ or frontend/",
+        rule_type="MUST",
+        reason="runtime — agent command behavior",
+    )
+    v.skip(
         "run the dual verify loop (BE typecheck + FE typecheck) after any schema change",
         rule_type="MUST",
         reason="runtime — executed during skill run",
     )
     v.skip(
-        "run bun run generate from the project root, not from backend/ or frontend/",
+        "apply the DB migration after model-field changes and read the generated SQL",
         rule_type="MUST",
-        reason="runtime — agent command behavior",
-    )
-    v.skip(
-        "run bunx prisma migrate dev after any schema change that altered model fields",
-        rule_type="MUST",
-        reason="runtime — agent command behavior",
+        reason="runtime — agent command behavior plus reading judgment",
     )
     v.skip(
         "use @postxl/ui-components primitives for any new UI element",
         rule_type="MUST",
         reason="semantic — UI element classification",
+    )
+    v.skip(
+        "register new user-facing platform/frontend/ actions as command palette actions",
+        rule_type="MUST",
+        reason="semantic — requires identifying 'new' and 'user-facing'",
     )
 
     # ── NEVER rules ──
@@ -188,6 +262,26 @@ def validate(cwd: str) -> dict:
         "edit a file listed in postxl-lock.json outside a // @custom-* block",
         rule_type="NEVER",
         reason="semantic — requires diff context against lockfile",
+    )
+    v.skip(
+        "treat pxl generate exit 0 as a clean run",
+        rule_type="NEVER",
+        reason="runtime — requires observing the generate run's own output",
+    )
+    v.skip(
+        "use -f to recover a permanently ejected file",
+        rule_type="NEVER",
+        reason="runtime — agent command behavior; force respects the sentinel",
+    )
+    v.skip(
+        "trust pxl validate as evidence that a constraint was emitted",
+        rule_type="NEVER",
+        reason="semantic — reasoning about what counts as evidence",
+    )
+    v.skip(
+        "gitignore .postxl/base-snapshot.json",
+        rule_type="NEVER",
+        reason="runtime — git state",
     )
     v.skip(
         "run bunx pxl generate directly in platform/ — use bun run generate",
@@ -206,12 +300,21 @@ def validate(cwd: str) -> dict:
                "(tracked in postxl-lock.json) from new ones",
     )
     v.skip(
-        "use pnpm — skaile-dev is bun across the board",
+        "use the @Optional() NestJS decorator",
         rule_type="NEVER",
-        reason="runtime — agent command behavior",
+        reason="semantic — requires TypeScript decorator analysis",
+    )
+    v.skip(
+        "access the database directly (raw Prisma client, raw SQL) in custom code",
+        rule_type="NEVER",
+        reason="semantic — requires distinguishing generated from custom call sites",
     )
 
     # ── Structural checks (the few that are deterministic) ──
+    v.never(
+        "use compositeUnique — not a PostXL schema key; parses silently, emits nothing",
+        lambda: _no_composite_unique(v),
+    )
     v.must(
         "platform/postxl-schema.json parses as JSON (when present)",
         lambda: _json_parses_if_present(v, "platform/postxl-schema.json"),
@@ -221,12 +324,12 @@ def validate(cwd: str) -> dict:
         lambda: _json_parses_if_present(v, "platform/postxl-lock.json"),
     )
     v.must(
-        "store/backend/postxl-schema.json parses as JSON (when present)",
-        lambda: _json_parses_if_present(v, "store/backend/postxl-schema.json"),
+        "store/postxl-schema.json parses as JSON (when present)",
+        lambda: _json_parses_if_present(v, "store/postxl-schema.json"),
     )
     v.must(
-        "store/backend/postxl-lock.json parses as JSON (when present)",
-        lambda: _json_parses_if_present(v, "store/backend/postxl-lock.json"),
+        "store/postxl-lock.json parses as JSON (when present)",
+        lambda: _json_parses_if_present(v, "store/postxl-lock.json"),
     )
     v.must(
         "@custom-start / @custom-end markers are balanced and named-matched "
@@ -236,24 +339,34 @@ def validate(cwd: str) -> dict:
 
     # ── CHECKLIST ──
     v.skip(
-        "Read the project's CLAUDE.md before any edit",
+        "Read the target project's CLAUDE.md before any edit",
         rule_type="CHECKLIST",
         reason="runtime — agent reading behavior",
     )
     v.skip(
-        "Picked the right mode: schema (Mode 1), custom block (Mode 2), or new module (Mode 3)",
+        "Picked the right mode: create, schema (Mode 1), custom block (Mode 2), new module (Mode 3)",
         rule_type="CHECKLIST",
         reason="semantic — mode-selection judgment",
     )
     v.skip(
-        "bunx pxl validate passed before bun run generate",
+        "Used the tree's own package manager (pnpm in a generated app, bun in skaile-dev)",
         rule_type="CHECKLIST",
         reason="runtime — execution step",
     )
     v.skip(
-        "Used bun run generate (not bare bunx pxl generate) so tsr generate ran",
+        "pxl validate passed before generating",
         rule_type="CHECKLIST",
         reason="runtime — execution step",
+    )
+    v.skip(
+        "In platform/: used bun run generate, not bare bunx pxl generate",
+        rule_type="CHECKLIST",
+        reason="runtime — execution step",
+    )
+    v.skip(
+        "Read the generate run's conflict list — exit 0 does not mean clean",
+        rule_type="CHECKLIST",
+        reason="runtime — agent reading behavior",
     )
     v.checklist(
         "Custom blocks anchored and have matching @custom-start / @custom-end markers",
@@ -265,9 +378,9 @@ def validate(cwd: str) -> dict:
         reason="semantic — requires diff context against lockfile",
     )
     v.skip(
-        "bunx prisma migrate dev run if model fields changed",
+        "Migration applied and the generated SQL confirms the intended constraint",
         rule_type="CHECKLIST",
-        reason="runtime — execution step",
+        reason="runtime — execution step plus reading judgment",
     )
     v.skip(
         "Both backend and frontend typechecks pass",
@@ -275,12 +388,12 @@ def validate(cwd: str) -> dict:
         reason="runtime — execution step",
     )
     v.skip(
-        "bunx pxl status shows no unintended drift / ejection",
+        "pxl status shows no unintended drift / ejection",
         rule_type="CHECKLIST",
         reason="runtime — execution step",
     )
     v.skip(
-        "Lint clean via bun run lint (ESLint) — Biome never invoked",
+        "Lint clean — in platform/, ESLint only, Biome never invoked",
         rule_type="CHECKLIST",
         reason="runtime — execution step",
     )
@@ -290,7 +403,22 @@ def validate(cwd: str) -> dict:
         reason="semantic — distinguishing PostXL-generated barrels from new ones",
     )
     v.skip(
-        "New user-facing UI feature registered as a command palette action (Frontend Action Pattern)",
+        "No @Optional() on any NestJS injectable",
+        rule_type="CHECKLIST",
+        reason="semantic — requires TypeScript decorator analysis",
+    )
+    v.skip(
+        "Custom action handlers inject no DispatcherService-dependent service",
+        rule_type="CHECKLIST",
+        reason="semantic — requires NestJS dependency-graph analysis",
+    )
+    v.skip(
+        "Custom code reads/writes via modelViewService / modelUpdateService, not raw Prisma",
+        rule_type="CHECKLIST",
+        reason="semantic — requires distinguishing generated from custom call sites",
+    )
+    v.skip(
+        "New user-facing platform/frontend/ UI registered as a command palette action",
         rule_type="CHECKLIST",
         reason="semantic — requires identifying 'new' and 'user-facing'",
     )
@@ -300,7 +428,7 @@ def validate(cwd: str) -> dict:
         reason="semantic — UI element classification",
     )
     v.skip(
-        "Submodule pointer bumped in dev shell after committing inside platform/ or store/",
+        "Submodule pointer bumped in shell repo after committing inside platform/ or store/",
         rule_type="CHECKLIST",
         reason="runtime — git state",
     )

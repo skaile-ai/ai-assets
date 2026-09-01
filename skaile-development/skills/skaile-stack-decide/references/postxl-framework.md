@@ -79,11 +79,10 @@ Each model declares:
 - `schema`, `databaseName`, `excelName`, `description`, `isReadonly`.
 - `fields` - typed:
   - **Id** - always present, configurable generation.
-  - **Scalar** - `String`, `Int`, `Float`, `Boolean`, `DateTime` (with `?` for optional). Validations: `maxLength`, `min`, `max`, `int`/`float`. Auto-fields: `isCreatedAt`, `isUpdatedAt`. `isUnique`, `hasIndex`, `defaultValue`, `placeholder`.
+  - **Scalar** - `String`, `Int`, `Float`, `Boolean`, `DateTime` (with `?` for optional). Validations: `maxLength` (String only), `min`/`max` (numeric only). Auto-fields: `isCreatedAt`, `isUpdatedAt`. `isUnique`, `hasIndex`, `defaultValue`, `placeholder`. Field decoders are strict — an unrecognized key is a hard error, and `int`/`float` are **not** keys (they are derived from the database type).
   - **Json** - opaque `unknown`-typed JSON blob.
   - **Relation** - typed by referencing another model name (e.g. `"type": "Post"` or `"Post?"`).
   - **Enum** - typed by referencing an enum name.
-  - **DiscriminatedUnion** - inline tagged union with `commonFields` and an array of `members` (each `type` is the discriminator). DU sub-fields get prefixed `excelName` / `databaseName` for flat I/O.
 - `standardFields` - opt into common fields like `id`, `createdAt`, `updatedAt`.
 - `labelField`, `keyField`, `defaultSort`, `indexes`.
 - `actions` - named custom actions (e.g. `publish`, `unpublish`) on top of standard CRUD.
@@ -163,8 +162,9 @@ Backend enforces via `ViewService.authorize(...)` (read) and `AuthorizationServi
 ## 6. Customization & Extensibility
 
 - **Custom blocks** - `// @custom-start[:name]` / `// @custom-end[:name]` blocks survive regeneration and are repositioned around their anchor lines.
-- **Eject** - editing a generated file outside custom blocks marks it ejected; you maintain it manually. Use `pnpm run generate -i` to skip ejected files.
-- **Schema split** - large schemas can be split into `schema/<modelName>.model.json` and `schema/<enumName>.enum.json`.
+- **Drift vs eject** - editing a generated file outside custom blocks makes it *drift*; the lockfile keeps the generated checksum and the next run merges over it. **Ejection is a separate, manual act**: a human replaces that file's checksum in `postxl-lock.json` with the string `"ejected"`. The generator never writes that sentinel, and `-f` does not override it — deleting the lockfile entry is the only way back.
+- **`-i` is `--ignore-errors`**, not "skip ejected". It swallows schema-verification and formatting errors so a broken run still exits 0.
+- **Schema split** - large schemas can be split into `schema/<camelCaseName>.model.json` and `schema/<camelCaseName>.enum.json`. The filename is the model name with **only its first character lowercased** (`OAuthFlowState` -> `oAuthFlowState.model.json`); get it wrong and the model is silently absent from the merge.
 - **Selective regen** - `pnpm run generate -m Country City` (per-model), `pnpm run generate -f -p 'glob'` (force regen by path).
 - **Custom generators** - `generate.ts` selects which generators run; you can write your own `GeneratorInterface` and add it to the array. Generators consume the parsed schema + a context object built up by other generators.
 - **Project-specific code** - lives outside generated paths (`src/components/`, custom routes, custom NestJS modules) and is left alone.
