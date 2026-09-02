@@ -100,9 +100,14 @@ fully owned by the developer — we must not … force overwrite."* So:
 
 Deleting the entry is the non-destructive option: an `L:empty` file whose disk content differs
 maps to `MergeConflict`, not `Write`, so it takes the merge path and the blocks are re-inserted.
-Non-destructive is not free, though — you get conflict markers to resolve, and with no lock
-checksum to verify a base against, that run is also a candidate for the unverified-ancestor
-exit 1.
+
+Non-destructive is not free, though. `resolveMergeBase` only returns `verified` when
+`lock.state === 'hash'` *and* the reconstructed base matches that hash — an `L:empty` file has
+no hash, so it is always `unverified` whenever a base was reconstructed at all. Two things
+follow, and they are not alternatives: `baseContent` is dropped (the merge degrades to 2-way,
+so expect markers), **and** `hasUnverifiedBase` is set, which `needsAttention()` turns into
+**exit 1**. So this recovery keeps your code but hands you a conflicted, non-zero run to
+finish by hand.
 
 Editing a generated file outside a `@custom-*` block therefore does *not* silently eject it —
 it drifts, and the next generate will try to merge. Ejection is a deliberate human act. What
