@@ -155,6 +155,7 @@ MUST  in skaile-dev, register every new user-facing `platform/frontend/` action 
 NEVER edit a file listed in `postxl-lock.json` outside a `// @custom-*` block — it drifts, and the next generate merges over it
 NEVER treat `pxl generate` exit 0 as a clean run — conflict markers alone exit 0; read the conflict list
 NEVER use `-f` to recover a permanently ejected file — force respects the `"ejected"` sentinel; delete the lockfile entry instead
+NEVER reach for `-f` to clear conflict markers or a "Generation aborted" — force takes the non-merge path, so it silently destroys every `@custom-*` block in the files it rewrites; resolve the on-disk markers by hand and re-run
 NEVER trust `pxl validate` as evidence that a constraint was emitted — it validates shape only
 NEVER use `compositeUnique` — it is not a PostXL schema key; it parses silently and emits nothing. Use `indexes`
 NEVER gitignore `.postxl/base-snapshot.json` — without it every fresh clone and CI run silently drops to a 2-way merge
