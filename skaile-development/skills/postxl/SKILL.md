@@ -8,6 +8,7 @@ description: "[skaile-development] Use when creating, building, modifying, or ex
   build a new full-stack TypeScript app on the PostXL stack (NestJS + Prisma + tRPC + React 19
   + Vite); or when a regeneration produced a confusing diff or merge conflict. Also covers the
   skaile-dev projects `platform/backend`, `platform/frontend`, and `store/backend`."
+version: 1.0.0
 metadata:
   tags:
   - "postxl"
