@@ -95,8 +95,19 @@ fully owned by the developer — we must not … force overwrite."* So:
 
 | To recover | Drift | Permanent eject |
 |---|---|---|
-| `-f` (force) | works | **no-op** |
-| Delete the lockfile entry | works | **the only route** — next run treats it as `L:empty` and regenerates |
+| `-f` (force) | works — **at the cost of the file's `@custom-*` blocks** | **no-op** |
+| Delete the lockfile entry | works, and **keeps custom blocks** | **the only route** — next run treats it as `L:empty` and regenerates |
+
+Deleting the entry is the non-destructive option: an `L:empty` file whose disk content differs
+maps to `MergeConflict`, not `Write`, so it takes the merge path and the blocks are re-inserted.
+
+Non-destructive is not free, though. `resolveMergeBase` only returns `verified` when
+`lock.state === 'hash'` *and* the reconstructed base matches that hash — an `L:empty` file has
+no hash, so it is always `unverified` whenever a base was reconstructed at all. Two things
+follow, and they are not alternatives: `baseContent` is dropped (the merge degrades to 2-way,
+so expect markers), **and** `hasUnverifiedBase` is set, which `needsAttention()` turns into
+**exit 1**. So this recovery keeps your code but hands you a conflicted, non-zero run to
+finish by hand.
 
 Editing a generated file outside a `@custom-*` block therefore does *not* silently eject it —
 it drifts, and the next generate will try to merge. Ejection is a deliberate human act. What
@@ -121,6 +132,8 @@ before ejecting — ejection is all-or-nothing and permanent.
 Verified against `@postxl/cli` 1.10.3. **Check which version you actually resolved** before
 trusting flag behaviour — a stale resolution does not announce itself, and several
 long-circulating warnings about these flags are stale-CLI symptoms rather than real semantics.
+Not all of them: the custom-block loss under `-f` is real on 1.10.3, and is the one warning
+here you should not discount.
 
 | Flag | What it does |
 |---|---|
@@ -128,13 +141,33 @@ long-circulating warnings about these flags are stale-CLI symptoms rather than r
 | `-m <Model…>` | Scope generation to models. Aggregate files always rebuild regardless, so a `-m` run still touches them. |
 | `-d` | Show the diff between the on-disk and generated file — the only way to see what a merge would discard. |
 | `-p '<glob>'` | Scope to a file glob. Genuinely scoped: the considered set is the pattern-filtered VFS plus lock entries passing `matchesPattern`, and non-matching lock entries are preserved. |
-| `-f` | Force. Overwrites drift — but **not** permanent ejects. Combine with `-p` to narrow it. |
+| `-f` | Force. Overwrites drift — but **not** permanent ejects — and **destroys `@custom-*` blocks in every file it rewrites** (see below). Combine with `-p` to narrow it. |
 | `-i` | **`--ignore-errors`**, *not* "skip ejected". It swallows schema-verification and formatting errors so a broken run still exits 0. It does **not** suppress the conflict report. (The framework's own docs get this one wrong.) |
 | `--no-three-way` | Disables base reconstruction; ejected files fall back to a 2-way merge. |
 
-**`-f -p '<glob>'` is the documented remedy for conflict markers**, not something to avoid.
-It is also the *only* way past the "Generation aborted: unresolved merge conflicts" abort —
-`sync()` bails on pre-existing markers unless `force` is set.
+### `-f` destroys custom blocks — treat it as a last resort
+
+Custom-block preservation (extract from the on-disk file → find anchors → re-insert) lives
+**only** on the `MergeConflict` path, in `utils/merge-conflict.js`. Force flips those states to
+a plain `Write`, which returns the raw generated content with no re-insertion:
+
+```js
+// utils/sync.js — actionMap is [defaultAction, isEjected, forceAction]
+'V:Hash1-L:Hash0-D:HashX': ['MergeConflict', true, 'Write'],
+'V:Hash1-L:empty-D:HashX': ['MergeConflict', true, 'Write'],
+```
+
+So **every `@custom-start` block in a forced file is silently gone** — no marker, no warning,
+nothing in the conflict report. Neither of the two common situations needs force:
+
+- **Conflict markers from a run** → resolve them the ordinary way: remove the colliding
+  `@custom-start` block, regenerate, re-add it. Your custom code survives.
+- **"Generation aborted: unresolved merge conflicts"** → the abort keys purely on markers found
+  *on disk* (`filesWithConflicts.length > 0 && !force`), so **resolving those markers by hand
+  and re-running clears it**, non-destructively.
+
+Reach for `-f -p '<glob>'` only when you would rather discard a file's local state wholesale,
+and recover its custom blocks from git first.
 
 If a scoped run blows up far outside its glob, suspect the resolved CLI version before you
 conclude the flag is broken.
@@ -243,4 +276,5 @@ sorting, filtering, inline edit, and saved views via the `TableView` standard mo
 | Trusting `pxl validate` to prove a constraint exists | It validates shape only. Read the migration SQL. |
 | Treating `pxl generate` exit 0 as "clean" | Conflict markers alone exit 0. Read the conflict list every run. |
 | Using `-f` to recover a permanently ejected file | Force respects the `"ejected"` sentinel. Delete the lockfile entry instead. |
+| Using `-f` to clear a "Generation aborted" | It rewrites the files without re-inserting custom blocks. Resolve the on-disk markers by hand and re-run. |
 | Gitignoring `.postxl/base-snapshot.json` | Every fresh clone and CI run silently drops to a 2-way merge. |
