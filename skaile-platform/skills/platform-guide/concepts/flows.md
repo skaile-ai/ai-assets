@@ -20,13 +20,13 @@ checkpoints.
 
 ## The shape of a definition
 
-The authority on shape is the published JSON Schema, not this file:
-
-```
-@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.schema.json
-```
-
-Read it when you need the exact field list. Everything below is what a schema cannot say:
+The authority on shape is the published JSON Schema, not this file. Get it at runtime with
+`platform.get_flow_schema` — no arguments, no authoring grant, no project context and no
+existing flow needed. It returns `schemaId`, `jsonSchema` and `example`, a complete valid
+definition to pattern-match against. Read the schema when you need the exact field list. The
+same document ships inside `@skaile/workspaces` as
+`dist/factory-assets/connectors/flow/contract/flow.v2.schema.json`, but the capability is the
+copy the platform actually validates against. Everything below is what a schema cannot say:
 which construct to reach for, and where authoring goes quietly wrong.
 
 Required at the top level: `schemaVersion` (always `2`), `id`, `version`, `name`, `nodes`,
@@ -36,6 +36,13 @@ A node requires `id`, `label`, `description` and `run`, and may add `phase`, `co
 `gate` and `control`. An edge requires `id`, `source`, `target` and `type` (`flow`,
 `parallel` or `optional`). Edges must form a DAG over existing node ids; a cycle is rejected
 with `flow graph must be acyclic`, pathed at the edge that closes it.
+
+The consequence is that **a flow cannot loop**. `control.retries` on a node is the only repeat
+the schema has, and it re-runs that one node — it cannot carry a cycle back through a gate.
+Any other iteration ("authority asks a follow-up, we respond, authority reviews again") has
+to be flattened into a forward path — one node per pass, a router choosing how far the run
+goes — or delegated to a `sub-flow` invoked once per pass. Never a back edge; design for this
+from the start rather than discovering it at the edge that closes the cycle.
 
 **Validation is strict.** Every object in the contract is closed, so an unrecognized key
 anywhere — top level, node, or inside `run` — is a hard error reporting the authored path,
@@ -106,12 +113,28 @@ definition file itself, which always applies.
 
 Node-level typing lives under `contract`: `requires` (guard expressions, each
 `{ expr, message? }`), `input` (bindings consumed) and `output` (`fields`, plus `artifacts`
-with a `lifetime` of `session` or `persistent`). When a node declares an output schema and
+with a `lifetime` of `session` or `persistent`).
+
+**`contract.output.fields` is a JSON Schema object** — not a map of field name to type, and
+not a list of field descriptors. The field names go under `properties`, on the node that
+**produces** them:
+
+```json
+"contract": { "output": { "fields": { "type": "object", "properties": { "needsApproval": { "type": "boolean" } } } } }
+```
+
+Only the list form fails where it is written (`expected record, received array`). A bare
+`{ "needsApproval": { "type": "boolean" } }` — or `{ "needsApproval": "boolean" }` —
+**parses**, because it is a valid JSON Schema that declares no `properties`; the failure then
+surfaces one layer later as `node <producer> does not declare output field needsApproval`,
+pathed at the **consuming router**. The message names one node and the defect is on another,
+which is why editing the router never fixes it. When a node declares an output schema and
 returns something non-conforming, an `agent` node gets **one corrective re-prompt** and then
 fails; a `subprompt` has no conversation to re-prompt in and a `function` fails directly, so
 both fail on the first mismatch.
 
-`control` carries `optional`, `retries`, `timeoutSec` and `parallelGroup`. The
+`control` carries `optional`, `retries`, `timeoutSec` and `parallelGroup`; `retries` re-runs
+that one node and is the only repeat in the schema (see the DAG consequence above). The
 node-level `gate` object carries `approval`: `none` | `optional` | `mandatory`.
 
 ## Gates versus checks
@@ -179,9 +202,28 @@ above; arriving by any other route it **normalizes into inert placeholders and t
 executes nothing**.
 
 Both write capabilities also describe the v2 shape in their prompt fragment, so a gated
-session can author from context alone. Before writing a new flow, read an existing one with
-`platform.get_flow` — it returns the full definition, which is the best worked example to
-pattern-match against.
+session can author from context alone. Two ungated queries make the rest discoverable at
+runtime. Both resolve no project context, so they work in a brand-new project that has no
+flows yet:
+
+- **`platform.get_flow_schema`** (no arguments) returns `schemaId`, `jsonSchema` and
+  `example` — a complete valid definition that exercises exactly the constructs authoring
+  fails on: the JSON Schema `contract.output.fields` shape, a router reading it, a bare
+  `default` route, choice options, hyphenated node ids. Start here.
+- **`platform.validate_flow`** with `{ definition }` checks a definition against the same
+  parser the writes use — no grant, no approval, nothing stored. **Call it before every
+  `platform.create_flow` and before the full-`definition` form of `platform.revise_flow`.**
+  The patch form has no `definition` to pass; to check a patch, apply it to the
+  `platform.get_flow` definition yourself and validate the result. The flow goes *under* a
+  `definition` key, not spread at the top level. A definition the contract rejects is still a
+  successful call — `{ ok: true, valid: false, issues: [{ path, message }] }`, never an
+  `error` — so loop on `issues`. Validation runs in layers (structural parse first, then
+  cross-node reference and expression checks), so clearing every issue can reveal the next
+  layer: re-call after each fix until it reports `valid: true`.
+
+Reading an existing flow with `platform.get_flow` (pick one from `platform.list_flows`) is the
+secondary worked example: it needs a flow to already exist, which is exactly what a first
+authoring attempt in a new project lacks.
 
 ```json
 {
@@ -306,8 +348,8 @@ to the agent as untrusted data. The token is shown once at creation and can be r
 The agent can request creating one (approval-gated). There is no UI surface for this yet —
 it is managed via the API/agent.
 
-Source of truth: the published contract
-(`@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.schema.json`),
+Source of truth: the published contract — `platform.get_flow_schema` at runtime, shipped
+as `@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.schema.json` —
 `platform/docs/flow-authoring-v2.md`, `platform/features/09-flow-execution/`,
 `platform/features/31-run-groups/`. For on-disk discovery: `loadFlowEntriesFromDir` in
 `@skaile/workspaces` → `factory-assets/connectors/flow/engine/loader.ts`, and `aiResourceRoots`
