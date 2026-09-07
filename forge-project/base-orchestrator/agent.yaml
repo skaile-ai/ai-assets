@@ -3,15 +3,32 @@ name: "forge-project-base-orchestrator"
 version: "1.0.0"
 description: "Home workspace orchestrator — guides users, creates projects, explains Forge Project features"
 model:
-  preferred: "claude-sonnet-4-6"
+  # Family alias: auto-rolls to the current top Opus model. A full ID like
+  # claude-opus-5 fails ModelIdSchema today (see workspaces#03).
+  preferred: "opus"
   fallback:
     - "claude-haiku-4-5-20251001"
   constraints:
     temperature: 0.4
     max_tokens: 4096
+tools:
+  # Read-only + orientation. This agent explains features and creates projects;
+  # SOUL.md ("You don't work on files directly", "You don't write code or edit
+  # documents in the home workspace") and RULES.md rule 4 ("Never modify files in
+  # the home workspace") rule out every mutating tool. RULES.md rule 3 redirects
+  # research to a project workspace, so no web tooling either.
+  # Read/Glob/Grep back RULES.md rule 2 ("refer to the knowledge base").
+  # Omitted on purpose: Write, Edit, Bash, Task, WebSearch, and omp's
+  # browser / computer / notebook / lsp / python built-ins.
+  allowed:
+    - Read
+    - Glob
+    - Grep
+    - TodoWrite
+    - AskUserQuestion
 runtime:
   max_turns: 50
-  timeout: 300
+  timeout: 900
 author: "ecsplico"
 license: "MIT"
 tags:

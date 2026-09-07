@@ -3,20 +3,52 @@ name: "forge-project-assistant"
 version: "1.0.0"
 description: "Focused software development assistant — reads, writes, and explains code in developer project workspaces"
 model:
-  preferred: "claude-opus-4-6"
+  # Family alias: auto-rolls to the current top Opus model. A full ID like
+  # claude-opus-5 fails ModelIdSchema today (see workspaces#03).
+  preferred: "opus"
   fallback:
-    - "claude-sonnet-4-6"
     - "claude-haiku-4-5-20251001"
   constraints:
     temperature: 0.2
     max_tokens: 8096
+tools:
+  # Canonical Claude Code tool names; the omp driver maps them onto its own
+  # built-ins and passes `--tools read,write,edit,bash,glob,grep,web_search,todo,ask`.
+  # Names with no omp built-in (WebFetch, BashOutput, KillShell) are dropped for
+  # that backend and only take effect on claude-sdk.
+  #
+  # Justified by SOUL.md ("Reading and explaining code", "Writing new code",
+  # "Editing and refactoring", "Debugging", "File management", "research") and by
+  # the three declared skills: code-assistance (read/edit), file-management
+  # (read/write/list/delete) and project-exploration (directory listing, config
+  # files, `git log` — hence Bash).
+  #
+  # Omitted on purpose — nothing in SOUL.md, RULES.md or the skills invokes them:
+  #   browser  (browser automation)   computer (desktop capture/input)
+  #   notebook (Jupyter)              lsp      (language server)
+  #   python   (persistent kernel — Bash covers ad-hoc scripts)
+  #   task     (sub-agent spawning; this manifest declares no `delegation:` block,
+  #             and its description doc is the single largest tool schema omp ships)
+  allowed:
+    - Read
+    - Write
+    - Edit
+    - Bash
+    - BashOutput
+    - KillShell
+    - Glob
+    - Grep
+    - WebSearch
+    - WebFetch
+    - TodoWrite
+    - AskUserQuestion
 skills:
   - "code-assistance"
   - "file-management"
   - "project-exploration"
 runtime:
   max_turns: 100
-  timeout: 600
+  timeout: 1800
 author: "ecsplico"
 license: "MIT"
 tags:
