@@ -28,8 +28,8 @@ wire up a frontend+backend app:
 - **Auto-discovery**: `frontend/` and `backend/` directories at the workspace root are
   detected and run as independent sibling containers automatically — no config file needed.
 - **Explicit `skaile.preview.json`**: declare each app's `path`, `role`
-  (`frontend`/`backend`), and `port` — needed for non-default ports, more than two apps, or
-  when an app lives at a nested path.
+  (`frontend`/`backend`), and `appPort` — needed for non-default ports, more than two apps,
+  or when an app lives at a nested path. Write it with the capabilities below, not by hand.
 
 **The contract is checked at the session workspace root — never at an arbitrary nested
 path.** If the agent scaffolds the generated project into a subdirectory (e.g. `app/`)
@@ -44,6 +44,41 @@ not a platform limitation. Fix it by scaffolding at the workspace root, or by ad
 missing piece (missing contract, wrong port, failed health check, etc.) and, when the app
 was scaffolded one level too deep, will name the nested directory it found. Guess only as a
 last resort, after reading that message.
+
+## Declaring apps — use the capabilities, not the editor
+
+Three capabilities own `skaile.preview.json`. Prefer them over writing the file directly:
+each validates the whole resulting config against the real schema *before* anything reaches
+disk, and returns a structured error naming the rule that was broken. A hand-written file is
+not checked until the preview fails to start, which is a far worse place to learn.
+
+- `platform.create_preview_config` — originate the file with one or more apps. Fails if a
+  config already exists.
+- `platform.edit_preview_config` — upsert or remove one app by id. The whole resulting config
+  is re-validated. Works even if the file does not exist yet: an upsert originates it.
+- `platform.delete_preview_config` — remove the file and fall back to auto-discovery.
+  Idempotent.
+
+Because an invalid write is refused before the file changes, calling one of these is also the
+cheapest way to test a shape you are unsure about: a rejection costs nothing and names the
+problem, and it leaves any existing config untouched.
+
+### Rules that hold across apps
+
+Per-app fields are documented on the capabilities themselves. These constraints are *between*
+apps, and are the ones that are easy to violate without noticing:
+
+- No two apps in the same `resourceId` mount may declare the same or overlapping paths. `"."`
+  is the mount root, so it overlaps every other path — declare either one app at `"."` or
+  non-nesting siblings, never both.
+- At most one app may have `role: "frontend"`, and at most one `role: "backend"`.
+- Each app must read `SKAILE_PREVIEW_BASE` in its base-path config (`base`, `basePath`,
+  `paths.base`, `app.baseURL`, …). The proxy rewrites root-anchored URLs only as a
+  compatibility layer, so without it a preview can reach `ready` while its module requests
+  fail under the proxy path — a failure that looks like a broken app rather than a missing
+  setting.
+- A path is relative to that app's `resourceId` mount (default `workspace`), and may contain
+  no `..` segments.
 
 ## Agent-controllable apps (Skailify)
 
