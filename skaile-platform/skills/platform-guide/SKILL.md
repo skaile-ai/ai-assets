@@ -9,7 +9,7 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   and permissions, hibernation, or any platform surface; or when you are about to create a
   project/session/organization, invite someone, start a connector setup, or read back a
   durable operation you started. Load on demand, not always-on."
-version: 0.8.0
+version: 0.9.0
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
