@@ -1,19 +1,22 @@
 ---
 name: "ship"
-description: "[skaile-development] Implement AND ship a single work item end-to-end in
-  ANY skaile-dev repo — bug, feature, UI fix, chore, or issue. Drives it from 'just
-  reported' to 'merged' in one flow: resolves the target repo + its conventions, opens
-  a GitHub issue (category label, assigned to the current gh user), creates an isolated
-  worktree + branch named after the issue number, investigates, writes an uncommitted
-  plan, dispatches a fresh agent to implement, dispatches a fresh agent to review,
-  fixes valid review concerns, commits + pushes, opens a PR that closes the issue,
-  reports the implementation summary, then BABYSITS the PR — watching CI to green,
-  waiting for automated review bots, and fixing every change-request related to the
-  work (including style nits) in a loop — and finally asks whether to squash-merge +
-  clean up, clean up only, or stop (optional meat reading diff).
-  Use when the user reports a bug, requests a feature,
-  asks for a UI fix or chore in any repo, and wants the whole cycle done in one shot."
-version: 1.2.0
+description: >-
+  Take one piece of work in one repository from "somebody described it" to a traceable,
+  reviewed, checks-green change whose fate the human decided. Use whenever someone wants
+  something in a repository actually changed rather than explained - however casually they
+  put it. "can you sort it", "can you take it", "can we get X on this", "have a look at #12"
+  and "fix it and push it" are all this skill; the person does not have to mention branches,
+  a pull request, review or merging, and the change can be as small as one constant, one
+  string of copy or one dependency bump. Also use when handed an issue number or link to
+  build, or an already-open pull request from this kind of work to carry the rest of the way.
+  It runs the whole cycle in one flow - files the tracker issue, branches in an isolated
+  worktree, implements, gets the diff reviewed, opens the PR, drives CI and review feedback
+  to green - then recaps in plain language and asks once whether to squash-merge and clean up.
+  Do not use for questions, diagnosis or code explanation, for reviewing someone else's
+  existing code, for plans or design proposals, for filing an issue when implementation is
+  explicitly deferred, for throwaway local experiments, or for work spanning several
+  repositories.
+version: 1.3.0
 metadata:
   tags:
   - "ship"
@@ -128,7 +131,7 @@ metadata:
 | 10 | Open a PR against `main` that `Closes #<number>` (respect PR template + changeset rules) |
 | 11 | **Report the implementation summary** to the user |
 | 12 | **Babysit the PR**: watch CI to green, wait for review bots, fix every related change-request (incl. nits) in a loop; report unrelated/architectural problems without fixing them |
-| 13 | Ask the user: **squash-merge + clean up** \| **clean up only** \| **stop here** (plus **reading diff first** via the `meat` skill, if installed) — then execute the choice |
+| 13 | **Recap in plain language** (no jargon — for a person returning after hours away), then ask the user: **squash-merge + clean up** \| **clean up only** \| **stop here** (plus **reading diff first** via the `meat` skill, if installed) — then execute the choice |
 | 14 | Final report |
 
 The worktree and local branch **persist** through phases 9–12 (they are where babysit
@@ -224,6 +227,7 @@ MUST  report a clear implementation summary to the user after the PR is opened (
 MUST  babysit the PR (Phase 12): watch CI to completion (this also waits for automated review-bot checks), read the PR's reviews + comments, and fix every actionable item — including style nits — that relates to the work item, looping push → re-watch until CI is green and the only remaining review notes are ones the reviewer explicitly blesses as fine to keep
 MUST  fix only items RELATED to the change (e.g. lint/type/test failures the change caused, review nits on the diff); for unrelated/pre-existing/architectural problems, REPORT them to the user and do NOT fix them
 MUST  converge the babysit loop — cap fix rounds, and if CI stays red on something unrelated or a review item recurs after a good-faith fix, stop and ask (gate #8)
+MUST  print the plain-language recap (Phase 13, STEP 14b) immediately BEFORE the final question — jargon-free, no paths or symbols, written for someone who was not watching
 MUST  ask the user at the end (Phase 13) to choose: squash-merge + cleanup | cleanup only | stop here — and execute exactly that
 MUST  after a MERGE of user-visible platform work, sync the capability docs (Phase 13b) — `platform/features/SKAILE-PLATFORM-CAPABILITIES.md` is the LEADING copy and is always updated; the business doc mirror and the platform-guide skill only when their paths are accessible on this machine
 MUST  use squash-and-merge (`gh pr merge <n> --squash`) when merging
@@ -688,6 +692,53 @@ EMIT [ship] babysit_done rounds=<R> fixed=<N> unrelated=<M>
 
 # ── Phase 13: Final Disposition (the one planned checkpoint) ───────
 
+STEP 14b: Plain-language recap (print BEFORE asking anything)
+  The person may have walked away hours ago and come back to a wall of scrollback. This
+  block is the one thing they read to remember what this was about. Write it for someone
+  who does not know this codebase and was not watching.
+
+  Hard rules for the recap text:
+    - No jargon. Banned unless the person used the word first: refactor, regression,
+      race condition, idempotent, nullable, migration, hydrate, memoize, endpoint,
+      payload, mutation, invariant, coerce, upstream, downstream.
+    - No file paths, no function names, no class names, no line numbers, no error
+      strings, no commit hashes, no code. Those are already in the PR.
+    - Describe the effect a person could notice, not the mechanism. "Customers saw a
+      spelling mistake on the payment page" - not "corrected two i18n string literals".
+    - Say what is different now that was not before, in one breath.
+    - Plain past tense, short sentences, no bullets inside the three lines.
+    - Never overstate: if the fix is partial, or something related is still broken, say
+      so in "Still open". If nothing is left, write "Nothing.".
+
+  Print:
+  ```
+  ── In plain words ──────────────────────────────────────────────
+  You asked for:  <1 sentence, the original request in everyday language>
+  What was wrong: <1-2 sentences, what was actually happening and who it affected.
+                   If nothing was broken (a new feature or a chore), say what was
+                   missing or awkward instead.>
+  What I did:     <2-3 sentences, the change as a person would notice it, plus how it
+                   was checked. Name the test or the manual check in everyday terms.>
+  Still open:     <anything related that is NOT fixed by this, in one sentence - or
+                   "Nothing.">
+  ────────────────────────────────────────────────────────────────
+  ```
+
+  Worked example (a real one, for calibration):
+  ```
+  ── In plain words ──────────────────────────────────────────────
+  You asked for:  The two spelling mistakes on the checkout screen to be fixed.
+  What was wrong: Customers paying for an order saw "try agin later" and "reciept"
+                  on screen. It had been live for several weeks.
+  What I did:     Corrected both words so the screen now reads "try again later" and
+                  "receipt". I ran the project's own checks and took a look at the
+                  checkout screen to confirm nothing else moved.
+  Still open:     Nothing.
+  ────────────────────────────────────────────────────────────────
+  ```
+
+EMIT [ship] recap_printed
+
 STEP 15: Ask the user how to finish (gate #9)
   Optional reading-diff preview: IF a `meat` skill is available in this session's
   skill list, offer it as a 4th option below. If absent, ask with the three
@@ -860,6 +911,7 @@ CHECKLIST
   - [ ] origin/<default_branch> merged into the branch; conflicts resolved; re-pushed
   - [ ] PR opened (Closes #<number>; PR template honored); implementation summary reported
   - [ ] Babysit loop run: CI green / bots finished / related items (incl. nits) fixed; unrelated items reported, not fixed; loop converged
+  - [ ] Plain-language recap printed before the final question (asked for / what was wrong / what I did / still open; no jargon, no paths, no symbols)
   - [ ] Final disposition asked (merge+cleanup / cleanup / stop; reading-diff option offered iff the `meat` skill is available) and executed; squash used for merge
   - [ ] Capability docs synced after a merged user-visible platform change: `platform/features/` leading doc always; business mirror + platform-guide skill skipped gracefully when not accessible
   - [ ] Cleanup (when chosen) removed worktree + local branch (+ remote branch on merge); worktree/branches kept on "stop"
