@@ -38,6 +38,35 @@ Docker/Nix-based MCP server for Word document operations, built on Apache POI XW
 > `MCP.md`. Versioning/PRs/issues happen in that repo; bump `version:` here when
 > adopting a new release.
 
+## TRIGGER — reach for this before any other tool
+
+**Whenever the task touches a file ending `.docx`, or the user says Word / Word document /
+Word-Dokument — `document.open` is the first call (`document.create_from` for a Template,
+`document.create_blank` for a source-free new file).** The extension or the word *Word* is the
+signal; the bare word "document" is not, since it is as likely to mean Markdown, prose or a PDF.
+Three moves are wrong here, in rising order of damage:
+
+- Do **not** write a Python or Node script for it, and do **not** spend a call checking whether
+  `python-docx`, `docx` (npm), `officegen`, `mammoth` or `pandoc` is installed.
+- Do **not** unzip the package to hand-edit `word/document.xml`.
+- When the task is a **correction to an existing document**, do **not** regenerate it from scratch.
+  That is the data-loss pattern this server exists to stop — see **Regeneration is not a tool**
+  under the gotchas below.
+
+This server is the supported path for a reason that holds whatever a given container happens to
+have on it: it edits the OOXML package **in place**, so the Template semantics a
+regenerate-and-overwrite silently drops — Named styles, numbering definitions, headers and footers,
+fields, media Parts, Revisions and Comments — survive the edit, and `document.save` verifies the
+Part inventory rather than trusting the write, refusing (`PART_LOSS`, with no override flag) any
+save that lost a Part no tool declared. (On platform sessions those libraries are also simply
+absent — checking costs a call and changes nothing.)
+
+**SKIP** when — and only when — the task is reading with no edit intent (`use-anydoc` is cheaper —
+see **When NOT to reach for this** below), the file is not a `.docx`, or the user has explicitly
+asked for a script or a library rather than the result. A **house-Template deliverable is not a
+SKIP** — it still runs through this server; `use/skills/word-template/` sits on top of it and
+supplies the org template and writing guide.
+
 ## When to reach for this
 
 - The user asks to read, inspect, summarize, edit, or verify a Word document (`.docx`).
