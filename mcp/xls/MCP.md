@@ -42,12 +42,29 @@ Docker-based MCP server for Excel file operations, built on Apache POI 5.5.1.
 > only** — `MCP.md`. Versioning/PRs/issues happen in that repo;
 > bump `version:` here when adopting a new release.
 
+## TRIGGER — reach for this before any other tool
+
+**Whenever the task touches a file ending `.xlsx` / `.xlsm` / `.xls`, or the user says
+spreadsheet / workbook / Excel / Tabelle / Arbeitsmappe — `workbook.open` (or
+`workbook.create`) is the first call.** Do **not** write a Python or Node script for it,
+and do **not** spend a call checking whether `openpyxl`, `pandas.read_excel`, `exceljs` or
+`xlsx` is installed. This server is the supported path for two reasons that hold whatever
+a given container happens to have on it: every edit flows through one POI writer, which is
+what keeps the file out of the "Excel repaired records" state a second serializer puts it
+in, and it is the only route that **evaluates formulas headlessly** rather than handing
+back the stale cached values a library read returns. (On platform sessions those libraries
+are also simply absent — checking costs a call and changes nothing.)
+
+**SKIP** when — and only when — the file is a `.csv` (plain file tools are the right
+reach), the file is `.xlsb` or not a spreadsheet at all (see **When NOT to reach for this**
+below), or the user has explicitly asked for a script or a library rather than the result.
+
 ## When to reach for this
 
 - The user asks to read, inspect, summarize, modify, or create an Excel workbook (.xlsx / .xlsm / .xls).
 - The agent needs to evaluate formulas, edit cells, insert or delete rows/columns, rename or reorder sheets, manage named ranges, or extract VBA source.
 - The task is to **present** a model, not just populate it: cell styling, number formats, column widths, freeze panes, conditional formatting, dropdown/range data validation, outline grouping, or a line/bar chart.
-- The task is to **review** a workbook someone else built: `workbook.audit` flags hardcoded constants and rows hidden outside an outline group; `cell.trace` walks a formula's precedents and dependents.
+- The task is to **review** a workbook someone else built: `workbook.audit` flags hardcoded constants, error cells, uncomputed formulas, circular references, and rows hidden outside an outline group; `cell.trace` walks a formula's precedents and dependents.
 - The task involves structured spreadsheet data where formula correctness and cell-type fidelity matter — not quick-and-dirty CSV work (use plain file tools for that).
 
 ## When NOT to reach for this
@@ -73,7 +90,7 @@ Both are **read-only extraction paths, not a shortcut for editing**. Two traps i
 - **Named ranges (4)** — `named_range.list`, `named_range.get`, `named_range.set`, `named_range.delete`
 - **VBA, read-only (2)** — `vba.list_modules`, `vba.get_module`
 
-Highlights: in-memory open/create behind a session handle; typed-cell reads that separate a real value from an uncomputed formula; **headless formula recalculation** (~280 of Excel's functions evaluated in place — uncommon for an agent-drivable spreadsheet tool); native cell styling, conditional formatting, data validation and sheet presentation through a single POI writer (no second-writer corruption); a **review** path as well as an authoring one (`workbook.audit` for hardcoded constants and rows hidden outside an outline group, `cell.trace` for precedents/dependents); atomic temp-file-and-rename saves.
+Highlights: in-memory open/create behind a session handle; typed-cell reads that separate a real value from an uncomputed formula; **headless formula recalculation** (~280 of Excel's functions evaluated in place — uncommon for an agent-drivable spreadsheet tool); native cell styling, conditional formatting, data validation and sheet presentation through a single POI writer (no second-writer corruption); a **review** path as well as an authoring one (`workbook.audit` for hardcoded constants, error cells, uncomputed formulas, circular references, and rows hidden outside an outline group, `cell.trace` for precedents/dependents); atomic temp-file-and-rename saves.
 
 Every tool declares an MCP `outputSchema` and behaviour annotations (`readOnlyHint` / `destructiveHint` / `idempotentHint`), so a client can tell a read from a write without parsing English — 16 of the 41 are read-only. The server validates its own results against those schemas at runtime.
 
@@ -143,6 +160,35 @@ workbook.open (or workbook.create)
 ```
 
 The process is **session-scoped**: one container per agent session, workbooks stay in memory across many tool calls so reads and edits don't pay a reload cost between turns. Closing without saving discards in-memory edits silently.
+
+### The rebuild cycle — when you are writing a model, not just reading one
+
+This is the write half of the flow above, tightened into the loop to run for any
+multi-sheet write. It does not replace the orientation steps —
+`workbook.capabilities_report` still comes before the first edit, or `workbook.recalculate`
+will silently leave the modern-function cells stale:
+
+```
+workbook.open
+  → workbook.capabilities_report  # which cells recalculate will leave stale — before the first edit
+  → range.get                     # understand structure and existing formulas, before every change
+  → range.clear / range.set       # seed row
+  → range.fill                    # spread it
+  → workbook.recalculate
+  → range.get                     # read results back against expected values
+  → workbook.audit                # errors, circular, uncomputed
+  → workbook.save                 # explicit `path` — a NEW file, never the source
+  → workbook.close
+```
+
+Two properties make it hold, and both are worth the extra calls:
+
+- **Recalculate and read back after every write**, not once at the end. A formula that is
+  written but never recalculated reads as `formula_uncomputed`, and a broken reference
+  surfaces at the write that caused it instead of forty calls later.
+- **Save to a NEW path** — pass `workbook.save` an explicit `path` rather than letting it
+  write back over the handle's source. The input workbook stays intact, so a bad run is
+  discarded rather than unwound, and the whole sequence is re-runnable from the same input.
 
 ## Non-obvious gotchas the agent must respect
 
