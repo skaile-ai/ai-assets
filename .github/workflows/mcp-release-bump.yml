@@ -59,8 +59,9 @@ jobs:
           # (a head-truncated `description:` would cut off the very count the row
           # exists to show) and snaps its edges to spaces, which are the only cut
           # points guaranteed not to land inside a multi-byte character under
-          # mawk's byte-based substr. `balance` closes a code span the window may
-          # have split, so an odd backtick cannot swallow the rest of the body.
+          # mawk's byte-based substr — a line with no space to snap to is returned
+          # whole rather than cut at a raw offset. `balance` closes a code span the
+          # window may have split, so an odd backtick cannot swallow the rest.
           SCAN_LIB='
             function window(s, pos,   start, end, out, n) {
               n = length(s)
@@ -70,7 +71,7 @@ jobs:
               while (start > 1 && start < pos && substr(s, start, 1) != " ") start++
               if (start > 1) start++
               while (end < n && end > pos && substr(s, end, 1) != " ") end--
-              if (end <= start) { start = pos; end = (pos + 159 > n) ? n : pos + 159 }
+              if (end <= start) return s
               out = substr(s, start, end - start + 1)
               if (start > 1) out = "... " out
               if (end < n)   out = out " ..."
