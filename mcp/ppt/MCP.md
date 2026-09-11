@@ -46,6 +46,37 @@ non-PPTX export formats.
 > bump `version:` here when adopting a new release. See `README.md` in that repo
 > for the authoritative tool catalog with argument schemas.
 
+## TRIGGER — reach for this before any other tool
+
+**Whenever the task touches a file ending `.pptx` / `.pptm`, or the user asks for a
+PowerPoint file / PowerPoint-Datei by name — `ppt.capabilities` then
+`ppt.open_document` (or `ppt.create_document`) is the entry point.** (Capabilities
+first is a **MUST** of this server's contract, not a formality — it is how you learn
+whether `high_fidelity_render` and `charts_update` are available before a call depends
+on them.) Do **not** write a Python or Node script for it, and do **not** spend a call
+checking whether `python-pptx`, `pptxgenjs` or `officegen` is installed. This server is
+the supported path for two reasons that hold whatever a given container happens to have
+on it: every edit flows through one POI writer against a single stateful `document_id`,
+so a multi-step change stays consistent — and `ppt.transaction_begin` /
+`ppt.transaction_commit` keep the deck atomic from the agent's perspective — and it is
+the only route that has a LibreOffice path at all, for slides rendered to PNG / JPG /
+SVG and the deck exported to PDF / HTML / image batch / outline text. (On platform
+sessions the competing libraries are also simply absent — checking costs a call and
+changes nothing. `soffice` itself can be absent in a hand-rolled image, which is the
+other reason to read `ppt.capabilities` first: `SOFFICE_UNAVAILABLE` is a branch, not a
+surprise.)
+
+**SKIP** when — and only when — one of these holds:
+
+- **The deliverable is a Skaile-branded presentation rather than a `.pptx` file** — that
+  is the `decks` skill (`use/skills/decks/`), which composes and rebuilds Skaile decks
+  through the pinned `@skaile/decks` HTML/PDF runtime. "Deck", "slides" and
+  "presentation" on their own do not choose a path; the requested **artifact** does.
+- **The task is read-only extraction from an existing deck** — `use-anydoc` is far
+  cheaper (see **When NOT to use** below).
+- **The input is legacy `.ppt` (binary) or `.odp`** — not supported here.
+- **The user explicitly asked for a script** rather than for the result.
+
 ## When to use
 
 Reach for this when the agent's task involves any of:
