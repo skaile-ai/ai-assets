@@ -70,9 +70,10 @@ below), or the user has explicitly asked for a script or a library rather than t
 ## When NOT to reach for this
 
 - **`.xlsb` (binary workbooks)** — rejected at open; POI has no binary-workbook reader. Convert with `use-anydoc` for read-only extraction.
-- **The file isn't a spreadsheet** (`.docx`, `.pdf`, `.odt`, `.rtf`, `.epub`, `.csv`) — `use-anydoc` reads all of these to Markdown; `use-docling` if it needs OCR.
+- **`.csv`** — plain text with no cells, formulas or styling to preserve. Read and write it with ordinary file tools; neither this server nor an extraction path is needed.
+- **The file isn't a spreadsheet** (`.docx`, `.pdf`, `.odt`, `.rtf`, `.epub`) — `use-anydoc` reads all of these to Markdown; `use-docling` if it needs OCR.
 
-Both are **read-only extraction paths, not a shortcut for editing**. Two traps if you use `use-anydoc` to orient before editing here:
+The two `use-anydoc` routes above are **read-only extraction paths, not a shortcut for editing**. Two traps if you use `use-anydoc` to orient before editing here:
 
 - **Its grid has no A1 addresses**, and it starts at the sheet's *used range*, not at A1 — a sheet whose data begins at D11 yields a table whose first column is D, with nothing in the output saying so. Never translate a position in anydoc output into an A1 address for a `range.set`. Re-locate the cell with `range.get` / `table.list` / `named_range.list` first.
 - **It reads cached values only**, so cells this server left as `type: "formula_uncomputed"` come through as *blank*. Call `workbook.recalculate` and `workbook.save` before converting a file this server wrote.
@@ -154,7 +155,7 @@ workbook.open (or workbook.create)
   → range.set_conditional_format       # rules that colour by value
   → range.set_validation               # dropdowns / bounds on input cells
   → chart.create                       # line or bar chart over a written range
-  → workbook.audit / cell.trace        # review: hardcoded constants, hidden rows, precedents
+  → workbook.audit / cell.trace        # review: constants, errors, circular, uncomputed, hidden rows; precedents
   → workbook.save                      # flush to disk (atomic temp-file + rename)
   → workbook.close                     # release in-memory state
 ```
