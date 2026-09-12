@@ -90,6 +90,7 @@ The two `use-anydoc` routes above are **read-only extraction paths, not a shortc
 
 48 tools over stdio, grouped by area:
 
+<!-- mcp-catalog-tools -->
 - **Workbook lifecycle, state & review (10)** — `workbook.open`, `workbook.create`, `workbook.save`, `workbook.close`, `workbook.list_sheets`, `workbook.metadata`, `workbook.recalculate`, `workbook.capabilities_report`, `workbook.list_handles`, `workbook.audit`
 - **Range I/O, styling & rules (9)** — `range.get`, `range.set`, `range.clear`, `range.fill`, `range.set_style`, `range.set_conditional_format`, `range.get_conditional_format`, `range.set_validation`, `range.get_validation`
 - **Formula tracing & search (2)** — `cell.trace`, `formula.search`
@@ -99,6 +100,7 @@ The two `use-anydoc` routes above are **read-only extraction paths, not a shortc
 - **Tables (2)** — `table.list`, `table.get`
 - **Named ranges (4)** — `named_range.list`, `named_range.get`, `named_range.set`, `named_range.delete`
 - **VBA, read-only (2)** — `vba.list_modules`, `vba.get_module`
+<!-- /mcp-catalog-tools -->
 
 Highlights: in-memory open/create behind a session handle; typed-cell reads that separate a real value from an uncomputed formula; **headless formula recalculation** (~280 of Excel's functions evaluated in place — uncommon for an agent-drivable spreadsheet tool); native cell styling, conditional formatting (written and read back), data validation, merged-region writes and sheet presentation including print setup, all through a single POI writer (no second-writer corruption); `formula.search` to find every cell whose formula matches a pattern, across sheets, by substring or regex; a **review** path as well as an authoring one (`workbook.audit` for hardcoded constants, error cells, uncomputed formulas, circular references, and rows hidden outside an outline group, `cell.trace` for precedents/dependents); atomic temp-file-and-rename saves.
 

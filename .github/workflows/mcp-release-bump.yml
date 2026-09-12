@@ -160,6 +160,409 @@ jobs:
             echo "stale=false" >> "$GITHUB_OUTPUT"
           fi
 
+          # The parity step needs the file this step's `case` resolved. Exporting
+          # it keeps the mcp-to-directory mapping in exactly one place.
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+
+      # The dispatch now carries a build-verified tool inventory (excel-mcp#135):
+      # a top-level array of {name, deferred}, sorted by name, generated from the
+      # server's own registry at release time. Diffing it against the catalog's
+      # enumeration turns the checklist row "tool inventory matches the release"
+      # from a re-derivation into a named list of what actually moved — for tool
+      # *names* only. Eagerness is a prose claim and stays one; see below.
+      #
+      # This step never fails the job. The version bump above is correct whatever
+      # the payload says, and a parity problem is something to read in the PR body
+      # rather than a reason to withhold the PR — the #62 lesson.
+      - name: Check tool-inventory parity
+        id: parity
+        env:
+          # `toJSON` of an absent field is the JSON literal `null`. That is the
+          # "this sender ships no inventory yet" state, not an error.
+          TOOLS_JSON: ${{ toJSON(github.event.client_payload.tools) }}
+          FILE: ${{ steps.bump.outputs.file }}
+          VERSION: ${{ github.event.client_payload.version }}
+          BODY: ${{ runner.temp }}/pr-body.md
+        # python3 (preinstalled on ubuntu-latest) rather than more awk: the work
+        # is JSON parsing and set algebra, which shell does badly. Every value
+        # crosses into the script through the environment above — no payload
+        # content is ever interpolated into this source or into a command line,
+        # so a hostile `client_payload` cannot become code.
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+
+          FILE = os.environ["FILE"]
+          VERSION = os.environ.get("VERSION", "")
+          BODY = os.environ["BODY"]
+          RAW = os.environ.get("TOOLS_JSON", "null")
+
+          # An entry opts into this check by declaring the marker above an
+          # enumeration whose backticked names are the *wire* names. Opt-in, not
+          # heuristics: mcp/ppt/MCP.md omits names for whole categories and writes
+          # bare `create_document` where the wire says `ppt.create_document`, so a
+          # parser that guessed would report ~52 removals that are not there — a
+          # loud wrong answer, which is the failure this check exists to prevent.
+          MARKER = "<!-- mcp-catalog-tools -->"
+          MARKER_END = "<!-- /mcp-catalog-tools -->"
+          # A wire tool name as the payload spells it (`workbook.open`,
+          # `range.set_style`). The block's other code spans (`.xlsx`, `#,##0`)
+          # do not match and are skipped.
+          NAME_RE = re.compile(r"^[a-z_][a-z0-9_]*\.[a-z0-9_]+$")
+          # Deliberately the same threshold as excel-mcp's
+          # MINIMUM_PLAUSIBLE_TOOL_COUNT rather than a second invented one: below
+          # it, a payload is far likelier to be a truncated build artefact than a
+          # real inventory. Wants revisiting if a genuinely smaller server ever
+          # adopts the payload shape.
+          MIN_PLAUSIBLE = 30
+          # Ceiling on every rendered list. GitHub caps a PR body at 65,536 characters;
+          # past that `create-pull-request` takes a 422, the step fails, and NO PR opens --
+          # which inverts this step's whole contract, since a parity problem is meant to be
+          # something you read in the PR rather than a reason to withhold it. A producer bug
+          # that put descriptions in `name` reaches that size without being hostile, and it
+          # passes every other check (strings, unique, sorted, bools).
+          MAX_LISTED = 50
+
+
+          class Fault(Exception):
+              """The payload cannot be trusted — report it, diff nothing."""
+
+              def __init__(self, check, value=None):
+                  self.check = check
+                  self.value = value
+
+
+          class NotChecked(Exception):
+              """No comparison was possible — say so, and say why."""
+
+              def __init__(self, lines):
+                  self.lines = lines
+
+
+          def excerpt(value, limit=200):
+              """Quote an untrusted value into a one-line, length-capped code span.
+
+              Used for every value taken from the payload, tool names included:
+              validation constrains a name to *a* string, not to a wire-shaped
+              one, and this body is Markdown a human reads.
+
+              Newlines are collapsed so payload text cannot break out of the line
+              it is printed on, and backticks are replaced rather than escaped so
+              a stray one cannot close the span and let the payload render as
+              Markdown in the PR body.
+              """
+              text = value if isinstance(value, str) else json.dumps(value, default=repr)
+              text = " ".join(text.split())
+              if len(text) > limit:
+                  text = text[:limit] + " ..."
+              return "`" + text.replace("`", "'") + "`"
+
+
+          def json_type(value):
+              return {
+                  dict: "object", list: "array", str: "string",
+                  bool: "boolean", int: "number", float: "number",
+              }.get(type(value), "null")
+
+
+          def parse_payload(raw):
+              """Validate the dispatched payload, or raise Fault / NotChecked.
+
+              Order matters: each check assumes the previous one passed, and a
+              failure names the check and the offending value so the fault is
+              actionable in the producer rather than here.
+              """
+              try:
+                  payload = json.loads(raw) if raw.strip() else None
+              except ValueError as err:
+                  raise Fault("the payload is not valid JSON (" + str(err) + ")", excerpt(raw))
+              # `null` (the literal `toJSON` produces for an absent field) is the
+              # absent state, not a fault.
+              if payload is None:
+                  raise NotChecked([
+                      "This dispatch carried no `tools` payload, so the enumeration in "
+                      "`" + FILE + "` was not verified against the release.",
+                      "",
+                      "Only the `excel` sender dispatches a `tools` array today; the `ppt` "
+                      "and `word` senders have not adopted the shape yet. Until they do, "
+                      "re-derive their tool inventory from the release README by hand.",
+                  ])
+              if not isinstance(payload, list):
+                  raise Fault(
+                      "the payload is not a JSON array (its JSON type is `"
+                      + json_type(payload) + "`)",
+                      excerpt(raw),
+                  )
+              # An empty array diffs to zero added and zero removed, which reads
+              # exactly like agreement. It is a fault, never a green result.
+              if not payload:
+                  raise Fault("the payload array is empty", "`[]`")
+              if len(payload) < MIN_PLAUSIBLE:
+                  raise Fault(
+                      "the payload lists %d tools, below the %d a real inventory is "
+                      "assumed to carry" % (len(payload), MIN_PLAUSIBLE),
+                      excerpt(payload),
+                  )
+              for index, entry in enumerate(payload):
+                  if (not isinstance(entry, dict)
+                          or not isinstance(entry.get("name"), str)
+                          or not isinstance(entry.get("deferred"), bool)):
+                      raise Fault(
+                          "entry %d is not an object with a string `name` and a boolean "
+                          "`deferred`" % index,
+                          excerpt(entry),
+                      )
+              names = [entry["name"] for entry in payload]
+              seen = set()
+              for name in names:
+                  if name in seen:
+                      raise Fault("the payload lists the tool " + excerpt(name) + " more than once")
+                  seen.add(name)
+              for index in range(1, len(names)):
+                  if names[index] < names[index - 1]:
+                      raise Fault(
+                          "the payload is not sorted by `name` (ASCII): entry %d %s follows %s"
+                          % (index, excerpt(names[index]), excerpt(names[index - 1]))
+                      )
+              return payload
+
+
+          def catalog_names(path):
+              """Names enumerated in the file's declared block, or raise NotChecked.
+
+              Every way this can fail to see the whole enumeration raises instead of
+              returning a short list: an undeclared, unclosed, duplicated or empty block,
+              and any backticked token inside the block that is not wire-shaped. A short
+              list would still diff, and would report the tools it did not read as
+              absent from neither side -- silence rendered as agreement.
+              """
+              try:
+                  with open(path, encoding="utf-8") as handle:
+                      lines = handle.read().splitlines()
+              except (OSError, UnicodeDecodeError) as err:
+                  raise NotChecked([
+                      "The catalog entry `" + path + "` could not be read (" + str(err) + "), "
+                      "so its enumeration was not compared against the payload.",
+                  ])
+              # Exactly one of each marker. "First one wins" would let a marker shown
+              # inside a fenced example -- DOMAIN.md documents the syntax now, so an entry
+              # may well illustrate it -- hijack the block, and would read only the first
+              # of two real blocks, leaving the second's tools in neither set.
+              opens = [i for i, line in enumerate(lines) if line.strip() == MARKER]
+              closes = [i for i, line in enumerate(lines) if line.strip() == MARKER_END]
+              if len(opens) > 1 or len(closes) > 1:
+                  raise NotChecked([
+                      "`%s` contains %d `%s` and %d `%s` lines; exactly one of each is "
+                      "required, so no comparison was attempted. A second marker (an "
+                      "example inside a fenced block, or a second enumeration) makes the "
+                      "declared extent ambiguous."
+                      % (path, len(opens), MARKER, len(closes), MARKER_END),
+                  ])
+              start = opens[0] + 1 if opens else None
+              if start is None:
+                  raise NotChecked([
+                      "`" + path + "` declares no `" + MARKER + "` block, so its enumeration "
+                      "was not compared against the payload.",
+                      "",
+                      "This is silence, not agreement: nothing here says the entry lists the "
+                      "right tools. An entry opts in by putting that marker above an "
+                      "enumeration whose backticked names are the wire names — guessing at an "
+                      "enumeration that was never declared to be one reports differences that "
+                      "do not exist.",
+                  ])
+              # The block is closed by an explicit end marker rather than by the next
+              # heading. Running to the heading would sweep in the prose below the bullets,
+              # which names tools in passing -- and a prose mention of a tool the release
+              # DROPPED would then satisfy the diff and hide the removal. That miss is
+              # exactly the class of failure this check exists to catch, so the boundary is
+              # declared rather than inferred.
+              block = []
+              closed = False
+              for line in lines[start:]:
+                  if line.strip() == MARKER_END:
+                      closed = True
+                      break
+                  block.append(line)
+              if not closed:
+                  raise NotChecked([
+                      "`%s:%d` opens a `%s` block that is never closed with `%s`, so its "
+                      "extent is undefined and no comparison was attempted."
+                      % (path, start, MARKER, MARKER_END),
+                  ])
+              # A backticked token in the block that is not wire-shaped is NOT dropped
+              # quietly. Dropping it would leave a documented tool in neither set, so a
+              # release that removed it would render as "no additions or removals" -- a
+              # green report over a comparison that never included it. Today every one of
+              # the 48 tokens matches, so refusing is free.
+              tokens = re.findall(r"`([^`\n]+)`", "\n".join(block))
+              skipped = sorted({t for t in tokens if not NAME_RE.match(t)})
+              if skipped:
+                  raise NotChecked([
+                      "The `%s` block at `%s:%d` contains %d backticked token(s) that are "
+                      "not wire-shaped tool names, so it was not compared: %s."
+                      % (MARKER, path, start, len(skipped),
+                         ", ".join("`" + excerpt(t) + "`" for t in skipped[:10])),
+                      "",
+                      "Every token inside the declared block must be a tool name. Move "
+                      "anything else outside the markers. Comparing anyway would leave "
+                      "those tools in neither set, and a release that dropped one would "
+                      "read as no change at all.",
+                  ])
+              names = sorted({t for t in tokens if NAME_RE.match(t)})
+              if not names:
+                  raise NotChecked([
+                      "The `" + MARKER + "` block at `%s:%d` yields no wire-shaped tool names, "
+                      "so there was nothing to compare the payload against." % (path, start),
+                  ])
+              return names
+
+
+          def prose_reference(path, needle="alwaysLoad"):
+              """`file:line` of the paragraph making the eagerness claim, if any."""
+              try:
+                  with open(path, encoding="utf-8") as handle:
+                      for number, line in enumerate(handle, 1):
+                          if needle in line:
+                              return "`%s:%d`" % (path, number)
+              except (OSError, UnicodeDecodeError):
+                  pass
+              return None
+
+
+          def bullets(names):
+              """Bulleted names, capped, with the remainder counted rather than dropped."""
+              shown = ["- " + excerpt(name) for name in names[:MAX_LISTED]]
+              if len(names) > MAX_LISTED:
+                  shown.append(
+                      "- … and %d more (listing capped at %d to keep the PR body inside "
+                      "GitHub's size limit; the counts above are complete)"
+                      % (len(names) - MAX_LISTED, MAX_LISTED)
+                  )
+              return shown
+
+
+          def eager_section(payload):
+              """Eagerness printed for a human, never asserted.
+
+              Settled on excel-mcp#135: mechanical set equality applies to names
+              only. The catalog states eagerness in English, and a check that read
+              English and reported green would be worse than no check — so print
+              the payload's eager set beside a pointer to the prose and let a
+              reviewer compare the two.
+              """
+              eager = [entry["name"] for entry in payload if not entry["deferred"]]
+              lines = ["", "### Eager tools in v" + VERSION, ""]
+              if eager:
+                  lines.append(
+                      "The payload flags these `deferred: false` — loaded without a search "
+                      "step in a client that hides MCP tools behind one:"
+                  )
+                  lines.append("")
+                  lines.extend(bullets(eager))
+              else:
+                  lines.append("The payload flags every tool `deferred: true`: none are eager.")
+              lines.append("")
+              reference = prose_reference(FILE)
+              # Say when the pointer could not be resolved. Letting it vanish silently
+              # would leave "states eagerness in prose" with nowhere to look, and the
+              # reader no way to tell a missing paragraph from a reworded one.
+              where = (" (" + reference + ")" if reference
+                       else " (paragraph not located — the entry no longer mentions "
+                            "`alwaysLoad`; find it by hand)")
+              lines.append(
+                  "The catalog states eagerness in prose" + where + ". That claim is **not** "
+                  "machine-verified and nothing above checks it — compare the list against the "
+                  "paragraph by hand. This is the defect class that shipped in #68: a tool named "
+                  "as an example of a deferred one after it had been pinned eager, with every "
+                  "count still correct."
+              )
+              return lines
+
+
+          def report():
+              payload = parse_payload(RAW)
+              enumerated = catalog_names(FILE)
+              dispatched = {entry["name"] for entry in payload}
+              added = sorted(dispatched - set(enumerated))
+              removed = sorted(set(enumerated) - dispatched)
+              lines = [
+                  "Compared the dispatched inventory against the `" + MARKER + "` block in "
+                  "`" + FILE + "`.",
+                  "",
+                  "- Dispatched by the v" + VERSION + " build: **%d tools**" % len(payload),
+                  "- Enumerated in `" + FILE + "`: **%d tools**" % len(enumerated),
+                  "",
+              ]
+              if not added and not removed:
+                  lines.append(
+                      "Enumeration matches the payload: %d tools, no additions or removals."
+                      % len(enumerated)
+                  )
+              if added:
+                  lines.extend(["### Tools added", ""])
+                  lines.append(
+                      "In the v" + VERSION + " build, missing from the enumeration — add them "
+                      "to the right category bullet and move the counts:"
+                  )
+                  lines.append("")
+                  lines.extend(bullets(added))
+                  lines.append("")
+              if removed:
+                  lines.extend(["### Tools removed", ""])
+                  lines.append(
+                      "Enumerated in the catalog but absent from the v" + VERSION + " build — "
+                      "delete them, and check the Limitations and gotchas that name them:"
+                  )
+                  lines.append("")
+                  lines.extend(bullets(removed))
+                  lines.append("")
+              # The eager section opens with its own blank line; drop any the
+              # diff sections left behind so the two never double up.
+              while lines and lines[-1] == "":
+                  lines.pop()
+              lines.extend(eager_section(payload))
+              return "checked", lines
+
+
+          try:
+              status, lines = report()
+          except Fault as err:
+              status = "fault"
+              lines = ["**PRODUCER FAULT** — " + err.check + "."]
+              if err.value is not None:
+                  lines.extend(["", "Value seen: " + err.value])
+              lines.extend([
+                  "",
+                  "**No comparison was performed.** Nothing here says the enumeration in `"
+                  + FILE + "` is either right or wrong; the payload failed validation before "
+                  "any diff was taken. Fix the producer and re-dispatch. The version bump in "
+                  "this PR is unaffected.",
+              ])
+          except NotChecked as err:
+              status = "unchecked"
+              lines = list(err.lines)
+              lines[0] = "**Not checked.** " + lines[0]
+          except Exception as err:  # noqa: BLE001
+              # A bug in this script must not cost the bump its PR, and must not
+              # be mistaken for agreement either. Report it as not checked, which
+              # is exactly what happened.
+              status = "unchecked"
+              lines = [
+                  "**Not checked.** The parity check itself failed with `"
+                  + type(err).__name__ + "`, so no comparison was performed. This is a bug in "
+                  "the workflow, not a finding about `" + FILE + "`.",
+              ]
+
+          section = "\n## Tool-inventory parity\n\n" + "\n".join(lines).rstrip() + "\n"
+          with open(BODY, "a", encoding="utf-8") as handle:
+              handle.write(section)
+          print(section)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              handle.write("parity=" + status + "\n")
+          PY
+
       - name: Open PR
         uses: peter-evans/create-pull-request@v6
         with:
@@ -167,5 +570,5 @@ jobs:
           title: "chore: bump ${{ github.event.client_payload.mcp }} MCP catalog to v${{ github.event.client_payload.version }}"
           commit-message: "chore: bump ${{ github.event.client_payload.mcp }} catalog version to ${{ github.event.client_payload.version }}"
           body-path: ${{ runner.temp }}/pr-body.md
-          draft: ${{ steps.bump.outputs.stale == 'true' }}
+          draft: ${{ steps.bump.outputs.stale == 'true' || steps.parity.outputs.parity == 'fault' }}
           delete-branch: true
