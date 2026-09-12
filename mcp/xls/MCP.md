@@ -1,6 +1,6 @@
 ---
 name: excel
-description: "A stateful, formula-aware Excel engine an agent can actually drive - not a file it has to parse by hand. Opens existing .xlsx/.xlsm/.xls workbooks (or creates new ones) entirely in memory, then queries and richly edits them across a whole session without reloading: cell values, typed formulas, styling, conditional formatting, data validation, charts, merged regions, cell notes, sheet structure and outline grouping, rows and columns, and named ranges (tables are read-only) - flushed to disk with an atomic, corruption-safe save. Its standout capability is headless recalculation: Apache POI evaluates ~280 Excel functions in place, so the agent works with real computed results instead of the stale cached zeros that code-based approaches (openpyxl/pandas, or Claude's built-in spreadsheet handling) leave behind - and every read distinguishes a genuine value from an as-yet-uncomputed formula. It can also review a model, not just write one: workbook.audit scans for hardcoded constants and hidden rows, and cell.trace walks precedents and dependents. Because all edits flow through one POI writer, it avoids the 'Excel repaired records' corruption a second serializer over the same file causes. 48 tools across workbook lifecycle (incl. audit), range I/O (incl. cell styling, conditional formats written and read back, data validation, formula tracing, formula-pattern search, and cell notes), sheet management (incl. merge/unmerge and sheet reordering), presentation, print setup and outlining, line and bar charts, tables, named ranges, and read-only VBA extraction."
+description: "A stateful, formula-aware Excel engine an agent can actually drive - not a file it has to parse by hand. Opens existing .xlsx/.xlsm/.xls workbooks (or creates new ones) entirely in memory, then queries and richly edits them across a whole session without reloading: cell values, typed formulas, styling, conditional formatting, data validation, charts, merged regions, cell notes, sheet structure and outline grouping, rows and columns, and named ranges (tables are read-only) - flushed to disk with an atomic, corruption-safe save. Its standout capability is headless recalculation: Apache POI evaluates ~280 Excel functions in place, so the agent works with real computed results instead of the stale cached zeros that code-based approaches (openpyxl/pandas, or Claude's built-in spreadsheet handling) leave behind - and every read distinguishes a genuine value from an as-yet-uncomputed formula. It can also review a model, not just write one: workbook.audit scans for hardcoded constants and hidden rows, and cell.trace walks precedents and dependents. Because all edits flow through one POI writer, it avoids the 'Excel repaired records' corruption a second serializer over the same file causes. 51 tools across workbook lifecycle (incl. audit), agent context, range I/O (incl. cell styling, conditional formats written and read back, data validation, formula tracing, formula-pattern search, and cell notes), sheet management (incl. merge/unmerge and sheet reordering), presentation, print setup and outlining, line and bar charts, tables, named ranges, and read-only VBA extraction."
 version: 0.4.0 # mcp-catalog-version
 transport: stdio
 recipe:
@@ -63,7 +63,7 @@ below), or the user has explicitly asked for a script or a library rather than t
 `_meta: {"anthropic/alwaysLoad": true}` — so in a client that hides MCP tools behind a search step
 they stay visible and callable without searching. They are the only two tools that mint a workbook
 handle, and every other tool needs one, so between them they cover every opening move: the door into
-an existing file and the door into a new one. The other 46 do not, including
+an existing file and the door into a new one. The other 49 do not, including
 `workbook.list_handles` — the third tool callable without a handle, but empty on turn one and so
 useless as an opening move.
 
@@ -88,10 +88,11 @@ The two `use-anydoc` routes above are **read-only extraction paths, not a shortc
 
 ## Capabilities
 
-48 tools over stdio, grouped by area:
+51 tools over stdio, grouped by area:
 
 <!-- mcp-catalog-tools -->
 - **Workbook lifecycle, state & review (10)** — `workbook.open`, `workbook.create`, `workbook.save`, `workbook.close`, `workbook.list_sheets`, `workbook.metadata`, `workbook.recalculate`, `workbook.capabilities_report`, `workbook.list_handles`, `workbook.audit`
+- **Agent context (3)** — `context.get`, `context.set`, `context.clear`
 - **Range I/O, styling & rules (9)** — `range.get`, `range.set`, `range.clear`, `range.fill`, `range.set_style`, `range.set_conditional_format`, `range.get_conditional_format`, `range.set_validation`, `range.get_validation`
 - **Formula tracing & search (2)** — `cell.trace`, `formula.search`
 - **Cell notes (2)** — `cell.set_comment`, `cell.get_comment`
@@ -102,9 +103,9 @@ The two `use-anydoc` routes above are **read-only extraction paths, not a shortc
 - **VBA, read-only (2)** — `vba.list_modules`, `vba.get_module`
 <!-- /mcp-catalog-tools -->
 
-Highlights: in-memory open/create behind a session handle; typed-cell reads that separate a real value from an uncomputed formula; **headless formula recalculation** (~280 of Excel's functions evaluated in place — uncommon for an agent-drivable spreadsheet tool); native cell styling, conditional formatting (written and read back), data validation, merged-region writes and sheet presentation including print setup, all through a single POI writer (no second-writer corruption); `formula.search` to find every cell whose formula matches a pattern, across sheets, by substring or regex; a **review** path as well as an authoring one (`workbook.audit` for hardcoded constants, error cells, uncomputed formulas, circular references, and rows hidden outside an outline group, `cell.trace` for precedents/dependents); atomic temp-file-and-rename saves.
+Highlights: in-memory open/create behind a session handle; a per-workbook agent-context note (`context.get`/`context.set`/`context.clear`) that travels with the file in a normal-hidden `_agent_context` sheet — discoverable via Excel's Unhide, capped at 32,000 characters, and flagged by `workbook.open` when one is present; typed-cell reads that separate a real value from an uncomputed formula; **headless formula recalculation** (~280 of Excel's functions evaluated in place — uncommon for an agent-drivable spreadsheet tool); native cell styling, conditional formatting (written and read back), data validation, merged-region writes and sheet presentation including print setup, all through a single POI writer (no second-writer corruption); `formula.search` to find every cell whose formula matches a pattern, across sheets, by substring or regex; a **review** path as well as an authoring one (`workbook.audit` for hardcoded constants, error cells, uncomputed formulas, circular references, and rows hidden outside an outline group, `cell.trace` for precedents/dependents); atomic temp-file-and-rename saves.
 
-Every tool declares an MCP `outputSchema` and behaviour annotations (`readOnlyHint` / `destructiveHint` / `idempotentHint`), so a client can tell a read from a write without parsing English — 19 of the 48 are read-only, and 9 are flagged destructive. Every one of the 48 states all four hints explicitly, because MCP's documented defaults are the opposite of what most of them do. The server validates its own results against those schemas at runtime.
+Every tool declares an MCP `outputSchema` and behaviour annotations (`readOnlyHint` / `destructiveHint` / `idempotentHint`), so a client can tell a read from a write without parsing English — 20 of the 51 are read-only, and 10 are flagged destructive. Every one of the 51 states all four hints explicitly, because MCP's documented defaults are the opposite of what most of them do. The server validates its own results against those schemas at runtime.
 
 ## Limitations
 
