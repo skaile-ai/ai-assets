@@ -59,9 +59,13 @@ are also simply absent — checking costs a call and changes nothing.)
 reach), the file is `.xlsb` or not a spreadsheet at all (see **When NOT to reach for this**
 below), or the user has explicitly asked for a script or a library rather than the result.
 
-`workbook.open` is pinned eager — it ships with `_meta: {"anthropic/alwaysLoad": true}` — so in a
-client that hides MCP tools behind a search step it stays visible and callable without searching.
-The other 47, `workbook.create` included, do not.
+`workbook.open` and `workbook.create` are pinned eager — both ship with
+`_meta: {"anthropic/alwaysLoad": true}` — so in a client that hides MCP tools behind a search step
+they stay visible and callable without searching. They are the only two tools that mint a workbook
+handle, and every other tool needs one, so between them they cover every opening move: the door into
+an existing file and the door into a new one. The other 46 do not, including
+`workbook.list_handles` — the third tool callable without a handle, but empty on turn one and so
+useless as an opening move.
 
 ## When to reach for this
 

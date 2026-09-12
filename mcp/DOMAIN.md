@@ -39,7 +39,7 @@ mcp/                      <- MCP servers (one subfolder per server)
 
 | Server | Source | Stage | Purpose |
 |---|---|---|---|
-| [excel](xls/MCP.md) | `mcp/xls` | alpha (v0.3.0) | Excel (.xlsx/.xlsm/.xls) read/write via Apache POI, 41 tools over stdio — headless recalculation, cell styling & sheet presentation, conditional formatting, data validation, outline grouping, line/bar charts, plus a review path (`workbook.audit`, `cell.trace`). |
+| [excel](xls/MCP.md) | `mcp/xls` | alpha (v0.4.0) | Excel (.xlsx/.xlsm/.xls) read/write via Apache POI, 48 tools over stdio — headless recalculation, cell styling & sheet presentation, conditional formatting (write and read-back), data validation, merged regions, cell notes, outline grouping, print setup, formula pattern search, line/bar charts, plus a review path (`workbook.audit`, `cell.trace`). |
 | [ppt](ppt/MCP.md) | `mcp/ppt` | stable (v1.0.0) | PowerPoint (.pptx/.pptm) authoring, rendering, export via Apache POI + LibreOffice, 52 tools over stdio. |
 | [word](docx/MCP.md) | `mcp/docx` | stable (v0.6.0) | Word (.docx) source-free creation, Template composition, and in-place editing via Apache POI XWPF — a neutral blank baseline plus Block-addressed body/header/footer/text-box flows, Named styles, tables, PDF previews, properties/fields, image/media writes, and Revision/Comment collaboration; 38 tools over stdio. |
 | [github](github/MCP.md) | `mcp/github` | alpha (v0.1.1) | GitHub hosted remote MCP (api.githubcopilot.com) over streamable HTTP - repos, issues, PRs, Actions, code search; permission-scoped to the connected GitHub identity. |
