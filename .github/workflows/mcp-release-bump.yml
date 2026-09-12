@@ -210,6 +210,11 @@ jobs:
           # A wire tool name as the payload spells it (`workbook.open`,
           # `range.set_style`). The block's other code spans (`.xlsx`, `#,##0`)
           # do not match and are skipped.
+          # Wire names are a single dotted pair (`workbook.open`, `named_range.list`).
+          # A deeper name (`a.b.c`) is deliberately NOT matched: rather than being
+          # silently skipped it makes the block refuse to compare at all, so a server
+          # that starts shipping nested names announces itself instead of quietly
+          # leaving those tools out of both sets.
           NAME_RE = re.compile(r"^[a-z_][a-z0-9_]*\.[a-z0-9_]+$")
           # Deliberately the same threshold as excel-mcp's
           # MINIMUM_PLAUSIBLE_TOOL_COUNT rather than a second invented one: below
@@ -359,6 +364,13 @@ jobs:
                       "example inside a fenced block, or a second enumeration) makes the "
                       "declared extent ambiguous."
                       % (path, len(opens), MARKER, len(closes), MARKER_END),
+                  ])
+              if closes and not opens:
+                  raise NotChecked([
+                      "`%s:%d` carries a `%s` with no `%s` above it, so no block was "
+                      "declared and nothing was compared. The pair is what declares the "
+                      "extent; a closing marker alone declares nothing."
+                      % (path, closes[0] + 1, MARKER_END, MARKER),
                   ])
               start = opens[0] + 1 if opens else None
               if start is None:
