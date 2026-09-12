@@ -1,7 +1,7 @@
 ---
 name: excel
 description: "A stateful, formula-aware Excel engine an agent can actually drive - not a file it has to parse by hand. Opens existing .xlsx/.xlsm/.xls workbooks (or creates new ones) entirely in memory, then queries and richly edits them across a whole session without reloading: cell values, typed formulas, styling, conditional formatting, data validation, charts, merged regions, cell notes, sheet structure and outline grouping, rows and columns, and named ranges (tables are read-only) - flushed to disk with an atomic, corruption-safe save. Its standout capability is headless recalculation: Apache POI evaluates ~280 Excel functions in place, so the agent works with real computed results instead of the stale cached zeros that code-based approaches (openpyxl/pandas, or Claude's built-in spreadsheet handling) leave behind - and every read distinguishes a genuine value from an as-yet-uncomputed formula. It can also review a model, not just write one: workbook.audit scans for hardcoded constants and hidden rows, and cell.trace walks precedents and dependents. Because all edits flow through one POI writer, it avoids the 'Excel repaired records' corruption a second serializer over the same file causes. 48 tools across workbook lifecycle (incl. audit), range I/O (incl. cell styling, conditional formats written and read back, data validation, formula tracing, formula-pattern search, and cell notes), sheet management (incl. merge/unmerge and sheet reordering), presentation, print setup and outlining, line and bar charts, tables, named ranges, and read-only VBA extraction."
-version: 0.3.0 # mcp-catalog-version
+version: 0.4.0 # mcp-catalog-version
 transport: stdio
 recipe:
   attr: mcps.excel
@@ -59,9 +59,13 @@ are also simply absent — checking costs a call and changes nothing.)
 reach), the file is `.xlsb` or not a spreadsheet at all (see **When NOT to reach for this**
 below), or the user has explicitly asked for a script or a library rather than the result.
 
-`workbook.open` is pinned eager — it ships with `_meta: {"anthropic/alwaysLoad": true}` — so in a
-client that hides MCP tools behind a search step it stays visible and callable without searching.
-The other 47, `workbook.create` included, do not.
+`workbook.open` and `workbook.create` are pinned eager — both ship with
+`_meta: {"anthropic/alwaysLoad": true}` — so in a client that hides MCP tools behind a search step
+they stay visible and callable without searching. They are the only two tools that mint a workbook
+handle, and every other tool needs one, so between them they cover every opening move: the door into
+an existing file and the door into a new one. The other 46 do not, including
+`workbook.list_handles` — the third tool callable without a handle, but empty on turn one and so
+useless as an opening move.
 
 ## When to reach for this
 
