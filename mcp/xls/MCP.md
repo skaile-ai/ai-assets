@@ -1,7 +1,7 @@
 ---
 name: excel
 description: "A stateful, formula-aware Excel engine an agent can actually drive - not a file it has to parse by hand. Opens existing .xlsx/.xlsm/.xls workbooks (or creates new ones) entirely in memory, then queries and richly edits them across a whole session without reloading: cell values, typed formulas, styling, conditional formatting, data validation, charts, merged regions, cell notes, sheet structure and outline grouping, rows and columns, and named ranges (tables are read-only) - flushed to disk with an atomic, corruption-safe save. Its standout capability is headless recalculation: Apache POI evaluates ~280 Excel functions in place, so the agent works with real computed results instead of the stale cached zeros that code-based approaches (openpyxl/pandas, or Claude's built-in spreadsheet handling) leave behind - and every read distinguishes a genuine value from an as-yet-uncomputed formula. It can also review a model, not just write one: workbook.audit scans for hardcoded constants and hidden rows, and cell.trace walks precedents and dependents. Because all edits flow through one POI writer, it avoids the 'Excel repaired records' corruption a second serializer over the same file causes. 48 tools across workbook lifecycle (incl. audit), range I/O (incl. cell styling, conditional formats written and read back, data validation, formula tracing, formula-pattern search, and cell notes), sheet management (incl. merge/unmerge and sheet reordering), presentation, print setup and outlining, line and bar charts, tables, named ranges, and read-only VBA extraction."
-version: 0.3.0 # mcp-catalog-version
+version: 0.4.0 # mcp-catalog-version
 transport: stdio
 recipe:
   attr: mcps.excel
