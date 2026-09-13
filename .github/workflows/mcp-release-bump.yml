@@ -413,8 +413,9 @@ jobs:
               # A backticked token in the block that is not wire-shaped is NOT dropped
               # quietly. Dropping it would leave a documented tool in neither set, so a
               # release that removed it would render as "no additions or removals" -- a
-              # green report over a comparison that never included it. Today every one of
-              # the 48 tokens matches, so refusing is free.
+              # green report over a comparison that never included it. Refusing costs
+              # nothing while every token in a declared block is a tool name, which is
+              # what declaring the block asserts in the first place.
               tokens = re.findall(r"`([^`\n]+)`", "\n".join(block))
               skipped = sorted({t for t in tokens if not NAME_RE.match(t)})
               if skipped:
