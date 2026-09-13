@@ -210,12 +210,19 @@ jobs:
           # A wire tool name as the payload spells it (`workbook.open`,
           # `range.set_style`). The block's other code spans (`.xlsx`, `#,##0`)
           # do not match and are skipped.
-          # Wire names are a single dotted pair (`workbook.open`, `named_range.list`).
-          # A deeper name (`a.b.c`) is deliberately NOT matched: rather than being
-          # silently skipped it makes the block refuse to compare at all, so a server
-          # that starts shipping nested names announces itself instead of quietly
-          # leaving those tools out of both sets.
-          NAME_RE = re.compile(r"^[a-z_][a-z0-9_]*\.[a-z0-9_]+$")
+          # Wire names are one segment with an OPTIONAL dotted suffix: `workbook.open`
+          # and `named_range.list`, but also the bare `batch`, which excel-mcp ships.
+          # Requiring the dot made a legitimate name look malformed, and since an
+          # unmatched token inside a declared block refuses the whole block, the check
+          # would have stopped comparing the excel entry the moment someone corrected it
+          # to list `batch`.
+          #
+          # Two or more dots still do NOT match, and that is deliberate: a nested name
+          # makes the block refuse outright, so a server that starts shipping one
+          # announces itself instead of quietly leaving those tools out of both sets.
+          # Everything inside the markers must be a tool name -- that is what declaring
+          # the block asserts -- so a looser shape here is not a looser contract.
+          NAME_RE = re.compile(r"^[a-z_][a-z0-9_]*(\.[a-z0-9_]+)?$")
           # Deliberately the same threshold as excel-mcp's
           # MINIMUM_PLAUSIBLE_TOOL_COUNT rather than a second invented one: below
           # it, a payload is far likelier to be a truncated build artefact than a
