@@ -2,9 +2,9 @@
 
 **What to build:** The orchestrators stop paying for tools they never use. A trivial prompt currently carries a ~22k-token fixed prefix, of which roughly three quarters is tool schemas — including browser automation, desktop capture, notebooks and language-server tooling that an onboarding/guidance agent has no use for. Every retry re-spends that prefix against the account's per-minute input-token limit, which is what turned one bad request into sustained upstream load.
 
-**Blocked by:** workspaces#01 (for the omp backend; the Claude SDK path works today)
+**Blocked by:** None — workspaces#01 is resolved: merged as `22ffa9cd` (an ancestor of `origin/main`) and released in `@skaile/workspaces@3.15.0`, which forge-project already consumes.
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [x] Each orchestrator declares only the tools it actually needs
 - [x] The estimated request prefix for a trivial prompt drops substantially from the ~22k baseline
@@ -16,11 +16,12 @@
       gateway load, no agent should start a dev server or issue live LLM requests unattended.
 - [x] The estimated before/after prefix sizes are recorded in the ticket
 
-> **omp-backend effect is pending a published release.** The `tools:` plumbing for omp
-> lives in workspaces#01, which exists only as uncommitted work on the local
-> `chore/post-incident-hardening` branch and is **not published to npm**. Until a release
-> carrying it ships and forge-project bumps to it, these blocks are **inert on omp** —
-> the backend that actually caused the incident. On `claude-sdk` they take effect today.
+> **The omp-backend effect is live.** The `tools:` plumbing for omp (workspaces#01) is merged
+> on `origin/main` as `22ffa9cd` and published in `@skaile/workspaces@3.15.0`. forge-project
+> declares `"@skaile/workspaces": "^3.16.2"` and has **3.16.2** installed, and that package's
+> `dist/bridge/drivers/omp.js` defines `buildOmpToolArgs` (line 142) and calls it when the
+> driver builds its argv (line 212). These blocks therefore take effect on **omp** — the
+> backend that actually caused the incident — as well as on `claude-sdk`.
 
 ## Work done
 
@@ -37,8 +38,8 @@ Three manifests under `forge-project/` — the same three ticket 01 touched.
 Names are written in the canonical Claude Code vocabulary, per `AgentToolsSchema`. The omp
 driver maps them onto its built-ins; `WebFetch` / `BashOutput` / `KillShell` have no omp
 built-in and are dropped for that backend, so they only take effect on `claude-sdk`. The
-`--tools` values above are the actual output of `buildOmpToolArgs` from the workspaces
-branch, not a hand-derivation.
+`--tools` values above are the actual output of `buildOmpToolArgs` as shipped in the installed
+`@skaile/workspaces` 3.16.2, not a hand-derivation.
 
 `agent/agent.yaml` is not one of the two orchestrators, but it is forge-project's
 `DEFAULT_AGENT_DIR` fallback, so leaving it unrestricted would have left the default path
@@ -132,13 +133,17 @@ Statically, with no dev server, no gateway traffic, and no LLM request.
   `@skaile/workspaces` 0.9.1 in `forge-project/node_modules`. All three return `ok: true`, and
   `AgentManifestSchema.parse()` shows the `tools` block surviving the loose-object parse intact,
   so it still reaches `AgentConfig.tools` and the claude-sdk driver's `buildToolRestrictions()`.
-- **Against the new typed schema** — `AgentManifestSchema` / `AgentToolsSchema` from the local
-  `chore/post-incident-hardening` branch of `workspaces`. All three parse `ok: true`. Negative
-  controls (`{allowed:"Read"}`, `{allowed:[""]}`, `{denied:[123]}`, `{allowed:[null]}`) are all
-  rejected, confirming the new schema does enforce shape — the caveat that a malformed block now
-  fails validation is real, and these blocks are not malformed.
-- **Against the omp translator** — `buildOmpToolArgs` from the same branch, run directly on each
-  allow list. Output is the `--tools` column in the table above.
+- **Against the published typed schema** — `AgentToolsSchema` exported from
+  `dist/types/manifests.js` of the installed `@skaile/workspaces` **3.16.2** in
+  `forge-project/node_modules`. All three allow lists parse `ok: true`. Negative controls
+  (`{allowed:"Read"}`, `{allowed:[""]}`, `{denied:[123]}`, `{allowed:[null]}`) are all rejected,
+  confirming the schema does enforce shape — the caveat that a malformed block now fails
+  validation is real, and these blocks are not malformed.
+- **Against the omp translator** — `buildOmpToolArgs` exported from `dist/bridge/drivers/omp.js`
+  of the same installed 3.16.2 package, run directly on each allow list. Output is the `--tools`
+  column in the table above: `read,glob,grep,todo,ask` for `base-orchestrator` and
+  `read,write,edit,bash,glob,grep,web_search,todo,ask` for `project-orchestrator` / `agent`. A
+  manifest with no `tools` block returns `[]`, i.e. no flag is added.
 
 ## Findings for neighbouring tickets
 
@@ -238,3 +243,35 @@ source file, test or config.
 - `Status: ready-for-agent` and this `## Triage (2026-09-19)` section are left intact; all other
   sections keep their existing content and headings.
 - No dev server started, no LLM request issued, no file outside this ticket modified.
+
+## Outcome (2026-09-19)
+
+Record-only correction; no manifest, source, test or config file was touched.
+
+- **`Blocked by:` (line 5)** now records workspaces#01 as resolved. Confirmed directly in the
+  `workspaces` submodule: `22ffa9cd74ad9f9e9d233e0f3c7b2243f819ba15` ("fix: post-incident
+  hardening — model defaults, manifest schema, gateway discovery, omp child env and tools
+  (#635)", 2026-09-07), `git merge-base --is-ancestor 22ffa9cd origin/main` succeeds, and
+  `git tag --contains 22ffa9cd` lists `@skaile/workspaces@3.15.0`.
+- **The "pending a published release" blockquote** is replaced by the live position. Confirmed
+  from `forge/forge-project/package.json` (`"@skaile/workspaces": "^3.16.2"`) and
+  `forge/forge-project/node_modules/@skaile/workspaces/package.json` (`version: 3.16.2`).
+- **The verification bullets** no longer credit the local `chore/post-incident-hardening`
+  branch. Both were re-run against the installed 3.16.2 artifact:
+  `buildOmpToolArgs` (exported from `dist/bridge/drivers/omp.js`, defined line 142, invoked by
+  the driver at line 212) returns `["--tools","read,glob,grep,todo,ask"]` for the
+  `base-orchestrator` allow list and
+  `["--tools","read,write,edit,bash,glob,grep,web_search,todo,ask"]` for the
+  `project-orchestrator` / `agent` allow list — byte-identical to the table on lines 32-36 —
+  and `[]` for a manifest with no `tools` block. `AgentToolsSchema` from
+  `dist/types/manifests.js` accepts both allow lists and rejects `{allowed:"Read"}`,
+  `{allowed:[""]}`, `{denied:[123]}` and `{allowed:[null]}`. Allow lists were taken verbatim
+  from the three manifests under `forge-project/`, not retyped from this ticket's prose.
+- **`Status:`** set to `done`; no checkbox state was changed.
+- **The first verification bullet is left exactly as written.** It is the record of the original
+  pass against the package installed at that time, not a statement about today's
+  `node_modules` — which carries 3.16.2, as the two bullets under it now say.
+
+The one box still unticked — "Both orchestrators still perform their normal duties end to end" —
+stays unticked on purpose: it needs a live session and real gateway traffic, which is
+forge-project#03's supervised work, not this ticket's.
