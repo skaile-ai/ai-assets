@@ -147,3 +147,43 @@ post-incident policy puts that under human supervision. It is deliberately not p
 this ticket — line 12 already defers it to forge-project#03, and that routing stands. No agent
 work remains inside this ticket's boundary, so `ready-for-agent` would be wrong; the residual step
 is a supervised paid API call, which is exactly what `ready-for-human` denotes.
+
+## Pre-flight (2026-09-20) — the run was staged, and would have proved nothing
+
+Preparing the supervised session found that **no forge-project session was loading any
+agent manifest at all**, so the live check as written could not have tested what it says.
+
+- Every project forge-project creates writes `agent: definition: agent:<name>` into its
+  workspace `skaile.yaml` (`agent-manager.ts:301,341,655`).
+- `resolveAgentDir` in the installed `@skaile/workspaces@3.16.2` returns `undefined` for
+  any `agent:`-prefixed definition — `dist/chunk-OZ7UNMTK.js:1887-1889`, pinned upstream
+  as "not yet supported" (`core/tests/workspace-config.test.ts:514-518`). It resolves
+  `ai-assets://` refs and relative paths only.
+- forge-project then fell back to a default directory that does not exist under the
+  super-repo layout, so `agentDefinitionExists` was false and the manifest branch at
+  `agent-manager.ts:1695` never ran.
+
+Consequence for this ticket: the three manifests pin `model.preferred: "opus"`, but that
+value was never reaching a session. A prompt sent under the old behaviour would have
+resolved its model from forge-project's own `DEFAULT_MODELS`, answered normally, and left
+box 4 looking tickable while the alias question stayed untested. Nothing would have
+errored — which is why this was worth catching before spending the turns, not after.
+
+Fixed app-side in forge-project (`server/utils/agent-definition.ts`, `agentDirForDefinition`,
+covered by `tests/server/agent-definition-resolve.test.ts`): `agent:<name>` now resolves by
+indexing the agent tree on each manifest's declared `name:`, which matters because the
+directory name and the declared name disagree for two of the three (`agent/` declares
+`forge-project-assistant`). The upstream behaviour is filed as
+`workspaces/.scratch/post-incident-hardening/issues/06-resolve-agent-dir-drops-agent-refs.md`.
+
+Two projects were staged so one session per agent is reachable, since all four pre-existing
+projects bind to `base-orchestrator`:
+
+| Project | Agent definition | Resolves to |
+|---|---|---|
+| `base` (existing) | `agent:forge-project-base-orchestrator` | `forge-project/base-orchestrator` |
+| `alias-check-agent` | `agent:forge-project-assistant` | `forge-project/agent` |
+| `alias-check-project-orchestrator` | `agent:forge-project-orchestrator` | `forge-project/project-orchestrator` |
+
+Status unchanged: `ready-for-human`. The residual step is still one supervised prompt per
+agent against the real gateway — it is now a check that can actually fail.
