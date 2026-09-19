@@ -4,7 +4,7 @@
 
 **Blocked by:** workspaces#01 (for the omp backend; the Claude SDK path works today)
 
-**Status:** ready-for-human
+**Status:** ready-for-agent
 
 - [x] Each orchestrator declares only the tools it actually needs
 - [x] The estimated request prefix for a trivial prompt drops substantially from the ~22k baseline
@@ -154,3 +154,87 @@ Statically, with no dev server, no gateway traffic, and no LLM request.
 - **The two orchestrators' toolsets are now the lever, not the model.** Anything added back to a
   `tools.allowed` list is a permanent per-request cost multiplied by every retry — the failure
   mode this ticket exists to remove.
+
+## Triage (2026-09-19)
+
+**Label: `ready-for-agent`** (was `ready-for-human`).
+
+### The blocker is resolved — evidence
+
+workspaces#01 is `workspaces/.scratch/post-incident-hardening/issues/01-omp-forward-tool-restrictions.md`.
+Its `Status: done` line is not the evidence; the git history of the `workspaces` submodule is:
+
+- **Merge SHA `22ffa9cd74ad9f9e9d233e0f3c7b2243f819ba15`** — "fix: post-incident hardening — model
+  defaults, manifest schema, gateway discovery, omp child env and tools (#635)", authored
+  2026-09-07. `git merge-base --is-ancestor 22ffa9cd origin/main` → true, so it is on the
+  mainline, not on a local branch. Its diffstat carries exactly the files workspaces#01 claims:
+  `packages/workspaces/bridge/src/drivers/omp.ts` (+277),
+  `packages/workspaces/types/src/manifests/agent.ts` (+94),
+  `packages/workspaces/bridge/tests/omp-tools-and-env.test.ts` (new, 390),
+  `packages/workspaces/types/tests/manifests/manifests.test.ts`, `MIGRATION.md`.
+  (Pre-merge, the same work is `0992440b` bridge/omp and `2cc5fbd4` types.)
+- **It was released.** `git tag --contains 22ffa9cd` includes `@skaile/workspaces@3.15.0`, and the
+  3.15.0 section of `packages/workspaces/CHANGELOG.md` carries the entry "Declare `tools` on the
+  agent manifest and forward it to the omp driver". `origin/main` is now at 3.20.0.
+- **forge-project already consumes it.** `forge/forge-project/package.json` declares
+  `"@skaile/workspaces": "^3.16.2"` and `node_modules/@skaile/workspaces/package.json` reports
+  version `3.16.2` — past 3.15.0.
+- **The shipped artifact really does it.** In the installed
+  `node_modules/@skaile/workspaces/dist/bridge/drivers/omp.js`, `buildOmpToolArgs` is defined at
+  line 142 and returns `["--no-tools"]` (line 150) or `["--tools", …]` (line 151), and the driver
+  calls it at line 212. Executed against this ticket's own allow lists it returns
+  `--tools read,glob,grep,todo,ask` for `base-orchestrator` and
+  `--tools read,write,edit,bash,glob,grep,web_search,todo,ask` for `project-orchestrator` / `agent`
+  — byte-identical to the table on lines 31-35, now reproduced from the **published** package
+  rather than from the local branch. A manifest with no `tools` block still yields `[]` (no flag).
+  `AgentToolsSchema` is exported from `dist/types/manifests.js` and rejects `{allowed: "Read"}`.
+
+The three manifests still carry the intended blocks:
+`base-orchestrator/agent.yaml:23-28`, `project-orchestrator/agent.yaml:32-44`,
+`agent/agent.yaml:32-44`.
+
+### Rationale
+
+The human-only part of this ticket is gone. It was never the toolset design — that is landed and
+re-verifiable offline — it was the release: someone with npm publish credentials had to cut a
+`@skaile/workspaces` version carrying the omp `tools` plumbing, and forge-project had to bump onto
+it. Both happened (3.15.0 published; forge-project on 3.16.2). The blockquote on lines 19-23 and
+the `Blocked by:` line on line 5 are therefore now factually false: they describe uncommitted work
+on a local `chore/post-incident-hardening` branch, while the code is on `origin/main`, published,
+installed, and executing. Correcting that record is bounded documentation work requiring no
+credential, no dashboard, no paid call and no judgement call, so it can be dispatched cold. The
+one genuinely human item — confirming both orchestrators still perform their duties end to end —
+is a live-traffic check already delegated to forge-project#03 by line 13 and is **not** in this
+ticket's boundary; it must not be pulled back in, ticked, or attempted.
+
+### Work to do
+
+Edit only this ticket file, `02-restrict-orchestrator-toolsets.md`. Do not touch any manifest,
+source file, test or config.
+
+1. Replace the `Blocked by:` line (line 5) so it records the blocker as resolved, naming
+   workspaces#01, the merge SHA `22ffa9cd`, and the release `@skaile/workspaces@3.15.0`.
+2. Replace the blockquote on lines 19-23. It must no longer claim the plumbing is unpublished or
+   inert on omp. It must state the true position: forge-project depends on `^3.16.2` and has
+   3.16.2 installed, that version carries `buildOmpToolArgs`, and the `tools` blocks take effect
+   on the omp backend today as well as on `claude-sdk`.
+3. In `### How this was verified` (lines 128-141), replace the "Against the new typed schema" and
+   "Against the omp translator" bullets' provenance: they cite the local
+   `chore/post-incident-hardening` branch, which is no longer how this is checkable. Re-run both
+   against `forge/forge-project/node_modules/@skaile/workspaces` (3.16.2) and record that as the
+   source. Keep the negative controls.
+4. Leave every checkbox exactly as it is. In particular do not tick line 13.
+
+### Acceptance criteria
+
+- The `Blocked by:` line names workspaces#01 as resolved and cites SHA `22ffa9cd` and release
+  `@skaile/workspaces@3.15.0`.
+- No sentence anywhere in the file asserts the omp effect is pending, inert, unpublished, or
+  living on a local branch.
+- The verification section attributes the `AgentToolsSchema` and `buildOmpToolArgs` results to the
+  installed published 3.16.2 package, and the `--tools` strings it quotes still match the table on
+  lines 31-35 exactly.
+- Line 13's checkbox is still unticked and still points at forge-project#03.
+- `Status: ready-for-agent` and this `## Triage (2026-09-19)` section are left intact; all other
+  sections keep their existing content and headings.
+- No dev server started, no LLM request issued, no file outside this ticket modified.

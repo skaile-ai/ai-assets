@@ -98,3 +98,52 @@ schema was never going to catch this; removing it from the manifests is the fix.
 - **A stale `claude-sonnet-4-6` remains outside this repo**, in forge-project's
   `server/utils/agent-manager.ts` (bootstrap `agent-config` default template). Out of scope here;
   flagged for the forge-project tickets.
+
+## Triage (2026-09-19)
+
+**Label: `ready-for-human`** (unchanged).
+
+### Human action required
+
+A human must run one live, supervised session per affected agent — `forge-project/agent`,
+`forge-project/base-orchestrator`, `forge-project/project-orchestrator` — against the real
+gateway and confirm the `opus` alias resolves to an actual Opus model on the **omp** backend,
+because that is a billable request against the gateway this incident overloaded and is the one
+check in this ticket that cannot be made offline.
+
+### What is unblocked around it
+
+Everything else. All three `[x]` boxes were re-verified independently of the ticket's own prose:
+
+- **The implicated model is gone from the asset tree.** A search for `claude-sonnet-4-6` and
+  `claude-opus-4-6` across `ai-assets/forge-project/` returns no matches, so the claim on line 30
+  holds. The three manifests now read `model.preferred: "opus"` with a
+  `claude-haiku-4-5-20251001` fallback and the stated timeouts —
+  `base-orchestrator/agent.yaml:8,10,31` (50 turns / 900 s),
+  `project-orchestrator/agent.yaml:8,10,51` and `agent/agent.yaml:8,10,51` (100 turns / 1800 s).
+- **The chosen ID validates against the schema forge-project actually runs.**
+  `ModelIdSchema` from the installed, published `@skaile/workspaces@3.16.2` in
+  `forge/forge-project/node_modules` accepts `opus`, and rejects `not-a-model`.
+- **The constraint that forced the alias has since been lifted, and it changes nothing.**
+  workspaces#03 (`workspaces/.scratch/post-incident-hardening/issues/03-model-id-schema-current-ids.md`,
+  `Status: done`) landed in workspaces commit `22ffa9cd` — an ancestor of `origin/main`, released
+  as `@skaile/workspaces@3.15.0` (git tag `@skaile/workspaces@3.15.0` contains that SHA). Against
+  the installed 3.16.2, `claude-opus-5` and `claude-sonnet-5` now validate. The alias was chosen
+  deliberately to stay correct "however workspaces#03 lands" (line 38) and still auto-rolls, so it
+  remains the better pin and **no rework follows from this**.
+- **The cross-repo residue flagged on line 98 is already resolved.** `claude-sonnet-4-6` no longer
+  appears in `forge/forge-project/server/utils/agent-manager.ts`; that bootstrap template now
+  carries an explicit comment leaving `model:` unset (`agent-manager.ts:267-269`).
+
+### Rationale
+
+The label does not change, but the reason for it narrows sharply. Previously the ticket read as
+human-gated partly because its own text treated the manifest-schema constraint as an open
+cross-repo dependency; that dependency has since shipped and been consumed, and every static
+claim in the ticket now re-verifies against the released package rather than against a local
+branch. What survives is not a blocked dependency but an irreducibly human step: confirming that
+a family alias resolves to a real model requires issuing a real request through the gateway, and
+post-incident policy puts that under human supervision. It is deliberately not pulled back into
+this ticket — line 12 already defers it to forge-project#03, and that routing stands. No agent
+work remains inside this ticket's boundary, so `ready-for-agent` would be wrong; the residual step
+is a supervised paid API call, which is exactly what `ready-for-human` denotes.
