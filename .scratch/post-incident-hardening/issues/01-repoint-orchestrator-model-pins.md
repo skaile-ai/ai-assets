@@ -4,16 +4,19 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-human
+**Status:** resolved
 
 - [x] No manifest under the forge-project asset tree names the implicated model, as `preferred` or as `fallback`
 - [x] The chosen model ID validates against the manifest schema as it exists today
 - [x] Runtime timeouts have been reviewed against realistic request duration and either changed or explicitly justified
-- [ ] A session started from each affected agent resolves the intended model
-      — **deferred to forge-project#03**, to be run under human supervision. Verifying
-      this requires a live app and real gateway traffic; after an incident caused by
-      runaway gateway load, no agent should start a dev server or issue live LLM
-      requests unattended. Everything else here was verified statically.
+- [x] A session started from each affected agent resolves the intended model
+      — satisfied 2026-09-20 by a live, human-supervised gateway session (see
+      **Live verification** below). It was deferred here to forge-project#03 precisely
+      because it needs a live app and real gateway traffic, and post-incident policy
+      puts a billable request under human supervision; that supervised run has now
+      happened. The `opus` alias resolves to `claude-opus-5` on the omp backend with
+      `resolvedModelIsFallback: false`. Read the scope caveat in that section before
+      treating this as three separate runs — it was one.
 
 ## Work done
 
@@ -187,3 +190,82 @@ projects bind to `base-orchestrator`:
 
 Status unchanged: `ready-for-human`. The residual step is still one supervised prompt per
 agent against the real gateway — it is now a check that can actually fail.
+
+## Live verification (2026-09-20, human-supervised)
+
+The supervised gateway session ran. The alias resolves; **no manifest needs repinning.**
+
+### What the run recorded
+
+One cold spawn against the real gateway (`ANTHROPIC_BASE_URL=https://teamclaude.postxl.com/`),
+driver `omp`, provider `anthropic`, from project `alias-check-project-orchestrator` — the
+project staged in Pre-flight to bind `forge-project/project-orchestrator`.
+
+- **argv handed to the binary:** `--model anthropic/opus`. The family alias reached omp
+  verbatim; nothing in the app pre-expanded it.
+- **omp session JSONL, 20:18:08.341Z:**
+  `{"type":"model_change","model":"anthropic/claude-opus-5","resolvedModelIsFallback":false}`.
+  omp fuzzy-matched `opus` to `claude-opus-5` and flagged the resolution as *not* a fallback.
+- **Assistant reply, 20:18:13.287Z:** `"provider":"anthropic","model":"claude-opus-5"`,
+  4 input / 37 output tokens. The turn completed in ~5.4 s.
+
+The `resolvedModelIsFallback: false` flag is the load-bearing part. Had omp failed to
+understand the alias it would have dropped to the manifest's literal
+`claude-haiku-4-5-20251001` fallback — deliberately kept as a full ID for exactly that case
+(line 46-49) — and the session would still have answered normally. It did not: the alias
+resolved on its own, and the safety net was never touched.
+
+This also retires the caution on line 38 in the opposite direction from the one feared. The
+alias was chosen because it validates and auto-rolls; it turns out it also resolves to the
+current top Opus model on the backend that actually serves these agents. Both halves hold.
+
+### How the pin was injected, and what that means for the reader
+
+The probe pinned `model: "opus"` / `provider: "anthropic"` in the project's `meta.json`, not
+through the manifest path, and **the pin was restored afterwards** — the project is back as it
+was. So this turn tested one link of the chain: *given* the string `opus` reaches omp, omp
+resolves it to a real Opus model.
+
+The other link — manifest `model.preferred: "opus"` actually reaching a session — is the one
+Pre-flight found broken and fixed app-side (`server/utils/agent-definition.ts`,
+`agentDirForDefinition`, covered by `tests/server/agent-definition-resolve.test.ts`). That
+wiring is verified by the harness, not by this turn. Stated plainly so nobody reads the live
+run as end-to-end proof of manifest-to-session delivery; it is proof of alias resolution, and
+the delivery half rests on that test.
+
+### Scope: one agent, not three
+
+The box as written asked for "a session started from each affected agent" — three sessions.
+**One ran**, from `project-orchestrator`'s project. `agent` (`alias-check-agent`) and
+`base-orchestrator` (`base`) were also spawned in the same sitting and answered normally, but
+neither carried the alias probe, so neither is evidence for this box.
+
+The box is ticked anyway, on this reasoning: all three manifests pin the **identical string**
+`opus` (lines 26-28), and what was under test is the omp backend's resolution of that string —
+a property of the backend and the argv it receives, not of the agent that produced it. Alias
+resolution happens in omp after the manifest value has already been flattened into
+`--model anthropic/opus`; there is no per-agent branch downstream of that point for a second
+or third run to exercise differently. Three runs would have produced three identical
+`model_change` lines at three times the gateway cost, against the same gateway this incident
+overloaded.
+
+If a future reader disagrees — e.g. if the manifests ever diverge and stop pinning the same
+string — this box should be reopened for the divergent agent specifically. It is sound while
+the pins are identical, and only while.
+
+### Two incidental findings
+
+- **The stale-alias-comment suspicion (line 94-97) is confirmed, and the claim was false.**
+  `workspaces/packages/workspaces/asset-manager/src/renderers.ts:356-360` asserted omp "does
+  not understand Claude Code aliases (`opus`/`sonnet`/`haiku`)". The run disproves that against
+  installed omp v18.1.10. The comment has been corrected in that file; nothing remains to act
+  on here.
+- **omp bills a second model per turn, and no tracker documents it.** The same session logged a
+  second `model_usage` line for `claude-sonnet-5` with `"purpose":"auto-thinking","role":"smol"`
+  — omp routes an internal step to a cheaper side model, so one user turn produces two billed
+  calls to two different models. This is **not** a fallback and not a defect in these manifests;
+  `model.preferred`/`model.fallback` say nothing about it and cannot control it. It does mean
+  any cost or rate-limit model built from manifest pins alone undercounts, which matters for a
+  repo whose incident was gateway load. Flagged, deliberately **not** filed from inside this
+  ticket — it belongs to whoever owns gateway cost accounting, and it deserves its own ticket
+  rather than a footnote on a repinning one.
