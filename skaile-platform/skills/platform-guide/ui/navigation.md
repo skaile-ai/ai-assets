@@ -17,11 +17,14 @@ real UI strings.
 - **Top header** — a breadcrumb with inline **org / project / session switchers**, the page
   title, a row of open **session tabs**, a **Send feedback to the Skaile team** button
   (report a bug / suggest an idea / ask a question — routes to the personal assistant when
-  available, else opens a form; reports reach the Skaile team directly), and the
-  right-sidebar toggle.
+  available, else opens a form; reports reach the Skaile team directly), and — in the
+  toolbar's right zone — **one icon per workspace side panel** (Assistant, Preview,
+  AI Assets, Connectors, Share, Summary, Flow, System, Config). There is **no permanent
+  right sidebar** anymore: clicking an icon opens that panel on the right of the
+  workspace; closing it leaves nothing on the right edge. See `ui/workspace.md`.
 - **Command palette (Cmd+K)** — global fuzzy search and action launcher across sessions,
   projects, settings, and registered actions. This is the primary "how do I do X" entry
-  point — most features have a command. Right sidebar toggles with **.** (period).
+  point — most features have a command.
 
 ## Top-level pages
 
@@ -30,7 +33,7 @@ real UI strings.
 | **Dashboard**     | `/<org>/dashboard`            | See all projects + recent activity; create a project; switch org. |
 | **Account**       | `/account`                    | Edit name, email, profile picture. |
 | **Preferences**   | `/<org>/preferences`          | Notification mode (All / Mentions / Direct / Off), sound, browser notifications. |
-| **My Connections**| `/<org>/my-connections`       | Personal **Connect** flows for GitHub, GitLab, SharePoint, Google Drive, NextCloud, Dropbox, Box (OAuth/PAT). |
+| **My Connections**| `/<org>/my-connections`       | Personal **Connect** flows for GitHub, GitLab, SharePoint, Google Drive, NextCloud, Box (OAuth/PAT). Dropbox is listed but **work in progress — not usable yet** (no driver behind it). A finished Connect stores a credential only — see `concepts/integrations.md` § *From a connection to files in a session* for the follow-up step users always need. |
 | **Flows**         | `/<org>/flows`                | Browse and author flow definitions; open a flow's graph view/editor. See `concepts/flows.md`. |
 
 ## Creating a project (wizard)
@@ -38,8 +41,10 @@ real UI strings.
 Entry: **New Project** in the sidebar, or the **Create** button on the dashboard. Steps:
 
 1. **Source** — pick the project data: On Skaile (empty) / Git (GitHub/GitLab/Bitbucket) /
-   SharePoint / Google Drive / NextCloud / Local Folder / Empty. The matching picker
-   (git tree, folder/file browser) appears inline.
+   SharePoint / Google Drive / NextCloud / **Box** / Local Folder / Empty. A cloud
+   provider appears once the org has a matching provider connection (e.g. Box shows up
+   when a Box provider exists). The matching picker (git tree, folder/file browser)
+   appears inline. Dropbox is **not** offered (work in progress).
 2. **Identity** — name, slug (auto-filled, editable), description.
 3. **Members & teams** — add members by email with a role; choose visibility:
    **Private** / **Team** / **Org**.
@@ -58,11 +63,11 @@ Path: `/<org>/projects/<project>/settings` (Owner-only). Tabs:
 | **Sessions**      | List/manage all sessions in the project; bulk mark-read / delete. |
 | **Members**       | Invite users, set Owner/User/Viewer, team access. |
 | **Project**       | Name, slug, description, visibility (Private/Team/Org), delete. |
-| **Session defaults** | Skaile config template applied to new sessions. |
-| **Assets**        | Default asset/connector assignments for the project's sessions. |
+| **Session defaults** | Skaile config template applied to new sessions — including additional mounts — plus the default asset assignments for the project's sessions. (There is no separate "Assets" tab; asset defaults live here.) |
 | **Security**      | Cross-org sharing, session access rules. |
-| **Shares**        | Manage public preview-share links. |
+| **Connectors**    | Project-level connector enablement and account selection (today: Exchange mailboxes). For file mounts use the workspace **Connectors** panel instead. |
 | **Costs**         | Cost tracking/attribution. |
+| **Shares**        | Manage public preview-share links. |
 
 ## Session settings
 
@@ -91,9 +96,12 @@ and **Catalog** (manage reusable assets/skills, assign to teams/projects).
   a UI-only step (see `concepts/agent.md`).
 - **Org-wide provider for everyone / service accounts** → org **Settings > Providers**.
 - **Which provider this project's data uses** → set at **project creation** (Source step).
+- **Bring a connected cloud folder into an existing session/project** → workspace
+  **Connectors** panel → **Connect \<provider\>** (see `concepts/integrations.md` §
+  *From a connection to files in a session*) — or create a new project with that Source.
 - **AI model/endpoint** → org **Settings > AI Providers**.
-- **Enable an asset/skill** → **Catalog** (org) or project **Assets** tab, or the workspace
-  **AI Assets** tab (see `ui/workspace.md`).
+- **Enable an asset/skill** → the workspace **AI Assets** panel (session- or
+  project-scope add), or org **Settings > Catalog** (see `ui/workspace.md`).
 
 Grounded in: `frontend/src/pages/` and `frontend/src/components/ui/` (dashboard, settings,
 sidebar, new-project-modal, project-setup).
