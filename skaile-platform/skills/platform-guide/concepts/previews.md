@@ -6,9 +6,11 @@ platform.
 
 ## What the user experiences
 
-- The workspace has a **preview** pane. Starting a preview builds and launches the app in a
-  separate container and loads its URL in an embedded iframe.
-- When a workspace exposes more than one app, a tab strip lets the user switch between them.
+- The preview is its own **pane**, toggled from the **panel switcher** in the toolbar's
+  centre zone. Starting a preview builds and launches the app in a separate container and
+  loads its URL in an embedded iframe.
+- When a workspace exposes more than one app, the pane header's app dropdown switches
+  between them.
 - Each app moves independently through `building -> starting -> ready -> stopped`. The user
   can start, stop, and refresh a preview (refresh = stop + start).
 

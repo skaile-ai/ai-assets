@@ -13,7 +13,8 @@ carries context about who is online, who sent it, and whether the agent was @men
 - **Reactions** — emoji reactions on messages (the agent can react too, as a lightweight
   acknowledgment).
 - **Threading** — replies can be threaded to a parent message.
-- **Presence** — who is online / typing / focused, surfaced in the workspace header.
+- **Presence** — who is online / typing / focused, surfaced as avatars in the toolbar's
+  right zone.
 
 When a new user joins mid-session, treat them as entering a shared context — do **not**
 assume they hold the same authorizations as the original user, and do not reveal which
@@ -27,8 +28,8 @@ user sent which message unless asked.
 - Inviting people may change how the agent accesses connected systems (credential mode
   shifts from the owner's delegated credentials toward a service account) — relevant when
   the user asks why a connector behaves differently after sharing.
-- Session-access presence: the workspace header shows everyone with read access to the
-  session, grouped online/offline.
+- Session-access presence: clicking the presence avatars in the toolbar's right zone shows
+  everyone with read access to the session, grouped online/offline.
 
 ## Public file-preview sharing
 

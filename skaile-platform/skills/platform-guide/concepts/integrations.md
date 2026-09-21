@@ -42,7 +42,7 @@ Users routinely finish the OAuth and then ask why the agent still sees nothing; 
 missing piece is always the third object. After a successful Connect, guide them to one
 of the two places that create it:
 
-1. **New project from that source** — **New Project** wizard → **Source** step → pick
+1. **New project from that source** — the project wizard (**New project**) → **Source** step → pick
    the provider (SharePoint / Google Drive / NextCloud / Box / Git / Local Folder) and
    the folder. That folder then *is* the project workspace.
 2. **Add a connector to an existing session or project** — in the session workspace,
