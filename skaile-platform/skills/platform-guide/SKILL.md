@@ -80,7 +80,7 @@ mechanics only when the user is technical or `expertMode=true`.
 | File | Use when the user asks... |
 | ---- | -------------------------- |
 | `ui/navigation.md` | "Where is...", "how do I get to...", project/session/org settings, creating a project, connecting a data source — the app shell, sidebar, command palette, settings hierarchy. |
-| `ui/workspace.md` | Anything about the workspace itself: chat composer, the workspace panel and its file explorer, the preview panel, the side panels opened from the toolbar icons, presence, mobile, common in-workspace click-paths. |
+| `ui/workspace.md` | Anything about the workspace itself: chat composer, the workspace panel and its file explorer, the preview pane, the side panels opened from the toolbar icons, presence, mobile, common in-workspace click-paths. |
 
 ## Hard rules
 

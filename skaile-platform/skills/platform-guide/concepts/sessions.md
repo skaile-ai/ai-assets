@@ -44,8 +44,8 @@ A **scoped session** mounts only a **subfolder** of the project data instead of 
 — for sharing a slice of a large data source with a collaborator without exposing the
 rest.
 
-- Created by a **Project Owner** from a folder in the resource explorer ("Share in new
-  session..."), choosing the collaborator's role and who to invite.
+- Created by a **Project Owner** from a folder in the **Workspace** panel (the folder
+  **...** menu > **Share in new session...**), choosing the collaborator's role and who to invite.
 - The agent inside sees a normal workspace rooted at that subfolder — it does not know it
   is a subset.
 - Supported for **SharePoint, S3, WebDAV, and LocalFolder** sources. **Not** supported for
