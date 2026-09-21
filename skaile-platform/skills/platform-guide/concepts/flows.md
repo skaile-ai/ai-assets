@@ -329,9 +329,11 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   created via **Save as recipe** from a configured session. Recipe environment values
   reference stored secrets — never literal secret strings. Creation fails up front if the
   recipe does not supply every asset the flow's nodes declare.
-- A status board shows per-item progress and cost with click-through into each session.
-  Approvals and input requests raised by unattended runs land in an org-level inbox
-  (badge in the navigation), filtered to the named approvers.
+- A status board shows per-item progress and cost, with click-through into the run group's
+  detail page. Approvals and input requests raised by unattended runs surface inside the
+  run itself — the flow gate panel in the session, and the run group detail page. There is
+  no org-level inbox that collects them outside a session. (The **Approvals** tab on the
+  org **Store** page is a different surface: it holds asset-share requests.)
 - Triggers: manual, **webhook** (external systems post signed requests that append
   inputs), or the agent itself (`platform.append_run_inputs`, approval-gated; appending
   to a specific group can be pre-approved in config). When routed as a durable operation,

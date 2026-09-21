@@ -5,23 +5,43 @@ real UI strings.
 
 ## The app shell
 
-- **Left sidebar** — top-level navigation.
-  - **Dashboard** button (with an activity badge for mentions/unread).
-  - **Project tree**, grouped by organization (collapsible). Each project lists its
-    sessions with unread indicators. A project/session context menu offers settings,
-    **New session**, etc.
-  - **Footer**: the user's avatar + name opens a dropdown with **Account**,
-    **Preferences**, **My Connections**, an **Expert mode** toggle, a **Theme**
-    submenu (Light/Dark/System), a **Platform** admin submenu (admins only), and **Sign Out**.
-  - Toggle the sidebar with **B**.
-- **Top header** — a breadcrumb with inline **org / project / session switchers**, the page
-  title, a row of open **session tabs**, a **Send feedback to the Skaile team** button
-  (report a bug / suggest an idea / ask a question — routes to the personal assistant when
-  available, else opens a form; reports reach the Skaile team directly), and — in the
-  toolbar's right zone — **one icon per workspace side panel** (Assistant, Preview,
-  AI Assets, Connectors, Share, Summary, Flow, System, Config). There is **no permanent
-  right sidebar** anymore: clicking an icon opens that panel on the right of the
-  workspace; closing it leaves nothing on the right edge. See `ui/workspace.md`.
+- **Left sidebar** — top-level navigation, top to bottom.
+  - The **Skaile logo** is the only entrance to the dashboard; it turns into an animated
+    spinner while the dashboard is open. There is no separate Dashboard row and no
+    activity badge on it.
+  - Below it, a **search field** over projects and sessions.
+  - The **organization** is a pinned header row, not a collapsible group. Its
+    always-visible kebab, **Organization actions**, offers **Switch organization**
+    (submenu), **New project**, **Store**, and **Organization settings** (admin only).
+    Flows is deliberately not in that menu.
+  - Two fixed entries under the org: **Run groups** (`/<org>/runs`) and **Flows**
+    (`/<org>/flows`).
+  - Then the **projects**. Each expands to its sessions and flows; a project's **...**
+    menu offers **New session**. There is no standalone New Project row, and no
+    per-session star — dashboard pins are the one source of truth for favourites.
+  - Collapsed, the sidebar is a rail of one icon per project; the flyout lists that
+    project's sessions, flows and **New session**.
+  - **Footer**: a **Personal** / **Business** workspace-mode toggle, and the user's
+    avatar menu — **Invite someone to Skaile**, **Report a problem**, **Account**,
+    **Preferences**, **Invites**, **My Connections**, an **Expert mode** toggle, **Info**
+    (expert mode only), a **Theme** submenu, **Focus organization**, a **Platform** admin
+    submenu (admins only), and **Sign Out**.
+  - Toggle the left sidebar with **Cmd/Ctrl+B**, the right one with **Cmd/Ctrl+.**.
+- **Top header** — two rows on desktop.
+  - Row 1: the sidebar toggle plus a **tab bar** of fully rounded pills, one per open
+    session or page. A session tab shows the project icon and the project name in bold,
+    then the session name; a page tab shows a type icon. There is no breadcrumb and no
+    inline org / project / session switcher.
+  - Row 2: the **toolbar**, a three-zone row — left the page or session title, centre the
+    **panel switcher** (which panes are visible) plus a round swap button, right the
+    **panel icons** (Assistant, Preview, AI Assets, Connectors, Share, Summary, Flow,
+    System, Config, Report) and live **member presence**.
+  - There is **no permanent right sidebar**: a panel icon opens that panel on the right of
+    the workspace and a second press dismisses it, leaving nothing on the right edge.
+    See `ui/workspace.md`.
+  - Reporting a bug, suggesting an idea or asking a question is **Report a problem** in the
+    user menu — it opens a short form; the follow-up conversation runs in the **Report**
+    panel, and reports reach the Skaile team directly.
 - **Command palette (Cmd+K)** — global fuzzy search and action launcher across sessions,
   projects, settings, and registered actions. This is the primary "how do I do X" entry
   point — most features have a command.
@@ -30,15 +50,18 @@ real UI strings.
 
 | Page              | Path                          | What the user does there |
 | ----------------- | ----------------------------- | ------------------------ |
-| **Dashboard**     | `/<org>/dashboard`            | See all projects + recent activity; create a project; switch org. |
+| **Dashboard**     | `/dashboard` (and `/<org>`)   | A bento grid of tiles the user rearranges with a pencil toggle (**Edit dashboard layout** / **Done editing dashboard**): **Assistant**, **Create Project**, **Create Session**, **Invite Users**, **Activity**, **Invitations**, **Recent Projects**, **Pinned Projects**, **Pinned Sessions**, **Pinned Previews**. Those are the names in the layout editor; the three action tiles read **Create project**, **Create session** and **Invite users** on the tile itself. A viewer who cannot invite gets no **Invite Users** tile at all. Pins are filtered to the current organization. |
 | **Account**       | `/account`                    | Edit name, email, profile picture. |
 | **Preferences**   | `/<org>/preferences`          | Notification mode (All / Mentions / Direct / Off), sound, browser notifications. |
 | **My Connections**| `/<org>/my-connections`       | Personal **Connect** flows for GitHub, GitLab, SharePoint, Google Drive, NextCloud, Box (OAuth/PAT). Dropbox is listed but **work in progress — not usable yet** (no driver behind it). A finished Connect stores a credential only — see `concepts/integrations.md` § *From a connection to files in a session* for the follow-up step users always need. |
+| **Store**         | `/<org>/store`                | The organization's asset/skill catalog, reached from the org kebab. Tabs: **Catalog**, **Library**, **Approvals** (approvals are admin-only). |
+| **Run groups**    | `/<org>/runs`                 | Batch / unattended processing: the status board for every run group, with click-through into a group's detail page. See `concepts/flows.md`. |
 | **Flows**         | `/<org>/flows`                | Browse and author flow definitions; open a flow's graph view/editor. See `concepts/flows.md`. |
 
 ## Creating a project (wizard)
 
-Entry: **New Project** in the sidebar, or the **Create** button on the dashboard. Steps:
+Entry: the org kebab (**Organization actions**) > **New project**, the dashboard's
+**Create project** tile, or Cmd+K. Steps:
 
 1. **Source** — pick the project data: On Skaile (empty) / Git (GitHub/GitLab/Bitbucket) /
    SharePoint / Google Drive / NextCloud / **Box** / Local Folder / Empty. A cloud
@@ -83,7 +106,9 @@ Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner).
 
 Path: `/<org>/settings` (admin only). Tabs: **Organization** (branding), **Users**
 (invite/roles/revoke), **Teams**, **Providers** (org-level connectors: Git / Files / Transport,
-with UserDelegation or ServiceAccount credentials), **AI Providers** (model endpoints:
+with UserDelegation or ServiceAccount credentials), **AI** (org-wide AI defaults: available
+clouds, flow authoring, and the driver/provider/model defaults inherited by all projects),
+**AI Providers** (model endpoints:
 Anthropic/OpenAI/Custom, scoped Global/Org/Project, delivered direct or via a cloud
 transport — AWS Bedrock, GCP Vertex, Azure AI Foundry, custom gateway — with per-config
 health checks), **Costs**, **Deployment Targets**,
@@ -103,5 +128,12 @@ and **Catalog** (manage reusable assets/skills, assign to teams/projects).
 - **Enable an asset/skill** → the workspace **AI Assets** panel (session- or
   project-scope add), or org **Settings > Catalog** (see `ui/workspace.md`).
 
-Grounded in: `frontend/src/pages/` and `frontend/src/components/ui/` (dashboard, settings,
-sidebar, new-project-modal, project-setup).
+Grounded in: `frontend/src/components/ui/app-sidebar-navigation/app-sidebar-navigation.tsx`,
+`frontend/src/components/ui/org-actions-menu/org-actions-menu.tsx`,
+`frontend/src/components/ui/workspace-explorer/sidebar-projects-tree.tsx`,
+`frontend/src/components/ui/session-tabs-bar/session-tabs-bar.tsx`,
+`frontend/src/components/ui/application-toolbar/`,
+`frontend/src/pages/dashboard/` (bento grid + tile catalogue),
+`frontend/src/pages/store/store.page.tsx`, `frontend/src/pages/settings/`,
+`frontend/src/components/ui/new-project-modal/new-project-modal.tsx`,
+`frontend/src/pages/projects/project-setup.page.tsx`.
