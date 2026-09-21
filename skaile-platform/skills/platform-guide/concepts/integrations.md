@@ -9,8 +9,12 @@ External provider connections are managed per-organization as **ProviderLinks**.
 declares:
 
 - **Category**: Git / Files / Transport.
-- **Provider type**: GitHub, GitLab, Bitbucket, SharePoint, Google Drive, S3, Dropbox,
-  SSH, WebDAV, NextCloud, Box.
+- **Provider type**: GitHub, GitLab, Bitbucket, SharePoint, Google Drive, S3, SSH,
+  WebDAV, NextCloud, Box. **Dropbox is work in progress — not usable yet**: it still
+  appears in some provider pickers, but no runtime driver exists, so a Dropbox
+  connection cannot bring files into any session today. Say that plainly and steer the
+  user to Box, SharePoint, Google Drive or NextCloud instead; never walk them into
+  creating a Dropbox provider.
 - **Credential mechanism**: how auth works (see below).
 - **App owner**: Org (customer-registered app) or Skaile (vendor-managed).
 
@@ -28,6 +32,35 @@ declares:
   credentials toward a service account (or shared delegation with the owner's
   acknowledgment).
 
+## From a connection to files in a session
+
+A personal **My Connections** sign-in stores a credential — it does **not** by itself
+put any files anywhere. Three separate objects are involved: the org's **ProviderLink**
+(the app registration), the user's **connection** (their credential on that link), and
+a **configured connector/mount** on a project or session (which folder, which access).
+Users routinely finish the OAuth and then ask why the agent still sees nothing; the
+missing piece is always the third object. After a successful Connect, guide them to one
+of the two places that create it:
+
+1. **New project from that source** — **New Project** wizard → **Source** step → pick
+   the provider (SharePoint / Google Drive / NextCloud / Box / Git / Local Folder) and
+   the folder. That folder then *is* the project workspace.
+2. **Add a connector to an existing session or project** — in the session workspace,
+   open the **Connectors** panel (its icon sits with the other panel icons at the top
+   right of the workspace) → use the connect offer for the provider (e.g. **Connect
+   Box**) → choose the account/connection and the folder → add for **This session** or
+   **Whole project**. New mounts attach on the next session reload/restart — the panel
+   prompts for it.
+
+Two rules worth repeating to users:
+
+- Mounts run on the **session owner's** connection. Connecting *your* account never
+  gives a session owned by someone else access to it.
+- The agent cannot create the configured connector itself — `platform.enable_asset`
+  only enables config-less assets or existing configured presets. Guide the user
+  through the Connectors panel, verify afterwards (`connector_list`), and propose a
+  restart if the mount has not attached yet.
+
 ## Access levels and policy
 
 Each connector, per project/asset, has an access level: read-write, read-only, or blocked.
@@ -42,8 +75,10 @@ Practical rules for the agent:
 ## Mounts vs. connectors (recap)
 
 - **Mounts** = external data surfaced as **files** in the workspace (git, local, S3,
-  WebDAV, SharePoint). The project's primary data source is a mount.
+  WebDAV/NextCloud, SharePoint, Google Drive, Box). The project's primary data source is
+  a mount; the workspace **Connectors** panel manages additional ones.
 - **Connectors** = external systems surfaced as **tools** (Postgres, Redis, SQLite, the
-  `session`/`presence` state stores).
+  `session`/`presence` state stores). Note the naming overlap: the workspace panel
+  called **Connectors** manages file *mounts*.
 
 Source of truth: `platform/docs/integration_architecture.md`.
