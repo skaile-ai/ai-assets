@@ -68,7 +68,7 @@ workspace". Panels (in icon order):
 | **Assistant**  | A mini chat with the user's personal AI assistant; **Expand** opens its full session. Shown only when the viewer has a personal assistant and is not already in it. |
 | **Preview**    | Capability-render previews (fallback when the main layout hides the workspace). |
 | **AI Assets**  | Skills, MCP servers, agents and contracts for this session — the place to enable an asset, for **This session** or the **Whole project**. Connectors are *not* here; they have their own panel. |
-| **Connectors** | The session's data-source mounts: shows what is mounted and on whose account, and offers **Connect Box / SharePoint / Google Drive / NextCloud / Git** flows — pick the account/connection and folder, scope **This session** or **Whole project**. New mounts attach on the next reload/restart (the panel prompts). This is the answer to "I connected my \<provider\> in My Connections — now what?". |
+| **Connectors** | The session's data-source mounts: shows what is mounted and on whose account, and offers **Connect Box / SharePoint / Google Drive / NextCloud / Git** flows — pick the account/connection and folder, set **Access** (**read-only** by default, or read-write; hidden for git), scope **This session** or **Whole project**. New mounts attach on the next reload/restart (the panel prompts). An existing mount row has **no settings/edit dialog** — to change its folder or access level, remove it and re-create it via **Connect**. This is the answer to "I connected my \<provider\> in My Connections — now what?". |
 | **Share**      | Sharing pane: visibility toggle, team access, project/session members + roles, invites, and public preview-share links. |
 | **Summary**    | Session snapshot and resume strategy. |
 | **Flow**       | Flow-run view when the session runs a flow. |
@@ -98,8 +98,12 @@ cost/status, and — when A2A is active — a Viewer/Chat view toggle.
 - **Enable a skill/asset** → **AI Assets** panel (toolbar icon).
 - **Mount a cloud folder (Box / SharePoint / Google Drive / NextCloud)** →
   **Connectors** panel (toolbar icon) → **Connect \<provider\>** → pick account +
-  folder → reload/restart when prompted. Requires the personal connection to exist
-  first (**My Connections**); mounts run on the **session owner's** connection.
+  folder → set **Access** (read-only default / read-write) → reload/restart when
+  prompted. Requires the personal connection to exist first (**My Connections**);
+  mounts run on the **session owner's** connection.
+- **Change a mount's folder or access level** → there is no edit dialog: **Connectors**
+  panel → remove the mount → **Connect \<provider\>** again with the new choice →
+  reload/restart.
 - **Share a folder with a collaborator (subset of data)** → the **Workspace** panel, folder
   **...** menu > **Share in new session...**.
 - **Share a finished report externally** → open the file, use the share action to create a

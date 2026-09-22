@@ -56,9 +56,14 @@ Two rules worth repeating to users:
 
 - Mounts run on the **session owner's** connection. Connecting *your* account never
   gives a session owned by someone else access to it.
-- The agent cannot create the configured connector itself — `platform.enable_asset`
-  only enables config-less assets or existing configured presets. Guide the user
-  through the Connectors panel, verify afterwards (`connector_list`), and propose a
+- The agent cannot *silently* create the configured connector — `platform.enable_asset`
+  only enables config-less assets or existing configured presets. What the agent can do
+  is **propose** one for the owner to approve: a complete non-secret mount as a single
+  approval card, or a configuration handoff that parks on a trusted page where the
+  owner picks account and folder themselves (see
+  `references/control-plane-capabilities.md` for both). Agent-proposed mounts are
+  always **read-only**; read-write needs the user's own **Connect** flow in the
+  Connectors panel. Either way, verify afterwards (`connector_list`) and propose a
   restart if the mount has not attached yet.
 
 ## Access levels and policy
@@ -66,6 +71,10 @@ Two rules worth repeating to users:
 Each connector, per project/asset, has an access level: read-write, read-only, or blocked.
 The platform's connector runtime enforces, at call time, "can this asset, in this session,
 run by this user, do this action on this system?" — plus audit logging of every call.
+
+The Connect dialog's **Access** selector defaults to **read-only**. An existing mount
+has no settings dialog — to change its folder or access level, the user removes it in
+the Connectors panel and re-creates it via **Connect**.
 
 Practical rules for the agent:
 - Respect read-only connectors and read-only mounts — never attempt a write.

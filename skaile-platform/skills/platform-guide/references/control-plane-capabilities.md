@@ -84,6 +84,19 @@ what decides whether an autonomy grant can ever cover it (see *Consent and auton
 | `platform.invite_to_session({ sessionId, email, role? })` | an invitation email; the invitee can then read that session's whole history | `external` | that target, its project, its organization, or everything reachable |
 | `platform.begin_connector_setup({ organizationId, providerType, providerLinkId? })` | reuses an already-usable connector, otherwise parks on the owner. `result.payload.reused` says which happened. | `routine` | that target, its organization, or everything reachable |
 | `platform.configure_project_source({ projectId, providerLinkId })` | re-points a project at an already-usable connector. `result.payload.changed` says whether anything actually had to move; re-pointing at the current one is a no-op, not an error. | `routine` | that target, its project, its organization, or everything reachable |
+| `platform.begin_asset_configuration({ assetId, scope })` | parks `AwaitingUser` with a short-lived (~15 min), single-use trusted-page link where the owner picks account, folder and any secrets; on completion an instance is minted and assigned. The result identifies `{ instance, assignment }` only — the agent never learns the configuration. Works in workspace and assistant sessions. | `routine` | that target, its project, its organization, or everything reachable |
+
+`platform.configure_connector({ providerType, providerLinkId, folderId?/path?, scope, rationale })`
+proposes a **complete connector mount** — connection, folder or repository, and scope — as one
+approval card. Only the non-secret drivers `box`, `sharepoint`, `googledrive` and `git` are
+eligible; a driver whose configuration involves credentials or secret placeholders is refused
+toward `platform.begin_asset_configuration`. Resolve `providerLinkId` first via
+`platform.list_connector_options` (pick an entry with `usable: true`). It is approval-gated but
+**not durable**: on approval it returns
+`{ status: "configured", instanceId, assignmentId?, scope, scopeRef, attaches: "next_reload_or_restart" }`
+directly. The minted mount is always **read-only** — the call has no access parameter;
+read-write needs the user's own **Connect** flow in the Connectors panel. The mount attaches on
+the next reload/restart, so propose `platform.cycle_session` afterwards.
 
 `platform.delegate_to_session({ sessionId, message, visibility: "Public" })` delivers one
 message into another session as the owner. It is also approval-gated and classed `external`,
