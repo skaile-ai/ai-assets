@@ -16,7 +16,7 @@ description: >-
   existing code, for plans or design proposals, for filing an issue when implementation is
   explicitly deferred, for throwaway local experiments, or for work spanning several
   repositories.
-version: 1.3.0
+version: 1.4.0
 metadata:
   tags:
   - "ship"
@@ -130,8 +130,9 @@ metadata:
 | 9b | Fetch latest `origin/main`, merge into the branch, resolve conflicts, re-push |
 | 10 | Open a PR against `main` that `Closes #<number>` (respect PR template + changeset rules) |
 | 11 | **Report the implementation summary** to the user |
-| 12 | **Babysit the PR**: watch CI to green, wait for review bots, fix every related change-request (incl. nits) in a loop; report unrelated/architectural problems without fixing them |
-| 13 | **Recap in plain language** (no jargon — for a person returning after hours away), then ask the user: **squash-merge + clean up** \| **clean up only** \| **stop here** (plus **reading diff first** via the `meat` skill, if installed) — then execute the choice |
+| 12 | **Babysit the PR**: act on whichever lands first — a review or CI — instead of waiting out the suite; drive CI to green and fix every related change-request in a loop (nits for the first three fix pushes, substantive only from the fourth); report unrelated/architectural problems without fixing them |
+| 12b | Sweep for follow-ups: ship the small leftovers into this PR, propose at most 3 IMPORTANT ones as issues |
+| 13 | **Recap in plain language** (no jargon — for a person returning after hours away), then ask the user: **squash-merge + clean up** \| **clean up only** \| **stop here** (plus **reading diff first** via the `meat` skill, if installed) — then execute the choice, and file the follow-ups the user picked |
 | 14 | Final report |
 
 The worktree and local branch **persist** through phases 9–12 (they are where babysit
@@ -174,8 +175,8 @@ complete list of legitimate stop-and-ask gates is:
 5. **A review finding is "apply-large"** — spawning a second implementation subagent is a meaningful escalation; confirm scope.
 6. **A merge conflict on source code is genuinely mutually-exclusive** — both intents cannot stand; the user must pick.
 7. **Push fails for a non-trivial reason** — e.g., the branch was rewritten remotely.
-8. **The babysit loop cannot converge** — CI stays red on something unrelated to the change, or the same review item recurs after a good-faith fix; report and ask.
-9. **The final disposition** — merge + cleanup / cleanup only / stop here (Phase 13). This is the ONE planned interactive checkpoint at the end.
+8. **The babysit loop cannot converge** — CI stays red on something unrelated to the change, the same review item recurs after a good-faith fix, or ~15 min pass with no signal at all (no review, no check reaching a conclusion); report and ask.
+9. **The final disposition** — merge + cleanup / cleanup only / stop here (Phase 13), asked together with which proposed follow-ups to file. This is the ONE planned interactive checkpoint at the end; both questions go in a single AskUserQuestion call.
 
 Everything else you do silently. The user can always interrupt to redirect.
 
@@ -224,10 +225,12 @@ MUST  push the branch before opening the PR
 MUST  fetch origin/main and merge it into the branch BEFORE opening the PR, resolving conflicts while the full local context is available
 MUST  open the PR with `gh pr create --base <default_branch> --head <branch>`, body containing `Closes #<number>`, honoring the repo's PR template if present
 MUST  report a clear implementation summary to the user after the PR is opened (Phase 11) — before babysitting
-MUST  babysit the PR (Phase 12): watch CI to completion (this also waits for automated review-bot checks), read the PR's reviews + comments, and fix every actionable item — including style nits — that relates to the work item, looping push → re-watch until CI is green and the only remaining review notes are ones the reviewer explicitly blesses as fine to keep
+MUST  babysit the PR (Phase 12): poll for the FIRST signal — a review or CI completion, whichever lands first — and act on a review the moment it arrives instead of waiting out the whole check suite; fix every actionable item that relates to the work item, looping push → re-poll until CI is green and the only remaining review notes are ones the reviewer explicitly blesses as fine to keep
+MUST  apply the nit cutoff, counted in FIX PUSHES not loop iterations: fix related nits for the first three fix pushes, but from the fourth on fix ONLY substantive items (failing required check, correctness/security/data-loss/performance defect, explicit blocking change-request, public-API/contract/migration problem) and decline the rest — comment and doc-wording nits above all
+MUST  run the Phase 12b follow-up sweep BEFORE the disposition gate: ship small leftovers (<15 min, inside this diff, no design decision) into THIS PR, and propose at most 3 IMPORTANT follow-ups as issues, filing only the ones the user selects
 MUST  fix only items RELATED to the change (e.g. lint/type/test failures the change caused, review nits on the diff); for unrelated/pre-existing/architectural problems, REPORT them to the user and do NOT fix them
 MUST  converge the babysit loop — cap fix rounds, and if CI stays red on something unrelated or a review item recurs after a good-faith fix, stop and ask (gate #8)
-MUST  print the plain-language recap (Phase 13, STEP 14b) immediately BEFORE the final question — jargon-free, no paths or symbols, written for someone who was not watching
+MUST  print the plain-language recap (Phase 13, STEP 14d) immediately BEFORE the final question — jargon-free, no paths or symbols, written for someone who was not watching
 MUST  ask the user at the end (Phase 13) to choose: squash-merge + cleanup | cleanup only | stop here — and execute exactly that
 MUST  after a MERGE of user-visible platform work, sync the capability docs (Phase 13b) — `platform/features/SKAILE-PLATFORM-CAPABILITIES.md` is the LEADING copy and is always updated; the business doc mirror and the platform-guide skill only when their paths are accessible on this machine
 MUST  use squash-and-merge (`gh pr merge <n> --squash`) when merging
@@ -623,34 +626,193 @@ EMIT [ship] summary_reported
 
 STEP 14: Drive the PR to a clean, reviewed state
   Goal: end with CI GREEN and the only remaining review notes being ones a reviewer
-  EXPLICITLY says are fine to keep. Wait for automated review bots to finish; do NOT
-  block on absent human reviewers.
+  EXPLICITLY blesses, or nits declined past the cutoff. Read each review the MOMENT it
+  lands — never hold it until the check suite finishes. Wait for automated review bots
+  to report; do NOT block on absent human reviewers.
 
-  babysit_round = 0; MAX_ROUNDS = 6; cumulative budget ≈ 45 min wall-clock
+  babysit_round = 0; MAX_ROUNDS = 10; cumulative budget ≈ 45 min wall-clock
+  fix_rounds = 0   # incremented ONLY in (c), and only when a commit is actually PUSHED
+  Keep the two counters separate. With the early break in (a) an iteration is no longer
+  one CI cycle — it can end on a review arriving mid-run, or on an already-terminal
+  rollup with nothing to do — so counting the nit cutoff in iterations would start
+  declining nits after one or two pushes. `babysit_round`/MAX_ROUNDS is the runaway
+  guard only; `fix_rounds` is the cost counter the cutoff uses. MAX_ROUNDS is 10 rather
+  than 6 because iterations are now cheaper and more numerous.
   LOOP:
     babysit_round += 1
     IF babysit_round > MAX_ROUNDS OR cumulative babysit time > ~45 min
        → STOP (gate #8): report current state, ask how to proceed.
 
-    (a) Wait for CI + review bots, handling the no-checks case first:
-        Detect checks reliably via JSON (exits 0 even when empty), NOT by scraping text:
-        $ gh pr view <pr_number> --repo <github_slug> --json statusCheckRollup -q '.statusCheckRollup | length'
-        IF 0 (no CI configured — common for content repos like ai-assets/infra, or
-        workspace-isolated marketing): set ci_state = "no-checks"; skip the watch.
-        ELSE: $ gh pr checks <pr_number> --repo <github_slug> --watch --interval 30
-              (this also waits for review-bot check runs to finish; note `gh pr checks`
-              exits non-zero on failure (1) and on no-checks (8) — rely on the JSON above
-              for the no-checks decision and on the post-watch snapshot for pass/fail, not
-              on the exit code alone). Wall-clock cap: if checks stay queued / never start
-              for ~15 min, stop watching and treat it as gate #8.
-        Then read review + merge state:
+    (a) Poll for the FIRST actionable signal — a review OR CI completion, whichever
+        lands first. Do NOT sit on the whole check suite before you read the reviews.
+        A review that arrives while tests are still running is actionable NOW, and
+        pushing its fix supersedes the in-flight run anyway, so reading it early
+        SHORTENS the turnaround instead of wasting a cycle.
+        head_sha = the PR's `headRefOid` — NOT the local worktree HEAD. Reviews are
+        attached to what GitHub actually has, and the two diverge whenever a push did not
+        land; filtering live reviews against a local SHA discards all of them until the
+        15-min cap. Read it in FULL; never poll against a truncated or remembered SHA
+        (a padded SHA matches on poll 1).
+        $ gh pr view <pr_number> --repo <github_slug> --json headRefOid -q .headRefOid
+
+        Poll every ~20s (wall-clock cap ~15 min with no signal at all → gate #8). THREE
+        sources, because no single one carries every signal WITH its commit:
         $ gh pr view <pr_number> --repo <github_slug> \
-            --json reviews,reviewThreads,comments,reviewDecision,mergeStateStatus,statusCheckRollup
+            --json headRefOid,reviews,reviewDecision,mergeStateStatus,statusCheckRollup
+        $ gh api repos/<owner>/<repo>/pulls/<pr_number>/comments    # inline review comments
+        $ gh api repos/<owner>/<repo>/issues/<pr_number>/comments   # top-level comments
+        There is NO `reviewThreads` field on `gh pr view --json`. Asking for one makes the
+        WHOLE call exit non-zero, so the loop gets no payload at all — and since this poll
+        is now the only data source, that failure is silent and total. Thread RESOLUTION
+        state needs `gh api graphql`; you rarely need it here.
+
+        SHA-scope every signal and DISCARD anything tied to an older commit — it is stale
+        from an earlier round and you already handled it:
+          - `reviews[]` → `.commit.oid`
+          - `pulls/<n>/comments[]` → judge staleness on `.original_commit_id`, NEVER
+            `.commit_id`. GitHub re-anchors `commit_id` FORWARD to the newest commit a
+            comment still applies to, so a comment from round N can read the current head;
+            `original_commit_id` is the commit it was written against and never moves.
+            The re-anchoring is per-comment (it follows whether that line survived the
+            new diff), so it is not predictable from here — two siblings from one review
+            can end up on different commits.
+          - `issues/<n>/comments[]` → carries NO commit. Scope it by time instead: ignore
+            any top-level comment whose `updated_at` predates the push of head_sha.
+
+        DISCARD every review, comment and reply authored by YOU. Your own reply is not a
+        signal — it is an echo of one you already consumed.
+        PRIMARY rule: track the id of every comment and reply YOU post — step (c) posts
+        them, so it has the ids from `gh`'s own output — and discard those. Identity by
+        construction, no lookup, works under any token.
+        $ me=$(gh api user -q .login)   # cross-check only; may fail, see below
+        Use that only as a cross-check, and do NOT assume it is the PR author: `ship`
+        pushes and replies as whatever `gh` is authenticated as, which on a PR you did not
+        open is someone else — a rule written against the PR author inverts, discarding
+        the genuine reviewer while keeping your own echoes. Under a GitHub App
+        installation token the call 403s ("Resource not accessible by integration"),
+        because such a token has no authenticated user; `me` is then EMPTY. An empty `me`
+        means "fall back to the id list" — never "no comments are mine", which would
+        silently disable the only guard against breaking on your own replies, in exactly
+        the bot-token setup where this loop runs unattended.
+        Step (c) posts its thread replies AFTER pushing, and they reach the current head
+        by two different routes:
+          - `issues/<n>/comments` — a `gh pr comment` decline carries no commit and is
+            scoped by `updated_at` > push, so it always lands in scope. This is the main
+            one, and it fires on EVERY declined nit past the cutoff, i.e. exactly where
+            the budget is tightest.
+          - `pulls/<n>/comments` — an inline reply inherits its PARENT's `commit_id`, not
+            the head (verified: 9/9 replies on this skill's own PR matched their parent).
+            So a reply to an older thread carries the older commit and the SHA scope
+            discards it anyway — but if the re-anchoring above moved the parent onto the
+            new head, the reply comes with it.
+        Without this rule the break fires on them, (b) finds nothing, and a round is
+        burned. SHA-scoping does not catch it: that guard is keyed on identity-of-signal,
+        not authorship.
+
+        IGNORE progress placeholders. A review bot configured with `track_progress` (this
+        repo's is) posts ONE top-level comment when the run STARTS and then EDITS THAT SAME
+        COMMENT IN PLACE with the finished review minutes later. Two consequences:
+          - a Bot comment is a SPINNER while it ANNOUNCES WORK IN PROGRESS: an unchecked
+            `- [ ]` box, or in-progress wording like "Claude Code is working… I'll analyze
+            this and get back to you" (the placeholder for a reply-triggered run, which
+            carries no checklist at all, so a test hinging on the checkbox shape misses
+            it). Never break on one: (b) would find nothing and burn a round on the bot's
+            own progress bar.
+            Do NOT define a spinner as "no findings". A FINISHED review with nothing to
+            report — the clean pass — also has no findings section, and it is how this
+            loop is SUPPOSED to end: classing it as a spinner leaves (e)'s "bots have
+            completed" permanently unsatisfied and runs to MAX_ROUNDS. Finished and empty
+            is a completed review; announcing work is a spinner.
+            Apply the spinner test ONLY to `user.type == "Bot"` (e.g. `claude[bot]`). A
+            human writing "looks good, but `- [ ] worth a test later`" must still count as
+            a review, or it never breaks the poll for as long as that box stays unchecked.
+          - the comment id is NOT a usable consumed-key, because the real review arrives
+            under the SAME id — marking the placeholder consumed would silently skip the
+            round-1 review. Key on (id, hash of the body), per the consumed-set rule
+            below: the spinner body differs from the review that replaces it, so the hash
+            tells them apart. Read them from the REST issue-comments endpoint;
+            `gh pr view --json comments` exposes neither a body-stable edit signal nor a
+            commit, which is the one reason that endpoint is used here.
+
+        BREAK out of the poll as soon as EITHER:
+          - a review bot or a human has posted a review, an inline comment, or a FINISHED
+            top-level comment for head_sha that you have NOT yet consumed → go straight to
+            (b) WITH CHECKS STILL RUNNING; do not wait for them, OR
+          - every check in statusCheckRollup has a terminal conclusion AND the rollup has
+            been non-empty, all-terminal and UNCHANGED IN SIZE for ≥2 consecutive polls
+            AND ≥60s have passed since the push, or
+          - ci_state = "no-checks".
+        The stability clause is not belt-and-braces: `statusCheckRollup` is a GROWING set,
+        not a fixed one. A re-triggered workflow is absent from it until it registers, so
+        for a few seconds after a push every check already listed reads terminal and the
+        break fires on a suite that is not done. This bit the very loop that wrote this
+        rule: 16/16 terminal, break taken, and `claude-review` appeared as IN_PROGRESS
+        moments later. Cross-check: an OPEN Bot spinner comment means a review is in
+        flight no matter what the rollup says — never conclude "bots have completed" past
+        one. BOUND IT by `created_at`: only a spinner created AFTER the push of head_sha
+        counts as in flight. An earlier one is ABANDONED, not running —
+        `.github/workflows/claude-code-review.yml` sets `cancel-in-progress: true` on a
+        per-PR concurrency group, so every fix push cancels the review it superseded and
+        a cancelled run never edits its progress comment, leaving it at unchecked boxes
+        forever. Treating those as in flight makes (e)'s "bots have completed"
+        permanently false from the second fix push on — the same stall as the spinner
+        bug above, re-entered through the cross-check that fixed it. Use `created_at`,
+        NOT `updated_at`: the metadata bumps documented below can carry an abandoned
+        spinner past a time filter keyed on the latter.
+
+        Set ci_state = "no-checks" ONLY after the rollup has come back EMPTY on ≥3
+        consecutive polls AND ≥60s have passed since the push. An empty
+        `statusCheckRollup` is ALSO what a CI-having repo returns for the first ~10-30s
+        while workflows queue — concluding "no-checks" there exits the loop and offers a
+        squash-merge on a PR whose suite simply had not started yet. A genuinely CI-less
+        repo (content repos like ai-assets/infra, workspace-isolated marketing) stays
+        empty and trips the condition a minute later at no cost.
+
+        Mark each consumed signal consumed GLOBALLY, keyed on (id, hash of the BODY) —
+        NOT per head_sha, and NOT on `updated_at`. GitHub bumps `updated_at` for thread
+        metadata alone — replies, resolution, round bookkeeping — including bumps this
+        loop causes itself: on this skill's own PR nine bot comments bumped in two tight
+        batches (five inside 3 seconds), one of them a comment whose `commit_id` never
+        moved, so a push is not the trigger. A body hash is immune to that and still
+        solves the case the timestamp was chosen for, since a spinner body genuinely
+        differs from the review that later replaces it under the same id.
+        `reviews[]` is keyed on `id` ALONE: it carries no edit timestamp at all (the
+        fields are `author, authorAssociation, body, commit, id, includesCreatedEdit,
+        reactionGroups, state, submittedAt`) and its `commit.oid` never moves. Do NOT
+        reach for `updatedAt` to fill the gap — that IS a valid `--json` field, so the
+        call succeeds, but it is the PR's last-activity time and changes on every event
+        on the PR, which would un-consume every review on almost every poll.
+        The consumed-set is the PRIMARY guard; the commit scoping above is a secondary
+        filter. When the two disagree, trust the consumed-set.
+        And GLOBAL, because a push must not un-consume anything: the signal did not
+        change, only the head did. Per-head keying looks equivalent and is not, because of
+        the re-anchoring above — an old comment that moves onto the new head arrives
+        unconsumed, passes the SHA scope, and is not caught by the authorship rule either
+        (its author is the reviewer). It then lands in (c)'s fingerprint check as a
+        REPEAT, which by that block's own rule means the fix did not satisfy the reviewer
+        → gate #8. So the cost is not a burned round; it is the loop stopping and
+        reporting a recurring item that was in fact accepted.
+        An already-consumed signal must NOT re-trigger the early break — otherwise (b)
+        finds nothing to do and the loop spins on its own signal.
+        `gh pr checks --watch` is the WRONG tool in this step: it blocks until the whole
+        suite finishes, which is exactly the latency this removes. Note also that it
+        exits 0 while checks are still pending. A `cancelled` check left behind by a
+        superseded push is normal — it is not a failure and never an actionable item.
 
     (b) Collect actionable items:
         - FAILED required checks (lint, typecheck, tests, changeset-check, build).
         - Review change-requests + inline review comments (bot e.g. claude-code-review,
           and any already-posted human reviews). Include STYLE NITS.
+        SKIP anything whose fingerprint is already in the `declined-set` — it was decided,
+        not left open, and re-collecting it is what makes an all-declined round loop.
+        EXCEPTION: if the item comes back as an EXPLICIT blocking change-request, or is
+        now claimed to be a correctness / security / data-loss defect, do NOT skip it —
+        remove it from the `declined-set` and escalate to gate #8 with your decline reason
+        and the reviewer's objection. A decline is YOUR severity call; a reviewer
+        contesting that call is new information, not a repeat. Without this the skip runs
+        before classification and before the severity filter, so the one item the cutoff
+        says is never declinable becomes unhearable once you have declined it once, and
+        (e) then counts it as addressed. "Do NOT re-litigate" binds you, not the reviewer.
         For each item classify (PROCEDURE classify_babysit_item):
           RELATED  → caused/exposed by this change (our lint/type/test failure, a nit on a
                      line we touched, a missing changeset, a bot suggestion on our code, OR
@@ -659,20 +821,90 @@ STEP 14: Drive the PR to a clean, reviewed state
                      tech debt elsewhere, a comment about code we didn't touch
 
     (c) IF there are RELATED actionable items:
+        CHURN CHECK first, before severity. Count how many of this round's items fault
+        lines ADDED BY THE IMMEDIATELY PRECEDING COMMIT (`git diff HEAD~1 HEAD`) rather
+        than by the original change. IF three consecutive rounds are mostly fixes-of-fixes,
+        STOP and escalate to gate #8: report the chain (each fix and the defect it
+        introduced) and offer to restructure, simplify, or ship as-is.
+        This is a DIFFERENT axis from the nit cutoff below and neither substitutes for the
+        other. The cutoff asks "is this item a nit?"; churn asks "is this a defect in the
+        fix I wrote ninety seconds ago?". A section can churn while every single finding is
+        substantive — and then the cutoff correctly never fires and nothing stops the loop.
+        Churn means the DESIGN is wrong, not the wording: each new guard is adding a new
+        edge, and ten more rounds of patching will not converge. Restructure instead.
+
         For each, compute a fingerprint = <file>:<line-or-near> + <rule / short text>.
         IF a fingerprint MATCHES one already in the seen-set (you fixed it in an earlier
         round and it came back), the fix didn't satisfy the reviewer or the bot disagrees
         with it → do NOT re-fix blindly; escalate to gate #8 (report the recurring item +
         your reasoning, ask how to proceed) rather than burning rounds.
-        Otherwise fix them in the worktree (small fixes inline; if one is apply-large,
-        gate #5). Address nits too — the bar is "clean," not "only must-fixes." The ONLY
-        items you may leave are ones the reviewer explicitly marked optional / fine-to-keep.
+
+        Severity filter — NIT_CUTOFF_ROUND = 3, counted in `fix_rounds` (pushes), NOT
+        in `babysit_round` (loop iterations):
+          While fix_rounds < 3 — the first three fix pushes: fix every RELATED item,
+            nits included. The bar is "clean," not "only must-fixes." The only items you
+            leave are ones the reviewer explicitly marked optional / fine-to-keep.
+          Once fix_rounds ≥ 3 — the fourth fix push onward: fix ONLY substantive items. An item is substantive iff it
+            is one of:
+              - a failing required check (lint, typecheck, test, changeset, build),
+              - a correctness, security, data-loss, or performance defect,
+              - an EXPLICIT blocking change-request from a reviewer,
+              - a public-API, contract, or migration problem.
+            Everything else is a nit and is DECLINED from the fourth fix push on — in particular
+            comment-wording and doc-polish nits, naming preferences, formatting taste,
+            optional "consider …" refactors, and re-phrasings of text that is already
+            correct. Comment nits are the clearest case: decline them.
+            Do NOT argue the merit and do NOT re-litigate. Record each as
+            `declined (nit, fix push <fix_rounds + 1>)` for the final report — `fix_rounds`
+            is not incremented until the push at the end of (c), so the bare counter is
+            one behind here. If this round declines everything and therefore pushes
+            nothing, record `declined (nit, no push)` instead: there is no fix push to
+            number. Reply once on the open thread with that reason, and move on.
+          Rationale: past the third fix push each nit costs a full CI cycle and changes
+          nothing a reader would notice. Nit loops are the known way this skill stalls.
+
+        Record every DECLINED item's fingerprint in a `declined-set`. A decline is a
+        decision, not an open item, and without this it has no terminal state: the
+        seen-set holds only FIXED fingerprints, so a declined nit is not a REPEAT, (b)
+        re-collects it from every poll, the severity filter declines it again, and the
+        round ends here — costing a poll and producing nothing until MAX_ROUNDS trips
+        gate #8, i.e. asking the user how to proceed on a PR the skill has already decided
+        is done. That is this change's own stall, moved from nine nit fixes to ten empty
+        polls. (b) SKIPS anything already in the `declined-set`, and (e) treats those
+        items as settled.
+
+        IF NOTHING survived the severity filter — every item was declined, which past
+        the cutoff is the COMMON round — skip the lint/commit/push block entirely: record
+        the declines, reply once on each thread, do NOT increment `fix_rounds`, and FALL
+        THROUGH to (d) and (e). Do NOT jump back to (a) — (c)'s `CONTINUE loop` below is
+        correct only because that path PUSHED and has new CI to wait for. Here nothing
+        was pushed: no new check run is coming, the rollup is already all-terminal from
+        the previous iteration, every remaining signal is in the consumed-set or the
+        declined-set, and the decline replies just posted are discarded as self-authored.
+        So (a) has nothing left that can break it and blocks to its ~15 min cap → gate #8,
+        while (e) — which counts declined items as addressed and would exit cleanly — is
+        never reached. Running the push block instead means `git commit` on an empty
+        index, which fails, and the label below then promises a fix push that never
+        happened.
+        Fix the surviving items in the worktree (small fixes inline; if one is
+        apply-large, gate #5).
+        IF a fix RENAMED anything or CHANGED A STATED RULE — a placeholder, a symbol, a
+        step id, a key, a threshold — grep the changed files for the OLD form before
+        committing, and fix every consumer you find.
+        $ grep -rn "<old form>" <changed paths>
+        A producer updated without its consumer is the cheapest and most common review
+        finding there is, it costs a whole CI cycle to hear about, and it is strictly worse
+        than the ambiguity it replaced: two things that merely read inconsistently now read
+        wrongly. Contradictory instructions are a CORRECTNESS defect, not wording — a
+        reader has no way to tell which of two stated rules is current.
         $ cd <worktree_path> && <lint_cmd> && <test_cmd>
         $ git add -A && git commit -m "fix(<scope>): address review feedback (#<issue_number>)"
         $ git push origin <branch_name>
+        fix_rounds += 1  (only here, only on an actual push)
         Add each fixed item's fingerprint to the seen-set; reply briefly on resolved review
         threads and mark them resolved where possible.
-        CONTINUE loop (new commit re-triggers CI + bots — wait for them in the next round).
+        CONTINUE loop. The new commit supersedes the running checks and re-triggers CI +
+        bots — that cancellation is intended, not a failure.
 
     (d) IF there are UNRELATED items:
         Do NOT fix them. Record each (what, where, why out of scope) for the final report.
@@ -683,16 +915,117 @@ STEP 14: Drive the PR to a clean, reviewed state
         - every required check is green, OR ci_state = "no-checks", OR the only red checks
           are unrelated + recorded,
         - automated review bots have completed for the latest commit (or there are none),
-        - no unaddressed RELATED change-requests/comments remain (only reviewer-blessed leftovers).
+        - no unaddressed RELATED change-requests/comments remain — reviewer-blessed
+          leftovers and items in the `declined-set` COUNT AS ADDRESSED. Declining past the
+          cutoff is an answer; if this clause required them fixed, the cutoff could never
+          let the loop exit.
         Do NOT wait for a human who hasn't reviewed.
 
-  Print: > "Babysit done after <R> round(s). CI: <green|blocked-by-unrelated>. Fixed: <N> related items. Unrelated/reported: <M>."
+  Do NOT print "Babysit done" here and do NOT emit `babysit_done` yet — Phase 12b may push once more and re-enter this loop,
+  and emitting here would understate `rounds=`.
+
+# ── Phase 12b: Follow-up Sweep (before the merge gate) ────────────
+
+STEP 14b: Decide what ships in THIS PR and what becomes a follow-up issue
+  Run this BEFORE the disposition question. A follow-up proposed after the merge is a
+  follow-up nobody files, and the PR body is not a tracker.
+
+  Gather every loose end you are holding: review findings deferred in Phase 8, UNRELATED
+  items recorded in Phase 12(d), nits declined at the cutoff, and anything you noticed
+  while implementing but did not do.
+
+  Split each one. The test is cost and blast radius, NOT how loudly it was reported:
+    SHIP IT NOW → it touches files already in this diff, needs no design decision, and
+      is roughly <15 min of work. Fix it in the worktree and push. Small things belong in
+      THIS PR — never open an issue for work that is cheaper to do than to file.
+      Nits DECLINED at the cutoff do not return through this door: they were declined on
+      merit, not on size.
+    FOLLOW-UP ISSUE → it is IMPORTANT and cannot ride along: an architectural change, a
+      cross-cutting refactor, a security or data-integrity gap, a missing test layer, a
+      separate product decision, or work outside this diff's blast radius.
+    DROP → neither important nor worth the diff. Say nothing about it.
+
+  Propose AT MOST 3 follow-ups. Each gets a one-line title and one line of why it
+  matters. If nothing clears the bar, propose NONE and say so — an empty sweep is the
+  normal outcome for a small PR, and a padded list trains the user to ignore the good
+  one. NEVER propose a nit, a "consider renaming", a docs-polish, or a restatement of
+  something already in the PR body.
+
+  IF you pushed anything in this step, RE-ENTER Phase 12 so its exit conditions re-apply
+  (the push restarts CI and re-triggers the review bot, which can produce fresh items).
+  Three constraints, without which a chatty bot alternates the two phases indefinitely —
+  in a skill whose whole point is convergence:
+    - the re-entry SHARES `babysit_round`, `fix_rounds` and the ~45 min budget. 12b's push
+      is a fix push like any other: it increments `fix_rounds` and does NOT reset the nit
+      bar.
+    - Phase 12b runs AT MOST ONCE. Coming back out of the re-entry, go straight to the
+      Phase 13 gate — do not sweep again.
+    - emit `babysit_done` only after the re-entry settles, so `rounds=` is accurate.
+
+  Print:
+  > "Babysit done after <R> round(s) / <F> fix push(es). CI: <green|blocked-by-unrelated>."
+  > "Fixed <N> related item(s); <M> unrelated/reported."
+  > "Follow-up sweep: shipped <S> small item(s) into this PR; proposing <P> follow-up(s); dropped <D>."
+
+  This is the ONLY "Babysit done" line the user sees. Phase 12 deliberately prints none:
+  it runs up to twice (12b re-enters it), and both of its passes would report an `<R>`
+  that the re-entry then invalidates.
 
 EMIT [ship] babysit_done rounds=<R> fixed=<N> unrelated=<M>
+EMIT [ship] followup_sweep shipped=<S> proposed=<P>
 
 # ── Phase 13: Final Disposition (the one planned checkpoint) ───────
 
-STEP 14b: Plain-language recap (print BEFORE asking anything)
+STEP 14c: Refresh the PR description with what ACTUALLY shipped
+  Run this after the babysit loop has settled and before the gate. The PR body was
+  written in Phase 11, at open time, from the plan — and every babysit fix push since has
+  changed what the PR does. By now it describes a proposal, not the change. It is also
+  the last thing a human reads before merging, and on a squash-merge it is what the
+  repo's history inherits.
+
+  Re-read the final diff (`git diff origin/<default_branch>...HEAD`), then fetch the body
+  AS IT STANDS NOW rather than recomposing it from memory — `--body-file` replaces the
+  whole body, and after a loop that may have run ten rounds the memory of it is the least
+  reliable thing in the session. The live body may also carry a human's edit from the
+  babysit window or a PR-template section honored at open time.
+    $ gh pr view <pr_number> --repo <github_slug> --json body -q .body > <tmp>
+    IF that command fails or <tmp> comes back EMPTY, STOP — do NOT run the edit. The two
+    commands are independent: a failed fetch prints nothing, the redirect leaves <tmp>
+    truncated to empty, and `gh` ACCEPTS an empty `--body-file` and clears the body,
+    `Closes #<n>` included. That is the loss this step exists to prevent, reached from
+    the other side.
+    # edit <tmp> in place, then CONFIRM the line survived YOUR OWN rewrite — the
+    # empty-fetch guard above does not cover a mangled edit, and this step exists to
+    # rewrite the body wholesale:
+    $ grep -qF "Closes #<issue_number>" <tmp>
+    IF it is absent, restore it before editing. Never push a body without it.
+    $ gh pr edit <pr_number> --repo <github_slug> --body-file <tmp>
+  Keep the original structure and keep `Closes #<issue_number>` EXACTLY as it was. Losing
+  it fails SILENTLY in two places that both assume it is there: STEP 15 deliberately does
+  not close the issue after merging because the body does it, so the issue simply stays
+  open; and STEP 3b finds an existing PR with `--search "Closes #<n> in:body"`, so a
+  mangled line makes a later `ship` on the same issue match zero PRs and open a SECOND
+  branch and PR for work that already has one. Update
+  anything the babysit rounds made false (version numbers, counts, "only X changes"
+  claims, described behaviour that was later corrected), and ADD a short recap at the top:
+
+    **What this does:** 1-2 sentences, plain language, describing the change as it now
+    stands. Not a changelog of the fix commits, not a restatement of the issue — what a
+    reader needs to know to understand the PR without reading the diff.
+
+  This is NOT the same text as STEP 14d's recap and neither replaces the other. This one
+  is WRITTEN, for whoever opens the PR later or reads the squashed commit in the history;
+  14d's is PRINTED, for the person in this session who walked away. Same change, different
+  readers: this may name the mechanism, 14d's may not.
+
+  With zero fix pushes there is nothing to correct — but still add the recap if the body
+  lacks one, and still refresh on the STEP 3b resume path, where `fix_rounds` starts at 0
+  against a body a PREVIOUS session wrote. That body has the widest gap of all between
+  text and diff, which is the case this step exists for.
+
+STEP 14d: Plain-language recap (print BEFORE asking anything)
+  Distinct from STEP 14c's written recap in the PR body: that one is for a future reader of
+  the PR and may name mechanism; this one is spoken to the person here, now, and may not.
   The person may have walked away hours ago and come back to a wall of scrollback. This
   block is the one thing they read to remember what this was about. Write it for someone
   who does not know this codebase and was not watching.
@@ -744,16 +1077,27 @@ STEP 15: Ask the user how to finish (gate #9)
   skill list, offer it as a 4th option below. If absent, ask with the three
   disposition options only — never fail or warn about it.
   Present concise state, then ask (use the AskUserQuestion tool):
-    Context line: "PR <pr_url> — CI <green|no-checks|blocked: …>, reviews <addressed|none yet|N blessed-nits>.
+    Context line: "PR <pr_url> — CI <green|running|no-checks|blocked: …>, reviews <addressed|none yet|N blessed-nits>.
                    <if reviewDecision requires approval and none is present: 'Note: branch
                     protection needs a human approval — auto-merge will be blocked.'>
                    <if unrelated blockers: 'Note: <X> is red for unrelated reasons.'>"
+    IF a Phase 12b push left checks mid-flight, either wait for them to go terminal first
+    or say "CI running" in that context line. The merge pre-check below reads
+    `mergeStateStatus,mergeable`, which catches a BLOCKED state but not a still-PENDING
+    one — so without this the user can pick "Squash-merge" against an unfinished suite.
     Question: "How should I finish this PR?"
       - "Squash-merge + clean up" — squash-merge the PR, delete the remote branch, remove the worktree, delete the local branch.
       - "Clean up only" — leave the PR open; remove the worktree + delete the local branch (keep the remote branch + PR).
       - "Stop here" — leave everything as-is (worktree, branches, PR all intact).
       - [only if the meat skill is available] "Reading diff first" — distill the PR's
         diff into a reading diff before deciding.
+  IF the Phase 12b sweep proposed follow-ups (P > 0), ask this as a SECOND question in
+  the SAME AskUserQuestion call (multiSelect) so the user is interrupted ONCE, not twice:
+    Question: "Which follow-ups should I file as issues?"
+      - one option per proposed follow-up: "<title>" — <one line on why it matters>
+  IF P = 0: ask the disposition question alone and print
+    > "Follow-ups: none worth filing."
+
   IF the user picks "Reading diff first":
     Invoke the `meat` skill from inside <worktree_path> with
     range = origin/<default_branch>...HEAD, print its reading diff, then re-ask the
@@ -797,7 +1141,18 @@ STEP 15: Ask the user how to finish (gate #9)
       Remind the user where the worktree is so they can resume.
       (Still fall through to the Phase 14 final report.)
 
-EMIT [ship] finished disposition=<merge+cleanup|cleanup|stop>
+  THEN file the SELECTED follow-ups (only those the user picked — never the whole list):
+    $ gh issue create --repo <github_slug> --title "<title>" \
+        --body "<why it matters, in 2-4 sentences. Refs #<issue_number> — <pr_url>>" \
+        --label <category label if that label exists in the repo>
+    Reference the origin issue and PR with a BARE `#<n>` or `Refs #<n>` only. NEVER write
+    a closing keyword (`Closes`/`Fixes`/`Resolves`) in a follow-up body — GitHub fires it
+    on merge and would close the work you are trying to track.
+    Do NOT assign them and do NOT add the `agent` label: these are backlog, not claimed
+    work, and an `agent`-labelled issue is picked up by other agents as ready to build.
+    Capture the created numbers for the final report.
+
+EMIT [ship] finished disposition=<merge+cleanup|cleanup|stop> followups=<list of #n>
 
 # ── Phase 13b: Capability-Docs Sync (conditional) ─────────────────
 
@@ -841,11 +1196,17 @@ STEP 16: Print the final block
   PR:      <pr_url>   [merged (squash) | open]
   Disposition: <merge+cleanup | cleanup | stop>
 
-  What shipped: <1-2 sentence summary>
+  What shipped: <1-2 sentences, plain language — what the change DOES, as merged.
+                 The same recap as the PR body's "What this does". Never a list of the
+                 fix commits: the user wants the outcome, not the route to it.>
   Babysit: <R> round(s); fixed <N> related review/CI items.
   Reported (not fixed — out of scope):
     - <unrelated item> — <why>
-  Deferred follow-ups:
+  Declined nits (from fix push <NIT_CUTOFF_ROUND>+1 on):
+    - <item> — <where>
+  Follow-up issues filed:
+    - #<n> <title>   <url>
+  Deferred follow-ups (not filed):
     - <finding> — <reason>
   Worktree: <removed | kept at <worktree_path>>
   ────────────────────────────────────────────────────────────────
@@ -880,13 +1241,15 @@ PROCEDURE category_label(category)
 PROCEDURE triage_finding(finding)
   - important + in-diff + ≤20 LOC → apply
   - important + in-diff + >20 LOC → apply-large
-  - nit → defer (pre-PR) / fix (during babysit — the bar is "clean")
+  - nit → defer (pre-PR) / fix (first three babysit fix pushes — the bar is "clean") / decline (fourth on)
   - preexisting/unrelated → report, don't fix
   - disputed → reject (reason in PR)
 
 PROCEDURE classify_babysit_item(item)
   - RELATED iff it concerns this change's diff, or a check our change caused/exposed to
-    fail, or a missing artifact our change needs (e.g. changeset). Fix these — incl. nits.
+    fail, or a missing artifact our change needs (e.g. changeset). Fix these — incl. nits
+    for the first three fix pushes; from the fourth on, substantive RELATED items only
+    (see the cutoff).
   - Tie-breaker for ambiguous CI failures: if the check is GREEN on origin/<default_branch>
     but RED on the branch, it is RELATED regardless of which file fails (our change exposed
     it) — fix it. Only checks ALSO red on main are UNRELATED.
@@ -910,7 +1273,11 @@ CHECKLIST
   - [ ] Commit type matches category; title references `#<number>`; branch pushed
   - [ ] origin/<default_branch> merged into the branch; conflicts resolved; re-pushed
   - [ ] PR opened (Closes #<number>; PR template honored); implementation summary reported
-  - [ ] Babysit loop run: CI green / bots finished / related items (incl. nits) fixed; unrelated items reported, not fixed; loop converged
+  - [ ] Babysit loop run: reviews read as they LANDED (never blocked on the full check suite first); CI green / bots finished; related items fixed — nits for the first three fix pushes, substantive only from the fourth; unrelated items reported, not fixed; loop converged
+  - [ ] Churn checked each round (fixes-of-fixes counted; 3 consecutive → gate #8, not another patch)
+  - [ ] Any rename or rule change in a fix was grepped for its old form before committing
+  - [ ] PR description refreshed to match what actually shipped (recap added; stale claims from the babysit rounds corrected; `Closes #<number>` preserved)
+  - [ ] Follow-up sweep done BEFORE the gate: small leftovers shipped into this PR; ≤3 IMPORTANT follow-ups proposed (or none); only user-selected ones filed, unassigned, no closing keyword in the body
   - [ ] Plain-language recap printed before the final question (asked for / what was wrong / what I did / still open; no jargon, no paths, no symbols)
   - [ ] Final disposition asked (merge+cleanup / cleanup / stop; reading-diff option offered iff the `meat` skill is available) and executed; squash used for merge
   - [ ] Capability docs synced after a merged user-visible platform change: `platform/features/` leading doc always; business mirror + platform-guide skill skipped gracefully when not accessible
@@ -928,7 +1295,14 @@ CHECKLIST
 | Writing to `platform/issues/` or any legacy markdown issue folder | Tracking is GitHub Issues. `gh issue create` on the target repo; identity is the native number; category is a label. |
 | Cleaning up the worktree right after opening the PR | The worktree + branch must live through babysitting — they're where fix commits come from. Tear down only in Phase 13 per the user's choice. |
 | Blocking forever waiting for a human review | Wait for automated bots to finish (they're CI checks); do NOT wait for absent humans. Exit when CI is green and posted feedback is resolved. |
-| Only fixing "must-fix" review items | The bar is a clean PR. Fix related nits too. The only items you leave are ones the reviewer explicitly blesses as fine to keep. |
+| Only fixing "must-fix" review items in the first rounds | Through the third fix push the bar is a clean PR — fix related nits too. The only items you leave are ones the reviewer explicitly blesses as fine to keep. |
+| Still fixing nits on the fourth fix push and beyond | Past the cutoff each nit costs a full CI cycle for nothing. Fix substantive items only; decline comment/wording nits with a one-line reason and move on. |
+| Waiting for the whole check suite before reading the reviews | Poll for the first signal. A review that lands mid-run is actionable now, and pushing its fix supersedes the running checks anyway — reading it early is what makes the turnaround short. |
+| Filing a follow-up issue for something cheaper to fix than to file | If it is inside this diff, needs no design decision, and is <15 min, ship it in THIS PR. Issues are for IMPORTANT leftovers only, capped at 3. |
+| Merging with the PR description that was written before babysitting | The body is written at open time from the plan; every fix push since changes what the PR does, and on a squash-merge that stale text becomes the repo's history. Refresh it in STEP 14c and lead with a 1-2 sentence plain-language recap. |
+| Patching on when every round faults the previous round's fix | The nit cutoff will not catch this — the findings are all substantive. Count fixes-of-fixes; three rounds running means the design is wrong, so stop at gate #8 and restructure rather than adding another guard with another edge. |
+| Renaming a placeholder or rule and updating only where it is defined | Grep the changed files for the old form before committing. A stated rule contradicting another stated rule is a correctness defect — the reader cannot tell which is current — and it is worse than the ambiguity it replaced. |
+| Proposing follow-ups after the merge | Sweep in Phase 12b, before the gate. A follow-up proposed after the merge is a follow-up nobody files. |
 | Fixing unrelated/pre-existing/architectural problems during babysitting | Report them; don't fix. Scope is this change. (Fix our lint; don't rebuild a broken CI pipeline.) |
 | Merging with a merge commit | Use squash-and-merge (`gh pr merge --squash`). |
 | Deleting a branch that's checked out in the worktree | Order: squash-merge → `git worktree remove --force` → `git branch -D` (local) → `git push origin --delete` (remote). Do NOT pass `--delete-branch` to `gh pr merge` while the branch is still checked out in the worktree. |
@@ -945,6 +1319,6 @@ CHECKLIST
 - **Calls (optional, soft dependency):** the `meat` skill for a reading diff at the Phase 13 gate — only offered when it is installed; ship works unchanged without it
 - **Uses:** `gh` CLI for issue + PR + CI/review state + merge; `git` directly for repo/worktree/branch/commit/push
 - **Reads:** the target repo's `CLAUDE.md` + `package.json`, the root `skaile-dev/CLAUDE.md` Formatting/Testing tables, affected source, `gh label/issue/pr` state
-- **Writes:** a GitHub issue + a PR on the target repo, implementation + babysit commits on the branch, a transient plan file (deleted); on merge, a squashed commit on the repo's main
+- **Writes:** a GitHub issue + a PR on the target repo, any user-approved follow-up issues, implementation + babysit commits on the branch, a transient plan file (deleted); on merge, a squashed commit on the repo's main
 - **Writes (conditional, Phase 13b):** after merging user-visible platform work — `platform/features/SKAILE-PLATFORM-CAPABILITIES.md` (the leading copy, always) plus its `features/<NN-section>/` doc; mirrored to the business doc (`/mnt/c/.../concept/`) and reflected in the ai-assets `platform-guide` skill only when those paths are accessible
 - **Never writes:** any repo's legacy markdown issue folder — tracking is GitHub Issues
