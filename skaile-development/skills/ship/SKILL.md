@@ -194,6 +194,11 @@ READS
   skills/git/references/commit-spec.md            — commit message format
   gh auth status                                  — verify GitHub auth before issue/PR creation
   gh label list / gh issue list / gh pr ...       — labels, dup detection, PR + CI + review state
+  gh pr view --json headRefOid,reviews,statusCheckRollup,mergeStateStatus
+                                                  — the babysit poll's head SHA, reviews and check rollup (Phase 12)
+  gh api repos/<owner>/<repo>/pulls/<n>/comments  — inline review comments WITH `original_commit_id` (the poll's staleness key)
+  gh api repos/<owner>/<repo>/issues/<n>/comments — top-level review comments WITH `updated_at` (no other surface exposes it)
+  gh api user                                     — own login, to discard self-authored signals (403s under an App token; see Phase 12)
 
 WRITES
   GitHub issue on <repo's slug>                   — opened up front (category label if it exists + `agent`, assigned @me); reused if `issue` is passed
@@ -201,6 +206,9 @@ WRITES
   <worktree>/<target-source-files>                — the implementation + babysit fixes
   PR on <repo's slug>                              — opened after implementation; body contains `Closes #<number>`
   commits on the feature branch                   — implementation, main-sync merge, and babysit fix commits
+  replies on PR review threads                    — one per resolved or declined item during babysitting
+  the PR body (`gh pr edit --body-file`)          — refreshed in STEP 14c to match what actually shipped
+  follow-up GitHub issues on <repo's slug>        — only the ones the user selects at the Phase 13 gate
 
 NEVER WRITES
   platform/issues/ or any repo's legacy markdown issue folder — tracking is GitHub Issues now
@@ -380,7 +388,12 @@ STEP 3b: Resume detection (skip building if a PR already exists for this work)
       $ git worktree prune
       $ git worktree add <worktree_path> <branch_name>   # attach to the EXISTING branch (no -b)
       Print: > "Resuming PR <pr_url> for #<issue_number> — skipping to babysitting."
-      SKIP STEP 4..STEP 13 and JUMP to Phase 12 (STEP 14). Phase 13 + 14 follow normally.
+      SKIP STEP 4..STEP 13 and JUMP to Phase 12 (STEP 14). Everything from there runs
+      normally: Phase 12b (follow-up sweep), Phase 13 (STEP 14c body refresh, STEP 14d
+      recap, STEP 15 disposition), Phase 13b (capability-docs sync) and Phase 14.
+      Note for STEP 14c: `fix_rounds` starts at 0 on this path, but the body was written
+      by a PREVIOUS session, so it still needs the refresh — that is the case with the
+      widest gap between what the body says and what the diff does.
     IF more than one match → ASK which PR to resume.
   ELSE → continue to STEP 4 (fresh flow).
 
