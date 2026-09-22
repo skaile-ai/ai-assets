@@ -1,7 +1,7 @@
 ---
 name: word
 description: "A stateful Word (.docx) engine for source-free document creation, Template composition, and editing a real document in place instead of regenerating it. Its 38 tools expose a neutral blank-package baseline; identity-bound Blocks across body, headers, footers and text boxes; Named styles and resolved style audits; scoped text, paragraph and table composition; live PDF previews; core properties and Word fields; PNG/JPEG replacement and insertion; and complete Revision/Comment collaboration. document.save backs up, verifies the OOXML Part inventory and content, and atomically replaces the target. Use it when creating a new document or preserving a Template, numbering, review markup, media and package fidelity."
-version: 0.6.0 # mcp-catalog-version
+version: 0.7.0 # mcp-catalog-version
 transport: stdio
 recipe:
   attr: mcps.word
