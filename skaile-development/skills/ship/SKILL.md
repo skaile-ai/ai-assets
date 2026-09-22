@@ -750,15 +750,19 @@ STEP 14: Drive the PR to a clean, reviewed state
         moments later. Cross-check: an OPEN Bot spinner comment means a review is in
         flight no matter what the rollup says — never conclude "bots have completed" past
         one. BOUND IT by `created_at`: only a spinner created AFTER the push of head_sha
-        counts as in flight. An earlier one is ABANDONED, not running —
-        `.github/workflows/claude-code-review.yml` sets `cancel-in-progress: true` on a
-        per-PR concurrency group, so every fix push cancels the review it superseded and
-        a cancelled run never edits its progress comment, leaving it at unchecked boxes
-        forever. Treating those as in flight makes (e)'s "bots have completed"
-        permanently false from the second fix push on — the same stall as the spinner
-        bug above, re-entered through the cross-check that fixed it. Use `created_at`,
-        NOT `updated_at`: the metadata bumps documented below can carry an abandoned
-        spinner past a time filter keyed on the latter.
+        counts as in flight. An earlier one never is, whichever way the repo is wired —
+        and do NOT assume which, because it differs per repo:
+          - IF the review workflow cancels superseded runs (a per-PR concurrency group
+            with `cancel-in-progress: true`), the run is dead and its progress comment
+            sits at unchecked boxes FOREVER. Check before relying on either branch: a
+            workflow with no `concurrency:` block does NOT cancel on push.
+          - IF it does NOT cancel, the superseded run keeps going and will post — but
+            against the OLD head, which the staleness scope above discards anyway.
+        Either way an earlier spinner must not count as in flight. Treating one as such
+        makes (e)'s "bots have completed" permanently false from the second fix push on —
+        the same stall as the spinner bug above, re-entered through the cross-check that
+        fixed it. Use `created_at`, NOT `updated_at`: the metadata bumps documented below
+        can carry an old spinner past a time filter keyed on the latter.
 
         Set ci_state = "no-checks" ONLY after the rollup has come back EMPTY on ≥3
         consecutive polls AND ≥60s have passed since the push. An empty
