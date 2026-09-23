@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # `npm test` rather than `bash tests/run.sh` on purpose: the package.json
+      # `npm test` rather than `bash scripts/run-tests.sh` on purpose: the package.json
       # script is the documented entry point, so CI must be what proves it still
       # works. Invoking the runner directly would let that script rot unnoticed.
       - name: Run tests

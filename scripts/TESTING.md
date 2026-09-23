@@ -5,22 +5,41 @@ executable scripts under a skill's `scripts/` directory. This is where those
 scripts get verified.
 
 ```bash
-npm test                          # everything
-bash tests/run.sh tests/x.test.sh # one file, while iterating
+npm test                                      # everything
+bash scripts/run-tests.sh path/to/x.test.sh   # one file, while iterating
 ```
 
 ## Where a test file goes
 
-Under `tests/`, mirroring the subject's path — **not** next to the subject.
+**Next to the thing it covers**, the same way `scripts/*.test.mjs`,
+`scripts/resolve-review-scope.test.sh` and `deploy/bin/*.test.sh` sit beside
+their subjects in the platform repo.
 
-Every `<domain>/skills/<name>/` directory named in `skaile.yaml` is an asset
-root, and a consumer repo receives that directory wholesale: platform's
-`.claude/skills/doc/` is a byte copy of `skaile-development/skills/doc/`,
-`scripts/` included. A test file placed inside an asset root would ship to every
-consumer and register there as asset drift.
+| subject | test |
+| --- | --- |
+| `skaile-development/skills/ship/scripts/babysit-poll.sh` | `skaile-development/skills/ship/scripts/babysit-poll.test.sh` |
+| something repo-level, like `skaile.yaml` | `scripts/<name>.test.sh` |
 
-So a test for `skaile-development/skills/ship/scripts/babysit-poll.sh` belongs at
-`tests/skaile-development/skills/ship/babysit-poll.test.sh`.
+Discovery is a repo-wide `find` for `*.test.sh`, pruning `node_modules`, `.git`,
+`__pycache__` and `.venv`. Nothing registers a test; putting the file in place is
+enough.
+
+### The consequence to know about
+
+A skill directory named in `skaile.yaml` is copied into consumer repos
+**wholesale** — `installer.ts` calls `cpSync(dir, dest, { recursive: true })`,
+with no filter, and there is no exclude or ignore mechanism anywhere in the
+deploy path. So a co-located test ships into every consumer alongside the script
+it covers: platform gets `.claude/skills/ship/scripts/babysit-poll.test.sh`.
+
+That is unavoidable while the script itself has to ship — it has to be there for
+the skill to run — and it is **not** asset drift, because the deploy rewrites
+`skaile.lock.yaml` as it copies. The real cost is smaller and worth knowing: a
+test-only edit changes a tracked hash in every consumer repo, so test iteration
+produces cross-repo lock churn.
+
+Keeping tests in a separate root would avoid that, at the price of splitting them
+from their subjects. This repo chose the convention.
 
 ## Writing one
 
@@ -48,7 +67,7 @@ failures and continue, so one file reports every problem it found.
   ones behind it.
 
 Both are verified by deliberately breaking them — do that again after any change
-to `run.sh`. A lane that cannot go red is worse than no lane.
+to `run-tests.sh`. A lane that cannot go red is worse than no lane.
 
 ## Runners
 
@@ -58,7 +77,7 @@ which is shell and `jq`.
 **`node --test` is deliberately not wired.** It would have no subject: the only
 JavaScript here is three `.ts` files run by the `doc` skill under `bun` and
 `catalogs/build.ts`, none of which `node --test` can execute without a TypeScript
-runner. Add it when the first `.mjs` arrives — discovery in `run.sh` is keyed on
+runner. Add it when the first `.mjs` arrives — discovery in `run-tests.sh` is keyed on
 the file extension, so it is a few lines.
 
 **Python is deliberately not wired, and this is not an oversight.** Python is by
@@ -74,6 +93,6 @@ than no runner, because someone will "fix" it by not writing the test.
 
 The correct Python lane is `uv run`, which resolves each script's own PEP 723
 block. It costs an `astral-sh/setup-uv` step in `test.yml` and a second discovery
-branch in `run.sh`. Wire it when the first Python subject exists — there are zero
+branch in `run-tests.sh`. Wire it when the first Python subject exists — there are zero
 Python tests in this repo today, so wiring it now would ship a runner that has
 never been observed to go red.

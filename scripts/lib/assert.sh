@@ -3,7 +3,7 @@
 # Minimal assertion helpers for `tests/*.test.sh`.
 #
 # Source it from a test:
-#   source "$(dirname "${BASH_SOURCE[0]}")/lib/assert.sh"
+#   source "$ROOT/scripts/lib/assert.sh"   # $ROOT = repo root; see scripts/TESTING.md
 #
 # Each helper records a failure and keeps going, so one test file reports every
 # problem it found rather than only the first. Call `assert_done` last: it is

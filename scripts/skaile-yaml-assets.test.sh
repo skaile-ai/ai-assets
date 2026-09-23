@@ -9,9 +9,11 @@
 # This pins the four properties that make an entry resolvable.
 
 set -uo pipefail
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/assert.sh"
+# Anchored at the repo root, not relative to this file, so a test co-located
+# inside a skill directory sources the library exactly the same way.
+ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && git rev-parse --show-toplevel)}"
+source "$ROOT/scripts/lib/assert.sh"
 
-ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 MANIFEST="$ROOT/skaile.yaml"
 
 assert_true "skaile.yaml exists" test -f "$MANIFEST"
