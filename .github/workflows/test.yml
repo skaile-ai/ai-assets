@@ -1,8 +1,12 @@
 name: Test
 
 # The lane exists so that logic extracted out of a SKILL.md into a script can be
-# verified. It runs on every pull request, and on pushes to main so a bad merge
-# is attributed to the merge rather than to the next PR that happens to run.
+# verified.
+#
+# Both triggers earn their place, and the push one is not the redundant half:
+# of the 25 commits before this workflow existed, 21 went straight to `main`
+# without a pull request. A PR-only lane would therefore have watched a minority
+# of the changes that land here.
 on:
   pull_request:
   push:
@@ -11,11 +15,21 @@ on:
 permissions:
   contents: read
 
+# Most commits in this repo land on `main` directly rather than through a pull
+# request, which makes the push run the primary signal rather than a duplicate
+# of the PR run. So: collapse superseded PR runs, but never cancel a main run —
+# grouping a push by its own SHA gives it a group of one.
+concurrency:
+  group: test-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Without this a hung test holds a runner for the 6-hour default.
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       # `npm test` rather than `bash scripts/run-tests.sh` on purpose: the package.json
       # script is the documented entry point, so CI must be what proves it still
