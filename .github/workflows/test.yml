@@ -15,7 +15,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # `npm test` rather than `bash tests/run.sh` on purpose: the package.json
       # script is the documented entry point, so CI must be what proves it still
