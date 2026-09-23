@@ -21,13 +21,23 @@ assert_true "skaile.yaml exists" test -f "$MANIFEST"
 entries="$(grep -E '^[[:space:]]*-[[:space:]]*\{' "$MANIFEST" || true)"
 entry_count="$(printf '%s' "$entries" | grep -c . || true)"
 
-# A parser that silently matches nothing would let every check below vacuously
-# pass, so the count is asserted before it is used.
-if [ "$entry_count" -lt 10 ]; then
-  fail "expected skaile.yaml to declare at least 10 assets, parsed $entry_count — the entry parser is probably broken"
+# The parser only understands the inline form, so it must also prove it saw
+# every entry. A total parser break is obvious; a *partial* miss is not — one
+# future entry written in block style (`- kind: skill` over several lines) would
+# drop silently out of the checked set while the count stayed plausible, and a
+# bad `root:` on exactly that entry would go unnoticed. So count the list items
+# in the `assets:` block independently and require the two to agree.
+listed="$(awk '/^assets:/{a=1; next} a && /^[A-Za-z_]/{a=0} a && /^[[:space:]]*-[[:space:]]/{n++} END{print n+0}' "$MANIFEST")"
+
+if [ "$listed" -lt 10 ]; then
+  fail "expected skaile.yaml to declare at least 10 assets, found $listed list items — the manifest or this parser is broken"
   assert_done
 fi
-pass "parsed $entry_count asset entries"
+if [ "$entry_count" -ne "$listed" ]; then
+  fail "parsed $entry_count inline entries but the assets: block lists $listed items — an entry is in a form this test does not read, and is going unchecked"
+  assert_done
+fi
+pass "parsed all $entry_count asset entries listed under assets:"
 
 field() {
   # field <line> <key> -> value, with surrounding whitespace and the closing
