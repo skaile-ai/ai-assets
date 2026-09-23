@@ -2,7 +2,7 @@
 #
 # Test runner for skaile-ai/ai-assets.
 #
-# Discovers every `*.test.sh` under `tests/` and runs each one in its own
+# Discovers every `*.test.sh` in the repository and runs each one in its own
 # subshell. A test passes by exiting 0 and fails by exiting non-zero.
 #
 # Two rules this runner exists to enforce:
@@ -14,23 +14,27 @@
 #   2. One failing test fails the run, but every test still runs, so a single
 #      break does not hide the ones behind it.
 #
-# Tests live under `tests/` and NOT next to the script they cover, because
-# every `<domain>/skills/<name>/` directory in this repo is an asset root that
-# `skaile.yaml` publishes wholesale into consumer repos (platform's
-# `.claude/skills/<name>/` is a byte copy, `scripts/` included). A test file
-# inside an asset root would ship to every consumer and register as asset
-# drift there. Mirror the subject's path under `tests/` instead.
+# A test sits NEXT TO the thing it covers, the way `scripts/*.test.mjs` and
+# `deploy/bin/*.test.sh` do in the platform repo. So a test for
+# `skaile-development/skills/ship/scripts/babysit-poll.sh` is that script's
+# neighbour, and a test for something repo-level lives here in `scripts/`.
+#
+# Know the one consequence: a skill directory named in `skaile.yaml` is copied
+# into consumer repos wholesale (`cpSync` recursive, no filter and no exclude
+# mechanism anywhere in the installer), so a co-located test ships alongside the
+# script it covers. That is unavoidable while the script itself has to ship, and
+# it is not drift — the deploy rewrites the lock — but a test-only edit does
+# change a hash in every consumer's `skaile.lock.yaml`.
 #
 # Usage:
-#   npm test                    # all tests
-#   bash tests/run.sh           # same
-#   bash tests/run.sh <path>    # one test file, for iterating
+#   npm test                       # all tests
+#   bash scripts/run-tests.sh      # same
+#   bash scripts/run-tests.sh <path>   # one test file, for iterating
 
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export REPO_ROOT
-TESTS_DIR="$REPO_ROOT/tests"
 
 declare -a FILES=()
 if [ "$#" -gt 0 ]; then
@@ -42,13 +46,19 @@ if [ "$#" -gt 0 ]; then
     FILES+=("$arg")
   done
 else
+  # Repo-wide, because tests live beside their subjects. The prunes keep the
+  # walk off dependency and VCS trees; everything else is fair game.
   while IFS= read -r f; do
     FILES+=("$f")
-  done < <(find "$TESTS_DIR" -type f -name '*.test.sh' | sort)
+  done < <(
+    find "$REPO_ROOT" \
+      \( -name node_modules -o -name .git -o -name __pycache__ -o -name .venv \) -prune \
+      -o -type f -name '*.test.sh' -print | sort
+  )
 fi
 
 if [ "${#FILES[@]}" -eq 0 ]; then
-  echo "runner: discovered 0 tests under ${TESTS_DIR#"$REPO_ROOT"/} — refusing to report success." >&2
+  echo "runner: discovered 0 tests in the repository — refusing to report success." >&2
   echo "runner: a lane that passes with nothing to run is worse than no lane." >&2
   exit 1
 fi

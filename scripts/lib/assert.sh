@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 #
-# Minimal assertion helpers for `tests/*.test.sh`.
+# Minimal assertion helpers for the repo's `*.test.sh` files, which sit beside
+# the things they cover (see scripts/TESTING.md).
 #
 # Source it from a test:
-#   source "$(dirname "${BASH_SOURCE[0]}")/lib/assert.sh"
+#   source "$ROOT/scripts/lib/assert.sh"   # $ROOT = repo root; see scripts/TESTING.md
 #
 # Each helper records a failure and keeps going, so one test file reports every
 # problem it found rather than only the first. Call `assert_done` last: it is
