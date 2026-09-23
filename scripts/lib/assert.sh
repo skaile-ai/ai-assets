@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #
-# Minimal assertion helpers for `tests/*.test.sh`.
+# Minimal assertion helpers for the repo's `*.test.sh` files, which sit beside
+# the things they cover (see scripts/TESTING.md).
 #
 # Source it from a test:
 #   source "$ROOT/scripts/lib/assert.sh"   # $ROOT = repo root; see scripts/TESTING.md
