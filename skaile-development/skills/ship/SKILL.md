@@ -131,7 +131,7 @@ metadata:
 | 10 | Open a PR against `main` that `Closes #<number>` (respect PR template + changeset rules) |
 | 11 | **Report the implementation summary** to the user |
 | 12 | **Babysit the PR**: act on whichever lands first — a review or CI — instead of waiting out the suite; drive CI to green and fix every related change-request in a loop (nits for the first three fix pushes, substantive only from the fourth); report unrelated/architectural problems without fixing them |
-| 12b | Sweep for follow-ups: ship the small leftovers into this PR; propose as issues only the ones that clear the **issue bar** (user harm / money / stability / security / team drag, with evidence), at most 3 |
+| 12b | Sweep for follow-ups: ship the small leftovers into this PR; propose as issues only the ones that clear the **issue bar** (user harm / money / stability / security / team drag / significant benefit, with evidence), at most 3 |
 | 13 | **Recap in plain language** (no jargon — for a person returning after hours away), then ask the user: **squash-merge + clean up** \| **clean up only** \| **stop here** (plus **reading diff first** via the `meat` skill, if installed) — then execute the choice, and file the follow-ups the user picked |
 | 14 | Final report |
 
@@ -235,7 +235,7 @@ MUST  open the PR with `gh pr create --base <default_branch> --head <branch>`, b
 MUST  report a clear implementation summary to the user after the PR is opened (Phase 11) — before babysitting
 MUST  babysit the PR (Phase 12): poll for the FIRST signal — a review or CI completion, whichever lands first — and act on a review the moment it arrives instead of waiting out the whole check suite; fix every actionable item that relates to the work item, looping push → re-poll until CI is green and the only remaining review notes are ones the reviewer explicitly blesses as fine to keep
 MUST  apply the nit cutoff, counted in FIX PUSHES not loop iterations: fix related nits for the first three fix pushes, but from the fourth on fix ONLY substantive items (failing required check, correctness/security/data-loss/performance defect, explicit blocking change-request, public-API/contract/migration problem) and decline the rest — comment and doc-wording nits above all
-MUST  run the Phase 12b follow-up sweep BEFORE the disposition gate: ship small leftovers (<15 min, inside this diff, no design decision) into THIS PR, and propose as issues only follow-ups that clear the issue bar (a YES with evidence on one of the five impact questions), at most 3, filing only the ones the user selects
+MUST  run the Phase 12b follow-up sweep BEFORE the disposition gate: ship small leftovers (<15 min, inside this diff, no design decision) into THIS PR, and propose as issues only follow-ups that clear the issue bar (a YES with evidence on one of the six impact questions), at most 3, filing only the ones the user selects
 MUST  fix only items RELATED to the change (e.g. lint/type/test failures the change caused, review nits on the diff); for unrelated/pre-existing/architectural problems, REPORT them to the user and do NOT fix them
 MUST  converge the babysit loop — cap fix rounds, and if CI stays red on something unrelated or a review item recurs after a good-faith fix, stop and ask (gate #8)
 MUST  print the plain-language recap (Phase 13, STEP 14d) immediately BEFORE the final question — jargon-free, no paths or symbols, written for someone who was not watching
@@ -958,7 +958,7 @@ STEP 14b: Decide what ships in THIS PR and what becomes a follow-up issue
       Nits DECLINED at the cutoff do not return through this door: they were declined on
       merit, not on size.
     FOLLOW-UP ISSUE → it cannot ride along AND it clears the ISSUE BAR: at least one
-      of these five answers YES, and you can cite the evidence in one line —
+      of these six answers YES, and you can cite the evidence in one line —
         1 User harm   a real user gets a wrong result, loses work or data, is blocked,
                       or has to work around it (report, prod log, repro, or a path
                       normal use reaches)
@@ -969,16 +969,19 @@ STEP 14b: Decide what ships in THIS PR and what becomes a follow-up issue
         4 Security    an exploitable path NOW, with the controls it gets past
         5 Team drag   a red or flaky required check, or a trap that ALREADY cost a
                       real run
+        6 Benefit     a significant gain users or the team would notice — measurably
+                      faster on a path people hit, a clearly better experience on a
+                      used flow, a simplification that unblocks named planned work
       No evidence counts as NO. A rare trigger is YES only when the damage is severe
       (data loss, cross-tenant leak, credential exposure). Unsure on one question: keep
       it as a candidate and name the open question in its option line; the user decides
       at the gate.
-    DROP → everything else, including its size. Defense in depth behind a control that
+    DROP → everything else, whatever its size. Defense in depth behind a control that
       holds, hypothetical edges, cleanup, refactors, renames, consistency, test gaps on
-      code with no known bug, "log more", docs polish: these answer NO to all five by
+      code with no known bug, "log more", docs polish: these answer NO to all six by
       default, however they were phrased by the reviewer. Say nothing about them.
     (The full catalog, and how to use it to sweep an existing backlog, is the
-    `issue-bar` skill. The five questions above are all this step needs.)
+    `issue-bar` skill. The six questions above are all this step needs.)
 
   Propose AT MOST 3 follow-ups. Each gets a one-line title and its YES as the why:
   "<question>: <evidence>". If nothing clears the bar, propose NONE and say so — an
@@ -1333,7 +1336,7 @@ CHECKLIST
 | Still fixing nits on the fourth fix push and beyond | Past the cutoff each nit costs a full CI cycle for nothing. Fix substantive items only; decline comment/wording nits with a one-line reason and move on. |
 | Waiting for the whole check suite before reading the reviews | Poll for the first signal. A review that lands mid-run is actionable now, and pushing its fix supersedes the running checks anyway — reading it early is what makes the turnaround short. |
 | Filing a follow-up issue for something cheaper to fix than to file | If it is inside this diff, needs no design decision, and is <15 min, ship it in THIS PR. Issues are only for leftovers that clear the issue bar, capped at 3. |
-| Filing defense in depth, a rare mild edge case, or cleanup as a follow-up | Run the five issue-bar questions (user harm / money / stability / security / team drag). Five NOs is a DROP, however the reviewer phrased it. |
+| Filing defense in depth, a rare mild edge case, or cleanup as a follow-up | Run the six issue-bar questions (user harm / money / stability / security / team drag / significant benefit). Six NOs is a DROP, however the reviewer phrased it. |
 | Merging with the PR description that was written before babysitting | The body is written at open time from the plan; every fix push since changes what the PR does, and on a squash-merge that stale text becomes the repo's history. Refresh it in STEP 14c and lead with a 1-2 sentence plain-language recap. |
 | Patching on when every round faults the previous round's fix | The nit cutoff will not catch this — the findings are all substantive. Count fixes-of-fixes; three rounds running means the design is wrong, so stop at gate #8 and restructure rather than adding another guard with another edge. |
 | Renaming a placeholder or rule and updating only where it is defined | Grep the changed files for the old form before committing. A stated rule contradicting another stated rule is a correctness defect — the reader cannot tell which is current — and it is worse than the ambiguity it replaced. |
