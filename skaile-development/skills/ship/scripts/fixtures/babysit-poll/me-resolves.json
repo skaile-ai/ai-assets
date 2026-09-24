@@ -1,0 +1,76 @@
+{
+  "user": "Frozen666",
+  "commits": {
+    "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c": "2026-09-22T11:39:30Z",
+    "6fbd036193b60f63a9584db0718911148c922f91": "2026-09-22T11:56:40Z"
+  },
+  "polls": {
+    "1": {
+      "pr": {
+        "headRefOid": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+        "mergeStateStatus": "BLOCKED",
+        "reviewDecision": "",
+        "reviews": [],
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "workflowName": "CI",
+            "name": "Detect CI scope",
+            "status": "COMPLETED",
+            "conclusion": "SUCCESS"
+          },
+          {
+            "__typename": "CheckRun",
+            "workflowName": "CI",
+            "name": "Build & Test",
+            "status": "IN_PROGRESS",
+            "conclusion": ""
+          },
+          {
+            "__typename": "CheckRun",
+            "workflowName": "Claude Code Review",
+            "name": "claude-review",
+            "status": "IN_PROGRESS",
+            "conclusion": ""
+          }
+        ]
+      },
+      "review_comments": [],
+      "issue_comments": [
+        {
+          "id": 300,
+          "user": {
+            "login": "Frozen666",
+            "type": "User"
+          },
+          "created_at": "2026-09-22T11:40:20Z",
+          "updated_at": "2026-09-22T11:40:20Z",
+          "body": "declined (nit, no push)",
+          "html_url": "https://github.com/o/r/pull/7#issuecomment-300"
+        },
+        {
+          "id": 301,
+          "user": {
+            "login": "Frozen666",
+            "type": "User"
+          },
+          "created_at": "2026-09-22T11:40:25Z",
+          "updated_at": "2026-09-22T11:40:25Z",
+          "body": "an unrecorded reply",
+          "html_url": "https://github.com/o/r/pull/7#issuecomment-301"
+        },
+        {
+          "id": 302,
+          "user": {
+            "login": "peteralbert",
+            "type": "User"
+          },
+          "created_at": "2026-09-22T11:40:30Z",
+          "updated_at": "2026-09-22T11:40:30Z",
+          "body": "a reviewer",
+          "html_url": "https://github.com/o/r/pull/7#issuecomment-302"
+        }
+      ]
+    }
+  }
+}
