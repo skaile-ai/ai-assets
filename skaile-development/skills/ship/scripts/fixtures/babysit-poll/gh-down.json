@@ -1,0 +1,12 @@
+{
+  "user": null,
+  "commits": {
+    "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c": "2026-09-22T11:39:30Z",
+    "6fbd036193b60f63a9584db0718911148c922f91": "2026-09-22T11:56:40Z"
+  },
+  "polls": {
+    "1": {
+      "fail": true
+    }
+  }
+}

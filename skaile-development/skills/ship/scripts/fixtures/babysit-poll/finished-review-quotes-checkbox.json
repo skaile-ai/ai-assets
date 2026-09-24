@@ -1,0 +1,94 @@
+{
+  "user": null,
+  "commits": {
+    "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c": "2026-09-22T11:39:30Z",
+    "6fbd036193b60f63a9584db0718911148c922f91": "2026-09-22T11:56:40Z"
+  },
+  "polls": {
+    "1": {
+      "pr": {
+        "headRefOid": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+        "mergeStateStatus": "BLOCKED",
+        "reviewDecision": "",
+        "reviews": [],
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "workflowName": "CI",
+            "name": "Detect CI scope",
+            "status": "COMPLETED",
+            "conclusion": "SUCCESS"
+          },
+          {
+            "__typename": "CheckRun",
+            "workflowName": "CI",
+            "name": "Build & Test",
+            "status": "COMPLETED",
+            "conclusion": "FAILURE"
+          },
+          {
+            "__typename": "CheckRun",
+            "workflowName": "Claude Code",
+            "name": "claude",
+            "status": "COMPLETED",
+            "conclusion": "SKIPPED"
+          },
+          {
+            "__typename": "CheckRun",
+            "workflowName": "Claude Code Review",
+            "name": "claude-review",
+            "status": "COMPLETED",
+            "conclusion": "SUCCESS"
+          }
+        ]
+      },
+      "review_comments": [],
+      "issue_comments": [
+        {
+          "id": 910,
+          "user": {
+            "login": "claude[bot]",
+            "type": "Bot"
+          },
+          "created_at": "2026-09-22T11:38:00Z",
+          "updated_at": "2026-09-22T11:40:40Z",
+          "body": "### Reviewing PR #4949 <img src=\"https://github.com/user-attachments/assets/5ac382c7-e004-429b-8e35-7feb3e8f9c6f\" width=\"14px\" height=\"14px\" style=\"vertical-align: middle; margin-left: 4px;\" />\n\n- [ ] Read the branch diff against `origin/main`\n- [ ] Review Phase 12 babysit loop changes\n- [ ] Review Phase 12b follow-up sweep\n- [ ] Post review\n\n[View job run](https://github.com/skaile-ai/platform/actions/runs/35725564596) · `chore/ship-babysit`",
+          "html_url": "https://github.com/o/r/pull/7#issuecomment-910"
+        },
+        {
+          "id": 911,
+          "user": {
+            "login": "claude[bot]",
+            "type": "Bot"
+          },
+          "created_at": "2026-09-22T11:40:15Z",
+          "updated_at": "2026-09-22T11:40:50Z",
+          "body": "**Claude finished @Frozen666's task in 2m 13s** —— [View job](https://github.com/skaile-ai/platform/actions/runs/35723570306)\n\n---\n### Re-review: PR #4949 — `ship` skill babysit changes\n\n- [x] Read the new commit `b92063876` against `8dadaaada`\n- [x] Re-check the 5 findings from the previous round\n- [x] Verify the corrected `gh` commands against the live API\n- [x] Post review\n\n`b92063876` addresses **all five** findings from the previous round, and the corrections hold up against the live API — I re-ran each call on this PR rather than taking the commit's word for it. The three-source poll is the right shape: it is the only combination that carries a commit oid on every head-scoped signal, and the commit says so explicitly instead of leaving it as folklore.\n\n### Previous-round findings\n\n| # | Finding | Status |\n|---|---|---|\n| 1 | `reviewThreads` is not a `gh pr view --json` field; SHA filter had nothing to read; `headRefOid` fetched-but-unused | **Addressed.** `reviewThreads` is gone with a note on *why* the whole call exits non-zero. `headRefOid` is now the SHA authority over the local worktree HEAD, with the divergence rationale. The scope rules name the right accessors — verified: `reviews[]` → `{\"commit\":{\"oid\":\"8dadaaad…\"}}`, `pulls/4949/comments[]` → `{\"commit_id\":\"8dadaaad…\",\"original_commit_id\":\"8dadaaad…\"}`. |\n| 2 | Consumed-by-id inverts against a `track_progress` sticky comment | **Addressed, and the fix is verified live.** Keying on (id, `updated_at`) from the REST issue-comments endpoint works precisely because the edit-in-place shows up there — the previous round's comment reads `created_at 11:42:03` / `updated_at 11:46:02` under one id. The `- [ ]`-means-spinner rule is spelled out too. |\n| 3 | Cutoff counted in a unit change (1) redefined | **Addressed.** `fix_rounds` is a separate counter incremented only on an actual push, the cutoff gates on it, `MAX_ROUNDS` is 6 → 10 as the runaway guard, and the reason the two must not be one counter is written down. Propagated through the summary table, MUST list, `triage_finding`, `classify_babysit_item`, the checklist and the anti-patterns table. |\n| 4 | 12b re-entry unaccounted | **Addressed.** Shared counters/budget, 12b runs at most once, `EMIT babysit_done` moved past the re-entry, and Phase 13 now has an explicit \"CI running\" branch with the note that `mergeStateStatus,mergeable` catches BLOCKED but not PENDING. |\n| 5 | Nit: empty rollup right after a push reads as `no-checks` | **Addressed.** ≥3 consecutive empty polls **and** ≥60s since the push, with the observation that a genuinely CI-less repo trips it a minute later at no cost. |\n\n### New findings on this commit\n\n**Important**\n\n| # | Where | What |\n|---|---|---|\n| 1 | [L753](https://github.com/skaile-ai/platform/pull/4949#discussion_r4071270627) | The loop can still spin on its own signal — the author just changed. (c) replies on threads *after* pushing, so those replies carry the new head's `commit_id` and are unconsumed at the new head SHA. The break fires, (b) finds nothing, a round burns. Worst on the decline path, which replies once per declined nit in exactly the rounds where the budget is tightest. One discard rule next to the SHA-scope list fixes it. |\n\n**Nits**\n\n- [L676](https://github.com/skaile-ai/platform/pull/4949#discussion_r4071270836) — the `- [ ]`-is-a-spinner test is stated over all top-level comments, so a human comment containing an unchecked task box is permanently ignored rather than deferred.\n- [L742](https://github.com/skaile-ai/platform/pull/4949#discussion_r4071272050) — `declined (nit, fix_round <F>)` is off by one (`fix_rounds` increments after the push), contradicting L919's `from fix push <NIT_CUTOFF_ROUND>+1 on`.\n- [L770](https://github.com/skaile-ai/platform/pull/4949#discussion_r4071272336) — Phase 12's \"Babysit done…\" print survives alongside 12b's new one; with the re-entry that's three prints for one babysit, the first two understating `<R>`.\n\n### Checked and fine\n\n- The cutoff arithmetic is consistent end to end: `fix_rounds < 3` at evaluation time means pushes 1–3 fix nits and push 4 declines, matching \"the fourth fix push onward\" and the `+1` in the final report header.\n- Every downstream mention of the old round-based cutoff was updated — I grepped for stragglers and found none.\n- Version 1.3.0 → 1.3.1 is right for a correctness fix to an unreleased-elsewhere skill; the #4944 drift note is untouched and still accurate.\n- Still no changeset needed: `.claude/**` is outside `changeset-check.yml`'s paths and `ship` is not in `scripts/embed-builtin-skills.ts`.\n\nCarrying forward, unchanged and still not a PR defect: this checkout's working tree holds a stale `version: 1.1.0` copy of the file while `HEAD` has 1.3.1. I reviewed `git show HEAD:…`, not the working tree — worth a glance locally in case it is more than a runner artifact.\n\n*Nothing implemented — review only.*\n · branch [`chore/ship-babysit`](https://github.com/skaile-ai/platform/tree/chore/ship-babysit)",
+          "html_url": "https://github.com/o/r/pull/7#issuecomment-911"
+        },
+        {
+          "id": 912,
+          "user": {
+            "login": "review-bot[bot]",
+            "type": "Bot"
+          },
+          "created_at": "2026-09-22T11:40:16Z",
+          "updated_at": "2026-09-22T11:40:51Z",
+          "body": "---\n### Re-review: PR #4949 — `ship` skill babysit changes\n\n- [x] Read the new commit `b92063876` against `8dadaaada`\n- [x] Re-check the 5 findings from the previous round\n- [x] Verify the corrected `gh` commands against the live API\n- [x] Post review\n\n`b92063876` addresses **all five** findings from the previous round, and the corrections hold up against the live API — I re-ran each call on this PR rather than taking the commit's word for it. The three-source poll is the right shape: it is the only combination that carries a commit oid on every head-scoped signal, and the commit says so explicitly instead of leaving it as folklore.\n\n### Previous-round findings\n\n| # | Finding | Status |\n|---|---|---|\n| 1 | `reviewThreads` is not a `gh pr view --json` field; SHA filter had nothing to read; `headRefOid` fetched-but-unused | **Addressed.** `reviewThreads` is gone with a note on *why* the whole call exits non-zero. `headRefOid` is now the SHA authority over the local worktree HEAD, with the divergence rationale. The scope rules name the right accessors — verified: `reviews[]` → `{\"commit\":{\"oid\":\"8dadaaad…\"}}`, `pulls/4949/comments[]` → `{\"commit_id\":\"8dadaaad…\",\"original_commit_id\":\"8dadaaad…\"}`. |\n| 2 | Consumed-by-id inverts against a `track_progress` sticky comment | **Addressed, and the fix is verified live.** Keying on (id, `updated_at`) from the REST issue-comments endpoint works precisely because the edit-in-place shows up there — the previous round's comment reads `created_at 11:42:03` / `updated_at 11:46:02` under one id. The `- [ ]`-means-spinner rule is spelled out too. |\n| 3 | Cutoff counted in a unit change (1) redefined | **Addressed.** `fix_rounds` is a separate counter incremented only on an actual push, the cutoff gates on it, `MAX_ROUNDS` is 6 → 10 as the runaway guard, and the reason the two must not be one counter is written down. Propagated through the summary table, MUST list, `triage_finding`, `classify_babysit_item`, the checklist and the anti-patterns table. |\n| 4 | 12b re-entry unaccounted | **Addressed.** Shared counters/budget, 12b runs at most once, `EMIT babysit_done` moved past the re-entry, and Phase 13 now has an explicit \"CI running\" branch with the note that `mergeStateStatus,mergeable` catches BLOCKED but not PENDING. |\n| 5 | Nit: empty rollup right after a push reads as `no-checks` | **Addressed.** ≥3 consecutive empty polls **and** ≥60s since the push, with the observation that a genuinely CI-less repo trips it a minute later at no cost. |\n\n### New findings on this commit\n\n**Important**\n\n| # | Where | What |\n|---|---|---|\n| 1 | [L753](https://github.com/skaile-ai/platform/pull/4949#discussion_r4071270627) | The loop can still spin on its own signal — the author just changed. (c) replies on threads *after* pushing, so those replies carry the new head's `commit_id` and are unconsumed at the new head SHA. The break fires, (b) finds nothing, a round burns. Worst on the decline path, which replies once per declined nit in exactly the rounds where the budget is tightest. One discard rule next to the SHA-scope list fixes it. |\n\n**Nits**\n\n- [L676](https://github.com/skaile-ai/platform/pull/4949#discussion_r4071270836) — the `- [ ]`-is-a-spinner test is stated over all top-level comments, so a human comment containing an unchecked task box is permanently ignored rather than deferred.\n- [L742](https://github.com/skaile-ai/platform/pull/4949#discussion_r4071272050) — `declined (nit, fix_round <F>)` is off by one (`fix_rounds` increments after the push), contradicting L919's `from fix push <NIT_CUTOFF_ROUND>+1 on`.\n- [L770](https://github.com/skaile-ai/platform/pull/4949#discussion_r4071272336) — Phase 12's \"Babysit done…\" print survives alongside 12b's new one; with the re-entry that's three prints for one babysit, the first two understating `<R>`.\n\n### Checked and fine\n\n- The cutoff arithmetic is consistent end to end: `fix_rounds < 3` at evaluation time means pushes 1–3 fix nits and push 4 declines, matching \"the fourth fix push onward\" and the `+1` in the final report header.\n- Every downstream mention of the old round-based cutoff was updated — I grepped for stragglers and found none.\n- Version 1.3.0 → 1.3.1 is right for a correctness fix to an unreleased-elsewhere skill; the #4944 drift note is untouched and still accurate.\n- Still no changeset needed: `.claude/**` is outside `changeset-check.yml`'s paths and `ship` is not in `scripts/embed-builtin-skills.ts`.\n\nCarrying forward, unchanged and still not a PR defect: this checkout's working tree holds a stale `version: 1.1.0` copy of the file while `HEAD` has 1.3.1. I reviewed `git show HEAD:…`, not the working tree — worth a glance locally in case it is more than a runner artifact.\n\n*Nothing implemented — review only.*\n · branch [`chore/ship-babysit`](https://github.com/skaile-ai/platform/tree/chore/ship-babysit)",
+          "html_url": "https://github.com/o/r/pull/7#issuecomment-912"
+        },
+        {
+          "id": 913,
+          "user": {
+            "login": "claude[bot]",
+            "type": "Bot"
+          },
+          "created_at": "2026-09-22T11:40:17Z",
+          "updated_at": "2026-09-22T11:40:52Z",
+          "body": "**Claude finished @Frozen666's task in 1m 2s** —— [View job](https://github.com/o/r/actions/runs/1)\n\n---\n- [x] Read the diff\n- [ ] Post inline comments\n\nNo issues found.",
+          "html_url": "https://github.com/o/r/pull/7#issuecomment-913"
+        }
+      ]
+    }
+  }
+}

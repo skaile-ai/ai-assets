@@ -16,7 +16,7 @@ description: >-
   existing code, for plans or design proposals, for filing an issue when implementation is
   explicitly deferred, for throwaway local experiments, or for work spanning several
   repositories.
-version: 1.4.0
+version: 1.5.0
 metadata:
   tags:
   - "ship"
@@ -194,11 +194,8 @@ READS
   skills/git/references/commit-spec.md            — commit message format
   gh auth status                                  — verify GitHub auth before issue/PR creation
   gh label list / gh issue list / gh pr ...       — labels, dup detection, PR + CI + review state
-  gh pr view --json headRefOid,reviews,statusCheckRollup,mergeStateStatus
-                                                  — the babysit poll's head SHA, reviews and check rollup (Phase 12)
-  gh api repos/<owner>/<repo>/pulls/<n>/comments  — inline review comments WITH `original_commit_id` (the poll's staleness key)
-  gh api repos/<owner>/<repo>/issues/<n>/comments — top-level review comments WITH `updated_at` (no other surface exposes it)
-  gh api user                                     — own login, to discard self-authored signals (403s under an App token; see Phase 12)
+  scripts/babysit-poll.sh (this skill)            — the Phase 12 poll: reads `gh pr view`, the pulls/ and issues/ comment
+                                                    endpoints and `gh api user`; keeps its state in a per-PR dir
 
 WRITES
   GitHub issue on <repo's slug>                   — opened up front (category label if it exists + `agent`, assigned @me); reused if `issue` is passed
@@ -661,175 +658,76 @@ STEP 14: Drive the PR to a clean, reviewed state
         A review that arrives while tests are still running is actionable NOW, and
         pushing its fix supersedes the in-flight run anyway, so reading it early
         SHORTENS the turnaround instead of wasting a cycle.
-        head_sha = the PR's `headRefOid` — NOT the local worktree HEAD. Reviews are
-        attached to what GitHub actually has, and the two diverge whenever a push did not
-        land; filtering live reviews against a local SHA discards all of them until the
-        15-min cap. Read it in FULL; never poll against a truncated or remembered SHA
-        (a padded SHA matches on poll 1).
-        $ gh pr view <pr_number> --repo <github_slug> --json headRefOid -q .headRefOid
 
-        Poll every ~20s (wall-clock cap ~15 min with no signal at all → gate #8). THREE
-        sources, because no single one carries every signal WITH its commit:
-        $ gh pr view <pr_number> --repo <github_slug> \
-            --json headRefOid,reviews,reviewDecision,mergeStateStatus,statusCheckRollup
-        $ gh api repos/<owner>/<repo>/pulls/<pr_number>/comments    # inline review comments
-        $ gh api repos/<owner>/<repo>/issues/<pr_number>/comments   # top-level comments
-        There is NO `reviewThreads` field on `gh pr view --json`. Asking for one makes the
-        WHOLE call exit non-zero, so the loop gets no payload at all — and since this poll
-        is now the only data source, that failure is silent and total. Thread RESOLUTION
-        state needs `gh api graphql`; you rarely need it here.
+        The poll is a script, `scripts/babysit-poll.sh` in this skill's directory. Its
+        edges are pinned by `babysit-poll.test.sh` beside it; do NOT re-implement them
+        by hand here, and change them only there, with a test.
+        $ POLL=<this skill's base directory>/scripts/babysit-poll.sh
+        $ STATE="${TMPDIR:-/tmp}/babysit-<owner>-<repo>-<pr_number>"   # one per PR, all rounds; never inside the worktree
+        $ "$POLL" poll --state "$STATE" --repo <github_slug> --pr <pr_number> \
+            [--pushed-at <UTC time of YOUR last push, `date -u +%s` right after it>]
+        It polls every 20s for up to 15 min and prints ONE JSON object:
+          result      "signal" | "ci-terminal" | "no-checks" | "timeout" (exit 4) | "error" (exit 3)
+          signals[]   the new reviews / inline comments / top-level comments, with body,
+                      author, path/line and URL — this is (b)'s input
+          checks      {total, all_terminal, failed[], pending[]}; ci_terminal is true when
+                      the suite finished stably in the same poll
+          bot_review_in_flight   a review bot's progress placeholder is open for this push
+          review_decision, merge_state, head_sha
+        "timeout" or "error" (exit 4 / 3 / 2) → gate #8, quoting the JSON. On "signal" go straight to (b)
+        WITH CHECKS STILL RUNNING. A `cancelled` check left by a superseded push is normal,
+        never an actionable item.
+        Pass --pushed-at after every push of your own: without it the script has to
+        bracket the push time from the commit date and from when it first saw the head,
+        and it errs toward waiting longer.
 
-        SHA-scope every signal and DISCARD anything tied to an older commit — it is stale
-        from an earlier round and you already handled it:
-          - `reviews[]` → `.commit.oid`
-          - `pulls/<n>/comments[]` → judge staleness on `.original_commit_id`, NEVER
-            `.commit_id`. GitHub re-anchors `commit_id` FORWARD to the newest commit a
-            comment still applies to, so a comment from round N can read the current head;
-            `original_commit_id` is the commit it was written against and never moves.
-            The re-anchoring is per-comment (it follows whether that line survived the
-            new diff), so it is not predictable from here — two siblings from one review
-            can end up on different commits.
-          - `issues/<n>/comments[]` → carries NO commit. Scope it by time instead: ignore
-            any top-level comment whose `updated_at` predates the push of head_sha.
-
-        DISCARD every review, comment and reply authored by YOU. Your own reply is not a
-        signal — it is an echo of one you already consumed.
-        PRIMARY rule: track the id of every comment and reply YOU post — step (c) posts
-        them, so it has the ids from `gh`'s own output — and discard those. Identity by
-        construction, no lookup, works under any token.
-        $ me=$(gh api user -q .login)   # cross-check only; may fail, see below
-        Use that only as a cross-check, and do NOT assume it is the PR author: `ship`
-        pushes and replies as whatever `gh` is authenticated as, which on a PR you did not
-        open is someone else — a rule written against the PR author inverts, discarding
-        the genuine reviewer while keeping your own echoes. Under a GitHub App
-        installation token the call 403s ("Resource not accessible by integration"),
-        because such a token has no authenticated user; `me` is then EMPTY. An empty `me`
-        means "fall back to the id list" — never "no comments are mine", which would
-        silently disable the only guard against breaking on your own replies, in exactly
-        the bot-token setup where this loop runs unattended.
-        Step (c) posts its thread replies AFTER pushing, and they reach the current head
-        by two different routes:
-          - `issues/<n>/comments` — a `gh pr comment` decline carries no commit and is
-            scoped by `updated_at` > push, so it always lands in scope. This is the main
-            one, and it fires on EVERY declined nit past the cutoff, i.e. exactly where
-            the budget is tightest.
-          - `pulls/<n>/comments` — an inline reply inherits its PARENT's `commit_id`, not
-            the head (verified: 9/9 replies on this skill's own PR matched their parent).
-            So a reply to an older thread carries the older commit and the SHA scope
-            discards it anyway — but if the re-anchoring above moved the parent onto the
-            new head, the reply comes with it.
-        Without this rule the break fires on them, (b) finds nothing, and a round is
-        burned. SHA-scoping does not catch it: that guard is keyed on identity-of-signal,
-        not authorship.
-
-        IGNORE progress placeholders. A review bot configured with `track_progress` (this
-        repo's is) posts ONE top-level comment when the run STARTS and then EDITS THAT SAME
-        COMMENT IN PLACE with the finished review minutes later. Two consequences:
-          - a Bot comment is a SPINNER while it ANNOUNCES WORK IN PROGRESS: an unchecked
-            `- [ ]` box, or in-progress wording like "Claude Code is working… I'll analyze
-            this and get back to you" (the placeholder for a reply-triggered run, which
-            carries no checklist at all, so a test hinging on the checkbox shape misses
-            it). Never break on one: (b) would find nothing and burn a round on the bot's
-            own progress bar.
-            Do NOT define a spinner as "no findings". A FINISHED review with nothing to
-            report — the clean pass — also has no findings section, and it is how this
-            loop is SUPPOSED to end: classing it as a spinner leaves (e)'s "bots have
-            completed" permanently unsatisfied and runs to MAX_ROUNDS. Finished and empty
-            is a completed review; announcing work is a spinner.
-            Apply the spinner test ONLY to `user.type == "Bot"` (e.g. `claude[bot]`). A
-            human writing "looks good, but `- [ ] worth a test later`" must still count as
-            a review, or it never breaks the poll for as long as that box stays unchecked.
-          - the comment id is NOT a usable consumed-key, because the real review arrives
-            under the SAME id — marking the placeholder consumed would silently skip the
-            round-1 review. Key on (id, hash of the body), per the consumed-set rule
-            below: the spinner body differs from the review that replaces it, so the hash
-            tells them apart. Read them from the REST issue-comments endpoint;
-            `gh pr view --json comments` exposes neither a body-stable edit signal nor a
-            commit, which is the one reason that endpoint is used here.
-
-        BREAK out of the poll as soon as EITHER:
-          - a review bot or a human has posted a review, an inline comment, or a FINISHED
-            top-level comment for head_sha that you have NOT yet consumed → go straight to
-            (b) WITH CHECKS STILL RUNNING; do not wait for them, OR
-          - every check in statusCheckRollup has a terminal conclusion AND the rollup has
-            been non-empty, all-terminal and UNCHANGED IN SIZE for ≥2 consecutive polls
-            AND ≥60s have passed since the push, or
-          - ci_state = "no-checks".
-        The stability clause is not belt-and-braces: `statusCheckRollup` is a GROWING set,
-        not a fixed one. A re-triggered workflow is absent from it until it registers, so
-        for a few seconds after a push every check already listed reads terminal and the
-        break fires on a suite that is not done. This bit the very loop that wrote this
-        rule: 16/16 terminal, break taken, and `claude-review` appeared as IN_PROGRESS
-        moments later. Cross-check: an OPEN Bot spinner comment means a review is in
-        flight no matter what the rollup says — never conclude "bots have completed" past
-        one. BOUND IT by `created_at`: only a spinner created AFTER the push of head_sha
-        counts as in flight. An earlier one never is, whichever way the repo is wired —
-        and do NOT assume which, because it differs per repo:
-          - IF the review workflow cancels superseded runs (a per-PR concurrency group
-            with `cancel-in-progress: true`), the run is dead and its progress comment
-            sits at unchecked boxes FOREVER. Check before relying on either branch: a
-            workflow with no `concurrency:` block does NOT cancel on push.
-          - IF it does NOT cancel, the superseded run keeps going and will post — but
-            against the OLD head, which the staleness scope above discards anyway.
-        Either way an earlier spinner must not count as in flight. Treating one as such
-        makes (e)'s "bots have completed" permanently false from the second fix push on —
-        the same stall as the spinner bug above, re-entered through the cross-check that
-        fixed it. Use `created_at`, NOT `updated_at`: the metadata bumps documented below
-        can carry an old spinner past a time filter keyed on the latter.
-
-        Set ci_state = "no-checks" ONLY after the rollup has come back EMPTY on ≥3
-        consecutive polls AND ≥60s have passed since the push. An empty
-        `statusCheckRollup` is ALSO what a CI-having repo returns for the first ~10-30s
-        while workflows queue — concluding "no-checks" there exits the loop and offers a
-        squash-merge on a PR whose suite simply had not started yet. A genuinely CI-less
-        repo (content repos like ai-assets/infra, workspace-isolated marketing) stays
-        empty and trips the condition a minute later at no cost.
-
-        Mark each consumed signal consumed GLOBALLY, keyed on (id, hash of the BODY) —
-        NOT per head_sha, and NOT on `updated_at`. GitHub bumps `updated_at` for thread
-        metadata alone — replies, resolution, round bookkeeping — including bumps this
-        loop causes itself: on this skill's own PR nine bot comments bumped in two tight
-        batches (five inside 3 seconds), one of them a comment whose `commit_id` never
-        moved, so a push is not the trigger. A body hash is immune to that and still
-        solves the case the timestamp was chosen for, since a spinner body genuinely
-        differs from the review that later replaces it under the same id.
-        `reviews[]` is keyed on `id` ALONE: it carries no edit timestamp at all (the
-        fields are `author, authorAssociation, body, commit, id, includesCreatedEdit,
-        reactionGroups, state, submittedAt`) and its `commit.oid` never moves. Do NOT
-        reach for `updatedAt` to fill the gap — that IS a valid `--json` field, so the
-        call succeeds, but it is the PR's last-activity time and changes on every event
-        on the PR, which would un-consume every review on almost every poll.
-        The consumed-set is the PRIMARY guard; the commit scoping above is a secondary
-        filter. When the two disagree, trust the consumed-set.
-        And GLOBAL, because a push must not un-consume anything: the signal did not
-        change, only the head did. Per-head keying looks equivalent and is not, because of
-        the re-anchoring above — an old comment that moves onto the new head arrives
-        unconsumed, passes the SHA scope, and is not caught by the authorship rule either
-        (its author is the reviewer). It then lands in (c)'s fingerprint check as a
-        REPEAT, which by that block's own rule means the fix did not satisfy the reviewer
-        → gate #8. So the cost is not a burned round; it is the loop stopping and
-        reporting a recurring item that was in fact accepted.
-        An already-consumed signal must NOT re-trigger the early break — otherwise (b)
-        finds nothing to do and the loop spins on its own signal.
-        `gh pr checks --watch` is the WRONG tool in this step: it blocks until the whole
-        suite finishes, which is exactly the latency this removes. Note also that it
-        exits 0 while checks are still pending. A `cancelled` check left behind by a
-        superseded push is normal — it is not a failure and never an actionable item.
+        What counts as a signal (the script decides; this is what it decides):
+          - a review, inline review comment, or FINISHED top-level comment on the PR's
+            current head (`headRefOid`, never the local HEAD), or one that landed on an
+            older commit AFTER the previous round's last poll — i.e. while you were fixing.
+            Inline comments are dated by `original_commit_id`: GitHub moves `commit_id`
+            forward onto newer commits.
+          - NOT an empty COMMENTED review: GitHub wraps every batch of inline comments in
+            one (a thread reply of yours included), and the comments are the signals.
+          - NOT a review or inline comment on an older commit posted AFTER your push: it
+            reviews a superseded commit.
+          - NOT anything you authored: record every comment/reply you post with
+            `"$POLL" own --state "$STATE" <id-or-url>` (the URL `gh pr comment` prints
+            works). The `gh api user` login is a cross-check only — it 403s under a GitHub
+            App token, and the script then relies on the id list alone.
+          - NOT a review bot's progress placeholder (an unchecked `- [ ]` at the start of a
+            line, or "…is working… get back to you"). The bot later EDITS the finished
+            review into the SAME comment id; that edit is the signal.
+          - NOT anything already delivered. Delivery consumes a signal for the whole PR,
+            keyed on comment id + body hash (reviews on id), so metadata bumps and
+            re-anchoring onto a new head never resurrect it, and an edited body does.
+        CI completion counts when the rollup is non-empty, all terminal and the SAME set of
+        checks on two consecutive polls, ≥60s after the push, with no review placeholder
+        created after the push still open. `statusCheckRollup` GROWS for a while after a
+        push, which is why one all-terminal reading is not enough. It is reported once per
+        outcome; re-polling with nothing new waits for a new signal. "no-checks" means the
+        rollup stayed empty for 3 polls and ≥60s (a CI-less content repo).
+        `gh pr checks --watch` is the WRONG tool here: it blocks until the whole suite
+        finishes (and exits 0 while checks are still pending).
 
     (b) Collect actionable items:
         - FAILED required checks (lint, typecheck, tests, changeset-check, build).
         - Review change-requests + inline review comments (bot e.g. claude-code-review,
           and any already-posted human reviews). Include STYLE NITS.
-        SKIP anything whose fingerprint is already in the `declined-set` — it was decided,
-        not left open, and re-collecting it is what makes an all-declined round loop.
-        EXCEPTION: if the item comes back as an EXPLICIT blocking change-request, or is
-        now claimed to be a correctness / security / data-loss defect, do NOT skip it —
-        remove it from the `declined-set` and escalate to gate #8 with your decline reason
-        and the reviewer's objection. A decline is YOUR severity call; a reviewer
-        contesting that call is new information, not a repeat. Without this the skip runs
-        before classification and before the severity filter, so the one item the cutoff
-        says is never declinable becomes unhearable once you have declined it once, and
-        (e) then counts it as addressed. "Do NOT re-litigate" binds you, not the reviewer.
+        For each item compute a fingerprint = <file>:<line-or-near> + <rule / short text>
+        and ask the script what it already knows about it:
+        $ "$POLL" item --state "$STATE" "<fingerprint>" [--blocking] [--defect]
+        Pass --blocking when the item is an EXPLICIT blocking change-request, --defect when
+        it is claimed to be a correctness / security / data-loss defect. It prints:
+          new       → classify and handle it below.
+          skip      → you DECLINED it in an earlier round; it is settled, do not collect it.
+                      Without this an all-declined round re-collects the same nits forever.
+          escalate  → you declined it, and the reviewer is now contesting that call as
+                      blocking or as a defect. The script has removed it from the declined
+                      set; go to gate #8 with your decline reason and the objection. A
+                      decline is YOUR severity call — "do NOT re-litigate" binds you, not
+                      the reviewer.
+          repeat    → you FIXED it in an earlier round and it came back (see (c)).
         For each item classify (PROCEDURE classify_babysit_item):
           RELATED  → caused/exposed by this change (our lint/type/test failure, a nit on a
                      line we touched, a missing changeset, a bot suggestion on our code, OR
@@ -850,11 +748,10 @@ STEP 14: Drive the PR to a clean, reviewed state
         Churn means the DESIGN is wrong, not the wording: each new guard is adding a new
         edge, and ten more rounds of patching will not converge. Restructure instead.
 
-        For each, compute a fingerprint = <file>:<line-or-near> + <rule / short text>.
-        IF a fingerprint MATCHES one already in the seen-set (you fixed it in an earlier
-        round and it came back), the fix didn't satisfy the reviewer or the bot disagrees
-        with it → do NOT re-fix blindly; escalate to gate #8 (report the recurring item +
-        your reasoning, ask how to proceed) rather than burning rounds.
+        IF (b)'s `item` answered `repeat` (you fixed it in an earlier round and it came
+        back), the fix didn't satisfy the reviewer or the bot disagrees with it → do NOT
+        re-fix blindly; escalate to gate #8 (report the recurring item + your reasoning,
+        ask how to proceed) rather than burning rounds.
 
         Severity filter — NIT_CUTOFF_ROUND = 3, counted in `fix_rounds` (pushes), NOT
         in `babysit_round` (loop iterations):
@@ -880,15 +777,11 @@ STEP 14: Drive the PR to a clean, reviewed state
           Rationale: past the third fix push each nit costs a full CI cycle and changes
           nothing a reader would notice. Nit loops are the known way this skill stalls.
 
-        Record every DECLINED item's fingerprint in a `declined-set`. A decline is a
-        decision, not an open item, and without this it has no terminal state: the
-        seen-set holds only FIXED fingerprints, so a declined nit is not a REPEAT, (b)
-        re-collects it from every poll, the severity filter declines it again, and the
-        round ends here — costing a poll and producing nothing until MAX_ROUNDS trips
-        gate #8, i.e. asking the user how to proceed on a PR the skill has already decided
-        is done. That is this change's own stall, moved from nine nit fixes to ten empty
-        polls. (b) SKIPS anything already in the `declined-set`, and (e) treats those
-        items as settled.
+        Record every DECLINED item so it has a terminal state:
+        $ "$POLL" decline --state "$STATE" "<fingerprint>"
+        Without it a declined nit is re-collected from every poll and declined again,
+        and the loop runs to MAX_ROUNDS on a PR it has already decided is done. (b) then
+        skips it, and (e) treats it as settled.
 
         IF NOTHING survived the severity filter — every item was declined, which past
         the cutoff is the COMMON round — skip the lint/commit/push block entirely: record
@@ -896,8 +789,9 @@ STEP 14: Drive the PR to a clean, reviewed state
         THROUGH to (d) and (e). Do NOT jump back to (a) — (c)'s `CONTINUE loop` below is
         correct only because that path PUSHED and has new CI to wait for. Here nothing
         was pushed: no new check run is coming, the rollup is already all-terminal from
-        the previous iteration, every remaining signal is in the consumed-set or the
-        declined-set, and the decline replies just posted are discarded as self-authored.
+        the previous iteration, every remaining signal is already delivered or
+        declined, and the decline replies just posted are discarded as self-authored
+        (record them with `own`).
         So (a) has nothing left that can break it and blocks to its ~15 min cap → gate #8,
         while (e) — which counts declined items as addressed and would exit cleanly — is
         never reached. Running the push block instead means `git commit` on an empty
@@ -918,8 +812,11 @@ STEP 14: Drive the PR to a clean, reviewed state
         $ git add -A && git commit -m "fix(<scope>): address review feedback (#<issue_number>)"
         $ git push origin <branch_name>
         fix_rounds += 1  (only here, only on an actual push)
-        Add each fixed item's fingerprint to the seen-set; reply briefly on resolved review
-        threads and mark them resolved where possible.
+        Record each fixed item with `"$POLL" fixed --state "$STATE" "<fingerprint>"`; reply
+        briefly on resolved review threads and mark them resolved where possible, and
+        record every reply you post with `"$POLL" own --state "$STATE" <id-or-url>` — an
+        unrecorded reply of yours reads as a new signal. Then re-poll with
+        `--pushed-at` set to the push you just made.
         CONTINUE loop. The new commit supersedes the running checks and re-triggers CI +
         bots — that cancellation is intended, not a failure.
 
@@ -929,7 +826,7 @@ STEP 14: Drive the PR to a clean, reviewed state
         not caused by us): note it; it will surface in Phase 13 as a merge blocker.
 
     (e) EXIT the loop when ALL hold:
-        - every required check is green, OR ci_state = "no-checks", OR the only red checks
+        - every required check is green, OR the poll returned "no-checks", OR the only red checks
           are unrelated + recorded,
         - automated review bots have completed for the latest commit (or there are none),
         - no unaddressed RELATED change-requests/comments remain — reviewer-blessed

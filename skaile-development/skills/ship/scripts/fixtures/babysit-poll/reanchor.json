@@ -1,0 +1,307 @@
+{
+  "user": null,
+  "commits": {
+    "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c": "2026-09-22T11:39:30Z",
+    "6fbd036193b60f63a9584db0718911148c922f91": "2026-09-22T11:56:40Z"
+  },
+  "polls": {
+    "1": {
+      "pr": {
+        "headRefOid": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+        "mergeStateStatus": "BLOCKED",
+        "reviewDecision": "",
+        "reviews": [
+          {
+            "id": "PRR_r1",
+            "author": {
+              "login": "claude"
+            },
+            "authorAssociation": "NONE",
+            "body": "",
+            "submittedAt": "2026-09-22T11:40:20Z",
+            "includesCreatedEdit": false,
+            "reactionGroups": [],
+            "state": "COMMENTED",
+            "commit": {
+              "oid": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c"
+            }
+          },
+          {
+            "id": "PRR_cr1",
+            "author": {
+              "login": "peteralbert"
+            },
+            "authorAssociation": "MEMBER",
+            "body": "Blocking: the loop never exits on an empty rollup.",
+            "submittedAt": "2026-09-22T11:40:25Z",
+            "includesCreatedEdit": false,
+            "reactionGroups": [],
+            "state": "CHANGES_REQUESTED",
+            "commit": {
+              "oid": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c"
+            }
+          }
+        ],
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "workflowName": "CI",
+            "name": "Detect CI scope",
+            "status": "COMPLETED",
+            "conclusion": "SUCCESS"
+          },
+          {
+            "__typename": "CheckRun",
+            "workflowName": "CI",
+            "name": "Build & Test",
+            "status": "IN_PROGRESS",
+            "conclusion": ""
+          },
+          {
+            "__typename": "CheckRun",
+            "workflowName": "Claude Code Review",
+            "name": "claude-review",
+            "status": "IN_PROGRESS",
+            "conclusion": ""
+          }
+        ]
+      },
+      "review_comments": [
+        {
+          "id": 101,
+          "user": {
+            "login": "claude[bot]",
+            "type": "Bot"
+          },
+          "commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "original_commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "path": "skills/ship/SKILL.md",
+          "line": null,
+          "original_line": 649,
+          "created_at": "2026-09-22T11:40:20Z",
+          "updated_at": "2026-09-22T11:40:20Z",
+          "body": "Rename this key.",
+          "in_reply_to_id": null,
+          "html_url": "https://github.com/o/r/pull/7#discussion_r101"
+        },
+        {
+          "id": 102,
+          "user": {
+            "login": "claude[bot]",
+            "type": "Bot"
+          },
+          "commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "original_commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "path": "skills/ship/SKILL.md",
+          "line": null,
+          "original_line": 649,
+          "created_at": "2026-09-22T11:40:20Z",
+          "updated_at": "2026-09-22T11:40:20Z",
+          "body": "This loop never exits.",
+          "in_reply_to_id": null,
+          "html_url": "https://github.com/o/r/pull/7#discussion_r102"
+        }
+      ],
+      "issue_comments": []
+    },
+    "2": {
+      "pr": {
+        "headRefOid": "6fbd036193b60f63a9584db0718911148c922f91",
+        "mergeStateStatus": "BLOCKED",
+        "reviewDecision": "",
+        "reviews": [
+          {
+            "id": "PRR_r1",
+            "author": {
+              "login": "claude"
+            },
+            "authorAssociation": "NONE",
+            "body": "",
+            "submittedAt": "2026-09-22T11:40:20Z",
+            "includesCreatedEdit": false,
+            "reactionGroups": [],
+            "state": "COMMENTED",
+            "commit": {
+              "oid": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c"
+            }
+          },
+          {
+            "id": "PRR_r0",
+            "author": {
+              "login": "claude"
+            },
+            "authorAssociation": "NONE",
+            "body": "ancient",
+            "submittedAt": "2026-09-22T11:31:40Z",
+            "includesCreatedEdit": false,
+            "reactionGroups": [],
+            "state": "COMMENTED",
+            "commit": {
+              "oid": "4a9114e4f0c2d1b3a5e6f7081928374655647382"
+            }
+          },
+          {
+            "id": "PRR_cr1",
+            "author": {
+              "login": "peteralbert"
+            },
+            "authorAssociation": "MEMBER",
+            "body": "Blocking: the loop never exits on an empty rollup.",
+            "submittedAt": "2026-09-22T11:40:25Z",
+            "includesCreatedEdit": false,
+            "reactionGroups": [],
+            "state": "CHANGES_REQUESTED",
+            "commit": {
+              "oid": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c"
+            }
+          }
+        ],
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "workflowName": "CI",
+            "name": "Detect CI scope",
+            "status": "COMPLETED",
+            "conclusion": "SUCCESS"
+          },
+          {
+            "__typename": "CheckRun",
+            "workflowName": "CI",
+            "name": "Build & Test",
+            "status": "IN_PROGRESS",
+            "conclusion": ""
+          },
+          {
+            "__typename": "CheckRun",
+            "workflowName": "Claude Code Review",
+            "name": "claude-review",
+            "status": "IN_PROGRESS",
+            "conclusion": ""
+          }
+        ]
+      },
+      "review_comments": [
+        {
+          "id": 99,
+          "user": {
+            "login": "claude[bot]",
+            "type": "Bot"
+          },
+          "commit_id": "6fbd036193b60f63a9584db0718911148c922f91",
+          "original_commit_id": "4a9114e4f0c2d1b3a5e6f7081928374655647382",
+          "path": "skills/ship/SKILL.md",
+          "line": null,
+          "original_line": 649,
+          "created_at": "2026-09-22T11:31:40Z",
+          "updated_at": "2026-09-22T11:31:40Z",
+          "body": "Written against an older commit, re-anchored onto the new head.",
+          "in_reply_to_id": null,
+          "html_url": "https://github.com/o/r/pull/7#discussion_r99"
+        },
+        {
+          "id": 101,
+          "user": {
+            "login": "claude[bot]",
+            "type": "Bot"
+          },
+          "commit_id": "6fbd036193b60f63a9584db0718911148c922f91",
+          "original_commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "path": "skills/ship/SKILL.md",
+          "line": null,
+          "original_line": 649,
+          "created_at": "2026-09-22T11:40:20Z",
+          "updated_at": "2026-09-22T11:40:20Z",
+          "body": "Rename this key.",
+          "in_reply_to_id": null,
+          "html_url": "https://github.com/o/r/pull/7#discussion_r101"
+        },
+        {
+          "id": 102,
+          "user": {
+            "login": "claude[bot]",
+            "type": "Bot"
+          },
+          "commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "original_commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "path": "skills/ship/SKILL.md",
+          "line": null,
+          "original_line": 649,
+          "created_at": "2026-09-22T11:40:20Z",
+          "updated_at": "2026-09-22T11:40:20Z",
+          "body": "This loop never exits.",
+          "in_reply_to_id": null,
+          "html_url": "https://github.com/o/r/pull/7#discussion_r102"
+        },
+        {
+          "id": 103,
+          "user": {
+            "login": "peteralbert",
+            "type": "User"
+          },
+          "commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "original_commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "path": "skills/ship/SKILL.md",
+          "line": null,
+          "original_line": 649,
+          "created_at": "2026-09-22T11:45:00Z",
+          "updated_at": "2026-09-22T11:45:00Z",
+          "body": "Landed while you were fixing: this drops page 2.",
+          "in_reply_to_id": null,
+          "html_url": "https://github.com/o/r/pull/7#discussion_r103"
+        },
+        {
+          "id": 105,
+          "user": {
+            "login": "Frozen666",
+            "type": "User"
+          },
+          "commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "original_commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "path": "skills/ship/SKILL.md",
+          "line": null,
+          "original_line": 649,
+          "created_at": "2026-09-22T11:46:40Z",
+          "updated_at": "2026-09-22T11:46:40Z",
+          "body": "Fixed in the next push.",
+          "in_reply_to_id": 101,
+          "html_url": "https://github.com/o/r/pull/7#discussion_r105"
+        },
+        {
+          "id": 106,
+          "user": {
+            "login": "claude[bot]",
+            "type": "Bot"
+          },
+          "commit_id": "6fbd036193b60f63a9584db0718911148c922f91",
+          "original_commit_id": "6fbd036193b60f63a9584db0718911148c922f91",
+          "path": "skills/ship/SKILL.md",
+          "line": null,
+          "original_line": 649,
+          "created_at": "2026-09-22T11:57:40Z",
+          "updated_at": "2026-09-22T11:57:40Z",
+          "body": "New finding on the new head.",
+          "in_reply_to_id": null,
+          "html_url": "https://github.com/o/r/pull/7#discussion_r106"
+        },
+        {
+          "id": 107,
+          "user": {
+            "login": "claude[bot]",
+            "type": "Bot"
+          },
+          "commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "original_commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "path": "skills/ship/SKILL.md",
+          "line": null,
+          "original_line": 649,
+          "created_at": "2026-09-22T11:58:15Z",
+          "updated_at": "2026-09-22T11:58:15Z",
+          "body": "From a review run of the superseded commit, posted after the push.",
+          "in_reply_to_id": null,
+          "html_url": "https://github.com/o/r/pull/7#discussion_r107"
+        }
+      ],
+      "issue_comments": []
+    }
+  }
+}
