@@ -181,6 +181,37 @@ agree.
 
 ## Authoring a flow as the agent
 
+**Two gates stand before every flow write, and the first is not the ordinary grant story.**
+`platform.create_flow` and `platform.revise_flow` are `effect` capabilities that always card,
+so a human approves each write. *Before* that, the **`platform.author_flows`** grant must
+already be in force for the scope the write targets. That grant is a **precondition**, not a
+card-skipper: with no grant the call is refused outright, and the refusal arrives as prose and
+nothing else — no card, no button, no structured remedy any screen renders. Relay it and stop;
+retrying changes nothing.
+
+The grant shows on screen as **Flow authoring**. Only these people can turn it on, in these
+two places:
+
+| Target scope | Who can turn it on | Where |
+| --- | --- | --- |
+| Project | an Owner of this project (the project owner, or a project member with the Owner role) | Project settings → Session defaults → Agent grants → Flow authoring |
+| Organization | an Owner of this organization | Organization settings → AI → Agent grants → Flow authoring |
+
+Three consequences to act on rather than retry:
+
+- **A project grant never authorizes an organization-scope write.** It must be re-issued at
+  organization scope. If organization-wide was not essential, offer to work at project scope —
+  the grant already in hand covers that.
+- **The account approving the card must itself be an Owner of the target scope.** A grant never
+  confers more authority than its approver holds, so re-granting cannot fix this; an Owner has
+  to be the one who approves the write.
+- **A grant dies with its grantor's authority.** If the person who issued it is no longer an
+  Owner, the grant is stale and an Owner must Revoke and then Grant again.
+
+You can neither mint, widen, nor request any of this yourself — see
+[Autonomy grants](agent.md). Name the settings path and the required role to the human, then
+ask them to try again.
+
 **Always declare `schemaVersion: 2`.** `platform.create_flow` and `platform.revise_flow`
 refuse any definition that does not carry its own, with exactly this message:
 
