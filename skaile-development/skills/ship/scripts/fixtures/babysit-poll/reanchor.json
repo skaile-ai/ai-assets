@@ -25,6 +25,21 @@
             "commit": {
               "oid": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c"
             }
+          },
+          {
+            "id": "PRR_cr1",
+            "author": {
+              "login": "peteralbert"
+            },
+            "authorAssociation": "MEMBER",
+            "body": "Blocking: the loop never exits on an empty rollup.",
+            "submittedAt": "2026-09-22T11:40:25Z",
+            "includesCreatedEdit": false,
+            "reactionGroups": [],
+            "state": "CHANGES_REQUESTED",
+            "commit": {
+              "oid": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c"
+            }
           }
         ],
         "statusCheckRollup": [
@@ -123,6 +138,21 @@
             "state": "COMMENTED",
             "commit": {
               "oid": "4a9114e4f0c2d1b3a5e6f7081928374655647382"
+            }
+          },
+          {
+            "id": "PRR_cr1",
+            "author": {
+              "login": "peteralbert"
+            },
+            "authorAssociation": "MEMBER",
+            "body": "Blocking: the loop never exits on an empty rollup.",
+            "submittedAt": "2026-09-22T11:40:25Z",
+            "includesCreatedEdit": false,
+            "reactionGroups": [],
+            "state": "CHANGES_REQUESTED",
+            "commit": {
+              "oid": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c"
             }
           }
         ],
@@ -252,6 +282,23 @@
           "body": "New finding on the new head.",
           "in_reply_to_id": null,
           "html_url": "https://github.com/o/r/pull/7#discussion_r106"
+        },
+        {
+          "id": 107,
+          "user": {
+            "login": "claude[bot]",
+            "type": "Bot"
+          },
+          "commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "original_commit_id": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
+          "path": "skills/ship/SKILL.md",
+          "line": null,
+          "original_line": 649,
+          "created_at": "2026-09-22T11:58:15Z",
+          "updated_at": "2026-09-22T11:58:15Z",
+          "body": "From a review run of the superseded commit, posted after the push.",
+          "in_reply_to_id": null,
+          "html_url": "https://github.com/o/r/pull/7#discussion_r107"
         }
       ],
       "issue_comments": []

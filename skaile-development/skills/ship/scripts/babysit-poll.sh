@@ -29,7 +29,13 @@ GH="${BABYSIT_GH:-gh}"
 NOW_CMD="${BABYSIT_NOW:-date +%s}"
 SLEEP_CMD="${BABYSIT_SLEEP:-sleep}"
 
-die() { echo "babysit-poll: $*" >&2; exit 2; }
+# Exit 2 = bad usage or unusable state. `poll` still prints a JSON error for it, so the
+# skill's "quote the JSON at gate #8" holds on every non-zero exit.
+die() {
+  echo "babysit-poll: $*" >&2
+  [ "${SUB:-}" = poll ] && jq -n --arg r "$*" '{result:"error", reason:$r}' 2>/dev/null
+  exit 2
+}
 now() { $NOW_CMD; }
 
 sha256() {
@@ -58,7 +64,7 @@ state_update() {
 
 to_epoch() { # ISO-8601 (GitHub's Z form) or bare epoch seconds
   case "$1" in
-    '' | *[!0-9]*) jq -rn --arg t "$1" '$t | sub("\\.[0-9]+"; "") | fromdateiso8601' 2>/dev/null || die "cannot parse time: $1" ;;
+    '' | *[!0-9]*) jq -rn --arg t "$1" '$t | sub("\\.[0-9]+"; "") | fromdateiso8601' 2>/dev/null ;; # non-zero on failure
     *) echo "$1" ;;
   esac
 }
@@ -146,6 +152,11 @@ resolve_me() {
 EVAL_JQ='
 def ep: if . == null then null else sub("\\.[0-9]+"; "") | fromdateiso8601 end;
 def after($t): $t != null and . != null and (ep > $t);
+# On an OLDER commit a review or inline comment is in scope only inside the fix window —
+# after the last poll of the previous round, and no later than the push. One posted after the
+# push reviews a superseded commit (a review run the push did not cancel) and would re-raise
+# what was just fixed, reading as a repeat.
+def in_fix_window: after($scope_since) and ((ep) <= $push_hi);
 def mine: ($me != "" and .author == $me) or ((.id|tostring) as $i | any($own[]; . == $i));
 # A Bot comment ANNOUNCING work: an unchecked box at the START of a line, or the
 # reply-triggered placeholder wording. Line-anchored because a finished review can QUOTE
@@ -161,12 +172,16 @@ $pr[0] as $p | $p.headRefOid as $head
 # below needs one, since the spinner test applies to top-level comments only.
 | ([$p.reviews[]? | {kind:"review", id:(.id|tostring), author:(.author.login // ""),
       state, body:(.body // ""), commit:(.commit.oid // null), at:.submittedAt}
-    | select(.commit == $head or (.at | after($scope_since)))]) as $reviews
+    # An empty-bodied COMMENTED review is only the wrapper GitHub makes for inline comments
+    # (a thread reply creates one too, under an id `own` cannot know); the comments
+    # themselves are the signals.
+    | select((.state == "COMMENTED" and (.body | test("^\\s*$"))) | not)
+    | select(.commit == $head or (.at | in_fix_window))]) as $reviews
 | ([$rc[0][] | {kind:"review-comment", id:(.id|tostring), author:(.user.login // ""),
       author_type:(.user.type // "User"), body:(.body // ""), path, line:(.line // .original_line),
       url:.html_url, commit:.original_commit_id, at:.created_at, reply_to:(.in_reply_to_id // null)}
     # original_commit_id, NEVER commit_id: GitHub re-anchors commit_id FORWARD per comment.
-    | select(.commit == $head or (.at | after($scope_since)))]) as $inline
+    | select(.commit == $head or (.at | in_fix_window))]) as $inline
 | ([$ic[0][] | {kind:"comment", id:(.id|tostring), author:(.user.login // ""),
       author_type:(.user.type // "User"), body:(.body // ""), url:.html_url,
       created:.created_at, at:.updated_at}]) as $issue_all
@@ -216,7 +231,11 @@ cmd_poll() {
     shift
   done
   [ -n "$REPO" ] && [ -n "$PR" ] || die "poll: --repo and --pr are required"
-  [ -n "$PUSHED_AT" ] && state_update '.pushed_at = $t' --argjson t "$(to_epoch "$PUSHED_AT")"
+  if [ -n "$PUSHED_AT" ]; then
+    local pushed_epoch
+    pushed_epoch="$(to_epoch "$PUSHED_AT")" || die "cannot parse --pushed-at '$PUSHED_AT' (want UTC ISO-8601 with Z, or epoch seconds)"
+    state_update '.pushed_at = $t' --argjson t "$pushed_epoch"
+  fi
 
   [ "$(jq -r '.me == null' "$(state_file)")" = true ] && resolve_me
 
@@ -250,13 +269,20 @@ cmd_poll() {
       # watermark. Anything created after it on an older commit is a signal we never had a
       # chance to see (it landed while we were fixing), so it stays in scope.
       if [ "$(jq -r '.head // ""' "$(state_file)")" != "$head" ]; then
-        local cdate
-        cdate="$("$GH" api "repos/$REPO/commits/$head" -q .commit.committer.date 2>/dev/null)" || cdate=""
-        cdate="$( [ -n "$cdate" ] && to_epoch "$cdate" || echo "$t")"
-        state_update '.head = $h | .head_first_seen = $t | .head_commit_date = $c
+        state_update '.head = $h | .head_first_seen = $t | .head_commit_date = null
           | .scope_since = .last_poll_at | .terminal_streak = 0 | .prev_signature = null
           | .empty_streak = 0 | .reported_ci = null' \
-          --arg h "$head" --argjson t "$t" --argjson c "$cdate"
+          --arg h "$head" --argjson t "$t"
+      fi
+      # Looked up until it succeeds: a failure stored as a stand-in date would outlive the
+      # blip for every later round on this head (and could veto a correct --pushed-at).
+      if [ "$(jq -r '.head_commit_date == null' "$(state_file)")" = true ]; then
+        local cdate
+        cdate="$("$GH" api "repos/$REPO/commits/$head" -q .commit.committer.date 2>/dev/null)" || cdate=""
+        local cepoch
+        if [ -n "$cdate" ] && cepoch="$(to_epoch "$cdate")"; then
+          state_update '.head_commit_date = $c' --argjson c "$cepoch"
+        fi
       fi
 
       # Push time. Given explicitly (--pushed-at, ignored once older than the head's commit,
@@ -265,8 +291,10 @@ cmd_poll() {
       # a signal: scoping and the in-flight spinner test use the lower bound (the head's
       # commit date), the 60s settle uses the upper bound (when we first saw this head).
       local push_lo push_hi scope_since issue_since
-      push_lo="$(jq -r 'if .pushed_at != null and .pushed_at >= .head_commit_date then .pushed_at else .head_commit_date end' "$(state_file)")"
-      push_hi="$(jq -r 'if .pushed_at != null and .pushed_at >= .head_commit_date then .pushed_at else .head_first_seen end' "$(state_file)")"
+      # With the commit date unknown, --pushed-at is trusted and the lower bound falls back
+      # to the first sighting (then scoping can only narrow, never stall).
+      push_lo="$(jq -r 'if .pushed_at != null and (.head_commit_date == null or .pushed_at >= .head_commit_date) then .pushed_at else (.head_commit_date // .head_first_seen) end' "$(state_file)")"
+      push_hi="$(jq -r 'if .pushed_at != null and (.head_commit_date == null or .pushed_at >= .head_commit_date) then .pushed_at else .head_first_seen end' "$(state_file)")"
       scope_since="$(jq -r '.scope_since // "null"' "$(state_file)")"
       issue_since="$(jq -rn --argjson a "$push_lo" --argjson b "$scope_since" 'if $b != null and $b < $a then $b else $a end')"
 
@@ -274,8 +302,8 @@ cmd_poll() {
       ev="$(jq -n \
         --slurpfile pr "$work/pr.json" --slurpfile rc "$work/review-comments.json" --slurpfile ic "$work/issue-comments.json" \
         --arg me "$(jq -r '.me // ""' "$(state_file)")" --argjson own "$(jq -c '.own_ids' "$(state_file)")" \
-        --argjson scope_since "$scope_since" --argjson issue_since "$issue_since" --argjson push_lo "$push_lo" \
-        "$EVAL_JQ")" || { echo "babysit-poll: evaluation failed" >&2; return 3; }
+        --argjson scope_since "$scope_since" --argjson issue_since "$issue_since" --argjson push_lo "$push_lo" --argjson push_hi "$push_hi" \
+        "$EVAL_JQ")" || { jq -n '{result:"error", reason:"evaluating the snapshot failed"}'; return 3; }
 
       # Consumed-set: GLOBAL (a push must not un-consume a signal whose comment merely
       # re-anchored onto the new head) and keyed on (id, body hash) for comments — a review
@@ -361,6 +389,7 @@ cmd_poll() {
 # ── dispatch ─────────────────────────────────────────────────────────
 
 sub=${1:-}
+SUB=$sub
 [ -n "$sub" ] || die "usage: babysit-poll.sh <poll|own|item|decline|fixed> --state <dir> ..."
 shift
 declare -a REST=()

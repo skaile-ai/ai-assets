@@ -674,7 +674,7 @@ STEP 14: Drive the PR to a clean, reviewed state
                       the suite finished stably in the same poll
           bot_review_in_flight   a review bot's progress placeholder is open for this push
           review_decision, merge_state, head_sha
-        "timeout" or "error" → gate #8, quoting the JSON. On "signal" go straight to (b)
+        "timeout" or "error" (exit 4 / 3 / 2) → gate #8, quoting the JSON. On "signal" go straight to (b)
         WITH CHECKS STILL RUNNING. A `cancelled` check left by a superseded push is normal,
         never an actionable item.
         Pass --pushed-at after every push of your own: without it the script has to
@@ -687,6 +687,10 @@ STEP 14: Drive the PR to a clean, reviewed state
             older commit AFTER the previous round's last poll — i.e. while you were fixing.
             Inline comments are dated by `original_commit_id`: GitHub moves `commit_id`
             forward onto newer commits.
+          - NOT an empty COMMENTED review: GitHub wraps every batch of inline comments in
+            one (a thread reply of yours included), and the comments are the signals.
+          - NOT a review or inline comment on an older commit posted AFTER your push: it
+            reviews a superseded commit.
           - NOT anything you authored: record every comment/reply you post with
             `"$POLL" own --state "$STATE" <id-or-url>` (the URL `gh pr comment` prints
             works). The `gh api user` login is a cross-check only — it 403s under a GitHub
@@ -822,7 +826,7 @@ STEP 14: Drive the PR to a clean, reviewed state
         not caused by us): note it; it will surface in Phase 13 as a merge blocker.
 
     (e) EXIT the loop when ALL hold:
-        - every required check is green, OR ci_state = "no-checks", OR the only red checks
+        - every required check is green, OR the poll returned "no-checks", OR the only red checks
           are unrelated + recorded,
         - automated review bots have completed for the latest commit (or there are none),
         - no unaddressed RELATED change-requests/comments remain — reviewer-blessed

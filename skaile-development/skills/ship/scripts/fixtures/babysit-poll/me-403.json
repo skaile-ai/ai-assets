@@ -10,7 +10,23 @@
         "headRefOid": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c",
         "mergeStateStatus": "BLOCKED",
         "reviewDecision": "",
-        "reviews": [],
+        "reviews": [
+          {
+            "id": "PRR_reply",
+            "author": {
+              "login": "Frozen666"
+            },
+            "authorAssociation": "MEMBER",
+            "body": "",
+            "submittedAt": "2026-09-22T11:40:26Z",
+            "includesCreatedEdit": false,
+            "reactionGroups": [],
+            "state": "COMMENTED",
+            "commit": {
+              "oid": "8dadaaada70b3b0b6ab8a5abb8d73437ca8a885c"
+            }
+          }
+        ],
         "statusCheckRollup": [
           {
             "__typename": "CheckRun",

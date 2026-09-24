@@ -82,6 +82,11 @@ start new-spinner-blocks-ci 120
 run --timeout 60
 assert_eq true "$(field .bot_review_in_flight)" "without --pushed-at the in-flight test uses the commit date, erring toward waiting"
 
+start commit-lookup-fails 120
+run --pushed-at $T0 --timeout 60
+assert_eq true "$(field .bot_review_in_flight)" "a failed commit-date lookup does not discard a correct --pushed-at"
+assert_eq '"timeout"' "$(field .result)" "...so the in-flight review still holds the poll open"
+
 echo "spinner test is Bot-only"
 start human-checkbox 30
 run --pushed-at $T0
@@ -90,7 +95,8 @@ assert_eq '["930"]' "$(field '[.signals[].id]')" "a human's unchecked box is sti
 echo "SHA scope: original_commit_id, the watermark, and the global consumed-set"
 start reanchor 30
 run --pushed-at $T0
-assert_eq '["PRR_r1","101","102"]' "$(field '[.signals[].id]')" "round 1 delivers the review and both inline comments"
+assert_eq '["PRR_cr1","101","102"]' "$(field '[.signals[].id]')" \
+  "round 1 delivers the change-request and both inline comments, not the empty COMMENTED wrapper around them"
 bs own "https://github.com/o/r/pull/7#discussion_r105"
 snapshot 2
 at 1100
@@ -98,7 +104,7 @@ run --pushed-at $((T0 + 1090))
 assert_eq "$(jq -r '.polls["2"].review_comments[] | select(.id == 101) | .commit_id' "$FX/reanchor.json")" "$(jq -r .head_sha <<<"$OUT")" \
   "negative control: comment 101 has been re-anchored onto the new head"
 assert_eq '["103","106"]' "$(field '[.signals[].id]')" \
-  "round 2: not 99 or 101 (re-anchored from older commits; 101 also consumed), not 102 (old commit), not our reply 105; yes the comment that landed mid-fix, and the new-head one"
+  "round 2: not 99 or 101 (re-anchored from older commits; 101 also consumed), not 107 (old commit, posted after the push), not 102 (old commit), not our reply 105; yes the comment that landed mid-fix, and the new-head one"
 
 echo "consumed-set: (id, body hash), not updated_at"
 start metadata-bump 30
@@ -145,7 +151,7 @@ assert_eq '["302"]' "$(field '[.signals[].id]')" "own ids and the resolved login
 start me-403 30
 bs own 300
 run --pushed-at $T0
-assert_eq '["301","302"]' "$(field '[.signals[].id]')" "a 403 on gh api user falls back to the id list, not to 'nothing is mine'"
+assert_eq '["301","302"]' "$(field '[.signals[].id]')" "a 403 on gh api user falls back to the id list, not to 'nothing is mine' (and our reply's review wrapper is not a signal)"
 
 echo "failure handling"
 start bad-head 30
@@ -173,5 +179,7 @@ bs fixed 'x.sh:7 off-by-one'
 assert_eq repeat "$(bs item 'x.sh:7 off-by-one')" "a fixed item coming back is a repeat"
 bash "$SCRIPT" own not-an-id --state "$BS" 2>/dev/null
 assert_eq 2 "$?" "own refuses an argument with no comment id"
+OUT="$(bash "$SCRIPT" poll --state "$BS" --repo o/r --pr 7 --pushed-at 'not a time' 2>/dev/null)"
+assert_eq '"error"' "$(field .result)" "a poll usage error still prints a JSON result"
 
 assert_done
