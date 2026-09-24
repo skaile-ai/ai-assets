@@ -6,6 +6,7 @@ dependencies:
   - skill:implement
   - skill:ship
   - skill:meat
+  - skill:issue-bar
   - skill:test
   - skill:e2e-platform
   - skill:doc
