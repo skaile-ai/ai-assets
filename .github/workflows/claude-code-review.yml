@@ -53,4 +53,6 @@ jobs:
             Be constructive but concise. Use inline comments for specific issues.
             Use a top-level comment only for a brief summary.
 
-          claude_args: '--allowed-tools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*)"'
+          # Pin the model: the action's default (claude-sonnet-5) fails in under 1 s with
+          # is_error:true since @v1 moved to Claude Code 2.1.281. Platform pins claude-opus-5 too.
+          claude_args: '--model claude-opus-5 --allowed-tools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*)"'
