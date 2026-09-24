@@ -16,7 +16,7 @@ description: >-
   existing code, for plans or design proposals, for filing an issue when implementation is
   explicitly deferred, for throwaway local experiments, or for work spanning several
   repositories.
-version: 1.4.0
+version: 1.5.0
 metadata:
   tags:
   - "ship"
@@ -131,7 +131,7 @@ metadata:
 | 10 | Open a PR against `main` that `Closes #<number>` (respect PR template + changeset rules) |
 | 11 | **Report the implementation summary** to the user |
 | 12 | **Babysit the PR**: act on whichever lands first — a review or CI — instead of waiting out the suite; drive CI to green and fix every related change-request in a loop (nits for the first three fix pushes, substantive only from the fourth); report unrelated/architectural problems without fixing them |
-| 12b | Sweep for follow-ups: ship the small leftovers into this PR, propose at most 3 IMPORTANT ones as issues |
+| 12b | Sweep for follow-ups: ship the small leftovers into this PR; propose as issues only the ones that clear the **issue bar** (user harm / money / stability / security / team drag, with evidence), at most 3 |
 | 13 | **Recap in plain language** (no jargon — for a person returning after hours away), then ask the user: **squash-merge + clean up** \| **clean up only** \| **stop here** (plus **reading diff first** via the `meat` skill, if installed) — then execute the choice, and file the follow-ups the user picked |
 | 14 | Final report |
 
@@ -235,7 +235,7 @@ MUST  open the PR with `gh pr create --base <default_branch> --head <branch>`, b
 MUST  report a clear implementation summary to the user after the PR is opened (Phase 11) — before babysitting
 MUST  babysit the PR (Phase 12): poll for the FIRST signal — a review or CI completion, whichever lands first — and act on a review the moment it arrives instead of waiting out the whole check suite; fix every actionable item that relates to the work item, looping push → re-poll until CI is green and the only remaining review notes are ones the reviewer explicitly blesses as fine to keep
 MUST  apply the nit cutoff, counted in FIX PUSHES not loop iterations: fix related nits for the first three fix pushes, but from the fourth on fix ONLY substantive items (failing required check, correctness/security/data-loss/performance defect, explicit blocking change-request, public-API/contract/migration problem) and decline the rest — comment and doc-wording nits above all
-MUST  run the Phase 12b follow-up sweep BEFORE the disposition gate: ship small leftovers (<15 min, inside this diff, no design decision) into THIS PR, and propose at most 3 IMPORTANT follow-ups as issues, filing only the ones the user selects
+MUST  run the Phase 12b follow-up sweep BEFORE the disposition gate: ship small leftovers (<15 min, inside this diff, no design decision) into THIS PR, and propose as issues only follow-ups that clear the issue bar (a YES with evidence on one of the five impact questions), at most 3, filing only the ones the user selects
 MUST  fix only items RELATED to the change (e.g. lint/type/test failures the change caused, review nits on the diff); for unrelated/pre-existing/architectural problems, REPORT them to the user and do NOT fix them
 MUST  converge the babysit loop — cap fix rounds, and if CI stays red on something unrelated or a review item recurs after a good-faith fix, stop and ask (gate #8)
 MUST  print the plain-language recap (Phase 13, STEP 14d) immediately BEFORE the final question — jargon-free, no paths or symbols, written for someone who was not watching
@@ -957,16 +957,33 @@ STEP 14b: Decide what ships in THIS PR and what becomes a follow-up issue
       THIS PR — never open an issue for work that is cheaper to do than to file.
       Nits DECLINED at the cutoff do not return through this door: they were declined on
       merit, not on size.
-    FOLLOW-UP ISSUE → it is IMPORTANT and cannot ride along: an architectural change, a
-      cross-cutting refactor, a security or data-integrity gap, a missing test layer, a
-      separate product decision, or work outside this diff's blast radius.
-    DROP → neither important nor worth the diff. Say nothing about it.
+    FOLLOW-UP ISSUE → it cannot ride along AND it clears the ISSUE BAR: at least one
+      of these five answers YES, and you can cite the evidence in one line —
+        1 User harm   a real user gets a wrong result, loses work or data, is blocked,
+                      or has to work around it (report, prod log, repro, or a path
+                      normal use reaches)
+        2 Money       an estimable cost (infra, tokens, paid API calls, support hours)
+                      or held-up revenue
+        3 Stability   a crash, hang, wedged session, corruption or broken deploy that
+                      has happened or that normal operation triggers
+        4 Security    an exploitable path NOW, with the controls it gets past
+        5 Team drag   a red or flaky required check, or a trap that ALREADY cost a
+                      real run
+      No evidence counts as NO. A rare trigger is YES only when the damage is severe
+      (data loss, cross-tenant leak, credential exposure). Unsure on one question: keep
+      it as a candidate and name the open question in its option line; the user decides
+      at the gate.
+    DROP → everything else, including its size. Defense in depth behind a control that
+      holds, hypothetical edges, cleanup, refactors, renames, consistency, test gaps on
+      code with no known bug, "log more", docs polish: these answer NO to all five by
+      default, however they were phrased by the reviewer. Say nothing about them.
+    (The full catalog, and how to use it to sweep an existing backlog, is the
+    `issue-bar` skill. The five questions above are all this step needs.)
 
-  Propose AT MOST 3 follow-ups. Each gets a one-line title and one line of why it
-  matters. If nothing clears the bar, propose NONE and say so — an empty sweep is the
-  normal outcome for a small PR, and a padded list trains the user to ignore the good
-  one. NEVER propose a nit, a "consider renaming", a docs-polish, or a restatement of
-  something already in the PR body.
+  Propose AT MOST 3 follow-ups. Each gets a one-line title and its YES as the why:
+  "<question>: <evidence>". If nothing clears the bar, propose NONE and say so — an
+  empty sweep is the normal outcome, and a padded list trains the user to ignore the
+  good one.
 
   IF you pushed anything in this step, RE-ENTER Phase 12 so its exit conditions re-apply
   (the push restarts CI and re-triggers the review bot, which can produce fresh items).
@@ -1111,7 +1128,7 @@ STEP 15: Ask the user how to finish (gate #9)
   IF the Phase 12b sweep proposed follow-ups (P > 0), ask this as a SECOND question in
   the SAME AskUserQuestion call (multiSelect) so the user is interrupted ONCE, not twice:
     Question: "Which follow-ups should I file as issues?"
-      - one option per proposed follow-up: "<title>" — <one line on why it matters>
+      - one option per proposed follow-up: "<title>" — <question>: <evidence>
   IF P = 0: ask the disposition question alone and print
     > "Follow-ups: none worth filing."
 
@@ -1160,7 +1177,7 @@ STEP 15: Ask the user how to finish (gate #9)
 
   THEN file the SELECTED follow-ups (only those the user picked — never the whole list):
     $ gh issue create --repo <github_slug> --title "<title>" \
-        --body "<why it matters, in 2-4 sentences. Refs #<issue_number> — <pr_url>>" \
+        --body "<what is wrong, in 2-4 sentences. Then 'Issue bar: <question> — <evidence>' for each YES, so a later backlog sweep can check it. Refs #<issue_number> — <pr_url>>" \
         --label <category label if that label exists in the repo>
     Reference the origin issue and PR with a BARE `#<n>` or `Refs #<n>` only. NEVER write
     a closing keyword (`Closes`/`Fixes`/`Resolves`) in a follow-up body — GitHub fires it
@@ -1294,7 +1311,7 @@ CHECKLIST
   - [ ] Churn checked each round (fixes-of-fixes counted; 3 consecutive → gate #8, not another patch)
   - [ ] Any rename or rule change in a fix was grepped for its old form before committing
   - [ ] PR description refreshed to match what actually shipped (recap added; stale claims from the babysit rounds corrected; `Closes #<number>` preserved)
-  - [ ] Follow-up sweep done BEFORE the gate: small leftovers shipped into this PR; ≤3 IMPORTANT follow-ups proposed (or none); only user-selected ones filed, unassigned, no closing keyword in the body
+  - [ ] Follow-up sweep done BEFORE the gate: small leftovers shipped into this PR; ≤3 follow-ups proposed, each with a cited issue-bar YES (or none); only user-selected ones filed, unassigned, no closing keyword in the body
   - [ ] Plain-language recap printed before the final question (asked for / what was wrong / what I did / still open; no jargon, no paths, no symbols)
   - [ ] Final disposition asked (merge+cleanup / cleanup / stop; reading-diff option offered iff the `meat` skill is available) and executed; squash used for merge
   - [ ] Capability docs synced after a merged user-visible platform change: `platform/features/` leading doc always; business mirror + platform-guide skill skipped gracefully when not accessible
@@ -1315,7 +1332,8 @@ CHECKLIST
 | Only fixing "must-fix" review items in the first rounds | Through the third fix push the bar is a clean PR — fix related nits too. The only items you leave are ones the reviewer explicitly blesses as fine to keep. |
 | Still fixing nits on the fourth fix push and beyond | Past the cutoff each nit costs a full CI cycle for nothing. Fix substantive items only; decline comment/wording nits with a one-line reason and move on. |
 | Waiting for the whole check suite before reading the reviews | Poll for the first signal. A review that lands mid-run is actionable now, and pushing its fix supersedes the running checks anyway — reading it early is what makes the turnaround short. |
-| Filing a follow-up issue for something cheaper to fix than to file | If it is inside this diff, needs no design decision, and is <15 min, ship it in THIS PR. Issues are for IMPORTANT leftovers only, capped at 3. |
+| Filing a follow-up issue for something cheaper to fix than to file | If it is inside this diff, needs no design decision, and is <15 min, ship it in THIS PR. Issues are only for leftovers that clear the issue bar, capped at 3. |
+| Filing defense in depth, a rare mild edge case, or cleanup as a follow-up | Run the five issue-bar questions (user harm / money / stability / security / team drag). Five NOs is a DROP, however the reviewer phrased it. |
 | Merging with the PR description that was written before babysitting | The body is written at open time from the plan; every fix push since changes what the PR does, and on a squash-merge that stale text becomes the repo's history. Refresh it in STEP 14c and lead with a 1-2 sentence plain-language recap. |
 | Patching on when every round faults the previous round's fix | The nit cutoff will not catch this — the findings are all substantive. Count fixes-of-fixes; three rounds running means the design is wrong, so stop at gate #8 and restructure rather than adding another guard with another edge. |
 | Renaming a placeholder or rule and updating only where it is defined | Grep the changed files for the old form before committing. A stated rule contradicting another stated rule is a correctness defect — the reader cannot tell which is current — and it is worse than the ambiguity it replaced. |
