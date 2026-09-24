@@ -235,7 +235,7 @@ MUST  open the PR with `gh pr create --base <default_branch> --head <branch>`, b
 MUST  report a clear implementation summary to the user after the PR is opened (Phase 11) — before babysitting
 MUST  babysit the PR (Phase 12): poll for the FIRST signal — a review or CI completion, whichever lands first — and act on a review the moment it arrives instead of waiting out the whole check suite; fix every actionable item that relates to the work item, looping push → re-poll until CI is green and the only remaining review notes are ones the reviewer explicitly blesses as fine to keep
 MUST  apply the nit cutoff, counted in FIX PUSHES not loop iterations: fix related nits for the first three fix pushes, but from the fourth on fix ONLY substantive items (failing required check, correctness/security/data-loss/performance defect, explicit blocking change-request, public-API/contract/migration problem) and decline the rest — comment and doc-wording nits above all
-MUST  run the Phase 12b follow-up sweep BEFORE the disposition gate: ship small leftovers (<15 min, inside this diff, no design decision) into THIS PR, and propose as issues only follow-ups that clear the issue bar (a YES with evidence on one of the six impact questions), at most 3, filing only the ones the user selects
+MUST  run the Phase 12b follow-up sweep BEFORE the disposition gate: ship small leftovers (<15 min, inside this diff, no design decision) into THIS PR, and propose as issues only follow-ups that clear the issue bar (a YES with evidence on one of the six impact questions, or a specific open question), at most 3, filing only the ones the user selects
 MUST  fix only items RELATED to the change (e.g. lint/type/test failures the change caused, review nits on the diff); for unrelated/pre-existing/architectural problems, REPORT them to the user and do NOT fix them
 MUST  converge the babysit loop — cap fix rounds, and if CI stays red on something unrelated or a review item recurs after a good-faith fix, stop and ask (gate #8)
 MUST  print the plain-language recap (Phase 13, STEP 14d) immediately BEFORE the final question — jargon-free, no paths or symbols, written for someone who was not watching
@@ -969,13 +969,16 @@ STEP 14b: Decide what ships in THIS PR and what becomes a follow-up issue
         4 Security    an exploitable path NOW, with the controls it gets past
         5 Team drag   a red or flaky required check, or a trap that ALREADY cost a
                       real run
-        6 Benefit     a significant gain users or the team would notice — measurably
-                      faster on a path people hit, a clearly better experience on a
-                      used flow, a simplification that unblocks named planned work
+        6 Benefit     a significant gain users or the team would notice — a measured
+                      speed-up on a path people hit, a concrete change to a used flow
+                      (steps removed, error gone, task now possible), or a
+                      simplification that unblocks a named issue or plan
       No evidence counts as NO. A rare trigger is YES only when the damage is severe
-      (data loss, cross-tenant leak, credential exposure). Unsure on one question: keep
-      it as a candidate and name the open question in its option line; the user decides
-      at the gate.
+      (data loss, cross-tenant leak, credential exposure).
+    OPEN QUESTION → one answer hangs on a SPECIFIC fact you cannot reach (prod data you
+      cannot read, a control's config you cannot see), or the item is a product call a
+      reviewer raised ("should this also apply to X?"). Being unable to prove a path
+      does not exist is NOT an open question — that is defense in depth, a DROP.
     DROP → everything else, whatever its size. Defense in depth behind a control that
       holds, hypothetical edges, cleanup, refactors, renames, consistency, test gaps on
       code with no known bug, "log more", docs polish: these answer NO to all six by
@@ -983,10 +986,12 @@ STEP 14b: Decide what ships in THIS PR and what becomes a follow-up issue
     (The full catalog, and how to use it to sweep an existing backlog, is the
     `issue-bar` skill. The six questions above are all this step needs.)
 
-  Propose AT MOST 3 follow-ups. Each gets a one-line title and its YES as the why:
-  "<question>: <evidence>". If nothing clears the bar, propose NONE and say so — an
-  empty sweep is the normal outcome, and a padded list trains the user to ignore the
-  good one.
+  Propose AT MOST 3 follow-ups: every FOLLOW-UP ISSUE first, then OPEN QUESTIONs in
+  whatever slots remain, so an open question never pushes out an evidenced YES. Each
+  gets a one-line title and its why: "<question>: <evidence>" for a YES, "open:
+  <question> — <what would settle it>" for an open question. If nothing clears the bar,
+  propose NONE and say so — an empty sweep is the normal outcome, and a padded list
+  trains the user to ignore the good one.
 
   IF you pushed anything in this step, RE-ENTER Phase 12 so its exit conditions re-apply
   (the push restarts CI and re-triggers the review bot, which can produce fresh items).
@@ -1131,7 +1136,7 @@ STEP 15: Ask the user how to finish (gate #9)
   IF the Phase 12b sweep proposed follow-ups (P > 0), ask this as a SECOND question in
   the SAME AskUserQuestion call (multiSelect) so the user is interrupted ONCE, not twice:
     Question: "Which follow-ups should I file as issues?"
-      - one option per proposed follow-up: "<title>" — <question>: <evidence>
+      - one option per proposed follow-up: "<title>" — <its why line from STEP 14b>
   IF P = 0: ask the disposition question alone and print
     > "Follow-ups: none worth filing."
 
@@ -1180,7 +1185,7 @@ STEP 15: Ask the user how to finish (gate #9)
 
   THEN file the SELECTED follow-ups (only those the user picked — never the whole list):
     $ gh issue create --repo <github_slug> --title "<title>" \
-        --body "<what is wrong, in 2-4 sentences. Then 'Issue bar: <question> — <evidence>' for each YES, so a later backlog sweep can check it. Refs #<issue_number> — <pr_url>>" \
+        --body "<what is wrong, in 2-4 sentences. Then 'Issue bar: <question> — <evidence>' for each YES (or 'Issue bar: open — <question> — <what would settle it>'), so a later backlog sweep can check it. Refs #<issue_number> — <pr_url>. Footer: 'Filed via the ship skill follow-up sweep.'>" \
         --label <category label if that label exists in the repo>
     Reference the origin issue and PR with a BARE `#<n>` or `Refs #<n>` only. NEVER write
     a closing keyword (`Closes`/`Fixes`/`Resolves`) in a follow-up body — GitHub fires it
@@ -1314,7 +1319,7 @@ CHECKLIST
   - [ ] Churn checked each round (fixes-of-fixes counted; 3 consecutive → gate #8, not another patch)
   - [ ] Any rename or rule change in a fix was grepped for its old form before committing
   - [ ] PR description refreshed to match what actually shipped (recap added; stale claims from the babysit rounds corrected; `Closes #<number>` preserved)
-  - [ ] Follow-up sweep done BEFORE the gate: small leftovers shipped into this PR; ≤3 follow-ups proposed, each with a cited issue-bar YES (or none); only user-selected ones filed, unassigned, no closing keyword in the body
+  - [ ] Follow-up sweep done BEFORE the gate: small leftovers shipped into this PR; ≤3 follow-ups proposed, each with a cited issue-bar YES or a specific open question, YESes first (or none); only user-selected ones filed, unassigned, no closing keyword in the body
   - [ ] Plain-language recap printed before the final question (asked for / what was wrong / what I did / still open; no jargon, no paths, no symbols)
   - [ ] Final disposition asked (merge+cleanup / cleanup / stop; reading-diff option offered iff the `meat` skill is available) and executed; squash used for merge
   - [ ] Capability docs synced after a merged user-visible platform change: `platform/features/` leading doc always; business mirror + platform-guide skill skipped gracefully when not accessible

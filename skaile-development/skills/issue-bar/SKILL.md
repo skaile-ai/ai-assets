@@ -40,17 +40,26 @@ Without evidence, the answer is NO.
 | 3 | **Stability.** Will it crash, hang, wedge a session, corrupt data, crash-loop the backend, or break a deploy? | It has happened (log, incident, devlog), or you can show the trigger normal operation reaches |
 | 4 | **Security.** Is there an exploitable path now: authz bypass, data leaking across user or org, exposed credentials, injection? | The attack path, step by step, with the controls it gets past |
 | 5 | **Team drag.** Does it block or repeatedly slow the team: a red or flaky required check, a trap that already cost someone a real run? | The run, PR or devlog where it has already bitten someone. A trap that could bite later does not count. |
-| 6 | **Significant benefit.** Will doing it deliver a gain users or the team would notice: noticeably faster, a clearly better or delightful experience on a flow people use, a real simplification that unblocks planned work? | A measurement (current latency, load time, token or query count) and the expected improvement, or a named flow and how often it is used. "Cleaner", "more consistent" or "slightly faster" is not a gain. |
+| 6 | **Significant benefit.** Will doing it deliver a gain users or the team would notice: noticeably faster, a clearly better or delightful experience on a flow people use, a real simplification that unblocks planned work? | Speed: a measurement (latency, load time, token or query count) and the expected improvement. Experience: the named flow, how often it is used, AND the concrete change (steps removed, an error no longer shown, a task now possible). Simplification: the issue or plan it unblocks, by number or name. "Cleaner", "more consistent" or "slightly faster" is not a gain. |
 
 **Verdict:**
 
 - **KEEP**: at least one YES with evidence. Put the question number and the evidence
   in the issue body.
 - **CLOSE**: six NOs.
-- **ASK**: you cannot answer one question from what is reachable (a security path you
-  cannot rule out, prod data you cannot read, a product call). Say which question is
-  open and what would settle it. Guessing either way is how the backlog fills up, and
-  also how real bugs get closed.
+- **ASK**: one answer hangs on a **specific** fact you cannot reach, such as prod data
+  you cannot read, or the config of a control you cannot see. Name that fact. Being
+  unable to prove a path does *not* exist is not enough: that is every
+  defense-in-depth ticket, and it answers NO. Product calls are also ASK. Guessing
+  either way is how the backlog fills up, and also how real bugs get closed.
+
+**Human reports.** A ticket is human-reported when its body carries neither an
+`Issue bar:` line nor a "Filed via …" agent footer, and it describes something a person
+saw happen. That person's account is evidence for Q1: score the question it supports
+YES, citing the report. It can still fail review: if main has since fixed it, or you
+reproduce the exact steps and it works, record that and give the verdict **ASK**,
+with the question for the reporter. A human report never goes straight to CLOSE: the
+reporter may know about harm the code cannot show you.
 
 ## Likelihood × severity
 
@@ -110,9 +119,15 @@ can check.
 ## Closing
 
 Closing is **outward-facing**, so the default is a report. Close only what the invoker
-authorised: this ticket, this list, or "everything that scored CLOSE". Then close
-through the tracker's own "not planned" state and post the evidence, so the decision
-can be read and reversed:
+authorised: this ticket, this list, or "everything that scored CLOSE". First, skip any
+ticket that is **in flight**, meaning it has an assignee, a milestone, or an open PR
+that references it. Report those as KEEP, pending their owner:
+`gh issue view <n> --json assignees,milestone,closedByPullRequestsReferences`.
+
+Pick the close reason by *why* the ticket fails the bar. Already fixed on main:
+`--reason completed`, citing the commit. Covered by another issue:
+`--reason "not planned"` with "Duplicate of #<m>". Everything else: `--reason "not planned"`
+with the six answers, so the decision can be read and reversed:
 
 ```bash
 gh issue close <n> --repo <slug> --reason "not planned" --comment "$(cat <<'EOF'
@@ -128,10 +143,6 @@ EOF
 )"
 ```
 
-A ticket filed by a **human** reporting something they saw: when it scores six NOs,
-the verdict is ASK. The reporter may know about harm the code cannot show you, so
-their word counts as evidence until they withdraw it.
-
 Feature requests and roadmap items: Q6 tells you whether the gain is real and
 significant, but whether we want it is a product decision. Record the Q6 answer, mark
 them `ASK — product decision` and move on.
@@ -142,5 +153,6 @@ The bar applies to a ticket that does not exist yet as well. One more check come
 first: if the work is small, fits the change already in flight and needs no design
 decision, **fix it now** and skip the ticket. For a ticket you do file, write the
 YES and its evidence into the body, so a later sweep does not have to rebuild the
-argument. Reference related work as `Refs #<n>`. A closing keyword next to another
+argument, and end the body with a "Filed via <skill>" footer so a sweep can tell
+it from a human report. Reference related work as `Refs #<n>`. A closing keyword next to another
 issue's number closes that issue.
