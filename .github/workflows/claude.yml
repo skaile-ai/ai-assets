@@ -33,7 +33,14 @@ jobs:
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
+        # Auth via the teamclaude pool (multi-account proxy) instead of one
+        # subscription's OAuth token, so a run does not share the 5h session limit.
+        env:
+          ANTHROPIC_BASE_URL: https://teamclaude.postxl.com
+          ANTHROPIC_CUSTOM_HEADERS: |
+            X-Teamclaude-Project: ${{ github.repository }}
+            X-Teamclaude-Ref: ${{ github.event.pull_request.number && format('pull/{0}', github.event.pull_request.number) || github.event.issue.pull_request && format('pull/{0}', github.event.issue.number) || github.event.issue.number && format('issue/{0}', github.event.issue.number) || github.ref_name }}
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.TEAMCLAUDE_CI_KEY }}
           additional_permissions: |
             actions: read
