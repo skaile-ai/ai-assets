@@ -111,8 +111,27 @@ clouds, flow authoring, and the driver/provider/model defaults inherited by all 
 **AI Providers** (model endpoints:
 Anthropic/OpenAI/Custom, scoped Global/Org/Project, delivered direct or via a cloud
 transport — AWS Bedrock, GCP Vertex, Azure AI Foundry, custom gateway — with per-config
-health checks), **Costs**, **Deployment Targets**,
-and **Catalog** (manage reusable assets/skills, assign to teams/projects).
+health checks), **Classifiers** (classifier providers — see below), **Costs**,
+**Deployment Targets**, and **Catalog** (manage reusable assets/skills, assign to
+teams/projects).
+
+### Classifiers
+
+**Settings > Classifiers** (org admin only) holds the organization's **classifier
+providers** — the fast, cheap yes/no/choice/score answerers behind classifier flow nodes and
+`platform.classify` (`references/classifier.md`). **Add Provider** asks for the **Provider**
+(**TypeSafe Jev**, or a **Jev-compatible endpoint** plus its **Endpoint**), a **Name**, a
+**Model version** — a pinned version such as `jev-1.13.0`; floating aliases like `jev-latest`
+are refused — and the **API key**, which is encrypted on save and never shown again. The
+dialog shows the vendor's data-processing notice: ticking it while adding makes the provider
+active at once; otherwise the admin clicks **Acknowledge terms** later and switches it
+**Active**. **Test** checks the key and model from the platform.
+
+Setting this up is the organization's **opt-in to sending content to the classifier vendor**,
+so it is an admin decision — never do it for the user. Until an active, acknowledged provider
+exists, classifier flow nodes run on the generative fallback and `platform.classify` returns
+`no_classifier_provider`. If the vendor's notice changes, the provider stops answering until
+an admin acknowledges the new one.
 
 ## Where to connect a data source (cheat sheet)
 
@@ -125,6 +144,7 @@ and **Catalog** (manage reusable assets/skills, assign to teams/projects).
   **Connectors** panel → **Connect \<provider\>** (see `concepts/integrations.md` §
   *From a connection to files in a session*) — or create a new project with that Source.
 - **AI model/endpoint** → org **Settings > AI Providers**.
+- **Classifier provider (TypeSafe Jev)** → org **Settings > Classifiers**.
 - **Enable an asset/skill** → the workspace **AI Assets** panel (session- or
   project-scope add), or org **Settings > Catalog** (see `ui/workspace.md`).
 
@@ -134,6 +154,7 @@ Grounded in: `frontend/src/components/ui/app-sidebar-navigation/app-sidebar-navi
 `frontend/src/components/ui/session-tabs-bar/session-tabs-bar.tsx`,
 `frontend/src/components/ui/application-toolbar/`,
 `frontend/src/pages/dashboard/` (bento grid + tile catalogue),
-`frontend/src/pages/store/store.page.tsx`, `frontend/src/pages/settings/`,
+`frontend/src/pages/store/store.page.tsx`, `frontend/src/pages/settings/` (incl.
+`classifier-providers.page.tsx`),
 `frontend/src/components/ui/new-project-modal/new-project-modal.tsx`,
 `frontend/src/pages/projects/project-setup.page.tsx`.

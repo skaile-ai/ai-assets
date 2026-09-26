@@ -24,7 +24,8 @@ at runtime**, never assumed from memory.
   status**; and the session-level actions — enabling/searching/listing assets, opening a
   file in the user's UI, searching GIFs, A2A (list peers / ask / send), setting an
   avatar, scheduling future/recurring actions, run-group operations, creating a session
-  webhook inbox, and — in Skailify-enabled sessions — actions registered by an embedded app
+  webhook inbox, batch classification of many items against closed questions
+  (`references/classifier.md`), and — in Skailify-enabled sessions — actions registered by an embedded app
   itself. Treat these as *categories* — confirm the exact action against the live registry.
 - The control-plane and discovery capabilities are **personal-assistant only**: advertised and
   accepted only in the session the platform resolves as the owner's own assistant. In an
