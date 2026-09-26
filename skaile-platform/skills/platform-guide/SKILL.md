@@ -4,12 +4,13 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   assistant can guide users and act on their behalf. Use when the user asks 'how do I...',
   'where is...', 'where do I find...', 'walk me through...', or 'help me with the platform';
   or asks about projects, sessions, workspaces, flows, run groups, batch runs, recipes,
-  webhooks, previews, agent-controlled apps (Skailify), sharing, inviting people,
+  webhooks, previews, classifiers (classifier providers, classifying many items),
+  agent-controlled apps (Skailify), sharing, inviting people,
   connecting a data source, enabling a skill/asset, scoped sessions, agent-to-agent, roles
   and permissions, hibernation, or any platform surface; or when you are about to create a
   project/session/organization, invite someone, start a connector setup, or read back a
   durable operation you started. Load on demand, not always-on."
-version: 0.10.0
+version: 0.11.0
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -32,6 +33,8 @@ keywords:
   - webhook
   - skailify
   - sharing
+  - classifier
+  - classify
 ---
 
 # Skaile Platform Guide
@@ -62,7 +65,7 @@ mechanics only when the user is technical or `expertMode=true`.
 | ---- | -------------------------------- |
 | `concepts/model.md` | The big picture: org/project/session/workspace, source types, mounts vs connectors, assets/skills, flows, roles & permissions. Start here for orientation. |
 | `concepts/sessions.md` | Session lifecycle (hibernate/wake/close), multiple sessions, **scoped sessions**, forking/renaming. |
-| `concepts/flows.md` | Flows and the Flows page/editor, **authoring a flow definition** (the seven node kinds, contracts, gates vs checks, provenance), runs and gates, **run groups** (batch / unattended processing), recipes, webhook triggers and the session webhook inbox. |
+| `concepts/flows.md` | Flows and the Flows page/editor, **authoring a flow definition** (the seven node kinds, contracts, gates vs checks, provenance), runs and gates, **classifier nodes**, **run groups** (batch / unattended processing), recipes, webhook triggers and the session webhook inbox. |
 | `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels. |
 | `concepts/collaboration.md` | Multi-user sessions (mentions/reactions/threading/presence), sharing with people, public file-preview links, agent-to-agent (A2A). |
 | `concepts/previews.md` | Running and viewing an app preview; what makes a workspace previewable. |
@@ -73,13 +76,14 @@ mechanics only when the user is technical or `expertMode=true`.
 | File | Use when... |
 | ---- | ----------- |
 | `references/agent-action-catalog.md` | You are about to call `platform.act` or `platform.act_batch` and need the exact sole allowlisted action, batch-reference syntax, consequences, and target-role rules. |
+| `references/classifier.md` | You are about to classify many items with closed questions (`platform.classify`) and need the call shape, limits, and how to read `calibrated` / `p`. |
 | `references/control-plane-capabilities.md` | You are about to create a project/session/organization, invite someone, start or repair a connector, or read an operation back — and need the family's shape, effect classes, real boundaries, the operation lifecycle, and the `AwaitingUser` handoff. |
 
 ### UI (where things live, click-paths)
 
 | File | Use when the user asks... |
 | ---- | -------------------------- |
-| `ui/navigation.md` | "Where is...", "how do I get to...", project/session/org settings, creating a project, connecting a data source — the app shell, sidebar, command palette, settings hierarchy. |
+| `ui/navigation.md` | "Where is...", "how do I get to...", project/session/org settings (incl. **Classifiers**), creating a project, connecting a data source — the app shell, sidebar, command palette, settings hierarchy. |
 | `ui/workspace.md` | Anything about the workspace itself: chat composer, the workspace panel and its file explorer, the preview pane, the side panels opened from the toolbar icons, presence, mobile, common in-workspace click-paths. |
 
 ## Hard rules
@@ -89,8 +93,8 @@ mechanics only when the user is technical or `expertMode=true`.
   The corollary binds equally: never tell the user you *cannot* do something because you do
   not remember a capability for it. Look, then answer.
   The `references/` tier is where exact names live, for a call you are about to construct:
-  `references/agent-action-catalog.md` and `references/control-plane-capabilities.md`. Both
-  are maps of a live registry, not substitutes for it.
+  `references/agent-action-catalog.md`, `references/control-plane-capabilities.md` and
+  `references/classifier.md`. All three are maps of a live registry, not substitutes for it.
   `platform.act` and `platform.act_batch` are default-deny: use only the exact action
   documented in `references/agent-action-catalog.md`, and never infer generic CRUD from
   the data model.

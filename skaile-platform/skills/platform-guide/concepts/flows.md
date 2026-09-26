@@ -304,6 +304,62 @@ authoring attempt in a new project lacks.
 }
 ```
 
+## Classifier nodes
+
+A `subprompt` can be answered by the organization's **classifier provider** (TypeSafe's Jev
+today) instead of a generative model. A classifier answers one closed question with a
+probability a router can put a threshold on. There is no eighth node kind: a `subprompt` opts
+in by declaring the reserved output fields `confidence` and `calibrated` next to exactly one
+**decision** property. The decision's shape picks the question kind:
+
+| Kind | Decision property | Answer |
+|---|---|---|
+| `binary` | `{ "type": "boolean" }` | `true` when p(yes) ≥ 0.5 |
+| `choice` | `oneOf` of `{ "const": "<label>", "description": "<rubric>" }` (2–255) | the most probable label |
+| `score` | `oneOf` of `{ "const": <integer>, "description": "<level>" }` (2–10) | the authored integer `const` of the most probable level |
+
+Prefer `oneOf` with a rubric per option — the rubric is what the classifier's accuracy rests
+on. `run.instruction` becomes the question; the resolved `contract.input` bindings are the
+text being classified. Keep arithmetic and date comparisons out of the question: put them in
+a router on `flow.input` before the classifier runs.
+
+The whole answer is also stored on the node output as `classification`: its `value` (the
+decision again), `providerKind`, `modelVersion`, the per-option `distribution` and, for a
+score, `expected`. For a score, `classification.value`, `expected` and the `distribution` keys
+are all on the **authored `const` scale** as of
+`@skaile/workspaces` 3.27.1 (earlier runtimes keyed a score's `distribution` by level index).
+`distribution` is raw provider output — never present it as a confidence.
+
+**Thresholds need the guard.** `confidence` is `null` whenever the answer is uncalibrated, and
+an uncalibrated answer can never pass a confidence threshold. So a `<`/`<=`/`>`/`>=` on a
+classifier's `confidence` must be preceded, earlier in the same `&&` chain, by the literal
+`nodes.<n>.output.fields.calibrated == true` for the same node — and a router that reads
+either reserved field must end with an unconditional **`default`** route —
+`{ "when": "default", "target": "<node id>" }` (`"when": "true"` is equivalent; `target` may be
+`null` to end the run) — which is where an uncertain answer reaches a human:
+
+```
+nodes.assess.output.fields.calibrated == true && nodes.assess.output.fields.verdict == "payout" && nodes.assess.output.fields.confidence >= 0.95
+```
+
+**A route on the decision alone is not a threshold.** `verdict == "payout"` is valid and acts
+on the most probable answer, calibrated or not; a `binary` `== true` fires at a coin flip.
+Where you mean "confidently yes", add the guarded `confidence` conjunct and let the rest fall
+through to the `default`. Never let a classifier answer be the last control before an
+irreversible action — keep a `check` or a `gate` next to it.
+
+**When no classifier answers, the flow still runs.** With no usable provider
+(`no_classifier_provider` — none configured, not acknowledged, or not callable), a provider
+failure, or a refused request, the node falls back to the ordinary generative subprompt: it
+completes with `confidence = null` and `calibrated = false`, so every guarded route is false
+and the router takes its `default`. Only an org admin can switch the classifier on — see
+**Settings > Classifiers** in `ui/navigation.md`.
+
+`platform.get_flow_schema` returns `classifierExample`, a complete valid classifier flow
+(ticket triage, with guarded thresholds and a `default` route) — pattern-match against it
+rather than writing one from memory. Classifier output comes from a `subprompt`, so a check
+comparing it is `asserted`, never `verified`.
+
 ## Not in the contract
 
 The validator refuses these, so do not author them:
