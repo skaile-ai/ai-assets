@@ -94,18 +94,20 @@ is never attributed to the assistant.
 
 ### Session-owner effects — also in ordinary sessions
 
-Three effects use the same consent machinery but are **not** personal-assistant-only: their
+Four effects use the same consent machinery but are **not** personal-assistant-only: their
 authority is owning the session they are called from, so they are offered in a regular project
-session too. They take no organization or project id — scope is resolved from the calling
-session.
+session too. Each row's schema says which ids it takes — the two configuration effects resolve
+their target from the calling session, while `run_flow_in_session` names another session and
+refuses the calling one.
 
 | Call | Effect | Returns |
 | --- | --- | --- |
 | `platform.begin_asset_configuration({ assetId, scope })` | configures a library asset that needs settings (a connector, an MCP server) for this `session` or its `project`. An asset needing no configuration is refused toward `platform.enable_asset`. | a receipt; reuses an instance already assigned at that scope, otherwise parks `AwaitingUser` (below) |
 | `platform.configure_connector({ providerType, providerLinkId, scope, rationale, …selection })` | mounts a folder or repository from an already-connected account in one card, for the non-secret drivers `box`, `sharepoint`, `googledrive`, `git`. Anything else is refused toward `platform.begin_asset_configuration`. | its own result, not a receipt; `alreadyAssigned` when an identical mount exists |
 | `platform.run_flow_in_session({ sessionId, flowId, … })` | starts a library flow in **another** session as the owner (see `concepts/flows.md`) | its own result, not a receipt |
+| `platform.cycle_session()` | restarts the calling session so a new mount or asset attaches | its own result; carded every time |
 
-All three are `routine`. `configure_connector` grants reach that exact target only. Two things
+All four are `routine`. `configure_connector` grants reach that exact target only. Two things
 to act on:
 
 - **A new mount or asset is not live yet.** Both configuration effects take effect only on the

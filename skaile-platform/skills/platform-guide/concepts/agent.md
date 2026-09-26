@@ -27,7 +27,8 @@ at runtime**, never assumed from memory.
     a flow in another session, listing or saving the owner's personal flows, and restarting
     ("cycling") the session so a new mount attaches;
   - **the session's own surface** — listing the project's sessions and members and inviting
-    someone to the project; listing, searching and enabling assets, adding a skill or a remote
+    someone to *this* project (a separate, older capability from the assistant's
+    `invite_to_*` family, offered only where that family is not); listing, searching and enabling assets, adding a skill or a remote
     MCP server by reference, and assigning assets project-wide where an administrator allowed
     it; opening a file, pane, flow or run group in the user's UI; flows and run groups
     (`concepts/flows.md`), schedules, a session webhook inbox, previews (`concepts/previews.md`)

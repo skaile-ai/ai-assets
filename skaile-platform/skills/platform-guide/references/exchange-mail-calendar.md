@@ -62,7 +62,7 @@ base64 straight to a file — never echo it into the conversation.
 | No approval, reversible | `flag_mail`, `assign_mail_categories` | Runs directly. Category names are free text — a typo makes a new label. |
 | No approval, not outbound | `create_draft`, `add_draft_attachment`, `remove_draft_attachment` | Lands in that mailbox's real Outlook Drafts; nothing is sent. |
 | Card, standing approval possible | `move_mail`, `copy_mail` (per destination folder); `create_mail_folder`, `rename_mail_folder`, `move_mail_folder`, `create_mail_category`, `delete_mail_category` (per mailbox) | Carded unless a standing approval already covers that shape; the card itself offers one. |
-| Card, standing approval possible | `create_calendar_event`, `modify_calendar_event` (own mailbox only) | Carded unless a standing pre-approval for that mailbox covers it. No autonomy grant covers calendar writes. |
+| Card, standing approval possible | `create_calendar_event`, `modify_calendar_event` (own mailbox only) | Carded unless a standing approval pinned to that mailbox covers it — the same standing-approval mechanism as the mail rows above, which is distinct from an autonomy grant. |
 | Card, privileged | `delete_mail` | A **soft** delete into Deleted Items, recoverable by the user. A standing approval for it needs the owner's deliberate privileged opt-in. |
 | Card every time | `delete_mail_folder` | Never grantable. The card names how many items and subfolders go with it and treats the delete as permanent. |
 | Card, grantable only deliberately | `send_draft` | See below. |

@@ -61,8 +61,9 @@ all of it — for bringing someone in on one folder without exposing the rest.
   people are added with the usual session roles (Owner / User / Viewer).
 - The session is created as a shared session, so project members who already see shared
   sessions see it too.
-- The agent inside sees a normal workspace rooted at that subfolder. It runs on the
-  **sharer's** connected accounts. Other file mounts are dropped; tool connectors (mail,
+- The agent inside sees a normal workspace rooted at that subfolder. Its tools and
+  library connectors run on the **sharer's** (the scoped session owner's) connected accounts —
+  the same session-owner rule as in `concepts/integrations.md`. Other file mounts are dropped; tool connectors (mail,
   databases, ...) are kept. The dialog warns about library file mounts the folder limit
   does not cover. The mounts cannot be widened afterwards.
 - Supported for **On Skaile, SharePoint, Google Drive, WebDAV/NextCloud, Box, and Local

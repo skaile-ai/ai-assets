@@ -44,6 +44,8 @@ keywords:
   - send-draft
   - connector-mount
   - agent-graph
+  - personal-flow
+  - notifications
 ---
 
 # Skaile Platform Guide

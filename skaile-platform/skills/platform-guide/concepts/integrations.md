@@ -94,8 +94,9 @@ enabled Exchange for the project — off by default, and only the actual project
 switch it (not a co-owner or platform admin). With several connections or shared
 mailboxes, the owner picks which mailboxes the project may use.
 
-- Reading mail is not approval-gated. Moving, filing into folders, and categorising need
-  approval; deleting moves to Deleted Items and is privileged.
+- Reading mail is not approval-gated, and neither is flagging or tagging a mail with a
+  category. Moving, filing into folders, and creating or deleting a category need approval;
+  deleting a mail moves it to Deleted Items and is privileged.
 - Drafts need no approval — the user reviews and sends them from Outlook. Sending from
   the agent is approved per message; only sends from the user's own mailbox can be
   covered by a standing project-level approval.
@@ -117,8 +118,7 @@ default) or a credentials file. A setup-token seat does not refresh itself: when
 working, the owner re-runs `claude setup-token` and pastes the new token. Each credential
 shows a health status (healthy, rate limited, authentication failed, or unreadable — the
 last means re-enter it). Seats that hit their usage limit are routed around until the
-limit resets, and the chat shows a notice when a seat is parked. OpenAI / Codex profiles
-may appear where a deployment has enabled them.
+limit resets, and the chat shows a notice when a seat is parked.
 
 Classifier providers (the models behind flow classifier steps) are configured separately
 under organization settings, **Classifiers** — see `concepts/flows.md`.

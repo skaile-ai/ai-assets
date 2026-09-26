@@ -145,8 +145,7 @@ inherited by all projects), **AI Providers** (model endpoints: Anthropic/OpenAI/
 scoped Global/Org/Project, delivered direct or via a cloud transport — AWS Bedrock, GCP
 Vertex, Azure AI Foundry, custom gateway — with per-config health checks; a **Claude
 subscription** seat is bound by pasting the output of `claude setup-token`, with the
-credentials-file upload as the alternative; the page also offers **Add Codex
-subscription**), **Classifiers** (classifier providers — see below), **Costs**,
+credentials-file upload as the alternative), **Classifiers** (classifier providers — see below), **Costs**,
 **Deployment Targets**, and **Catalog** (manage reusable assets/skills, assign to
 teams/projects). The org sessions report is not a tab — it is **Sessions** in the org
 kebab.

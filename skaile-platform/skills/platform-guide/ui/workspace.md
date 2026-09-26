@@ -122,8 +122,9 @@ cost/status, and — when A2A is active — a Viewer/Chat view toggle.
 - **Mount a cloud folder (Box / SharePoint / Google Drive / NextCloud)** →
   **Connectors** panel (toolbar icon) → **Connect \<provider\>** → pick account +
   folder → reload/restart when prompted. Requires the **project owner's** connection to
-  exist first (**My Connections**) — mounts run on the project owner's connection, whoever
-  adds them (see `concepts/integrations.md`).
+  exist first (**My Connections**) — a cloud-drive mount added here runs on the project
+  owner's connection, whoever adds it. Library-assigned connectors and scoped sessions follow
+  different rules; see `concepts/integrations.md` and `concepts/sessions.md`.
 - **Share a folder with a collaborator (subset of data)** → the **Workspace** panel, folder
   **...** menu > **Share in new session...**.
 - **Share a finished report externally** → open the file, use the share action to create a
