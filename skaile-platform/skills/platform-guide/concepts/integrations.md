@@ -8,9 +8,9 @@ is, why a connection might require a sign-in, and what "read-only" means.
 External provider connections are managed per-organization as **ProviderLinks**. Each
 declares:
 
-- **Category**: Git / Files / Transport.
+- **Category**: Git / Files / Transport / Chat / Mail.
 - **Provider type**: GitHub, GitLab, Bitbucket, SharePoint, Google Drive, S3, SSH,
-  WebDAV, NextCloud, Box. **Dropbox is work in progress — not usable yet**: it still
+  WebDAV, NextCloud, Box, Exchange (mail), and remote MCP servers. **Dropbox is work in progress — not usable yet**: it still
   appears in some provider pickers, but no runtime driver exists, so a Dropbox
   connection cannot bring files into any session today. Say that plainly and steer the
   user to Box, SharePoint, Google Drive or NextCloud instead; never walk them into
@@ -28,9 +28,10 @@ declares:
   for the part only they can do — see the handoff contract in `concepts/agent.md`. Never
   ask for or accept a token, password, or OAuth code in chat.
 - **Service Account** — a shared credential registered by IT/admin, used for all access.
-  When a session gains multiple members, access can shift from the owner's delegated
-  credentials toward a service account (or shared delegation with the owner's
-  acknowledgment).
+
+When a stored sign-in has expired or been revoked (or a GitHub App installation is gone),
+provider pickers show **Reconnect** — or **Connect account** when the user has no
+credential on that connection yet — linking to **My connections**.
 
 ## From a connection to files in a session
 
@@ -54,12 +55,20 @@ of the two places that create it:
 
 Two rules worth repeating to users:
 
-- Mounts run on the **session owner's** connection. Connecting *your* account never
-  gives a session owned by someone else access to it.
-- The agent cannot create the configured connector itself — `platform.enable_asset`
-  only enables config-less assets or existing configured presets. Guide the user
-  through the Connectors panel, verify afterwards (`connector_list`), and propose a
-  restart if the mount has not attached yet.
+- A project's cloud-drive mounts (SharePoint / OneDrive, Google Drive, Box, NextCloud)
+  run on the **project owner's** connection, whoever added them; adding one is refused
+  when the project owner has no usable connection for it. Connectors assigned through the
+  organization library run on the **session owner's** connection. Connecting *your*
+  account never gives a project or session owned by someone else access to it.
+- The agent cannot *silently* create the configured connector — `platform.enable_asset`
+  only enables config-less assets or existing configured presets. What the agent can do
+  is **propose** one for the owner to approve: a complete non-secret mount (Box,
+  SharePoint, Google Drive, or Git) as a single approval card for this session or the
+  whole project, or a configuration handoff that parks on a trusted page where the owner
+  picks account and folder themselves. Agent-proposed drive mounts are **read-only**;
+  read-write needs the user's own **Connect** flow in the Connectors panel. Either way,
+  verify afterwards (`connector_list`) and propose a restart if the mount has not
+  attached yet.
 
 ## Access levels and policy
 
@@ -67,18 +76,65 @@ Each connector, per project/asset, has an access level: read-write, read-only, o
 The platform's connector runtime enforces, at call time, "can this asset, in this session,
 run by this user, do this action on this system?" — plus audit logging of every call.
 
+The Connect dialog's **Access** selector defaults to **read-only**. An existing mount
+has no settings dialog — to change its folder or access level, the user removes it in
+the Connectors panel and re-creates it via **Connect**.
+
 Practical rules for the agent:
 - Respect read-only connectors and read-only mounts — never attempt a write.
 - If an action needs a permission the agent is unsure the user has, ask rather than assume.
 - Never send the user's data to an external service without explicit permission.
+
+## Exchange mail
+
+Exchange (Outlook mail and calendar) is a native **Mail** connection with its own
+Microsoft app registration. Two separate things must both be true before an agent sees a
+mailbox: the user has a **connection** (My connections), and the **project owner** has
+enabled Exchange for the project — off by default, and only the actual project owner can
+switch it (not a co-owner or platform admin). With several connections or shared
+mailboxes, the owner picks which mailboxes the project may use.
+
+- Reading mail is not approval-gated. Moving, filing into folders, and categorising need
+  approval; deleting moves to Deleted Items and is privileged.
+- Drafts need no approval — the user reviews and sends them from Outlook. Sending from
+  the agent is approved per message; only sends from the user's own mailbox can be
+  covered by a standing project-level approval.
+- Calendar access covers the user's own mailbox only.
+- **Shared mailboxes**: the user adds them once per connection in **My connections**,
+  after granting **Allow shared mail access**. A mailbox is admitted only if the user's
+  account can actually open its inbox (Full Access). The project owner then enables it
+  per project. Sends from a shared mailbox are approved every time.
+- Filing mail attachments into SharePoint is the agent combining steps (read the
+  attachment, write it to a SharePoint mount) — there is no automatic filing rule.
+- When the grant expires, the agent tells the user to reconnect.
+
+## AI providers
+
+The models the agents run on are configured under the organization's settings, **AI**
+section, **AI Providers** tab, at global, organization, or project scope. A Claude
+subscription seat can be connected by pasting a token from `claude setup-token` (the
+default) or a credentials file. A setup-token seat does not refresh itself: when it stops
+working, the owner re-runs `claude setup-token` and pastes the new token. Each credential
+shows a health status (healthy, rate limited, authentication failed, or unreadable — the
+last means re-enter it). Seats that hit their usage limit are routed around until the
+limit resets, and the chat shows a notice when a seat is parked. OpenAI / Codex profiles
+may appear where a deployment has enabled them.
+
+Classifier providers (the models behind flow classifier steps) are configured separately
+under organization settings, **Classifiers** — see `concepts/flows.md`.
 
 ## Mounts vs. connectors (recap)
 
 - **Mounts** = external data surfaced as **files** in the workspace (git, local, S3,
   WebDAV/NextCloud, SharePoint, Google Drive, Box). The project's primary data source is
   a mount; the workspace **Connectors** panel manages additional ones.
-- **Connectors** = external systems surfaced as **tools** (Postgres, Redis, SQLite, the
-  `session`/`presence` state stores). Note the naming overlap: the workspace panel
+- **Connectors** = external systems surfaced as **tools** (Postgres, Redis, SQLite,
+  Exchange mail, the `session`/`presence` state stores). Note the naming overlap: the workspace panel
   called **Connectors** manages file *mounts*.
 
-Source of truth: `platform/docs/integration_architecture.md`.
+Source of truth: `platform/docs/integration_architecture.md`,
+`platform/docs/mount-connection-binding.md` (owner invariant), `platform/docs/exchange-connector.md`,
+`platform/docs/ai-provider-credential-lifecycle.md`, `connector-mount-provisioning.ts`
+(agent-proposed mounts), `configure-instance-modal.tsx` (Access default), platform PRs
+#5337/#5357 (Reconnect), #5364 (shared mailboxes per org), #4703 (setup-token seats),
+#5099/#5109/#5139 (seat health and routing), #5305 (classifier providers).

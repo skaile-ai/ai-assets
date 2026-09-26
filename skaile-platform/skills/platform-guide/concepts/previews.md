@@ -6,13 +6,22 @@ platform.
 
 ## What the user experiences
 
-- The preview is its own **pane**, toggled from the **panel switcher** in the toolbar's
-  centre zone. Starting a preview builds and launches the app in a separate container and
-  loads its URL in an embedded iframe.
-- When a workspace exposes more than one app, the pane header's app dropdown switches
-  between them.
-- Each app moves independently through `building -> starting -> ready -> stopped`. The user
-  can start, stop, and refresh a preview (refresh = stop + start).
+- The toolbar's preview button opens and closes the **preview panel**. It is absent when
+  the workspace offers no preview at all. Opening the panel starts nothing.
+- The panel opens onto the list of the workspace's apps, each with start / stop / open and,
+  when it failed, the reason. With a preview open, the panel header names it and is a
+  dropdown for switching between apps and starting or stopping them.
+- The panel reopens on the last preview this user used in this project if it is still
+  running, otherwise on the list.
+- Starting a preview builds and launches the app in a separate container and loads it in
+  an embedded frame. Each app moves independently through
+  `building -> starting -> ready -> stopped`; refresh = stop + start.
+- Apps also appear under their project in the Explorer, with a green dot while serving.
+  Opening one there (or with Cmd+K **Go to app**) shows that preview on its own.
+- The preview toolbar's pin control adds the preview to the dashboard's **Pinned
+  Previews** tile.
+- Deployments running agents on the broker do not offer previews; the preview check
+  reports it as not available.
 
 ## What makes a workspace previewable
 
@@ -30,8 +39,9 @@ wire up a frontend+backend app:
 - **Auto-discovery**: `frontend/` and `backend/` directories at the workspace root are
   detected and run as independent sibling containers automatically — no config file needed.
 - **Explicit `skaile.preview.json`**: declare each app's `path`, `role`
-  (`frontend`/`backend`), and `appPort` — needed for non-default ports, more than two apps,
-  or when an app lives at a nested path. Write it with the capabilities below, not by hand.
+  (`frontend`/`backend`), and `appPort` (default 3000; 80 for static apps) — needed for
+  non-default ports, more than two apps, or when an app lives at a nested path. Write it
+  with the capabilities below, not by hand.
 
 **The contract is checked at the session workspace root — never at an arbitrary nested
 path.** If the agent scaffolds the generated project into a subdirectory (e.g. `app/`)
@@ -81,6 +91,11 @@ apps, and are the ones that are easy to violate without noticing:
   setting.
 - A path is relative to that app's `resourceId` mount (default `workspace`), and may contain
   no `..` segments.
+- `api` is reserved and cannot be used as an app id.
+- Each app is built from its own directory only. An app that imports files from above it
+  (shared types, a sibling `libs/` tree) passes validation but fails in the build. The
+  supported shape is a single app at the root with a root-level `Dockerfile.preview` that
+  starts only the app to preview.
 
 ## Agent-controllable apps (Skailify)
 
@@ -99,4 +114,6 @@ this is discovered at runtime like all capabilities — never assume it.
   workspace; the user refreshes the preview to see changes.
 - Previews have resource caps (memory/CPU/PIDs) and are reconciled if orphaned.
 
-Source of truth: `platform/docs/preview-contract.md`, `platform/docs/preview-lifecycle.md`.
+Source of truth: `platform/docs/preview-contract.md`, `platform/docs/preview-lifecycle.md`,
+`platform/docs/multi-app-preview.md`, platform PRs #4072–#4075 and #4630 (panel toggle,
+app list, remembered preview), #5244 (apps in the Explorer), #4063 (pinned previews).
