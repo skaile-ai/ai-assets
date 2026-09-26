@@ -212,6 +212,15 @@ You can neither mint, widen, nor request any of this yourself — see
 [Autonomy grants](agent.md). Name the settings path and the required role to the human, then
 ask them to try again.
 
+**Personal flows are the exception.** `platform.create_flow` with scope `personal` saves the
+flow to the session owner's own library, visible only to them, and needs no Flow authoring
+grant and no admin role. The write is still approved — per call, or by a standing grant over
+this session that only the session owner can issue — and still validated as strict v2 before
+the card shows. `platform.list_flows` lists project and organization flows only; personal
+flows are listed by `platform.list_personal_flows`, which is itself approval-gated because
+listing puts flow names into a conversation every member can read. `platform.get_flow` and
+`platform.revise_flow` do not reach personal flows (they read as not found).
+
 **Always declare `schemaVersion: 2`.** `platform.create_flow` and `platform.revise_flow`
 refuse any definition that does not carry its own, with exactly this message:
 
@@ -377,7 +386,26 @@ The validator refuses these, so do not author them:
 - **Gates** pause a run for a human: approval gates (approve/reject) and input gates
   (provide data). Runs can be started in autonomous mode — no pauses — except that a node
   marked **mandatory** always stops for a human; the engine enforces this and the agent
-  cannot skip it. Live per-node state on the graph is not yet available.
+  cannot skip it.
+- The session's **Flow** tab shows per-node progress of the running flow. The org **Flows**
+  page graph shows the definition only.
+
+### Running a library flow inside a session
+
+A flow from the library (organization, project, or personal) can run inside an existing
+session, in that session's conversation — one run per session at a time; a start while one
+is in progress is refused. While it runs, chat messages to the session are handled as part
+of the run. It can be started:
+
+- by a user, from the session's **Flow** tab (**Run a flow…**) or Cmd+K **Run a flow in
+  this session**, choosing the flow and an optional input;
+- by the session's own agent, with no approval;
+- by an agent in another session, with the session owner's approval or a standing grant —
+  and only if that owner may send to the target session.
+
+The input reaches the flow unchanged as `defaults.run_input`; it cannot override values the
+author set — only declared `parameters` can. Sessions created for a run group cannot host a
+second run.
 
 ## Flow files on disk
 
@@ -412,10 +440,17 @@ Fuller treatment: `ai-assets/docs/flows.md`.
 - A run group = one flow + one **recipe** + a list of inputs. Each input runs in its own
   temporary session; a scheduler limits how many run at once. Groups can be paused,
   cancelled, retried per item, and new inputs can be appended while running.
+- Every group has a mode, fixed at creation: **Batch** (a fixed set of inputs; the group
+  finishes when every run has finished) or **Standing** (trigger-fed and long-running; it
+  keeps taking new inputs until someone clicks **Close**). A Standing group can mint its
+  webhook at creation.
 - A **recipe** is a saved session configuration (data sources, skills, model, environment)
   created via **Save as recipe** from a configured session. Recipe environment values
   reference stored secrets — never literal secret strings. Creation fails up front if the
-  recipe does not supply every asset the flow's nodes declare.
+  recipe does not supply every asset the flow's nodes declare. Before proposing a group,
+  the agent can check this without creating anything
+  (`platform.preflight_flow_requirements`, no approval); it does not check binaries,
+  credential scopes, or node kinds.
 - A status board shows per-item progress and cost, with click-through into the run group's
   detail page. Approvals and input requests raised by unattended runs surface inside the
   run itself — the flow gate panel in the session, and the run group detail page. There is
@@ -440,6 +475,8 @@ it is managed via the API/agent.
 Source of truth: the published contract — `platform.get_flow_schema` at runtime, shipped
 as `@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.schema.json` —
 `platform/docs/flow-authoring-v2.md`, `platform/features/09-flow-execution/`,
-`platform/features/31-run-groups/`. For on-disk discovery: `loadFlowEntriesFromDir` in
+`platform/features/31-run-groups/`, `platform/features/09-flow-execution/in-session-flow-runs.md`
+(platform #5233), `platform/docs/flow-authoring-v2.md` "Personal flows" (platform #5252),
+the run-group create wizard (Batch / Standing), `RunGroupRecipePreflightService`. For on-disk discovery: `loadFlowEntriesFromDir` in
 `@skaile/workspaces` → `factory-assets/connectors/flow/engine/loader.ts`, and `aiResourceRoots`
 in `cli/src/paths.ts`.

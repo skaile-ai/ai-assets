@@ -8,42 +8,61 @@ Always speak in the user-facing terms unless the user is technical.
 
 ```
 Organization ──1:N── Project ──1:N── Session
-Project      ──1:1── Project data (a git repo, SharePoint site, local folder, or empty)
-Session      ──1:1── Workspace (an isolated working copy of the project data)
+Project      ──1:1── Project data (On Skaile, a git repo, a cloud drive, or a local folder)
+Session      ──1:1── Workspace (the session's working view of the project data)
 ```
 
 - **Organization** — the company/tenant. Users, projects, and integrations belong to it.
+  Every user also has a private single-member organization, shown as **My Workspace**,
+  which hosts their personal assistant. The sidebar toggle switches between **Personal**
+  and **Business**; personal mode uses a warmer colour palette. Only platform
+  administrators create new organizations, and a shared organization must keep at least
+  one active Owner.
 - **Project** — a unit of work with its own **project data** (one data source) and its
   own set of enabled **assets** and **connectors**. A project has a **main session**
   (the primary workspace) and any number of additional sessions.
-- **Session** — an isolated workspace where the user chats with the agent and work
-  happens. Each session has its own copy of the project data; changes in one session
-  do not affect another until the session is closed and synced back to main.
+- **Session** — a workspace where the user chats with the agent and work happens. In the
+  UI a session is presented as an **agent** (see below). How far sessions are isolated from
+  each other depends on the source type (next section).
 - **Workspace** — the files and data the agent and user work on inside a session. Backed
   on disk per session; the running container is just a compute wrapper around it.
 
 ## Project data (source types)
 
-A project's data comes from one **source type**, chosen at project creation. This
-determines how sessions are isolated and how a closed session syncs back.
+A project's data comes from one **source type**, chosen at project creation. The wizard
+offers **On Skaile** (the default — Skaile keeps the files, no external provider),
+**Git Repository**, **SharePoint / OneDrive**, **Google Drive**, **NextCloud**, **Box**,
+and **Local Folder**. Projects an agent creates may also start **Empty**.
 
-| Source type   | Where data comes from                          | Session isolation        | On close |
-| ------------- | ---------------------------------------------- | ------------------------ | -------- |
-| **Git**       | New repo, or clone from GitHub/GitLab/Bitbucket | New branch + worktree    | Merge branch to main |
-| **SharePoint**| Linked SharePoint site/library                  | Fresh delta-sync copy    | Sync changes back |
-| **LocalFolder**| A folder on the host (local/dev deployments)   | Filesystem copy          | Copy changes back |
-| **Empty**     | Nothing — the agent populates it                | Empty directory          | No sync needed |
+- **Git** — each session works on its own branch and worktree; closing merges the branch
+  back to main.
+- **On Skaile / Local Folder** — sessions of the project work on the same project folder.
+- **Cloud drives** (SharePoint / OneDrive, Google Drive, NextCloud, Box) — the drive is
+  mounted live; the project's mount always uses the **project owner's** connection.
 
 User-facing terms: "data source + mounts" = **project data**; "create project + mount"
 = **create project**; "session workspace" = **session**.
+
+## Explorer and agents
+
+In the Explorer, each project lists its **Apps** (green dot while serving), its live
+sessions, its **Flows**, and an **Archive** of closed and archived sessions.
+
+Each session carries an **agent** identity — name (also its @handle), picture, voice,
+description, and instructions — set in the **New agent** / **Edit agent** dialog. A picture
+can be generated from a text prompt with **Generate** where the deployment has image
+generation configured. The agent can propose renaming itself; the user approves it.
+
+The **Agent graph** (project menu or Cmd+K) shows a project's agents as cards, their
+agent-to-agent links as arrows, and the project's apps and flows alongside.
 
 ## Connectors vs. mounts
 
 Both bring external systems into a session, but differently:
 
 - **Mounts** mount external data into the workspace **as files** the agent reads/writes
-  directly — git, local folder, S3, WebDAV, SharePoint. The project's main data source
-  is itself a mount.
+  directly — git, local folder, SharePoint / OneDrive, Google Drive, Box, WebDAV /
+  NextCloud, S3. The project's main data source is itself a mount.
 - **Connectors** expose external systems as **tools** the agent calls (not files) —
   Postgres, Redis, SQLite, and the shared `session`/`presence` state stores. Auth,
   access policy, and audit logging are handled by the platform's connector runtime.
@@ -93,7 +112,15 @@ Other notable rules:
 - **Private sessions** are visible only to the Session Owner and explicit session members
   — not even to the Project Owner or PlatformAdmin.
 - A **Shared** project/session is visible to Org Users/Owners and project/session members.
-- Only **Project Owners** create sessions (including scoped sessions). **Forking,
-  reopening, or discarding** a session requires **Org Owner**.
+- Creating a session (including a scoped session) needs a project role of **User** or
+  **Owner**. **Forking, reopening, or discarding** a session requires **Org Owner**.
+- A project can also be shared with a **team** at a role (Owner / User / Viewer), which
+  the team's members then hold on that project.
 
 Full matrix: `platform/docs/roles-permissions-matrix.md`.
+
+Grounded in: `platform/docs/roles-permissions-matrix.md`, `platform/docs/scoped-sessions.md`,
+`platform/docs/mount-connection-binding.md` (owner invariant), the new-project wizard's
+source picker, the `is_personal` organization field, platform PRs #3760 (org creation),
+#4281 (last Owner), #5023 (Personal/Business), #5076/#5354 (Explorer sections), #5251
+(agent graph), #5336/#5352 (agent rename, picture generation), `team-sharing.service.ts`.

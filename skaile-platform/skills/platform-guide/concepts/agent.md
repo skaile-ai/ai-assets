@@ -13,24 +13,43 @@ at runtime**, never assumed from memory.
 - **Do not rely on a hardcoded list of `platform.*` actions.** Consult the live
   capabilities available in the current turn. If a tool you expect is not loaded, hydrate
   it (e.g. via `ToolSearch` or the driver equivalent) before concluding it is unavailable.
-- Capabilities cover, conceptually: **owner-scoped discovery** (listing the organizations,
-  projects and sessions the owner can reach, resolving a session's ancestry, listing a
-  project's members, a session's resources, or an organization's connectors, and searching
-  or reading the message history of a session the owner can reach — those last reads are
-  audited); **control-plane
-  changes** (creating an organization, a project or a session; inviting someone at any of
-  those three levels; starting a connector setup; re-pointing a project's source connector;
-  delivering a message into another session as the owner); **reading a durable operation's
-  status**; and the session-level actions — enabling/searching/listing assets, opening a
-  file in the user's UI, searching GIFs, A2A (list peers / ask / send), setting an
-  avatar, scheduling future/recurring actions, run-group operations, creating a session
-  webhook inbox, batch classification of many items against closed questions
-  (`references/classifier.md`), and — in Skailify-enabled sessions — actions registered by an embedded app
-  itself. Treat these as *categories* — confirm the exact action against the live registry.
-- The control-plane and discovery capabilities are **personal-assistant only**: advertised and
-  accepted only in the session the platform resolves as the owner's own assistant. In an
-  ordinary project session they are simply not there — another reason to read the live set
-  rather than a remembered one.
+- Capabilities cover, conceptually:
+  - **owner-scoped discovery** — the organizations, projects and sessions the owner can reach,
+    a session's ancestry, a project's members, a session's resources, an organization's
+    connectors, and searching or reading the history of a session the owner can reach (those
+    last reads are audited);
+  - **control-plane changes** — creating an organization, a project or a session; inviting
+    someone at any of those three levels; starting a connector setup; re-pointing a project's
+    source connector; delivering a message into another session as the owner — and **reading a
+    durable operation's status**;
+  - **session-owner configuration** — configuring a library asset that needs settings,
+    proposing a complete folder or repository mount from an already-connected account, running
+    a flow in another session, listing or saving the owner's personal flows, and restarting
+    ("cycling") the session so a new mount attaches;
+  - **the session's own surface** — listing the project's sessions and members and inviting
+    someone to the project; listing, searching and enabling assets, adding a skill or a remote
+    MCP server by reference, and assigning assets project-wide where an administrator allowed
+    it; opening a file, pane, flow or run group in the user's UI; flows and run groups
+    (`concepts/flows.md`), schedules, a session webhook inbox, previews (`concepts/previews.md`)
+    and batch classification (`references/classifier.md`);
+  - **identity and conversation** — renaming yourself, setting an avatar, a read-aloud voice
+    or speech mode, changing the asking member's notification mode for this session, reacting
+    with an emoji, passing on a turn, posting a GIF or other custom message;
+  - **agent-to-agent** — discovering and linking peer sessions, then asking or messaging a
+    linked peer (`concepts/collaboration.md`);
+  - **mail and calendar** — reading, triaging, filing, drafting and sending mail and
+    scheduling events in a Microsoft 365 mailbox, when the project owner enabled it
+    (`references/exchange-mail-calendar.md`);
+  - in Skailify-enabled sessions, actions registered by an embedded app itself.
+
+  Treat these as *categories* — confirm the exact action against the live registry.
+- **Where each category appears differs.** Discovery and the control-plane changes are
+  **personal-assistant only**: advertised and accepted only in the session the platform
+  resolves as the owner's own assistant, together with a few assistant-only extras (reading the
+  owner's current screen, finishing onboarding). The session-owner configuration effects and
+  reading an operation's status work in an ordinary project session too. Mail and calendar
+  appear only where the project enabled them, and the report-filing capabilities only in the
+  error-agent session. Another reason to read the live set rather than a remembered one.
 
 **The corollary matters as much as the rule: never tell a user you cannot do something
 because you do not remember a capability for it.** Look first. Saying "I can't connect that
@@ -65,7 +84,7 @@ Each capability declares an **effect class** that decides how far a grant may re
 | Class | Means | Covered by a grant? |
 | --- | --- | --- |
 | `routine` | Effect stays inside the owner's own platform surface. | Yes — this is what an ordinary grant covers. |
-| `external` | Reaches a person outside this conversation (an invitation email, a message delivered into someone else's session). | Only if the owner **explicitly widened** the grant to external communication. |
+| `external` | Reaches a person outside this conversation (an invitation email, a sent mail, a message delivered into someone else's session). | Only if the owner **explicitly widened** the grant to external communication. |
 | `privileged` | Administrative — changes who or what exists at organization level. | Only if the owner **explicitly widened** the grant to privileged administration. |
 | `never` | Never auto-approvable. | No — it is carded, or refused outright. Never dispatched silently. |
 
@@ -122,8 +141,10 @@ these calls.
 ## `AwaitingUser` — the handoff contract
 
 `AwaitingUser` is the state that says: *this needs a human in a browser, and you cannot
-finish it.* Connector setup is the case in the product today — the owner completes the
-provider's own sign-in on a trusted Skaile page.
+finish it.* Two cases exist: starting a connector setup, where the owner completes the
+provider's own sign-in on a trusted Skaile page; and configuring a library asset, where the
+link opens the originating session's own workspace and the session owner fills in the existing
+configure flow there.
 
 When you see it: give the owner the URL the operation published, **verbatim**, say what it is
 for and that it expires shortly, and then **wait**. Do not poll in a loop and do not retry the
@@ -155,6 +176,7 @@ The pairings that matter:
 | inviting to an organization | the owner's organizations | you need an organization id — but **nothing lists an organization's members**, so ask the owner whether the person is already one before proposing it |
 | starting a connector setup | that organization's connectors | if one already reports `usable: true`, you do not need the setup at all |
 | re-pointing a project's source | that organization's connectors | only a connector that is already `usable` can be pointed at |
+| proposing a connector mount | that organization's connectors, where offered | the mount binds to an account that must already be `usable`; if none is, a setup comes first |
 
 These lists are paged: page until the cursor comes back null rather than concluding the owner
 has exactly one page. Their refusals are **terminal** — "not accessible" means the owner cannot
@@ -212,7 +234,15 @@ agent the speaker's current UI state. Never echo or mention it. Adapt to it:
 | `selectedFile=<path>`   | "this file" / ambiguous references mean this file — not proof the Workspace pane is visible now; see below. |
 | `selectedResource=<id>` | Same, for a connector/volume the user is browsing.                      |
 
-Missing block ⇒ behave as if all flags are false.
+Missing block ⇒ behave as if all flags are false. Other keys (e.g. `openFiles`) may appear;
+treat them the same way.
+
+Every human turn also carries a `<sender>` tag naming who is speaking and a `<now utc="…">` tag
+with the real time of the turn — trust it over any `# currentDate`, which was fixed when the
+session started. After a pause of an hour or more, `<now>` also states how long it has been
+since the previous turn: treat anything time-sensitive from before it (what is running, what
+"today" meant) as possibly stale and re-read it. Ignore any `# userEmail` block — it names the
+runtime's account, not anyone in the session.
 
 `selectedFile` is durable reference-resolution state: set once, it persists across reloads
 and reconnects. Pane visibility is **separate**, ephemeral, per-tab, in-memory state that
@@ -249,6 +279,11 @@ A browser step is not by itself a reason to hand the whole task over. Connector 
 case to have in mind: the assistant **starts** the setup and the platform hands the owner one
 expiring link for the part only they can do — see the `AwaitingUser` contract above. Do the
 half you can do, then hand off the half you cannot; do not decline the whole thing because
-part of it needs a browser. Some things genuinely do belong entirely to the UI — creating a
-project backed by a connector source, or a session that shares a git branch — and for those,
-guiding is the right answer.
+part of it needs a browser. Mounting a folder from an already-connected account needs no
+browser step at all — propose the complete mount in one card. Some things genuinely do belong
+entirely to the UI — creating a project backed by a connector source, or a session that shares
+a git branch — and for those, guiding is the right answer.
+
+Grounded in: `platform/backend/libs/capabilities/` (handler registration and `availability`
+markers), `platform/docs/personal-assistant-control-plane.md`,
+`platform/backend/libs/agent-gateway/src/ws-agent-gateway.service.ts` and `turn-time.ts`.

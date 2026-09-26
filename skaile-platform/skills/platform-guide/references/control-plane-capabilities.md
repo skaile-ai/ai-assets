@@ -5,8 +5,8 @@ organizations, projects, sessions, memberships, connector wiring — plus the re
 discovery that resolves the ids they take, and the one query that reports what happened.
 
 This file is a **map, not a contract**. The live registry is authoritative: the set changes
-every deploy, and this family is advertised only in the owner's own personal-assistant
-session. Consult the capabilities available in the current turn and use the exact schema they
+every deploy, and most of this family is advertised only in the owner's own personal-assistant
+session (the exceptions are listed under *Session-owner effects* below). Consult the capabilities available in the current turn and use the exact schema they
 carry. Read this to know what the family *is* and how consent and completion work in it — not
 to decide whether a capability exists. `concepts/agent.md` carries the model; this is the
 detail you load when you are about to construct one of these calls.
@@ -92,6 +92,35 @@ returns its own result rather than an operation receipt, so there is no `operati
 The delivered message always shows it was sent by the owner via their Personal Assistant; it
 is never attributed to the assistant.
 
+### Session-owner effects — also in ordinary sessions
+
+Three effects use the same consent machinery but are **not** personal-assistant-only: their
+authority is owning the session they are called from, so they are offered in a regular project
+session too. They take no organization or project id — scope is resolved from the calling
+session.
+
+| Call | Effect | Returns |
+| --- | --- | --- |
+| `platform.begin_asset_configuration({ assetId, scope })` | configures a library asset that needs settings (a connector, an MCP server) for this `session` or its `project`. An asset needing no configuration is refused toward `platform.enable_asset`. | a receipt; reuses an instance already assigned at that scope, otherwise parks `AwaitingUser` (below) |
+| `platform.configure_connector({ providerType, providerLinkId, scope, rationale, …selection })` | mounts a folder or repository from an already-connected account in one card, for the non-secret drivers `box`, `sharepoint`, `googledrive`, `git`. Anything else is refused toward `platform.begin_asset_configuration`. | its own result, not a receipt; `alreadyAssigned` when an identical mount exists |
+| `platform.run_flow_in_session({ sessionId, flowId, … })` | starts a library flow in **another** session as the owner (see `concepts/flows.md`) | its own result, not a receipt |
+
+All three are `routine`. `configure_connector` grants reach that exact target only. Two things
+to act on:
+
+- **A new mount or asset is not live yet.** Both configuration effects take effect only on the
+  next session reload or restart (`configure_connector` says so in
+  `attaches: "next_reload_or_restart"`), so propose
+  `platform.cycle_session` — itself carded every time — rather than telling the user it is
+  already there.
+- A git `repoUrl` must be on the connection's own host; the platform only ever presents the
+  owner's git credential to that host.
+
+The owner's **personal flows** ride the same machinery too: listing them
+(`platform.list_personal_flows`) and saving one with `platform.create_flow({ scope: "personal" })`
+are approval-gated (listing too, because the names land in a conversation every member can read), grantable
+only for this session, and executed as the session owner. Detail is in `concepts/flows.md`.
+
 ### Boundaries that are real, not conservatism
 
 These are refusals by design — proposing around them wastes the owner's approval:
@@ -108,8 +137,9 @@ These are refusals by design — proposing around them wastes the owner's approv
 - **Personal workspaces.** A personal-assistant project or session cannot be invited into, and
   a personal organization cannot be invited into. Pick a shared one.
 - **Credentials.** No capability in this family accepts a token, password, personal access
-  token, OAuth code, client secret, repository URL, or branch. Every such field is rejected.
-  Never ask for one, and never accept one if offered.
+  token, OAuth code, or client secret, and the personal-assistant effects take no repository
+  URL or branch either (only `configure_connector` names a repository, on the connection's own
+  host). Every such field is rejected. Never ask for one, and never accept one if offered.
 - **Batches.** None of these is batch-eligible, and none is grantable through a batch.
 - **Creating an organization is PlatformAdmin-only.** The server verifies the owner currently
   holds PlatformAdmin — membership, however senior, is not enough. Do not offer it to an owner
@@ -121,7 +151,8 @@ These are refusals by design — proposing around them wastes the owner's approv
 ## The operation lifecycle
 
 `platform.get_operation` reads one operation. It takes **either** `{ operationId }` **or**
-`{ invocationId }` — one key, never both.
+`{ invocationId }` — one key, never both. It is offered in ordinary sessions too, where it reads
+the operations this session's owner owns.
 
 The durable lifecycle is **not exclusive to this family**: appending inputs to a run group can
 also return a receipt rather than a result, and is read back the same way (run groups are covered
@@ -160,8 +191,8 @@ Reading a status reply:
 
 Two identifiers, two phases. Before consent there is no operation at all: a call parked on the
 owner's approval answers with `{ status: "awaiting_approval", invocationId }`, and
-`platform.get_operation({ invocationId })` is what you poll to learn whether it became an
-operation or was denied or expired. After consent there is an **operation id**,
+`platform.get_operation({ invocationId })` is what you poll: it answers `AwaitingApproval` while
+the card is still open, and later either the operation it became or `Denied` / `Expired`. After consent there is an **operation id**,
 and that is what you poll for progress. **Never re-issue the capability to find out** — a
 second call is a second operation and repeats the whole effect.
 
@@ -171,8 +202,13 @@ handful of times. Then tell the owner it is still running. Do not block a turn o
 ## The `AwaitingUser` handoff
 
 A parked operation is waiting on a human in a browser, and no autonomy setting can complete it.
-The connector setup is the case in the product today: the platform mints a single-use ticket and
-publishes a trusted Skaile page for it, and the credential is entered only there.
+Two capabilities park this way, and each mints a single-use ticket valid for 15 minutes:
+
+- `platform.begin_connector_setup` — a trusted Skaile page where the owner signs in to the
+  provider; the credential is entered only there.
+- `platform.begin_asset_configuration` — a link back into the **originating session's own
+  workspace**, where the session owner completes the existing configure flow (account, folder,
+  any credential). Nothing they enter reaches you.
 
 `result.payload.userAction` carries the handoff: `kind`, the `url` to give the owner **verbatim**,
 a `label`, and `expiresAt` — the deadline the platform published to the owner, and the one the
@@ -180,9 +216,9 @@ platform itself enforces.
 
 What resumes it is not a click. The trusted page re-checks four things live, in order: the
 ticket is found only among that caller's *own* parked operations, so a stolen link is inert in
-anyone else's session; its window is still open; the caller is still authorized on the
-operation's organization *this instant*; and the connector has genuinely become usable. Only
-then does the operation return to `Queued`. Redemption is single-use — a replay, a double-click,
+anyone else's session; its window is still open; the caller is still authorized *this instant*;
+and the condition genuinely holds — the connector is usable, or an instance of the asset is
+really assigned at the target scope. Only then does the operation return to `Queued`. Redemption is single-use — a replay, a double-click,
 and two racing tabs all collapse onto exactly one resume.
 
 If the window closes first, the operation terminalizes itself as `Failed` with an
@@ -198,7 +234,7 @@ Every effect here is approval-gated. Per call, the platform either cards it, dis
 an existing autonomy grant, or refuses it — **you do not choose, and cannot predict, which**. Never
 promise the owner a card.
 
-A grant is minted only by a human — an owner of the assistant session, from a card they
+A grant is minted only by a human — an owner of the session the card was shown in, from a card they
 themselves approved — and it is narrow by construction:
 
 - **One capability.** A grant never spans a family.
@@ -236,5 +272,7 @@ must not do is reach for `platform.act` / `platform.act_batch` to synthesize one
 is default-deny and documented separately in `references/agent-action-catalog.md`, where every
 unlisted scope/type pair is blocked too.
 
-Grounded in: `platform/docs/protocol-v2-capabilities.md` and
-`platform/backend/libs/capabilities/`.
+Grounded in: `platform/docs/protocol-v2-capabilities.md`,
+`platform/docs/personal-assistant-control-plane.md` and `platform/backend/libs/capabilities/`
+(`configure-connector.handler.ts`, `begin-asset-configuration.handler.ts`,
+`get-operation.handler.ts`, `personal-flows-policy.service.ts`).
