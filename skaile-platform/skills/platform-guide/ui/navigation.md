@@ -15,6 +15,12 @@ real UI strings.
     organization** (submenu), **New project**, then **Flows**, **Run groups**, **Sessions**
     and **Store**, and **Organization settings** (org Owners and platform admins). This
     menu is the only sidebar entrance to those four pages; Cmd+K has them too.
+    **Switch organization** groups the user's orgs into collapsible sections: **Starred**
+    (only when something is starred; open by default), **Organizations** (open unless
+    something is starred), and **Invited personal workspaces** (other people's personal
+    orgs the user was invited to; collapsed by default). Each row has a star icon
+    (**Star \<org\>**) that moves the org into or out of **Starred**. Stars are per user
+    and follow them across devices.
   - Then the **projects**. Expanding one shows, in order: **Apps** (the apps its sessions
     declare; a green **Running** dot marks one that is serving — clicking an app opens its
     session with only that app's preview showing), the project's sessions, **Flows** (each
@@ -22,11 +28,14 @@ real UI strings.
     A section with one item shows it directly under the project instead of in a group row;
     empty sections are omitted. Clicking the name of a project with exactly one session
     opens that session; its expand toggle still expands it.
-  - A project's **...** menu: **Pin to dashboard**, **Mark all sessions as read**, **New
-    agent** (opens the **New agent** dialog, which creates a session), **New flow**,
-    **Flows**, **Run groups**, **Agent graph**, **Project settings** (Owner only), and a
-    **Notifications** submenu. There is no standalone New Project row, and no per-session
-    star — dashboard pins are the one source of truth for favourites.
+  - When the user has starred projects, the list opens with a **Starred** group and
+    the rest follow under **All projects**.
+  - A project's **...** menu: **Pin to dashboard**, **Star** / **Unstar**, **Mark all
+    sessions as read**, **New agent** (opens the **New agent** dialog, which creates a
+    session), **New flow**, **Flows**, **Run groups**, **Agent graph**, **Project
+    settings** (Owner only), and a **Notifications** submenu. There is no standalone New
+    Project row, and no per-session star. Pins decide what the dashboard shows; stars only
+    reorder the sidebar's org and project lists.
   - Collapsed, the sidebar is a rail of one icon per project; the flyout lists that
     project's sessions, flows and **New agent**.
   - **Footer**: a **Personal** / **Business** workspace-mode toggle (switching to Personal
@@ -61,7 +70,9 @@ real UI strings.
   projects, settings, and registered actions. This is the primary "how do I do X" entry
   point — most features have a command. It lists one **Switch to \<org\>** entry per other
   organization, and each session as **Switch to \<Project\>: \<Session\>** (prefixed with
-  the org name when the user has two or more business orgs).
+  the org name when the user has two or more business orgs). **Star or unstar a project**
+  picks a project and flips its star, and each org has a **Star organization "\<org\>"**
+  / **Unstar organization "\<org\>"** entry.
 
 ## Top-level pages
 
