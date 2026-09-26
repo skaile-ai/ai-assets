@@ -107,7 +107,7 @@ refuses the calling one.
 | `platform.run_flow_in_session({ sessionId, flowId, … })` | starts a library flow in **another** session as the owner (see `concepts/flows.md`) | its own result, not a receipt |
 | `platform.cycle_session()` | restarts the calling session so a new mount or asset attaches | its own result; carded every time |
 
-All four are `routine`. `configure_connector` grants reach that exact target only. Two things
+All four are `routine`, but `cycle_session` is never covered by a grant — it is carded every time. `configure_connector` grants reach that exact target only. Two things
 to act on:
 
 - **A new mount or asset is not live yet.** Both configuration effects take effect only on the

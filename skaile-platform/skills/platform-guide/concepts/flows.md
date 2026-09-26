@@ -399,7 +399,7 @@ of the run. It can be started:
 
 - by a user, from the session's **Flow** tab (**Run a flow…**) or Cmd+K **Run a flow in
   this session**, choosing the flow and an optional input;
-- by the session's own agent, with no approval;
+- by the session's own agent, with no approval (`platform.run_flow`);
 - by an agent in another session, with the session owner's approval or a standing grant —
   and only if that owner may send to the target session.
 
