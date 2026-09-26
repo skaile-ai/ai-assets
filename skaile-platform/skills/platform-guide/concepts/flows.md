@@ -323,9 +323,10 @@ on. `run.instruction` becomes the question; the resolved `contract.input` bindin
 text being classified. Keep arithmetic and date comparisons out of the question: put them in
 a router on `flow.input` before the classifier runs.
 
-The whole answer is also stored on the node output as `classification`: `providerKind`,
-`modelVersion`, the per-option `distribution` and, for a score, `expected`. A score's `value`,
-`expected` and `distribution` keys are all on the **authored `const` scale** as of
+The whole answer is also stored on the node output as `classification`: its `value` (the
+decision again), `providerKind`, `modelVersion`, the per-option `distribution` and, for a
+score, `expected`. For a score, `classification.value`, `expected` and the `distribution` keys
+are all on the **authored `const` scale** as of
 `@skaile/workspaces` 3.27.1 (earlier runtimes keyed a score's `distribution` by level index).
 `distribution` is raw provider output — never present it as a confidence.
 
