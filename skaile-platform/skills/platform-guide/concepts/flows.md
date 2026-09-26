@@ -333,8 +333,9 @@ The whole answer is also stored on the node output as `classification`: `provide
 an uncalibrated answer can never pass a confidence threshold. So a `<`/`<=`/`>`/`>=` on a
 classifier's `confidence` must be preceded, earlier in the same `&&` chain, by the literal
 `nodes.<n>.output.fields.calibrated == true` for the same node — and a router that reads
-either reserved field must end with an unconditional **`default`** route, which is where an
-uncertain answer reaches a human:
+either reserved field must end with an unconditional **`default`** route —
+`{ "when": "default", "target": "<node id>" }` (`"when": "true"` is equivalent; `target` may be
+`null` to end the run) — which is where an uncertain answer reaches a human:
 
 ```
 nodes.assess.output.fields.calibrated == true && nodes.assess.output.fields.verdict == "payout" && nodes.assess.output.fields.confidence >= 0.95

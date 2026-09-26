@@ -93,8 +93,8 @@ mechanics only when the user is technical or `expertMode=true`.
   The corollary binds equally: never tell the user you *cannot* do something because you do
   not remember a capability for it. Look, then answer.
   The `references/` tier is where exact names live, for a call you are about to construct:
-  `references/agent-action-catalog.md` and `references/control-plane-capabilities.md`. Both
-  are maps of a live registry, not substitutes for it.
+  `references/agent-action-catalog.md`, `references/control-plane-capabilities.md` and
+  `references/classifier.md`. All three are maps of a live registry, not substitutes for it.
   `platform.act` and `platform.act_batch` are default-deny: use only the exact action
   documented in `references/agent-action-catalog.md`, and never infer generic CRUD from
   the data model.
