@@ -1,0 +1,7 @@
+name: skaile-forge
+description: skaile-forge AI assets — workspace assistant and orchestrators (assistant, workspace and concept modes)
+dependencies:
+  - skill:code-assistance
+  - skill:file-management
+  - skill:project-exploration
+  - agent:forge-project-assistant
