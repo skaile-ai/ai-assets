@@ -1,10 +1,10 @@
 ---
-name: Forge-Project Agent Skills
+name: skaile-forge Agent Skills
 description: Agent definitions and skills for the skaile-forge application (forge/skaile-forge)
 app: forge/skaile-forge
 ---
 
-# Forge Project Agent
+# skaile-forge Agents
 
 The AI coding assistant and orchestrators embedded in the `forge/skaile-forge` web interface. Drives software development sessions within developer project workspaces — reading, writing, and explaining code.
 
