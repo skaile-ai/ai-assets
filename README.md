@@ -21,7 +21,7 @@ skaile add <skill-name>
 | [`ai-asset-management/`](ai-asset-management/DOMAIN.md)                             | Create skills, domains, CLI tools; navigate the catalog                 |
 | [`skaile-development/`](skaile-development/DOMAIN.md)                               | Skaile-dev monorepo workflow skills (git, test, audit, implement, etc.) |
 | [`skaile-platform/`](skaile-platform/DOMAIN.md)                                     | Skaile platform-specific skills                                         |
-| [`forge-project/`](forge-project/DOMAIN.md)                                         | Forge app project skills                                                |
+| [`skaile-forge/`](skaile-forge/DOMAIN.md)                                           | skaile-forge app agents and skills                                                |
 | [`dev-implementation-experts-js/`](dev-implementation-experts-js/DOMAIN.md)         | Deep JS/TS expertise (Nuxt, Directus, TipTap, PrimeVue, etc.)           |
 | [`dev-implementation-experts-python/`](dev-implementation-experts-python/DOMAIN.md) | Deep Python expertise (Python, Pydantic AI, Marimo)                     |
 | [`dev-implementation-experts-typst/`](dev-implementation-experts-typst/DOMAIN.md)   | Typst document expertise + expert advisor router                        |

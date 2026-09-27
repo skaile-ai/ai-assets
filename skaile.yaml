@@ -63,7 +63,7 @@ assets:
   - { kind: skill,  name: uv-cli-implementer, root: ai-asset-management/skills/uv-cli-implementer }
   - { kind: bundle, name: ai-asset-management, root: ai-asset-management, files: [ai-asset-management.bundle.yaml] }
 
-# Other domains (dev-implementation-experts*, forge-project, knowledge-research,
+# Other domains (dev-implementation-experts*, skaile-forge, knowledge-research,
 # use, testing, skaile-platform, github-ops, external) rely on the
 # agentskills.io filename convention and are discovered by the workspaces walker.
 # Move them into the `assets:` block if/when their identity needs locking.

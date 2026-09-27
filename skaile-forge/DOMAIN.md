@@ -1,17 +1,17 @@
 ---
 name: Forge-Project Agent Skills
-description: Agent definitions and skills for the Forge-Project (forge/L4-project) application
-app: forge/L4-project
+description: Agent definitions and skills for the skaile-forge application (forge/skaile-forge)
+app: forge/skaile-forge
 ---
 
 # Forge Project Agent
 
-The AI coding assistant and orchestrators embedded in the `forge/L4-project` web interface. Drives software development sessions within developer project workspaces — reading, writing, and explaining code.
+The AI coding assistant and orchestrators embedded in the `forge/skaile-forge` web interface. Drives software development sessions within developer project workspaces — reading, writing, and explaining code.
 
 ## Contents
 
 ```
-ai-assets/forge-project/
+ai-assets/skaile-forge/
 ├── DOMAIN.md                      ← this file
 ├── agent/                         ← GitAgent definition (spec v0.1.0) — coding assistant
 │   ├── agent.yaml
@@ -34,7 +34,7 @@ ai-assets/forge-project/
 │   └── RULES.md
 ├── skills/                        ← application-specific skills
 │   └── ui-rendering/
-└── forge-project.bundle.yaml
+└── skaile-forge.bundle.yaml
 ```
 
 ## Agents
@@ -53,12 +53,12 @@ ai-assets/forge-project/
 
 ## Usage
 
-The agent definition is loaded at runtime by `forge/L4-project/server/utils/agent-definition.ts` and injected as the system prompt for each coding session. The canonical path is `ai-assets/forge-project/agent` relative to the skaile-dev monorepo root.
+The agent definition is loaded at runtime by `forge/skaile-forge/server/utils/agent-definition.ts` and injected as the system prompt for each coding session. The canonical path is `ai-assets/skaile-forge/agent` relative to the skaile-dev monorepo root.
 
-`agent.yaml` sets `imprint_on_project_open: true` — the imprint is rebuilt whenever a project is opened in the forge/L4-project UI.
+`agent.yaml` sets `imprint_on_project_open: true` — the imprint is rebuilt whenever a project is opened in skaile-forge.
 
 ## Notes
 
-The `forge-project-orchestrator` and `forge-project-base-orchestrator` are referenced by `forge/L4-project/server/utils/agent-manager.ts` via `agent:` lookup names.
+The `forge-project-orchestrator` and `forge-project-base-orchestrator` are referenced by `forge/skaile-forge/server/utils/workspaces.ts` via scoped `agent:@skaile-ai/<name>` refs.
 
 The UI rendering skill depends on the manifest injected by the SessionDispatcher (`<system-context name="UI_MANIFEST">`). Check the manifest before rendering any component.
