@@ -92,8 +92,9 @@ Each capability declares an **effect class** that decides how far a grant may re
 | `privileged` | Administrative — changes who or what exists at organization level. | Only if the owner **explicitly widened** the grant to privileged administration. |
 | `never` | Never auto-approvable. | No — it is carded, or refused outright. Never dispatched silently. |
 
-A grant is narrow: it names **one capability**, one target scope, and an absolute expiry, and
-may carry use and budget caps. Batch requests are ungrantable outright — `platform.act_batch`
+A grant is narrow: it names **one capability** and one target scope. It either has an absolute
+expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it may
+carry use and budget caps. Batch requests are ungrantable outright — `platform.act_batch`
 always requires a card.
 
 Two consequences you must actually act on:
