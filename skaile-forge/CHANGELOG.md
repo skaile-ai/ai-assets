@@ -11,4 +11,4 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   - **Unchanged:** agent asset names stay `forge-project-assistant`, `forge-project-base-orchestrator`, `forge-project-orchestrator`, and the `ui-rendering` skill keeps its name — `agent:` / `skill:` refs need no change.
 
 ### Other
-- Domain docs and agent prompts now target the unified `forge/skaile-forge` app (standalone repo `skaile-ai/skaile-forge`), which replaces forge-project, forge-assistant and forge-concept.
+- Domain docs and agent prompts now target the unified `forge/skaile-forge` app (standalone repo `skaile-ai/skaile-forge`). `forge/L4-project` references in skaile-development skills were repointed; `forge/L4-assistant` / `forge/L5-concept` references are not part of this change.

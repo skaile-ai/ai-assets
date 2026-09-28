@@ -30,7 +30,7 @@ run `cd forge/forge-common && bun x --bun vitest run`.
 | `forge/common-ui` | Vitest + Playwright CT | `tests/` + `tests/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ (Playwright CT) |
 | `forge/common-tui` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
 
-Forge E2E runs Playwright against `bun run dev` on a dedicated port. Fixtures in `test/e2e/fixtures.ts`, sandbox in `test/e2e/sandbox.ts`. Use `bun x playwright test` inside the package.
+Forge E2E specs live in `tests/e2e/`. In `forge/skaile-forge`, `tests/e2e/_setup/global-setup.ts` builds the app once and every Playwright worker boots the built output with its own `FORGE_HOME`. Use `bun run test:e2e` (or `bun x playwright test`) inside the package.
 
 For `forge/common-ui`, E2E uses Playwright CT (component testing) instead of a full Nuxt dev server — see the Playwright Component Testing section below.
 
@@ -77,7 +77,7 @@ For `forge/common-ui`, E2E uses Playwright CT (component testing) instead of a f
 |---|---|---|---|---|
 | Unit | Vitest, `test/unit/` or `tests/` | Vitest, `tests/` | Jest, colocated `*.spec.ts` | Vitest, `__tests__/` |
 | Integration | Vitest w/ real SQLite temp DB | Vitest w/ in-memory fixtures | Jest w/ PostgreSQL test container | — |
-| E2E | Playwright, `test/e2e/` | — (N/A — library) | — (delegated to platform/e2e) | Playwright, via `platform/e2e/` |
+| E2E | Playwright, `tests/e2e/` | — (N/A — library) | — (delegated to platform/e2e) | Playwright, via `platform/e2e/` |
 
 ## Playwright Component Testing (forge/common-ui)
 
