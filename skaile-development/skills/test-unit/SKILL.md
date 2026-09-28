@@ -237,9 +237,12 @@ STEP 3 (skip if mode=generate): Scaffold missing infrastructure
     `<target>/tests/_setup/nitro-globals.ts` + `<target>/tests/_setup/h3-event.ts`
     — mirror `forge/skaile-forge/test/unit/_setup/`.
 
-  **Root workspace registration:**
+  **Vitest config registration:**
   - Ensure the package's workspace entry in root `vitest.config.ts` defines a project name
-    matching test_stack_map.md (e.g. forge-project, agent-runner). Add the project if missing.
+    matching test_stack_map.md (e.g. agent-runner, agent-cli). Add the project if missing.
+  - Standalone repos with their own `vitest.config.ts` (e.g. `forge/skaile-forge`,
+    `forge/forge-common`) are not registered in the root config — extend their own
+    config's `include` instead.
 
 EMIT [test-unit] setup_done target=<pkg> scaffolded=<list>
 
@@ -385,13 +388,15 @@ STEP 6: For each uncovered unit, generate a test file
   is not Bun-compatible). Mock at the package boundary with `vi.mock` —
   `@skaile/forge-common-backend`, or `@skaile-ai/forge-common/server` in forge/skaile-forge.
 
-### Pattern 7 — Nitro route integration (synthetic h3 event)
+### Pattern 7 — Nitro route test (synthetic h3 event)
 
   Reference: `forge/skaile-forge/test/unit/_setup/h3-event.ts`, `_setup/nitro-globals.ts`,
   `api-auth-logout.test.ts`
 
-  Use for Nuxt Nitro route unit-integration tests. The `_setup/` helpers install the minimum
-  Nitro globals and build a synthetic h3 event; the test calls the route handler directly.
+  Use for Nuxt Nitro route tests. These are unit-level: in forge/skaile-forge they live under
+  `test/unit/`, while `tests/integration/` is reserved for cross-module suites. The `_setup/`
+  helpers install the minimum Nitro globals and build a synthetic h3 event; the test calls the
+  route handler directly.
 
 ### Pattern 8 — Happy-dom for Vue composables
 

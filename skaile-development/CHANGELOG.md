@@ -7,6 +7,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Docs
 - Skill references and examples now point at `forge/skaile-forge` (standalone repo `skaile-ai/skaile-forge`), which replaced `forge/L4-project`; branch-slug map entry `forge/skaile-forge` → `skaile-forge`.
+- `references/test_stack_map.md`: `forge/skaile-forge` row lists unit `test/unit/`, integration `tests/integration/`, e2e `tests/e2e/`; new `forge/forge-common` row. Test skills describe skaile-forge's synthetic-h3 Nitro route tests as unit-level (`test/unit/`), not integration tests.
 
 ## [0.4.2] — 2026-04-30
 

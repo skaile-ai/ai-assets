@@ -284,9 +284,10 @@ IF mode = construct
       `vitest.config.ts` must set `environment: "happy-dom"` and list
       `happy-dom` as a devDependency. `forge/skaile-forge/vitest.config.ts` is the
       reference.
-    - **Nitro route integration tests** (forge L5 integration tier): synthesize an
+    - **Nitro route tests** (forge L5, unit-level): synthesize an
       h3 event via `test/unit/_setup/h3-event.ts` + install Nitro globals via
-      `test/unit/_setup/nitro-globals.ts` as a `setupFiles` entry. See
+      `test/unit/_setup/nitro-globals.ts` as a `setupFiles` entry. In forge/skaile-forge these
+      live under `test/unit/`; `tests/integration/` holds only cross-module suites. See
       `forge/skaile-forge/test/unit/api-auth-logout.test.ts` for the canonical pattern (import the
       route handler dynamically, mock `@skaile-ai/forge-common/server` at the package
       boundary, call the handler with a synthetic event).
@@ -466,7 +467,7 @@ bun x --bun vitest run -t "workspace rename" 2>&1 | tail -40
 bun x --bun vitest run agent-framework/core/src/manifest.test.ts
 
 # Run a forge Nuxt app's suite (their own vitest config — happy-dom + Nitro shims)
-bun run --filter @skaile/forge-project test 2>&1 | tail -60
+(cd forge/skaile-forge && bun run test 2>&1 | tail -60)
 bun run --filter @skaile/forge-assistant test 2>&1 | tail -60
 bun run --filter @skaile/forge-concept test 2>&1 | tail -60    # vitest@4.1, scoped only
 

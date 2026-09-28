@@ -176,7 +176,7 @@ WRITES
 
 MUST  read CLAUDE.md before scaffolding anything
 MUST  read the concept spec (`_devlog/specs/2026-04-22-test-concept-design.md`) + plan (`_devlog/plans/2026-04-22-test-gap-fill.md`) before choosing between L4 CLI, L5 Nitro integration, L5 spawned-server, or L5 Playwright
-MUST  reuse existing reference configs: `agent-framework/cli/tests/cli-e2e/` for L4, `forge/skaile-forge/test/unit/` for L5 Nitro integration, `forge/skaile-forge/playwright.config.ts` + `forge/L4-assistant/playwright.config.ts` + `forge/L5-concept/playwright.config.ts` + `platform/e2e/playwright.config.ts` for L5 Playwright
+MUST  reuse existing reference configs: `agent-framework/cli/tests/cli-e2e/` for L4, `forge/skaile-forge/test/unit/` (unit-level route tests; not `tests/integration/`) for L5 Nitro integration, `forge/skaile-forge/playwright.config.ts` + `forge/L4-assistant/playwright.config.ts` + `forge/L5-concept/playwright.config.ts` + `platform/e2e/playwright.config.ts` for L5 Playwright
 MUST  scaffold isolated per-test sandbox — no leaking state between runs (use `makeTempDir` / `makeTempProject` from `@skaile/test-utils` for L4)
 MUST  start the dev server (L5 Playwright) via `webServer` in playwright.config.ts; the L4 harness invokes `src/index.ts` via `bun` directly (no build step)
 MUST  screenshot every failing L5 Playwright journey step automatically (`screenshot: 'only-on-failure'`)
@@ -541,7 +541,7 @@ STEP 4c (web, forge apps only): Scaffold L5 Nitro integration tests
     2. WRITE `<target>/tests/_setup/nitro-globals.ts` (copy from the same ref)
     3. WRITE/UPDATE `<target>/vitest.config.ts` — set `test.environment: "happy-dom"` and `test.setupFiles: ["tests/_setup/nitro-globals.ts"]`
 
-  Tests live at `<target>/tests/api-<route>.test.ts` (flat under tests/, prefix `api-` — note this is NOT under `tests/integration/`; this is the forge-app convention).
+  Tests live at `<target>/tests/api-<route>.test.ts` (flat under tests/, prefix `api-` — this is the forge-app convention). In `forge/skaile-forge` these route tests are unit-level files at `test/unit/api-<route>.test.ts` (run by `bun run test:unit`); its `tests/integration/` holds only cross-module integration suites (`framework-contract.test.ts`, `skaileup-flows.test.ts`) — do not put route tests there. See `references/test_stack_map.md`.
 
   Cookie-name convention (confirm per app in `server/utils/auth.ts`):
 
@@ -563,8 +563,9 @@ STEP 4c (web, forge apps only): Scaffold L5 Nitro integration tests
     mockGetSessionUser: vi.fn(),
   }))
 
-  vi.mock('@skaile/forge-common-backend', async () => {
-    const actual = await vi.importActual<Record<string, unknown>>('@skaile/forge-common-backend')
+  // forge/skaile-forge entry; other forge apps mock '@skaile/forge-common-backend'
+  vi.mock('@skaile-ai/forge-common/server', async () => {
+    const actual = await vi.importActual<Record<string, unknown>>('@skaile-ai/forge-common/server')
     return { ...actual, createDb: mockCreateDb, getSessionUser: mockGetSessionUser }
   })
 
@@ -577,7 +578,7 @@ STEP 4c (web, forge apps only): Scaffold L5 Nitro integration tests
     test('returns the authenticated user when the cookie is valid', async () => {
       mockGetSessionUser.mockResolvedValue({ id: 1, username: 'admin', role: 'admin' })
       const handler = (await import('../server/api/auth/me.get')).default as (e: unknown) => Promise<unknown>
-      const event = makeEvent({ cookies: { forge_project_auth: 'valid-token' } })
+      const event = makeEvent({ cookies: { skaile_forge_auth: 'valid-token' } })
       const result = await handler(event)
       expect(result).toMatchObject({ username: 'admin' })
     })
@@ -697,7 +698,7 @@ CHECKLIST
 | Layer | Pattern | File |
 |---|---|---|
 | L4 | CLI spawn-harness | `agent-framework/cli/tests/cli-e2e/setup.ts`, `agent-framework/cli/tests/cli-e2e/help.test.ts`, `config.test.ts`, `flow.test.ts` |
-| L5 | Nitro integration (synthetic h3 event) | `forge/skaile-forge/test/unit/_setup/h3-event.ts`, `forge/skaile-forge/test/unit/api-auth-logout.test.ts` |
+| L5 | Nitro integration (synthetic h3 event; unit-level files in skaile-forge) | `forge/skaile-forge/test/unit/_setup/h3-event.ts`, `forge/skaile-forge/test/unit/api-auth-logout.test.ts` |
 | L5 | Playwright web E2E | `forge/skaile-forge/tests/e2e/*.spec.ts`, `forge/L4-assistant/tests/e2e/*.spec.ts`, `forge/L5-concept/test/e2e/*.spec.ts`, `platform/e2e/` |
 | L1/L2 | Playwright CT | `forge/common-ui/playwright-ct.config.ts`, `forge/common-ui/tests/e2e/fixtures/EditorFixture.vue`, `forge/common-ui/tests/e2e/useSkaileEditor.spec.ts` |
 
