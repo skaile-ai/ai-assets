@@ -97,7 +97,7 @@ workspace". Panels (in icon order):
 | **Flow**       | Flow-run view when the session runs a flow; with none running, **Run a flow…** starts one in this session. |
 | **System**     | Restart / kill / compact the session, view protocol info, and read live logs. (Formerly "Debug".) |
 | **Config**     | Skaile config editor for the session (full or mounts-only). |
-| **Report**     | The error-agent conversation behind **Report a problem** — filing, refining and tracking a problem report. Appears only once the user has a report in play. |
+| **Report**     | The error-agent conversation behind **Report a problem** — filing, refining and tracking a problem report. The agent shows the drafted report for review before sending it, unless the user asks it to send directly. Appears only once the user has a report in play. |
 
 ## Header & presence
 
@@ -161,3 +161,4 @@ Connectors panels), `frontend/src/components/ui/sharing-sidepanel/sharing-sidepa
 `frontend/src/pages/projects/settings/project-connectors-workspace.tsx`,
 `frontend/src/components/ui/provider-reauth-notice/provider-reauth-notice.tsx`.
 Verified against platform `main` @ `bb6449b20` (2026-09-26).
+The **Report a problem** review-or-send-directly choice: platform `main` @ `c59fd243b` (2026-09-28).

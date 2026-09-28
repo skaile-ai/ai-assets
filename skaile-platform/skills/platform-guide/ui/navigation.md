@@ -221,3 +221,4 @@ sections), `frontend/src/components/ui/project-actions-menu/project-actions-menu
 `frontend/src/pages/projects/project-setup.page.tsx`,
 `frontend/src/pages/projects/settings/` (tabs, security, connectors).
 Verified against platform `main` @ `bb6449b20` (2026-09-26).
+The **Report a problem** review-or-send-directly choice: platform `main` @ `c59fd243b` (2026-09-28).
