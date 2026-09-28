@@ -98,7 +98,10 @@ A shared mailbox is added **once per Connection** in **My Connections > Exchange
 Shared mailboxes**: open **Add a shared mailbox**, pick the **Acting account**, enter the
 **Shared mailbox address**, **Add mailbox**. The acting account needs Full Access to it in
 Exchange; if the Connection lacks the permission, the refusal offers **Allow shared mail
-access** (a Microsoft sign-in; some tenants need an admin to approve it). Adding enables
+access** (a Microsoft sign-in). If Microsoft refuses because the tenant lets only admins
+approve apps, the **not granted** notice offers **Get an administrator approval link**: a
+dialog with **Copy link** and **Email administrator**. The link is valid for 7 days. After the admin
+approves, the user runs **Allow shared mail access** again themselves. Adding enables
 nothing: each project then lists the mailbox unchecked until a project Owner enables it in
 the project's Connectors settings. **Remove** takes it away from every project. The list
 shows only mailboxes on the current organization's Connections.
