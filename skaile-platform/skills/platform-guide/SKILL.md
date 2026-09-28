@@ -6,8 +6,8 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   flows (run groups, batch runs, recipes, webhooks, personal flows), previews, classifiers,
   Exchange mail and calendar (triage, drafting, sending, shared mailboxes), the agent graph,
   Skailify apps, sharing and inviting, connecting a data source, AI providers and Claude
-  seats, skills/assets, scoped sessions, agent-to-agent, notifications, roles, personal vs
-  business workspace, hibernation, or any platform surface; before creating a
+  seats, skills/assets, scoped sessions, agent-to-agent, notifications, roles and permissions,
+  personal vs business workspace, hibernation, or any platform surface; before creating a
   project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
