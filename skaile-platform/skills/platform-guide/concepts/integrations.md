@@ -104,7 +104,9 @@ mailboxes, the owner picks which mailboxes the project may use.
 - **Shared mailboxes**: the user adds them once per connection in **My connections**,
   after granting **Allow shared mail access**. A mailbox is admitted only if the user's
   account can actually open its inbox (Full Access). The project owner then enables it
-  per project. Sends from a shared mailbox are approved every time.
+  per project. Sends from a shared mailbox are approved every time. In a tenant where only
+  admins may approve apps, the user sends an admin the **administrator approval link**
+  (valid 7 days), then grants **Allow shared mail access** again themselves.
 - Filing mail attachments into SharePoint is the agent combining steps (read the
   attachment, write it to a SharePoint mount) — there is no automatic filing rule.
 - When the grant expires, the agent tells the user to reconnect.
@@ -136,5 +138,5 @@ Source of truth: `platform/docs/integration_architecture.md`,
 `platform/docs/mount-connection-binding.md` (owner invariant), `platform/docs/exchange-connector.md`,
 `platform/docs/ai-provider-credential-lifecycle.md`, `connector-mount-provisioning.ts`
 (agent-proposed mounts), `configure-instance-modal.tsx` (Access default), platform PRs
-#5337/#5357 (Reconnect), #5364 (shared mailboxes per org), #4703 (setup-token seats),
+#5337/#5357 (Reconnect), #5364 (shared mailboxes per org), #5531 (shared-mail admin approval link), #4703 (setup-token seats),
 #5099/#5109/#5139 (seat health and routing), #5305 (classifier providers).
