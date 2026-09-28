@@ -1,19 +1,16 @@
 ---
 name: "platform-guide"
 description: "Deep knowledge of the Skaile platform's UI and conceptual model so the
-  assistant can guide users and act on their behalf. Use when the user asks 'how do I...',
-  'where is...', 'where do I find...', 'walk me through...', or 'help me with the platform';
-  or asks about projects, sessions, workspaces, flows, run groups, batch runs, recipes,
-  webhooks, in-session flow runs, personal flows, previews, classifiers (classifier
-  providers, classifying many items), Exchange mail and calendar (inbox triage, drafting and
-  sending mail, shared mailboxes), agents and the agent graph, agent-controlled apps
-  (Skailify), sharing, inviting people, connecting a data source, AI providers and Claude
-  subscription seats, enabling a skill/asset, scoped sessions, agent-to-agent, notification
-  modes, roles and permissions, personal vs business workspace, hibernation, or any platform
-  surface; or when you are about to create a project/session/organization, invite someone,
-  start a connector setup or propose a connector mount, or read back a durable operation you
-  started; or when you hit a problem in the platform itself, or the user wants to report a
-  bug or suggest a feature to the Skaile team. Load on demand, not always-on."
+  assistant can guide users and act on their behalf. Use for 'how do I...', 'where is...',
+  'walk me through...' or 'help me with the platform'; for projects, sessions, workspaces,
+  flows (run groups, batch runs, recipes, webhooks, personal flows), previews, classifiers,
+  Exchange mail and calendar (triage, drafting, sending, shared mailboxes), the agent graph,
+  Skailify apps, sharing and inviting, connecting a data source, AI providers and Claude
+  seats, skills/assets, scoped sessions, agent-to-agent, notifications, roles, personal vs
+  business workspace, hibernation, or any platform surface; before creating a
+  project/session/organization, inviting someone, starting a connector setup or mount, or
+  reading back a durable operation; or when you hit a platform problem, or the user wants
+  to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
 version: 0.13.0
 metadata:
   stage: "alpha"

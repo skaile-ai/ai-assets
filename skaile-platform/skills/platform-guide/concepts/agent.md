@@ -52,7 +52,8 @@ at runtime**, never assumed from memory.
   owner's current screen, finishing onboarding). The session-owner configuration effects and
   reading an operation's status work in an ordinary project session too. Mail and calendar
   appear only where the project enabled them. Filing a report directly works in every
-  session; the reviewed report form belongs to the **Report** conversation only. Another reason to read the live set rather than a remembered one.
+  session; the drafted-report review step exists only in the **Report** conversation.
+  Another reason to read the live set rather than a remembered one.
 
 **The corollary matters as much as the rule: never tell a user you cannot do something
 because you do not remember a capability for it.** Look first. Saying "I can't connect that
