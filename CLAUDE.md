@@ -17,7 +17,7 @@ ai-asset-management/              ← meta: skill/domain scaffolding, catalog na
 skaile-development/               ← skaile-dev monorepo workflow skills (git, test, audit, implement, etc.)
 skaile-platform/                  ← skaile platform-specific skills (agent personas)
 mcp/                              ← MCP server catalog entries (xls, ppt, github)
-forge-project/                    ← forge app project skills
+skaile-forge/                     ← skaile-forge app agents and skills
 dev-implementation-experts-js/    ← JS/TS framework experts
 dev-implementation-experts-python/ ← Python experts
 dev-implementation-experts-typst/  ← Typst expert

@@ -24,7 +24,7 @@ metadata:
     - id: target
       label: "Package path"
       type: text
-      hint: "e.g. forge/L4-project, agent-framework/runner, platform/backend"
+      hint: "e.g. forge/skaile-forge, agent-framework/runner, platform/backend"
     inputs_optional:
     - id: layers
       label: "Layers to plan (comma-separated)"
@@ -224,12 +224,15 @@ STEP 5: Enumerate testable units per layer
     - stdout/exit-code assertions for each top-level subcommand group
     - One happy-path + one error-path per subcommand (missing flag, bad argument)
 
-  L5 — Reference apps (forge) have three shapes:
+  L5 — Reference apps (forge) have four shapes:
     - Unit (composables, server utilities, auth middleware):
-      Reference: `forge/L4-project/tests/use-color-mode.test.ts` (happy-dom for Vue composables)
-    - Integration (Nitro route handlers with synthetic h3 events + mocked @skaile/forge-common-backend):
-      Reference: `forge/L4-project/tests/_setup/h3-event.ts`, `_setup/nitro-globals.ts`,
-      `api-auth-logout.test.ts`, `api-auth-me.test.ts`
+      Reference: `forge/skaile-forge/test/unit/workspace-access.test.ts` (its `vitest.config.ts` sets happy-dom for Vue composables)
+    - Nitro route tests (route handlers with synthetic h3 events + mocked forge-common server entry) —
+      unit-level in forge/skaile-forge, under `test/unit/`:
+      Reference: `forge/skaile-forge/test/unit/_setup/h3-event.ts`, `_setup/nitro-globals.ts`,
+      `api-auth-logout.test.ts`, `workspace-patch.test.ts`
+    - Integration (cross-module contracts, real `@skaile/workspaces` pipeline) under `tests/integration/`:
+      Reference: `forge/skaile-forge/tests/integration/framework-contract.test.ts`, `skaileup-flows.test.ts`
     - E2E (Playwright) — critical user journeys only.
     - **Library composable E2E (Playwright CT):** when an L1/L2 library package exports
       composables that happy-dom cannot test (TipTap, ProseMirror, WebGL, etc.), use
@@ -287,7 +290,7 @@ STEP 7: Specify fixture/seed per scenario
   Agent framework L3 drivers: fake-binary fixture under `tests/fixtures/fake-omp/` + env override (e.g. `OMP_BRIDGE_BIN`)
   Agent framework L3 lab/docker: gated by `SKAILE_DOCKER_TESTS=1`; skip block otherwise
   Platform frontend: mock API via MSW (or fetch stub); render with TanStack providers
-  Forge Nitro integration: synthetic h3 event via `tests/_setup/h3-event.ts` + Nitro globals via `tests/_setup/nitro-globals.ts`
+  Forge Nitro route tests: synthetic h3 event via `tests/_setup/h3-event.ts` + Nitro globals via `tests/_setup/nitro-globals.ts` (forge/skaile-forge: `test/unit/_setup/`)
   YAML workspaces: `loadFixtureWorkspace(name)` reads from `tests/fixtures/workspaces/<name>.yaml`
 
 # ── Phase 5: Write Plan ───────────────────────────────────────────

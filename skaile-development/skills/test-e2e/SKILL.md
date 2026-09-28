@@ -108,8 +108,8 @@ Bootstraps and generates end-to-end tests for the top of the layer stack. Two fl
 | Layer | Kind | Applies to | Framework | Pattern | Test suffix |
 |---|---|---|---|---|---|
 | **L4** | CLI spawn-harness | `agent-framework/cli` (and `sdk` acceptance) | Vitest | `runCli(args, { cwd })` spawns the real binary, asserts stdout/exit | `.test.ts` |
-| **L5** | Nitro integration (cheap cousin) | `forge/L4-project`, `forge/L4-assistant`, `forge/L5-concept` | Vitest + synthetic h3 event | In-process route handler invoked with `makeEvent({ cookies })` | `.test.ts` (prefix `api-`) |
-| **L5** | Spawned-server harness | `forge/L4-project`, `forge/L4-assistant` | Vitest + child Nitro process | Real Nuxt dev server spawned, gated behind `FORGE_SERVER_TESTS=1` | `.test.ts` (prefix `api-server-`) |
+| **L5** | Nitro integration (cheap cousin) | `forge/skaile-forge`, `forge/L4-assistant`, `forge/L5-concept` | Vitest + synthetic h3 event | In-process route handler invoked with `makeEvent({ cookies })` | `.test.ts` (prefix `api-`) |
+| **L5** | Spawned-server harness | `forge/L4-assistant` | Vitest + child Nitro process | Real Nuxt dev server spawned, gated behind `FORGE_SERVER_TESTS=1` | `.test.ts` (prefix `api-server-`) |
 | **L5** | Web E2E | `forge/*`, `platform/e2e` | Playwright | Browser journeys against a running dev server | `.spec.ts` |
 | **L1/L2** | Component Testing (CT) | `forge/common-ui` (composable libraries) | `@playwright/experimental-ct-vue` | Mounts a `.vue` fixture in Chromium via Vite CT server — no Nuxt app | `.spec.ts` |
 
@@ -121,13 +121,13 @@ Read these canonical documents before scaffolding anything:
 - **Root overview:** root `CLAUDE.md` § "Testing Strategy".
 - **Shared helpers:** `agent-framework/test-utils/CLAUDE.md` + `agent-framework/test-utils/src/index.ts` — used by the CLI E2E harness (`makeTempDir`).
 
-Platform E2E already lives in `platform/e2e/` with its own config — for the platform this skill *extends* it rather than scaffolding a new one. `forge/L5-concept` (historical `test/e2e/` layout), `forge/L4-project` (`tests/e2e/`), `forge/L4-assistant` (`tests/e2e/`), and `platform/e2e/` are the four reference Playwright suites.
+Platform E2E already lives in `platform/e2e/` with its own config — for the platform this skill *extends* it rather than scaffolding a new one. `forge/L5-concept` (historical `test/e2e/` layout), `forge/skaile-forge` (`tests/e2e/`, standalone repo `skaile-ai/skaile-forge`), `forge/L4-assistant` (`tests/e2e/`), and `platform/e2e/` are the four reference Playwright suites.
 
 The agent-framework itself has no Playwright layer — runner / bridge / session packages are covered by integration tests. `agent-framework/cli` owns the dedicated L4 CLI-e2e suite that invokes the compiled bin via `bun`.
 
 ## When to Use
 
-- Adding Playwright coverage to a forge app (`forge/L4-project`, `forge/L4-assistant`, `forge/L5-concept`) or the platform suite
+- Adding Playwright coverage to a forge app (`forge/skaile-forge`, `forge/L4-assistant`, `forge/L5-concept`) or the platform suite
 - Adding journeys after a new page/route is implemented
 - Adding L4 CLI E2E tests for a new skaile subcommand in `agent-framework/cli`
 - Adding L5 Nitro integration tests (synthetic h3 event) for a new forge API route
@@ -167,7 +167,7 @@ WRITES
     <target>/tests/_setup/nitro-globals.ts          — Nitro global stubs for Vitest
     <target>/tests/api-<route>.test.ts              — per-route integration tests
     <target>/vitest.config.ts                       — sets environment: "happy-dom" + setupFiles
-  L5 Spawned-server harness (forge/L4-project, forge/L4-assistant; gated):
+  L5 Spawned-server harness (forge/L4-assistant; gated):
     <target>/tests/_setup/spawn-server.ts           — spawns Nuxt dev server, returns { url, stop }
     <target>/tests/api-server-harness.test.ts       — canonical gated test (FORGE_SERVER_TESTS=1)
   L4 CLI spawn-harness (agent-framework/cli + package.json with `bin`):
@@ -176,7 +176,7 @@ WRITES
 
 MUST  read CLAUDE.md before scaffolding anything
 MUST  read the concept spec (`_devlog/specs/2026-04-22-test-concept-design.md`) + plan (`_devlog/plans/2026-04-22-test-gap-fill.md`) before choosing between L4 CLI, L5 Nitro integration, L5 spawned-server, or L5 Playwright
-MUST  reuse existing reference configs: `agent-framework/cli/tests/cli-e2e/` for L4, `forge/L4-project/tests/` for L5 Nitro integration, `forge/L4-project/playwright.config.ts` + `forge/L4-assistant/playwright.config.ts` + `forge/L5-concept/playwright.config.ts` + `platform/e2e/playwright.config.ts` for L5 Playwright
+MUST  reuse existing reference configs: `agent-framework/cli/tests/cli-e2e/` for L4, `forge/skaile-forge/test/unit/` (unit-level route tests; not `tests/integration/`) for L5 Nitro integration, `forge/skaile-forge/playwright.config.ts` + `forge/L4-assistant/playwright.config.ts` + `forge/L5-concept/playwright.config.ts` + `platform/e2e/playwright.config.ts` for L5 Playwright
 MUST  scaffold isolated per-test sandbox — no leaking state between runs (use `makeTempDir` / `makeTempProject` from `@skaile/test-utils` for L4)
 MUST  start the dev server (L5 Playwright) via `webServer` in playwright.config.ts; the L4 harness invokes `src/index.ts` via `bun` directly (no build step)
 MUST  screenshot every failing L5 Playwright journey step automatically (`screenshot: 'only-on-failure'`)
@@ -214,7 +214,7 @@ STEP 2: Load context
 STEP 3a (web, skip if mode=generate): Scaffold Playwright (L5)
 
   Each forge app owns its own `playwright.config.ts`. Reference configs:
-  - `forge/L4-project/playwright.config.ts` — tests at `tests/e2e/*.spec.ts`
+  - `forge/skaile-forge/playwright.config.ts` — tests at `tests/e2e/*.spec.ts`; `@nuxt/test-utils/playwright` with one shared build (`tests/e2e/_setup/global-setup.ts`) and a per-worker `FORGE_HOME`
   - `forge/L4-assistant/playwright.config.ts` — tests at `tests/e2e/*.spec.ts`
   - `forge/L5-concept/playwright.config.ts` — tests at `test/e2e/*.spec.ts` (historical; keep the `test/` vs `tests/` quirk for this app only — do not rename)
   - `platform/e2e/playwright.config.ts` — platform suite; do NOT scaffold a parallel config when target is platform/frontend, extend this one instead
@@ -228,7 +228,7 @@ STEP 3a (web, skip if mode=generate): Scaffold Playwright (L5)
     ```typescript
     import { defineConfig } from '@playwright/test'
 
-    const PORT = <pick unused port based on package, e.g. 3400 for forge/L4-project, 3344 for forge/L5-concept, etc.>
+    const PORT = <pick unused port based on package, e.g. 3344 for forge/L5-concept, 3410 for forge/L4-assistant, etc.>
 
     export default defineConfig({
       testDir: './tests/e2e',
@@ -531,27 +531,27 @@ STEP 4c (web, forge apps only): Scaffold L5 Nitro integration tests
   L5 Nitro integration is the cheap cousin of Playwright: it invokes a Nuxt route handler directly with a synthetic h3 event. No browser, no dev server, just Vitest + `vi.mock` at the boundary. Use it to cover every API route's happy + auth-failure + validation-failure paths cheaply; reserve Playwright for real user journeys.
 
   Reference files:
-  - `forge/L4-project/tests/_setup/h3-event.ts` — `makeEvent({ cookies, body, query, context })` synthetic event
-  - `forge/L4-project/tests/_setup/nitro-globals.ts` — setup file that stubs Nitro globals (`defineEventHandler`, `readBody`, `getCookie`, `setCookie`, …)
-  - `forge/L4-project/tests/api-auth-me.test.ts` — canonical mock-at-the-boundary example
-  - `forge/L4-project/vitest.config.ts` — `setupFiles: ["tests/_setup/nitro-globals.ts"]` + `environment: "happy-dom"`
+  - `forge/skaile-forge/test/unit/_setup/h3-event.ts` — `makeEvent({ cookies, body, query, context })` synthetic event
+  - `forge/skaile-forge/test/unit/_setup/nitro-globals.ts` — setup file that stubs Nitro globals (`defineEventHandler`, `readBody`, `getCookie`, `setCookie`, …)
+  - `forge/skaile-forge/test/unit/api-auth-logout.test.ts` — canonical mock-at-the-boundary example
+  - `forge/skaile-forge/vitest.config.ts` — `setupFiles: ["test/unit/_setup/nitro-globals.ts"]` + `environment: "happy-dom"`
 
   Three-file scaffolding when missing:
-    1. WRITE `<target>/tests/_setup/h3-event.ts` (copy from `forge/L4-project/tests/_setup/h3-event.ts`)
+    1. WRITE `<target>/tests/_setup/h3-event.ts` (copy from `forge/skaile-forge/test/unit/_setup/h3-event.ts`)
     2. WRITE `<target>/tests/_setup/nitro-globals.ts` (copy from the same ref)
     3. WRITE/UPDATE `<target>/vitest.config.ts` — set `test.environment: "happy-dom"` and `test.setupFiles: ["tests/_setup/nitro-globals.ts"]`
 
-  Tests live at `<target>/tests/api-<route>.test.ts` (flat under tests/, prefix `api-` — note this is NOT under `tests/integration/`; this is the forge-app convention).
+  Tests live at `<target>/tests/api-<route>.test.ts` (flat under tests/, prefix `api-` — this is the forge-app convention). In `forge/skaile-forge` these route tests are unit-level files at `test/unit/api-<route>.test.ts` (run by `bun run test:unit`); its `tests/integration/` holds only cross-module integration suites (`framework-contract.test.ts`, `skaileup-flows.test.ts`) — do not put route tests there. See `references/test_stack_map.md`.
 
   Cookie-name convention (confirm per app in `server/utils/auth.ts`):
 
     | Forge app | Cookie name |
     |---|---|
-    | `forge/L4-project` | `forge_project_auth` |
+    | `forge/skaile-forge` | `skaile_forge_auth` |
     | `forge/L4-assistant` | `forge_assistant_auth` |
     | `forge/L5-concept` | `auth_session` (different pattern — historical, confirm by reading `server/utils/auth.ts`) |
 
-  Mock boundary: any route that reaches `getDb()` or auth primitives MUST mock `@skaile/forge-common-backend`'s `createDb` + `getSessionUser`/`deleteSession` at the module boundary (not deeper). See `forge/L4-project/tests/api-auth-me.test.ts` for the canonical `vi.hoisted` + `vi.mock` shape.
+  Mock boundary: any route that reaches `getDb()` or auth primitives MUST mock the forge-common server entry's `createDb` + `getSessionUser`/`deleteSession` at the module boundary (not deeper) — `@skaile/forge-common-backend`, or `@skaile-ai/forge-common/server` in forge/skaile-forge. See `forge/skaile-forge/test/unit/api-auth-logout.test.ts` for the canonical `vi.hoisted` + `vi.mock` shape.
 
   Template:
   ```typescript
@@ -563,8 +563,9 @@ STEP 4c (web, forge apps only): Scaffold L5 Nitro integration tests
     mockGetSessionUser: vi.fn(),
   }))
 
-  vi.mock('@skaile/forge-common-backend', async () => {
-    const actual = await vi.importActual<Record<string, unknown>>('@skaile/forge-common-backend')
+  // forge/skaile-forge entry; other forge apps mock '@skaile/forge-common-backend'
+  vi.mock('@skaile-ai/forge-common/server', async () => {
+    const actual = await vi.importActual<Record<string, unknown>>('@skaile-ai/forge-common/server')
     return { ...actual, createDb: mockCreateDb, getSessionUser: mockGetSessionUser }
   })
 
@@ -576,8 +577,9 @@ STEP 4c (web, forge apps only): Scaffold L5 Nitro integration tests
 
     test('returns the authenticated user when the cookie is valid', async () => {
       mockGetSessionUser.mockResolvedValue({ id: 1, username: 'admin', role: 'admin' })
+      // flat tests/ dir; from skaile-forge's test/unit/ use '../../server/...'
       const handler = (await import('../server/api/auth/me.get')).default as (e: unknown) => Promise<unknown>
-      const event = makeEvent({ cookies: { forge_project_auth: 'valid-token' } })
+      const event = makeEvent({ cookies: { skaile_forge_auth: 'valid-token' } })
       const result = await handler(event)
       expect(result).toMatchObject({ username: 'admin' })
     })
@@ -595,8 +597,7 @@ STEP 4d (web, forge apps only, when vi.mock cannot reach the route's transitive 
   Some routes transitively import `agent-manager.ts` (→ `consola` → `@skaile/agent-bridge` → the full agent-framework chain) and `vi.mock` under Bun+Vitest cannot reliably intercept those deep imports. The fallback is to spawn the real Nuxt dev server as a child process.
 
   Reference files:
-  - `forge/L4-project/tests/_setup/spawn-server.ts` — `{ url, stop }` handle; polls the port; parses "Listening on" from stdout
-  - `forge/L4-project/tests/api-server-harness.test.ts` — canonical gate + usage
+  - None in `forge/skaile-forge` — it ships no spawned-server harness; routes that `vi.mock` cannot isolate are covered by its Playwright suite (one shared Nitro build from `tests/e2e/_setup/global-setup.ts`, a per-worker `FORGE_HOME`).
   - `_devlog/entries/2026-04-22-phase-d2-nitro-integration.md` — documents the vi.mock failure mode + why `birpc` packaging currently blocks flipping the flag in CI
 
   Tests MUST self-gate behind `FORGE_SERVER_TESTS=1`:
@@ -605,18 +606,18 @@ STEP 4d (web, forge apps only, when vi.mock cannot reach the route's transitive 
   runIfServer('spawn-server', () => { /* ... */ })
   ```
 
-  Currently disabled in CI — a `birpc` packaging bug blocks enabling it. When that clears, flipping `FORGE_SERVER_TESTS=1` in the e2e lane activates the harness for forge/L4-project + forge/L4-assistant.
+  Currently disabled in CI — a `birpc` packaging bug blocks enabling it. When that clears, flipping `FORGE_SERVER_TESTS=1` in the e2e lane activates the harness for forge/L4-assistant.
 
   Do not scaffold spawn-server for a forge app that doesn't have it yet unless the user explicitly requests it; Nitro integration (STEP 4c) should be the default.
 
 ## Constraints
 
 - **CI lane placement:** Playwright runs ONLY in the E2E lane (`.github/workflows/test-e2e.yml`), never in the fast lane (`test-fast.yml`) or full lane (`test-full.yml`). The L4 CLI spawn-harness runs in the full lane. L5 Nitro integration runs in the full lane. L5 spawned-server runs in the E2E lane once its gate is flipped.
-- **Playwright matrix:** one GitHub Actions matrix cell per app — `forge/L4-project`, `forge/L4-assistant`, `forge/L5-concept`, `platform/e2e`. Each cell owns its browser cache (keyed on `bun.lock` + `package.json`). Test results + HTML reports upload on failure only, 14-day retention.
+- **Playwright matrix:** one GitHub Actions matrix cell per app — `forge/L4-assistant`, `forge/L5-concept`, `platform/e2e`. Each cell owns its browser cache (keyed on `bun.lock` + `package.json`). Test results + HTML reports upload on failure only, 14-day retention. `forge/skaile-forge` is a standalone repo and runs its suite (`bun run test:e2e`) outside this matrix.
 - **Browser install:** `bun x --bun playwright install chromium --with-deps` (CI runs this once per cache key).
 - **Chromium only:** matches existing CI. Do not add firefox/webkit projects without explicit approval — they triple the lane runtime.
 - **Subprocess spawn cost (L4):** every `runCli` invocation is a bun subprocess. Target 3-6 tests per subcommand-group file; don't explode the count per group. Long-running cases belong behind `SKAILE_SPAWN_TESTS=1` in the integration suite, not the L4 E2E suite.
-- **Spawned-server harness (L5):** gated behind `FORGE_SERVER_TESTS=1`. Currently blocked by an unrelated `birpc` packaging bug (see `_devlog/entries/2026-04-22-phase-d2-nitro-integration.md`). Flipping the flag in CI happens when that clears — at which point forge/L4-project + forge/L4-assistant harnesses light up automatically.
+- **Spawned-server harness (L5):** gated behind `FORGE_SERVER_TESTS=1`. Currently blocked by an unrelated `birpc` packaging bug (see `_devlog/entries/2026-04-22-phase-d2-nitro-integration.md`). Flipping the flag in CI happens when that clears — at which point the forge/L4-assistant harness lights up automatically.
 - **No `@skaile/test-utils` in Playwright specs:** the Playwright runner does not use the shared vitest helpers. Use Playwright fixtures and the app's own sandbox helpers instead. L4 and Nitro-integration tests (both Vitest-based) DO use `@skaile/test-utils`.
 
 # ── Phase 6: Verify ──────────────────────────────────────────────
@@ -698,9 +699,8 @@ CHECKLIST
 | Layer | Pattern | File |
 |---|---|---|
 | L4 | CLI spawn-harness | `agent-framework/cli/tests/cli-e2e/setup.ts`, `agent-framework/cli/tests/cli-e2e/help.test.ts`, `config.test.ts`, `flow.test.ts` |
-| L5 | Nitro integration (synthetic h3 event) | `forge/L4-project/tests/_setup/h3-event.ts`, `forge/L4-project/tests/api-auth-me.test.ts` |
-| L5 | Spawned-server harness | `forge/L4-project/tests/_setup/spawn-server.ts`, `forge/L4-project/tests/api-server-harness.test.ts` |
-| L5 | Playwright web E2E | `forge/L4-project/tests/e2e/*.spec.ts`, `forge/L4-assistant/tests/e2e/*.spec.ts`, `forge/L5-concept/test/e2e/*.spec.ts`, `platform/e2e/` |
+| L5 | Nitro integration (synthetic h3 event; unit-level files in skaile-forge) | `forge/skaile-forge/test/unit/_setup/h3-event.ts`, `forge/skaile-forge/test/unit/api-auth-logout.test.ts` |
+| L5 | Playwright web E2E | `forge/skaile-forge/tests/e2e/*.spec.ts`, `forge/L4-assistant/tests/e2e/*.spec.ts`, `forge/L5-concept/test/e2e/*.spec.ts`, `platform/e2e/` |
 | L1/L2 | Playwright CT | `forge/common-ui/playwright-ct.config.ts`, `forge/common-ui/tests/e2e/fixtures/EditorFixture.vue`, `forge/common-ui/tests/e2e/useSkaileEditor.spec.ts` |
 
 ## Port Allocation for Forge Apps
@@ -710,7 +710,7 @@ Pick a stable port per forge app to avoid conflicts during parallel e2e runs:
 | Package | Port |
 |---|---|
 | `forge/L5-concept` | 3344 |
-| `forge/L4-project` | 3400 |
+| `forge/skaile-forge` | none — `@nuxt/test-utils` assigns a port per Playwright worker |
 | `forge/L4-assistant` | 3410 |
 | `forge/L1-chat` | 3420 |
 | `forge/L3-mattermost` | 3430 |

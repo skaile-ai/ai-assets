@@ -27,7 +27,7 @@ metadata:
       type: text
     inputs_optional:
     - id: target_package
-      label: "Target package(s) if known (e.g., forge/L4-project, platform/backend/libs/session-manager)"
+      label: "Target package(s) if known (e.g., forge/skaile-forge, platform/backend/libs/session-manager)"
       type: text
     - id: complexity
       label: "Complexity hint"
@@ -141,7 +141,7 @@ STEP 1: Parse task
   - Identify: target package(s) from task_description or target_package input
   IF target_package is not provided
     - Infer from task_description by matching keywords against the monorepo package map:
-      - forge/L4-project / forge/L5-concept → forge apps (Nuxt 4)
+      - forge/skaile-forge / forge/L5-concept → forge apps (Nuxt 4)
       - platform/backend → NestJS + Fastify + Prisma
       - platform/frontend → React 19 + Vite + TanStack
       - agent-framework/* → agent runtime stack
@@ -158,7 +158,7 @@ STEP 2: Load context
 
   | Package | Stack | Prog Expert |
   |---------|-------|-------------|
-  | forge/L4-project, forge/L5-concept | Nuxt 4, drizzle-orm, SQLite, UnoCSS | prog-expert-nuxt |
+  | forge/skaile-forge, forge/L5-concept | Nuxt 4, drizzle-orm, SQLite (skaile-forge: PrimeVue; L5-concept: UnoCSS) | prog-expert-nuxt |
   | platform/backend | NestJS, Fastify, Prisma, tRPC, Jest (PostXL-generated) | postxl + (read platform/CLAUDE.md) |
   | platform/frontend | React 19, Vite, TanStack, Tailwind CSS 4, Vitest (PostXL-generated) | postxl + (read platform/CLAUDE.md) |
   | store/backend | NestJS, Prisma (PostXL-generated, in progress) | postxl + (read store/CLAUDE.md) |

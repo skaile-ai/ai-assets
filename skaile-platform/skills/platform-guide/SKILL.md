@@ -1,16 +1,17 @@
 ---
 name: "platform-guide"
 description: "Deep knowledge of the Skaile platform's UI and conceptual model so the
-  assistant can guide users and act on their behalf. Use when the user asks 'how do I...',
-  'where is...', 'where do I find...', 'walk me through...', or 'help me with the platform';
-  or asks about projects, sessions, workspaces, flows, run groups, batch runs, recipes,
-  webhooks, previews, classifiers (classifier providers, classifying many items),
-  agent-controlled apps (Skailify), sharing, inviting people,
-  connecting a data source, enabling a skill/asset, scoped sessions, agent-to-agent, roles
-  and permissions, hibernation, or any platform surface; or when you are about to create a
-  project/session/organization, invite someone, start a connector setup, or read back a
-  durable operation you started. Load on demand, not always-on."
-version: 0.11.1
+  assistant can guide users and act on their behalf. Use for 'how do I...', 'where is...',
+  'walk me through...' or 'help me with the platform'; for projects, sessions, workspaces,
+  flows (run groups, batch runs, recipes, webhooks, personal flows), previews, classifiers,
+  Exchange mail and calendar (triage, drafting, sending, shared mailboxes), the agent graph,
+  Skailify apps, sharing and inviting, connecting a data source, AI providers and Claude
+  seats, skills/assets, scoped sessions, agent-to-agent, notifications, roles and permissions,
+  personal vs business workspace, hibernation, or any platform surface; before creating a
+  project/session/organization, inviting someone, starting a connector setup or mount, or
+  reading back a durable operation; or when you hit a platform problem, or the user wants
+  to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
+version: 0.13.1
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -35,6 +36,16 @@ keywords:
   - sharing
   - classifier
   - classify
+  - exchange
+  - mail
+  - calendar
+  - send-draft
+  - connector-mount
+  - agent-graph
+  - personal-flow
+  - notifications
+  - report-a-problem
+  - feedback
 ---
 
 # Skaile Platform Guide
@@ -63,27 +74,28 @@ mechanics only when the user is technical or `expertMode=true`.
 
 | File | Use when the user asks about... |
 | ---- | -------------------------------- |
-| `concepts/model.md` | The big picture: org/project/session/workspace, source types, mounts vs connectors, assets/skills, flows, roles & permissions. Start here for orientation. |
-| `concepts/sessions.md` | Session lifecycle (hibernate/wake/close), multiple sessions, **scoped sessions**, forking/renaming. |
-| `concepts/flows.md` | Flows and the Flows page/editor, **authoring a flow definition** (the seven node kinds, contracts, gates vs checks, provenance), runs and gates, **classifier nodes**, **run groups** (batch / unattended processing), recipes, webhook triggers and the session webhook inbox. |
-| `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels. |
+| `concepts/model.md` | The big picture: org/project/session/workspace, source types, mounts vs connectors, assets/skills, agents and the agent graph, flows, roles & permissions, personal vs business workspace. Start here for orientation. |
+| `concepts/sessions.md` | Session lifecycle (hibernate/wake/close), what a sleeping session shows and how it wakes, multiple sessions, **scoped sessions**, forking/renaming. |
+| `concepts/flows.md` | Flows and the Flows page/editor, **authoring a flow definition** (the seven node kinds, contracts, gates vs checks, provenance), runs and gates, **classifier nodes**, **run groups** (batch / standing / unattended processing), **personal flows**, running a flow inside an existing session, recipes, webhook triggers and the session webhook inbox. |
+| `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels, whose connection a mount runs on, **Reconnect**, Exchange mail and shared mailboxes, AI providers and subscription seats, classifier providers. |
 | `concepts/collaboration.md` | Multi-user sessions (mentions/reactions/threading/presence), sharing with people, public file-preview links, agent-to-agent (A2A). |
 | `concepts/previews.md` | Running and viewing an app preview; what makes a workspace previewable. |
-| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants, durable operations and the `AwaitingUser` handoff, discovery-then-propose, the target-bound `platform.act` / `platform.act_batch` allowlist, UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
+| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants, durable operations and the `AwaitingUser` handoff, discovery-then-propose, reporting platform problems to the Skaile team, the target-bound `platform.act` / `platform.act_batch` allowlist, UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
 
 ### Reference (load only when constructing an action)
 
 | File | Use when... |
 | ---- | ----------- |
 | `references/agent-action-catalog.md` | You are about to call `platform.act` or `platform.act_batch` and need the exact sole allowlisted action, batch-reference syntax, consequences, and target-role rules. |
+| `references/exchange-mail-calendar.md` | You are about to read, triage, file, draft or send mail, or read or change a calendar event, in a connected Microsoft 365 mailbox — and need mailbox selection, the approval tiers, the send grant, and how to read a send result. |
 | `references/classifier.md` | You are about to classify many items with closed questions (`platform.classify`) and need the call shape, limits, and how to read `calibrated` / `p`. |
-| `references/control-plane-capabilities.md` | You are about to create a project/session/organization, invite someone, start or repair a connector, or read an operation back — and need the family's shape, effect classes, real boundaries, the operation lifecycle, and the `AwaitingUser` handoff. |
+| `references/control-plane-capabilities.md` | You are about to create a project/session/organization, invite someone, start or repair a connector, propose a connector mount or an asset configuration, run a flow in another session, or read an operation back — and need the family's shape, effect classes, real boundaries, the operation lifecycle, and the `AwaitingUser` handoff. |
 
 ### UI (where things live, click-paths)
 
 | File | Use when the user asks... |
 | ---- | -------------------------- |
-| `ui/navigation.md` | "Where is...", "how do I get to...", project/session/org settings (incl. **Classifiers**), creating a project, connecting a data source — the app shell, sidebar, command palette, settings hierarchy. |
+| `ui/navigation.md` | "Where is...", "how do I get to...", project/session/org settings (incl. **Classifiers**), creating a project, connecting a data source, shared Exchange mailboxes, the org **Sessions** report, **Agent graph**, Escape and Cmd+K switching — the app shell, sidebar, command palette, settings hierarchy. |
 | `ui/workspace.md` | Anything about the workspace itself: chat composer, the workspace panel and its file explorer, the preview pane, the side panels opened from the toolbar icons, presence, mobile, common in-workspace click-paths. |
 
 ## Hard rules
@@ -93,8 +105,8 @@ mechanics only when the user is technical or `expertMode=true`.
   The corollary binds equally: never tell the user you *cannot* do something because you do
   not remember a capability for it. Look, then answer.
   The `references/` tier is where exact names live, for a call you are about to construct:
-  `references/agent-action-catalog.md`, `references/control-plane-capabilities.md` and
-  `references/classifier.md`. All three are maps of a live registry, not substitutes for it.
+  `references/agent-action-catalog.md`, `references/control-plane-capabilities.md`,
+  `references/exchange-mail-calendar.md` and `references/classifier.md`. All four are maps of a live registry, not substitutes for it.
   `platform.act` and `platform.act_batch` are default-deny: use only the exact action
   documented in `references/agent-action-catalog.md`, and never infer generic CRUD from
   the data model.

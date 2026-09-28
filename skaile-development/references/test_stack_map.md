@@ -8,12 +8,19 @@ Used by: `test`, `test-plan`, `test-unit`, `test-integration`, `test-e2e`, `audi
 
 ## Forge Apps (Nuxt 4 + drizzle-orm + SQLite)
 
-All forge packages share a single root `vitest.config.ts` at `forge/` that picks up
+All forge packages except `forge/skaile-forge` and `forge/forge-common` share a single root `vitest.config.ts` at `forge/` that picks up
 `**/tests/**/*.test.ts`. Run the whole suite with `bun x --bun vitest run` from `forge/`.
+`forge/skaile-forge` is a standalone repo (`skaile-ai/skaile-forge`) with its own `vitest.config.ts`
+and `playwright.config.ts`; run `bun run test` / `bun run test:e2e` inside `forge/skaile-forge`. Its Vitest
+config picks up both `test/unit/**/*.test.ts` (unit-level, incl. Nitro route tests with a synthetic h3 event)
+and `tests/integration/**/*.test.ts` (cross-module integration, e.g. `framework-contract.test.ts`).
+`forge/forge-common` is a standalone repo (`skaile-ai/forge-common`) with its own `vitest.config.ts`;
+run `cd forge/forge-common && bun x --bun vitest run`.
 
 | Package | Framework | Test Dir | Pattern | Status |
 |---|---|---|---|---|
-| `forge/L4-project` | Vitest (unit) + Playwright (e2e) | `tests/` + `tests/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
+| `forge/skaile-forge` | Vitest (unit + integration) + Playwright (e2e) | unit `test/unit/` + integration `tests/integration/` + e2e `tests/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, integration ✓, e2e ✓ |
+| `forge/forge-common` | Vitest | `tests/` + `tests/ui/` (happy-dom composables) | `*.test.ts` | unit ✓ |
 | `forge/L5-concept` | Vitest (unit) + Playwright (e2e) | `test/unit/` + `test/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
 | `forge/L4-assistant` | Playwright (e2e only) | `tests/e2e/` | `*.spec.ts` | e2e ✓ |
 | `forge/L1-chat` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
@@ -23,7 +30,7 @@ All forge packages share a single root `vitest.config.ts` at `forge/` that picks
 | `forge/common-ui` | Vitest + Playwright CT | `tests/` + `tests/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ (Playwright CT) |
 | `forge/common-tui` | Vitest | `tests/` | `*.test.ts` | unit ✓ |
 
-Forge E2E runs Playwright against `bun run dev` on a dedicated port. Fixtures in `test/e2e/fixtures.ts`, sandbox in `test/e2e/sandbox.ts`. Use `bun x playwright test` inside the package.
+Forge E2E specs live in `tests/e2e/` (except `forge/L5-concept`: `test/e2e/`). In `forge/skaile-forge`, `tests/e2e/_setup/global-setup.ts` builds the app once and every Playwright worker boots the built output with its own `FORGE_HOME`. Use `bun run test:e2e` (or `bun x playwright test`) inside the package.
 
 For `forge/common-ui`, E2E uses Playwright CT (component testing) instead of a full Nuxt dev server — see the Playwright Component Testing section below.
 
@@ -70,7 +77,7 @@ For `forge/common-ui`, E2E uses Playwright CT (component testing) instead of a f
 |---|---|---|---|---|
 | Unit | Vitest, `test/unit/` or `tests/` | Vitest, `tests/` | Jest, colocated `*.spec.ts` | Vitest, `__tests__/` |
 | Integration | Vitest w/ real SQLite temp DB | Vitest w/ in-memory fixtures | Jest w/ PostgreSQL test container | — |
-| E2E | Playwright, `test/e2e/` | — (N/A — library) | — (delegated to platform/e2e) | Playwright, via `platform/e2e/` |
+| E2E | Playwright, `tests/e2e/` (L5-concept: `test/e2e/`) | — (N/A — library) | — (delegated to platform/e2e) | Playwright, via `platform/e2e/` |
 
 ## Playwright Component Testing (forge/common-ui)
 

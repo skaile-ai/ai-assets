@@ -2,6 +2,8 @@
 
 `platform.act` is default-deny. This reference documents its **sole allowlisted action**;
 it is not a data-model CRUD catalog. Prefer a dedicated capability whenever one exists.
+Unlike the control-plane family, both generic action capabilities are offered in ordinary
+project sessions as well as the personal assistant.
 
 ## Allowed request
 
@@ -70,3 +72,12 @@ Do not construct generic create, update, delete, lifecycle, membership,
 credential/provider-link, runtime-internal, or destructive actions through either generic
 action capability. Every unlisted scope/type pair is blocked, and blocked workflows cannot
 be made available by putting them in a batch.
+
+An operator can also switch the whole surface off, or to observation-only, for a deployment.
+Then even the allowlisted action comes back as `action is not available`, the same refusal an
+unlisted action gets — the reason is not shown to you. Do not retry or rephrase it; tell the
+user it is unavailable here and offer the UI path.
+
+Grounded in: `platform/backend/libs/capabilities/src/agent-action-policy.registry.ts`,
+`agent-action-policy-rollout.service.ts` and
+`platform/docs/personal-assistant-control-plane.md` §4.

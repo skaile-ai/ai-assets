@@ -26,7 +26,7 @@ metadata:
     - id: target
       label: "Package path"
       type: text
-      hint: "e.g. forge/L4-project, agent-framework/runner, platform/backend"
+      hint: "e.g. forge/skaile-forge, agent-framework/runner, platform/backend"
     inputs_optional:
     - id: mode
       label: "Mode"
@@ -209,7 +209,7 @@ STEP 3 (skip if mode=generate): Scaffold missing infrastructure
 
   **Vue composable tests (forge apps):**
   - Add `environment: "happy-dom"` to the package's `vitest.config.ts`.
-  - Already configured on forge/L4-project, forge/L4-assistant, forge/L5-concept.
+  - Already configured on forge/skaile-forge, forge/L4-assistant, forge/L5-concept.
   - Add `happy-dom` to `devDependencies` if missing.
   - **When happy-dom is insufficient** (TipTap, ProseMirror, WebGL, Canvas): skip
     the composable in the unit suite with a TODO comment and route to `test-e2e`
@@ -235,11 +235,14 @@ STEP 3 (skip if mode=generate): Scaffold missing infrastructure
   - Create `<target>/tests/` if missing.
   - If the package has Nitro routes that need test-time globals, add
     `<target>/tests/_setup/nitro-globals.ts` + `<target>/tests/_setup/h3-event.ts`
-    — mirror `forge/L4-project/tests/_setup/`.
+    — mirror `forge/skaile-forge/test/unit/_setup/`.
 
-  **Root workspace registration:**
+  **Vitest config registration:**
   - Ensure the package's workspace entry in root `vitest.config.ts` defines a project name
-    matching test_stack_map.md (e.g. forge-project, agent-runner). Add the project if missing.
+    matching test_stack_map.md (e.g. agent-runner, agent-cli). Add the project if missing.
+  - Standalone repos with their own `vitest.config.ts` (e.g. `forge/skaile-forge`,
+    `forge/forge-common`) are not registered in the root config — extend their own
+    config's `include` instead.
 
 EMIT [test-unit] setup_done target=<pkg> scaffolded=<list>
 
@@ -379,22 +382,25 @@ STEP 6: For each uncovered unit, generate a test file
 
 ### Pattern 6 — Boundary mock for common-backend (forge app unit tests)
 
-  Reference: `forge/L4-project/tests/api-auth-me.test.ts`, `forge/L4-project/tests/api-auth-logout.test.ts`
+  Reference: `forge/skaile-forge/test/unit/api-auth-logout.test.ts`, `forge/skaile-forge/test/unit/auth-roles.test.ts`
 
-  Forge apps can't import `@skaile/forge-common-backend`'s `createDb` at runtime in a unit test
-  (better-sqlite3 is not Bun-compatible). Mock at the package boundary with `vi.mock`.
+  Forge apps can't import the forge-common `createDb` at runtime in a unit test (better-sqlite3
+  is not Bun-compatible). Mock at the package boundary with `vi.mock` —
+  `@skaile/forge-common-backend`, or `@skaile-ai/forge-common/server` in forge/skaile-forge.
 
-### Pattern 7 — Nitro route integration (synthetic h3 event)
+### Pattern 7 — Nitro route test (synthetic h3 event)
 
-  Reference: `forge/L4-project/tests/_setup/h3-event.ts`, `_setup/nitro-globals.ts`,
+  Reference: `forge/skaile-forge/test/unit/_setup/h3-event.ts`, `_setup/nitro-globals.ts`,
   `api-auth-logout.test.ts`
 
-  Use for Nuxt Nitro route unit-integration tests. The `_setup/` helpers install the minimum
-  Nitro globals and build a synthetic h3 event; the test calls the route handler directly.
+  Use for Nuxt Nitro route tests. These are unit-level: in forge/skaile-forge they live under
+  `test/unit/`, while `tests/integration/` is reserved for cross-module suites. The `_setup/`
+  helpers install the minimum Nitro globals and build a synthetic h3 event; the test calls the
+  route handler directly.
 
 ### Pattern 8 — Happy-dom for Vue composables
 
-  Reference: `forge/L4-project/tests/use-color-mode.test.ts`
+  Reference: `forge/forge-common/tests/ui/useSettingsModal.test.ts`
 
   Add `environment: "happy-dom"` to the package's `vitest.config.ts`. Then composables that
   touch `document` / `window` work without a full browser.

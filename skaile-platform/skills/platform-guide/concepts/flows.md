@@ -21,8 +21,8 @@ checkpoints.
 ## The shape of a definition
 
 The authority on shape is the published JSON Schema, not this file. Get it at runtime with
-`platform.get_flow_schema` — no arguments, no authoring grant, no project context and no
-existing flow needed. It returns `schemaId`, `jsonSchema` and `example`, a complete valid
+`platform.get_flow_schema` — no arguments, no approval, no project context and no existing
+flow needed. It returns `schemaId`, `jsonSchema` and `example`, a complete valid
 definition to pattern-match against. Read the schema when you need the exact field list. The
 same document ships inside `@skaile/workspaces` as
 `dist/factory-assets/connectors/flow/contract/flow.v2.schema.json`, but the capability is the
@@ -181,36 +181,40 @@ agree.
 
 ## Authoring a flow as the agent
 
-**Two gates stand before every flow write, and the first is not the ordinary grant story.**
+**Every project or organization flow write is approved by an Owner of that scope.**
 `platform.create_flow` and `platform.revise_flow` are `effect` capabilities that always card,
-so a human approves each write. *Before* that, the **`platform.author_flows`** grant must
-already be in force for the scope the write targets. That grant is a **precondition**, not a
-card-skipper: with no grant the call is refused outright, and the refusal arrives as prose and
-nothing else — no card, no button, no structured remedy any screen renders. Relay it and stop;
-retrying changes nothing.
+so a human approves each write. Nothing has to be switched on in settings first. The one rule
+is who may approve: the account approving the card must be an Owner of the scope the write
+targets, and approving never confers more authority than the approver already holds.
 
-The grant shows on screen as **Flow authoring**. Only these people can turn it on, in these
-two places:
+| Target scope | Who can approve the card |
+| --- | --- |
+| Project | an Owner of this project (the project owner, or a project member with the Owner role) |
+| Organization | an Owner of this organization |
 
-| Target scope | Who can turn it on | Where |
-| --- | --- | --- |
-| Project | an Owner of this project (the project owner, or a project member with the Owner role) | Project settings → Session defaults → Agent grants → Flow authoring |
-| Organization | an Owner of this organization | Organization settings → AI → Agent grants → Flow authoring |
+For `platform.revise_flow` the scope is the stored flow's own, not the session's project.
 
-Three consequences to act on rather than retry:
+Unlike `platform.act` (see [Autonomy grants](agent.md)), a project or organization flow write
+runs as the **approver**, not the session owner, so the Owner role is required of whoever
+approves — and it is checked only **after** the card is approved. A non-Owner's approval is
+spent on a write that is then refused, so name the required Owner when you post the card,
+before anyone approves it. The refusal is prose that names the role, plus a structured `remedy`
+(`capability`, `requiredScope`, `requiredRole`) that no screen renders; relay the refusal prose
+verbatim, not the `remedy` object, and stop — retrying with the same approver changes nothing.
+Ask an Owner of that scope to approve the next attempt. If organization-wide was not essential,
+offer to work at project scope, where a project Owner can approve.
 
-- **A project grant never authorizes an organization-scope write.** It must be re-issued at
-  organization scope. If organization-wide was not essential, offer to work at project scope —
-  the grant already in hand covers that.
-- **The account approving the card must itself be an Owner of the target scope.** A grant never
-  confers more authority than its approver holds, so re-granting cannot fix this; an Owner has
-  to be the one who approves the write.
-- **A grant dies with its grantor's authority.** If the person who issued it is no longer an
-  Owner, the grant is stale and an Owner must Revoke and then Grant again.
+You cannot approve, widen, or request this authority yourself — see
+[Autonomy grants](agent.md).
 
-You can neither mint, widen, nor request any of this yourself — see
-[Autonomy grants](agent.md). Name the settings path and the required role to the human, then
-ask them to try again.
+**Personal flows are the exception.** `platform.create_flow` with scope `personal` saves the
+flow to the session owner's own library, visible only to them, and needs no admin role. The
+write is still approved — per call, or by a standing grant over this session that only the
+session owner can issue — and still validated as strict v2 before the card shows.
+`platform.list_flows` lists project and organization flows only; personal flows are listed by
+`platform.list_personal_flows`, which is itself approval-gated because listing puts flow names
+into a conversation every member can read. `platform.get_flow` and
+`platform.revise_flow` do not reach personal flows (they read as not found).
 
 **Always declare `schemaVersion: 2`.** `platform.create_flow` and `platform.revise_flow`
 refuse any definition that does not carry its own, with exactly this message:
@@ -222,15 +226,28 @@ platform.create_flow: strict v2 flow definitions only — include a `schemaVersi
 The reason is worth knowing, because the failure it prevents is silent. An *absent*
 `schemaVersion` is what opts a definition into v1 compatibility normalization: a legacy
 `skill` node becomes an `agent` node (its `parameters.instructions` becomes
-`run.instruction`, the named skill becomes a `skill:<name>` asset) and a legacy `sub-flow`
-becomes a real `sub-flow`, but
-**every other** node becomes an inert `router` placeholder carrying
+`run.instruction`, the named skill becomes a `skill:<name>` asset), a legacy `sub-flow`
+becomes a real `sub-flow`, and a legacy `type: gate` becomes a real gate node
+(`run.kind: "gate"`, `run.schema: { kind: "text" }`). No `gate.approval` is set on it, and none
+is needed: `gate.approval` (see *Gates versus checks*) is the approval policy for another
+node's output, such as an agent node's, while a node whose `run.kind` is `gate` is itself the
+human decision point and always parks the run, whatever `defaults.approval` says. (The
+`data.approval.mandatory` → `gate.approval` mapping applies to v1 skill nodes, not to v1 gates.) Its
+`run.prompt` is the v1 `data.message` (or the description) followed by
+`Approval criterion (not evaluated automatically): <data.check>`; the check is shown, never
+evaluated. But **every other** node becomes an inert `router` placeholder carrying
 `contract.requires: [{ expr: "false" }]` and `control.optional: true`. That placeholder has
 no `run.instruction` field at all, so the authored instruction text is not carried forward
-as an instruction and the node can never become available. So both halves of the
-consequence: authored through the capability, a v1-shaped flow **bounces** with the message
-above; arriving by any other route it **normalizes into inert placeholders and the run
-executes nothing**.
+as an instruction and the node can never become available.
+
+One v1 shape does not normalize at all: a gate with `data.optional: true`, or a
+`data.on_fail` other than `pause-for-human`. That fails the whole definition's parse with an
+issue at `nodes.<i>.data.optional` / `nodes.<i>.data.on_fail`, so the flow does not load.
+
+So, in practice: authored through the capability, a v1-shaped flow **bounces** with the
+message above. Arriving by any other route, a malformed gate makes the **whole definition
+fail to load**; otherwise its **gate nodes park the run until a human approves** and nodes of
+the remaining kinds **normalize into inert placeholders that never run**.
 
 Both write capabilities also describe the v2 shape in their prompt fragment, so a gated
 session can author from context alone. Two ungated queries make the rest discoverable at
@@ -377,7 +394,26 @@ The validator refuses these, so do not author them:
 - **Gates** pause a run for a human: approval gates (approve/reject) and input gates
   (provide data). Runs can be started in autonomous mode — no pauses — except that a node
   marked **mandatory** always stops for a human; the engine enforces this and the agent
-  cannot skip it. Live per-node state on the graph is not yet available.
+  cannot skip it.
+- The session's **Flow** tab shows per-node progress of the running flow. The org **Flows**
+  page graph shows the definition only.
+
+### Running a library flow inside a session
+
+A flow from the library (organization, project, or personal) can run inside an existing
+session, in that session's conversation — one run per session at a time; a start while one
+is in progress is refused. While it runs, chat messages to the session are handled as part
+of the run. It can be started:
+
+- by a user, from the session's **Flow** tab (**Run a flow…**) or Cmd+K **Run a flow in
+  this session**, choosing the flow and an optional input;
+- by the session's own agent, with no approval (`platform.run_flow`);
+- by an agent in another session, with the session owner's approval or a standing grant —
+  and only if that owner may send to the target session.
+
+The input reaches the flow unchanged as `defaults.run_input`; it cannot override values the
+author set — only declared `parameters` can. Sessions created for a run group cannot host a
+second run.
 
 ## Flow files on disk
 
@@ -412,10 +448,17 @@ Fuller treatment: `ai-assets/docs/flows.md`.
 - A run group = one flow + one **recipe** + a list of inputs. Each input runs in its own
   temporary session; a scheduler limits how many run at once. Groups can be paused,
   cancelled, retried per item, and new inputs can be appended while running.
+- Every group has a mode, fixed at creation: **Batch** (a fixed set of inputs; the group
+  finishes when every run has finished) or **Standing** (trigger-fed and long-running; it
+  keeps taking new inputs until someone clicks **Close**). A Standing group can mint its
+  webhook at creation.
 - A **recipe** is a saved session configuration (data sources, skills, model, environment)
   created via **Save as recipe** from a configured session. Recipe environment values
   reference stored secrets — never literal secret strings. Creation fails up front if the
-  recipe does not supply every asset the flow's nodes declare.
+  recipe does not supply every asset the flow's nodes declare. Before proposing a group,
+  the agent can check this without creating anything
+  (`platform.preflight_flow_requirements`, no approval); it does not check binaries,
+  credential scopes, or node kinds.
 - A status board shows per-item progress and cost, with click-through into the run group's
   detail page. Approvals and input requests raised by unattended runs surface inside the
   run itself — the flow gate panel in the session, and the run group detail page. There is
@@ -440,6 +483,8 @@ it is managed via the API/agent.
 Source of truth: the published contract — `platform.get_flow_schema` at runtime, shipped
 as `@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.schema.json` —
 `platform/docs/flow-authoring-v2.md`, `platform/features/09-flow-execution/`,
-`platform/features/31-run-groups/`. For on-disk discovery: `loadFlowEntriesFromDir` in
+`platform/features/31-run-groups/`, `platform/features/09-flow-execution/in-session-flow-runs.md`
+(platform #5233), `platform/docs/flow-authoring-v2.md` "Personal flows" (platform #5252),
+the run-group create wizard (Batch / Standing), `RunGroupRecipePreflightService`. For on-disk discovery: `loadFlowEntriesFromDir` in
 `@skaile/workspaces` → `factory-assets/connectors/flow/engine/loader.ts`, and `aiResourceRoots`
 in `cli/src/paths.ts`.

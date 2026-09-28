@@ -220,14 +220,15 @@ How it maps:
 | node `type: "skill"` + `data.skill` | `run.kind: "agent"` + `skill:<name>` in `run.assets` |
 | node `data.parameters.instructions` | `run.instruction` — and if there is none, `run.instruction` falls back to the node's `description`, the one case where a description *is* executed |
 | node `data.parameters` (rest) | `contract.input` |
-| node `data.approval.mandatory` | `gate.approval: "mandatory"` |
-| node `data.optional` / `parallel_group` | `control.optional` / `control.parallelGroup` |
+| node `data.approval.mandatory` (on `skill` nodes) | `gate.approval: "mandatory"` |
+| node `data.optional` / `parallel_group` | `control.optional` / `control.parallelGroup` — except on a `type: "gate"` node, where `data.optional: true` is refused (see below) |
 | node `data.subagent`, flow-level `subagent_mode` | **dropped** — neither has a v2 equivalent; both were declared-but-unread v1 fields |
 | node `type: "sub-flow"` + `data.flow` | `run.kind: "sub-flow"` + `flow:<id>` in `run.assets` |
+| node `type: "gate"` | `run.kind: "gate"`, `run.schema: { kind: "text" }`, `run.prompt` = `data.message` (or the description) + `Approval criterion (not evaluated automatically): <data.check>`; no `gate.approval`. A gate with `data.optional: true`, or a `data.on_fail` other than `pause-for-human`, fails the whole definition's parse. |
 | any other node `type` (e.g. `group`, `router`) | inert `router` placeholder, `contract.requires: [{ expr: "false" }]`, `control.optional: true` |
 | edges | preserved; a missing `type` defaults to `optional`, a missing `id` is generated |
 
-Two consequences are worth internalising before you rely on the normalizer. A `type: "group"` visual container has no v2 equivalent — it becomes the inert placeholder. And that placeholder has **no `run.instruction` field at all**, so instruction text authored on a non-`skill` node is not carried forward *as an instruction* — it survives only as inert data under `contract.input`. The node never becomes available and the work silently does not happen.
+Since `@skaile/workspaces` 4.8.0 a v1 `type: "gate"` is a real gate that parks the run for a human, like any first-class gate (see *Execution*). Two consequences are worth internalising before you rely on the normalizer for the other kinds. A `type: "group"` visual container has no v2 equivalent — it becomes the inert placeholder. And that placeholder has **no `run.instruction` field at all**, so instruction text authored on a node that is not `skill`, `sub-flow` or `gate` is not carried forward *as an instruction* — it survives only as inert data under `contract.input`. The node never becomes available and the work silently does not happen.
 
 ## Execution
 
@@ -269,7 +270,7 @@ This repo ships one flow, the test fixture `testing/flows/test-echo.flow.yaml`. 
    - Files **and directories** starting with `_` are skipped by `loadAllFlows`.
 5. Validate by loading it: `skaile run <id> --project-dir <dir> --dry-run` parses through the contract and prints the available nodes without executing.
 
-If a flow is authored by an agent through the platform's flow-authoring capabilities rather than by hand, the `schemaVersion` declaration is mandatory: those capabilities refuse a definition without it, precisely so the v1 normalizer cannot turn the definition into inert placeholders that run nothing.
+If a flow is authored by an agent through the platform's flow-authoring capabilities rather than by hand, the `schemaVersion` declaration is mandatory: those capabilities refuse a definition without it, precisely so the v1 normalizer cannot turn the definition's non-`skill`, non-`sub-flow`, non-`gate` nodes into inert placeholders that run nothing.
 
 `ai-assets-skaileup/skaileup/contracts/flow.schema.json` is not a second runtime — its only consumer is that repo's authoring-time verifier script.
 

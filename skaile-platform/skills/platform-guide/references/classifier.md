@@ -20,10 +20,9 @@ judgment instead, and tell the user you did.
 
 ## The call
 
-- **`questions`** — 1 to 32 **named** questions per call; ask them all in one call rather than
-  one call per question. If a call is refused for too many questions, trust the live schema's
-  `questions` description and split them across calls over the same items. Each question is
-  one of:
+- **`questions`** — 1–32 **named** questions per call. If a call is refused for too many
+  questions, trust the live schema's `questions` description and split them across calls over
+  the same items. Each question is one of:
   - `{ kind: "binary", instructions, yes?, no? }`
   - `{ kind: "choice", instructions, options: { "<label>": "<rubric>" | null } }`
   - `{ kind: "score", instructions, levels: ["<level>", …] }` (2–10, ordered)

@@ -104,7 +104,7 @@ Think in five horizontal layers; each one builds on the layers beneath:
 ```
 +---------------------------------------------------------------+
 | 5. APPLICATION                                                |
-|    forge/L2-tui, forge/L4-project, forge/L5-concept,          |
+|    forge/L2-tui, forge/skaile-forge, forge/L5-concept,        |
 |    platform/, your app                                        |
 +---------------------------------------------------------------+
 | 4. ORCHESTRATION                                              |
@@ -141,7 +141,7 @@ then pick a **reference app** to mimic in `forge/` or `platform/`.
 |---|---|---|---|---|---|
 | 1 | `createAgentSession()` from `@skaile/agent-sdk` | 1 | Buffer only | In-process | `skaile repl` (in `agent-framework/tui/`) |
 | 2 | Custom session class + `LocalRuntime` + registry | N | Buffer or your own | In-process | `forge/L2-tui` |
-| 3 | `AgentProcessManager` + `SessionDispatcher` + `MessageStore` | N per user/entity | JSONL or your DB | Subprocess (WS IPC) | `forge/L4-project`, `forge/L5-concept` |
+| 3 | `AgentProcessManager` + `SessionDispatcher` + `MessageStore` | N per user/entity | JSONL or your DB | Subprocess (WS IPC) | `forge/skaile-forge`, `forge/L5-concept` |
 | 4 | Container-per-session, gateway, container manager | N x M (multi-tenant) | Postgres + durable mirrors | Container (Docker / vm-agent) | `platform/` |
 
 ### Reference-app cheat sheet
@@ -151,7 +151,7 @@ then pick a **reference app** to mimic in `forge/` or `platform/`.
 | CLI tool, single AI session | `skaile repl` (Tier 1) | One factory call; covered by `@skaile/agent-tui` |
 | Operator console with N AI sessions | `forge/L2-tui` (Tier 2) | Profile YAML pattern, ink layout, `SessionRegistry` |
 | Slack/Mattermost/Discord bot | (deprecated `forge/L3-mattermost`) | Lazy session per thread, dual output routing |
-| Personal AI web assistant | `forge/L4-project` (Pichi) or `forge/L4-assistant` | SSE + JSONL + cookie auth + asset catalog UI |
+| Personal AI web assistant | `forge/skaile-forge` (assistant/workspace modes) or `forge/L4-assistant` | SSE + JSONL + cookie auth + asset catalog UI |
 | Multi-user real-time collaborative AI editor | `forge/L5-concept` | Hocuspocus + Yjs + flow engine + per-document sessions |
 | Multi-tenant SaaS with org/project/session hierarchy | `platform/` | Container manager, gateway, durable flow mirror, voice IO |
 | AI co-design / spec generation pipeline | `ai-assets-skaileup/` flows | Concept pipeline produces structured `_concept/` from a brief |
@@ -164,7 +164,7 @@ then pick a **reference app** to mimic in `forge/` or `platform/`.
 |---|---|---|
 | L2 | `L2-tui` | Multi-session ink TUI: profile YAML -> `LocalRuntime`, `SessionRegistry`, log viewer, settings |
 | L3 | (archived `L3-mattermost`) | Bot per thread: lazy `LocalRuntime` start on first message, SQLite-per-channel state |
-| L4 | `L4-project` (Pichi) | Personal AI web assistant: subprocess agent + JSONL + SSE, SQLite multi-user auth, WebDAV/SSH access |
+| L4 | `skaile-forge` (standalone repo `skaile-ai/skaile-forge`) | Unified forge web app with assistant/workspace/concept modes: subprocess agent + JSONL + SSE, SQLite multi-user auth, WebDAV access |
 | L4 | `L4-assistant` | Simpler personal AI assistant variant focused on chat |
 | L5 | `L5-concept` | Multi-user collaborative concept editor: Hocuspocus + Yjs + flow engine, voice IO, AI flows generate `_concept/` specs |
 
@@ -242,7 +242,7 @@ config.
 |---|---|
 | `skaile-development/` | 30+ workflow skills for the monorepo (git, test, audit, implement, doc, devlog, review, release, ...) -- many usable on any TS monorepo with light edits |
 | `skaile-platform/` | Platform-specific tasks (e2e harness, preview ops) |
-| `forge-project/` | Forge app management skills |
+| `skaile-forge/` | skaile-forge app agents and skills |
 | `dev-implementation-experts-js/` | Deep JS/TS expertise: Nuxt, Directus, TipTap, PrimeVue, SDK building, AI integration patterns |
 | `dev-implementation-experts-python/` | Python, Pydantic AI, Marimo |
 | `dev-implementation-experts-typst/` | Typst document generation + expert advisor router |
@@ -362,7 +362,7 @@ Documented at `platform/docs/protocol-extensions.md`:
 - Persist with `JsonlMessageStore` (or roll your own `MessageStore` against your DB).
 - Frontend: SSE -> `@skaile/agent-store/react` for streaming text + tool events.
 - Optional: connectors for app data (`postgres`, `redis`).
-- Reference: `forge/L4-project`.
+- Reference: `forge/skaile-forge`.
 
 ### "AI co-pilot over our Postgres + S3 data"
 
@@ -463,7 +463,7 @@ Documented at `platform/docs/protocol-extensions.md`:
 | Skill capabilities | Existing skills in `ai-assets/` (or new ones in your own domain) | `ai-assets/` |
 | Concept->code pipeline | Skaileup flows + skills | `ai-assets-skaileup/` |
 | Code audit / tests / readiness | `skaileup-quality` + `skaile-development/skills/audit\|test\|review` | `ai-assets-skaileup/`, `ai-assets/` |
-| Multi-user web app shell | `forge/L4-project` (cookie auth, SQLite, settings UI) | `forge/` |
+| Multi-user web app shell | `forge/skaile-forge` (cookie auth, SQLite, settings UI) | `forge/` |
 | Real-time collab editor | `forge/L5-concept` (Hocuspocus, Yjs, voice) | `forge/` |
 | Multi-tenant container hosting | `platform/` (vm-agent, gateway, container manager) | `platform/` |
 | Voice IO | `platform/backend/libs/voice` (Deepgram + ElevenLabs) | `platform/` |

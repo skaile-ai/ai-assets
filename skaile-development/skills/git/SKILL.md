@@ -289,7 +289,7 @@ IF mode = branch
     - If description provided: derive slug from it (lowercase, hyphens, max 40 chars)
     - If target_packages provided: include package abbreviation in slug
     - Apply naming rule from references/branch_naming.md:
-      feature/<pkg>/<slug>    e.g. feature/forge-project/workspace-rename
+      feature/<pkg>/<slug>    e.g. feature/skaile-forge/workspace-rename
       fix/<pkg>/<slug>         e.g. fix/platform-backend/session-leak
       refactor/<pkg>/<slug>    e.g. refactor/cli/command-structure
       docs/<pkg>/<slug>        e.g. docs/cli/add-resource-types

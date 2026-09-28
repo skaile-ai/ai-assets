@@ -57,7 +57,7 @@ tags:
   - "project-workspace"
 metadata:
   repo: "bitbucket.org/ecsplico/skaile-dev"
-  canonical_path: "ai-assets/forge-project/agent"
-  app: "forge-project"
+  canonical_path: "ai-assets/skaile-forge/agent"
+  app: "skaile-forge"
   imprint_on_project_open: true
   stage: "alpha"

@@ -37,6 +37,6 @@ tags:
   - "project-management"
 metadata:
   repo: "bitbucket.org/ecsplico/skaile-dev"
-  canonical_path: "ai-assets/forge-project/base-orchestrator"
-  app: "forge-project"
+  canonical_path: "ai-assets/skaile-forge/base-orchestrator"
+  app: "skaile-forge"
   stage: "alpha"
