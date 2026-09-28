@@ -228,7 +228,7 @@ How it maps:
 | any other node `type` (e.g. `group`, `router`) | inert `router` placeholder, `contract.requires: [{ expr: "false" }]`, `control.optional: true` |
 | edges | preserved; a missing `type` defaults to `optional`, a missing `id` is generated |
 
-Since `@skaile/workspaces` 4.8.0 a v1 `type: "gate"` is a real gate that parks the run for a human, like any first-class gate (see *Execution*). Two consequences are worth internalising before you rely on the normalizer for the other kinds. A `type: "group"` visual container has no v2 equivalent — it becomes the inert placeholder. And that placeholder has **no `run.instruction` field at all**, so instruction text authored on a node of those other kinds is not carried forward *as an instruction* — it survives only as inert data under `contract.input`. The node never becomes available and the work silently does not happen.
+Since `@skaile/workspaces` 4.8.0 a v1 `type: "gate"` is a real gate that parks the run for a human, like any first-class gate (see *Execution*). Two consequences are worth internalising before you rely on the normalizer for the other kinds. A `type: "group"` visual container has no v2 equivalent — it becomes the inert placeholder. And that placeholder has **no `run.instruction` field at all**, so instruction text authored on a node that is not `skill`, `sub-flow` or `gate` is not carried forward *as an instruction* — it survives only as inert data under `contract.input`. The node never becomes available and the work silently does not happen.
 
 ## Execution
 
