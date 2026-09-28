@@ -3,7 +3,6 @@ description: Day-to-day skaile-dev workflow — git ops, implementation, tests, 
 dependencies:
   - skill:git
   - skill:review
-  - skill:implement
   - skill:ship
   - skill:meat
   - skill:issue-bar
