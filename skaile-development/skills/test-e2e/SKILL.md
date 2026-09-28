@@ -577,8 +577,8 @@ STEP 4c (web, forge apps only): Scaffold L5 Nitro integration tests
 
     test('returns the authenticated user when the cookie is valid', async () => {
       mockGetSessionUser.mockResolvedValue({ id: 1, username: 'admin', role: 'admin' })
-      // from test/unit/ (skaile-forge); use '../server/...' in a flat tests/ dir
-      const handler = (await import('../../server/api/auth/me.get')).default as (e: unknown) => Promise<unknown>
+      // flat tests/ dir; from skaile-forge's test/unit/ use '../../server/...'
+      const handler = (await import('../server/api/auth/me.get')).default as (e: unknown) => Promise<unknown>
       const event = makeEvent({ cookies: { skaile_forge_auth: 'valid-token' } })
       const result = await handler(event)
       expect(result).toMatchObject({ username: 'admin' })
