@@ -199,7 +199,8 @@ session owner's effective role on that target **before** showing an approval car
 malformed, lifecycle, membership, credential/provider, runtime, and destructive actions
 fail without a card. If approved, the platform reloads the current owner and target and
 reauthorizes immediately before execution. The human who clicks Approve supplies consent;
-they do not replace the session owner as the action actor.
+they do not replace the session owner as the action actor. Project and organization flow
+writes are the exception: they run as the approver — see [Flows](flows.md).
 
 Rules:
 
