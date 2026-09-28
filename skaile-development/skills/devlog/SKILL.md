@@ -218,13 +218,13 @@ STEP 3: Write entry file + update index
   ```markdown
   ## 2026-03-22 — Rename users table primary key from id to user_id
 
-  **What changed:** The `users` table in forge/L4-project and forge/L5-concept now uses `user_id`
+  **What changed:** The `users` table in forge/skaile-forge and forge/L5-concept now uses `user_id`
   as the primary key column name instead of `id`.
 
   **Why:** Consistent with the platform's naming convention; reduces confusion when
   joining tables in complex queries.
 
-  **Affected:** `forge/L4-project`, `forge/L5-concept`, `forge/common-backend`
+  **Affected:** `forge/skaile-forge`, `forge/L5-concept`, `forge/common-backend`
 
   **Implications:** Breaking change. All existing sessions are invalidated (the FK column
   in `sessions` also changed). Run the provided migration script before deploying.
@@ -343,7 +343,7 @@ CHECKLIST
 
 | Mistake | What to do instead |
 |---------|-------------------|
-| Writing git-commit-style entries ("feat: add X") | Write in plain language: "Added X to forge/L4-project, which allows users to..." |
+| Writing git-commit-style entries ("feat: add X") | Write in plain language: "Added X to forge/skaile-forge, which allows users to..." |
 | Skipping the "why" | The why is the most valuable part — always include it |
 | Overwriting DEVLOG.md | Always prepend — never overwrite or truncate |
 | Writing reports for every change | Reports are for conceptual/architectural changes only |

@@ -26,7 +26,7 @@
 
 | Package | Abbreviation |
 |---------|--------------|
-| `forge/L4-project` | `forge-project` |
+| `forge/skaile-forge` | `skaile-forge` |
 | `forge/L5-concept` | `forge-concept` |
 | `forge/common-backend` | `forge-common-be` |
 | `forge/common-ui` | `forge-common-ui` |
@@ -46,7 +46,7 @@
 ## Examples
 
 ```
-feature/forge-project/workspace-rename
+feature/skaile-forge/workspace-rename
 feature/forge-concept/collaborative-cursor
 fix/platform-be/session-token-expiry
 fix/cli/run-command-exit-code
@@ -58,7 +58,7 @@ skill/skaile-development/add-devlog-skill
 skill/ai-skaileup-evaluate/merge-cf-saxe-audit
 chore/bump-bun-1-4
 chore/platform-be/update-prisma
-test/forge-project/add-auth-unit-tests
+test/skaile-forge/add-auth-unit-tests
 feature/add-skaile-development-domain    (monorepo-wide: no package segment)
 ```
 
