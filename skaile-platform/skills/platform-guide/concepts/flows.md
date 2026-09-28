@@ -21,8 +21,8 @@ checkpoints.
 ## The shape of a definition
 
 The authority on shape is the published JSON Schema, not this file. Get it at runtime with
-`platform.get_flow_schema` — no arguments, no authoring grant, no project context and no
-existing flow needed. It returns `schemaId`, `jsonSchema` and `example`, a complete valid
+`platform.get_flow_schema` — no arguments, no approval, no project context and no existing
+flow needed. It returns `schemaId`, `jsonSchema` and `example`, a complete valid
 definition to pattern-match against. Read the schema when you need the exact field list. The
 same document ships inside `@skaile/workspaces` as
 `dist/factory-assets/connectors/flow/contract/flow.v2.schema.json`, but the capability is the
@@ -181,44 +181,39 @@ agree.
 
 ## Authoring a flow as the agent
 
-**Two gates stand before every flow write, and the first is not the ordinary grant story.**
+**Every project or organization flow write is approved by an Owner of that scope.**
 `platform.create_flow` and `platform.revise_flow` are `effect` capabilities that always card,
-so a human approves each write. *Before* that, the **`platform.author_flows`** grant must
-already be in force for the scope the write targets. That grant is a **precondition**, not a
-card-skipper: with no grant the call is refused outright, and the refusal arrives as prose and
-nothing else — no card, no button, no structured remedy any screen renders. Relay it and stop;
-retrying changes nothing.
+so a human approves each write. Nothing has to be switched on in settings first. The one rule
+is who may approve: the account approving the card must be an Owner of the scope the write
+targets, and approving never confers more authority than the approver already holds.
 
-The grant shows on screen as **Flow authoring**. Only these people can turn it on, in these
-two places:
+| Target scope | Who can approve the card |
+| --- | --- |
+| Project | an Owner of this project (the project owner, or a project member with the Owner role) |
+| Organization | an Owner of this organization |
 
-| Target scope | Who can turn it on | Where |
-| --- | --- | --- |
-| Project | an Owner of this project (the project owner, or a project member with the Owner role) | Project settings → Session defaults → Agent grants → Flow authoring |
-| Organization | an Owner of this organization | Organization settings → AI → Agent grants → Flow authoring |
+For `platform.revise_flow` the scope is the stored flow's own, not the session's project.
 
-Three consequences to act on rather than retry:
+Unlike `platform.act` (see [Autonomy grants](agent.md)), a project or organization flow write
+runs as the **approver**, not the session owner, so the Owner role is required of whoever
+approves — and it is checked only **after** the card is approved. A non-Owner's approval is
+spent on a write that is then refused, so name the required Owner when you post the card,
+before anyone approves it. The refusal is prose that names the role, plus a structured `remedy`
+(`capability`, `requiredScope`, `requiredRole`) that no screen renders; relay the refusal prose
+verbatim, not the `remedy` object, and stop — retrying with the same approver changes nothing.
+Ask an Owner of that scope to approve the next attempt. If organization-wide was not essential,
+offer to work at project scope, where a project Owner can approve.
 
-- **A project grant never authorizes an organization-scope write.** It must be re-issued at
-  organization scope. If organization-wide was not essential, offer to work at project scope —
-  the grant already in hand covers that.
-- **The account approving the card must itself be an Owner of the target scope.** A grant never
-  confers more authority than its approver holds, so re-granting cannot fix this; an Owner has
-  to be the one who approves the write.
-- **A grant dies with its grantor's authority.** If the person who issued it is no longer an
-  Owner, the grant is stale and an Owner must Revoke and then Grant again.
-
-You can neither mint, widen, nor request any of this yourself — see
-[Autonomy grants](agent.md). Name the settings path and the required role to the human, then
-ask them to try again.
+You cannot approve, widen, or request this authority yourself — see
+[Autonomy grants](agent.md).
 
 **Personal flows are the exception.** `platform.create_flow` with scope `personal` saves the
-flow to the session owner's own library, visible only to them, and needs no Flow authoring
-grant and no admin role. The write is still approved — per call, or by a standing grant over
-this session that only the session owner can issue — and still validated as strict v2 before
-the card shows. `platform.list_flows` lists project and organization flows only; personal
-flows are listed by `platform.list_personal_flows`, which is itself approval-gated because
-listing puts flow names into a conversation every member can read. `platform.get_flow` and
+flow to the session owner's own library, visible only to them, and needs no admin role. The
+write is still approved — per call, or by a standing grant over this session that only the
+session owner can issue — and still validated as strict v2 before the card shows.
+`platform.list_flows` lists project and organization flows only; personal flows are listed by
+`platform.list_personal_flows`, which is itself approval-gated because listing puts flow names
+into a conversation every member can read. `platform.get_flow` and
 `platform.revise_flow` do not reach personal flows (they read as not found).
 
 **Always declare `schemaVersion: 2`.** `platform.create_flow` and `platform.revise_flow`
