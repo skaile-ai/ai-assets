@@ -65,7 +65,10 @@ real UI strings.
     See `ui/workspace.md`.
   - Reporting a bug, suggesting an idea or asking a question is **Report a problem** in the
     user menu — it opens a short form; the follow-up conversation runs in the **Report**
-    panel, and reports reach the Skaile team directly.
+    panel, and reports reach the Skaile team directly. The agent there shows the drafted
+    report for review before sending it, unless the user asks it to send directly. Any
+    session's agent can also report a platform problem it runs into on its own (see
+    `concepts/agent.md`).
 - **Command palette (Cmd+K)** — global fuzzy search and action launcher across sessions,
   projects, settings, and registered actions. This is the primary "how do I do X" entry
   point — most features have a command. It lists one **Switch to \<org\>** entry per other

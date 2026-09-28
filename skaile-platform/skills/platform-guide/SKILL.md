@@ -12,8 +12,9 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   modes, roles and permissions, personal vs business workspace, hibernation, or any platform
   surface; or when you are about to create a project/session/organization, invite someone,
   start a connector setup or propose a connector mount, or read back a durable operation you
-  started. Load on demand, not always-on."
-version: 0.12.0
+  started; or when you hit a problem in the platform itself, or the user wants to report a
+  bug or suggest a feature to the Skaile team. Load on demand, not always-on."
+version: 0.13.0
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -46,6 +47,8 @@ keywords:
   - agent-graph
   - personal-flow
   - notifications
+  - report-a-problem
+  - feedback
 ---
 
 # Skaile Platform Guide
@@ -80,7 +83,7 @@ mechanics only when the user is technical or `expertMode=true`.
 | `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels, whose connection a mount runs on, **Reconnect**, Exchange mail and shared mailboxes, AI providers and subscription seats, classifier providers. |
 | `concepts/collaboration.md` | Multi-user sessions (mentions/reactions/threading/presence), sharing with people, public file-preview links, agent-to-agent (A2A). |
 | `concepts/previews.md` | Running and viewing an app preview; what makes a workspace previewable. |
-| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants, durable operations and the `AwaitingUser` handoff, discovery-then-propose, the target-bound `platform.act` / `platform.act_batch` allowlist, UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
+| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants, durable operations and the `AwaitingUser` handoff, discovery-then-propose, reporting platform problems to the Skaile team, the target-bound `platform.act` / `platform.act_batch` allowlist, UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
 
 ### Reference (load only when constructing an action)
 
