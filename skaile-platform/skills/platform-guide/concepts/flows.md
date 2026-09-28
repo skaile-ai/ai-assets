@@ -233,20 +233,21 @@ The reason is worth knowing, because the failure it prevents is silent. An *abse
 `skill` node becomes an `agent` node (its `parameters.instructions` becomes
 `run.instruction`, the named skill becomes a `skill:<name>` asset), a legacy `sub-flow`
 becomes a real `sub-flow`, and a legacy `type: gate` becomes a real gate node
-(`run.kind: "gate"`, `run.schema: { kind: "text" }`) that always parks the run for a human.
-Its `run.prompt` is the v1 `data.message` (or the description) followed by
-`Approval criterion (not evaluated automatically): <data.check>`. The check is shown, never
-evaluated. A v1 gate with `data.optional: true`, or a `data.on_fail` other than
-`pause-for-human`, fails the whole definition's parse with an issue at
-`nodes.<i>.data.optional` / `nodes.<i>.data.on_fail`, so that flow does not load at all. But
-**every other** node becomes an inert `router` placeholder carrying
+(`run.kind: "gate"`, `run.schema: { kind: "text" }`). No `gate.approval` is set: a node whose
+`run.kind` is `gate` always parks the run for a human, whatever the `approval_mode`. Its
+`run.prompt` is the v1 `data.message` (or the description) followed by
+`Approval criterion (not evaluated automatically): <data.check>`; the check is shown, never
+evaluated. But **every other** node becomes an inert `router` placeholder carrying
 `contract.requires: [{ expr: "false" }]` and `control.optional: true`. That placeholder has
 no `run.instruction` field at all, so the authored instruction text is not carried forward
 as an instruction and the node can never become available. So, in practice: authored
 through the capability, a v1-shaped flow **bounces** with the message
 above. Arriving by any other route, its **gate nodes park the run until a human approves**,
-a malformed gate makes the definition fail to load, and nodes of the remaining kinds
-**normalize into inert placeholders that never run**.
+and nodes of the remaining kinds **normalize into inert placeholders that never run**.
+
+One v1 shape does not normalize at all: a gate with `data.optional: true`, or a
+`data.on_fail` other than `pause-for-human`. That fails the whole definition's parse with an
+issue at `nodes.<i>.data.optional` / `nodes.<i>.data.on_fail`, so the flow does not load.
 
 Both write capabilities also describe the v2 shape in their prompt fragment, so a gated
 session can author from context alone. Two ungated queries make the rest discoverable at
