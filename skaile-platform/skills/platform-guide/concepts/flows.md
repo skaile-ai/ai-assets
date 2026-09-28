@@ -231,15 +231,17 @@ platform.create_flow: strict v2 flow definitions only — include a `schemaVersi
 The reason is worth knowing, because the failure it prevents is silent. An *absent*
 `schemaVersion` is what opts a definition into v1 compatibility normalization: a legacy
 `skill` node becomes an `agent` node (its `parameters.instructions` becomes
-`run.instruction`, the named skill becomes a `skill:<name>` asset) and a legacy `sub-flow`
-becomes a real `sub-flow`, but
+`run.instruction`, the named skill becomes a `skill:<name>` asset), a legacy `sub-flow`
+becomes a real `sub-flow`, and a legacy `type: gate` becomes a required `gate` that pauses
+for human approval (its v1 `check` is shown to the approver, not evaluated; a v1 gate with
+`optional: true` or an `on_fail` other than `pause-for-human` is rejected). But
 **every other** node becomes an inert `router` placeholder carrying
 `contract.requires: [{ expr: "false" }]` and `control.optional: true`. That placeholder has
 no `run.instruction` field at all, so the authored instruction text is not carried forward
 as an instruction and the node can never become available. So both halves of the
 consequence: authored through the capability, a v1-shaped flow **bounces** with the message
-above; arriving by any other route it **normalizes into inert placeholders and the run
-executes nothing**.
+above; arriving by any other route, its nodes of those other kinds **normalize into inert
+placeholders that never run**.
 
 Both write capabilities also describe the v2 shape in their prompt fragment, so a gated
 session can author from context alone. Two ungated queries make the rest discoverable at
