@@ -24,7 +24,7 @@ metadata:
     - id: target
       label: "Package path"
       type: text
-      hint: "e.g. forge/L4-project, agent-framework/runner, platform/backend"
+      hint: "e.g. forge/skaile-forge, agent-framework/runner, platform/backend"
     inputs_optional:
     - id: layers
       label: "Layers to plan (comma-separated)"
@@ -226,10 +226,10 @@ STEP 5: Enumerate testable units per layer
 
   L5 — Reference apps (forge) have three shapes:
     - Unit (composables, server utilities, auth middleware):
-      Reference: `forge/L4-project/tests/use-color-mode.test.ts` (happy-dom for Vue composables)
-    - Integration (Nitro route handlers with synthetic h3 events + mocked @skaile/forge-common-backend):
-      Reference: `forge/L4-project/tests/_setup/h3-event.ts`, `_setup/nitro-globals.ts`,
-      `api-auth-logout.test.ts`, `api-auth-me.test.ts`
+      Reference: `forge/skaile-forge/test/unit/workspace-access.test.ts` (its `vitest.config.ts` sets happy-dom for Vue composables)
+    - Integration (Nitro route handlers with synthetic h3 events + mocked forge-common server entry):
+      Reference: `forge/skaile-forge/test/unit/_setup/h3-event.ts`, `_setup/nitro-globals.ts`,
+      `api-auth-logout.test.ts`, `workspace-patch.test.ts`
     - E2E (Playwright) — critical user journeys only.
     - **Library composable E2E (Playwright CT):** when an L1/L2 library package exports
       composables that happy-dom cannot test (TipTap, ProseMirror, WebGL, etc.), use

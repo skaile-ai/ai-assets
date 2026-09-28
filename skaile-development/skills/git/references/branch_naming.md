@@ -26,7 +26,7 @@
 
 | Package | Abbreviation |
 |---------|--------------|
-| `forge/L4-project` | `forge-project` |
+| `forge/skaile-forge` | `skaile-forge` |
 | `forge/L5-concept` | `forge-concept` |
 | `forge/common-backend` | `forge-common-be` |
 | `forge/common-ui` | `forge-common-ui` |

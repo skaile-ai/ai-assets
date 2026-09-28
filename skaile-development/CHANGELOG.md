@@ -5,6 +5,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Docs
+- Skill references and examples now point at `forge/skaile-forge` (standalone repo `skaile-ai/skaile-forge`), which replaced `forge/L4-project`; branch-slug map entry `forge/skaile-forge` → `skaile-forge`.
+
 ## [0.4.2] — 2026-04-30
 
 ### Fixes

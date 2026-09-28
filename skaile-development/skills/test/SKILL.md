@@ -3,8 +3,8 @@ name: "test"
 description: "Test construction and execution for the skaile-dev monorepo. Two modes:
   'run' executes the test suite for one or more packages and reports results; 'construct'
   generates new tests for recently implemented code. Knows the full test stack: Vitest
-  3.2.4 (agent-framework + forge/L4-project + forge/L4-assistant + _scripts), Vitest
-  4.1 (forge/L5-concept), Jest (platform backend), Vitest (platform frontend), Playwright
+  3.2.4 (agent-framework + forge/L4-assistant + _scripts), Vitest
+  4.1 (forge/skaile-forge + forge/L5-concept), Jest (platform backend), Vitest (platform frontend), Playwright
   (E2E), and how to run each via the Bun workspace. Coverage is collected under Bun
   with @vitest/coverage-istanbul (not v8) and ratcheted against the committed baseline
   via _scripts/check-coverage-ratchet.ts."
@@ -39,7 +39,7 @@ metadata:
       type: "text"
       required: false
       default: "all"
-      hint: "e.g. 'forge/L4-project', 'platform/backend', 'agent-framework/cli'"
+      hint: "e.g. 'forge/skaile-forge', 'platform/backend', 'agent-framework/cli'"
     - id: "filter"
       label: "Test name filter (for 'run' mode — runs only matching tests)"
       type: "text"
@@ -106,14 +106,14 @@ wants a few tests for recently changed files.
 The root `vitest.config.ts` aggregates every agent-framework package plus `_scripts/`.
 A single `bun x --bun vitest run` from the repo root runs them all. Packages that need
 a different environment (happy-dom for Vue composables, Nitro shims for forge routes,
-vitest 4.1 for forge/L5-concept) keep their own `vitest.config.ts` and their own
+vitest 4.1 for forge/skaile-forge and forge/L5-concept) keep their own `vitest.config.ts` and their own
 `bun run test` script; those are scoped runs.
 
 | Package | Framework | Run Command (from skaile-dev root) |
 |---------|-----------|-----------------------------------|
 | `agent-framework/*` (all packages under this tree) | Vitest 3.2.4 | `bun x --bun vitest run` |
 | `_scripts/` (check-coverage-ratchet etc.) | Vitest 3.2.4 | `bun x --bun vitest run` |
-| `forge/L4-project` | Vitest 3.2.4 + `happy-dom` | `bun run --filter @skaile/forge-project test` |
+| `forge/skaile-forge` (standalone repo `skaile-ai/skaile-forge`) | Vitest 4.1 + `happy-dom` | `cd forge/skaile-forge && bun run test` |
 | `forge/L4-assistant` | Vitest 3.2.4 + `happy-dom` | `bun run --filter @skaile/forge-assistant test` |
 | `forge/L5-concept` | Vitest 4.1 | `bun run --filter @skaile/forge-concept test` |
 | `forge/common-backend` | Vitest 3.2.4 | root `bun x --bun vitest run` (included via root config) |
@@ -122,7 +122,7 @@ vitest 4.1 for forge/L5-concept) keep their own `vitest.config.ts` and their own
 | `platform/backend` | Jest | `bun run --filter ./platform/backend test` |
 | `platform/frontend` | Vitest | `bun run --filter ./platform/frontend test` |
 | `platform/e2e` | Playwright | `bun run --filter ./platform/e2e test:e2e` |
-| `forge/L4-project/tests/e2e/` | Playwright | `cd forge/L4-project && bun run test:e2e` |
+| `forge/skaile-forge/tests/e2e/` | Playwright | `cd forge/skaile-forge && bun run test:e2e` |
 
 **Never** run `vitest` from inside a submodule/package with `bun` — always invoke from
 the skaile-dev root so the workspace overrides resolve every `@skaile/*` dependency
@@ -210,7 +210,7 @@ IF mode = run
     ### Summary
     | Package | Total | Passed | Failed | Skipped | Duration |
     |---------|-------|--------|--------|---------|----------|
-    | forge/L4-project | 42 | 42 | 0 | 0 | 1.2s |
+    | forge/skaile-forge | 42 | 42 | 0 | 0 | 1.2s |
     | platform/backend | 156 | 154 | 2 | 0 | 8.4s |
     ...
     | **Total** | **N** | **N** | **N** | **N** | **Ns** |
@@ -282,13 +282,13 @@ IF mode = construct
       fixture files live under `tests/fixtures/` (never `__fixtures__` or `test/fixtures`).
     - **Vue composables in forge apps** (L5 unit tier): the forge Nuxt app's
       `vitest.config.ts` must set `environment: "happy-dom"` and list
-      `happy-dom` as a devDependency. `forge/L4-project/vitest.config.ts` is the
+      `happy-dom` as a devDependency. `forge/skaile-forge/vitest.config.ts` is the
       reference.
     - **Nitro route integration tests** (forge L5 integration tier): synthesize an
-      h3 event via `tests/_setup/h3-event.ts` + install Nitro globals via
-      `tests/_setup/nitro-globals.ts` as a `setupFiles` entry. See
-      `forge/L4-project/tests/api-*.test.ts` for the canonical pattern (import the
-      route handler dynamically, mock `@skaile/forge-common-backend` at the package
+      h3 event via `test/unit/_setup/h3-event.ts` + install Nitro globals via
+      `test/unit/_setup/nitro-globals.ts` as a `setupFiles` entry. See
+      `forge/skaile-forge/test/unit/api-auth-logout.test.ts` for the canonical pattern (import the
+      route handler dynamically, mock `@skaile-ai/forge-common/server` at the package
       boundary, call the handler with a synthetic event).
     - **Bridge / subprocess drivers** (L3 integration tier): use the fake-binary
       harness pattern in `agent-framework/bridge/tests/omp-driver.test.ts`. The
@@ -397,7 +397,7 @@ IF mode = construct
     ### Generated
     | File | Package | Tests | Units Covered |
     |------|---------|-------|---------------|
-    | src/composables/useWorkspace.test.ts | forge/L4-project | 8 | 2 |
+    | test/unit/use-workspace.test.ts | forge/skaile-forge | 8 | 2 |
 
     ### Coverage Added
     | Unit | File | Was Tested | Now Tested |
@@ -473,9 +473,9 @@ bun run --filter @skaile/forge-concept test 2>&1 | tail -60    # vitest@4.1, sco
 # Run platform backend (Jest)
 bun run --filter ./platform/backend test 2>&1 | tail -80
 
-# Run platform / forge-project E2E (Playwright)
+# Run platform / skaile-forge E2E (Playwright)
 bun run --filter ./platform/e2e test:e2e 2>&1 | tail -60
-(cd forge/L4-project && bun run test:e2e 2>&1 | tail -60)
+(cd forge/skaile-forge && bun run test:e2e 2>&1 | tail -60)
 
 # Run forge/common-ui Playwright CT (TipTap/ProseMirror browser tests)
 (cd forge/common-ui && bun run test:e2e 2>&1 | tail -20)
@@ -514,7 +514,7 @@ try to route around them — they are documented here so the skill won't flail.
 
 | Constraint | Where | Workaround |
 |---|---|---|
-| `better-sqlite3` has no Bun build | forge/L4-project, forge/L5-concept, forge/L4-assistant | Mock `createDb` at the `@skaile/forge-common-backend` boundary. For forge/L5-concept, also return a chainable stub so the seed-check short-circuits. |
+| `better-sqlite3` has no Bun build | forge/skaile-forge, forge/L5-concept, forge/L4-assistant | Mock `createDb` at the forge-common boundary (`@skaile/forge-common-backend`; `@skaile-ai/forge-common/server` in forge/skaile-forge). For forge/L5-concept, also return a chainable stub so the seed-check short-circuits. |
 | `vi.mock` misses same-package relatives under Bun+Vitest | forge Nitro route tests | Register three specifier forms: `./foo`, `../foo`, and the absolute path via `new URL("../foo.ts", import.meta.url).pathname`. |
 | `vi.mock` + dynamic `import()` unstable under Bun | `bridge/tests/codex-driver.test.ts`, `runner/tests/session-builder.test.ts` | These files are `describe.skip` under Bun and pass under plain `bun x vitest run` (Node). Leave them skipped — do not "fix" them. |
 | `@vitest/coverage-v8` requires Node's inspector | whole monorepo | Use `@vitest/coverage-istanbul` under Bun. See test-full.yml. |

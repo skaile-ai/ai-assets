@@ -13,6 +13,7 @@ The AI coding assistant and orchestrators embedded in the `forge/skaile-forge` w
 ```
 ai-assets/skaile-forge/
 ├── DOMAIN.md                      ← this file
+├── CHANGELOG.md                   ← release notes (bundle rename migration in 1.0.0)
 ├── agent/                         ← GitAgent definition (spec v0.1.0) — coding assistant
 │   ├── agent.yaml
 │   ├── SOUL.md

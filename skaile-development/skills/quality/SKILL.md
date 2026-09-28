@@ -191,10 +191,11 @@ STEP 3: Run tests
       Exit codes: 0 pass, 1 regression (fail the gate), 2 invalid input (fail the gate).
       A `baseline-improved` verdict is informational — the ratchet does not
       fail on improvement; updating the committed baseline is a manual PR step.
-    - Note: forge/L5-concept (vitest 4.1), forge/L4-project, forge/L4-assistant, platform/*,
-      and all Playwright suites are not part of the root istanbul run — run them
-      via their scoped test commands (`bun run --filter <pkg> test 2>&1 | tail -60`)
-      if they're in scope.
+    - Note: forge/L5-concept (vitest 4.1), forge/skaile-forge (vitest 4.1, standalone repo),
+      forge/L4-assistant, platform/*, and all Playwright suites are not part of the root
+      istanbul run — run them via their scoped test commands (`bun run --filter <pkg> test
+      2>&1 | tail -60`; for forge/skaile-forge `cd forge/skaile-forge && bun run test`) if
+      they're in scope.
     - mode=full SESSION NOTE: If this is running in a long session that already has
       significant context, consider starting a fresh session for mode=full — the
       coverage + audit + doc sequence is resource-intensive and benefits from a clean

@@ -8,12 +8,14 @@ Used by: `test`, `test-plan`, `test-unit`, `test-integration`, `test-e2e`, `audi
 
 ## Forge Apps (Nuxt 4 + drizzle-orm + SQLite)
 
-All forge packages share a single root `vitest.config.ts` at `forge/` that picks up
+All forge packages except `forge/skaile-forge` share a single root `vitest.config.ts` at `forge/` that picks up
 `**/tests/**/*.test.ts`. Run the whole suite with `bun x --bun vitest run` from `forge/`.
+`forge/skaile-forge` is a standalone repo (`skaile-ai/skaile-forge`) with its own `vitest.config.ts`
+and `playwright.config.ts`; run `bun run test` / `bun run test:e2e` inside `forge/skaile-forge`.
 
 | Package | Framework | Test Dir | Pattern | Status |
 |---|---|---|---|---|
-| `forge/L4-project` | Vitest (unit) + Playwright (e2e) | `tests/` + `tests/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
+| `forge/skaile-forge` | Vitest (unit + integration) + Playwright (e2e) | `test/unit/` + `tests/integration/` + `tests/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
 | `forge/L5-concept` | Vitest (unit) + Playwright (e2e) | `test/unit/` + `test/e2e/` | `*.test.ts`, `*.spec.ts` | unit ✓, e2e ✓ |
 | `forge/L4-assistant` | Playwright (e2e only) | `tests/e2e/` | `*.spec.ts` | e2e ✓ |
 | `forge/L1-chat` | Vitest | `tests/` | `*.test.ts` | unit ✓ |

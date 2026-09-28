@@ -253,7 +253,7 @@ Each forge app is a working reference for one tier. Source under `forge/`.
 |---|---|---|---|---|---|---|
 | L2 | `L2-tui` | `LocalRuntime` + custom session, profile YAML | In-process | N (registry) | None | Multi-session TUI, profile-based driver/connector selection, ink layout, focus mgmt, lazy start |
 | L3 | (deprecated mattermost) | `LocalRuntime` + lazy start | In-process | N per-thread | SQLite per channel | Bot pattern, thread-as-session, custom event handler routing typing/post events |
-| L4 | `L4-project` (Pichi) | `AgentProcessManager` + dispatcher | Subprocess (WS) | N per-user-project | JSONL | Personal AI assistant, settings UI, asset catalog, WebDAV/SSH access, multi-user SQLite auth |
+| L4 | `skaile-forge` | `AgentProcessManager` + dispatcher | Subprocess (WS) | N per-user-workspace | JSONL | Unified forge web app (assistant/workspace/concept modes), settings UI, asset catalog, WebDAV access, multi-user SQLite auth |
 | L4 | `L4-assistant` | Same shape, simpler chat UI | Subprocess (WS) | N | JSONL | Minimal personal assistant chat |
 | L5 | `L5-concept` | `AgentProcessManager` + flow engine + Hocuspocus | Subprocess (WS) | N per-concept | JSONL + Git | Multi-user real-time concept editor, Yjs CRDT, AI flows produce `_concept/` specs, voice STT/TTS |
 
@@ -263,7 +263,7 @@ Each forge app is a working reference for one tier. Source under `forge/`.
 |---|---|---|
 | Terminal/CLI tool with one or N sessions | L2-tui | Profile YAML pattern, registry, ink components from `@skaile/agent-tui` |
 | Slack/Mattermost/Discord bot | L3 mattermost (archived) | Lazy session start per thread, dual output routing, channel-scoped state |
-| Personal web AI assistant | L4-project or L4-assistant | Subprocess + JSONL + SSE, settings UI, catalog browser, voice IO |
+| Personal web AI assistant | skaile-forge or L4-assistant | Subprocess + JSONL + SSE, settings UI, catalog browser, voice IO |
 | Multi-user editor with AI co-design | L5-concept | Hocuspocus + Yjs + flow engine + per-document sessions |
 | Enterprise multi-tenant platform | Skaile platform itself | Container manager, session lifecycle, gateway, durable flow mirror |
 
@@ -436,7 +436,7 @@ the agent at these files (paths relative to the skaile-dev repo root):
 | Flow execution model (universal) | `agent-framework/docs/flow-execution.md` |
 | Client-server protocol | `agent-framework/docs/client-server-architecture.md` |
 | Forge integration matrix | `forge/README.md`, `forge/CLAUDE.md` |
-| Per-app forge architecture | `forge/<L2-tui\|L4-project\|L4-assistant\|L5-concept>/CLAUDE.md` |
+| Per-app forge architecture | `forge/<L2-tui\|skaile-forge\|L4-assistant\|L5-concept>/CLAUDE.md` |
 | Platform architecture | `platform/CLAUDE.md` + `platform/docs/*.md` |
 | Skill authoring conventions | `dev/CLAUDE.md` Skill Structure Convention + `ai-assets-skaileup/skaileup-contracts/contracts/` |
 
