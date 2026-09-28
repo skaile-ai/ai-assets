@@ -154,7 +154,7 @@ Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner).
 Path: `/<org>/settings` (org Owners and platform admins). Tabs: **Organization**
 (branding), **Users** (invite/roles/revoke), **Teams**, **Providers** (org-level connectors:
 Git / Files / Transport, with UserDelegation or ServiceAccount credentials), **AI** (org-wide
-AI defaults: available clouds, flow authoring, and the driver/provider/model defaults
+AI defaults: available clouds, stored agent grants, and the driver/provider/model defaults
 inherited by all projects), **AI Providers** (model endpoints: Anthropic/OpenAI/Custom,
 scoped Global/Org/Project, delivered direct or via a cloud transport — AWS Bedrock, GCP
 Vertex, Azure AI Foundry, custom gateway — with per-config health checks; a **Claude

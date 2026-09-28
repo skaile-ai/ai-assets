@@ -21,8 +21,8 @@ checkpoints.
 ## The shape of a definition
 
 The authority on shape is the published JSON Schema, not this file. Get it at runtime with
-`platform.get_flow_schema` — no arguments, no authoring grant, no project context and no
-existing flow needed. It returns `schemaId`, `jsonSchema` and `example`, a complete valid
+`platform.get_flow_schema` — no arguments, no approval, no project context and no existing
+flow needed. It returns `schemaId`, `jsonSchema` and `example`, a complete valid
 definition to pattern-match against. Read the schema when you need the exact field list. The
 same document ships inside `@skaile/workspaces` as
 `dist/factory-assets/connectors/flow/contract/flow.v2.schema.json`, but the capability is the
@@ -194,11 +194,14 @@ targets, and approving never confers more authority than the approver already ho
 
 For `platform.revise_flow` the scope is the stored flow's own, not the session's project.
 
-If someone without that role approves, the write is refused. The refusal is prose that names
-the role, plus a structured `remedy` (`capability`, `requiredScope`, `requiredRole`); no
-screen renders it, so relay it verbatim and stop — retrying with the same approver changes
-nothing. Ask an Owner of that scope to approve the next attempt. If organization-wide was not
-essential, offer to work at project scope, where a project Owner can approve.
+The role is checked only **after** the card is approved: anyone with access to the session can
+press Approve, and a non-Owner's approval is spent on a write that is then refused. So name the
+required Owner when you post the card, before anyone approves it. The refusal is prose that
+names the role, plus a structured `remedy` (`capability`, `requiredScope`, `requiredRole`)
+that no screen renders; relay the refusal prose verbatim, not the `remedy` object, and stop —
+retrying with the same approver changes nothing. Ask an Owner of that scope to approve the
+next attempt. If organization-wide was not essential, offer to work at project scope, where a
+project Owner can approve.
 
 You cannot approve, widen, or request this authority yourself — see
 [Autonomy grants](agent.md).
@@ -206,9 +209,10 @@ You cannot approve, widen, or request this authority yourself — see
 **Personal flows are the exception.** `platform.create_flow` with scope `personal` saves the
 flow to the session owner's own library, visible only to them, and needs no admin role. The
 write is still approved — per call, or by a standing grant over this session that only the
-session owner can issue — and still validated as strict v2 before the card shows. `platform.list_flows` lists project and organization flows only; personal
-flows are listed by `platform.list_personal_flows`, which is itself approval-gated because
-listing puts flow names into a conversation every member can read. `platform.get_flow` and
+session owner can issue — and still validated as strict v2 before the card shows.
+`platform.list_flows` lists project and organization flows only; personal flows are listed by
+`platform.list_personal_flows`, which is itself approval-gated because listing puts flow names
+into a conversation every member can read. `platform.get_flow` and
 `platform.revise_flow` do not reach personal flows (they read as not found).
 
 **Always declare `schemaVersion: 2`.** `platform.create_flow` and `platform.revise_flow`
