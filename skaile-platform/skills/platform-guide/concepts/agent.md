@@ -101,7 +101,7 @@ Each capability declares an **effect class** that decides how far a grant may re
 | Class | Means | Covered by a grant? |
 | --- | --- | --- |
 | `routine` | Effect stays inside the owner's own platform surface. | Yes — this is what an ordinary grant covers. |
-| `external` | Reaches a person outside this conversation (an invitation email, a sent mail, a message delivered into someone else's session). | Only if the owner **explicitly widened** the grant to external communication. |
+| `external` | Reaches a person or system outside Skaile (an invitation email, a sent mail, a calendar invitation, GitHub or another third-party API). A message delivered into another Skaile session is not external. | Only if the owner **explicitly widened** the grant to external communication. |
 | `privileged` | Administrative — changes who or what exists at organization level. | Only if the owner **explicitly widened** the grant to privileged administration. |
 | `never` | Never auto-approvable (no capability declares it today). | No — it is carded, or refused outright. Never dispatched silently. |
 

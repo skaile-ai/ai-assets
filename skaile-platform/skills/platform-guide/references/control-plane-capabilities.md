@@ -86,8 +86,10 @@ what decides whether an autonomy grant can ever cover it (see *Consent and auton
 | `platform.configure_project_source({ projectId, providerLinkId })` | re-points a project at an already-usable connector. `result.payload.changed` says whether anything actually had to move; re-pointing at the current one is a no-op, not an error. | `routine` | that target, its project, its organization, or everything reachable |
 
 `platform.delegate_to_session({ sessionId, message, visibility: "Public" })` delivers one
-message into another session as the owner. It is also approval-gated and classed `external`,
-with a grant reaching **that one target and nothing else** — but it is **not durable**: it
+message into another session as the owner. It is also approval-gated but classed `routine` —
+the message never leaves Skaile, so a grant needs no external opt-in — with a grant reaching
+**that one target and nothing else**. It cannot yet be requested ahead with
+`platform.request_standing_approval`. And it is **not durable**: it
 returns its own result rather than an operation receipt, so there is no `operationId` to poll.
 The delivered message always shows it was sent by the owner via their Personal Assistant; it
 is never attributed to the assistant.
