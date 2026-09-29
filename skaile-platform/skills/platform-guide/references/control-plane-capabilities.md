@@ -116,7 +116,8 @@ to act on:
   `platform.cycle_session` — itself carded every time — rather than telling the user it is
   already there.
 - A git `repoUrl` must be on the connection's own host; the platform only ever presents the
-  owner's git credential to that host.
+  owner's git credential to that host (and, inside the session, Git's helper answers only for
+  the mounted repository's URL — see `concepts/flows.md`).
 
 The owner's **personal flows** ride the same machinery too: listing them
 (`platform.list_personal_flows`) and saving one with `platform.create_flow({ scope: "personal" })`
