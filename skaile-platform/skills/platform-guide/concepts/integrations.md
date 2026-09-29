@@ -98,16 +98,17 @@ mailboxes, the owner picks which mailboxes the project may use.
   category. Moving, filing into folders, and creating or deleting a category need approval;
   deleting a mail moves it to Deleted Items and is privileged.
 - Drafts need no approval — the user reviews and sends them from Outlook. Sending from
-  the agent is approved per message; only sends from the user's own mailbox can be
-  covered by a standing project-level approval.
+  the agent is approved per message unless a standing approval covers it: for the user's own
+  mailbox, one pinned to that mailbox or the project; for a shared mailbox, one pinned to that
+  mailbox.
 - Calendar access covers the user's own mailbox only.
 - **Shared mailboxes**: the user adds them once per connection in **My connections**,
   after granting **Allow shared mail access**. A mailbox is admitted only if the user's
   account can actually open its inbox (Full Access). The project owner then enables it
-  per project. Sends from a shared mailbox are approved every time. If that sign-in is
-  refused because the tenant lets only admins approve apps, the **not granted** notice
-  offers an **administrator approval link** (valid for 7 days) to send to an admin; after
-  they approve, the user grants **Allow shared mail access** again themselves.
+  per project. If that sign-in is refused because the tenant lets only admins approve
+  apps, the **not granted** notice offers an **administrator approval link** (valid for 7
+  days) to send to an admin; after they approve, the user grants **Allow shared mail
+  access** again themselves.
 - Filing mail attachments into SharePoint is the agent combining steps (read the
   attachment, write it to a SharePoint mount) — there is no automatic filing rule.
 - When the grant expires, the agent tells the user to reconnect.

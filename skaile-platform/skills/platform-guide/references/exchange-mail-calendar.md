@@ -62,9 +62,9 @@ base64 straight to a file — never echo it into the conversation.
 | No approval, reversible | `flag_mail`, `assign_mail_categories` | Runs directly. Category names are free text — a typo makes a new label. |
 | No approval, not outbound | `create_draft`, `add_draft_attachment`, `remove_draft_attachment` | Lands in that mailbox's real Outlook Drafts; nothing is sent. |
 | Card, standing approval possible | `move_mail`, `copy_mail` (per destination folder); `create_mail_folder`, `rename_mail_folder`, `move_mail_folder`, `create_mail_category`, `delete_mail_category` (per mailbox) | Carded unless a standing approval already covers that shape; the card itself offers one. |
-| Card, standing approval possible | `create_calendar_event`, `modify_calendar_event` (own mailbox only) | Carded unless a standing approval pinned to that mailbox covers it — the same standing-approval mechanism as the mail rows above, which is distinct from an autonomy grant. |
+| Card, standing approval possible | `create_calendar_event`, `modify_calendar_event` (own mailbox only; shared mailboxes are refused) | Carded unless an autonomy grant covers it. Create is grantable for that mailbox; modify for one event or every event on that calendar — never project-wide. An event with attendees is `external`, because Exchange emails the invitations and updates, so its grant needs the owner's external-communication opt-in. Modify is refused if the event has gained attendees since the card was approved. |
 | Card, privileged | `delete_mail` | A **soft** delete into Deleted Items, recoverable by the user. A standing approval for it needs the owner's deliberate privileged opt-in. |
-| Card every time | `delete_mail_folder` | Never grantable. The card names how many items and subfolders go with it and treats the delete as permanent. |
+| Card, privileged | `delete_mail_folder` | The card names how many items and subfolders go with it and treats the delete as permanent. A standing approval needs the owner's deliberate privileged opt-in and is pinned to that one mailbox, own or shared. |
 | Card, grantable only deliberately | `send_draft` | See below. |
 
 Real refusals, not conservatism:
@@ -91,9 +91,10 @@ Real refusals, not conservatism:
   **not undoable**. Its card is built from the draft as Exchange holds it now and names every
   attachment; a draft edited after approval invalidates that approval.
 - **Standing grant for sending.** The owner can mint one from the card's advanced options only:
-  project-scoped, bound to that session, time-boxed, and only with external communication
-  explicitly allowed. It covers sends from the **own** mailbox. A shared-mailbox send is carded
-  every time and no grant ever covers it.
+  bound to that session, with an expiry or *Unlimited*, and only with external communication
+  explicitly allowed. For the **own** mailbox it is pinned to that mailbox or to the project.
+  A **shared-mailbox** send is covered only by a grant pinned to that same shared mailbox. For
+  an unattended send workflow, ask for one ahead with `platform.request_standing_approval`.
 - Reading the send result: `outcome: "accepted"` is sent. `rejected` means Exchange refused and
   nothing went out. `uncertain` means nobody knows — the platform did not retry, so check Sent
   Items before preparing another send. Never re-send blindly.
