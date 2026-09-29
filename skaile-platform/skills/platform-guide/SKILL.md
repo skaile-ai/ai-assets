@@ -11,7 +11,7 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
-version: 0.13.2
+version: 0.14.0
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -80,7 +80,7 @@ mechanics only when the user is technical or `expertMode=true`.
 | `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels, whose connection a mount runs on, **Reconnect**, Exchange mail and shared mailboxes, AI providers and subscription seats, classifier providers. |
 | `concepts/collaboration.md` | Multi-user sessions (mentions/reactions/threading/presence), sharing with people, public file-preview links, agent-to-agent (A2A). |
 | `concepts/previews.md` | Running and viewing an app preview; what makes a workspace previewable. |
-| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants, durable operations and the `AwaitingUser` handoff, discovery-then-propose, reporting platform problems to the Skaile team, the target-bound `platform.act` / `platform.act_batch` allowlist, UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
+| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants (incl. asking the owner for one ahead), durable operations and the `AwaitingUser` handoff, discovery-then-propose, reporting platform problems to the Skaile team, the target-bound `platform.act` / `platform.act_batch` allowlist, UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
 
 ### Reference (load only when constructing an action)
 

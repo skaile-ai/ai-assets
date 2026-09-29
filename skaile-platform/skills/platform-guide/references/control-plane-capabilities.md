@@ -92,6 +92,13 @@ returns its own result rather than an operation receipt, so there is no `operati
 The delivered message always shows it was sent by the owner via their Personal Assistant; it
 is never attributed to the assistant.
 
+`platform.invite_user` is the ordinary project session's way to invite someone to its project;
+use `platform.invite_to_project` instead wherever that is offered. It shares that capability's
+gate and its `external` class, so a grant covers it only if the owner explicitly included
+external communication — but a grant for one never covers the other. It is durable too: it
+returns an operation receipt, read with `platform.get_operation`. It takes no `context` note; a
+person adds one from the web app.
+
 ### Session-owner effects — also in ordinary sessions
 
 Four effects use the same consent machinery but are **not** personal-assistant-only: their
@@ -105,15 +112,16 @@ refuses the calling one.
 | `platform.begin_asset_configuration({ assetId, scope })` | configures a library asset that needs settings (a connector, an MCP server) for this `session` or its `project`. An asset needing no configuration is refused toward `platform.enable_asset`. | a receipt; reuses an instance already assigned at that scope, otherwise parks `AwaitingUser` (below) |
 | `platform.configure_connector({ providerType, providerLinkId, scope, rationale, …selection })` | mounts a folder or repository from an already-connected account in one card, for the non-secret drivers `box`, `sharepoint`, `googledrive`, `git`. Anything else is refused toward `platform.begin_asset_configuration`. | its own result, not a receipt; `alreadyAssigned` when an identical mount exists |
 | `platform.run_flow_in_session({ sessionId, flowId, … })` | starts a library flow in **another** session as the owner (see `concepts/flows.md`) | its own result, not a receipt |
-| `platform.cycle_session()` | restarts the calling session so a new mount or asset attaches | its own result; carded every time |
+| `platform.cycle_session()` | restarts the calling session so a new mount or asset attaches | its own result |
 
-All four are `routine`, but `cycle_session` is never covered by a grant — it is carded every time. `configure_connector` grants reach that exact target only. Two things
-to act on:
+All four are `routine`. `configure_connector` grants reach that exact target only, and a
+`cycle_session` grant reaches this session only; the restart that rides a configuration card is
+approved with that card and never by a grant. Two things to act on:
 
 - **A new mount or asset is not live yet.** Both configuration effects take effect only on the
   next session reload or restart (`configure_connector` says so in
   `attaches: "next_reload_or_restart"`), so propose
-  `platform.cycle_session` — itself carded every time — rather than telling the user it is
+  `platform.cycle_session` — itself approval-gated — rather than telling the user it is
   already there.
 - A git `repoUrl` must be on the connection's own host; the platform only ever presents the
   owner's git credential to that host.
@@ -156,12 +164,12 @@ These are refusals by design — proposing around them wastes the owner's approv
 `{ invocationId }` — one key, never both. It is offered in ordinary sessions too, where it reads
 the operations this session's owner owns.
 
-The durable lifecycle is **not exclusive to this family**: appending inputs to a run group can
-also return a receipt rather than a result, and is read back the same way (run groups are covered
-in `concepts/flows.md`). That happens on the approval-card durable path; pre-approved card-free
-appends and rare fallback cases where the approval request cannot be represented for the
-background worker return a direct append result. So a receipt from outside the table above is not
-anomalous — read it here.
+The durable lifecycle is **not exclusive to this family**: appending inputs to a run group, and
+`platform.invite_user` (below), also return a receipt rather than a result, and are read back the
+same way (run groups are covered in `concepts/flows.md`). An append returns one whether a card or
+a standing grant approved it; only rare fallback cases, where the request cannot be represented
+for the background worker, return a direct append result. So a receipt from outside the table
+above is not anomalous — read it here.
 
 The operation lifecycle is `Queued` →
 `Running` → one of `Succeeded` / `Failed` / `Cancelled`, with `AwaitingUser` as a park in the
@@ -241,17 +249,23 @@ themselves approved — and it is narrow by construction:
 
 - **One capability.** A grant never spans a family.
 - **One scope** — that exact target, everything under its project, everything under its
-  organization, or everything of that kind the owner can reach. Only the scopes a capability
-  declares, and its own target's ancestry supports, are ever offered.
+  organization, everything of that kind the owner can reach, or, for Exchange mail, everything
+  in one mailbox. Only the scopes a capability declares, and its own target's ancestry supports,
+  are ever offered.
+- **Anchored to one session** — the one whose card minted it.
 - **A named window.** The owner picks a duration by name from a server-owned list; the expiry is
-  computed on the server. The one-click option alongside "approve once" is deliberately narrow —
-  time-boxed, that exact target, both effect opt-ins off — and its length is server-chosen per
-  capability, so do not quote a number at the owner.
+  computed on the server. *Unlimited* — no expiry, lasting until revoked — is one of those
+  names, never the default, and only when the owner explicitly chooses it. The one-click
+  option alongside "approve once" is deliberately narrow — time-boxed, that exact target,
+  both effect opt-ins off — and its length is server-chosen per capability, so do not quote
+  a number at the owner.
 - **Optional use and budget caps**, clamped down to the server's own ceilings.
 - **Effect opt-ins.** Because the safe default leaves both off, an `external` or `privileged`
   effect has no one-click option at all — the owner has to widen it deliberately. An effect
-  classed `never` is ungrantable, and so is any batch. Ungrantable means it can only be carded
-  or refused — never dispatched silently.
+  classed `never` would be ungrantable, though no capability uses that class today; any batch
+  is. Ungrantable means it can only be carded or refused — never dispatched silently.
+- **Only on a card.** Config pre-approvals (`preApprovedCapabilities`) are retired and ignored;
+  the card is the one place a standing approval comes from.
 
 Revocation is immediate, and the platform re-checks the owner's live authorization, the limits
 and the budget right before the effect. **A call that dispatched silently a minute ago can come
@@ -261,7 +275,14 @@ You see grants only on turns a human sent, in the `<AUTONOMY>` block: which capa
 it reaches, until when, and what is left of any caps, plus notice when one has been **revoked**.
 Expiry produces no notice at all — the row simply stops appearing — so a grant vanishing from the
 block is not evidence of revocation. A schedule firing, a peer agent, or a webhook carries no
-block at all, and **its absence there tells you nothing.** And nothing agent-facing can create, extend, or widen a grant.
+block at all, and **its absence there tells you nothing.**
+
+You cannot create, extend or widen a grant yourself. You can ask the owner for one with
+`platform.request_standing_approval`, and only the owner can grant it, from the card. Ask ahead
+of an unattended workflow — a scheduled mail digest, say — naming the capability and why. The
+request itself runs nothing and returns `grant_requested` with an `invocationId`. At most 5
+requests can wait on the owner per session; a further one is refused until the owner decides
+one, and an identical repeat joins its open card.
 
 ## What this family is not
 

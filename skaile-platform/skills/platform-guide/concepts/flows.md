@@ -181,31 +181,32 @@ agree.
 
 ## Authoring a flow as the agent
 
-**Every project or organization flow write is approved by an Owner of that scope.**
-`platform.create_flow` and `platform.revise_flow` are `effect` capabilities that always card,
-so a human approves each write. Nothing has to be switched on in settings first. The one rule
-is who may approve: the account approving the card must be an Owner of the scope the write
-targets, and approving never confers more authority than the approver already holds.
-
-| Target scope | Who can approve the card |
-| --- | --- |
-| Project | an Owner of this project (the project owner, or a project member with the Owner role) |
-| Organization | an Owner of this organization |
+**A project or organization flow write needs a session owner who administers that scope.**
+`platform.create_flow` and `platform.revise_flow` are `effect` capabilities: each write is
+approved on a card, or covered by a standing grant the owner chose on an earlier card. Nothing
+has to be switched on in settings first. The one rule is whose authority the write uses: the
+**session owner's**, never the approver's. The owner must be an admin of the scope the write
+targets — an Owner of the project for a project flow, an Owner of the organization for an
+organization flow. The platform checks this when it prepares the card, again when the card is
+decided, and again immediately before the write.
 
 For `platform.revise_flow` the scope is the stored flow's own, not the session's project.
 
-Unlike `platform.act` (see [Autonomy grants](agent.md)), a project or organization flow write
-runs as the **approver**, not the session owner, so the Owner role is required of whoever
-approves — and it is checked only **after** the card is approved. A non-Owner's approval is
-spent on a write that is then refused, so name the required Owner when you post the card,
-before anyone approves it. The refusal is prose that names the role, plus a structured `remedy`
-(`capability`, `requiredScope`, `requiredRole`) that no screen renders; relay the refusal prose
-verbatim, not the `remedy` object, and stop — retrying with the same approver changes nothing.
-Ask an Owner of that scope to approve the next attempt. If organization-wide was not essential,
-offer to work at project scope, where a project Owner can approve.
+So an owner who is not an admin of that scope is refused **before any card appears**, and
+someone else approving cannot change that. The refusal is prose that names the role, plus a
+structured `remedy` (`capability`, `requiredScope`, `requiredRole`) that no screen renders;
+relay the refusal prose verbatim, not the `remedy` object, and stop — retrying changes nothing.
+If organization-wide was not essential, offer to work at project scope, if the owner
+administers the project.
 
-You cannot approve, widen, or request this authority yourself — see
-[Autonomy grants](agent.md).
+A standing grant can cover these writes: `platform.revise_flow` at that exact flow or its
+project, `platform.create_flow` at that exact target only. You cannot create, extend or widen
+a grant yourself — see [Autonomy grants](agent.md).
+
+`platform.assign_project_asset` and `platform.unassign_project_asset` follow the same rule: the
+session owner must administer the project, checked at the same three points, and a grant
+reaches that exact target only. Unassigning a skill unloads it from the project's running
+sessions at once; other kinds leave on each session's next wake.
 
 **Personal flows are the exception.** `platform.create_flow` with scope `personal` saves the
 flow to the session owner's own library, visible only to them, and needs no admin role. The
@@ -465,12 +466,18 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   no org-level inbox that collects them outside a session. (The **Approvals** tab on the
   org **Store** page is a different surface: it holds asset-share requests.)
 - Triggers: manual, **webhook** (external systems post signed requests that append
-  inputs), or the agent itself (`platform.append_run_inputs`, approval-gated; appending
-  to a specific group can be pre-approved in config). When routed as a durable operation,
-  the capability returns an operation receipt; read it with `platform.get_operation`.
-  Pre-approved card-free appends and rare fallback cases where the approval request cannot
-  be represented for the background worker return the direct append result.
+  inputs), or the agent itself (`platform.append_run_inputs`, approval-gated; a standing
+  grant can cover appends to that group or its project). Whether approved on a card or
+  matched by a grant, the append returns an operation receipt; read it with
+  `platform.get_operation`. Only rare fallback cases, where the request cannot be represented
+  for the background worker, return the direct append result.
   Time-based scheduling of groups is not yet available.
+- The agent can also create, pause and cancel a group (`platform.create_run_group`,
+  `platform.pause_run_group`, `platform.cancel_run_group`), each approval-gated and
+  grantable. The session owner must be among those the group's **startableBy** allows (for
+  a new group, the startableBy being set), or the call is refused before any card appears.
+  An agent cannot create an autonomous group: its runs always stop at the flow's gates, and
+  a person can switch autonomy on from the board.
 
 ## Webhooks that wake a session
 

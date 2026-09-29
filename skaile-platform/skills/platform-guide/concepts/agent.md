@@ -27,12 +27,14 @@ at runtime**, never assumed from memory.
     a flow in another session, listing or saving the owner's personal flows, and restarting
     ("cycling") the session so a new mount attaches;
   - **the session's own surface** — listing the project's sessions and members and inviting
-    someone to *this* project (a separate, older capability from the assistant's
-    `invite_to_*` family, offered only where that family is not); listing, searching and enabling assets, adding a skill or a remote
-    MCP server by reference, and assigning assets project-wide where an administrator allowed
-    it; opening a file, pane, flow or run group in the user's UI; flows and run groups
-    (`concepts/flows.md`), schedules, a session webhook inbox, previews (`concepts/previews.md`)
-    and batch classification (`references/classifier.md`);
+    someone to *this* project (`platform.invite_user`, a separate, older capability from the
+    assistant's `invite_to_*` family, the one to use where that family is not offered — see
+    `references/control-plane-capabilities.md`); listing, searching and enabling assets,
+    adding a skill or a remote MCP server by reference, and assigning or unassigning assets
+    project-wide when the session owner administers the project; opening a file, pane, flow
+    or run group in the user's UI; flows and run groups (`concepts/flows.md`), schedules, a
+    session webhook inbox, previews (`concepts/previews.md`) and batch classification
+    (`references/classifier.md`);
   - **identity and conversation** — renaming yourself, setting an avatar, a read-aloud voice
     or speech mode, changing the asking member's notification mode for this session, reacting
     with an emoji, passing on a turn, posting a GIF or other custom message;
@@ -72,6 +74,11 @@ the platform decides — per call, itself — between exactly three outcomes:
 You do not choose which, and you cannot tell in advance. So **never promise the user that a
 confirmation card will appear.** Say what you are about to do, then read the real result.
 
+Some cards let the owner edit the request before deciding — a voice pick, a drafted report.
+The edit re-prepares the request as a new one; `platform.get_operation` on your original id
+then answers for the edited request and names it with `revisedFrom`. Report what was actually
+approved, not what you proposed.
+
 This mirrors the agent's own safety rules: confirm before destructive or
 consequence-bearing operations (deleting files, overwriting uncommitted work, dropping DB
 records, sending messages or data on the user's behalf).
@@ -80,8 +87,14 @@ records, sending messages or data on the user's behalf).
 
 An **autonomy grant** is a human pre-authorizing one exact capability so matching calls dispatch
 without a card. Only a human can mint one — an owner of this session, from a card they themselves
-approved. **No capability lets you create, extend, or widen a grant, and asking for one is not a
-thing you can do.**
+approved. Every approval-gated capability's card offers one — *approve once*, or *approve and
+grant* — except a batch (`platform.act_batch` stays card-only) and `platform.act`, whose grants
+follow its action registry. **You cannot create, extend or widen a grant yourself.** You can ask
+the owner for one with `platform.request_standing_approval`, and only the owner can grant it,
+from the card. Ask ahead when a workflow will run unattended — a scheduled mail digest, say —
+because nobody will be there to answer a card for the real call. The request runs nothing. At
+most 5 of your requests can wait on the owner at once; a further one is refused until the owner
+decides one, and repeating an identical open request joins its existing card.
 
 Each capability declares an **effect class** that decides how far a grant may reach:
 
@@ -90,12 +103,15 @@ Each capability declares an **effect class** that decides how far a grant may re
 | `routine` | Effect stays inside the owner's own platform surface. | Yes — this is what an ordinary grant covers. |
 | `external` | Reaches a person outside this conversation (an invitation email, a sent mail, a message delivered into someone else's session). | Only if the owner **explicitly widened** the grant to external communication. |
 | `privileged` | Administrative — changes who or what exists at organization level. | Only if the owner **explicitly widened** the grant to privileged administration. |
-| `never` | Never auto-approvable. | No — it is carded, or refused outright. Never dispatched silently. |
+| `never` | Never auto-approvable (no capability declares it today). | No — it is carded, or refused outright. Never dispatched silently. |
 
-A grant is narrow: it names **one capability** and one target scope. It either has an absolute
-expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it may
-carry use and budget caps. Batch requests are ungrantable outright — `platform.act_batch`
-always requires a card.
+A grant is narrow: it names **one capability** and one target scope — that exact target, its
+project, and so on up, or for Exchange mail one mailbox. It either has an absolute expiry or,
+when the owner explicitly chose *Unlimited*, lasts until they revoke it; it may carry use and
+budget caps. It stays anchored to the session it was approved in. Batch requests are
+ungrantable outright — `platform.act_batch` always requires a card. Standing approvals live
+only on cards: the former `preApprovedCapabilities` agent-config list is retired, and any
+entries still in a config are ignored.
 
 Two consequences you must actually act on:
 
@@ -200,8 +216,8 @@ session owner's effective role on that target **before** showing an approval car
 malformed, lifecycle, membership, credential/provider, runtime, and destructive actions
 fail without a card. If approved, the platform reloads the current owner and target and
 reauthorizes immediately before execution. The human who clicks Approve supplies consent;
-they do not replace the session owner as the action actor. Project and organization flow
-writes are the exception: they run as the approver — see [Flows](flows.md).
+they do not replace the session owner as the action actor. That holds for every capability,
+project and organization flow writes included — see [Flows](flows.md).
 
 Rules:
 
