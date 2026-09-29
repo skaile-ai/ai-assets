@@ -153,6 +153,20 @@ Two distinct concepts, deliberately not two flavours of one.
 someone" and "never merge with red CI" are different requirements. A check in a locked flow
 cannot be modified by an executing agent, because a locked flow cannot be modified at all.
 
+**GitHub access from a `function` or `check` node.** The node runs in the session workspace
+with the same Git credential helper the agent has, but that helper is scoped to each mounted
+repository's URL, not to the host. A `git credential fill` that names only
+`protocol=https` and `host=github.com` carries no path, matches no helper and returns no
+password — every time, so retrying it only delays the failure. Either call `gh` from inside
+the checkout (the runtime's `gh` finds the repository's token itself), or ask with the
+checkout's origin URL exactly as Git prints it:
+
+```bash
+printf 'url=%s\n\n' "$(git -C <checkout> remote get-url origin)" | git credential fill
+```
+
+Git compares the path literally, so the URL without its `.git` suffix misses as well.
+
 ## Provenance — `verified` versus `asserted`
 
 The engine labels each check by where the values bound into it came from. The label is
