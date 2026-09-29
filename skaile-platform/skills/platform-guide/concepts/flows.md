@@ -155,10 +155,11 @@ cannot be modified by an executing agent, because a locked flow cannot be modifi
 
 **GitHub access from a `function` or `check` node.** The node runs in the session workspace
 with the same Git credential helper the agent has (only for a git mount with
-`exposeAccessToken` on). That helper is scoped to the mount's repository URL, not to the host.
+`exposeAccessToken` on, shown in the mount editor as "Allow agent to use git CLI directly"). That helper is scoped to the mount's repository URL, not to the host.
 A `git credential fill` that names only `protocol=https` and `host=github.com` carries no path,
-so it matches no helper and fails (`could not read Username for 'https://github.com'`) every
-time; retrying only delays the failure. Either call `gh` from inside the checkout (for an
+so it matches no helper. With `GIT_TERMINAL_PROMPT=0` set it then fails at once
+(`could not read Username for 'https://github.com'`), every time; retrying only delays the
+failure. Either call `gh` from inside the checkout (for an
 `https` origin the runtime's `gh` wrapper queries with the origin URL itself and never prints
 the token), or query with the checkout's origin URL verbatim. The mount sets `origin` to the
 same URL it keys the helper by, and Git compares the path literally, so any other spelling
@@ -167,10 +168,16 @@ same URL it keys the helper by, and Git compares the path literally, so any othe
 ```bash
 token=$(printf 'url=%s\n\n' "$(git -C <checkout> remote get-url origin)" |
   GIT_TERMINAL_PROMPT=0 git -C <checkout> credential fill | sed -n 's/^password=//p')
+[ -n "$token" ] || { echo 'no git credential for this repository' >&2; exit 1; }
 ```
 
-Never print the token: `credential fill` writes `password=<token>` to stdout, and a node's
-stdout can end up in its persisted output and in the evidence a gate renders.
+Keep the guard: the pipeline's exit status is `sed`'s, so without it a failed query leaves
+`token` empty and the node fails later with an unrelated authentication error.
+
+Never print the token: `credential fill` writes `password=<token>` to stdout, and
+`git remote get-url origin` can print a URL with the token baked in (platform #4977). A node's
+stdout can end up in its persisted output and in the evidence a gate renders, so keep both
+inside a variable or command substitution.
 
 ## Provenance — `verified` versus `asserted`
 
