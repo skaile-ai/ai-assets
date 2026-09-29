@@ -153,6 +153,37 @@ Two distinct concepts, deliberately not two flavours of one.
 someone" and "never merge with red CI" are different requirements. A check in a locked flow
 cannot be modified by an executing agent, because a locked flow cannot be modified at all.
 
+### GitHub access from a `function` or `check` node
+
+The node runs in the session workspace with the same Git credential helper the agent has. The
+helper exists only for a git mount with `exposeAccessToken` on, shown in the mount editor as
+"Allow agent to use git CLI directly"; the runtime's `gh` relies on the same helper, so with the
+toggle off neither route below has a supported token and the mount's owner has to turn it on.
+
+The helper is scoped to the mount's repository URL, not to the host. A `git credential fill`
+that names only `protocol=https` and `host=github.com` carries no path, so it matches no helper
+and never returns a password: with `GIT_TERMINAL_PROMPT=0` it fails at once (`could not read
+Username for 'https://github.com'`); without it, Git falls back to a prompt, which in a node
+fails or waits. Retrying only delays the failure. Either call `gh` from inside the checkout
+(for an `https` origin the runtime's `gh` wrapper queries with the origin URL itself and never
+prints the token), or query with the checkout's origin URL verbatim. The mount sets `origin` to
+the same URL it keys the helper by, and Git compares the path literally, so any other spelling
+(adding or dropping `.git`) misses:
+
+```bash
+token=$(printf 'url=%s\n\n' "$(git -C <checkout> remote get-url origin)" |
+  GIT_TERMINAL_PROMPT=0 git -C <checkout> credential fill | sed -n 's/^password=//p')
+[ -n "$token" ] || { echo 'no git credential for this repository' >&2; exit 1; }
+```
+
+Keep the guard: the pipeline's exit status is `sed`'s, so without it a failed query leaves
+`token` empty and the node fails later with an unrelated authentication error.
+
+Never print the token: `credential fill` writes `password=<token>` to stdout, and
+`git remote get-url origin` can print a URL with the token baked in (platform #4977). A node's
+stdout can end up in its persisted output and in the evidence a gate renders, so keep both
+inside a variable or command substitution.
+
 ## Provenance — `verified` versus `asserted`
 
 The engine labels each check by where the values bound into it came from. The label is
@@ -489,7 +520,8 @@ it is managed via the API/agent.
 
 Source of truth: the published contract — `platform.get_flow_schema` at runtime, shipped
 as `@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.schema.json` —
-`platform/docs/flow-authoring-v2.md`, `platform/features/09-flow-execution/`,
+`platform/docs/flow-authoring-v2.md` (incl. git credentials in nodes, platform #5603),
+`platform/features/09-flow-execution/`,
 `platform/features/31-run-groups/`, `platform/features/09-flow-execution/in-session-flow-runs.md`
 (platform #5233), `platform/docs/flow-authoring-v2.md` "Personal flows" (platform #5252),
 the run-group create wizard (Batch / Standing), `RunGroupRecipePreflightService`. For on-disk discovery: `loadFlowEntriesFromDir` in
