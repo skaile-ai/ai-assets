@@ -154,18 +154,23 @@ someone" and "never merge with red CI" are different requirements. A check in a 
 cannot be modified by an executing agent, because a locked flow cannot be modified at all.
 
 **GitHub access from a `function` or `check` node.** The node runs in the session workspace
-with the same Git credential helper the agent has, but that helper is scoped to each mounted
-repository's URL, not to the host. A `git credential fill` that names only
-`protocol=https` and `host=github.com` carries no path, matches no helper and returns no
-password — every time, so retrying it only delays the failure. Either call `gh` from inside
-the checkout (the runtime's `gh` finds the repository's token itself), or ask with the
-checkout's origin URL exactly as Git prints it:
+with the same Git credential helper the agent has (only for a git mount with
+`exposeAccessToken` on). That helper is scoped to the mount's repository URL, not to the host.
+A `git credential fill` that names only `protocol=https` and `host=github.com` carries no path,
+so it matches no helper and fails (`could not read Username for 'https://github.com'`) every
+time; retrying only delays the failure. Either call `gh` from inside the checkout (for an
+`https` origin the runtime's `gh` wrapper queries with the origin URL itself and never prints
+the token), or query with the checkout's origin URL verbatim. The mount sets `origin` to the
+same URL it keys the helper by, and Git compares the path literally, so any other spelling
+(adding or dropping `.git`) misses:
 
 ```bash
-printf 'url=%s\n\n' "$(git -C <checkout> remote get-url origin)" | git credential fill
+token=$(printf 'url=%s\n\n' "$(git -C <checkout> remote get-url origin)" |
+  GIT_TERMINAL_PROMPT=0 git -C <checkout> credential fill | sed -n 's/^password=//p')
 ```
 
-Git compares the path literally, so the URL without its `.git` suffix misses as well.
+Never print the token: `credential fill` writes `password=<token>` to stdout, and a node's
+stdout can end up in its persisted output and in the evidence a gate renders.
 
 ## Provenance — `verified` versus `asserted`
 
@@ -499,6 +504,7 @@ as `@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.sche
 `platform/docs/flow-authoring-v2.md`, `platform/features/09-flow-execution/`,
 `platform/features/31-run-groups/`, `platform/features/09-flow-execution/in-session-flow-runs.md`
 (platform #5233), `platform/docs/flow-authoring-v2.md` "Personal flows" (platform #5252),
-the run-group create wizard (Batch / Standing), `RunGroupRecipePreflightService`. For on-disk discovery: `loadFlowEntriesFromDir` in
+the run-group create wizard (Batch / Standing), `RunGroupRecipePreflightService`. Git
+credentials in deterministic nodes: `platform/docs/flow-authoring-v2.md` (platform #5603). For on-disk discovery: `loadFlowEntriesFromDir` in
 `@skaile/workspaces` → `factory-assets/connectors/flow/engine/loader.ts`, and `aiResourceRoots`
 in `cli/src/paths.ts`.
