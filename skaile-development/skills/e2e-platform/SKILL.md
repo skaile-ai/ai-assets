@@ -31,8 +31,12 @@ metadata:
         it, does not scaffold it — see `test-e2e` for initial scaffolding).'
     - path: 'platform/e2e/CLAUDE.md'
       gate: soft
+      description: 'Recommended knowledge source. The skill references its scaffolding
+        rules.'
+    - path: 'platform/e2e/README.md'
+      gate: soft
       description: 'Recommended knowledge source. The skill references its failure-mode
-        table and scaffolding rules.'
+        table.'
   user_inputs:
     dialog:
     - id: 'mode'
@@ -118,7 +122,7 @@ WRITES
   (add + fix modes)
     platform/e2e/specs/**/<new-or-edited>.spec.ts
 
-MUST   read platform/e2e/CLAUDE.md before executing or writing anything
+MUST   read platform/e2e/CLAUDE.md and platform/e2e/README.md before executing or writing anything
 MUST   run pre-flight before every invocation (see Step 0)
 MUST   use the shared `page` fixture from test-fixtures.ts (NOT `browser.newContext()`)
 MUST   use org-scoped slug-based URLs (`/acme/projects/<slug>/main/...`)
@@ -136,13 +140,13 @@ NEVER  make a test lie: weaken/loosen an assertion, add a blind wait, or broaden
 NEVER  use `page.waitForLoadState('networkidle')` (SSE subscriptions never idle)
 NEVER  hardcode project IDs in URLs — always slugs
 NEVER  (add mode) bypass the user approval gate
-NEVER  put a `pkill`/`pgrep` option after the pattern — on macOS (BSD) it becomes another pattern, and `-u` then matches every Chrome/Electron helper. GNU/Linux permutes arguments, so the same command is harmless there and a Linux test run does not catch it. Options first (`pkill -u "$(id -u)" -f 'skaile serve'`); dry-run with `pgrep -lf`. See the note under the failure-mode table in `platform/e2e/README.md`.
+NEVER  put a `pkill`/`pgrep` option after the pattern — on macOS (BSD) it becomes another pattern, and `-u` then matches every Chrome/Electron helper. GNU/Linux permutes arguments, so the same command is harmless there and a Linux test run does not catch it. Options first (`pkill -u "$(id -u)" -f 'skaile serve'`); dry-run with `pgrep -lf` (macOS) or `pgrep -af` (Linux). See the note under the failure-mode table in `platform/e2e/README.md`.
 
 EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
 # ── Step 0: Pre-flight (both modes) ──────────────────────────────
 
-1. Read `platform/e2e/CLAUDE.md` if not already in context.
+1. Read `platform/e2e/CLAUDE.md` and `platform/e2e/README.md` if not already in context.
 
 2. Ensure services are up. Both modes need backend (:3001) + frontend (:3000) listening.
    ```bash
