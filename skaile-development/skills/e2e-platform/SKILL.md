@@ -103,8 +103,8 @@ test-harness particularities (session modes, impersonation,
 org-scoped slug URLs, coverage fixture, per-spec backend isolation).
 
 READS
-  ! platform/e2e/CLAUDE.md                   — failure-mode table + scaffolding rules
-  ! platform/e2e/README.md                   — env vars, session modes
+  ! platform/e2e/CLAUDE.md                   — scaffolding rules
+  ! platform/e2e/README.md                   — env vars, session modes, failure-mode table
   ? platform/e2e/E2E-GUIDE.md                — seed data tables, keyword triggers
   ! platform/e2e/specs/**                    — existing specs as templates + coverage map
   ! platform/e2e/fixtures/{test-fixtures,handle-backend}.ts — auto-fixtures + startBackend/getTestHeaders
@@ -136,7 +136,7 @@ NEVER  make a test lie: weaken/loosen an assertion, add a blind wait, or broaden
 NEVER  use `page.waitForLoadState('networkidle')` (SSE subscriptions never idle)
 NEVER  hardcode project IDs in URLs — always slugs
 NEVER  (add mode) bypass the user approval gate
-NEVER  put a `pkill`/`pgrep` option after the pattern — on macOS (BSD) it becomes another pattern, and `-u` then matches every Chrome/Electron helper. Options first (`pkill -u "$(id -u)" -f 'skaile serve'`); dry-run with `pgrep -lf`. See the note under the failure-mode table in `platform/e2e/README.md`.
+NEVER  put a `pkill`/`pgrep` option after the pattern — on macOS (BSD) it becomes another pattern, and `-u` then matches every Chrome/Electron helper. GNU/Linux permutes arguments, so the same command is harmless there and a Linux test run does not catch it. Options first (`pkill -u "$(id -u)" -f 'skaile serve'`); dry-run with `pgrep -lf`. See the note under the failure-mode table in `platform/e2e/README.md`.
 
 EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
@@ -288,7 +288,7 @@ IF mode = run
     - `| tail -60` is enough for the dot summary + a couple of failure traces. For triage, re-run the failing spec alone with `--reporter=list` and no tail to see full traces.
 
   STEP R2: Classify failures (if any)
-    For each failed test, match against `platform/e2e/CLAUDE.md`'s failure-mode table:
+    For each failed test, match against the failure-mode table in `platform/e2e/README.md`:
 
     | Cause category | Auto-recover? | Action |
     |---|---|---|
