@@ -244,6 +244,7 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
    ```bash
    pkill -f 'skaile serve' 2>/dev/null || true
    ```
+   On macOS, put any added `pkill` option (e.g. `-u`) before the pattern: BSD `pkill` reads later arguments as patterns, and `-u` then matches every Chrome/Electron helper. Dry-run with `pgrep -lf` first. See `e2e/README.md#failure-mode-table` in the platform repo.
 
 7. Check seed staleness:
    ```bash
