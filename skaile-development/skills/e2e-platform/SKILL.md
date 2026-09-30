@@ -14,7 +14,7 @@ description: 'Run, fix, or extend the Skaile platform e2e suite. Three modes: `r
   the user says "run e2e tests", "fix the failing e2e tests", "the e2e suite is red",
   "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
-  version: '1.3.0'
+  version: '1.3.1'
   tags:
   - 'testing'
   - 'e2e'
@@ -136,6 +136,7 @@ NEVER  make a test lie: weaken/loosen an assertion, add a blind wait, or broaden
 NEVER  use `page.waitForLoadState('networkidle')` (SSE subscriptions never idle)
 NEVER  hardcode project IDs in URLs — always slugs
 NEVER  (add mode) bypass the user approval gate
+NEVER  put a `pkill`/`pgrep` option after the pattern — on macOS (BSD) it becomes another pattern, and `-u` then matches every Chrome/Electron helper. Options first (`pkill -u "$(id -u)" -f 'skaile serve'`); dry-run with `pgrep -lf`. See the note under the failure-mode table in `platform/e2e/README.md`.
 
 EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
@@ -244,7 +245,6 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
    ```bash
    pkill -f 'skaile serve' 2>/dev/null || true
    ```
-   On macOS, put any added `pkill` option (e.g. `-u`) before the pattern: BSD `pkill` reads later arguments as patterns, and `-u` then matches every Chrome/Electron helper. Dry-run with `pgrep -lf` first. See `e2e/README.md#failure-mode-table` in the platform repo.
 
 7. Check seed staleness:
    ```bash
