@@ -14,7 +14,7 @@ description: 'Run, fix, or extend the Skaile platform e2e suite. Three modes: `r
   the user says "run e2e tests", "fix the failing e2e tests", "the e2e suite is red",
   "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
-  version: '1.3.0'
+  version: '1.3.1'
   tags:
   - 'testing'
   - 'e2e'
@@ -31,8 +31,12 @@ metadata:
         it, does not scaffold it — see `test-e2e` for initial scaffolding).'
     - path: 'platform/e2e/CLAUDE.md'
       gate: soft
+      description: 'Recommended knowledge source. The skill references its scaffolding
+        rules.'
+    - path: 'platform/e2e/README.md'
+      gate: soft
       description: 'Recommended knowledge source. The skill references its failure-mode
-        table and scaffolding rules.'
+        table.'
   user_inputs:
     dialog:
     - id: 'mode'
@@ -103,8 +107,8 @@ test-harness particularities (session modes, impersonation,
 org-scoped slug URLs, coverage fixture, per-spec backend isolation).
 
 READS
-  ! platform/e2e/CLAUDE.md                   — failure-mode table + scaffolding rules
-  ! platform/e2e/README.md                   — env vars, session modes
+  ! platform/e2e/CLAUDE.md                   — scaffolding rules
+  ! platform/e2e/README.md                   — env vars, session modes, failure-mode table
   ? platform/e2e/E2E-GUIDE.md                — seed data tables, keyword triggers
   ! platform/e2e/specs/**                    — existing specs as templates + coverage map
   ! platform/e2e/fixtures/{test-fixtures,handle-backend}.ts — auto-fixtures + startBackend/getTestHeaders
@@ -118,7 +122,7 @@ WRITES
   (add + fix modes)
     platform/e2e/specs/**/<new-or-edited>.spec.ts
 
-MUST   read platform/e2e/CLAUDE.md before executing or writing anything
+MUST   read platform/e2e/CLAUDE.md and platform/e2e/README.md before executing or writing anything
 MUST   run pre-flight before every invocation (see Step 0)
 MUST   use the shared `page` fixture from test-fixtures.ts (NOT `browser.newContext()`)
 MUST   use org-scoped slug-based URLs (`/acme/projects/<slug>/main/...`)
@@ -136,12 +140,13 @@ NEVER  make a test lie: weaken/loosen an assertion, add a blind wait, or broaden
 NEVER  use `page.waitForLoadState('networkidle')` (SSE subscriptions never idle)
 NEVER  hardcode project IDs in URLs — always slugs
 NEVER  (add mode) bypass the user approval gate
+NEVER  put a `pkill`/`pgrep` option after the pattern — on macOS (BSD) it becomes another pattern, and `-u` then matches every Chrome/Electron helper. GNU/Linux permutes arguments, so the same command is harmless there and a Linux test run does not catch it. Options first (`pkill -u "$(id -u)" -f 'skaile serve'`); dry-run with `pgrep -lf` (macOS) or `pgrep -af` (Linux). See the note under the failure-mode table in `platform/e2e/README.md`.
 
 EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
 # ── Step 0: Pre-flight (both modes) ──────────────────────────────
 
-1. Read `platform/e2e/CLAUDE.md` if not already in context.
+1. Read `platform/e2e/CLAUDE.md` and `platform/e2e/README.md` if not already in context.
 
 2. Ensure services are up. Both modes need backend (:3001) + frontend (:3000) listening.
    ```bash
@@ -287,7 +292,7 @@ IF mode = run
     - `| tail -60` is enough for the dot summary + a couple of failure traces. For triage, re-run the failing spec alone with `--reporter=list` and no tail to see full traces.
 
   STEP R2: Classify failures (if any)
-    For each failed test, match against `platform/e2e/CLAUDE.md`'s failure-mode table:
+    For each failed test, match against the failure-mode table in `platform/e2e/README.md`:
 
     | Cause category | Auto-recover? | Action |
     |---|---|---|
