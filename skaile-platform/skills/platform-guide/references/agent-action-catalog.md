@@ -13,13 +13,16 @@ capability whenever one exists.
 A read-only lexical search: `query` is a few words of what you want ("mute notifications",
 "rename session"), `limit` 1–20 (default 8). Each result carries `action` (the key), `title`,
 `description`, `kind` (`read` or `write`) and `inputSchema`. An empty result means nothing fits
-**on this turn**: rephrase once with other words, then tell the user. Results are filtered by who
+**on this turn**: rephrase once with other words, then tell the user. On a turn the platform
+cannot attribute to anyone it is always empty — do not rephrase; say so in your output. Results are filtered by who
 asked the turn (see *Shared sessions* below), never by whether a specific target exists — so a
 result is not proof you may act on a given project.
 
-Examples of what it finds today: the user's notification preferences and per-project/session
-overrides, starring and unstarring, renaming or describing a session, marking every session in a
-project read. Treat that list as illustrative only.
+Examples of what it finds today: starring and unstarring, renaming or describing a session,
+marking every session in a project read, the owner's own notification preferences. Treat that
+list as illustrative only. Catalogue actions always act on the **owner's** things: a member who
+asks to change *their own* notification mode for this session needs the dedicated
+`platform.set_notification_mode`, not a catalogue action.
 
 ## Run one — `platform.invoke({ action, input })`
 
@@ -29,7 +32,8 @@ procedure's own authorization, exactly as in the UI.
 - **Every call asks the owner first — reads included** — unless a standing grant the owner made
   from an earlier card covers that action on that target. The card is generic: the action's
   title, its input, and a note when it is not idempotent. Grants reach that one target only (for
-  an action on the owner's own settings, the calling session). Never promise a card.
+  an action on the owner's own settings, the calling session). So never tell the user a card
+  will appear, nor that the call will run without one.
 - **Refusals are uniform.** An unknown or undeclared key, a target that does not resolve or that
   someone cannot reach, a malformed or oversized input all read the same. Do not retry with
   other ids or keys. A procedure's own client error (bad input, conflict) comes back with its
@@ -44,8 +48,9 @@ or `{ id, invoke: "<key>", input }` for a `write` action. Any input value may be
 `{ "$ref": ["<step id>", "<field>", ...] }` — that field of an earlier step's result. Step ids,
 not indices; references point backwards only, and a read may reference only earlier reads.
 
-- **Reads run first**, before anyone is asked, so only reads every session reader may see are
-  allowed in a batch; an owner-private read goes through `platform.invoke` instead. Their results
+- **Reads run first**, before anyone is asked, so a batch accepts only reads declared visible to
+  every session reader. A read of the owner's private data is refused as a batch step in every
+  session, the personal assistant included — run it with `platform.invoke`. Batch read results
   are not returned to you.
 - **Consent is per step.** Each write is matched against its own action's standing grants. One
   card lists only the steps no grant covers; with none uncovered, there is no card. A step the

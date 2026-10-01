@@ -219,7 +219,7 @@ deliberately identical whether the target does not exist or the owner has no sta
 
 Much of what a user does in the Skaile UI is also declared for agents as a **platform action**,
 and the set grows every deploy. When no dedicated capability fits, search before saying you
-cannot: `platform.find_actions({ query: "mute notifications" })` returns matching actions with
+cannot: `platform.find_actions({ query: "rename session" })` returns matching actions with
 their input schema. Run one with `platform.invoke({ action, input })`; run several as one plan
 with `platform.batch({ steps })`, passing values between steps with `$ref`. Every action runs as
 the session owner, through the same authorization as the UI. Exact shapes, refusals and file

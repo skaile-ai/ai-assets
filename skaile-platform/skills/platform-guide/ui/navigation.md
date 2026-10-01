@@ -4,7 +4,20 @@ How to find anything and walk a user through a click-path. Labels in **bold** ar
 real UI strings. When the user would rather be taken there, the agent can open the screen
 for them with `platform.navigate` (dashboard, projects, sessions, a project or its settings and
 runs, a session, a run group, flows, organization settings, **My Connections**, the store,
-preferences) — see `concepts/agent.md`.
+preferences) — see `concepts/agent.md`. The call is
+`platform.navigate({ route, params?, search?, target? })`; `params` take an id or slug, and `org`
+defaults to the project's (else this session's) organization:
+
+| `route` | Screen | `params` |
+| --- | --- | --- |
+| `dashboard` | Dashboard | — |
+| `projects`, `sessions`, `flows`, `store`, `preferences`, `myConnections` | that organization page (`myConnections` takes `search: { link }` to highlight one connection) | `org` |
+| `org.settings` | Organization settings (org Owners only; `search: { tab }`, e.g. `ai-providers`) | `org` |
+| `project`, `project.settings`, `project.runs` | a project's main session, its settings, its run board | `project` |
+| `runGroup` | one run group's board | `project`, `runGroup` |
+| `session` | one session | `session` (a slug resolves in this session's project; elsewhere pass its id or `project`) |
+
+The capability's own description carries the live list; prefer it if the two differ.
 
 ## The app shell
 

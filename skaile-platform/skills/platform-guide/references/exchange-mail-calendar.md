@@ -38,12 +38,13 @@ shared mailbox; the owner does, and nothing is ever discovered from delegations.
 - **Reuse one handle** for a message, its draft, its attachments and its pagination. A wrong,
   disabled or foreign handle is refused and never falls back to another mailbox.
 
-## Reading — no approval
+## Reading — no approval while only the owner can read the session
 
 `platform.list_mail_folders`, `platform.list_mail`, `platform.search_mail`,
 `platform.read_mail`, `platform.read_mail_attachment`, `platform.list_mail_categories`,
 `platform.list_calendar_events`. Reads carry no card on purpose — the owner's enablement is
-the consent, and a card per message would make triage unusable.
+the consent, and a card per message would make triage unusable. Once anyone besides the owner
+can read the session, each read is carded to the owner instead (see the caveat above).
 
 - Call `list_mail_folders` once before guessing a folder; well-known names (`inbox`,
   `sentitems`, `drafts`, `archive`) also work. It returns unread counts, so it answers "anything
@@ -64,8 +65,8 @@ base64 straight to a file — never echo it into the conversation.
 
 | Tier | Capabilities | What happens |
 | --- | --- | --- |
-| No approval, reversible | `flag_mail`, `assign_mail_categories` | Runs directly. Category names are free text — a typo makes a new label. |
-| No approval, not outbound | `create_draft`, `add_draft_attachment`, `remove_draft_attachment` | Lands in that mailbox's real Outlook Drafts; nothing is sent. Exception: attaching a file from another organization is carded every time, with no standing approval. |
+| No approval, reversible | `flag_mail`, `assign_mail_categories` | Runs directly. Category names are free text — a typo makes a new label. In a session others can read, refused unless the owner asked. |
+| No approval, not outbound | `create_draft`, `add_draft_attachment`, `remove_draft_attachment` | Lands in that mailbox's real Outlook Drafts; nothing is sent. In a session others can read, refused unless the owner asked. Exception: attaching a file from another organization is carded every time, with no standing approval. |
 | Card, standing approval possible | `move_mail`, `copy_mail` (per destination folder); `create_mail_folder`, `rename_mail_folder`, `move_mail_folder`, `create_mail_category`, `delete_mail_category` (per mailbox) | Carded unless a standing approval already covers that shape; the card itself offers one. |
 | Card, standing approval possible | `create_calendar_event`, `modify_calendar_event` (own mailbox only; shared mailboxes are refused) | Carded unless an autonomy grant covers it. Create is grantable for that mailbox; modify for one event or every event on that calendar — never project-wide. An event with attendees is `external`, because Exchange emails the invitations and updates, so its grant needs the owner's external-communication opt-in. Modify is refused if the event has gained attendees since the card was approved. |
 | Card, privileged | `delete_mail` | A **soft** delete into Deleted Items, recoverable by the user. A standing approval for it needs the owner's deliberate privileged opt-in. |
