@@ -96,16 +96,17 @@ records, sending messages or data on the user's behalf).
 ## Autonomy grants — what "already approved" means
 
 An **autonomy grant** is a human pre-authorizing one exact capability so matching calls dispatch
-without a card. Only a human can mint one — an owner of this session, from a card they themselves
-approved. Every approval-gated capability's card offers one — *approve once*, or *approve and
-grant* — except a few ungrantable by design (a card-per-call disclosure read, a file leaving its
-organization) and `platform.batch`, which is never granted whole: each of its steps is matched
-against that action's own grants. **You cannot create, extend or widen a grant yourself.** You
-can ask the owner for one with `platform.request_standing_approval`, and only the owner can
-grant it, from the card. Ask ahead when a workflow will run unattended — a scheduled mail digest, say —
-because nobody will be there to answer a card for the real call. The request runs nothing. At
-most 5 of your requests can wait on the owner at once; a further one is refused until the owner
-decides one, and repeating an identical open request joins its existing card.
+without a card. Only a human can mint one — an owner of this session, from a card they
+themselves approved. Every approval-gated capability's card offers one — *approve once*, or
+*approve and grant* — except a few ungrantable by design (a card-per-call disclosure read, a
+file leaving its organization) and `platform.batch`, which is never granted whole: each of its
+steps is matched against that action's own grants. **You cannot create, extend or widen a grant
+yourself.** You can ask the owner for one with `platform.request_standing_approval`, and only
+the owner can grant it, from the card. Ask ahead when a workflow will run unattended — a
+scheduled mail digest, say — because nobody will be there to answer a card for the real call.
+The request runs nothing. At most 5 of your requests can wait on the owner at once; a further
+one is refused until the owner decides one, and repeating an identical open request joins its
+existing card.
 
 Each capability declares an **effect class** that decides how far a grant may reach:
 
@@ -295,11 +296,12 @@ when they asked to see it or you just did something they should look at; never u
 never repeatedly in one turn. Routes and their params: `ui/navigation.md`.
 
 Read the `status` `open_file` and `navigate` return. `opening` (their tab is on its way) and
-`offered` (they had unsaved edits and were asked first) are not failures. `no_visible_client` means none of their tabs was
-visible. These calls move **only the asker's** tab: on a turn no single person wrote — a schedule,
-a webhook, a flow, several members at once — `platform.navigate` moves nobody
-(`no_single_requester`), and `open_file` reaches only a tab already showing this session, so
-`no_visible_client` is expected there. Tell the user where to find it instead.
+`offered` (they had unsaved edits and were asked first) are not failures. `no_visible_client`
+means none of their tabs was visible. These calls move **only the asker's** tab: on a turn no
+single person wrote — a schedule, a webhook, a flow, several members at once —
+`platform.navigate` moves nobody (`no_single_requester`), and `open_file` reaches only a tab
+already showing this session, so `no_visible_client` is expected there. Tell the user where to
+find it instead.
 
 ## Live shared state stores
 
