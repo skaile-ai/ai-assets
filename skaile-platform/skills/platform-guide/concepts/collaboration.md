@@ -64,6 +64,16 @@ Sessions can talk to each other's agents through directed, two-sided opt-in link
   declare a **Scope** describing what it is willing to do for them before it can be linked.
 - Once linked, the agent can **ask** a peer session's agent (waits up to 5 minutes for the
   answer, then reports it as pending) or **send** to it (fire-and-forget).
+- An agent can also **subscribe** to a linked peer (a link in either direction counts): once
+  the peer finishes its current work, the platform starts one new turn in the subscriber
+  with an idle notice, waking it if it has hibernated. It can subscribe on its own or as
+  part of a send, so it hears when the handed-off work is done instead of polling. A peer
+  that is already idle, hibernated or closed is reported straight away and nothing is
+  armed. The subscription is one-shot: it ends with a notice if the peer hibernates or
+  nothing happens within 2 hours — but only the idle notice wakes a hibernated subscriber;
+  those two are dropped for it — and is dropped silently on unlink or a platform restart.
+  Each delivered notice counts toward the pair's 20-message budget below; a notice is not
+  an exchange, so it carries no hop count.
 - Exchanges are bounded: at most 4 hops, cycle detection, and a budget of 20 messages
   between a pair with no human turn in either session — after that the agent stops,
   summarizes, and reports back to its user.
@@ -78,4 +88,5 @@ Sessions can talk to each other's agents through directed, two-sided opt-in link
 Source of truth: `platform/docs/protocol-extensions.md`,
 `platform/docs/public-file-preview-sharing.md`, `platform/backend/libs/agent-to-agent/`,
 platform PRs #4917 (notification modes), #4566 (cross-org A2A), #5152 (share wake budget),
+#5876 (idle subscriptions),
 `platform/docs/roles-permissions-matrix.md` (share and invite permissions).
