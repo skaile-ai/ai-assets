@@ -1,83 +1,96 @@
-# Agent Action Catalog — `platform.act` / `platform.act_batch`
+# Agent Action Catalogue — `platform.find_actions`, `platform.invoke`, `platform.batch`
 
-`platform.act` is default-deny. This reference documents its **sole allowlisted action**;
-it is not a data-model CRUD catalog. Prefer a dedicated capability whenever one exists.
-Unlike the control-plane family, both generic action capabilities are offered in ordinary
-project sessions as well as the personal assistant.
+Beyond its dedicated capabilities, the agent can run **platform actions**: the things a user
+does in the Skaile UI that the platform has declared for agents. Each is one existing tRPC
+procedure (or an adapted upload/download route) carrying a declaration — title, description,
+keywords, target, risk. Undeclared, generated CRUD and browser-only procedures are never in it.
+The catalogue grows every deploy, so **search it; never recall it.** The three capabilities are
+offered in ordinary project sessions as well as the personal assistant. Prefer a dedicated
+capability whenever one exists.
 
-## Allowed request
+## Discover — `platform.find_actions({ query, limit? })`
 
-`{ scope: "project", type: "markAllSessionsRead", payload: { id: "<projectId>" }, rationale }`
+A read-only lexical search: `query` is a few words of what you want ("mute notifications",
+"rename session"), `limit` 1–20 (default 8). Each result carries `action` (the key), `title`,
+`description`, `kind` (`read` or `write`) and `inputSchema`. An empty result means nothing fits
+**on this turn**: rephrase once with other words, then tell the user. Results are filtered by who
+asked the turn (see *Shared sessions* below), never by whether a specific target exists — so a
+result is not proof you may act on a given project.
 
-- `payload.id` is the canonical target project id.
-- `rationale` must state why clearing the unread indicators is useful.
-- The effect resets unread indicators for every member of every session in the target project.
-- Risk is low/routine and target-scoped. This is the sole descriptor eligible for batch
-  execution.
+Examples of what it finds today: the user's notification preferences and per-project/session
+overrides, starring and unstarring, renaming or describing a session, marking every session in a
+project read. Treat that list as illustrative only.
 
-## Allowed batch request
+## Run one — `platform.invoke({ action, input })`
 
-```json
-{
-  "rationale": "Why the complete batch is needed",
-  "steps": [
-    {
-      "scope": "project",
-      "type": "markAllSessionsRead",
-      "payload": { "id": "<projectId>" },
-      "rationale": "Optional reason for this step"
-    }
-  ]
-}
-```
+`input` must match the result's `inputSchema`. It runs **as the session owner**, through the
+procedure's own authorization, exactly as in the UI.
 
-- The batch contains 1–20 ordered steps, all from the same compatible
-  `project-read-state` family.
-- `payload.id` may use `{ "$ref": [earlierStepIndex, "id"] }`. The referenced `id` is a
-  descriptor-declared string projected from the earlier canonical project target.
-- References must point backward and name a declared output whose type matches the exact
-  receiving field. The platform rejects the entire request before approval or execution
-  if any shape, action, target, or reference is invalid.
-- The proposal lists the normalized steps, symbolic dependencies, exact project targets,
-  per-step and aggregate risk, and all consequences.
+- **Every call asks the owner first — reads included** — unless a standing grant the owner made
+  from an earlier card covers that action on that target. The card is generic: the action's
+  title, its input, and a note when it is not idempotent. Grants reach that one target only (for
+  an action on the owner's own settings, the calling session). Never promise a card.
+- **Refusals are uniform.** An unknown or undeclared key, a target that does not resolve or that
+  someone cannot reach, a malformed or oversized input all read the same. Do not retry with
+  other ids or keys. A procedure's own client error (bad input, conflict) comes back with its
+  message.
+- Each call runs at most once. A grant that stopped mid-session means the next call is carded,
+  not that something broke.
 
-## Approval and authorization
+## Several at once — `platform.batch({ steps })`
 
-The platform prepares the request before it shows a card: it parses the exact payload,
-resolves the canonical project and organization ancestry, writes the approval description,
-and authorizes the current **session owner** on the target project. Malformed or unknown
-requests fail without a card.
+Up to 20 steps, run as one plan. Each step is `{ id, read: "<key>", input }` for a `read` action
+or `{ id, invoke: "<key>", input }` for a `write` action. Any input value may be
+`{ "$ref": ["<step id>", "<field>", ...] }` — that field of an earlier step's result. Step ids,
+not indices; references point backwards only, and a read may reference only earlier reads.
 
-Project `User` or `Owner` is required. An explicit ProjectMember or team `Viewer`
-role wins over a broader organization role and is denied; no target-project access is also
-denied. PlatformAdmin is the explicit break-glass role.
+- **Reads run first**, before anyone is asked, so only reads every session reader may see are
+  allowed in a batch; an owner-private read goes through `platform.invoke` instead. Their results
+  are not returned to you.
+- **Consent is per step.** Each write is matched against its own action's standing grants. One
+  card lists only the steps no grant covers; with none uncovered, there is no card. A step the
+  policy would refuse outright refuses the whole batch. A batch is never granted whole.
+- **Drift.** At run time the reads run again; if any answers differently from what the card
+  showed, nothing runs (`batch_drifted`) — call `platform.batch` again.
+- **Order and failure.** Writes run in order and stop at the first failure; the result names the
+  `completed`, `failed` and `unexecuted` steps. Nothing is rolled back; a retry is a new batch.
 
-Approval records consent only. The person who clicks Approve does not become the actor.
-Immediately before single-action execution—and before every individual batch step—the
-platform reloads the current session owner and target, verifies the prepared request and
-policy version, and recomputes the target-project role.
+## Files: pass a reference, never bytes
 
-A batch requires an explicit approval card. Wildcard and standing grants do not authorize
-`platform.act_batch`. Once approved, execution is ordered and best-effort: the first
-failure stops the batch, the receipt identifies completed/failed/unexecuted steps, and no
-completed effect is rolled back. Treat every retry as a new batch. Batch steps have no
-process-local timeout because the dispatcher cannot cancel an in-flight effect: the batch
-waits for the authoritative result rather than producing a false terminal receipt. A slow
-step can therefore keep the batch pending; durable cancellation and recovery belong to the
-operation workflow, not this capability.
+A file is named by reference, `{ sessionId?, resourceId?, path }` — `sessionId` defaults to this
+session, `resourceId` to `workspace`, and `path` is mount-relative (`reports/Q3.pdf`, not
+`workspace/reports/Q3.pdf`). The platform reads the bytes itself. Another session can be named
+only from the personal assistant, only its workspace, and only one the owner can reach (find it
+with `platform.search_my_sessions` / `platform.read_session_history`); that read is audited, and a
+sleeping session is never woken for it — if it cannot be read, ask the owner to open it.
 
-## Everything else is unavailable
+Two catalogue actions move files, at most 10 MiB each, and the bytes never reach you:
 
-Do not construct generic create, update, delete, lifecycle, membership,
-credential/provider-link, runtime-internal, or destructive actions through either generic
-action capability. Every unlisted scope/type pair is blocked, and blocked workflows cannot
-be made available by putting them in a batch.
+- a **download** writes the stored file into `downloads/` of this session's workspace (a taken
+  name gets a numbered sibling) and returns `{ file: { sessionId, resourceId, path }, name, size,
+  contentType }` — open it (`platform.open_file`) or attach it by that path;
+- an **upload** takes `file: { sessionId?, path }`; a file from another organization is refused.
+  The card shows the reference, not the content.
 
-An operator can also switch the whole surface off, or to observation-only, for a deployment.
-Then even the allowlisted action comes back as `action is not available`, the same refusal an
-unlisted action gets — the reason is not shown to you. Do not retry or rephrase it; tell the
-user it is unavailable here and offer the UI path.
+`platform.add_draft_attachment` takes the same reference — see
+`references/exchange-mail-calendar.md`.
 
-Grounded in: `platform/backend/libs/capabilities/src/agent-action-policy.registry.ts`,
-`agent-action-policy-rollout.service.ts` and
-`platform/docs/personal-assistant-control-plane.md` §4.
+## Shared sessions
+
+The platform records who set off each turn; the agent cannot set it. All three capabilities key
+on it:
+
+- **Grants cover only the owner's own turns** (and triggers the owner set up). A member's turn,
+  several members at once, or an unattributable turn always gets a card.
+- `find_actions` hides actions on the owner's own things from anyone but the owner, and shows
+  nothing on a turn it cannot attribute.
+- When a member asks, they must be able to do it themselves as well; the owner's reach is not
+  enough. Actions that would act *as the asker* are not runnable through `invoke` yet.
+- An action on the owner's own things is decided by the owner only; one on a shared project or
+  session can also be decided by a co-owner.
+
+Grounded in: `platform/docs/agent-action-declarations.md`,
+`platform/docs/personal-assistant-control-plane.md` §4 and §5.7–5.8,
+`platform/decisions/2026-09-30-agent-action-catalogue.md`, and
+`platform/backend/libs/capabilities/src/handlers/` (`find-actions.handler.ts`,
+`invoke.handler.ts`, `batch.handler.ts`) and `resource-reference.ts`.

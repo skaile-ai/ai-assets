@@ -1,7 +1,10 @@
 # UI: Navigation & Settings (Where Things Live)
 
 How to find anything and walk a user through a click-path. Labels in **bold** are the
-real UI strings.
+real UI strings. When the user would rather be taken there, the agent can open the screen
+for them with `platform.navigate` (dashboard, projects, sessions, a project or its settings and
+runs, a session, a run group, flows, organization settings, **My Connections**, the store,
+preferences) — see `concepts/agent.md`.
 
 ## The app shell
 

@@ -42,15 +42,18 @@ above:
 | `platform.search_my_sessions({ query, limit? })` | `hits` — snippet, `sessionId`, `projectId`, `seq`, `createdAt` — across the sessions the owner can read. `limit` caps at 100. |
 | `platform.read_session_history({ sessionId, limit?, beforeSeq? })` | `messages`, newest-first, from one session the owner can reach, plus `hasMore`. `limit` defaults to 50 and caps at 200; `beforeSeq` pages backwards, returning only messages with `seq` strictly below it. |
 
-Use them in that order: search to find the session, then read that session's history. Search
+Use them in that order: search to find the session, then read that session's history — and to
+use a file you found there, pass it on by reference (`{ sessionId, path }`, see
+`references/agent-action-catalog.md`) rather than copying its content. Search
 scans the 50 most-recently-active sessions and returns at most 100 hits, and `truncated: true`
 means it hit one of those two caps — not that nothing else matched. So treat a truncated search
 as "look harder", never as a complete answer.
 
-**These reads are audited.** Four capabilities write a personal-assistant read audit naming the
-owner, the target session's ancestry and how much came back: `platform.search_my_sessions`,
-`platform.read_session_history`, `platform.get_session_context` and
-`platform.list_session_resources`. Reading a colleague's conversation on the owner's behalf
+**These reads are audited.** `platform.search_my_sessions`, `platform.read_session_history`,
+`platform.get_session_context` and `platform.list_session_resources` write a personal-assistant
+read audit naming the owner, the target session's ancestry and how much came back — and so does
+reading another session's file by reference (`platform.add_draft_attachment`, an upload through
+`platform.invoke`). Reading a colleague's conversation on the owner's behalf
 leaves a record. That is not a reason to avoid it when the owner asks — it is a reason not to
 go trawling sessions speculatively.
 
@@ -71,14 +74,15 @@ Reading connector readiness is the one that most often ends the task early:
 
 Every capability in the table below hands the work to a durable background worker once the
 owner consents, and returns `{ operationId, status: "Queued", target, instruction }`. None of
-them returns the thing it made. None of them may appear in a batch. The **effect class** is
+them returns the thing it made. None of them is a catalogue action, so none can be a
+`platform.batch` step. The **effect class** is
 what decides whether an autonomy grant can ever cover it (see *Consent and autonomy* below).
 
 | Call | Effect | Effect class | Grant may reach |
 | --- | --- | --- | --- |
 | `platform.create_organization({ name, slug?, logoUrl?, iconSvg? })` | a new organization | `privileged` | only the widest scope: every target of that kind the owner can reach |
 | `platform.create_project({ organizationId, name, sourceType, description?, visibility?, agentName?, agentAvatarUrl?, initialMessage? })` | a new project. `sourceType` is `Empty` or `OnSkaile`; `visibility` `Private` (default) or `Shared`. | `routine` | that target, its organization, or everything reachable |
-| `platform.create_session({ projectId, name, slug?, followMain?, visibility? })` | a new session | `routine` | that target, its project, its organization, or everything reachable |
+| `platform.create_session({ projectId, name, slug?, followMain?, visibility? })` | a new session; once `Succeeded`, `result.payload.url` links to it — share it, or bring it up with `platform.navigate({ route: "session", params: { session: result.payload.sessionId } })` when the owner asked to go there | `routine` | that target, its project, its organization, or everything reachable |
 | `platform.invite_to_organization({ organizationId, email, role? })` | an invitation email | `external` | that target, its organization, or everything reachable |
 | `platform.invite_to_project({ projectId, email, role? })` | an invitation email | `external` | that target, its project, its organization, or everything reachable |
 | `platform.invite_to_session({ sessionId, email, role? })` | an invitation email; the invitee can then read that session's whole history | `external` | that target, its project, its organization, or everything reachable |
@@ -153,7 +157,7 @@ These are refusals by design — proposing around them wastes the owner's approv
   token, OAuth code, or client secret, and the personal-assistant effects take no repository
   URL or branch either (only `configure_connector` names a repository, on the connection's own
   host). Every such field is rejected. Never ask for one, and never accept one if offered.
-- **Batches.** None of these is batch-eligible, and none is grantable through a batch.
+- **Batches.** `platform.batch` runs only catalogue actions, so none of these can be a step.
 - **Creating an organization is PlatformAdmin-only.** The server verifies the owner currently
   holds PlatformAdmin — membership, however senior, is not enough. Do not offer it to an owner
   who is not one.
@@ -265,14 +269,18 @@ themselves approved — and it is narrow by construction:
 - **Optional use and budget caps**, clamped down to the server's own ceilings.
 - **Effect opt-ins.** Because the safe default leaves both off, an `external` or `privileged`
   effect has no one-click option at all — the owner has to widen it deliberately. An effect
-  classed `never` would be ungrantable, though no capability uses that class today; any batch
-  is. Ungrantable means it can only be carded or refused — never dispatched silently.
+  classed `never` is ungrantable, and so is `platform.batch` as a whole (each step matches its own
+  action's grants). Ungrantable means it can only be carded or refused — never dispatched silently.
 - **Only on a card.** Config pre-approvals (`preApprovedCapabilities`) are retired and ignored;
   the card is the one place a standing approval comes from.
 
 Revocation is immediate, and the platform re-checks the owner's live authorization, the limits
 and the budget right before the effect. **A call that dispatched silently a minute ago can come
 back parked on approval** — that means it is no longer covered, not that something failed.
+
+A grant covers a call only on **the owner's own turn**, or a trigger the owner set up: when
+another member, several members, or nobody attributable set off the turn, the call is carded
+whatever grants exist (`concepts/agent.md`, *Shared sessions*).
 
 You see grants only on turns a human sent, in the `<AUTONOMY>` block: which capability, how far
 it reaches, until when, and what is left of any caps, plus notice when one has been **revoked**.
@@ -293,10 +301,10 @@ It is not generic CRUD over the data model, and it is not a lifecycle escape hat
 lists nothing for deleting an organization, project, or session; for changing or removing a
 membership; for editing an organization's settings; or for handling a credential.
 **Check the live registry before telling the owner any of those is impossible** — this file is
-a map, and the registry moves. If it genuinely is not there, guide them to the UI. What you
-must not do is reach for `platform.act` / `platform.act_batch` to synthesize one: that surface
-is default-deny and documented separately in `references/agent-action-catalog.md`, where every
-unlisted scope/type pair is blocked too.
+a map, and the registry moves — and search the platform actions with `platform.find_actions`
+(`references/agent-action-catalog.md`), which grow every deploy. If neither has it, guide them to
+the UI. Never try to build one from the data model: generic create/update/delete is not exposed
+to agents.
 
 Grounded in: `platform/docs/protocol-v2-capabilities.md`,
 `platform/docs/personal-assistant-control-plane.md` and `platform/backend/libs/capabilities/`
