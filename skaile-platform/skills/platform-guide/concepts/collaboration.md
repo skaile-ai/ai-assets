@@ -68,11 +68,12 @@ Sessions can talk to each other's agents through directed, two-sided opt-in link
   the peer finishes its current work, the platform starts one new turn in the subscriber
   with an idle notice, waking it if it has hibernated. It can subscribe on its own or as
   part of a send, so it hears when the handed-off work is done instead of polling. A peer
-  that is already idle (or not running) is reported straight away and nothing is armed.
-  The subscription is one-shot: it ends with a notice if the peer stops or nothing happens
-  within 2 hours (those two notices are dropped, not delivered, when the subscriber itself
-  is not running), and is dropped silently on unlink or a platform restart. Each delivered
-  idle notice counts toward the pair's 20-message budget below.
+  that is already idle, hibernated or closed is reported straight away and nothing is
+  armed. The subscription is one-shot: it ends with a notice if the peer hibernates or
+  nothing happens within 2 hours — but only the idle notice wakes a hibernated subscriber;
+  those two are dropped for it — and is dropped silently on unlink or a platform restart.
+  Each delivered notice counts toward the pair's 20-message budget below; a notice is not
+  an exchange, so it carries no hop count.
 - Exchanges are bounded: at most 4 hops, cycle detection, and a budget of 20 messages
   between a pair with no human turn in either session — after that the agent stops,
   summarizes, and reports back to its user.
