@@ -227,8 +227,12 @@ with `platform.batch({ steps })`, passing values between steps with `$ref`. Ever
 the session owner, through the same authorization as the UI. Exact shapes, refusals and file
 transfers: `references/agent-action-catalog.md`.
 
-- **Every `invoke` is carded — reads included** — unless a standing grant covers that action on
-  that target. A batch shows one card listing only the steps no grant covers.
+- **A read everyone in the session may see runs at once**, with no card. Every other `invoke` —
+  writes, and reads of the owner's private data — is carded unless a standing grant covers that
+  action on that target. A batch shows one card listing only the steps no grant covers.
+- **Each action has a minimum role.** The owner, and every person who asked, must hold at least
+  that role on the target (e.g. Owner to archive a session or unarchive a project); otherwise the
+  action is not offered and is refused, with no card.
 - **Files travel by reference**, `{ sessionId?, resourceId?, path }`, never as bytes or base64.
 - **A refusal does not say why.** Do not retry with other ids or keys; tell the user.
 - **Prefer a dedicated capability when one exists.** The catalogue is not generic CRUD: generated
