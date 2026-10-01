@@ -18,6 +18,11 @@ call:
 So if no mail capability is in your live set, the fix is the project owner's, in the web app.
 Say so; do not claim mail is unsupported. Revoking either fact takes the family away mid-session.
 
+**In a session someone besides the owner can read**, the mailbox is still the owner's: every mail
+or calendar read goes to the owner as a card per read (no standing approval), and the uncarded
+changes below (flagging, categories, drafts and their attachments) are refused unless the owner
+asked. See *Shared sessions* in `concepts/agent.md`.
+
 ## Choosing the mailbox
 
 A project can reach more than one mailbox: its owner's own, and **shared mailboxes** the owner
@@ -33,12 +38,13 @@ shared mailbox; the owner does, and nothing is ever discovered from delegations.
 - **Reuse one handle** for a message, its draft, its attachments and its pagination. A wrong,
   disabled or foreign handle is refused and never falls back to another mailbox.
 
-## Reading — no approval
+## Reading — no approval while only the owner can read the session
 
 `platform.list_mail_folders`, `platform.list_mail`, `platform.search_mail`,
 `platform.read_mail`, `platform.read_mail_attachment`, `platform.list_mail_categories`,
 `platform.list_calendar_events`. Reads carry no card on purpose — the owner's enablement is
-the consent, and a card per message would make triage unusable.
+the consent, and a card per message would make triage unusable. Once anyone besides the owner
+can read the session, each read is carded to the owner instead (see the caveat above).
 
 - Call `list_mail_folders` once before guessing a folder; well-known names (`inbox`,
   `sentitems`, `drafts`, `archive`) also work. It returns unread counts, so it answers "anything
@@ -59,8 +65,8 @@ base64 straight to a file — never echo it into the conversation.
 
 | Tier | Capabilities | What happens |
 | --- | --- | --- |
-| No approval, reversible | `flag_mail`, `assign_mail_categories` | Runs directly. Category names are free text — a typo makes a new label. |
-| No approval, not outbound | `create_draft`, `add_draft_attachment`, `remove_draft_attachment` | Lands in that mailbox's real Outlook Drafts; nothing is sent. |
+| No approval, reversible | `flag_mail`, `assign_mail_categories` | Runs directly. Category names are free text — a typo makes a new label. In a session others can read, refused unless the owner asked. |
+| No approval, not outbound | `create_draft`, `add_draft_attachment`, `remove_draft_attachment` | Lands in that mailbox's real Outlook Drafts; nothing is sent. In a session others can read, refused unless the owner asked. Exception: attaching a file from another organization is carded every time, with no standing approval. |
 | Card, standing approval possible | `move_mail`, `copy_mail` (per destination folder); `create_mail_folder`, `rename_mail_folder`, `move_mail_folder`, `create_mail_category`, `delete_mail_category` (per mailbox) | Carded unless a standing approval already covers that shape; the card itself offers one. |
 | Card, standing approval possible | `create_calendar_event`, `modify_calendar_event` (own mailbox only; shared mailboxes are refused) | Carded unless an autonomy grant covers it. Create is grantable for that mailbox; modify for one event or every event on that calendar — never project-wide. An event with attendees is `external`, because Exchange emails the invitations and updates, so its grant needs the owner's external-communication opt-in. Modify is refused if the event has gained attendees since the card was approved. |
 | Card, privileged | `delete_mail` | A **soft** delete into Deleted Items, recoverable by the user. A standing approval for it needs the owner's deliberate privileged opt-in. |
@@ -82,8 +88,12 @@ Real refusals, not conservatism:
   `body` is plain text unless `bodyFormat: "markdown"`, which is sent as sanitised HTML: bold,
   italic, links, lists, headings, block quotes, simple tables. Raw HTML and images are dropped
   and strike-through is not rendered — do not use them.
-- `add_draft_attachment` takes a **workspace path**, never bytes: mount-relative `path`, with
-  `resourceId` defaulting to `workspace`. Under 3 MB, drafts only. A non-UTF-8 text file (a
+- `add_draft_attachment` takes a **file reference**, never bytes: a mount-relative `path` of this
+  session (with `resourceId` defaulting to `workspace`), or — in the personal assistant only —
+  `file: { sessionId, path }` for a file in another of the owner's sessions' workspace (find it
+  with `platform.search_my_sessions` / `platform.read_session_history`). A source in another
+  organization is carded to the owner every time, and refused if the file changed after the
+  card. Under 3 MB, drafts only. A non-UTF-8 text file (a
   cp1252 CSV) is refused — convert it or zip it. `remove_draft_attachment` refuses inline
   images, and removing a forwarded file larger than 256 KiB cannot be undone except by
   re-creating the forward.

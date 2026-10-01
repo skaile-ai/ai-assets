@@ -11,7 +11,7 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
-version: 0.14.0
+version: 0.15.0
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -27,6 +27,7 @@ keywords:
   - run-group
   - agent-action
   - action-batch
+  - find-actions
   - control-plane
   - durable-operation
   - autonomy
@@ -80,13 +81,13 @@ mechanics only when the user is technical or `expertMode=true`.
 | `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels, whose connection a mount runs on, **Reconnect**, Exchange mail and shared mailboxes, AI providers and subscription seats, classifier providers. |
 | `concepts/collaboration.md` | Multi-user sessions (mentions/reactions/threading/presence), sharing with people, public file-preview links, agent-to-agent (A2A). |
 | `concepts/previews.md` | Running and viewing an app preview; what makes a workspace previewable. |
-| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants (incl. asking the owner for one ahead), durable operations and the `AwaitingUser` handoff, discovery-then-propose, reporting platform problems to the Skaile team, the target-bound `platform.act` / `platform.act_batch` allowlist, UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
+| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants (incl. asking the owner for one ahead), durable operations and the `AwaitingUser` handoff, discovery-then-propose, reporting platform problems to the Skaile team, platform actions (`find_actions` / `invoke` / `batch`), shared sessions (whose turn it is), UI steering (`open_file`, `navigate`) and UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
 
 ### Reference (load only when constructing an action)
 
 | File | Use when... |
 | ---- | ----------- |
-| `references/agent-action-catalog.md` | You are about to call `platform.act` or `platform.act_batch` and need the exact sole allowlisted action, batch-reference syntax, consequences, and target-role rules. |
+| `references/agent-action-catalog.md` | You are about to search for or run a platform action (`platform.find_actions`, `platform.invoke`, `platform.batch`), or pass a file by reference — and need the call shapes, `$ref` syntax, per-step consent, file transfers and shared-session rules. |
 | `references/exchange-mail-calendar.md` | You are about to read, triage, file, draft or send mail, or read or change a calendar event, in a connected Microsoft 365 mailbox — and need mailbox selection, the approval tiers, the send grant, and how to read a send result. |
 | `references/classifier.md` | You are about to classify many items with closed questions (`platform.classify`) and need the call shape, limits, and how to read `calibrated` / `p`. |
 | `references/control-plane-capabilities.md` | You are about to create a project/session/organization, invite someone, start or repair a connector, propose a connector mount or an asset configuration, run a flow in another session, or read an operation back — and need the family's shape, effect classes, real boundaries, the operation lifecycle, and the `AwaitingUser` handoff. |
@@ -107,9 +108,9 @@ mechanics only when the user is technical or `expertMode=true`.
   The `references/` tier is where exact names live, for a call you are about to construct:
   `references/agent-action-catalog.md`, `references/control-plane-capabilities.md`,
   `references/exchange-mail-calendar.md` and `references/classifier.md`. All four are maps of a live registry, not substitutes for it.
-  `platform.act` and `platform.act_batch` are default-deny: use only the exact action
-  documented in `references/agent-action-catalog.md`, and never infer generic CRUD from
-  the data model.
+  Platform actions are discovered with `platform.find_actions`, never recalled or inferred
+  from the data model: run only an action it returned, with the input schema it returned
+  (`references/agent-action-catalog.md`).
 - Never invent UI labels, paths, or platform facts. If a detail file does not cover it, say
   so or check the live UI/capabilities rather than guess.
 - Respect approval gates and access levels (read-only connectors/mounts, role restrictions).

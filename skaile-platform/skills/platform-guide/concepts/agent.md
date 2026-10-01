@@ -32,12 +32,14 @@ at runtime**, never assumed from memory.
     `references/control-plane-capabilities.md`); listing, searching and enabling assets,
     adding a skill or a remote MCP server by reference, and assigning or unassigning assets
     project-wide when the session owner administers the project; opening a file, pane, flow
-    or run group in the user's UI; flows and run groups (`concepts/flows.md`), schedules, a
+    or run group in the user's UI, or taking them to a screen of the app (`platform.navigate`);
+    flows and run groups (`concepts/flows.md`), schedules, a
     session webhook inbox, previews (`concepts/previews.md`) and batch classification
     (`references/classifier.md`);
   - **identity and conversation** — renaming yourself, setting an avatar, a read-aloud voice
-    or speech mode, changing the asking member's notification mode for this session, reacting
-    with an emoji, passing on a turn, posting a GIF or other custom message;
+    or speech mode, changing the asking member's notification mode for this session
+    (`platform.set_notification_mode`), reacting with an emoji, passing on a turn, posting a GIF
+    or other custom message;
   - **agent-to-agent** — discovering and linking peer sessions, then asking or messaging a
     linked peer (`concepts/collaboration.md`);
   - **mail and calendar** — reading, triaging, filing, drafting and sending mail and
@@ -45,6 +47,9 @@ at runtime**, never assumed from memory.
     (`references/exchange-mail-calendar.md`);
   - **reporting to the Skaile team** — filing a platform problem or a feature request
     directly, without a review form (see below);
+  - **platform actions** — the things a user does in the Skaile UI that are declared for agents
+    (the owner's own notification preferences, stars, renaming a session, …), searched with
+    `platform.find_actions` and run with `platform.invoke` or `platform.batch` (see below);
   - in Skailify-enabled sessions, actions registered by an embedded app itself.
 
   Treat these as *categories* — confirm the exact action against the live registry.
@@ -79,6 +84,11 @@ The edit re-prepares the request as a new one; `platform.get_operation` on your 
 then answers for the edited request and names it with `revisedFrom`. Report what was actually
 approved, not what you proposed.
 
+**Whose card it is.** A card about the owner's own things — mail, calendar, connections, other
+sessions, their settings — is decided by the owner alone and shown only to them; other members
+see that the owner has been asked, never its content. A card about something shared — this
+project, its flows and run groups — can also be decided by a co-owner.
+
 This mirrors the agent's own safety rules: confirm before destructive or
 consequence-bearing operations (deleting files, overwriting uncommitted work, dropping DB
 records, sending messages or data on the user's behalf).
@@ -86,15 +96,17 @@ records, sending messages or data on the user's behalf).
 ## Autonomy grants — what "already approved" means
 
 An **autonomy grant** is a human pre-authorizing one exact capability so matching calls dispatch
-without a card. Only a human can mint one — an owner of this session, from a card they themselves
-approved. Every approval-gated capability's card offers one — *approve once*, or *approve and
-grant* — except a batch (`platform.act_batch` stays card-only) and `platform.act`, whose grants
-follow its action registry. **You cannot create, extend or widen a grant yourself.** You can ask
-the owner for one with `platform.request_standing_approval`, and only the owner can grant it,
-from the card. Ask ahead when a workflow will run unattended — a scheduled mail digest, say —
-because nobody will be there to answer a card for the real call. The request runs nothing. At
-most 5 of your requests can wait on the owner at once; a further one is refused until the owner
-decides one, and repeating an identical open request joins its existing card.
+without a card. Only a human can mint one — an owner of this session, from a card they
+themselves approved. Every approval-gated capability's card offers one — *approve once*, or
+*approve and grant* — except a few ungrantable by design (a card-per-call disclosure read, a
+file leaving its organization) and `platform.batch`, which is never granted whole: each of its
+steps is matched against that action's own grants. **You cannot create, extend or widen a grant
+yourself.** You can ask the owner for one with `platform.request_standing_approval`, and only
+the owner can grant it, from the card. Ask ahead when a workflow will run unattended — a
+scheduled mail digest, say — because nobody will be there to answer a card for the real call.
+The request runs nothing. At most 5 of your requests can wait on the owner at once; a further
+one is refused until the owner decides one, and repeating an identical open request joins its
+existing card.
 
 Each capability declares an **effect class** that decides how far a grant may reach:
 
@@ -103,13 +115,14 @@ Each capability declares an **effect class** that decides how far a grant may re
 | `routine` | Effect stays inside the owner's own platform surface. | Yes — this is what an ordinary grant covers. |
 | `external` | Reaches a person or system outside Skaile (an invitation email, a sent mail, a calendar invitation, GitHub or another third-party API). A message delivered into another Skaile session is not external. | Only if the owner **explicitly widened** the grant to external communication. |
 | `privileged` | Administrative — changes who or what exists at organization level. | Only if the owner **explicitly widened** the grant to privileged administration. |
-| `never` | Never auto-approvable (no capability declares it today). | No — it is carded, or refused outright. Never dispatched silently. |
+| `never` | Never auto-approvable — a disclosure read in a shared session, a file attached across organizations. | No — it is carded, or refused outright. Never dispatched silently. |
 
 A grant is narrow: it names **one capability** and one target scope — that exact target, its
 project, and so on up, or for Exchange mail one mailbox. It either has an absolute expiry or,
 when the owner explicitly chose *Unlimited*, lasts until they revoke it; it may carry use and
-budget caps. It stays anchored to the session it was approved in. Batch requests are
-ungrantable outright — `platform.act_batch` always requires a card. Standing approvals live
+budget caps. It stays anchored to the session it was approved in, and it covers only calls on
+**the owner's own turns** (or a trigger the owner set up) — see *Shared sessions* below. Standing
+approvals live
 only on cards: the former `preApprovedCapabilities` agent-config list is retired, and any
 entries still in a config are ignored.
 
@@ -204,45 +217,48 @@ has exactly one page. Their refusals are **terminal** — "not accessible" means
 see that target, so tell them rather than retrying or guessing at other ids. The refusal is
 deliberately identical whether the target does not exist or the owner has no standing on it.
 
-## Target-bound actions via `platform.act` and `platform.act_batch`
+## Platform actions — `find_actions`, `invoke`, `batch`
 
-These are a separate, much narrower thing from the dedicated control-plane capabilities
-above. `platform.act` is a narrow, default-deny capability. Its sole current action is:
+Much of what a user does in the Skaile UI is also declared for agents as a **platform action**,
+and the set grows every deploy. When no dedicated capability fits, search before saying you
+cannot: `platform.find_actions({ query: "rename session" })` returns matching actions with
+their input schema. Run one with `platform.invoke({ action, input })`; run several as one plan
+with `platform.batch({ steps })`, passing values between steps with `$ref`. Every action runs as
+the session owner, through the same authorization as the UI. Exact shapes, refusals and file
+transfers: `references/agent-action-catalog.md`.
 
-`{ scope: "project", type: "markAllSessionsRead", payload: { id: "<projectId>" }, rationale }`
+- **Every `invoke` is carded — reads included** — unless a standing grant covers that action on
+  that target. A batch shows one card listing only the steps no grant covers.
+- **Files travel by reference**, `{ sessionId?, resourceId?, path }`, never as bytes or base64.
+- **A refusal does not say why.** Do not retry with other ids or keys; tell the user.
+- **Prefer a dedicated capability when one exists.** The catalogue is not generic CRUD: generated
+  per-model create/update/delete is never exposed.
 
-The platform parses the request, resolves the canonical target project, and checks the
-session owner's effective role on that target **before** showing an approval card. Unknown,
-malformed, lifecycle, membership, credential/provider, runtime, and destructive actions
-fail without a card. If approved, the platform reloads the current owner and target and
-reauthorizes immediately before execution. The human who clicks Approve supplies consent;
-they do not replace the session owner as the action actor. That holds for every capability,
-project and organization flow writes included — see [Flows](flows.md).
+The human who clicks Approve supplies consent; they do not replace the session owner as the
+actor. That holds for every capability, project and organization flow writes included — see
+[Flows](flows.md).
 
-Rules:
+## Shared sessions — whose turn it is
 
-- **Prefer a dedicated capability when one exists.** Never infer a `platform.act` scope,
-  type, or payload from the data model.
-- **Always pass a specific `rationale`** and wait for the real result.
-- Target-project `User` and `Owner` roles are allowed; `Viewer` and no-access roles are
-  denied. PlatformAdmin remains the explicit break-glass role.
-- The action clears unread indicators for every member of every session in the target
-  project. Describe that consequence accurately when proposing it.
+The agent always acts as the session owner, but in a session other people can write into the
+platform records **who set off each turn** — the one member who wrote, several members (mixed),
+or the person a schedule, webhook or peer request acts for. You cannot set or claim it. It
+decides:
 
-`platform.act_batch` can run an ordered, bounded list of that same action. It is not a
-broad CRUD or lifecycle escape hatch. The platform validates every step, exact target,
-compatible action family, and typed symbolic dependency before showing one approval
-proposal. A step may set its `payload.id` to `{ "$ref": [earlierStepIndex, "id"] }` to
-reuse the canonical project id produced by an earlier step; forward, missing, malformed,
-or type-incompatible references are rejected before any effect.
-
-Batch execution is ordered and best-effort. The platform reloads and reauthorizes each
-target immediately before that step, stops on the first failure, and reports exactly
-which steps completed, failed, and remain unexecuted. Completed effects are never rolled
-back; retrying is a new batch. To keep that receipt truthful, the platform waits for each
-authoritative dispatcher result instead of declaring a non-cancelling timeout a failure,
-so a slow step can keep the batch pending. The batch currently always requires an explicit
-approval card; a wildcard or standing grant cannot suppress it.
+- **Grants apply only to the owner's own turns.** A member's turn, a mixed turn, or one the
+  platform cannot attribute always gets a card, even where the owner holds a grant.
+- **The asker needs the authority too.** When a member asks for something on a shared target,
+  they must be able to do it themselves; the owner's reach is not borrowed.
+- **The owner's private things are the owner's to ask for.** Once anyone besides the owner can
+  read the session, a read of the owner's mail, calendar, other sessions or other owner-scoped
+  lists — asking a linked peer included — goes to the owner as a card per read (no standing
+  approval), and its result is then visible to the session. Small effects that normally run with
+  no card — drafting and filing mail, attaching a file, messaging a linked peer, renaming the
+  assistant — are refused unless the owner asked ("Only `<owner>` can ask for this"). In a
+  session only the owner can read, such as the personal assistant, all of this runs as before.
+- **"Me" means the asker** where a capability acts on the asker's own setting: changing
+  notification mode changes the asking member's, and is refused when no single person asked.
+- **Steering the UI moves only the asker's screen** — see below.
 
 ## UI context the platform feeds the agent
 
@@ -273,7 +289,19 @@ resets independently — a reload, a new tab, or time passing can close the pane
 telling a user a file or the workspace is already open, re-assert it: call
 `platform.open_file` again for a specific file, or `platform.set_session_view({ action:
 "activate_workspace" })` to reveal the workspace generally. Both are idempotent and cheap —
-prefer re-invoking over guessing from stale context.
+prefer re-invoking over guessing from stale context. They reach the user wherever they are in
+the app, the side panel included. To bring up a whole screen — a project, its settings, a run
+board, the user's connections — call `platform.navigate({ route, params?, search?, target? })`
+when they asked to see it or you just did something they should look at; never unprompted, and
+never repeatedly in one turn. Routes and their params: `ui/navigation.md`.
+
+Read the `status` `open_file` and `navigate` return. `opening` (their tab is on its way) and
+`offered` (they had unsaved edits and were asked first) are not failures. `no_visible_client`
+means none of their tabs was visible. These calls move **only the asker's** tab: on a turn no
+single person wrote — a schedule, a webhook, a flow, several members at once —
+`platform.navigate` moves nobody (`no_single_requester`), and `open_file` reaches only a tab
+already showing this session, so `no_visible_client` is expected there. Tell the user where to
+find it instead.
 
 ## Live shared state stores
 
@@ -337,5 +365,6 @@ entirely to the UI — creating a project backed by a connector source, or a ses
 a git branch — and for those, guiding is the right answer.
 
 Grounded in: `platform/backend/libs/capabilities/` (handler registration and `availability`
-markers), `platform/docs/personal-assistant-control-plane.md`,
+markers), `platform/docs/personal-assistant-control-plane.md` (§4, §5.7–5.8),
+`platform/decisions/2026-09-30-agent-action-catalogue.md`,
 `platform/backend/libs/agent-gateway/src/ws-agent-gateway.service.ts` and `turn-time.ts`.

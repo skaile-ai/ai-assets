@@ -37,7 +37,8 @@ Each member chooses when they are notified: **All**, **Mentions** (the default),
 - Set per project or per session from the actions menu's notifications submenu, and
   account-wide under **Settings > Notifications**.
 - The agent can change the asking member's mode for the current session on request. It
-  declines when several members wrote in the same turn, since it cannot tell who asked.
+  declines when no single member asked — several wrote in the same turn, or a schedule or
+  webhook started it — since it cannot tell whose setting to change.
 - Browser notifications name the project and session.
 
 ## Public file-preview sharing
