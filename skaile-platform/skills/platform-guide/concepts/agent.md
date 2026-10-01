@@ -38,8 +38,8 @@ at runtime**, never assumed from memory.
     (`references/classifier.md`);
   - **identity and conversation** — renaming yourself, setting an avatar, a read-aloud voice
     or speech mode, changing the asking member's notification mode for this session
-    (`platform.set_notification_mode`), reacting
-    with an emoji, passing on a turn, posting a GIF or other custom message;
+    (`platform.set_notification_mode`), reacting with an emoji, passing on a turn, posting a GIF
+    or other custom message;
   - **agent-to-agent** — discovering and linking peer sessions, then asking or messaging a
     linked peer (`concepts/collaboration.md`);
   - **mail and calendar** — reading, triaging, filing, drafting and sending mail and
@@ -48,7 +48,7 @@ at runtime**, never assumed from memory.
   - **reporting to the Skaile team** — filing a platform problem or a feature request
     directly, without a review form (see below);
   - **platform actions** — the things a user does in the Skaile UI that are declared for agents
-    (notification preferences, stars, renaming a session, …), searched with
+    (the owner's own notification preferences, stars, renaming a session, …), searched with
     `platform.find_actions` and run with `platform.invoke` or `platform.batch` (see below);
   - in Skailify-enabled sessions, actions registered by an embedded app itself.
 
