@@ -29,7 +29,9 @@ asks to change *their own* notification mode for this session needs the dedicate
 `input` must match the result's `inputSchema`. It runs **as the session owner**, through the
 procedure's own authorization, exactly as in the UI.
 
-- **Every call asks the owner first — reads included** — unless a standing grant the owner made
+- **A read everyone in the session may see runs at once** — no card, grant or decision row, as a
+  batch read step does. **Every other call asks the owner first** — writes, and reads of the
+  owner's private data (whose card only the owner decides) — unless a standing grant the owner made
   from an earlier card covers that action on that target. The card is generic: the action's
   title, its input, and a note when it is not idempotent. Grants reach that one target only (for
   an action on the owner's own settings, the calling session). So never tell the user a card
@@ -90,7 +92,10 @@ on it:
 - `find_actions` hides actions on the owner's own things from anyone but the owner, and shows
   nothing on a turn it cannot attribute.
 - When a member asks, they must be able to do it themselves as well; the owner's reach is not
-  enough. Actions that would act *as the asker* are not runnable through `invoke` yet.
+  enough. Each action declares a minimum role (`minTier`, e.g. Owner to archive a session or
+  unarchive a project); the owner and every asker are held to it. On a member's turn
+  `find_actions` hides what the member could not do, and `invoke` or `batch` refuse it before any
+  card. Actions that would act *as the asker* are not runnable through `invoke` yet.
 - An action on the owner's own things is decided by the owner only; one on a shared project or
   session can also be decided by a co-owner.
 
