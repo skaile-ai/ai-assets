@@ -6,13 +6,14 @@ for them with `platform.navigate` (dashboard, projects, sessions, a project or i
 runs, a session, a run group, flows, organization settings, **My Connections**, the store,
 preferences) — see `concepts/agent.md`. The call is
 `platform.navigate({ route, params?, search?, target? })`; `params` take an id or slug, and `org`
-defaults to the project's (else this session's) organization:
+defaults to the project's (else this session's) organization. `target` is `current` (default,
+replaces the page they are on) or `tab` (opens a new tab and keeps the current one):
 
 | `route` | Screen | `params` |
 | --- | --- | --- |
 | `dashboard` | Dashboard | — |
-| `projects`, `sessions`, `flows`, `store`, `preferences`, `myConnections` | that organization page (`myConnections` takes `search: { link }` to highlight one connection) | `org` |
-| `org.settings` | Organization settings (org Owners only; `search: { tab }`, e.g. `ai-providers`) | `org` |
+| `projects`, `sessions`, `flows`, `store`, `preferences`, `myConnections` | that organization page (`myConnections` takes `search: { link }` to highlight one connection) | `org?` |
+| `org.settings` | Organization settings (org Owners only; `search: { tab }`, e.g. `ai-providers`) | `org?` |
 | `project`, `project.settings`, `project.runs` | a project's main session, its settings, its run board | `project` |
 | `runGroup` | one run group's board | `project`, `runGroup` |
 | `session` | one session | `session` (a slug resolves in this session's project; elsewhere pass its id or `project`) |

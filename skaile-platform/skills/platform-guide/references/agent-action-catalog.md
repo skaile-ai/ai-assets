@@ -14,9 +14,9 @@ A read-only lexical search: `query` is a few words of what you want ("mute notif
 "rename session"), `limit` 1–20 (default 8). Each result carries `action` (the key), `title`,
 `description`, `kind` (`read` or `write`) and `inputSchema`. An empty result means nothing fits
 **on this turn**: rephrase once with other words, then tell the user. On a turn the platform
-cannot attribute to anyone it is always empty — do not rephrase; say so in your output. Results are filtered by who
-asked the turn (see *Shared sessions* below), never by whether a specific target exists — so a
-result is not proof you may act on a given project.
+cannot attribute to anyone it is always empty — do not rephrase; say so in your output.
+Results are filtered by who asked the turn (see *Shared sessions* below), never by whether a
+specific target exists — so a result is not proof you may act on a given project.
 
 Examples of what it finds today: starring and unstarring, renaming or describing a session,
 marking every session in a project read, the owner's own notification preferences. Treat that
