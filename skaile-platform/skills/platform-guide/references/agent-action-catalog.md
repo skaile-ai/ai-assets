@@ -62,7 +62,7 @@ not indices; references point backwards only, and a read may reference only earl
 - **Order and failure.** Writes run in order and stop at the first failure; the result names the
   `completed`, `failed` and `unexecuted` steps. Nothing is rolled back; a retry is a new batch.
 
-## Files: pass a reference, never bytes
+## Files: actions take a reference, never bytes
 
 A file is named by reference, `{ sessionId?, resourceId?, path }` — `sessionId` defaults to this
 session, `resourceId` to `workspace`, and `path` is mount-relative (`reports/Q3.pdf`, not
@@ -81,6 +81,11 @@ Two catalogue actions move files, at most 10 MiB each, and the bytes never reach
 
 `platform.add_draft_attachment` takes the same reference — see
 `references/exchange-mail-calendar.md`.
+
+This rule is for moving a file. To read the text of a file in another of the owner's sessions,
+or to create or replace one there, the personal assistant has `platform.read_session_file` and
+`platform.write_session_file`, which do carry text — see
+`references/control-plane-capabilities.md`.
 
 ## Shared sessions
 
