@@ -26,6 +26,10 @@ user sent which message unless asked.
 - Who can share: a **shared** session — its Project Owner or Session Owner; a **private**
   session — its Session Owner only. Inviting someone by email to a project needs Org Owner
   or Project Owner; to a session, Org Owner or Session Owner.
+- Nobody can share a **private project** (the personal assistant's Home, or a project in a
+  user's My space) or any of its sessions: sharing, inviting, team grants and making a
+  session Shared are all refused: the project is private to its owner, and work is shared
+  from a project under Projects instead. A Home can never be moved.
 - Session-access presence: clicking the presence avatars in the toolbar's right zone shows
   everyone with read access to the session, grouped online/offline.
 
@@ -88,5 +92,5 @@ Sessions can talk to each other's agents through directed, two-sided opt-in link
 Source of truth: `platform/docs/protocol-extensions.md`,
 `platform/docs/public-file-preview-sharing.md`, `platform/backend/libs/agent-to-agent/`,
 platform PRs #4917 (notification modes), #4566 (cross-org A2A), #5152 (share wake budget),
-#5876 (idle subscriptions),
+#5876 (idle subscriptions), #6008 (private projects not shareable),
 `platform/docs/roles-permissions-matrix.md` (share and invite permissions).
