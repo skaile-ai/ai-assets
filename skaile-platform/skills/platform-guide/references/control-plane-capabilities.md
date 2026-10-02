@@ -110,8 +110,9 @@ leading `workspace/`. The two content limits below count characters; the 2 MiB c
   any carded call (see *The operation lifecycle*); once it runs it returns `{ status: "written",
   sessionId, path }` itself, with no operation id and nothing further to poll.
 - **Refusal codes**, for both calls — the only refusals an assistant sees as codes.
-  `not_found`: the session does not exist, or the owner cannot see it (another person's
-  private project reads the same way); do not retry, tell the owner what you could not reach.
+  `not_found`: the session does not exist, the owner cannot see it (another person's
+  private project reads the same way), or its organization does not allow you to read files
+  there (reach below **Full**); do not retry, tell the owner what you could not reach.
   `file_not_found`: the session is reachable but has no such file. `invalid_path`: the path
   breaks the rules above.
 - **Write refusals in words**, not codes, each saying why: your own session (write your own
