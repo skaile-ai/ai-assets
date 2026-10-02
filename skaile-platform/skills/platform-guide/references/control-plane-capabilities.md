@@ -94,15 +94,20 @@ leading `workspace/`. The two content limits below count characters; the 2 MiB c
 
 - **Read** is a query: no card while the owner is the only reader of your session; once anyone
   else can read it, each read goes to the owner as a card, like any read of the owner's private
-  things (`concepts/agent.md`, *Shared sessions*). It never gets a standing grant.
+  things (`concepts/agent.md`, *Shared sessions*). It never gets a standing grant. If that card
+  is still unanswered when the call stops waiting, do not poll: the result is never kept, so
+  call again only when the owner asks.
 - **Write** is approval-gated. The owner sees the path and the change side by side on a card,
   unless a standing grant covers it; a grant can cover that one session or every session of
-  its project. Read the file before you replace it. Once run, it returns `{ status: "written",
-  sessionId, path }` itself, not an operation receipt: there is nothing to poll.
-- **Refusal codes**, for both calls (the only refusals that come back as codes). `not_found`: the session does not exist, or the owner
-  cannot see it (another person's private project reads the same way); do not retry, tell the
-  owner what you could not reach. `file_not_found`: the session is reachable but has no such
-  file. `invalid_path`: the path breaks the rules above.
+  its project. Read the file before you replace it. If the owner has not answered by the time
+  the call stops waiting, it comes back as `{ status: "awaiting_approval", invocationId }` like
+  any carded call (see *The operation lifecycle*); once it runs it returns `{ status: "written",
+  sessionId, path }` itself, with no operation id and nothing further to poll.
+- **Refusal codes**, for both calls — the only refusals an assistant sees as codes.
+  `not_found`: the session does not exist, or the owner cannot see it (another person's
+  private project reads the same way); do not retry, tell the owner what you could not reach.
+  `file_not_found`: the session is reachable but has no such file. `invalid_path`: the path
+  breaks the rules above.
 - **Write refusals in words**, not codes, each saying why: your own session (write your own
   workspace directly); a session the owner can only view (the message says writing needs the
   User or Owner role there, so tell the owner that rather than that the session is missing); a
