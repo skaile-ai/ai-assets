@@ -65,8 +65,9 @@ Two rules worth repeating to users:
   is **propose** one for the owner to approve: a complete non-secret mount (Box,
   SharePoint, Google Drive, or Git) as a single approval card for this session or the
   whole project, or a configuration handoff that parks on a trusted page where the owner
-  picks account and folder themselves. Agent-proposed drive mounts are **read-only**;
-  read-write needs the user's own **Connect** flow in the Connectors panel. Either way,
+  picks account and folder themselves. Agent-proposed drive mounts (Box, SharePoint,
+  Google Drive) are **read-only**; read-write needs the user's own **Connect** flow in the
+  Connectors panel. An agent-proposed Git mount is read-write, like any Git connection. Either way,
   verify afterwards (`connector_list`) and propose a restart if the mount has not
   attached yet.
 
@@ -81,7 +82,7 @@ Folder) the Connect dialog shows a **Read-only** switch once a folder is picked.
 by default, so a mount the user connects is read-write unless they turn it on. A Git
 connection has no such switch: it is always read-write today, and the platform has no
 read-only Git mount. Never tell a user a Git repo can be connected read-only. An existing
-mount has no settings dialog — to change its folder or access level, the user removes it in
+mount has no settings dialog — to change a drive or folder mount's folder or access level, the user removes it in
 the Connectors panel and re-creates it via **Connect**.
 
 Practical rules for the agent:
