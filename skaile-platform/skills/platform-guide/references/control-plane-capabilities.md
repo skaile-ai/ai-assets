@@ -151,13 +151,12 @@ These are refusals by design — proposing around them wastes the owner's approv
   `Viewer`/`User` vocabulary through the capability — not the Owner/Participant labels the
   Share tab shows (`concepts/collaboration.md`). No personal note, personal message, or
   display name can be attached — the human adds those from the web app.
-- **The assistant's own project.** It (the owner's Home) and every session in it cannot be
-  invited into. Invite into another project instead.
-- **Private workspaces take a few members.** A Private workspace (the UI name for a personal
-  organization) has six seats, the owner's included; a pending invitation holds a seat. An
-  organization invite into one works only while a seat is free and only as `Viewer` or `User`.
-  When it is full the invite is refused with the seat count; say so, and suggest a shared
-  organization if the owner needs more people.
+- **The assistant's own project.** The project the personal assistant lives in, and every
+  session in it, cannot be invited into. Invite into another project instead.
+- **Private workspace seat cap.** A Private workspace (the UI name for a personal
+  organization) has six seats, the owner's included, and a pending invitation holds one. An
+  organization invite into it is refused once the seats are full, with the seat count; say
+  so, and suggest a shared organization if the owner needs more people. Roles as above.
 - **Credentials.** No capability in this family accepts a token, password, personal access
   token, OAuth code, or client secret, and the personal-assistant effects take no repository
   URL or branch either (only `configure_connector` names a repository, on the connection's own
