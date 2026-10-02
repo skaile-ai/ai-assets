@@ -135,4 +135,5 @@ Grounded in: `platform/docs/roles-permissions-matrix.md`, `platform/docs/scoped-
 source picker, the `is_personal` organization field, platform PRs #3760 (org creation),
 #4281 (last Owner), #5023 (Personal/Business), #5076/#5354 (Explorer sections), #5251
 (agent graph), #5336/#5352 (agent rename, picture generation), #5988 (Private workspace
-seats), #6008 (private projects: `canAccessMySpaceProject`), `team-sharing.service.ts`.
+seats), #6008 (private projects: `canAccessMySpaceProject`), #6044 (a leaver's Home is
+archived, not inherited), `team-sharing.service.ts`.

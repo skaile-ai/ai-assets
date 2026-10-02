@@ -192,13 +192,16 @@ These are refusals by design — proposing around them wastes the owner's approv
   Projects instead." A Home can never be moved, so never suggest moving it: share the work
   from another project under Projects instead.
 - **Private workspace seat cap.** A Private workspace (the UI name for a personal
-  organization) has six seats, the owner's included, and a pending invitation holds one. An
-  organization invite into it is refused once the seats are full, with the seat count; say
-  so, and suggest a shared organization if the owner needs more people. Roles as above.
-  Someone invited only to a project, session or team in it takes a seat too, but that is
-  checked when they **accept**: the invitation itself goes out, and in a full workspace the
-  invitee is told it is full and can accept once a seat frees up. When the workspace is at
-  its cap, tell the owner this before you send such an invitation.
+  organization) has six seats, the owner's included, and a pending organization invitation
+  holds one. An organization invite into it is refused once the seats are full, with the
+  seat count; say so, and suggest a shared organization if the owner needs more people.
+  Roles as above.
+  Someone invited only to a project, session or team in it takes a seat too, but only when
+  they **accept**: such an invitation holds no seat while pending, and it is sent even when
+  the workspace is full, without any warning. In a full workspace the invitee is told so
+  when they accept, and can accept once a seat frees up. You cannot see the seat count, so
+  when you send such an invitation into a Private workspace, mention that the person can
+  only join while a seat is free.
 - **Credentials.** No capability in this family accepts a token, password, personal access
   token, OAuth code, or client secret, and the personal-assistant effects take no repository
   URL or branch either (only `configure_connector` names a repository, on the connection's own
@@ -359,4 +362,5 @@ Grounded in: `platform/docs/protocol-v2-capabilities.md`,
 (`configure-connector.handler.ts`, `begin-asset-configuration.handler.ts`,
 `get-operation.handler.ts`, `personal-flows-policy.service.ts`), platform PRs #6006
 (business-workspace confinement, `assistant-reach.service.ts`), #6008 (private projects) and
-#6009 (`update-assistant-profile.handler.ts`, `update-assistant-profile-policy.service.ts`).
+#6009 (`update-assistant-profile.handler.ts`, `update-assistant-profile-policy.service.ts`),
+and #6040 (project, session and team invitations take a Private workspace seat on accept).
