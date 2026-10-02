@@ -84,8 +84,8 @@ Reading connector readiness is the one that most often ends the task early:
 
 The personal assistant can read and change a text file in the `workspace` of another of the
 owner's sessions. `path` is relative to that workspace, with no leading slash, no `..`, and no
-leading `workspace/`. Both limits below count characters, not bytes; `size` is the one figure in
-bytes.
+leading `workspace/`. The two content limits below count characters; the 2 MiB ceiling and
+`size` are bytes.
 
 | Call | Does |
 | --- | --- |
@@ -97,15 +97,17 @@ bytes.
   things (`concepts/agent.md`, *Shared sessions*). It never gets a standing grant.
 - **Write** is approval-gated. The owner sees the path and the change side by side on a card,
   unless a standing grant covers it; a grant can cover that one session or every session of
-  its project. Read the file before you replace it.
-- **Refusal codes**, for both calls. `not_found`: the session does not exist, or the owner
+  its project. Read the file before you replace it. Once run, it returns `{ status: "written",
+  sessionId, path }` itself, not an operation receipt: there is nothing to poll.
+- **Refusal codes**, for both calls (the only refusals that come back as codes). `not_found`: the session does not exist, or the owner
   cannot see it (another person's private project reads the same way); do not retry, tell the
   owner what you could not reach. `file_not_found`: the session is reachable but has no such
   file. `invalid_path`: the path breaks the rules above.
-- **Write refusals in words**, each saying why: your own session (write your own workspace
-  directly); a session where the owner can only view (writing needs the User or Owner role
-  there); a read-only folder; a `create` on an existing file or a `replace` with no file there
-  (switch the mode; this comes before any card).
+- **Write refusals in words**, not codes, each saying why: your own session (write your own
+  workspace directly); a session the owner can only view (the message says writing needs the
+  User or Owner role there, so tell the owner that rather than that the session is missing); a
+  read-only folder; a `create` on an existing file or a `replace` with no file there (the
+  message names the mode to use; this comes before any card).
 - **The file changed.** The write lands only if the file still holds exactly the text the card
   showed (for `create`: still does not exist). A refusal saying it changed since the card was
   shown means someone edited it meanwhile: read it again and propose anew.
@@ -169,9 +171,9 @@ uses with you, and change it only when they ask to switch. Change the profile on
 
 Your name, voice and avatar have their own capabilities. Called from the Private workspace's
 assistant they change all of the owner's assistants; from a business workspace they change
-only that one. A later change of the same thing (name, voice or avatar) in the Private
-workspace or on the **Your assistant** page sets it for every assistant again, that one
-included.
+only that one. A later change of the same thing (name, voice or avatar, which the app calls the
+picture) in the Private workspace or on the **Your assistant** page sets it for every assistant
+again, that one included.
 
 The owner edits the same profile on the **Your assistant** page (`/assistant`; Cmd+K **Edit
 \<name\>'s profile**, or the **Your assistant** card on the Account page and in your own
