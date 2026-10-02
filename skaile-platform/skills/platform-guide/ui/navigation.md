@@ -34,7 +34,7 @@ The capability's own description carries the live list; prefer it if the two dif
     menu is the only sidebar entrance to those four pages; Cmd+K has them too.
     **Switch organization** groups the user's orgs into collapsible sections: **Starred**
     (only when something is starred; open by default), **Organizations** (open unless
-    something is starred), and **Invited personal workspaces** (other people's personal
+    something is starred), and **Invited Private workspaces** (other people's Private
     orgs the user was invited to; collapsed by default). Each row has a star icon
     (**Star \<org\>**) that moves the org into or out of **Starred**. Stars are per user
     and follow them across devices.
@@ -137,7 +137,8 @@ Entry: the org kebab (**Organization actions**) > **New project**, the dashboard
    account**), which opens that connection in My Connections. Dropbox is **not** offered.
 3. **Project Details** — **Project Name** (required) and **Description**.
 4. **Agent** — the name and picture of the project's first agent.
-5. **Sharing** — **Private** or **Shared** (Shared needs an org Owner); for Shared,
+5. **Sharing** — **Invited only** or **Everyone in \<Org\>** (the second needs an org
+   Owner; stored as `Private` / `Shared`); for **Everyone in \<Org\>**,
    **Teams with access**.
 6. **Create Project**.
 
@@ -152,7 +153,7 @@ Path: `/<org>/projects/<project>/settings` (Owner-only). Tabs:
 | ----------------- | ------- |
 | **Sessions**      | List/manage all sessions in the project; bulk mark-read / delete. |
 | **Members**       | Invite users, set Owner/User/Viewer, team access. |
-| **Project**       | Name, slug, description, **Visibility** (**Private** / **Shared**), delete. |
+| **Project**       | Name, slug, description, **Visibility** (**Invited only** / **Everyone in \<Org\>**), delete. |
 | **Session defaults** | Skaile config template applied to new sessions — including additional mounts — plus the default asset assignments for the project's sessions. (There is no separate "Assets" tab; asset defaults live here.) |
 | **Security**      | **Network egress**: **Open**, **Off — LLM provider only**, or **Allowlist specific domains**. |
 | **Connectors**    | Project-level connector enablement and account selection (today: Exchange — the project's mailbox access switch, and per-mailbox enable/disable including shared mailboxes admitted in My Connections). For file mounts use the workspace **Connectors** panel instead. |
@@ -167,7 +168,7 @@ Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner).
 | ------------ | ------- |
 | **Members**  | Session-scoped role overrides on top of project membership; add session-only members. |
 | **Config**   | Session-scoped Skaile config (overrides project defaults). |
-| **Shares**   | Session visibility toggle (**Shared** / **Private**) and public file-preview links. |
+| **Shares**   | Session visibility (**Everyone in the project** / **Invited only**) and public file-preview links. |
 
 ## Organization settings
 
