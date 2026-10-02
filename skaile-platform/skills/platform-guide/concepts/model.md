@@ -110,9 +110,9 @@ scope wins instead, and one rule above all of them:
   Home), and any project in a user's My space, opens only for that user. No Org role,
   Project role or PlatformAdmin reaches it, nor does whoever inherits the owner's other
   projects when the owner leaves the organization or is deleted (a deleted user's private
-  projects are sealed for everyone). A leaver's Home (in a Private workspace, all their My
-  space) is archived, not handed over, and stays closed to everyone while archived. It comes
-  back if they rejoin within 30 days and a seat is free; after that it is deleted.
+  projects are sealed for everyone). A leaver's Home — and in a Private workspace, all of
+  their My space — is archived, not handed over, and stays closed to everyone while
+  archived. It comes back if they rejoin within 30 days; after that it is deleted.
 
 - **Sending messages / talking to the agent** — a Session (or Project) Viewer is
   write-locked even if they are an Org User/Owner; the composer goes read-only.
@@ -137,4 +137,4 @@ source picker, the `is_personal` organization field, platform PRs #3760 (org cre
 #4281 (last Owner), #5023 (Personal/Business), #5076/#5354 (Explorer sections), #5251
 (agent graph), #5336/#5352 (agent rename, picture generation), #5988 (Private workspace
 seats), #6008 (private projects: `canAccessMySpaceProject`), #6044 (a leaver's Home is
-archived, not inherited), `team-sharing.service.ts`.
+archived, not inherited, and deleted after 30 days), `team-sharing.service.ts`.

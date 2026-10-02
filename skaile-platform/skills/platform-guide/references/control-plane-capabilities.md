@@ -196,13 +196,14 @@ These are refusals by design — proposing around them wastes the owner's approv
   holds one. An organization invite into it is refused once the seats are full, with the
   seat count; say so, and suggest a shared organization if the owner needs more people.
   Roles as above.
-  Someone invited only to a shareable project (one under Projects), or to a session or team
-  in it, takes a seat too, but only when they **accept**: such an invitation holds no seat
-  while pending, and sending it succeeds even when the workspace is full, with no sign of the
-  seat cap in the result. In a full workspace the invitee's accept is refused with that
-  reason, and the invitation stays valid, so they can accept it once a seat frees up. You cannot see the seat count, so
-  when you send such an invitation into a Private workspace, mention that the person can
-  only join while a seat is free.
+- **Share invitations into a Private workspace.** Someone invited only to a shareable
+  project (one under Projects), or to a session or team in it, takes a seat too, but only
+  when they **accept**: such an invitation holds no seat while pending, and sending it
+  succeeds even when the workspace is full, with no sign of the seat cap in the result. In a
+  full workspace the invitee's accept is refused with that reason, and the invitation stays
+  valid, so they can accept it once a seat frees up. You cannot see the seat count, so when
+  you send such an invitation into a Private workspace, mention that the person can only
+  join while a seat is free.
 - **Credentials.** No capability in this family accepts a token, password, personal access
   token, OAuth code, or client secret, and the personal-assistant effects take no repository
   URL or branch either (only `configure_connector` names a repository, on the connection's own
