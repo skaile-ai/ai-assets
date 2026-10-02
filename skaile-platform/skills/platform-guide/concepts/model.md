@@ -110,8 +110,9 @@ scope wins instead, and one rule above all of them:
   Home), and any project in a user's My space, opens only for that user. No Org role,
   Project role or PlatformAdmin reaches it, nor does whoever inherits the owner's other
   projects when the owner leaves the organization or is deleted (a deleted user's private
-  projects are sealed for everyone). A leaver's Home is archived, not handed over, and
-  comes back if they rejoin within 30 days.
+  projects are sealed for everyone). A leaver's Home (in a Private workspace, all their My
+  space) is archived, not handed over, and stays closed to everyone while archived. It comes
+  back if they rejoin within 30 days and a seat is free; after that it is deleted.
 
 - **Sending messages / talking to the agent** — a Session (or Project) Viewer is
   write-locked even if they are an Org User/Owner; the composer goes read-only.
