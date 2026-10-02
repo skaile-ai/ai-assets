@@ -27,9 +27,10 @@ The capability's own description carries the live list; prefer it if the two dif
     spinner while the dashboard is open. There is no separate Dashboard row and no
     activity badge on it.
   - Below it, the **Work** / **Private** switch, shown only to someone who has both their
-    own Private workspace and a business organization. **Private** opens their own Private
-    workspace (never one they were invited into); **Work** opens the business organization
-    they used last. Inside their own Private workspace the app is repainted in a warm
+    home Private workspace and a business organization. **Private** opens their home
+    Private workspace (the one they own, or else the first one they joined; never another
+    Private workspace they merely have a seat in); **Work** opens the business organization
+    they used last. Inside their home Private workspace the app is repainted in a warm
     palette, so they can see which side they are on. The side the user is not on shows a
     count of approvals waiting for them there. Cmd+K has it as **Switch to Private** /
     **Switch to Work**.
@@ -77,7 +78,7 @@ The capability's own description carries the live list; prefer it if the two dif
     has it as **Open \<name\>**. Which assistant it opens depends on where the user is: in
     a business org where they have a Home, that org's assistant; in their Private
     workspace, on the dashboard, or in an org where they are only a Viewer, their home
-    assistant (the one in their Private workspace). Each falls back to the other when it
+    assistant (the one in their home Private workspace). Each falls back to the other when it
     does not exist, and **Launcher always opens my home assistant** in **Preferences**
     makes it the home assistant everywhere. On the collapsed icon rail the launcher is its
     own icon above the avatar. The avatar opens the user menu — **Invite someone to
@@ -180,9 +181,11 @@ empty dashboard (**No Home yet**) that tells them to ask an admin for the User r
 
 ### A read-only Private workspace
 
-A Private workspace stays writable while an organization sponsors it. When the
-sponsorship ends, a notice strip at the top of every page in that workspace says when it
-becomes read-only (a grace period) and then that it **is read-only**, with **Ask your
+A Private workspace stays writable while someone pays for it (an employer organization,
+a platform administrator's grant, or the user). Private workspaces that existed before
+Work and Private spaces were switched on are kept as they were and never lock. When the
+last sponsorship ends, a notice strip at the top of every page in that workspace says the
+date, 30 days on, when it becomes read-only, and then that it **is read-only**, with **Ask your
 admin** and **Export your data** (each explains what to do; there is no one-click export of
 a whole workspace). Once it is read-only, write buttons such as **Create Project** and
 **Move to Projects** are disabled with the tooltip "This Private workspace is read-only."
@@ -243,7 +246,7 @@ undone). Nobody can open those projects until then. Homes are never listed.
 **Settings > Assistants** (business organizations only) governs members' assistants:
 
 - **Assistant reach** — **Default for every member**: how far each member's home
-  assistant (the one in their Private workspace) may reach into this organization:
+  assistant (the one in their home Private workspace) may reach into this organization:
   **Off** (cannot see the organization at all), **Coordinate** (sees the member's projects
   and sessions here, names only, and may message them; the default) or **Full** (may also
   read and write files and act with the member's authority, behind the usual approvals).

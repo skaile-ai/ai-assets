@@ -34,7 +34,7 @@ effect in this family do not reach it; only **Full** opens those.
 | Call | Gives you |
 | --- | --- |
 | `platform.list_my_organizations({ search?, cursor?, limit? })` | `organizationId`, the owner's live role, a permissions summary |
-| `platform.list_my_projects({ organizationId?, search?, cursor?, limit? })` | `projectId`, `organizationId`, status, visibility, source type, live role. The assistant's own workspace is never listed. |
+| `platform.list_my_projects({ organizationId?, search?, cursor?, limit? })` | `projectId`, `organizationId`, status, visibility, source type, live role. The Home in the owner's home Private workspace is never listed; the owner's Homes anywhere else (a business organization, or a Private workspace they were invited into) are listed like any project. Nobody else's Home is ever listed. |
 | `platform.list_my_sessions({ organizationId?, projectId?, archived?, search?, cursor?, limit? })` | `sessionId` with full ancestry (organization → project → session), live role. Omit `archived` for both. |
 | `platform.get_session_context({ sessionId })` | one session's ancestry plus the owner's effective role at each level. Not paged. |
 | `platform.list_project_members({ projectId, search?, cursor?, limit? })` | every membership *and invitation* row, with `status`: `Active`, `Invited`, `Expired`, `Revoked` |

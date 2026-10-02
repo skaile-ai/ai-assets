@@ -16,17 +16,22 @@ Session      ──1:1── Workspace (the session's working view of the projec
   There are two kinds. A **business organization** is a company's. A **Private
   workspace** is one person's own organization (up to six members, the owner included,
   invited by the owner; on an org subdomain, which is off in production, it is at
-  `/private` and old `/personal` links redirect). A user has a Private workspace when an
-  organization sponsors one for them (or a platform administrator creates it); it stays
-  writable while sponsored and turns read-only after a grace period once the sponsorship
-  ends (`ui/navigation.md`). The **Work** / **Private** switch at the top of the sidebar
-  moves between the two and is shown only to someone who has both; their own Private
+  `/private` and old `/personal` links redirect). A user gets a Private workspace when an
+  organization sponsors one for them (or a platform administrator creates it). Someone
+  must pay for it — an employer organization, a platform administrator's grant, or the
+  user — except a Private workspace that existed before Work and Private spaces were
+  switched on, which is kept as it was and never locks. With nobody paying, it gets 30 days
+  of grace with a notice, then turns read-only (`ui/navigation.md`). A user's **home
+  Private workspace** is the one they own or, if they own none, the first one they joined
+  (which can be someone else's); it is where their home assistant lives. The **Work** /
+  **Private** switch at the top of the sidebar moves between a business organization and
+  that home Private workspace, and is shown only to someone who has both; the home Private
   workspace uses a warmer colour palette. Only platform administrators create new
   organizations, and a business organization must keep at least one active Owner.
 - **Home and the assistant** — in every organization where they are a User or Owner, a
   member has a **Home**: a private project, first in their **My space**, whose main session
-  is their **assistant** there. The assistant in their Private workspace is their **home
-  assistant**. A Viewer has no Home. All of a user's assistants share one profile (name,
+  is their **assistant** there. The assistant in their home Private workspace is their
+  **home assistant**; every other one is an organization assistant. A Viewer has no Home. All of a user's assistants share one profile (name,
   picture, voice; the **Your assistant** page). The assistant is opened from the round
   launcher button at the end of the user row in the sidebar. The member can add more
   projects to My space (**New My space project**); they open only for their owner, and one

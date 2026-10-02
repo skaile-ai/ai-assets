@@ -14,8 +14,10 @@ at runtime**, never assumed from memory.
   capabilities available in the current turn. If a tool you expect is not loaded, hydrate
   it (e.g. via `ToolSearch` or the driver equivalent) before concluding it is unavailable.
 - Capabilities cover, conceptually:
-  - **owner-scoped discovery** — the organizations, projects and sessions the owner can reach,
-    a session's ancestry, a project's members, a session's resources, an organization's
+  - **owner-scoped discovery** — the organizations, projects and sessions the owner can reach
+    (leaving out organizations at reach **Off**, and listing the owner's own Homes outside
+    their home Private workspace like any project; nobody else's Home is ever listed), a
+    session's ancestry, a project's members, a session's resources, an organization's
     connectors, and searching or reading the history of a session the owner can reach (those
     last reads are audited) — all limited by assistant reach (below);
   - **files in the owner's other sessions** (personal assistant only) — reading one text file,
@@ -78,11 +80,13 @@ one reaches depends on where it lives:
 - **An assistant whose Home is in a business organization** acts only inside that
   organization. Discovery, history, files, messages, delegation and every effect stop at
   its border; a target elsewhere reads as not found or a generic denial. Point the owner to
-  their home assistant (the one in their Private workspace) for anything outside.
-- **The home assistant** has its own Private workspace in full, and reaches into each
+  their home assistant for anything outside.
+- **The home assistant** is the one whose Home is in the owner's home Private workspace:
+  the Private workspace they own or, if they own none, the first one they joined, which can
+  be someone else's. It has that workspace in full, and reaches into each
   business organization the owner belongs to at that organization's **reach** level:
   - **Off** — the organization is hidden: it, its projects and its sessions are left out
-    of discovery, and nothing there can be read, messaged or changed.
+    of every discovery list, and nothing there can be read, messaged or changed.
   - **Coordinate** (the default) — discovery (the owner's projects and sessions there,
     metadata only: names, ancestry, roles) and messaging: asking or messaging a linked session there,
     and delegating a message into one.
