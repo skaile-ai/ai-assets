@@ -195,6 +195,10 @@ These are refusals by design — proposing around them wastes the owner's approv
   organization) has six seats, the owner's included, and a pending invitation holds one. An
   organization invite into it is refused once the seats are full, with the seat count; say
   so, and suggest a shared organization if the owner needs more people. Roles as above.
+  Someone invited only to a project, session or team in it takes a seat too, but that is
+  checked when they **accept**: the invitation itself goes out, and in a full workspace the
+  invitee is told it is full and can accept once a seat frees up. When the workspace is at
+  its cap, tell the owner this before you send such an invitation.
 - **Credentials.** No capability in this family accepts a token, password, personal access
   token, OAuth code, or client secret, and the personal-assistant effects take no repository
   URL or branch either (only `configure_connector` names a repository, on the connection's own
