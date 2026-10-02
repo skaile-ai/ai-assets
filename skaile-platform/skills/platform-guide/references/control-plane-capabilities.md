@@ -151,8 +151,9 @@ These are refusals by design — proposing around them wastes the owner's approv
   `Viewer`/`User` vocabulary through the capability — not the Owner/Participant labels the
   Share tab shows (`concepts/collaboration.md`). No personal note, personal message, or
   display name can be attached — the human adds those from the web app.
-- **Personal workspaces.** A personal-assistant project or session cannot be invited into, and
-  a personal organization cannot be invited into. Pick a shared one.
+- **Private workspaces.** An assistant project or session cannot be invited into, and a
+  Private workspace (the UI name for a personal organization) cannot be invited into. Pick a
+  shared one.
 - **Credentials.** No capability in this family accepts a token, password, personal access
   token, OAuth code, or client secret, and the personal-assistant effects take no repository
   URL or branch either (only `configure_connector` names a repository, on the connection's own
