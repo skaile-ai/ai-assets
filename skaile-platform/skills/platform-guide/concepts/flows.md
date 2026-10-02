@@ -7,8 +7,8 @@ checkpoints.
 
 ## Flow definitions
 
-- A flow is an asset (like a skill) and can be owned at any scope: Personal, Session,
-  Project, Team, or Organization. Owners can publish upward with **Share to org**.
+- A flow is an asset (like a skill) and can be owned at any scope: Personal (shown as
+  **Only me** in the UI), Session, Project, Team, or Organization. Owners can publish upward with **Share to org**.
 - The org-level **Flows** page lists flow definitions and opens each into a graph view
   (nodes, dependencies, gate badges). Authorized users (scope admins) can edit visually:
   add/connect/remove nodes, change node settings, undo/redo. Flows import and export as
@@ -240,7 +240,8 @@ reaches that exact target only. Unassigning a skill unloads it from the project'
 sessions at once; other kinds leave on each session's next wake.
 
 **Personal flows are the exception.** `platform.create_flow` with scope `personal` saves the
-flow to the session owner's own library, visible only to them, and needs no admin role. The
+flow to the session owner's own library, visible only to them (the UI labels this scope
+**Only me**; "Private" means the Private workspace, so do not call it that), and needs no admin role. The
 write is still approved — per call, or by a standing grant over this session that only the
 session owner can issue — and still validated as strict v2 before the card shows.
 `platform.list_flows` lists project and organization flows only; personal flows are listed by
