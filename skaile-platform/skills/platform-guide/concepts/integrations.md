@@ -65,8 +65,9 @@ Two rules worth repeating to users:
   is **propose** one for the owner to approve: a complete non-secret mount (Box,
   SharePoint, Google Drive, or Git) as a single approval card for this session or the
   whole project, or a configuration handoff that parks on a trusted page where the owner
-  picks account and folder themselves. Agent-proposed drive mounts are **read-only**;
-  read-write needs the user's own **Connect** flow in the Connectors panel. Either way,
+  picks account and folder themselves. Agent-proposed drive mounts (Box, SharePoint,
+  Google Drive) are **read-only**; read-write needs the user's own **Connect** flow in the
+  Connectors panel. An agent-proposed Git mount is read-write, like any Git connection. Either way,
   verify afterwards (`connector_list`) and propose a restart if the mount has not
   attached yet.
 
@@ -76,8 +77,12 @@ Each connector, per project/asset, has an access level: read-write, read-only, o
 The platform's connector runtime enforces, at call time, "can this asset, in this session,
 run by this user, do this action on this system?" — plus audit logging of every call.
 
-The Connect dialog's **Access** selector defaults to **read-only**. An existing mount
-has no settings dialog — to change its folder or access level, the user removes it in
+For drive and folder mounts (SharePoint / OneDrive, Google Drive, Box, NextCloud, Local
+Folder) the Connect dialog shows a **Read-only** switch once a folder is picked. It is off
+by default, so a mount the user connects is read-write unless they turn it on. A Git
+connection has no such switch: it is always read-write today, and the platform has no
+read-only Git mount. Never tell a user a Git repo can be connected read-only. An existing
+mount has no settings dialog — to change a drive or folder mount's folder or access level, the user removes it in
 the Connectors panel and re-creates it via **Connect**.
 
 Practical rules for the agent:
@@ -139,7 +144,8 @@ under organization settings, **Classifiers** — see `concepts/flows.md`.
 Source of truth: `platform/docs/integration_architecture.md`,
 `platform/docs/mount-connection-binding.md` (owner invariant), `platform/docs/exchange-connector.md`,
 `platform/docs/ai-provider-credential-lifecycle.md`, `connector-mount-provisioning.ts`
-(agent-proposed mounts), `configure-instance-modal.tsx` (Access default), platform PRs
+(agent-proposed mounts), `configure-instance-modal.tsx` and `configure-registry.tsx`
+(Read-only switch; Git pinned read-write), platform PRs
 #5337/#5357 (Reconnect), #5364 (shared mailboxes per org),
 #5531 (shared-mail admin approval link), #4703 (setup-token seats),
 #5099/#5109/#5139 (seat health and routing), #5305 (classifier providers).
