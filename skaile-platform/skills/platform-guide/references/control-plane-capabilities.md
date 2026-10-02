@@ -27,6 +27,12 @@ running flows all stop at its border, and a target elsewhere reads as not found 
 denial. If the owner needs something in another workspace, point them to their Private
 workspace's assistant.
 
+**The owner's reach settings** can be read and lowered with two platform actions, **Read my
+assistant reach** and **Lower my assistant reach** (`platform.find_actions`). They never raise
+a level: a request to go higher is refused, and only the owner can undo their own lowering.
+The owner's own Private workspace has no such setting. `enforced: false` in the result means the settings are stored but not applied yet, so
+lowering one changes nothing today; say so if the owner asks.
+
 | Call | Gives you |
 | --- | --- |
 | `platform.list_my_organizations({ search?, cursor?, limit? })` | `organizationId`, the owner's live role, a permissions summary |
@@ -50,20 +56,49 @@ above:
 | `platform.search_my_sessions({ query, limit? })` | `hits` — snippet, `sessionId`, `projectId`, `seq`, `createdAt` — across the sessions the owner can read. `limit` caps at 100. |
 | `platform.read_session_history({ sessionId, limit?, beforeSeq? })` | `messages`, newest-first, from one session the owner can reach, plus `hasMore`. `limit` defaults to 50 and caps at 200; `beforeSeq` pages backwards, returning only messages with `seq` strictly below it. |
 
-Use them in that order: search to find the session, then read that session's history — and to
-use a file you found there, pass it on by reference (`{ sessionId, path }`, see
-`references/agent-action-catalog.md`) rather than copying its content. Search
+Use them in that order: search to find the session, then read that session's history. To hand
+a file you found there to an action (an upload, a mail attachment), pass it on by reference
+(`{ sessionId, path }`, see `references/agent-action-catalog.md`) rather than copying its
+content; to read its text yourself, use `platform.read_session_file` (below). Search
 scans the 50 most-recently-active sessions and returns at most 100 hits, and `truncated: true`
 means it hit one of those two caps — not that nothing else matched. So treat a truncated search
 as "look harder", never as a complete answer.
 
 **These reads are audited.** `platform.search_my_sessions`, `platform.read_session_history`,
-`platform.get_session_context` and `platform.list_session_resources` write a personal-assistant
-read audit naming the owner, the target session's ancestry and how much came back — and so does
-reading another session's file by reference (`platform.add_draft_attachment`, an upload through
+`platform.get_session_context`, `platform.list_session_resources` and
+`platform.read_session_file` write a personal-assistant read audit naming the owner, the target
+session's ancestry and how much came back — and so does reading another session's file by
+reference (`platform.add_draft_attachment`, an upload through
 `platform.invoke`). Reading a colleague's conversation on the owner's behalf
 leaves a record. That is not a reason to avoid it when the owner asks — it is a reason not to
 go trawling sessions speculatively.
+
+### Files in the owner's other sessions
+
+The personal assistant can read and change a text file in the `workspace` of another of the
+owner's sessions. `path` is relative to that workspace, with no leading slash and no `..`.
+
+| Call | Does |
+| --- | --- |
+| `platform.read_session_file({ sessionId, path })` | returns `{ sessionId, path, content, truncated, size }`. Only the first 256 KiB characters come back (`truncated: true`); `size` is the whole file in bytes. A file over 2 MiB, or one that is not UTF-8 text, is refused. |
+| `platform.write_session_file({ sessionId, path, content, mode })` | creates (`mode: "create"`) or replaces (`"replace"`) one text file, as the owner. `content` is the whole file, at most 64 KiB characters; a larger existing file cannot be replaced. |
+
+- **Read** is a query: no card while the owner is the only reader of your session; once anyone
+  else can read it, each read goes to the owner as a card, like any read of the owner's private
+  things (`concepts/agent.md`, *Shared sessions*). It never gets a standing grant.
+- **Write** is approval-gated. The owner sees the path and the change side by side on a card,
+  unless a standing grant covers it; a grant can cover that one session or every session of
+  its project. Read the file before you replace it.
+- **Where a write is refused:** your own session (write your own workspace directly); a
+  session where the owner can only view (it needs the User or Owner role); another person's
+  private project; a read-only folder.
+- **The file changed.** The write lands only if the file still holds exactly the text the card
+  showed (for `create`: still does not exist). A refusal saying it changed means someone
+  edited it meanwhile: read it again and propose anew. A `create` on an existing file, or a
+  `replace` with no file there, is refused before any card; switch the mode.
+- **Refusal codes.** `not_found` means the session does not exist or the owner cannot see it;
+  do not retry it. `file_not_found` means the session is
+  reachable but has no such file. `invalid_path` means the path is not usable.
 
 Do not confuse `platform.read_session_history` with `platform.read_own_session_history`. The
 latter is **not** part of this family: it is available in ordinary project sessions, always
@@ -137,7 +172,22 @@ uses with you, and change it only when they ask to switch. Change the profile on
 
 Your name, voice and avatar have their own capabilities. Called from the Private workspace's
 assistant they change all of the owner's assistants; from a business workspace they change
-only that one.
+only that one, until the next name change in the Private workspace or on the **Your
+assistant** page renames every assistant again.
+
+The owner edits the same profile on the **Your assistant** page (`/assistant`; Cmd+K **Edit
+\<name\>'s profile**, or the **Your assistant** card on the Account page and in your own
+session settings): name, picture, voice and the three documents. When the owner asks how to
+change who you are or what you know about them, point them there, or propose the change
+yourself.
+
+**The profile is not a file.** Your Home's `Skaile/` folder holds only `MEMORY.md`, your memory
+notes. Older assistants had `IDENTITY.md`, `SOUL.md` and `USER.md` there: on the first start
+after the change they are copied into the profile once and moved to `Skaile/archive/`, which is
+deleted after 30 days (an assistant on a separate agent server keeps them in `Skaile/` for
+now). Do not recreate or edit those files; nothing reads them as your profile.
+If your profile block says it could not be loaded from your old home files, they are still in
+`Skaile/` and the next start tries again.
 
 ### Session-owner effects — also in ordinary sessions
 
@@ -365,4 +415,7 @@ Grounded in: `platform/docs/protocol-v2-capabilities.md`,
 `get-operation.handler.ts`, `personal-flows-policy.service.ts`), platform PRs #6006
 (business-workspace confinement, `assistant-reach.service.ts`), #6008 (private projects),
 #6009 (`update-assistant-profile.handler.ts`, `update-assistant-profile-policy.service.ts`),
-and #6040 (project, session and team invitations take a Private workspace seat on accept).
+#6040 (project, session and team invitations take a Private workspace seat on accept),
+#6053 (`session-file.handler.ts`, `session-file-policy.service.ts`), #6057 (the profile leaves
+the Home: `import-home-files.ts`, `profile-archive-sweeper.service.ts`), #6051 (the **Your
+assistant** page) and #6058 (`assistant-reach.route.ts`).

@@ -18,6 +18,9 @@ at runtime**, never assumed from memory.
     a session's ancestry, a project's members, a session's resources, an organization's
     connectors, and searching or reading the history of a session the owner can reach (those
     last reads are audited);
+  - **files in the owner's other sessions** (personal assistant only) — reading one text file,
+    and, after the owner approves the change, creating or replacing one (see
+    `references/control-plane-capabilities.md`);
   - **control-plane changes** — creating an organization, a project or a session; inviting
     someone at any of those three levels; starting a connector setup; re-pointing a project's
     source connector; delivering a message into another session as the owner — and **reading a
@@ -234,6 +237,8 @@ transfers: `references/agent-action-catalog.md`.
   that role on the target (e.g. Owner to archive a session or unarchive a project); otherwise the
   action is not offered and is refused, with no card.
 - **Files travel by reference**, `{ sessionId?, resourceId?, path }`, never as bytes or base64.
+  This is about actions; reading or writing a text file in another session yourself has its own
+  two capabilities (`references/control-plane-capabilities.md`).
 - **A refusal does not say why.** Do not retry with other ids or keys; tell the user.
 - **Prefer a dedicated capability when one exists.** The catalogue is not generic CRUD: generated
   per-model create/update/delete is never exposed.
