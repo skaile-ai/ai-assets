@@ -19,8 +19,8 @@ at runtime**, never assumed from memory.
     connectors, and searching or reading the history of a session the owner can reach (those
     last reads are audited);
   - **files in the owner's other sessions** (personal assistant only) — reading one text file,
-    and, after the owner approves the change, creating or replacing one (see
-    `references/control-plane-capabilities.md`);
+    and, after the owner approves the change, creating or replacing one (the read is audited;
+    see `references/control-plane-capabilities.md`);
   - **control-plane changes** — creating an organization, a project or a session; inviting
     someone at any of those three levels; starting a connector setup; re-pointing a project's
     source connector; delivering a message into another session as the owner — and **reading a

@@ -171,6 +171,9 @@ Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner).
 | **Config**   | Session-scoped Skaile config (overrides project defaults). |
 | **Shares**   | Session visibility (**Everyone in the project** / **Invited only**) and public file-preview links. |
 
+In the user's own assistant session, a **Your assistant** card above the tabs links to the
+**Your assistant** page.
+
 ## Organization settings
 
 Path: `/<org>/settings` (org Owners and platform admins). Tabs: **Organization**

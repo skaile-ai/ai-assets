@@ -47,6 +47,8 @@ keywords:
   - notifications
   - report-a-problem
   - feedback
+  - assistant-profile
+  - session-file
 ---
 
 # Skaile Platform Guide
