@@ -7,11 +7,11 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   Exchange mail and calendar (triage, drafting, sending, shared mailboxes), the agent graph,
   Skailify apps, sharing and inviting, connecting a data source, AI providers and Claude
   seats, skills/assets, scoped sessions, agent-to-agent, notifications, roles and permissions,
-  personal vs business workspace, hibernation, or any platform surface; before creating a
+  Work vs Private workspaces, My space and the Home, assistant reach, hibernation, or any platform surface; before creating a
   project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
-version: 0.15.5
+version: 0.16.0
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -49,6 +49,9 @@ keywords:
   - feedback
   - assistant-profile
   - session-file
+  - private-workspace
+  - my-space
+  - assistant-reach
 ---
 
 # Skaile Platform Guide
@@ -77,13 +80,13 @@ mechanics only when the user is technical or `expertMode=true`.
 
 | File | Use when the user asks about... |
 | ---- | -------------------------------- |
-| `concepts/model.md` | The big picture: org/project/session/workspace, source types, mounts vs connectors, assets/skills, agents and the agent graph, flows, roles & permissions, personal vs business workspace. Start here for orientation. |
+| `concepts/model.md` | The big picture: org/project/session/workspace, source types, mounts vs connectors, assets/skills, agents and the agent graph, flows, roles & permissions, business organizations vs Private workspaces, the Home and My space. Start here for orientation. |
 | `concepts/sessions.md` | Session lifecycle (hibernate/wake/close), what a sleeping session shows and how it wakes, multiple sessions, **scoped sessions**, forking/renaming. |
 | `concepts/flows.md` | Flows and the Flows page/editor, **authoring a flow definition** (the seven node kinds, contracts, gates vs checks, provenance), runs and gates, **classifier nodes**, **run groups** (batch / standing / unattended processing), **personal flows**, running a flow inside an existing session, recipes, webhook triggers and the session webhook inbox. |
 | `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels, whose connection a mount runs on, **Reconnect**, Exchange mail and shared mailboxes, AI providers and subscription seats, classifier providers. |
 | `concepts/collaboration.md` | Multi-user sessions (mentions/reactions/threading/presence), sharing with people, public file-preview links, agent-to-agent (A2A). |
 | `concepts/previews.md` | Running and viewing an app preview; what makes a workspace previewable. |
-| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants (incl. asking the owner for one ahead), durable operations and the `AwaitingUser` handoff, discovery-then-propose, reporting platform problems to the Skaile team, platform actions (`find_actions` / `invoke` / `batch`), shared sessions (whose turn it is), UI steering (`open_file`, `navigate`) and UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
+| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants (incl. asking the owner for one ahead), durable operations and the `AwaitingUser` handoff, discovery-then-propose, **assistant reach** (which organizations you can see and act in), reporting platform problems to the Skaile team, platform actions (`find_actions` / `invoke` / `batch`), shared sessions (whose turn it is), UI steering (`open_file`, `navigate`) and UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
 
 ### Reference (load only when constructing an action)
 
@@ -98,7 +101,7 @@ mechanics only when the user is technical or `expertMode=true`.
 
 | File | Use when the user asks... |
 | ---- | -------------------------- |
-| `ui/navigation.md` | "Where is...", "how do I get to...", project/session/org settings (incl. **Classifiers**), creating a project, connecting a data source, shared Exchange mailboxes, the org **Sessions** report, **Agent graph**, Escape and Cmd+K switching — the app shell, sidebar, command palette, settings hierarchy. |
+| `ui/navigation.md` | "Where is...", "how do I get to...", the **Work** / **Private** switch, the sidebar's Company / Projects / My space sections and the assistant launcher, project/session/org settings (incl. **Classifiers**, **Assistants**), a read-only Private workspace, creating a project, connecting a data source, shared Exchange mailboxes, the org **Sessions** report, **Agent graph**, Escape and Cmd+K switching — the app shell, sidebar, command palette, settings hierarchy. |
 | `ui/workspace.md` | Anything about the workspace itself: chat composer, the workspace panel and its file explorer, the preview pane, the side panels opened from the toolbar icons, presence, mobile, common in-workspace click-paths. |
 
 ## Hard rules

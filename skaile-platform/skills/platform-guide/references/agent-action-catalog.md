@@ -29,8 +29,10 @@ asks to change *their own* notification mode for this session needs the dedicate
 `input` must match the result's `inputSchema`. It runs **as the session owner**, through the
 procedure's own authorization, exactly as in the UI.
 
-- **A read everyone in the session may see runs at once** — no card, grant or decision row, as a
-  batch read step does. **Every other call asks the owner first** — writes, and reads of the
+- **A read everyone in the session may see runs with no card**, grant or decision row, as a
+  batch read step does. From the home assistant it still needs **Full** reach into the
+  organization the action runs in, like a write; below that it is refused like any other
+  refusal (`concepts/agent.md` § *Assistant reach*). **Every other call asks the owner first** — writes, and reads of the
   owner's private data (whose card only the owner decides) — unless a standing grant the owner made
   from an earlier card covers that action on that target. The card is generic: the action's
   title, its input, and a note when it is not idempotent. Grants reach that one target only (for
@@ -67,8 +69,9 @@ not indices; references point backwards only, and a read may reference only earl
 A file is named by reference, `{ sessionId?, resourceId?, path }` — `sessionId` defaults to this
 session, `resourceId` to `workspace`, and `path` is mount-relative (`reports/Q3.pdf`, not
 `workspace/reports/Q3.pdf`). The platform reads the bytes itself. Another session can be named
-only from the personal assistant, only its workspace, and only one the owner can reach (find it
-with `platform.search_my_sessions` / `platform.read_session_history`); that read is audited, and a
+only from the personal assistant, only its workspace, and only one the owner can reach, in an
+organization where the assistant has **Full** reach (find it with `platform.search_my_sessions` /
+`platform.read_session_history`); that read is audited, and a
 sleeping session is never woken for it — if it cannot be read, ask the owner to open it.
 
 Two catalogue actions move files, at most 10 MiB each, and the bytes never reach you:
@@ -96,7 +99,7 @@ on it:
   several members at once, or an unattributable turn always gets a card.
 - `find_actions` hides actions on the owner's own things from anyone but the owner, and shows
   nothing on a turn it cannot attribute.
-- When a member asks, they must be able to do it themselves as well; the owner's reach is not
+- When a member asks, they must be able to do it themselves as well; the owner's authority is not
   enough. Each action declares a minimum role (`minTier`, e.g. Owner to archive a session or
   unarchive a project); the owner and every asker are held to it. On a member's turn
   `find_actions` hides what the member could not do, and `invoke` or `batch` refuse it before any

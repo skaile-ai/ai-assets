@@ -88,7 +88,7 @@ workspace". Panels (in icon order):
 
 | Panel          | Purpose |
 | -------------- | ------- |
-| **Assistant**  | A mini chat with the user's personal AI assistant; **Open full session** opens its full session. Shown only when the viewer has a personal assistant and is not already in it. |
+| **Assistant**  | A mini chat with the user's assistant — the same one the sidebar's assistant launcher opens on this page (in a business org where the user has a Home, that org's assistant; otherwise their home assistant), shown with the name and picture from their assistant profile; **Open full session** opens its full session. The launcher button in the sidebar opens and closes this panel. Shown only when the viewer has an assistant and is not already in its session. |
 | **Preview**    | Capability-render previews (fallback when the main layout hides the workspace). |
 | **AI Assets**  | Skills, MCP servers, agents and contracts for this session — the place to enable an asset, for **This session** or the **Whole project**. Connectors are *not* here; they have their own panel. |
 | **Connectors** | The session's data-source mounts: shows what is mounted and on whose account, and offers **Connect Box / SharePoint / Google Drive / NextCloud / Git** flows — pick the account/connection and folder, scope **This session** or **Whole project**. New mounts attach on the next reload/restart (the panel prompts). If the user's sign-in has lapsed, the folder picker shows **Reconnect** (or **Connect account**). It also holds **Exchange project access**: the project Owner's switch for the project's mailbox, and per-mailbox enable/disable (shared mailboxes are added in **My Connections** first). This is the answer to "I connected my \<provider\> in My Connections — now what?". |
@@ -161,4 +161,6 @@ Connectors panels), `frontend/src/components/ui/sharing-sidepanel/sharing-sidepa
 `frontend/src/pages/projects/settings/project-connectors-workspace.tsx`,
 `frontend/src/components/ui/provider-reauth-notice/provider-reauth-notice.tsx`.
 Verified against platform `main` @ `bb6449b20` (2026-09-26).
+The Assistant panel with the Work and Private spaces flag on
+(`assistant-companion-tab/`, `assistant-launcher/`): platform `main` @ `7687851fb` (2026-10-02).
 The **Report a problem** review-or-send-directly choice: platform `main` @ `c59fd243b` (2026-09-28).

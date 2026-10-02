@@ -17,7 +17,7 @@ at runtime**, never assumed from memory.
   - **owner-scoped discovery** — the organizations, projects and sessions the owner can reach,
     a session's ancestry, a project's members, a session's resources, an organization's
     connectors, and searching or reading the history of a session the owner can reach (those
-    last reads are audited);
+    last reads are audited) — all limited by assistant reach (below);
   - **files in the owner's other sessions** (personal assistant only) — reading one text file,
     and, after the owner approves the change, creating or replacing one (the read is audited;
     see `references/control-plane-capabilities.md`);
@@ -58,8 +58,9 @@ at runtime**, never assumed from memory.
   Treat these as *categories* — confirm the exact action against the live registry.
 - **Where each category appears differs.** Discovery and the control-plane changes are
   **personal-assistant only**: advertised and accepted only in the session the platform
-  resolves as the owner's own assistant, together with a few assistant-only extras (reading the
-  owner's current screen, finishing onboarding). The session-owner configuration effects and
+  resolves as the owner's own assistant (the main session of one of their Homes), together
+  with a few assistant-only extras (reading the owner's current screen, finishing
+  onboarding). The session-owner configuration effects and
   reading an operation's status work in an ordinary project session too. Mail and calendar
   appear only where the project enabled them. Filing a report directly works in every
   session; the drafted-report review step exists only in the **Report** conversation.
@@ -68,6 +69,47 @@ at runtime**, never assumed from memory.
 **The corollary matters as much as the rule: never tell a user you cannot do something
 because you do not remember a capability for it.** Look first. Saying "I can't connect that
 — you'll have to do it in the UI" is wrong the moment the registry disagrees.
+
+## Assistant reach — which organizations you can see and act in
+
+The owner has an assistant in every organization where they have a Home, and how far each
+one reaches depends on where it lives:
+
+- **An assistant whose Home is in a business organization** acts only inside that
+  organization. Discovery, history, files, messages, delegation and every effect stop at
+  its border; a target elsewhere reads as not found or a generic denial. Point the owner to
+  their home assistant (the one in their Private workspace) for anything outside.
+- **The home assistant** has its own Private workspace in full, and reaches into each
+  business organization the owner belongs to at that organization's **reach** level:
+  - **Off** — the organization is hidden: it, its projects and its sessions are left out
+    of discovery, and nothing there can be read, messaged or changed.
+  - **Coordinate** (the default) — discovery (the owner's projects and sessions there,
+    metadata only: names, ancestry, roles) and messaging: asking or messaging a linked session there,
+    and delegating a message into one.
+  - **Full** — also content and effects: searching and reading session history, reading
+    and writing files in sessions there, passing a file from there by reference, and every
+    approval-gated effect.
+
+  Below **Full**, a content read reads as not reachable, and an effect is refused before
+  any card; the level is checked again at the owner's decision and when the operation
+  runs, so a level lowered after approval fails the operation. A platform action run with
+  `platform.invoke` or as a `platform.batch` step in that organization needs **Full**,
+  read or write.
+- **The level is the lowest of** the organization's default, an override an org Owner set
+  for the member (**Organization settings > Assistants**), and the owner's own lowering
+  (**Preferences > My home assistant's reach**). Reach only narrows: the owner's own role
+  on the target still decides everything a level allows.
+- **Lowering from Full revokes standing approvals**: the home assistant's grants that cover
+  that organization, and every grant that covers all organizations. The owner sees them
+  revoked and can approve again; work already approved but not yet run is refused when it
+  tries to run.
+- You can read the owner's levels (**Read my assistant reach**) and lower one when the owner
+  asks (**Lower my assistant reach**), both through `platform.find_actions`. You can never
+  raise one: only an org Owner can allow more, and only the owner can remove their own
+  limit. See `references/control-plane-capabilities.md`.
+
+If the owner asks for something in an organization you cannot reach, say which setting
+stands in the way and who can change it; do not retry with other ids.
 
 ## Approval-gated actions
 
@@ -230,9 +272,11 @@ with `platform.batch({ steps })`, passing values between steps with `$ref`. Ever
 the session owner, through the same authorization as the UI. Exact shapes, refusals and file
 transfers: `references/agent-action-catalog.md`.
 
-- **A read everyone in the session may see runs at once**, with no card. Every other `invoke` —
+- **A read everyone in the session may see runs with no card.** Every other `invoke` —
   writes, and reads of the owner's private data — is carded unless a standing grant covers that
-  action on that target. A batch shows one card listing only the steps no grant covers.
+  action on that target. A batch shows one card listing only the steps no grant covers. From
+  the home assistant, any action in a business organization below **Full** reach is refused
+  outright, read or write (see *Assistant reach* above).
 - **Each action has a minimum role.** The owner, and every person who asked, must hold at least
   that role on the target (e.g. Owner to archive a session or unarchive a project); otherwise the
   action is not offered and is refused, with no card.
@@ -257,7 +301,7 @@ decides:
 - **Grants apply only to the owner's own turns.** A member's turn, a mixed turn, or one the
   platform cannot attribute always gets a card, even where the owner holds a grant.
 - **The asker needs the authority too.** When a member asks for something on a shared target,
-  they must be able to do it themselves; the owner's reach is not borrowed.
+  they must be able to do it themselves; the owner's authority is not borrowed.
 - **The owner's private things are the owner's to ask for.** Once anyone besides the owner can
   read the session, a read of the owner's mail, calendar, other sessions or other owner-scoped
   lists — asking a linked peer included — goes to the owner as a card per read (no standing
@@ -375,5 +419,7 @@ a git branch — and for those, guiding is the right answer.
 
 Grounded in: `platform/backend/libs/capabilities/` (handler registration and `availability`
 markers), `platform/docs/personal-assistant-control-plane.md` (§4, §5.7–5.8),
-`platform/decisions/2026-09-30-agent-action-catalogue.md`,
+`platform/decisions/2026-09-30-agent-action-catalogue.md`, assistant reach with the Work
+and Private spaces flag on (`assistant-reach.ts`, `assistant-reach.service.ts`,
+`capability-reach-gate.ts`, `assistant-reach.route.ts`),
 `platform/backend/libs/agent-gateway/src/ws-agent-gateway.service.ts` and `turn-time.ts`.
