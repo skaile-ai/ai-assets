@@ -243,8 +243,9 @@ sessions at once; other kinds leave on each session's next wake.
 **Personal flows are the exception.** `platform.create_flow` with scope `personal` saves the
 flow to the session owner's own library, visible only to them (the UI labels this scope
 **Only me**; "Private" means the Private workspace, so do not call it that), and needs no
-admin role. The write is still approved — per call, or by a standing grant over this session that only the
-session owner can issue — and still validated as strict v2 before the card shows.
+admin role. The write is still approved — per call, or by a standing grant over this
+session that only the session owner can issue — and still validated as strict v2 before
+the card shows.
 `platform.list_flows` lists project and organization flows only; personal flows are listed by
 `platform.list_personal_flows`, which is itself approval-gated because listing puts flow names
 into a conversation every member can read. `platform.get_flow` and
