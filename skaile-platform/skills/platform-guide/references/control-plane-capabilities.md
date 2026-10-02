@@ -187,9 +187,10 @@ These are refusals by design — proposing around them wastes the owner's approv
   display name can be attached — the human adds those from the web app.
 - **Private projects.** The project the personal assistant lives in (its Home), any project
   in the owner's My space, and every session in them, cannot be invited into, shared, or
-  shared with a team, and none of those sessions can be made Shared. The refusal tells the
-  user to move the project to Projects first, but a Home can never be moved, so for the Home
-  say plainly that it stays private. Invite into or share another project instead.
+  shared with a team, and none of those sessions can be made Shared. The refusal reads "this
+  project is private to its owner and cannot be shared. Share work from a project under
+  Projects instead." A Home can never be moved, so never suggest moving it: share the work
+  from another project under Projects instead.
 - **Private workspace seat cap.** A Private workspace (the UI name for a personal
   organization) has six seats, the owner's included, and a pending invitation holds one. An
   organization invite into it is refused once the seats are full, with the seat count; say

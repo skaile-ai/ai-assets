@@ -28,8 +28,8 @@ user sent which message unless asked.
   or Project Owner; to a session, Org Owner or Session Owner.
 - Nobody can share a **private project** (the personal assistant's Home, or a project in a
   user's My space) or any of its sessions: sharing, inviting, team grants and making a
-  session Shared are all refused, with a message to move the project to Projects first (a
-  Home itself can never be moved).
+  session Shared are all refused: the project is private to its owner, and work is shared
+  from a project under Projects instead. A Home can never be moved.
 - Session-access presence: clicking the presence avatars in the toolbar's right zone shows
   everyone with read access to the session, grouped online/offline.
 
