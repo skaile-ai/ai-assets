@@ -13,9 +13,10 @@ Session      ──1:1── Workspace (the session's working view of the projec
 ```
 
 - **Organization** — the company/tenant. Users, projects, and integrations belong to it.
-  Every user also has a private single-member organization, their **Private** workspace
-  (shown as **My Workspace**; on an org subdomain, which is off in production, it is at
-  `/private` and old `/personal` links redirect),
+  Every user also has a private organization of their own, their **Private** workspace
+  (up to six members, the owner included, invited by the owner; shown as **My Workspace**;
+  on an org subdomain, which is off in production, it is at `/private` and old `/personal`
+  links redirect),
   which hosts their personal assistant. The sidebar toggle switches between **Personal**
   and **Business**; personal mode uses a warmer colour palette. Only platform
   administrators create new organizations, and a shared organization must keep at least
@@ -125,4 +126,5 @@ Grounded in: `platform/docs/roles-permissions-matrix.md`, `platform/docs/scoped-
 `platform/docs/mount-connection-binding.md` (owner invariant), the new-project wizard's
 source picker, the `is_personal` organization field, platform PRs #3760 (org creation),
 #4281 (last Owner), #5023 (Personal/Business), #5076/#5354 (Explorer sections), #5251
-(agent graph), #5336/#5352 (agent rename, picture generation), `team-sharing.service.ts`.
+(agent graph), #5336/#5352 (agent rename, picture generation), #5988 (Private workspace
+seats), `team-sharing.service.ts`.
