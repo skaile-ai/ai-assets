@@ -14,7 +14,8 @@ Session      ──1:1── Workspace (the session's working view of the projec
 
 - **Organization** — the company/tenant. Users, projects, and integrations belong to it.
   Every user also has a private single-member organization, their **Private** workspace
-  (shown as **My Workspace**; reachable at `/private`, old `/personal` links redirect),
+  (shown as **My Workspace**; on an org subdomain, which is off in production, it is at
+  `/private` and old `/personal` links redirect),
   which hosts their personal assistant. The sidebar toggle switches between **Personal**
   and **Business**; personal mode uses a warmer colour palette. Only platform
   administrators create new organizations, and a shared organization must keep at least
