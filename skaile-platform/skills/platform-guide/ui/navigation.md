@@ -181,8 +181,10 @@ empty dashboard (**No Home yet**) that tells them to ask an admin for the User r
 
 ### A read-only Private workspace
 
-A Private workspace stays writable while someone pays for it (an employer organization,
-a platform administrator's grant, or the user). Private workspaces that existed before
+A Private workspace stays writable while someone pays for it: an employer organization,
+or a platform admin. There is no self-service payment yet, so never send a user looking
+for a way to pay for their own workspace; the way back is an organization sponsoring it
+(**Ask your admin**). Private workspaces that existed before
 Work and Private spaces were switched on are kept as they were and never lock. When the
 last sponsorship ends, a notice strip at the top of every page in that workspace says the
 date, 30 days on, when it becomes read-only, and then that it **is read-only**, with **Ask your

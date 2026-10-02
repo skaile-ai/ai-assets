@@ -17,11 +17,12 @@ Session      ──1:1── Workspace (the session's working view of the projec
   workspace** is one person's own organization (up to six members, the owner included,
   invited by the owner; on an org subdomain, which is off in production, it is at
   `/private` and old `/personal` links redirect). A user gets a Private workspace when an
-  organization sponsors one for them (or a platform administrator creates it). Someone
-  must pay for it — an employer organization, a platform administrator's grant, or the
-  user — except a Private workspace that existed before Work and Private spaces were
-  switched on, which is kept as it was and never locks. With nobody paying, it gets 30 days
-  of grace with a notice, then turns read-only (`ui/navigation.md`). A user's **home
+  organization sponsors one for them (or a platform administrator creates it). It is paid
+  for by an employer organization or a platform admin; there is no self-service payment
+  yet, so never send a user looking for one. A Private workspace that existed before Work
+  and Private spaces were switched on is kept as it was and never locks. With nobody
+  paying, it gets 30 days of grace with a notice, then turns read-only
+  (`ui/navigation.md`). A user's **home
   Private workspace** is the one they own or, if they own none, the first one they joined
   (which can be someone else's); it is where their home assistant lives. The **Work** /
   **Private** switch at the top of the sidebar moves between a business organization and
