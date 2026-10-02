@@ -60,7 +60,8 @@ all of it — for bringing someone in on one folder without exposing the rest.
   The dialog asks for a session name, then opens the regular add-member dialog, where
   people are added with the usual session roles (Owner / User / Viewer).
 - The session is created as a shared session, so project members who already see shared
-  sessions see it too.
+  sessions see it too. In a private project (the assistant's Home or a My space project)
+  it is created Private instead, like every session there.
 - The agent inside sees a normal workspace rooted at that subfolder. Its tools and
   library connectors run on the **sharer's** (the scoped session owner's) connected accounts —
   the same session-owner rule as in `concepts/integrations.md`. Other file mounts are dropped; tool connectors (mail,
@@ -84,4 +85,5 @@ all of it — for bringing someone in on one folder without exposing the rest.
 Source of truth: `platform/docs/session-lifecycle.md`, `platform/docs/scoped-sessions.md`,
 `platform/backend/libs/session/src/idle-detection.service.ts` (timeout, stalled-turn and
 30-day auto-close defaults), platform PRs #5013/#5090/#5294 (cached-first wake), #5334
-(time since last turn), `isProjectSessionCreateRole` (who can create sessions).
+(time since last turn), #6008 (sessions in a private project are Private),
+`isProjectSessionCreateRole` (who can create sessions).

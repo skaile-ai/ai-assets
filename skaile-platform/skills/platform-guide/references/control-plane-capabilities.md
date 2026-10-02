@@ -19,6 +19,14 @@ Owner-scoped, query-only, and available only where the platform resolves the cal
 as the owner's own assistant. They never create approvals, grants, operations, invitations,
 or connector configuration.
 
+**Which organizations you reach depends on where you live.** The assistant in the owner's
+Private workspace reaches every organization the owner belongs to. An assistant whose Home is
+in a business workspace sees and acts **only in that workspace**: discovery, linking to
+sessions, creating sessions and projects, invitations, connector setup, delegation and
+running flows all stop at its border, and a target elsewhere reads as not found or a generic
+denial. If the owner needs something in another workspace, point them to their Private
+workspace's assistant.
+
 | Call | Gives you |
 | --- | --- |
 | `platform.list_my_organizations({ search?, cursor?, limit? })` | `organizationId`, the owner's live role, a permissions summary |
@@ -82,7 +90,7 @@ what decides whether an autonomy grant can ever cover it (see *Consent and auton
 | --- | --- | --- | --- |
 | `platform.create_organization({ name, slug?, logoUrl?, iconSvg? })` | a new organization | `privileged` | only the widest scope: every target of that kind the owner can reach |
 | `platform.create_project({ organizationId, name, sourceType, description?, visibility?, agentName?, agentAvatarUrl?, initialMessage? })` | a new project. `sourceType` is `Empty` or `OnSkaile`; `visibility` `Private` (default) or `Shared`. | `routine` | that target, its organization, or everything reachable |
-| `platform.create_session({ projectId, name, slug?, followMain?, visibility? })` | a new session; once `Succeeded`, `result.payload.url` links to it and `result.payload.sessionId` names it — share the link, or bring it up with `platform.navigate({ route: "session", params: { session: result.payload.sessionId } })` when the owner asked to go there | `routine` | that target, its project, its organization, or everything reachable |
+| `platform.create_session({ projectId, name, slug?, followMain?, visibility? })` | a new session; once `Succeeded`, `result.payload.url` links to it and `result.payload.sessionId` names it — share the link, or bring it up with `platform.navigate({ route: "session", params: { session: result.payload.sessionId } })` when the owner asked to go there. In a private project (the assistant's Home or a My space project) the session is always Private and `visibility: "Shared"` is refused. | `routine` | that target, its project, its organization, or everything reachable |
 | `platform.invite_to_organization({ organizationId, email, role? })` | an invitation email | `external` | that target, its organization, or everything reachable |
 | `platform.invite_to_project({ projectId, email, role? })` | an invitation email | `external` | that target, its project, its organization, or everything reachable |
 | `platform.invite_to_session({ sessionId, email, role? })` | an invitation email; the invitee can then read that session's whole history | `external` | that target, its project, its organization, or everything reachable |
@@ -104,6 +112,32 @@ gate and its `external` class, so a grant covers it only if the owner explicitly
 external communication — but a grant for one never covers the other. It is durable too: it
 returns an operation receipt, read with `platform.get_operation`. It takes no `context` note; a
 person adds one from the web app.
+
+### The assistant profile — `platform.update_assistant_profile`
+
+All of the owner's assistants, in every workspace, share one profile, shown to you as the
+`<ASSISTANT_PROFILE>` block: a name and three documents, **IDENTITY** (who you are), **SOUL**
+(how you speak) and **USER** (what you know about the owner). The **Language:** line in USER is
+the language rule: reply in that language, add the line once you know the language the owner
+uses with you, and change it only when they ask to switch. Change the profile only with
+`platform.update_assistant_profile({ document, mode, content })`:
+
+- `document` is `"identity"`, `"soul"` or `"user"`; `mode` is `"replace"` (the whole
+  document) or `"append"` (adds `content` on a new line).
+- The owner sees a card with the document before and after. A standing grant can cover SOUL
+  and USER, and only for the assistant in the owner's Private workspace; **IDENTITY always
+  shows the card**, and so does every change from an assistant in a business workspace. You
+  cannot request the grant ahead with `platform.request_standing_approval`; the owner grants
+  it from a card.
+- Caps: IDENTITY 4000, SOUL 8000, USER 12000 characters, and 24 KiB for the three together.
+  `{ error: "too_long" }` means the result would exceed one; shorten it. A refusal saying the
+  profile changed means it was edited meanwhile: read the new profile, then propose again.
+- Keep organization details out of the profile unless the owner asks: every workspace's
+  assistant reads it.
+
+Your name, voice and avatar have their own capabilities. Called from the Private workspace's
+assistant they change all of the owner's assistants; from a business workspace they change
+only that one.
 
 ### Session-owner effects — also in ordinary sessions
 
@@ -151,8 +185,11 @@ These are refusals by design — proposing around them wastes the owner's approv
   `Viewer`/`User` vocabulary through the capability — not the Owner/Participant labels the
   Share tab shows (`concepts/collaboration.md`). No personal note, personal message, or
   display name can be attached — the human adds those from the web app.
-- **The assistant's own project.** The project the personal assistant lives in, and every
-  session in it, cannot be invited into. Invite into another project instead.
+- **Private projects.** The project the personal assistant lives in (its Home), any project
+  in the owner's My space, and every session in them, cannot be invited into, shared, or
+  shared with a team, and none of those sessions can be made Shared. The refusal tells the
+  user to move the project to Projects first, but a Home can never be moved, so for the Home
+  say plainly that it stays private. Invite into or share another project instead.
 - **Private workspace seat cap.** A Private workspace (the UI name for a personal
   organization) has six seats, the owner's included, and a pending invitation holds one. An
   organization invite into it is refused once the seats are full, with the seat count; say
@@ -162,6 +199,8 @@ These are refusals by design — proposing around them wastes the owner's approv
   URL or branch either (only `configure_connector` names a repository, on the connection's own
   host). Every such field is rejected. Never ask for one, and never accept one if offered.
 - **Batches.** `platform.batch` runs only catalogue actions, so none of these can be a step.
+- **Business-workspace assistants stay in their workspace.** See *Which organizations you
+  reach* above; proposing a target in another organization is refused, not carded.
 - **Creating an organization is PlatformAdmin-only.** The server verifies the owner currently
   holds PlatformAdmin — membership, however senior, is not enough. Do not offer it to an owner
   who is not one.
@@ -313,4 +352,6 @@ to agents.
 Grounded in: `platform/docs/protocol-v2-capabilities.md`,
 `platform/docs/personal-assistant-control-plane.md` and `platform/backend/libs/capabilities/`
 (`configure-connector.handler.ts`, `begin-asset-configuration.handler.ts`,
-`get-operation.handler.ts`, `personal-flows-policy.service.ts`).
+`get-operation.handler.ts`, `personal-flows-policy.service.ts`), platform PRs #6006
+(business-workspace confinement, `assistant-reach.service.ts`), #6008 (private projects) and
+#6009 (`update-assistant-profile.handler.ts`, `update-assistant-profile-policy.service.ts`).

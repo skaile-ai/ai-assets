@@ -104,7 +104,13 @@ A user holds **three independent roles at once** — one each for **Org**, **Pro
 
 Reading rule: a user may use a feature as soon as **at least one** of their roles allows
 it (Org OR Project OR Session OR Admin) — with two exceptions where the most-specific
-scope wins instead:
+scope wins instead, and one rule above all of them:
+
+- **A private project is its owner's alone.** The personal assistant's own project (its
+  Home), and any project in a user's My space, opens only for that user. No Org role,
+  Project role or PlatformAdmin reaches it, nor does whoever inherits it when the owner
+  leaves the organization or is deleted (a deleted user's private projects are sealed for
+  everyone).
 
 - **Sending messages / talking to the agent** — a Session (or Project) Viewer is
   write-locked even if they are an Org User/Owner; the composer goes read-only.
@@ -114,7 +120,8 @@ Other notable rules:
 
 - **Private sessions** are visible only to the Session Owner and explicit session members
   — not even to the Project Owner or PlatformAdmin.
-- A **Shared** project/session is visible to Org Users/Owners and project/session members.
+- A **Shared** project/session is visible to Org Users/Owners and project/session members —
+  but never inside someone's private project, where only its owner sees anything.
 - Creating a session (including a scoped session) needs a project role of **User** or
   **Owner**. **Forking, reopening, or discarding** a session requires **Org Owner**.
 - A project can also be shared with a **team** at a role (Owner / User / Viewer), which
@@ -127,4 +134,4 @@ Grounded in: `platform/docs/roles-permissions-matrix.md`, `platform/docs/scoped-
 source picker, the `is_personal` organization field, platform PRs #3760 (org creation),
 #4281 (last Owner), #5023 (Personal/Business), #5076/#5354 (Explorer sections), #5251
 (agent graph), #5336/#5352 (agent rename, picture generation), #5988 (Private workspace
-seats), `team-sharing.service.ts`.
+seats), #6008 (private projects: `canAccessMySpaceProject`), `team-sharing.service.ts`.
