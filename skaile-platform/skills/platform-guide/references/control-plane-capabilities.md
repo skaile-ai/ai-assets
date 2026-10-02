@@ -196,8 +196,8 @@ These are refusals by design — proposing around them wastes the owner's approv
   holds one. An organization invite into it is refused once the seats are full, with the
   seat count; say so, and suggest a shared organization if the owner needs more people.
   Roles as above.
-- **Share invitations into a Private workspace.** Someone invited only to a shareable
-  project (one under Projects), or to a session or team in it, takes a seat too, but only
+- **Share invitations into a Private workspace.** Someone invited only to a team, or
+  to a shareable project (one under Projects) or a session in it, takes a seat too, but only
   when they **accept**: such an invitation holds no seat while pending, and sending it
   succeeds even when the workspace is full, with no sign of the seat cap in the result. In a
   full workspace the invitee's accept is refused with that reason, and the invitation stays
@@ -363,6 +363,6 @@ Grounded in: `platform/docs/protocol-v2-capabilities.md`,
 `platform/docs/personal-assistant-control-plane.md` and `platform/backend/libs/capabilities/`
 (`configure-connector.handler.ts`, `begin-asset-configuration.handler.ts`,
 `get-operation.handler.ts`, `personal-flows-policy.service.ts`), platform PRs #6006
-(business-workspace confinement, `assistant-reach.service.ts`), #6008 (private projects) and
+(business-workspace confinement, `assistant-reach.service.ts`), #6008 (private projects),
 #6009 (`update-assistant-profile.handler.ts`, `update-assistant-profile-policy.service.ts`),
 and #6040 (project, session and team invitations take a Private workspace seat on accept).
