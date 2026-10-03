@@ -52,8 +52,7 @@ project role of **User** or **Owner**, and the project must not be archived.
 
 An agent can create one too, from any session and not only the home assistant: the platform
 action **Create a new agent in a project** (find it with `platform.find_actions`). It takes the
-project id — `platform.list_sessions`, the ordinary session's listing of its own project (not
-the home assistant's `platform.list_my_sessions`), returns it as `projectId` — a name, and
+project id — listing the current project's sessions returns it as `projectId` — a name, and
 optionally a one-line description, instructions (the dialog's **Prompt**), an identity, and
 **Shared** (the default) or **Private**. In a private project (the assistant's Home or a My
 space project) the agent is always Private: left out, it is made Private; an explicit Shared is
