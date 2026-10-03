@@ -372,10 +372,10 @@ do not retry the capability, and never take a secret in chat.
 
 ## Consent and autonomy
 
-Every effect here is approval-gated, with one exception: `platform.cycle_session` (above) posts
-no card and no grant reaches it. Per call, the platform either cards it, dispatches it under
-an existing autonomy grant, or refuses it — **you do not choose, and cannot predict, which**. Never
-promise the owner a card.
+Every effect here is approval-gated. Per call, the platform either cards it, dispatches it under
+an existing autonomy grant, or refuses it — **you do not choose, and cannot predict, which**.
+Never promise the owner a card. One exception: `platform.cycle_session` (above) posts no card,
+and no grant reaches it.
 
 A grant is minted only by a human — an owner of the session the card was shown in, from a card they
 themselves approved — and it is narrow by construction:
