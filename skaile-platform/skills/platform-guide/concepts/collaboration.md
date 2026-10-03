@@ -9,7 +9,8 @@ carries context about who is online, who sent it, and whether the agent was @men
 
 - **Mentions** — `@agent`, `@here`, `@all` address the agent; `@<name>` / `@humans`
   address specific people. A user's own assistant answers to the name they gave it on the
-  "Your assistant" page (and to its session's name); `@` offers it under that name. A name a
+  "Your assistant" page, written as one word (`@jarvis`; "Miss Minutes" is `@missminutes`), and
+  to its session's name; `@` offers it under that one-word name. A name a
   member, a group or the session's agent already answers to addresses them, not the assistant. The agent responds when @mentioned or when it can meaningfully
   contribute; it stays silent (internally `[PASS]`) when a message is human-to-human.
 - **Reactions** — emoji reactions on messages (the agent can react too, as a lightweight
