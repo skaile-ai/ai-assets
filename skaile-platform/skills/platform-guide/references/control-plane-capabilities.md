@@ -207,7 +207,9 @@ Four effects are **not** personal-assistant-only: their authority is the session
 from, so they are offered in a regular project session too. Three use the same consent
 machinery; `cycle_session` posts no card at all (below). Each row's schema says which ids it takes — the two configuration effects resolve
 their target from the calling session, while `run_flow_in_session` names another session and
-refuses the calling one.
+refuses the calling one. Creating an agent from an ordinary session is not in this family and
+not `create_session` (above, assistant-only): it is the platform action **Create a new agent in
+a project**, found through `platform.find_actions` (`concepts/sessions.md`).
 
 | Call | Effect | Returns |
 | --- | --- | --- |

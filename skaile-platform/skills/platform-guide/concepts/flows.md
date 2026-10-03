@@ -510,18 +510,22 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   `platform.pause_run_group`, `platform.cancel_run_group`), each approval-gated and
   grantable. The session owner must be among those the group's **startableBy** allows (for
   a new group, the startableBy being set), or the call is refused before any card appears.
-- A group the agent creates is a **Draft**: it runs nothing until it is activated. The
-  order is create, then optionally switch autonomous mode on, then activate:
+- A group the agent creates is a **Draft**: it runs nothing until it is activated (the
+  board's create wizard activates straight away). The order is create, then optionally
+  switch autonomous mode on, then activate:
   - `platform.list_run_groups` (no approval) lists the project's groups, newest first —
     use it to find a group whose create was approved after your call stopped waiting.
   - `platform.set_run_group_autonomous_mode({ groupId, autonomousMode })` switches
-    autonomous mode on or off. It is classed privileged: a routine standing grant never
-    covers it. It affects only runs admitted afterwards (so set it before activating), and
-    gates the flow marks mandatory still stop every run. `create_run_group` itself still
+    autonomous mode on or off. It is classed `privileged`, so it has no one-click grant
+    option: a grant reaches it only if the owner deliberately turned that opt-in on. It
+    affects only runs admitted afterwards (so set it before activating), and gates the flow
+    marks mandatory still stop every run. `create_run_group` itself still
     refuses `autonomousMode: true`.
   - `platform.activate_run_group({ groupId })` starts a Draft group, with the same check as
     the board's **Activate** button. It starts only a Draft: a paused group is resumed by a
     person on the board.
+  - A person does the same on the group's page: **Activate**, and the **Autonomous**
+    switch.
 
 ## Webhooks that wake a session
 

@@ -61,7 +61,8 @@ refused. Like any action it runs as the session
 owner and needs the owner's approval, and the owner needs the same project role the **New
 agent** dialog requires. The card cuts long
 instructions short; the full text is in the new agent's **Edit agent** dialog. It does not link
-the new agent to the calling session — propose that separately with `platform.link_to_session`.
+the new agent to the calling session — propose an agent-to-agent link separately (see
+*Agent-to-Agent* in `concepts/collaboration.md`).
 
 ## Scoped sessions
 
