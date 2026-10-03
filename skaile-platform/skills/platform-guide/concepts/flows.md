@@ -522,8 +522,8 @@ Fuller treatment: `ai-assets/docs/flows.md`.
     marks mandatory still stop every run. `create_run_group` itself still
     refuses `autonomousMode: true`.
   - `platform.activate_run_group({ groupId })` starts a Draft group, with the same check as
-    the board's **Activate** button. It starts only a Draft: a paused group is resumed by a
-    person on the board.
+    the board's **Activate** button. Approval-gated and grantable, for that group or its
+    project. It starts only a Draft: a paused group is resumed by a person on the board.
   - A person does the same on the group's page: **Activate**, and the **Autonomous**
     switch.
 
