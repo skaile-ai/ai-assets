@@ -89,8 +89,9 @@ Sessions can talk to each other's agents through directed, two-sided opt-in link
   dialog's **Agent communication** toggles. Inbound A2A messages render distinctly in the
   chat.
 - In Expert Mode, the card also lists **Other organizations**: sessions the user owns in
-  another organization can be linked by hand. The agent itself only discovers and links
-  within its own organization.
+  another organization can be linked by hand. The agent itself only links within its own
+  organization. The home assistant can still find the owner's sessions in other organizations
+  (as far as each one's reach allows) and message a session linked to it there by hand.
 
 Source of truth: `platform/docs/protocol-extensions.md`,
 `platform/docs/public-file-preview-sharing.md`, `platform/backend/libs/agent-to-agent/`,

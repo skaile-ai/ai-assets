@@ -83,13 +83,17 @@ one reaches depends on where it lives:
   their home assistant for anything outside.
 - **The home assistant** is the one whose Home is in the owner's home Private workspace:
   the Private workspace they own or, if they own none, the first one they joined, which can
-  be someone else's. It has that workspace in full, and reaches into each
-  business organization the owner belongs to at that organization's **reach** level:
+  be someone else's. It has that workspace in full, and reaches into each other
+  organization the owner belongs to at that organization's **reach** level (a Private
+  workspace the owner was only invited into counts too, and stays at **Coordinate**: no
+  settings page offers a control for it):
   - **Off** — the organization is hidden: it, its projects and its sessions are left out
     of every discovery list, and nothing there can be read, messaged or changed.
-  - **Coordinate** (the default) — discovery (the owner's projects and sessions there,
-    metadata only: names, ancestry, roles) and messaging: asking or messaging a linked session there,
-    and delegating a message into one.
+  - **Coordinate** (the default) — discovery (structure only, never content: the owner's
+    projects and sessions there with names, ancestry and roles, project members, a session's
+    resources, and connectors redacted to identity and readiness) and messaging: asking or
+    messaging a session linked to it there, and delegating a message into one. The assistant
+    cannot link across organizations itself; such a link is made by hand in Expert Mode.
   - **Full** — also content and effects: searching and reading session history, reading
     and writing files in sessions there, passing a file from there by reference, and every
     approval-gated effect.
