@@ -150,4 +150,5 @@ Source of truth: `platform/docs/integration_architecture.md`,
 (Read-only switch; Git pinned read-write), platform PRs
 #5337/#5357 (Reconnect), #5364 (shared mailboxes per org),
 #5531 (shared-mail admin approval link), #4703 (setup-token seats),
-#5099/#5109/#5139 (seat health and routing), #5305 (classifier providers).
+#5099/#5109/#5139 (seat health and routing), #5305 (classifier providers),
+#6133 (cycle_session without an approval card).
