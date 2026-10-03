@@ -56,12 +56,12 @@ project id — listing the current project's sessions returns it as `projectId` 
 optionally a one-line description, instructions (the dialog's **Prompt**), an identity, and
 **Shared** (the default) or **Private**. In a private project (the assistant's Home or a My
 space project) the agent is always Private: left out, it is made Private; an explicit Shared is
-refused. Like any action it runs as the session owner and needs the owner's approval, unless, on the
-owner's own turn, a standing grant already covers that action on that project; the owner, and anyone else who asked
-on this turn, needs the same project role the **New agent** dialog requires. The card cuts long
-instructions short; the full text is in the new agent's **Edit agent** dialog. It does not link
-the new agent to the calling session — propose an agent-to-agent link separately (see
-*Agent-to-Agent* in `concepts/collaboration.md`).
+refused. Like any action it runs as the session owner and needs the owner's approval, unless,
+on the owner's own turn, a standing grant already covers that action on that project; the
+owner, and anyone else who asked on this turn, needs the same project role the **New agent**
+dialog requires. The card cuts long instructions short; the full text is in the new agent's
+**Edit agent** dialog. It does not link the new agent to the calling session — propose an
+agent-to-agent link separately (see *Agent-to-Agent* in `concepts/collaboration.md`).
 
 ## Scoped sessions
 

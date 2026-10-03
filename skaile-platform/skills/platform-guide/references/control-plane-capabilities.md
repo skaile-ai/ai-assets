@@ -395,9 +395,9 @@ themselves approved — and it is narrow by construction:
 - **Optional use and budget caps**, clamped down to the server's own ceilings.
 - **Effect opt-ins.** Because the safe default leaves both off, an `external` or `privileged`
   effect has no one-click option at all — the owner has to widen it deliberately. An effect
-  classed `never` is ungrantable, and so is `platform.batch` as a whole (each step matches its own
-  action's grants). Ungrantable means it can only be carded or refused — never dispatched silently. (`cycle_session`
-  is not ungrantable in this sense: it has no consent step at all.)
+  classed `never` is ungrantable, and so is `platform.batch` as a whole (each step matches its
+  own action's grants). Ungrantable means it can only be carded or refused — never dispatched
+  silently. (`cycle_session` is not ungrantable in this sense: it has no consent step at all.)
 - **Only on a card.** Config pre-approvals (`preApprovedCapabilities`) are retired and ignored;
   the card is the one place a standing approval comes from.
 
@@ -449,7 +449,8 @@ to agents.
 Grounded in: `platform/docs/protocol-v2-capabilities.md`,
 `platform/docs/personal-assistant-control-plane.md` and `platform/backend/libs/capabilities/`
 (`configure-connector.handler.ts`, `begin-asset-configuration.handler.ts`,
-`get-operation.handler.ts`, `personal-flows-policy.service.ts`, `cycle-session.handler.ts`), platform PRs #6006
+`get-operation.handler.ts`, `personal-flows-policy.service.ts`, `cycle-session.handler.ts`),
+platform PRs #6006
 (business-workspace confinement, `assistant-reach.service.ts`), #6008 (private projects),
 #6009 (`update-assistant-profile.handler.ts`, `update-assistant-profile-policy.service.ts`),
 #6040 (project, session and team invitations take a Private workspace seat on accept),
