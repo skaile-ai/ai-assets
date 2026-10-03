@@ -24,8 +24,8 @@ a business workspace sees and acts **only in that workspace**: discovery, linkin
 sessions, creating sessions and projects, invitations, connector setup, delegation and
 running flows all stop at its border, and a target elsewhere reads as not found or a generic
 denial. If the owner needs something in another workspace, point them to their Private
-workspace's assistant, the home assistant. The home assistant reaches each business
-organization the owner belongs to only as far as that organization's **reach** level allows
+workspace's assistant, the home assistant. The home assistant reaches each other
+organization the owner belongs to (an invited Private workspace too) only as far as that organization's **reach** level allows
 (`concepts/agent.md` § *Assistant reach*): at **Off** the organization is left out of every
 list below; at **Coordinate** (the default) the seven structural lists include it, but
 `platform.search_my_sessions`, `platform.read_session_history`, the file calls and every

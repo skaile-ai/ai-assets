@@ -85,8 +85,8 @@ one reaches depends on where it lives:
   the Private workspace they own or, if they own none, the first one they joined, which can
   be someone else's. It has that workspace in full, and reaches into each other
   organization the owner belongs to at that organization's **reach** level (a Private
-  workspace the owner was only invited into counts too, and is at **Coordinate** unless
-  changed):
+  workspace the owner was only invited into counts too, and stays at **Coordinate**: no
+  settings page offers a control for it):
   - **Off** — the organization is hidden: it, its projects and its sessions are left out
     of every discovery list, and nothing there can be read, messaged or changed.
   - **Coordinate** (the default) — discovery (structure only, never content: the owner's
