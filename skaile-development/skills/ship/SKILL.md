@@ -238,8 +238,8 @@ MUST  fix only items RELATED to the change (e.g. lint/type/test failures the cha
 MUST  converge the babysit loop — cap fix rounds, and if CI stays red on something unrelated or a review item recurs after a good-faith fix, stop and ask (gate #8)
 MUST  print the plain-language recap (Phase 13, STEP 14d) immediately BEFORE the final question — jargon-free, no paths or symbols, written for someone who was not watching
 MUST  ask the user at the end (Phase 13) to choose: squash-merge + cleanup | cleanup only | stop here — and execute exactly that
-MUST  for platform work, decide `docs_impact` BEFORE committing (Phase 8b) and, when user-visible, update `features/SKAILE-PLATFORM-CAPABILITIES.md` (+ its `features/<NN>/` doc) IN THE SAME PR and open an ai-assets PR for the `platform-guide` skill — docs are part of the change, not a post-merge chore; the platform PR body carries a `## Docs` section the CI guard parses
-NEVER skip the platform-guide update because the ai-assets checkout is "not accessible" — clone `skaile-ai/ai-assets` into a scratch dir; stop and ask (gate #7) only if that clone itself fails
+MUST  for platform work, decide `docs_impact` BEFORE committing (Phase 8b) and, when user-visible, update `features/SKAILE-PLATFORM-CAPABILITIES.md` (+ its `features/<NN-section>/` doc) IN THE SAME PR and open an ai-assets PR for the `platform-guide` skill — docs are part of the change, not a post-merge chore; the platform PR body carries a `## Docs` section the CI guard parses
+NEVER skip the platform-guide update because the ai-assets checkout is "not accessible" — clone `skaile-ai/ai-assets` into a scratch dir; stop and ask (gate #10) only if that clone itself fails
 MUST  use squash-and-merge (`gh pr merge <n> --squash`) when merging
 MUST  on cleanup: remove the worktree and delete the local branch; on merge+cleanup also delete the remote branch
 MUST  report back with: repo, issue number + URL, branch, PR URL + final state (merged / open), 1-2 line summary, deferred/unrelated items
@@ -559,6 +559,10 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
          `references/` file (SKILL.md index + keywords only if a new topic area appeared).
          Hard rules from that skill: real UI labels in **bold**; never enumerate live
          `platform.*` capabilities from memory (point at `platform.find_actions` instead).
+       - Re-entrant (babysit delta, resume): first look for an open ai-assets PR whose body has
+         `Refs skaile-ai/platform#<issue_number>`; if one exists, check out ITS branch (no `-b`) and
+         push to it — never open a second guide PR. Always `git fetch origin` before branching.
+       - Clone failure (`gh repo clone` / fetch) is gate #10: STOP and ask — do not fall back to "n/a".
        - Commit `docs(platform-guide): <what> (skaile-ai/platform#<issue_number>)`, push, and
          `gh pr create --repo skaile-ai/ai-assets` with `Refs skaile-ai/platform#<issue_number>`
          in the body — a reference, NEVER a closing keyword. Capture `guide_pr_url`.
@@ -573,7 +577,7 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
 
   The platform PR body MUST contain this section (STEP 12) — the CI guard parses these exact lines:
     ## Docs
-    Capabilities doc: updated | n/a — <reason, ≥ 10 characters>
+    Capabilities doc: updated | n/a — <reason, ≥ 10 characters>   (write ONE alternative, no brackets)
     Platform guide: <https://github.com/skaile-ai/ai-assets/pull/N> | n/a — <reason, ≥ 10 characters>
 
 EMIT [ship] docs_impact value=<user-visible|none> guide_pr=<url|n/a>
@@ -649,6 +653,8 @@ EMIT [ship] synced_with_main incoming=<N>
 STEP 12: Open the PR
   Title type by category (matches commit type): bug/issue/ui → fix, chore → chore, feature → feat.
   IF pr_template exists: fill its sections; otherwise use the default body below.
+  Platform, either way: the body MUST contain the `## Docs` section from STEP 10b — append it
+  after the template's sections when the template lacks it. CI parses it.
   $ cd <repo_path>
   $ gh pr create --base <default_branch> --head <branch_name> \
       --title "<type>(<scope>): <title> (#<issue_number>)" \
