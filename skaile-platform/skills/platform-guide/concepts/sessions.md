@@ -50,8 +50,12 @@ session** is the canonical one; other sessions branch off it and merge back on c
 In the UI a session is presented as an agent: creating one is **New agent**. It needs a
 project role of **User** or **Owner**, and the project must not be archived.
 
-An agent can create one too, from any session and not only the home assistant: the platform
-action **Create a new agent in a project** (find it with `platform.find_actions`). It takes the
+An agent can create one too, from any session and not only the home assistant, in one of two
+ways. From one of the project's **agent templates**, it calls `platform.spawn_agent`: the new
+agent becomes a child of the calling session, runs as the session owner, and gets its task by a
+send afterwards, after an agent-to-agent link if there is none yet (*Agent templates* in
+`references/control-plane-capabilities.md`). From scratch, it uses the platform action
+**Create a new agent in a project** (find it with `platform.find_actions`). That action takes the
 project id — listing the current project's sessions returns it as `projectId` — a name, and
 optionally a one-line description, instructions (the dialog's **Prompt**), an identity, and
 **Shared** (the default) or **Private**. In a private project (the assistant's Home or a My
@@ -101,4 +105,6 @@ Source of truth: `platform/docs/session-lifecycle.md`, `platform/docs/scoped-ses
 `platform/backend/libs/session/src/idle-detection.service.ts` (timeout, stalled-turn and
 30-day auto-close defaults), platform PRs #5013/#5090/#5294 (cached-first wake), #5334
 (time since last turn), #6008 (sessions in a private project are Private),
-`isProjectSessionCreateRole` (who can create sessions), platform #6065 (agents create agents).
+`isProjectSessionCreateRole` (who can create sessions), platform #6065 (agents create agents),
+platform #6165, part of #6152 (spawning from agent templates: `spawn-agent.handler.ts`,
+`spawn-agent-policy.service.ts`).

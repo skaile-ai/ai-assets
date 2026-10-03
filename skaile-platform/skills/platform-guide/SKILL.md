@@ -7,11 +7,11 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   Exchange mail and calendar (triage, drafting, sending, shared mailboxes), the agent graph,
   Skailify apps, sharing and inviting, connecting a data source, AI providers and Claude
   seats, skills/assets, scoped sessions, agent-to-agent, notifications, roles and permissions,
-  Work vs Private workspaces, My space and the Home, assistant reach, hibernation, or any platform surface; before creating a
+  Work vs Private workspaces, My space and the Home, assistant reach, hibernation, agent templates, or any platform surface; before creating a
   project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
-version: 0.16.1
+version: 0.16.2
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -52,6 +52,8 @@ keywords:
   - private-workspace
   - my-space
   - assistant-reach
+  - agent-template
+  - spawn-agent
 ---
 
 # Skaile Platform Guide
@@ -95,7 +97,7 @@ mechanics only when the user is technical or `expertMode=true`.
 | `references/agent-action-catalog.md` | You are about to search for or run a platform action (`platform.find_actions`, `platform.invoke`, `platform.batch`), or pass a file by reference — and need the call shapes, `$ref` syntax, per-step consent, file transfers and shared-session rules. |
 | `references/exchange-mail-calendar.md` | You are about to read, triage, file, draft or send mail, or read or change a calendar event, in a connected Microsoft 365 mailbox — and need mailbox selection, the approval tiers, the send grant, and how to read a send result. |
 | `references/classifier.md` | You are about to classify many items with closed questions (`platform.classify`) and need the call shape, limits, and how to read `calibrated` / `p`. |
-| `references/control-plane-capabilities.md` | You are about to create a project/session/organization, invite someone, start or repair a connector, propose a connector mount or an asset configuration, run a flow in another session, read or write a text file in another of the owner's sessions, change the assistant profile, or read an operation back — and need the family's shape, effect classes, real boundaries, the operation lifecycle, and the `AwaitingUser` handoff. |
+| `references/control-plane-capabilities.md` | You are about to create a project/session/organization, invite someone, start or repair a connector, propose a connector mount or an asset configuration, run a flow in another session, read or write a text file in another of the owner's sessions, change the assistant profile, spawn an agent from an agent template or edit a template's instructions or skills, or read an operation back — and need the family's shape, effect classes, real boundaries, the operation lifecycle, and the `AwaitingUser` handoff. |
 
 ### UI (where things live, click-paths)
 
