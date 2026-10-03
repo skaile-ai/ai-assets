@@ -53,7 +53,8 @@ at runtime**, never assumed from memory.
   - **reporting to the Skaile team** — filing a platform problem or a feature request
     directly, without a review form (see below);
   - **platform actions** — the things a user does in the Skaile UI that are declared for agents
-    (the owner's own notification preferences, stars, renaming a session, …), searched with
+    (the owner's own notification preferences, stars, renaming a session, creating an agent in
+    a project, …), searched with
     `platform.find_actions` and run with `platform.invoke` or `platform.batch` (see below);
   - in Skailify-enabled sessions, actions registered by an embedded app itself.
 
@@ -63,7 +64,9 @@ at runtime**, never assumed from memory.
   resolves as the owner's own assistant (the main session of one of their Homes), together
   with a few assistant-only extras (reading the owner's current screen, finishing
   onboarding). The session-owner configuration effects and
-  reading an operation's status work in an ordinary project session too. Mail and calendar
+  reading an operation's status work in an ordinary project session too, and so do platform
+  actions — creating an agent in a project among them (`concepts/sessions.md`), though creating
+  a session through the control plane stays assistant-only. Mail and calendar
   appear only where the project enabled them. Filing a report directly works in every
   session; the drafted-report review step exists only in the **Report** conversation.
   Another reason to read the live set rather than a remembered one.
