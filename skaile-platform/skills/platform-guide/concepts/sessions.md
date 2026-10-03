@@ -50,6 +50,17 @@ session** is the canonical one; other sessions branch off it and merge back on c
 In the UI a session is presented as an agent: creating one is **New agent**. It needs a
 project role of **User** or **Owner**, and the project must not be archived.
 
+An agent can create one too, from any session and not only the home assistant: the platform
+action **Create a new agent in a project** (find it with `platform.find_actions`). It takes the
+project id — `platform.list_sessions` returns the current project's `projectId` — a name, and
+optionally a one-line description, instructions (the dialog's **Prompt**), an identity, and
+**Shared** (the default) or **Private**. In a My space project the agent is always Private: left
+out, it is made Private; an explicit Shared is refused. Like any action it runs as the session
+owner and needs the owner's approval, and the owner needs the same project role the **New
+agent** dialog requires. The card cuts long
+instructions short; the full text is in the new agent's **Edit agent** dialog. It does not link
+the new agent to the calling session — propose that separately with `platform.link_to_session`.
+
 ## Scoped sessions
 
 A **scoped session** mounts only a **subfolder** of the project's workspace instead of
@@ -86,4 +97,4 @@ Source of truth: `platform/docs/session-lifecycle.md`, `platform/docs/scoped-ses
 `platform/backend/libs/session/src/idle-detection.service.ts` (timeout, stalled-turn and
 30-day auto-close defaults), platform PRs #5013/#5090/#5294 (cached-first wake), #5334
 (time since last turn), #6008 (sessions in a private project are Private),
-`isProjectSessionCreateRole` (who can create sessions).
+`isProjectSessionCreateRole` (who can create sessions), platform #6065 (agents create agents).
