@@ -137,8 +137,8 @@ confirmation card will appear.** Say what you are about to do, then read the rea
 
 Restarting your own session (`platform.cycle_session`) is outside these three: it posts no card and
 no grant reaches it. It runs when the person behind the turn is an Owner of the session or of
-its project (or a platform admin), and is refused otherwise
-(`references/control-plane-capabilities.md`).
+its project (or a platform admin). It is refused otherwise, and on a turn the platform
+attributes to several people or to none (`references/control-plane-capabilities.md`).
 
 Some cards let the owner edit the request before deciding — a voice pick, a drafted report.
 The edit re-prepares the request as a new one; `platform.get_operation` on your original id
