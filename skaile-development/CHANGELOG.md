@@ -5,6 +5,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixes
+- `ship` 1.7.0: the platform capability-docs sync moved from post-merge Phase 13b (conditional, "only if accessible") to Phase 8b, before the commit. The capabilities doc now rides in the same PR, the `platform-guide` skill gets its own ai-assets PR (cloned when no checkout exists) merged with the platform PR, and the PR body carries a `## Docs` section that platform CI parses. Headless or forked runs stop before the merge gate and never reached the old step, which is why the docs were never updated.
+
 ### Docs
 - Skill references and examples now point at `forge/skaile-forge` (standalone repo `skaile-ai/skaile-forge`), which replaced `forge/L4-project`; branch-slug map entry `forge/skaile-forge` → `skaile-forge`.
 - `references/test_stack_map.md`: `forge/skaile-forge` row lists unit `test/unit/`, integration `tests/integration/`, e2e `tests/e2e/`; new `forge/forge-common` row. Test skills describe skaile-forge's synthetic-h3 Nitro route tests as unit-level (`test/unit/`), not integration tests.
