@@ -249,8 +249,9 @@ undone). Nobody can open those projects until then. Homes are never listed.
 
 - **Assistant reach** — **Default for every member**: how far each member's home
   assistant (the one in their home Private workspace) may reach into this organization:
-  **Off** (cannot see the organization at all), **Coordinate** (sees the member's projects
-  and sessions here, names only, and may message them; the default) or **Full** (may also
+  **Off** (cannot see the organization at all), **Coordinate** (sees the member's projects,
+  sessions, members and connectors here, names and status only, never content, and may
+  message them; the default) or **Full** (may also
   read and write files and act with the member's authority, behind the usual approvals).
   Lowering from **Full** asks for confirmation and revokes the standing approvals that
   assistants held here.
