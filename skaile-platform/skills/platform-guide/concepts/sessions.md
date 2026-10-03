@@ -90,7 +90,9 @@ all of it — for bringing someone in on one folder without exposing the rest.
 ## Forking / reopening / discarding
 
 - **Fork / reopen / discard** a session requires **Org Owner**. Expert Mode also offers
-  **Cycle session** (restart the container without closing).
+  **Cycle session** (restart the container without closing), which needs only an Owner of the
+  session or of its project (or a platform admin); Expert Mode is a display setting, not a
+  permission.
 - Renaming a session or project is a label-only change — it does not move the underlying
   workspace or git branch (those are frozen at creation). An old bookmarked URL after a
   rename shows an "address changed" screen prompting the user to reopen from the explorer.

@@ -206,8 +206,8 @@ If your profile block says it could not be loaded from your old home files, they
 Four effects are **not** personal-assistant-only: their authority comes from the session they
 are called from rather than from the owner's own assistant (for `cycle_session`, from the person
 behind the turn — below), so they are offered in a regular project session too. Three use the
-same consent machinery; `cycle_session` posts no card at all. Each row's schema says which ids it takes — the two configuration effects resolve
-their target from the calling session, while `run_flow_in_session` names another session and
+same consent machinery; `cycle_session` posts no card at all. Each row's schema says which ids
+it takes — the two configuration effects resolve their target from the calling session, while `run_flow_in_session` names another session and
 refuses the calling one. Creating an agent from an ordinary session is not in this family and
 not `create_session` (above, assistant-only): it is the platform action **Create a new agent in
 a project**, found through `platform.find_actions` (`concepts/sessions.md`).
@@ -225,8 +225,8 @@ only, and the restart that rides a configuration card is approved with that card
 grant. `cycle_session` has no card and no grant reaches it: it runs when the person behind the
 turn — the human who wrote it, or the user a schedule or webhook acts for — is an Owner of this
 session or of its project, or a platform admin (the check the UI's own restart uses). It is
-refused otherwise, and for a turn with several or no attributable people. The restart happens once your turn ends, so finish your reply
-briefly. It is skipped if the session stays busy for ten minutes or an approval card is still
+refused otherwise, and for a turn with several attributable people or none. The restart
+happens once your turn ends, so finish your reply briefly. It is skipped if the session stays busy for ten minutes or an approval card is still
 pending; if the mount is still absent on your next turn, call it again. Two things to act on:
 
 - **A new mount or asset is not live yet.** Both configuration effects take effect only on the
