@@ -259,23 +259,24 @@ with `platform.get_operation` (*The operation lifecycle* below), and `result.pay
 once it has `Succeeded`.
 
 There is no call that lists a project's templates. `templateId` takes the template's id or its
-exact name, so use the name the person gives you, or the id from the project's agent templates
-in the UI. A template **holds bound credentials** when connector credentials are attached to
-the template itself, so every instance reaches those systems on the template's connection,
-whoever spawned it.
+exact name, so use the name or id the person gives you, and ask them when you have neither.
+A template **holds bound credentials** when connector credentials are attached to the template
+itself, so every instance reaches those systems on the template's connection, whoever spawned
+it.
 
 | Call | Effect | Effect class |
 | --- | --- | --- |
-| `platform.spawn_agent({ templateId, name?, visibility? })` | a new session from the template, a child of this one. `templateId` is the id or the exact name. Once `Succeeded`, `result.payload.sessionId` and `slug` name it. | `routine`; `privileged` when the template holds bound credentials |
-| `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills? })` | replaces the template's instructions or skill list; never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`; `privileged` when the template holds bound credentials |
+| `platform.spawn_agent({ templateId, name?, visibility? })` | a new session from the template, a child of this one. Once `Succeeded`, `result.payload.sessionId` and `slug` name it. | `routine`; `privileged` when the template holds bound credentials |
+| `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills? })` | replaces the template's instructions or skill list; never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
 
 A grant on either reaches that one template only. Things to act on:
 
 - **`spawn_agent` takes no task.** Once it has `Succeeded`, give the child its task by
   sending to it (`platform.send_to_session`). The spawn creates no agent-to-agent link, so if
   the send refuses for want of one, propose a link to the child first
-  (`platform.link_to_session`); its card also opens the child to peers, which the owner may do
-  for their own child. Your messages never count as the human turn, so this session keeps the
+  (`platform.link_to_session`). If the child is not yet open to peers, the same card opens it,
+  and that is session-wide: other sessions can then propose links to it too, so say so when you
+  propose the link. Your messages never count as the human turn, so this session keeps the
   right to close the child until a person writes in it. The link, send and budget rules are
   the ordinary ones in *Agent-to-Agent* (`concepts/collaboration.md`).
 - **A shared template reports back with a send, not an ask.** Ask the child to send you its
