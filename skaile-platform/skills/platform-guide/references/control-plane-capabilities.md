@@ -19,18 +19,22 @@ Owner-scoped, query-only, and available only where the platform resolves the cal
 as the owner's own assistant. They never create approvals, grants, operations, invitations,
 or connector configuration.
 
-**Which organizations you reach depends on where you live.** The assistant in the owner's
-Private workspace reaches every organization the owner belongs to. An assistant whose Home is
-in a business workspace sees and acts **only in that workspace**: discovery, linking to
+**Which organizations you reach depends on where you live.** An assistant whose Home is in
+a business workspace sees and acts **only in that workspace**: discovery, linking to
 sessions, creating sessions and projects, invitations, connector setup, delegation and
 running flows all stop at its border, and a target elsewhere reads as not found or a generic
 denial. If the owner needs something in another workspace, point them to their Private
-workspace's assistant.
+workspace's assistant, the home assistant. The home assistant reaches each other
+organization the owner belongs to (an invited Private workspace too) only as far as that organization's **reach** level allows
+(`concepts/agent.md` § *Assistant reach*): at **Off** the organization is left out of every
+list below; at **Coordinate** (the default) the seven structural lists include it, but
+`platform.search_my_sessions`, `platform.read_session_history`, the file calls and every
+effect in this family do not reach it; only **Full** opens those.
 
 | Call | Gives you |
 | --- | --- |
 | `platform.list_my_organizations({ search?, cursor?, limit? })` | `organizationId`, the owner's live role, a permissions summary |
-| `platform.list_my_projects({ organizationId?, search?, cursor?, limit? })` | `projectId`, `organizationId`, status, visibility, source type, live role. The assistant's own workspace is never listed. |
+| `platform.list_my_projects({ organizationId?, search?, cursor?, limit? })` | `projectId`, `organizationId`, status, visibility, source type, live role. The Home in the owner's home Private workspace is never listed; the owner's Homes anywhere else (a business organization, or a Private workspace they were invited into) are listed like any project. Nobody else's Home is ever listed. |
 | `platform.list_my_sessions({ organizationId?, projectId?, archived?, search?, cursor?, limit? })` | `sessionId` with full ancestry (organization → project → session), live role. Omit `archived` for both. |
 | `platform.get_session_context({ sessionId })` | one session's ancestry plus the owner's effective role at each level. Not paged. |
 | `platform.list_project_members({ projectId, search?, cursor?, limit? })` | every membership *and invitation* row, with `status`: `Active`, `Invited`, `Expired`, `Revoked` |
@@ -53,7 +57,9 @@ above:
 Use them in that order: search to find the session, then read that session's history. To hand
 a file you found there to an action (an upload, a mail attachment), pass it on by reference
 (`{ sessionId, path }`, see `references/agent-action-catalog.md`) rather than copying its
-content; to read its text yourself, use `platform.read_session_file` (below). Search
+content; to read its text yourself, use `platform.read_session_file` (below). Searching,
+reading history, passing a file on and reading it all need **Full** reach into that
+session's organization; search skips sessions anywhere else. Search
 scans the 50 most-recently-active sessions and returns at most 100 hits, and `truncated: true`
 means it hit one of those two caps — not that nothing else matched. So treat a truncated search
 as "look harder", never as a complete answer.
@@ -104,8 +110,9 @@ leading `workspace/`. The two content limits below count characters; the 2 MiB c
   any carded call (see *The operation lifecycle*); once it runs it returns `{ status: "written",
   sessionId, path }` itself, with no operation id and nothing further to poll.
 - **Refusal codes**, for both calls — the only refusals an assistant sees as codes.
-  `not_found`: the session does not exist, or the owner cannot see it (another person's
-  private project reads the same way); do not retry, tell the owner what you could not reach.
+  `not_found`: the session does not exist, the owner cannot see it (another person's
+  private project reads the same way), or its organization does not allow you to read files
+  there (reach below **Full**); do not retry, tell the owner what you could not reach.
   `file_not_found`: the session is reachable but has no such file. `invalid_path`: the path
   breaks the rules above.
 - **Write refusals in words**, not codes, each saying why: your own session (write your own
@@ -405,12 +412,16 @@ one, and an identical repeat joins its open card.
 
 **The owner's reach settings.** Two platform actions from `platform.find_actions`, not part of
 this family (no operation receipt, not covered by the effect classes above): **Read my
-assistant reach** lists, per organization, how far the owner's assistant may act there and who
-set it; **Lower my assistant reach** lowers it in one organization, with the owner's approval
-like any action. Neither can raise a level: a request to go higher is refused, and only the
-owner can undo their own lowering. The owner's own Private workspace has no such setting.
-`enforced: false` in the result means the settings are stored but not applied yet, so lowering
-one changes nothing today; say so if the owner asks.
+assistant reach** lists, per organization, how far the owner's home assistant may act there
+(`level`, the lowest of `orgDefault`, `override` and `self`) and so who set it; **Lower my
+assistant reach** lowers it in one organization, with the owner's approval like any action.
+Neither can raise a level: a request to go higher is refused. Only the owner can remove
+their own limit (**Remove my limit** in **Preferences**), and only an org Owner can allow
+more. The owner's own Private workspace has no such setting. Lowering from **Full** — by the
+owner, or by an org Owner's default or override — revokes the home assistant's standing
+grants that cover that organization, and every grant that covers all organizations; tell
+the owner they will see those cards again. A level lowered after approval makes the
+operation fail with `operation_target_not_authorized`.
 
 ## What this family is not
 
@@ -430,6 +441,8 @@ Grounded in: `platform/docs/protocol-v2-capabilities.md`,
 (business-workspace confinement, `assistant-reach.service.ts`), #6008 (private projects),
 #6009 (`update-assistant-profile.handler.ts`, `update-assistant-profile-policy.service.ts`),
 #6040 (project, session and team invitations take a Private workspace seat on accept),
-#6053 (`session-file.handler.ts`, `session-file-policy.service.ts`), #6057 (the profile leaves
+#6053 (`session-file.handler.ts`, `session-file-policy.service.ts`), reach with the Work and
+Private spaces flag on (`assistant-reach.service.ts`, `capability-reach-gate.ts`,
+`assistant-access.service.ts` `discoverableSessions`), #6057 (the profile leaves
 the Home: `import-home-files.ts`, `profile-archive-sweeper.service.ts`), #6051 (the **Your
 assistant** page) and #6058 (`assistant-reach.route.ts`).

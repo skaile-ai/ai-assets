@@ -13,7 +13,7 @@ replaces the page they are on) or `tab` (opens a new tab and keeps the current o
 | --- | --- | --- |
 | `dashboard` | Dashboard | — |
 | `projects`, `sessions`, `flows`, `store`, `preferences`, `myConnections` | that organization page (`myConnections` takes `search: { link }` to highlight one connection) | `org?` |
-| `org.settings` | Organization settings (org Owners only; `search: { tab }`, e.g. `ai-providers`) | `org?` |
+| `org.settings` | Organization settings (org Owners only; `search: { tab }`, e.g. `ai-providers`, `assistants`, or `orphaned-my-space` for the former members' My space review) | `org?` |
 | `project`, `project.settings`, `project.runs` | a project's main session, its settings, its run board | `project` |
 | `runGroup` | one run group's board | `project`, `runGroup` |
 | `session` | one session | `session` (a slug resolves in this session's project; elsewhere pass its id or `project`) |
@@ -26,27 +26,44 @@ The capability's own description carries the live list; prefer it if the two dif
   - The **Skaile logo** is the only entrance to the dashboard; it turns into an animated
     spinner while the dashboard is open. There is no separate Dashboard row and no
     activity badge on it.
-  - Below it, a **search field** (**Search projects and sessions…**).
+  - Below it, the **Work** / **Private** switch, shown only to someone who has both their
+    home Private workspace and a business organization. **Private** opens their home
+    Private workspace (the one they own, or else the first one they joined; never another
+    Private workspace they merely have a seat in); **Work** opens the business organization
+    they used last. Inside their home Private workspace the app is repainted in a warm
+    palette, so they can see which side they are on. The side the user is not on shows a
+    count of approvals waiting for them there. Cmd+K has it as **Switch to Private** /
+    **Switch to Work**.
+  - Then a **search field** (**Search projects and sessions…**).
   - The **organization** is a pinned header row, not a collapsible group. Its kebab,
     **Organization actions** (also opened by clicking the row), offers **Switch
     organization** (submenu), **New project**, then **Flows**, **Run groups**, **Sessions**
     and **Store**, and **Organization settings** (org Owners and platform admins). This
     menu is the only sidebar entrance to those four pages; Cmd+K has them too.
     **Switch organization** groups the user's orgs into collapsible sections: **Starred**
-    (only when something is starred; open by default), **Organizations** (open unless
-    something is starred), and **Invited Private workspaces** (other people's Private
-    orgs the user was invited to; collapsed by default). Each row has a star icon
+    (only when something is starred; open by default), **Recent** (the last five business
+    orgs the user was in, shown only once they belong to more than five; its orgs stay
+    under **Organizations** too), **Organizations** (open unless something is starred), and
+    **Invited Private workspaces** (other people's Private orgs the user was invited to;
+    collapsed by default). Each row has a star icon
     (**Star \<org\>**) that moves the org into or out of **Starred**. Stars are per user
     and follow them across devices.
-  - Then the **projects**. Expanding one shows, in order: **Apps** (the apps its sessions
-    declare; a green **Running** dot marks one that is serving — clicking an app opens its
-    session with only that app's preview showing), the project's sessions, **Flows** (each
-    flow with its run groups), and **Archive** (archived sessions — only in expert mode).
+  - Then the **projects**, in up to three sections: **Company** (projects an org Owner
+    marked as company projects; never in a Private workspace), **Projects** (the
+    organization's other projects), and **My space** (the user's own private projects).
+    The user's **Home** comes first in My space, labelled with their assistant's name; it
+    is where that assistant lives. The **My space** heading carries a **+** (**New My space
+    project**, also in Cmd+K) for anyone who is an org User or Owner there; a Viewer has no
+    My space. A new My space project opens only for its creator; to share it later, it must
+    be moved to Projects (see *Project settings*). Starred projects are lifted into a
+    leading **Starred** section, and an empty section has no heading (except My space, so
+    its **+** stays reachable). Expanding a project shows, in order: **Apps** (the apps
+    its sessions declare; a green **Running** dot marks one that is serving — clicking an
+    app opens its session with only that app's preview showing), the project's sessions,
+    **Flows** (each flow with its run groups), and **Archive** (archived sessions — only in expert mode).
     A section with one item shows it directly under the project instead of in a group row;
     empty sections are omitted. Clicking the name of a project with exactly one session
     opens that session; its expand toggle still expands it.
-  - When the user has starred projects, the list opens with a **Starred** group and
-    the rest follow under **All projects**.
   - A project's **...** menu: **Pin to dashboard**, **Star** / **Unstar**, **Mark all
     sessions as read**, **New agent** (opens the **New agent** dialog, which creates a
     session), **New flow**, **Flows**, **Run groups**, **Agent graph**, **Project
@@ -55,12 +72,21 @@ The capability's own description carries the live list; prefer it if the two dif
     reorder the sidebar's org and project lists.
   - Collapsed, the sidebar is a rail of one icon per project; the flyout lists that
     project's sessions, flows and **New agent**.
-  - **Footer**: a **Personal** / **Business** workspace-mode toggle (switching to Personal
-    repaints the app in a warm palette, so the user can see which workspace they are in),
-    and the user's avatar menu — **Invite someone to Skaile**, **Report a problem**,
-    **Account**, **Preferences**, **Invites**, **My Connections** (hidden from org
-    Viewers), an **Expert mode** toggle, a **Theme** submenu, an **Info** submenu
-    (**Open-source licenses** plus the frontend/backend version numbers; for everyone),
+  - **Footer**: the user row. At its right end sits a round button with the assistant's
+    picture (ringed, with a dot for unread replies): the **assistant launcher**. It opens
+    the assistant panel over the current page, or closes it if it is showing, and Cmd+K
+    has it as **Open \<name\>**. Which assistant it opens depends on where the user is: in
+    a business org where they have a Home, that org's assistant; in their Private
+    workspace, on the dashboard, or in an org where they are only a Viewer, their home
+    assistant (the one in their home Private workspace). Each falls back to the other when it
+    does not exist, and **Launcher always opens my home assistant** in **Preferences**
+    makes it the home assistant everywhere. On the collapsed icon rail the launcher is its
+    own icon above the avatar. The avatar opens the user menu — **Invite someone to
+    Skaile**, **Report a problem**, **Account**, **Preferences**, **Invites**,
+    **Approvals** (with a count of what waits on the user), **My Connections** (hidden
+    from org Viewers), an **Expert mode** toggle, a **Theme** submenu, an **Info** submenu
+    (**What's new**, **Open-source licenses** and the frontend/backend version numbers; for
+    everyone),
     **Focus organization** (only on deployments with organization subdomains), a **Platform**
     admin submenu (platform admins only: **Admin Dashboard**, **User Dashboard**, **Org
     Dashboard**, **Platform Usage**, **Session Manager**), and **Sign Out**.
@@ -76,7 +102,9 @@ The capability's own description carries the live list; prefer it if the two dif
   - Row 2: the **toolbar**, a three-zone row — left the page or session title, centre the
     **panel switcher** (which panes are visible) plus a round swap button, right the
     **panel icons** (Assistant, Preview, AI Assets, Connectors, Share, Summary, Flow,
-    System, Config, Report) and live **member presence**.
+    System, Config, Report) and live **member presence**. The Assistant icon opens the
+    same assistant as the sidebar launcher; there is no separate assistant button in the
+    desktop toolbar.
   - There is **no permanent right sidebar**: a panel icon opens that panel on the right of
     the workspace and a second press dismisses it, leaving nothing on the right edge.
     See `ui/workspace.md`.
@@ -99,9 +127,9 @@ The capability's own description carries the live list; prefer it if the two dif
 | Page              | Path                          | What the user does there |
 | ----------------- | ----------------------------- | ------------------------ |
 | **Dashboard**     | `/dashboard` (and `/<org>`)   | A bento grid of tiles the user rearranges with a pencil toggle (**Edit dashboard layout** / **Done editing dashboard**): **Assistant**, **Create Project**, **Create Session**, **Invite Users**, **Activity**, **Invitations**, **Recent Projects**, **Pinned Projects**, **Pinned Previews**. Those are the names in the layout editor; the three action tiles read **Create project**, **Create session** and **Invite users** on the tile itself. A viewer who cannot invite gets no **Invite Users** tile at all. Each **pinned session** (up to six) is its own live tile — its conversation, a status badge, and a composer the user can send from without leaving the dashboard; **Open full session** opens it, and in edit mode **Unpin \<name\>** removes it. The **Assistant** tile is the same kind of live chat. Pins are filtered to the current organization. |
-| **Account**       | `/account`                    | Edit name, email, profile picture. A **Your assistant** card links to the assistant's page (below). |
+| **Account**       | `/account`                    | The profile (name, picture, roles) with **Edit profile**; the email is shown read-only. A **Your assistant** card links to the assistant's page (below). **Archived spaces** lists the user's own My space in each Private workspace they have left, with the date it is deleted and **Export** (its conversations, not its files); rejoining the workspace before then restores it. The card is absent when nothing is archived. |
 | **Your assistant**| `/assistant`                  | The profile every one of the user's assistants reads, in every workspace: **Name, picture and voice**, and **What your assistant reads** (the IDENTITY, SOUL and USER documents, each with a live character count, plus one for **All three together** against 24 KiB). One **Save**; **Discard changes** drops the draft. If the profile changed elsewhere since the page loaded, the save is refused ("Changed elsewhere — reload") and the draft stays until **Reload**. Opens as its own tab and warns before unsaved changes are lost. Also reached from Cmd+K (**Edit \<name\>'s profile**) and from a **Your assistant** card in the assistant's own session settings. Changing the name, picture (avatar) or voice here sets it for every one of the user's assistants, including one in a business workspace that had set its own. |
-| **Preferences**   | `/<org>/preferences`          | Notification mode (All / Mentions / Direct / Off), sound, browser notifications. |
+| **Preferences**   | `/<org>/preferences`          | Notification mode (All / Mentions / Direct / Off), sound, browser notifications. **Assistant**: **Launcher always opens my home assistant** (only for someone with a home assistant). **My home assistant's reach**: one row per business organization the user belongs to, with how far the assistant in their Private workspace may reach there (**Off**, **Coordinate** or **Full**) and who set it (**Lowered by you.**, **Set for you by an organization admin.**, or the organization's default). The user can only lower a level; **Remove my limit** undoes their own lowering, back to what the organization allows. Lowering from **Full** asks for confirmation and revokes the standing approvals the assistant held there. See `concepts/agent.md` § *Assistant reach*. |
 | **My Connections**| `/<org>/my-connections`       | The user's own sign-ins, **one provider at a time**: a tab each for **SharePoint**, **Exchange**, **Box**, **GitHub**, **Google Drive** and **Nextcloud** (with a count of connected accounts), plus **Other** when the org has further provider links. Each tab has a **Skaile-managed** one-click connect and an **IT-managed / bring your own app** section; a connection that stopped working offers **Reconnect**. The **Exchange** tab also holds **Shared mailboxes** — see below. Dropbox has no tab and is **not usable yet** (no driver behind it), even if an admin has added a Dropbox provider. A finished Connect stores a credential only — see `concepts/integrations.md` § *From a connection to files in a session* for the follow-up step users always need. |
 | **Store**         | `/<org>/store`                | The organization's asset/skill catalog, reached from the org kebab. Tabs: **Catalog**, **Library**, **Approvals** (approvals are admin-only). |
 | **Run groups**    | `/<org>/runs`                 | Batch / unattended processing: the status board for every run group, with click-through into a group's detail page. See `concepts/flows.md`. |
@@ -127,7 +155,9 @@ shows only mailboxes on the current organization's Connections.
 ## Creating a project
 
 Entry: the org kebab (**Organization actions**) > **New project**, the dashboard's
-**Create project** tile, or Cmd+K. It is one form, not a wizard:
+**Create project** tile, or Cmd+K. It creates a project under **Projects**; a private one
+is **New My space project** on the sidebar's My space heading instead. It is one form, not
+a wizard:
 
 1. **Organization** picker (in the dialog; locked when opened from an org row).
 2. **Source** cards: **On Skaile**, **Git Repository**, **SharePoint / OneDrive**,
@@ -141,10 +171,28 @@ Entry: the org kebab (**Organization actions**) > **New project**, the dashboard
 5. **Sharing** — **Invited only** or **Everyone in \<Org\>** (the second needs an org
    Owner; stored as `Private` / `Shared`); for **Everyone in \<Org\>**,
    **Teams with access**.
-6. **Create Project**.
+6. **Create Project**. It is disabled, with a tooltip saying why, in a Private workspace
+   that has become read-only (below).
 
-First-time users get a first-run onboarding modal that can launch a working session in one
-optional step (e.g. "Analyse a document" guides drag-and-drop upload in the workspace).
+There is no onboarding form. On a new user's first visit the app opens their Home's
+assistant chat, chat-only, in the organization they were invited to, and the assistant
+takes it from there. Someone who is a Viewer everywhere gets no Home: they land on an
+empty dashboard (**No Home yet**) that tells them to ask an admin for the User role.
+
+### A read-only Private workspace
+
+A Private workspace stays writable while someone pays for it: an employer organization,
+or a platform admin. There is no self-service payment yet, so never send a user looking
+for a way to pay for their own workspace; the way back is an organization sponsoring it
+(**Ask your admin**). Private workspaces that existed before
+Work and Private spaces were switched on are kept as they were and never lock. When the
+last sponsorship ends, a notice strip at the top of every page in that workspace says the
+date, 30 days on, when it becomes read-only, and then that it **is read-only**, with **Ask your
+admin** and **Export your data** (each explains what to do; there is no one-click export of
+a whole workspace). Once it is read-only, write buttons such as **Create Project** and
+**Move to Projects** are disabled with the tooltip "This Private workspace is read-only."
+Nothing is deleted, everything stays readable, and it unlocks as soon as someone sponsors
+it again.
 
 ## Project settings
 
@@ -153,8 +201,8 @@ Path: `/<org>/projects/<project>/settings` (Owner-only). Tabs:
 | Tab               | Purpose |
 | ----------------- | ------- |
 | **Sessions**      | List/manage all sessions in the project; bulk mark-read / delete. |
-| **Members**       | Invite users, set Owner/User/Viewer, team access. |
-| **Project**       | Name, slug, description, **Visibility** (**Invited only** / **Everyone in \<Org\>**), delete. |
+| **Members**       | Invite users, set Owner/User/Viewer, team access. For a My space project there are no share controls: **Only you can open this project**, and, except on the Home, **Move to Projects** — one-way, after which it stays **Invited only** and can be shared. The Home can never be moved. |
+| **Project**       | Name, slug, description, **Visibility** (**Invited only** / **Everyone in \<Org\>**), delete. For an org Owner in a business organization (not on a My space project) who can open this page (it needs Owner authority on the project), a **Company project** card with **Mark as company project** / **Unmark as company project**: it changes only where the project is listed (under **Company**), not who can open it. |
 | **Session defaults** | Skaile config template applied to new sessions — including additional mounts — plus the default asset assignments for the project's sessions. (There is no separate "Assets" tab; asset defaults live here.) |
 | **Security**      | **Network egress**: **Open**, **Off — LLM provider only**, or **Allowlist specific domains**. |
 | **Connectors**    | Project-level connector enablement and account selection (today: Exchange — the project's mailbox access switch, and per-mailbox enable/disable including shared mailboxes admitted in My Connections). For file mounts use the workspace **Connectors** panel instead. |
@@ -185,9 +233,37 @@ scoped Global/Org/Project, delivered direct or via a cloud transport — AWS Bed
 Vertex, Azure AI Foundry, custom gateway — with per-config health checks; a **Claude
 subscription** seat is bound by pasting the output of `claude setup-token`, with the
 credentials-file upload as the alternative), **Classifiers** (classifier providers — see below), **Costs**,
-**Deployment Targets**, and **Catalog** (manage reusable assets/skills, assign to
-teams/projects). The org sessions report is not a tab — it is **Sessions** in the org
-kebab.
+**Deployment Targets**, **Catalog** (manage reusable assets/skills, assign to
+teams/projects), and, in a business organization, **Assistants** (below). The org sessions
+report is not a tab — it is **Sessions** in the org kebab.
+
+**Former members' My space** is a tab reached only by link: while projects that people
+left behind in their My space are waiting, the **Users** tab shows a callout with
+**Review**. Each listed project offers **Take over** (it moves to Projects, **Invited
+only**, with that Owner as its owner) or **Delete** (with its sessions and files; cannot be
+undone). Nobody can open those projects until then. Homes are never listed.
+
+### Assistants
+
+**Settings > Assistants** (business organizations only) governs members' assistants:
+
+- **Assistant reach** — **Default for every member**: how far each member's home
+  assistant (the one in their home Private workspace) may reach into this organization:
+  **Off** (cannot see the organization at all), **Coordinate** (sees the member's projects,
+  sessions, members and connectors here, names and status only, never content, and may
+  message them; the default) or **Full** (may also
+  read and write files and act with the member's authority, behind the usual approvals).
+  Lowering from **Full** asks for confirmation and revokes the standing approvals that
+  assistants held here.
+- **Members** — per member, a reach below the default (or **Organization default**), and
+  whether the organization sponsors their Private workspace (**Sponsor private seats for
+  new members** sets the default). A sponsored member without a Private workspace gets one
+  on their next visit.
+- **My space storage** — **Store Homes** **On Skaile** or **In a SharePoint folder for each
+  member**; it applies to Homes created from then on.
+
+A member's own assistant in this organization (the one in their Home here) always works
+in this organization; reach governs only the home assistant coming in from outside.
 
 ### Classifiers
 
@@ -246,4 +322,12 @@ sections), `frontend/src/components/ui/project-actions-menu/project-actions-menu
 `frontend/src/pages/projects/project-setup.page.tsx`,
 `frontend/src/pages/projects/settings/` (tabs, security, connectors).
 Verified against platform `main` @ `bb6449b20` (2026-09-26).
+Work and Private spaces (the switch, sidebar sections, launcher, first run, Assistants and
+Former members' My space tabs, Company mark, Archived spaces, the read-only notice):
+`workspace-mode-toggle/`, `workspace-explorer/sidebar-projects-tree.helpers.ts`
+(`buildSectionRows`), `assistant-launcher/`, `onboarding/first-run-onboarding-gate.tsx`,
+`pages/settings/` (`org-assistants-settings.page.tsx`, `orphaned-my-space.page.tsx`,
+`my-assistant-reach-card.tsx`, `archived-spaces-card.tsx`, `preferences.page.tsx`),
+`pages/projects/my-space-project-controls.tsx`, `private-status-notice/`, and backend
+`landing.utils.ts`; platform `main` @ `7687851fb` (2026-10-02), with the rollout flag on.
 The **Report a problem** review-or-send-directly choice: platform `main` @ `c59fd243b` (2026-09-28).

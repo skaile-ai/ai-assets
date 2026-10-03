@@ -13,14 +13,30 @@ Session      ──1:1── Workspace (the session's working view of the projec
 ```
 
 - **Organization** — the company/tenant. Users, projects, and integrations belong to it.
-  Every user also has a private organization of their own, their **Private** workspace
-  (up to six members, the owner included, invited by the owner; shown as **My Workspace**;
-  on an org subdomain, which is off in production, it is at `/private` and old `/personal`
-  links redirect),
-  which hosts their personal assistant. The sidebar toggle switches between **Personal**
-  and **Business**; personal mode uses a warmer colour palette. Only platform
-  administrators create new organizations, and a shared organization must keep at least
-  one active Owner.
+  There are two kinds. A **business organization** is a company's. A **Private
+  workspace** is one person's own organization (up to six members, the owner included,
+  invited by the owner; on an org subdomain, which is off in production, it is at
+  `/private` and old `/personal` links redirect). A user gets a Private workspace when an
+  organization sponsors one for them (or a platform administrator creates it). It is paid
+  for by an employer organization or a platform admin; there is no self-service payment
+  yet, so never send a user looking for one. A Private workspace that existed before Work
+  and Private spaces were switched on is kept as it was and never locks. With nobody
+  paying, it gets 30 days of grace with a notice, then turns read-only
+  (`ui/navigation.md`). A user's **home
+  Private workspace** is the one they own or, if they own none, the first one they joined
+  (which can be someone else's); it is where their home assistant lives. The **Work** /
+  **Private** switch at the top of the sidebar moves between a business organization and
+  that home Private workspace, and is shown only to someone who has both; the home Private
+  workspace uses a warmer colour palette. Only platform administrators create new
+  organizations, and a business organization must keep at least one active Owner.
+- **Home and the assistant** — in every organization where they are a User or Owner, a
+  member has a **Home**: a private project, first in their **My space**, whose main session
+  is their **assistant** there. The assistant in their home Private workspace is their
+  **home assistant**; every other one is an organization assistant. A Viewer has no Home. All of a user's assistants share one profile (name,
+  picture, voice; the **Your assistant** page). The assistant is opened from the round
+  launcher button at the end of the user row in the sidebar. The member can add more
+  projects to My space (**New My space project**); they open only for their owner, and one
+  can be moved to Projects (one-way) to share it. A Home never moves.
 - **Project** — a unit of work with its own **project data** (one data source) and its
   own set of enabled **assets** and **connectors**. A project has a **main session**
   (the primary workspace) and any number of additional sessions.
@@ -48,8 +64,11 @@ User-facing terms: "data source + mounts" = **project data**; "create project + 
 
 ## Explorer and agents
 
-In the Explorer, each project lists its **Apps** (green dot while serving), its live
-sessions, its **Flows**, and an **Archive** of closed and archived sessions.
+The Explorer groups an organization's projects into **Company** (projects an org Owner
+marked as company projects; business organizations only), **Projects**, and **My space**
+(the user's own private projects, their Home first under the assistant's name). Each
+project lists its **Apps** (green dot while serving), its live sessions, its **Flows**, and
+an **Archive** of closed and archived sessions.
 
 Each session carries an **agent** identity — name (also its @handle), picture, voice,
 description, and instructions — set in the **New agent** / **Edit agent** dialog. A picture
@@ -112,7 +131,10 @@ scope wins instead, and one rule above all of them:
   projects when the owner leaves the organization or is deleted (a deleted user's private
   projects are sealed for everyone). A leaver's Home — and in a Private workspace, all of
   their My space — is archived, not handed over, and stays closed to everyone while
-  archived. It comes back if they rejoin within 30 days; after that it is deleted.
+  archived. It comes back if they rejoin within 30 days; after that it is deleted. Their
+  other My space projects in a business organization stay closed until an org Owner takes
+  one over (it moves to Projects as theirs) or deletes it, under **Organization settings >
+  Former members' My space**.
 
 - **Sending messages / talking to the agent** — a Session (or Project) Viewer is
   write-locked even if they are an Org User/Owner; the composer goes read-only.
@@ -137,4 +159,7 @@ source picker, the `is_personal` organization field, platform PRs #3760 (org cre
 #4281 (last Owner), #5023 (Personal/Business), #5076/#5354 (Explorer sections), #5251
 (agent graph), #5336/#5352 (agent rename, picture generation), #5988 (Private workspace
 seats), #6008 (private projects: `canAccessMySpaceProject`), #6044 (a leaver's Home is
-archived, not inherited, and deleted after 30 days), `team-sharing.service.ts`.
+archived, not inherited, and deleted after 30 days), `team-sharing.service.ts`. Work and
+Private spaces with the rollout flag on: `landing.utils.ts`, `my-space.utils.ts`,
+`private-sponsorship.service.ts`, `sidebar-projects-tree.helpers.ts`,
+`orphaned-my-space.page.tsx`.
