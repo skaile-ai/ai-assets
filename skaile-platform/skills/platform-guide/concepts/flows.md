@@ -510,8 +510,23 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   `platform.pause_run_group`, `platform.cancel_run_group`), each approval-gated and
   grantable. The session owner must be among those the group's **startableBy** allows (for
   a new group, the startableBy being set), or the call is refused before any card appears.
-  An agent cannot create an autonomous group: its runs always stop at the flow's gates, and
-  a person can switch autonomy on from the board.
+- A group the agent creates is a **Draft**: it runs nothing until it is activated (the
+  board's create wizard activates straight away). The order is create, then optionally
+  switch autonomous mode on, then activate:
+  - `platform.list_run_groups` (no approval) lists the project's groups, newest first —
+    use it to find a group whose create was approved after your call stopped waiting.
+  - `platform.set_run_group_autonomous_mode({ groupId, autonomousMode })` switches
+    autonomous mode on or off. It is approval-gated, and classed `privileged`, so it has no
+    one-click grant option: a grant reaches it only if the owner deliberately turned that
+    opt-in on. It affects only runs admitted afterwards (so set it before activating), and
+    gates the flow marks mandatory still stop every run. `create_run_group` itself still
+    refuses `autonomousMode: true`.
+  - `platform.activate_run_group({ groupId })` starts a Draft group, with the same check as
+    the **Activate** button on the group's detail page. Approval-gated and grantable, for
+    that group or its project. It starts only a Draft: a paused group is resumed by a
+    person from that page.
+- A person does the same on the group's detail page (click through from the board):
+  **Activate**, and the **Autonomous** switch.
 
 ## Webhooks that wake a session
 
@@ -527,7 +542,7 @@ as `@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.sche
 `platform/features/09-flow-execution/`,
 `platform/features/31-run-groups/`, `platform/features/09-flow-execution/in-session-flow-runs.md`
 (platform #5233), `platform/docs/flow-authoring-v2.md` "Personal flows" (platform #5252),
-the "Only me" scope label (platform #5989),
+the "Only me" scope label (platform #5989), agent activation and autonomous mode for run groups (platform #6061),
 the run-group create wizard (Batch / Standing), `RunGroupRecipePreflightService`. For on-disk discovery: `loadFlowEntriesFromDir` in
 `@skaile/workspaces` → `factory-assets/connectors/flow/engine/loader.ts`, and `aiResourceRoots`
 in `cli/src/paths.ts`.

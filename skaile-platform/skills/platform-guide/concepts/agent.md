@@ -53,7 +53,8 @@ at runtime**, never assumed from memory.
   - **reporting to the Skaile team** — filing a platform problem or a feature request
     directly, without a review form (see below);
   - **platform actions** — the things a user does in the Skaile UI that are declared for agents
-    (the owner's own notification preferences, stars, renaming a session, …), searched with
+    (the owner's own notification preferences, stars, renaming a session, creating an agent in
+    a project, …), searched with
     `platform.find_actions` and run with `platform.invoke` or `platform.batch` (see below);
   - in Skailify-enabled sessions, actions registered by an embedded app itself.
 
@@ -63,7 +64,9 @@ at runtime**, never assumed from memory.
   resolves as the owner's own assistant (the main session of one of their Homes), together
   with a few assistant-only extras (reading the owner's current screen, finishing
   onboarding). The session-owner configuration effects and
-  reading an operation's status work in an ordinary project session too. Mail and calendar
+  reading an operation's status work in an ordinary project session too, and so do platform
+  actions — creating an agent in a project among them (`concepts/sessions.md`), though creating
+  a session through the control plane stays assistant-only. Mail and calendar
   appear only where the project enabled them. Filing a report directly works in every
   session; the drafted-report review step exists only in the **Report** conversation.
   Another reason to read the live set rather than a remembered one.
@@ -131,6 +134,11 @@ the platform decides — per call, itself — between exactly three outcomes:
 
 You do not choose which, and you cannot tell in advance. So **never promise the user that a
 confirmation card will appear.** Say what you are about to do, then read the real result.
+
+Restarting your own session (`platform.cycle_session`) is outside these three: it posts no card and
+no grant reaches it. It runs when the person behind the turn is an Owner of the session or of
+its project (or a platform admin). It is refused otherwise, and on a turn the platform
+attributes to several people or to none (`references/control-plane-capabilities.md`).
 
 Some cards let the owner edit the request before deciding — a voice pick, a drafted report.
 The edit re-prepares the request as a new one; `platform.get_operation` on your original id
@@ -308,6 +316,8 @@ decides:
 
 - **Grants apply only to the owner's own turns.** A member's turn, a mixed turn, or one the
   platform cannot attribute always gets a card, even where the owner holds a grant.
+  (`platform.cycle_session` is outside this: no card ever, refused on a mixed or unattributed
+  turn — see *Approval-gated actions*.)
 - **The asker needs the authority too.** When a member asks for something on a shared target,
   they must be able to do it themselves; the owner's authority is not borrowed.
 - **The owner's private things are the owner's to ask for.** Once anyone besides the owner can
@@ -430,4 +440,5 @@ markers), `platform/docs/personal-assistant-control-plane.md` (§4, §5.7–5.8)
 `platform/decisions/2026-09-30-agent-action-catalogue.md`, assistant reach with the Work
 and Private spaces flag on (`assistant-reach.ts`, `assistant-reach.service.ts`,
 `capability-reach-gate.ts`, `assistant-reach.route.ts`),
-`platform/backend/libs/agent-gateway/src/ws-agent-gateway.service.ts` and `turn-time.ts`.
+`platform/backend/libs/agent-gateway/src/ws-agent-gateway.service.ts` and `turn-time.ts`,
+platform #6065 (creating an agent in a project) and #6133 (`cycle-session.handler.ts`).

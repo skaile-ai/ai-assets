@@ -203,28 +203,42 @@ If your profile block says it could not be loaded from your old home files, they
 
 ### Session-owner effects — also in ordinary sessions
 
-Four effects use the same consent machinery but are **not** personal-assistant-only: their
-authority is owning the session they are called from, so they are offered in a regular project
-session too. Each row's schema says which ids it takes — the two configuration effects resolve
-their target from the calling session, while `run_flow_in_session` names another session and
-refuses the calling one.
+Four effects are **not** personal-assistant-only: their authority comes from the session they
+are called from rather than from the owner's own assistant (for `cycle_session`, from the
+person behind the turn — below), so they are offered in a regular project session too. Three
+use the same consent machinery; `cycle_session` posts no card at all. Each row's schema says
+which ids it takes — the two configuration effects resolve their target from the calling
+session, while `run_flow_in_session` names another session and refuses the calling one.
+Creating an agent from an ordinary session is not in this family and not `create_session`
+(above, assistant-only): it is the platform action **Create a new agent in a project**, found
+through `platform.find_actions` (`concepts/sessions.md`).
 
 | Call | Effect | Returns |
 | --- | --- | --- |
 | `platform.begin_asset_configuration({ assetId, scope })` | configures a library asset that needs settings (a connector, an MCP server) for this `session` or its `project`. An asset needing no configuration is refused toward `platform.enable_asset`. | a receipt; reuses an instance already assigned at that scope, otherwise parks `AwaitingUser` (below) |
 | `platform.configure_connector({ providerType, providerLinkId, scope, rationale, …selection })` | mounts a folder or repository from an already-connected account in one card, for the non-secret drivers `box`, `sharepoint`, `googledrive`, `git`. Anything else is refused toward `platform.begin_asset_configuration`. | its own result, not a receipt; `alreadyAssigned` when an identical mount exists |
 | `platform.run_flow_in_session({ sessionId, flowId, … })` | starts a library flow in **another** session as the owner (see `concepts/flows.md`) | its own result, not a receipt |
-| `platform.cycle_session()` | restarts the calling session so a new mount or asset attaches | its own result |
+| `platform.cycle_session()` | restarts the calling session so a new mount or asset attaches | `{ ok: true, restart: "after_turn" }` |
 
-All four are `routine`. `configure_connector` grants reach that exact target only, and a
-`cycle_session` grant reaches this session only; the restart that rides a configuration card is
-approved with that card and never by a grant. Two things to act on:
+The three consented ones are `routine`; `cycle_session` carries no class, because nothing about
+it is consented — the rule below is its whole gate. `configure_connector` grants reach that
+exact target only, and the restart that rides a configuration card is approved with that card
+and never by a grant. `cycle_session` has no card and no grant reaches it: it runs when the
+person behind the turn — the human who wrote it, or the user a schedule or webhook acts for —
+is an Owner of this session or of its project, or a platform admin (the check the UI's own
+restart uses). It is refused otherwise, and for a turn with several attributable people or
+none. When you call it, that check comes first and the session's state second: if the platform
+does not record this session as Running at that moment, the call is refused too (there is
+nothing to restart), and trying again in the same turn will not change that. The restart
+happens once your turn ends, so finish your reply briefly. It is skipped if the session stays
+busy for ten minutes or an approval card is still pending. Call it again only if what you
+needed the restart for (a mount, an asset) is still missing on your next turn — never just to
+make sure it happened. Two things to act on:
 
 - **A new mount or asset is not live yet.** Both configuration effects take effect only on the
   next session reload or restart (`configure_connector` says so in
-  `attaches: "next_reload_or_restart"`), so propose
-  `platform.cycle_session` — itself approval-gated — rather than telling the user it is
-  already there.
+  `attaches: "next_reload_or_restart"`), so call `platform.cycle_session` rather than
+  telling the user it is already there.
 - A git `repoUrl` must be on the connection's own host; the platform only ever presents the
   owner's git credential to that host (and, inside the session, Git's helper answers only for
   the mounted repository's URL — see `concepts/flows.md`).
@@ -363,8 +377,9 @@ do not retry the capability, and never take a secret in chat.
 ## Consent and autonomy
 
 Every effect here is approval-gated. Per call, the platform either cards it, dispatches it under
-an existing autonomy grant, or refuses it — **you do not choose, and cannot predict, which**. Never
-promise the owner a card.
+an existing autonomy grant, or refuses it — **you do not choose, and cannot predict, which**.
+Never promise the owner a card. One exception: `platform.cycle_session` (above) posts no card,
+and no grant reaches it.
 
 A grant is minted only by a human — an owner of the session the card was shown in, from a card they
 themselves approved — and it is narrow by construction:
@@ -384,8 +399,9 @@ themselves approved — and it is narrow by construction:
 - **Optional use and budget caps**, clamped down to the server's own ceilings.
 - **Effect opt-ins.** Because the safe default leaves both off, an `external` or `privileged`
   effect has no one-click option at all — the owner has to widen it deliberately. An effect
-  classed `never` is ungrantable, and so is `platform.batch` as a whole (each step matches its own
-  action's grants). Ungrantable means it can only be carded or refused — never dispatched silently.
+  classed `never` is ungrantable, and so is `platform.batch` as a whole (each step matches its
+  own action's grants). Ungrantable means it can only be carded or refused — never dispatched
+  silently. (`cycle_session` is not ungrantable in this sense: it has no consent step at all.)
 - **Only on a card.** Config pre-approvals (`preApprovedCapabilities`) are retired and ignored;
   the card is the one place a standing approval comes from.
 
@@ -437,7 +453,8 @@ to agents.
 Grounded in: `platform/docs/protocol-v2-capabilities.md`,
 `platform/docs/personal-assistant-control-plane.md` and `platform/backend/libs/capabilities/`
 (`configure-connector.handler.ts`, `begin-asset-configuration.handler.ts`,
-`get-operation.handler.ts`, `personal-flows-policy.service.ts`), platform PRs #6006
+`get-operation.handler.ts`, `personal-flows-policy.service.ts`, `cycle-session.handler.ts`),
+platform PRs #6006
 (business-workspace confinement, `assistant-reach.service.ts`), #6008 (private projects),
 #6009 (`update-assistant-profile.handler.ts`, `update-assistant-profile-policy.service.ts`),
 #6040 (project, session and team invitations take a Private workspace seat on accept),
@@ -445,4 +462,4 @@ Grounded in: `platform/docs/protocol-v2-capabilities.md`,
 Private spaces flag on (`assistant-reach.service.ts`, `capability-reach-gate.ts`,
 `assistant-access.service.ts` `discoverableSessions`), #6057 (the profile leaves
 the Home: `import-home-files.ts`, `profile-archive-sweeper.service.ts`), #6051 (the **Your
-assistant** page) and #6058 (`assistant-reach.route.ts`).
+assistant** page), #6058 (`assistant-reach.route.ts`) and #6133 (`cycle_session` without a card).
