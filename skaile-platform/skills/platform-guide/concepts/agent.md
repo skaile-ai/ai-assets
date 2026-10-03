@@ -440,4 +440,5 @@ markers), `platform/docs/personal-assistant-control-plane.md` (§4, §5.7–5.8)
 `platform/decisions/2026-09-30-agent-action-catalogue.md`, assistant reach with the Work
 and Private spaces flag on (`assistant-reach.ts`, `assistant-reach.service.ts`,
 `capability-reach-gate.ts`, `assistant-reach.route.ts`),
-`platform/backend/libs/agent-gateway/src/ws-agent-gateway.service.ts` and `turn-time.ts`.
+`platform/backend/libs/agent-gateway/src/ws-agent-gateway.service.ts` and `turn-time.ts`,
+platform #6065 (creating an agent in a project) and #6133 (`cycle-session.handler.ts`).

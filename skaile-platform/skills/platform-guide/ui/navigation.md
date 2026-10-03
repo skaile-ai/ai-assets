@@ -331,3 +331,5 @@ Former members' My space tabs, Company mark, Archived spaces, the read-only noti
 `pages/projects/my-space-project-controls.tsx`, `private-status-notice/`, and backend
 `landing.utils.ts`; platform `main` @ `7687851fb` (2026-10-02), with the rollout flag on.
 The **Report a problem** review-or-send-directly choice: platform `main` @ `c59fd243b` (2026-09-28).
+The run-group detail page's controls: `pages/run-board/run-group-detail.page.tsx` and
+`pages/run-board/parts/group-controls.tsx` (platform #6061).
