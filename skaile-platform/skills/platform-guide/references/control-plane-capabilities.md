@@ -209,9 +209,11 @@ person behind the turn — below), so they are offered in a regular project sess
 use the same consent machinery; `cycle_session` posts no card at all. Each row's schema says
 which ids it takes — the two configuration effects resolve their target from the calling
 session, while `run_flow_in_session` names another session and refuses the calling one.
-Creating an agent from an ordinary session is not in this family and not `create_session`
-(above, assistant-only): it is the platform action **Create a new agent in a project**, found
-through `platform.find_actions` (`concepts/sessions.md`).
+Creating an agent from an ordinary session is not `create_session` (above, assistant-only),
+and it takes one of two routes. From scratch, it is the platform action **Create a new agent in
+a project**, found through `platform.find_actions` (`concepts/sessions.md`). From one of the
+project's agent templates, it is `platform.spawn_agent` (*Agent templates* below), which makes
+the new agent a child of this session; neither route links the new agent to this session.
 
 | Call | Effect | Returns |
 | --- | --- | --- |
@@ -251,29 +253,44 @@ only for this session, and executed as the session owner. Detail is in `concepts
 ### Agent templates — also in ordinary sessions
 
 An agent template is a reusable agent in a project: instructions, skills and the connectors it
-needs. Two effects use one, from any session in that project, as the session owner. Both return
-a receipt and run in the background; only the session owner decides their cards.
+needs. Two effects use one, from any session in that project, as the session owner; only the
+session owner decides their cards. Both are durable: each returns an operation receipt, read
+with `platform.get_operation` (*The operation lifecycle* below), and `result.payload` is set
+once it has `Succeeded`.
+
+There is no call that lists a project's templates. `templateId` takes the template's id or its
+exact name, so use the name the person gives you, or the id from the project's agent templates
+in the UI. A template **holds bound credentials** when connector credentials are attached to
+the template itself, so every instance reaches those systems on the template's connection,
+whoever spawned it.
 
 | Call | Effect | Effect class |
 | --- | --- | --- |
 | `platform.spawn_agent({ templateId, name?, visibility? })` | a new session from the template, a child of this one. `templateId` is the id or the exact name. Once `Succeeded`, `result.payload.sessionId` and `slug` name it. | `routine`; `privileged` when the template holds bound credentials |
-| `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills? })` | replaces the template's instructions or skill list; never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine` (`privileged` with bound credentials) on the owner's own turn; `never` otherwise |
+| `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills? })` | replaces the template's instructions or skill list; never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`; `privileged` when the template holds bound credentials |
 
 A grant on either reaches that one template only. Things to act on:
 
-- **`spawn_agent` takes no task.** Once it has `Succeeded`, give the child its task with
-  `platform.send_to_session`; if that refuses because no link exists, call
-  `platform.link_to_session` with the child first. Your messages do not count as a person
-  writing there, so this session can close the child until a person does.
-- **A shared template reports back with `send`, not `ask`.** Ask the child to send you its
-  result when done, and use `platform.notify_when_idle` to learn that it has finished.
+- **`spawn_agent` takes no task.** Once it has `Succeeded`, give the child its task by
+  sending to it (`platform.send_to_session`). The spawn creates no agent-to-agent link, so if
+  the send refuses for want of one, propose a link to the child first
+  (`platform.link_to_session`); its card also opens the child to peers, which the owner may do
+  for their own child. Your messages never count as the human turn, so this session keeps the
+  right to close the child until a person writes in it. The link, send and budget rules are
+  the ordinary ones in *Agent-to-Agent* (`concepts/collaboration.md`).
+- **A shared template reports back with a send, not an ask.** Ask the child to send you its
+  result when done, and subscribe to it (`platform.notify_when_idle`) to hear that it has
+  finished.
 - **Bound credentials narrow who can spawn.** A template that holds them spawns only on the
   owner's own turn or an automation acting for them; a project member's request is refused.
-- **A limit refusal is not final.** Depth, fan-out and concurrency limits clear once an
-  instance closes.
+- **A limit refusal is not final.** The server sets a spawn-depth limit, a limit on live
+  children per session and a limit on live instances per owner per template (a template may set
+  lower ones); the refusal says which was hit. It clears once an instance closes, so tell the
+  person which one to close rather than retrying.
 - **An edit is based on a version.** A refusal naming another version means the template
-  changed: rebase on that version and propose again. An edit asked for by anyone but the owner
-  in their own turn always gets a card. Instructions are capped at 8000 characters per edit.
+  changed: rebase on that version and propose again. A standing grant covers an edit only when
+  the owner asks for it in their own turn; an edit set off by anyone or anything else always gets
+  a card. Instructions are capped at 8000 characters per edit.
 
 ### Boundaries that are real, not conservatism
 
@@ -489,4 +506,7 @@ platform PRs #6006
 Private spaces flag on (`assistant-reach.service.ts`, `capability-reach-gate.ts`,
 `assistant-access.service.ts` `discoverableSessions`), #6057 (the profile leaves
 the Home: `import-home-files.ts`, `profile-archive-sweeper.service.ts`), #6051 (the **Your
-assistant** page), #6058 (`assistant-reach.route.ts`) and #6133 (`cycle_session` without a card).
+assistant** page), #6058 (`assistant-reach.route.ts`), #6133 (`cycle_session` without a card)
+and #6165, part of #6152 (agent templates: `spawn-agent.handler.ts`,
+`spawn-agent-policy.service.ts`, `update-agent-template.handler.ts`,
+`update-agent-template-policy.service.ts`, `agent-template-target.ts`).
