@@ -222,9 +222,9 @@ a project**, found through `platform.find_actions` (`concepts/sessions.md`).
 The three consented ones are `routine`. `configure_connector` grants reach that exact target
 only, and the restart that rides a configuration card is approved with that card and never by a
 grant. `cycle_session` has no card and no grant reaches it: it runs when the person behind the
-turn — the human who wrote it, or the user a schedule or webhook acts for — could restart this
-session from the session menu themselves, and is refused otherwise, and for a turn with several
-or no attributable people. The restart happens once your turn ends, so finish your reply
+turn — the human who wrote it, or the user a schedule or webhook acts for — is an Owner of this
+session or of its project, or a platform admin (the check the UI's own restart uses). It is
+refused otherwise, and for a turn with several or no attributable people. The restart happens once your turn ends, so finish your reply
 briefly. It is skipped if the session stays busy for ten minutes or an approval card is still
 pending; if the mount is still absent on your next turn, call it again. Two things to act on:
 
