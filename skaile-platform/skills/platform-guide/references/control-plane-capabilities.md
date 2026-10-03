@@ -281,13 +281,14 @@ A grant on either reaches that one template only. Things to act on:
   the ordinary ones in *Agent-to-Agent* (`concepts/collaboration.md`).
 - **Finish a child with `platform.finish_spawned_instance({ sessionId })`** once its work is
   done. Only the session that spawned it may call it, and only on its own children: a child of
-  another session (`not_spawner`) or an ordinary session (`not_an_instance`) is refused before
-  any card. It is `routine`, and a grant covers this session finishing its own children. What it
-  does is decided when it runs, not when you propose it: with no person's message in the child
-  yet it archives it (`closed`; the conversation is kept and the owner can unarchive it); once a
-  person has written there, even while the card waited, it only asks the owner in the child to
-  mark it done (`proposed`), so do not call it again for that child. `already_done` means it was
-  archived already.
+  another session (`not_spawner`), an ordinary session (`not_an_instance`) and an archived child
+  (`already_done`) are refused before any card. It is `routine`, and a grant covers this session
+  finishing its own children. What it does is decided when it runs, not when you propose it: with
+  no person's message in the child yet it archives it (`closed`; the conversation is kept and the
+  owner can unarchive it); once a person has written there, even while the card waited, it only
+  asks the owner in the child to mark it done (`proposed`). It posts that request once until a
+  person answers there, so calling again changes nothing. `not_delivered` means the request could
+  not be posted: tell the owner yourself.
 - **A shared template reports back with a send, not an ask.** Ask the child to send you its
   result when done, and subscribe to it (`platform.notify_when_idle`) to hear that it has
   finished.
