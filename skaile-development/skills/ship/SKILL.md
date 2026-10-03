@@ -551,14 +551,16 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
        feature doc under `features/<NN-section>/` (for a `platform.*` capability that is
        `features/06-agent-runtime/platform-capabilities.md`).
     2. Platform-guide skill — a SEPARATE repo (`skaile-ai/ai-assets`), so a separate PR:
-       - FIRST: look for an existing guide PR — an open ai-assets PR whose body has
-         `Refs skaile-ai/platform#<issue_number>`. If one exists (babysit delta, resume), check
-         out ITS branch (no `-b`), push to it and reuse its URL; never open a second guide PR.
-         Otherwise continue below. Either way `git fetch origin` in the checkout before use.
-       - Locate a checkout: `<repo_path>/../ai-assets` if it is a git repo whose `origin` is
+       - (a) Locate a checkout: `<repo_path>/../ai-assets` if it is a git repo whose `origin` is
          `skaile-ai/ai-assets`; otherwise `gh repo clone skaile-ai/ai-assets <scratch>/ai-assets`.
          NEVER edit inside a shared checkout — it may be dirty or parked on another session's
-         branch. Create a worktree off `origin/main`, branch `docs/platform-guide-<issue_number>`.
+         branch. Then `git fetch origin` there.
+       - (b) Look for an existing guide PR — an open ai-assets PR whose body has
+         `Refs skaile-ai/platform#<issue_number>`. If one exists (babysit delta, resume), add a
+         worktree on ITS branch (no `-b`), push to it and reuse its URL; never open a second
+         guide PR. Skip (c).
+       - (c) Only if (b) found none: create a worktree off `origin/main` with
+         `-b docs/platform-guide-<issue_number>`.
        - Edit `skaile-platform/skills/platform-guide/` — the matching `concepts/`, `ui/` or
          `references/` file (SKILL.md index + keywords only if a new topic area appeared).
          Hard rules from that skill: real UI labels in **bold**; never enumerate live
