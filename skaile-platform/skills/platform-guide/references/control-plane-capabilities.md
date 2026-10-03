@@ -227,11 +227,13 @@ and never by a grant. `cycle_session` has no card and no grant reaches it: it ru
 person behind the turn — the human who wrote it, or the user a schedule or webhook acts for —
 is an Owner of this session or of its project, or a platform admin (the check the UI's own
 restart uses). It is refused otherwise, and for a turn with several attributable people or
-none. That check comes first; a session that passes it but is not Running is then refused too
-(there is nothing to restart). The restart happens once your turn ends, so finish your reply
-briefly. It is skipped if the session stays busy for ten minutes or an approval card is still
-pending. Call it again only if what you needed the restart for (a mount, an asset) is still
-missing on your next turn — never just to make sure it happened. Two things to act on:
+none. When you call it, that check comes first and the session's state second: if the platform
+does not record this session as Running at that moment, the call is refused too (there is
+nothing to restart), and trying again in the same turn will not change that. The restart
+happens once your turn ends, so finish your reply briefly. It is skipped if the session stays
+busy for ten minutes or an approval card is still pending. Call it again only if what you
+needed the restart for (a mount, an asset) is still missing on your next turn — never just to
+make sure it happened. Two things to act on:
 
 - **A new mount or asset is not live yet.** Both configuration effects take effect only on the
   next session reload or restart (`configure_connector` says so in
