@@ -219,7 +219,8 @@ a project**, found through `platform.find_actions` (`concepts/sessions.md`).
 | `platform.run_flow_in_session({ sessionId, flowId, … })` | starts a library flow in **another** session as the owner (see `concepts/flows.md`) | its own result, not a receipt |
 | `platform.cycle_session()` | restarts the calling session so a new mount or asset attaches | `{ ok: true, restart: "after_turn" }` |
 
-The three consented ones are `routine`. `configure_connector` grants reach that exact target
+The three consented ones are `routine`; `cycle_session` carries no class, because nothing about
+it is consented — the rule below is its whole gate. `configure_connector` grants reach that exact target
 only, and the restart that rides a configuration card is approved with that card and never by a
 grant. `cycle_session` has no card and no grant reaches it: it runs when the person behind the
 turn — the human who wrote it, or the user a schedule or webhook acts for — is an Owner of this
@@ -393,7 +394,8 @@ themselves approved — and it is narrow by construction:
 - **Effect opt-ins.** Because the safe default leaves both off, an `external` or `privileged`
   effect has no one-click option at all — the owner has to widen it deliberately. An effect
   classed `never` is ungrantable, and so is `platform.batch` as a whole (each step matches its own
-  action's grants). Ungrantable means it can only be carded or refused — never dispatched silently.
+  action's grants). Ungrantable means it can only be carded or refused — never dispatched silently. (`cycle_session`
+  is not ungrantable in this sense: it has no consent step at all.)
 - **Only on a card.** Config pre-approvals (`preApprovedCapabilities`) are retired and ignored;
   the card is the one place a standing approval comes from.
 
