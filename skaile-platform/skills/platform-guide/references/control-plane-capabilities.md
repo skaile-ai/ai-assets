@@ -277,8 +277,17 @@ A grant on either reaches that one template only. Things to act on:
   (`platform.link_to_session`). If the child is not yet open to peers, the same card opens it,
   and that is session-wide: other sessions can then propose links to it too, so say so when you
   propose the link. Your messages never count as the human turn, so this session keeps the
-  right to close the child until a person writes in it. The link, send and budget rules are
+  right to close the child (next item) until a person writes in it. The link, send and budget rules are
   the ordinary ones in *Agent-to-Agent* (`concepts/collaboration.md`).
+- **Finish a child with `platform.finish_spawned_instance({ sessionId })`** once its work is
+  done. Only the session that spawned it may call it, and only on its own children: a child of
+  another session (`not_spawner`) or an ordinary session (`not_an_instance`) is refused before
+  any card. It is `routine`, and a grant covers this session finishing its own children. What it
+  does is decided when it runs, not when you propose it: with no person's message in the child
+  yet it archives it (`closed`; the conversation is kept and the owner can unarchive it); once a
+  person has written there, even while the card waited, it only asks the owner in the child to
+  mark it done (`proposed`), so do not call it again for that child. `already_done` means it was
+  archived already.
 - **A shared template reports back with a send, not an ask.** Ask the child to send you its
   result when done, and subscribe to it (`platform.notify_when_idle`) to hear that it has
   finished.
@@ -510,4 +519,6 @@ the Home: `import-home-files.ts`, `profile-archive-sweeper.service.ts`), #6051 (
 assistant** page), #6058 (`assistant-reach.route.ts`), #6133 (`cycle_session` without a card)
 and #6165, part of #6152 (agent templates: `spawn-agent.handler.ts`,
 `spawn-agent-policy.service.ts`, `update-agent-template.handler.ts`,
-`update-agent-template-policy.service.ts`, `agent-template-target.ts`).
+`update-agent-template-policy.service.ts`, `agent-template-target.ts`) and #6185, part of #6152
+(finishing a spawned instance: `finish-spawned-instance.handler.ts`,
+`finish-spawned-instance-policy.service.ts`).
