@@ -54,6 +54,7 @@ keywords:
   - assistant-reach
   - agent-template
   - spawn-agent
+  - finish-spawned-instance
 ---
 
 # Skaile Platform Guide

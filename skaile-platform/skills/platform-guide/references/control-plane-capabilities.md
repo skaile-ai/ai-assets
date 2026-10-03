@@ -288,21 +288,25 @@ A grant on `spawn_agent` or `update_agent_template` reaches that one template on
   done. Use it rather than the **Archive** action from `platform.find_actions`, which is the
   owner's. Only the session that spawned it may call it, and only on its own children: a child
   of another session (`not_spawner`), an ordinary session (`not_an_instance`) and an archived
-  child (`already_done`) are refused before any card, and each is final, so do not retry. A
-  child that is already closed but not archived (an owner closed it, or it sat hibernated for 30
-  days) is only archived: its work was synced back when it closed. If the owner has not answered
-  the card by the time the call stops waiting, it comes back as
+  child (`already_done`) are refused before any card, and each is final, so do not retry. If the
+  owner has not answered the card by the time the call stops waiting, it comes back as
   `{ status: "awaiting_approval", invocationId }` like any carded call. If the owner approves
   after that, it still runs, but its result is not kept:
   `platform.get_operation({ invocationId })` tells you only that they approved, not whether the
   child was archived or asked to be marked done. Read the child instead:
   `platform.list_my_sessions({ archived: true })` lists it if it was archived; otherwise it is
-  still open, and the owner was asked to mark it done. What it does is decided when it runs, not
-  when you propose it. The reply is `{ status, sessionId }`:
+  still open, and either the owner was asked in it to mark it done or the request could not be
+  posted (`not_delivered`, below). Read its history (`platform.read_session_history`) for the
+  request; if it is not there or you cannot read it, tell the owner in this session that the
+  child is done. What it
+  does is decided when it runs, not when you propose it. The reply is `{ status, sessionId }`:
   - `archived`: no person had written in the child, so it is closed exactly as a person closing
     it would (its work is synced back to the project, the **Closed** step in
     `concepts/sessions.md`) and then archived: its conversation is kept, and the owner can
-    unarchive it (in expert mode, from the project's **Archive** group in the sidebar).
+    unarchive it (in expert mode, from the project's **Archive** group in the sidebar). A child
+    that was already closed but not archived (an owner closed it, or it sat hibernated for 30
+    days) also comes back `archived`, but only the archive happens: its work was synced back
+    when it closed.
   - `proposed`: a person has written there, even while the card waited, so the child is not
     archived and the owner is asked in it to mark it done. Do not call again: it posts that
     request once until a person answers there, so a repeat changes nothing.
@@ -545,4 +549,6 @@ and #6165, part of #6152 (agent templates: `spawn-agent.handler.ts`,
 `spawn-agent-policy.service.ts`, `update-agent-template.handler.ts`,
 `update-agent-template-policy.service.ts`, `agent-template-target.ts`) and #6185, part of #6152
 (finishing a spawned instance: `finish-spawned-instance.handler.ts`,
-`finish-spawned-instance-policy.service.ts`), with the `archived` status from #6189.
+`finish-spawned-instance-policy.service.ts`) and #6189 (the `archived` status, and the close
+before the archive: `session.update.service.ts`, whose archive closes a running or hibernated
+session first).

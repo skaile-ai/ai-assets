@@ -9,7 +9,7 @@ what "closing" actually does.
 ```
 PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
                   |                                                  |
-                  | explicit close          (failure on any step)   v
+                  | close                   (failure on any step)   v
                   v                                                ERROR
                CLOSING -> CLOSED (changes synced to main)
 ```
