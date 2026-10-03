@@ -56,10 +56,11 @@ agent becomes a child of the calling session, runs as the session owner, and get
 send afterwards, after an agent-to-agent link if there is none yet (*Agent templates* in
 `references/control-plane-capabilities.md`). When its work is done, the spawning session ends it
 with `platform.finish_spawned_instance`, which archives it (no sync-back, unlike **Closed**) or,
-once a person has written there, asks the owner to mark it done (same section). From scratch, it uses the platform action
-**Create a new agent in a project** (find it with `platform.find_actions`). That action takes the
-project id — listing the current project's sessions returns it as `projectId` — a name, and
-optionally a one-line description, instructions (the dialog's **Prompt**), an identity, and
+once a person has written there, asks the owner to mark it done (same section). From scratch, it
+uses the platform action **Create a new agent in a project** (find it with
+`platform.find_actions`). That action takes the project id — listing the current project's
+sessions returns it as `projectId` — a name, and optionally a one-line description, instructions
+(the dialog's **Prompt**), an identity, and
 **Shared** (the default) or **Private**. In a private project (the assistant's Home or a My
 space project) the agent is always Private: left out, it is made Private; an explicit Shared is
 refused. Like any action it runs as the session owner and needs the owner's approval, unless,
@@ -109,5 +110,5 @@ Source of truth: `platform/docs/session-lifecycle.md`, `platform/docs/scoped-ses
 (time since last turn), #6008 (sessions in a private project are Private),
 `isProjectSessionCreateRole` (who can create sessions), platform #6065 (agents create agents),
 platform #6165, part of #6152 (spawning from agent templates: `spawn-agent.handler.ts`,
-`spawn-agent-policy.service.ts`), platform #6185 and #6189, part of #6152 (finishing a spawned instance:
-`finish-spawned-instance.handler.ts`).
+`spawn-agent-policy.service.ts`), platform #6185 and #6189, part of #6152 (finishing a
+spawned instance: `finish-spawned-instance.handler.ts`).

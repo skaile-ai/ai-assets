@@ -291,18 +291,24 @@ A grant on `spawn_agent` or `update_agent_template` reaches that one template on
   of another session (`not_spawner`), an ordinary session (`not_an_instance`) and an archived
   child (`already_done`) are refused before any card, and each is final, so do not retry. If the
   owner has not answered the card by the time the call stops waiting, it comes back as
-  `{ status: "awaiting_approval", invocationId }` like any carded call. What it does is decided
-  when it runs, not when you propose it. The reply is `{ status, sessionId }`:
+  `{ status: "awaiting_approval", invocationId }` like any carded call. If the owner approves
+  after that, it still runs, but its result is not kept: `platform.get_operation({ invocationId
+  })` tells you only that they approved, not whether the child was archived or asked to be
+  marked done, so ask the owner rather than assuming either. What it does is decided when it
+  runs, not when you propose it. The reply is `{ status, sessionId }`:
   - `archived`: no person had written in the child, so it is archived. Its container stops, its
-    conversation is kept, and the owner can unarchive it. This is not the **Closed** step of a
+    conversation is kept, and the owner can unarchive it (in expert mode, from the project's
+    **Archive** group in the sidebar). This is not the **Closed** step of a
     session (`concepts/sessions.md`): nothing in the child is synced back to the project, so
     make sure its result has reached you, or is saved somewhere the project keeps, first.
   - `proposed`: a person has written there, even while the card waited, so the child keeps
     running and the owner is asked in it to mark it done. Do not call again: it posts that
     request once until a person answers there, so a repeat changes nothing.
   - `already_done`: the child was archived while the card waited. Nothing more to do.
-  - `not_delivered` (a refusal code): a person has written there and the request could not be
-    posted. The child keeps running. Do not retry; tell the owner yourself that it is done.
+
+  One refusal comes only when it runs: `not_delivered`, a code, not a `status`. A person has
+  written in the child and the request to mark it done could not be posted there, so the child
+  keeps running. Do not retry; tell the owner in this session that the child is done.
 - **A shared template reports back with a send, not an ask.** Ask the child to send you its
   result when done, and subscribe to it (`platform.notify_when_idle`) to hear that it has
   finished.
