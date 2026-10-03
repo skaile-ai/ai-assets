@@ -271,31 +271,34 @@ it.
 | --- | --- | --- |
 | `platform.spawn_agent({ templateId, name?, visibility? })` | a new session from the template, a child of this one. Once `Succeeded`, `result.payload.sessionId` and `slug` name it. | `routine`; `privileged` when the template holds bound credentials |
 | `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills? })` | replaces the template's instructions or skill list; never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
-| `platform.finish_spawned_instance({ sessionId })` | archives a child this session spawned, or asks its owner to mark it done; the reply's `status` says which. | `routine` |
+| `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine` |
 
 A grant on `spawn_agent` or `update_agent_template` reaches that one template only; a grant on
 `finish_spawned_instance` covers this session finishing its own children. Things to act on:
 
-- **`spawn_agent` takes no task.** Once it has `Succeeded`, give the child its task by
-  sending to it (`platform.send_to_session`). The spawn creates no agent-to-agent link, so if
-  the send refuses for want of one, propose a link to the child first
-  (`platform.link_to_session`). If the child is not yet open to peers, the same card opens it,
-  and that is session-wide: other sessions can then propose links to it too, so say so when you
-  propose the link. Your messages never count as the human turn, so this session keeps the
-  right to archive the child (see *Finish a child* below) until a person writes in it. The
-  link, send and budget rules are the ordinary ones in *Agent-to-Agent*
-  (`concepts/collaboration.md`).
+- **`spawn_agent` takes no task.** Once it has `Succeeded`, give the child its task by sending
+  to it (`platform.send_to_session`). The spawn creates no agent-to-agent link, so if the send
+  refuses for want of one, propose a link to the child first (`platform.link_to_session`). If
+  the child is not yet open to peers, the same card opens it, and that is session-wide: other
+  sessions can then propose links to it too, so say so when you propose the link. Your messages
+  never count as the human turn, so this session keeps the right to close and archive the child
+  (see *Finish a child* below) until a person writes in it. The link, send and budget rules are
+  the ordinary ones in *Agent-to-Agent* (`concepts/collaboration.md`).
 - **Finish a child with `platform.finish_spawned_instance({ sessionId })`** once its work is
   done. Use it rather than the **Archive** action from `platform.find_actions`, which is the
   owner's. Only the session that spawned it may call it, and only on its own children: a child
   of another session (`not_spawner`), an ordinary session (`not_an_instance`) and an archived
-  child (`already_done`) are refused before any card, and each is final, so do not retry. If the
-  owner has not answered the card by the time the call stops waiting, it comes back as
+  child (`already_done`) are refused before any card, and each is final, so do not retry. A
+  child that is already closed but not archived (an owner closed it, or it sat hibernated for 30
+  days) is only archived: its work was synced back when it closed. If the owner has not answered
+  the card by the time the call stops waiting, it comes back as
   `{ status: "awaiting_approval", invocationId }` like any carded call. If the owner approves
-  after that, it still runs, but its result is not kept: `platform.get_operation({ invocationId
-  })` tells you only that they approved, not whether the child was archived or asked to be
-  marked done, so ask the owner rather than assuming either. What it does is decided when it
-  runs, not when you propose it. The reply is `{ status, sessionId }`:
+  after that, it still runs, but its result is not kept:
+  `platform.get_operation({ invocationId })` tells you only that they approved, not whether the
+  child was archived or asked to be marked done. Read the child instead:
+  `platform.list_my_sessions({ archived: true })` lists it if it was archived; otherwise it is
+  still open, and the owner was asked to mark it done. What it does is decided when it runs, not
+  when you propose it. The reply is `{ status, sessionId }`:
   - `archived`: no person had written in the child, so it is closed exactly as a person closing
     it would (its work is synced back to the project, the **Closed** step in
     `concepts/sessions.md`) and then archived: its conversation is kept, and the owner can
@@ -315,7 +318,7 @@ A grant on `spawn_agent` or `update_agent_template` reaches that one template on
   owner's own turn or an automation acting for them; a project member's request is refused.
 - **A limit refusal is not final.** The server sets a spawn-depth limit, a limit on live
   children per session and a limit on live instances per owner per template (a template may set
-  lower ones); the refusal says which was hit. It clears once an instance is archived: finish
+  lower ones); the refusal says which was hit. It clears once an instance is closed: finish
   one of this session's own children whose work is done with `platform.finish_spawned_instance`,
   or tell the person which one to mark done, rather than retrying.
 - **An edit is based on a version.** A refusal naming another version means the template

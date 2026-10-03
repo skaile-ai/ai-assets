@@ -27,10 +27,11 @@ PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
   waits for it), or the user clicks **Resume session**. Waking starts a fresh container,
   restores the conversation to the agent, and rehydrates any running flow. The first turn
   after wake is slightly slower (no prompt cache).
-- **Closed** — an explicit user action. Changes are **synced back to the project's main
-  data** (git merge for git projects; driver-specific sync-back for other sources), then
-  the workspace is cleaned up. Closing is the "I'm done, fold this work back in" step.
-  A non-main session left hibernated for 30 days is closed automatically; the main
+- **Closed** — an explicit user action, or the spawning agent finishing a child it spawned
+  (`platform.finish_spawned_instance`, which also archives it). Changes are **synced back to
+  the project's main data** (git merge for git projects; driver-specific sync-back for other
+  sources), then the workspace is cleaned up. Closing is the "I'm done, fold this work back
+  in" step. A non-main session left hibernated for 30 days is closed automatically; the main
   session never is.
 
 After a gap of an hour or more, the agent is told how long it has been since the previous
@@ -60,15 +61,15 @@ it or, once a person has written there, asks the owner to mark it done (same sec
 scratch, it uses the platform action **Create a new agent in a project** (find it with
 `platform.find_actions`). That action takes the project id — listing the current project's
 sessions returns it as `projectId` — a name, and optionally a one-line description, instructions
-(the dialog's **Prompt**), an identity, and
-**Shared** (the default) or **Private**. In a private project (the assistant's Home or a My
-space project) the agent is always Private: left out, it is made Private; an explicit Shared is
-refused. Like any action it runs as the session owner and needs the owner's approval, unless,
-on the owner's own turn, a standing grant already covers that action on that project; the
-owner, and anyone else who asked on this turn, needs the same project role the **New agent**
-dialog requires. The card cuts long instructions short; the full text is in the new agent's
-**Edit agent** dialog. It does not link the new agent to the calling session — propose an
-agent-to-agent link separately (see *Agent-to-Agent* in `concepts/collaboration.md`).
+(the dialog's **Prompt**), an identity, and **Shared** (the default) or **Private**. In a
+private project (the assistant's Home or a My space project) the agent is always Private: left
+out, it is made Private; an explicit Shared is refused. Like any action it runs as the session
+owner and needs the owner's approval, unless, on the owner's own turn, a standing grant already
+covers that action on that project; the owner, and anyone else who asked on this turn, needs the
+same project role the **New agent** dialog requires. The card cuts long instructions short; the
+full text is in the new agent's **Edit agent** dialog. It does not link the new agent to the
+calling session — propose an agent-to-agent link separately (see *Agent-to-Agent* in
+`concepts/collaboration.md`).
 
 ## Scoped sessions
 
