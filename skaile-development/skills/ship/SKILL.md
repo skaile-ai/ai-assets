@@ -238,8 +238,8 @@ MUST  fix only items RELATED to the change (e.g. lint/type/test failures the cha
 MUST  converge the babysit loop — cap fix rounds, and if CI stays red on something unrelated or a review item recurs after a good-faith fix, stop and ask (gate #8)
 MUST  print the plain-language recap (Phase 13, STEP 14d) immediately BEFORE the final question — jargon-free, no paths or symbols, written for someone who was not watching
 MUST  ask the user at the end (Phase 13) to choose: squash-merge + cleanup | cleanup only | stop here — and execute exactly that
-MUST  for platform work, decide `docs_impact` BEFORE committing (Phase 8b) and, when user-visible, update `platform/features/SKAILE-PLATFORM-CAPABILITIES.md` (+ its `features/<NN>/` doc) IN THE SAME PR and open an ai-assets PR for the `platform-guide` skill — docs are part of the change, not a post-merge chore; the platform PR body carries a `## Docs` section the CI guard parses
-NEVER skip the platform-guide update because the ai-assets checkout is "not accessible" — clone `skaile-ai/ai-assets` into a scratch dir; stop and ask only if that clone itself fails
+MUST  for platform work, decide `docs_impact` BEFORE committing (Phase 8b) and, when user-visible, update `features/SKAILE-PLATFORM-CAPABILITIES.md` (+ its `features/<NN>/` doc) IN THE SAME PR and open an ai-assets PR for the `platform-guide` skill — docs are part of the change, not a post-merge chore; the platform PR body carries a `## Docs` section the CI guard parses
+NEVER skip the platform-guide update because the ai-assets checkout is "not accessible" — clone `skaile-ai/ai-assets` into a scratch dir; stop and ask (gate #7) only if that clone itself fails
 MUST  use squash-and-merge (`gh pr merge <n> --squash`) when merging
 MUST  on cleanup: remove the worktree and delete the local branch; on merge+cleanup also delete the remote branch
 MUST  report back with: repo, issue number + URL, branch, PR URL + final state (merged / open), 1-2 line summary, deferred/unrelated items
@@ -511,7 +511,7 @@ EMIT [ship] review_done important=<N> nits=<N>
 # ── Phase 8: Triage + Apply ───────────────────────────────────────
 
 STEP 10: Triage (PROCEDURE triage_finding) — decide silently
-  IF review was skipped in STEP 9 (review_findings empty): nothing to triage — continue to STEP 11.
+  IF review was skipped in STEP 9 (review_findings empty): nothing to triage — continue to STEP 10b (platform) / STEP 11. A skipped review never skips the docs decision.
   Otherwise, for each finding:
   | Verdict | When | Action |
   |---------|------|--------|
@@ -568,6 +568,8 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
        - IF nothing in the change is something a user would ask the assistant about,
          `Platform guide: n/a — <reason>` is allowed; say why.
     3. Babysit rounds that change user-visible behaviour re-open this step for the delta.
+    4. Resume path (STEP 3b skipped STEP 4–5): the worktree from STEP 3b is the checkout for
+       the docs commit; push to the PR branch as for any babysit fix.
 
   The platform PR body MUST contain this section (STEP 12) — the CI guard parses these exact lines:
     ## Docs
@@ -987,6 +989,9 @@ STEP 14c: Refresh the PR description with what ACTUALLY shipped
   whole body, and after a loop that may have run ten rounds the memory of it is the least
   reliable thing in the session. The live body may also carry a human's edit from the
   babysit window or a PR-template section honored at open time.
+  Platform PRs: the `## Docs` section is machine-parsed by CI — carry its two lines over
+  verbatim, changing a value only to reflect a STEP 10b re-run; grep the new body for both
+  `Capabilities doc:` and `Platform guide:` before editing, as for `Closes #`.
     $ gh pr view <pr_number> --repo <github_slug> --json body -q .body > <tmp>
     IF that command fails or <tmp> comes back EMPTY, STOP — do NOT run the edit. The two
     commands are independent: a failed fetch prints nothing, the redirect leaves <tmp>
@@ -1162,7 +1167,8 @@ STEP 15b: Publish what Phase 8b prepared
 
   1. Guide PR — IF STEP 10b opened one: `gh pr merge <guide_pr> --repo skaile-ai/ai-assets --squash`
      (after confirming its checks/review the same way as the platform PR; never leave it dangling).
-     On `cleanup`/`stop`, leave it open and list it in the final report as "guide PR still open".
+     On `cleanup`/`stop` this whole step is skipped: the guide PR stays open, and STEP 16's
+     `Guide PR:` line says so.
   2. Business mirror (SharePoint-synced; edit = publish) — ONLY if accessible (`test -e <path>`;
      absent on most machines, skip with a one-line note):
      `/mnt/c/Users/peter/Skaile GmbH/Management - Documents/General/concept/SKAILE-PLATFORM-CAPABILITIES.md`
@@ -1170,7 +1176,7 @@ STEP 15b: Publish what Phase 8b prepared
 
   Print: > "Post-merge docs: guide PR <merged | none | open>; mirror <updated | skipped (not accessible)>."
 
-EMIT [ship] capability_docs_synced guide_pr=<merged|none|open>
+EMIT [ship] docs_published guide_pr=<merged|none|open>
 
 # ── Phase 14: Final Report ────────────────────────────────────────
 
@@ -1181,6 +1187,7 @@ STEP 16: Print the final block
   Issue:   #<issue_number> (<category>) — <title>   <issue_url>
   Branch:  <branch_name>   [removed | kept]
   PR:      <pr_url>   [merged (squash) | open]
+  Guide PR: <ai-assets url>   [merged | open | none]   (platform only)
   Disposition: <merge+cleanup | cleanup | stop>
 
   What shipped: <1-2 sentences, plain language — what the change DOES, as merged.
@@ -1308,5 +1315,5 @@ CHECKLIST
 - **Uses:** `gh` CLI for issue + PR + CI/review state + merge; `git` directly for repo/worktree/branch/commit/push
 - **Reads:** the target repo's `CLAUDE.md` + `package.json`, the root `skaile-dev/CLAUDE.md` Formatting/Testing tables, affected source, `gh label/issue/pr` state
 - **Writes:** a GitHub issue + a PR on the target repo, any user-approved follow-up issues, implementation + babysit commits on the branch, a transient plan file (deleted); on merge, a squashed commit on the repo's main
-- **Writes (platform, Phase 8b):** in the PR — `platform/features/SKAILE-PLATFORM-CAPABILITIES.md` plus its `features/<NN-section>/` doc; plus an ai-assets PR for the `platform-guide` skill, merged with the platform PR; the business doc mirror (`/mnt/c/.../concept/`) post-merge only when accessible
+- **Writes (platform, Phase 8b):** in the PR — `features/SKAILE-PLATFORM-CAPABILITIES.md` plus its `features/<NN-section>/` doc; plus an ai-assets PR for the `platform-guide` skill, merged with the platform PR; the business doc mirror (`/mnt/c/.../concept/`) post-merge only when accessible
 - **Never writes:** any repo's legacy markdown issue folder — tracking is GitHub Issues
