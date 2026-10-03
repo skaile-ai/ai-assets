@@ -551,6 +551,10 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
        feature doc under `features/<NN-section>/` (for a `platform.*` capability that is
        `features/06-agent-runtime/platform-capabilities.md`).
     2. Platform-guide skill — a SEPARATE repo (`skaile-ai/ai-assets`), so a separate PR:
+       - FIRST: look for an existing guide PR — an open ai-assets PR whose body has
+         `Refs skaile-ai/platform#<issue_number>`. If one exists (babysit delta, resume), check
+         out ITS branch (no `-b`), push to it and reuse its URL; never open a second guide PR.
+         Otherwise continue below. Either way `git fetch origin` in the checkout before use.
        - Locate a checkout: `<repo_path>/../ai-assets` if it is a git repo whose `origin` is
          `skaile-ai/ai-assets`; otherwise `gh repo clone skaile-ai/ai-assets <scratch>/ai-assets`.
          NEVER edit inside a shared checkout — it may be dirty or parked on another session's
@@ -559,9 +563,6 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
          `references/` file (SKILL.md index + keywords only if a new topic area appeared).
          Hard rules from that skill: real UI labels in **bold**; never enumerate live
          `platform.*` capabilities from memory (point at `platform.find_actions` instead).
-       - Re-entrant (babysit delta, resume): first look for an open ai-assets PR whose body has
-         `Refs skaile-ai/platform#<issue_number>`; if one exists, check out ITS branch (no `-b`) and
-         push to it — never open a second guide PR. Always `git fetch origin` before branching.
        - Clone failure (`gh repo clone` / fetch) is gate #10: STOP and ask — do not fall back to "n/a".
        - Commit `docs(platform-guide): <what> (skaile-ai/platform#<issue_number>)`, push, and
          `gh pr create --repo skaile-ai/ai-assets` with `Refs skaile-ai/platform#<issue_number>`
@@ -577,8 +578,9 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
 
   The platform PR body MUST contain this section (STEP 12) — the CI guard parses these exact lines:
     ## Docs
-    Capabilities doc: updated | n/a — <reason, ≥ 10 characters>   (write ONE alternative, no brackets)
-    Platform guide: <https://github.com/skaile-ai/ai-assets/pull/N> | n/a — <reason, ≥ 10 characters>
+    Capabilities doc: updated            OR   Capabilities doc: n/a — <reason, ≥ 10 characters>
+    Platform guide: <guide_pr_url>       OR   Platform guide: n/a — <reason, ≥ 10 characters>
+  Write ONE alternative per line, with no angle brackets or `|` left in the final text.
 
 EMIT [ship] docs_impact value=<user-visible|none> guide_pr=<url|n/a>
 
@@ -671,8 +673,8 @@ Closes #<issue_number>: <refined description>
 - [ ] No regression in <adjacent surface>
 ## Docs
 [platform only — see STEP 10b; omit for other repos]
-Capabilities doc: <updated | n/a — reason>
-Platform guide: <ai-assets PR URL | n/a — reason>
+Capabilities doc: <"updated" or "n/a — reason"; write the chosen text only>
+Platform guide: <ai-assets PR URL, or "n/a — reason"; chosen text only>
 ## Deferred Follow-ups
 [only if any] - <finding> — <reason>
 EOF
