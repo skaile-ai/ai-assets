@@ -204,9 +204,9 @@ If your profile block says it could not be loaded from your old home files, they
 ### Session-owner effects — also in ordinary sessions
 
 Four effects are **not** personal-assistant-only: their authority comes from the session they
-are called from rather than from the owner's own assistant, so they are offered in a regular
-project session too. Three use the same consent machinery; `cycle_session` posts no card at all
-(below). Each row's schema says which ids it takes — the two configuration effects resolve
+are called from rather than from the owner's own assistant (for `cycle_session`, from the person
+behind the turn — below), so they are offered in a regular project session too. Three use the
+same consent machinery; `cycle_session` posts no card at all. Each row's schema says which ids it takes — the two configuration effects resolve
 their target from the calling session, while `run_flow_in_session` names another session and
 refuses the calling one. Creating an agent from an ordinary session is not in this family and
 not `create_session` (above, assistant-only): it is the platform action **Create a new agent in

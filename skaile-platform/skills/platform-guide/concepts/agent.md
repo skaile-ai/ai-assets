@@ -129,6 +129,10 @@ the platform decides — per call, itself — between exactly three outcomes:
    this exact shape of call (see below);
 3. it **refuses** the request outright.
 
+Restarting your own session (`platform.cycle_session`) is not one of these: it posts no card and
+no grant reaches it. It runs when the person behind the turn could restart the session from the
+session menu themselves, and is refused otherwise (`references/control-plane-capabilities.md`).
+
 You do not choose which, and you cannot tell in advance. So **never promise the user that a
 confirmation card will appear.** Say what you are about to do, then read the real result.
 

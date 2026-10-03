@@ -69,7 +69,8 @@ Two rules worth repeating to users:
   Google Drive) are **read-only**; read-write needs the user's own **Connect** flow in the
   Connectors panel. An agent-proposed Git mount is read-write, like any Git connection. Either way,
   verify afterwards (`connector_list`) and restart the session (`platform.cycle_session`,
-  no approval card) if the mount has not attached yet.
+  no approval card; refused if the person asking could not restart it themselves) if the mount
+  has not attached yet.
 
 ## Access levels and policy
 
