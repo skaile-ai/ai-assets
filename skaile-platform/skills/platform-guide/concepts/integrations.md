@@ -68,9 +68,10 @@ Two rules worth repeating to users:
   picks account and folder themselves. Agent-proposed drive mounts (Box, SharePoint,
   Google Drive) are **read-only**; read-write needs the user's own **Connect** flow in the
   Connectors panel. An agent-proposed Git mount is read-write, like any Git connection. Either way,
-  verify afterwards (`connector_list`) and restart the session (`platform.cycle_session`,
-  no approval card; refused if the person asking could not restart it themselves) if the mount
-  has not attached yet.
+  verify afterwards (`connector_list`) and, if the mount has not attached yet, call
+  `platform.cycle_session` — no approval card, refused if the person asking could not restart
+  the session themselves, and it restarts only once your turn has ended, so finish your reply
+  and check the mount on the next one (`references/control-plane-capabilities.md`).
 
 ## Access levels and policy
 
