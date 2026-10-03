@@ -316,6 +316,8 @@ decides:
 
 - **Grants apply only to the owner's own turns.** A member's turn, a mixed turn, or one the
   platform cannot attribute always gets a card, even where the owner holds a grant.
+  (`platform.cycle_session` is outside this: no card ever, refused on a mixed or unattributed
+  turn — see *Approval-gated actions*.)
 - **The asker needs the authority too.** When a member asks for something on a shared target,
   they must be able to do it themselves; the owner's authority is not borrowed.
 - **The owner's private things are the owner's to ask for.** Once anyone besides the owner can
