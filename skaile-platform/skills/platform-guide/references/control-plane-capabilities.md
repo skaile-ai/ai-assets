@@ -248,6 +248,33 @@ The owner's **personal flows** ride the same machinery too: listing them
 are approval-gated (listing too, because the names land in a conversation every member can read), grantable
 only for this session, and executed as the session owner. Detail is in `concepts/flows.md`.
 
+### Agent templates — also in ordinary sessions
+
+An agent template is a reusable agent in a project: instructions, skills and the connectors it
+needs. Two effects use one, from any session in that project, as the session owner. Both return
+a receipt and run in the background; only the session owner decides their cards.
+
+| Call | Effect | Effect class |
+| --- | --- | --- |
+| `platform.spawn_agent({ templateId, name?, visibility? })` | a new session from the template, a child of this one. `templateId` is the id or the exact name. Once `Succeeded`, `result.payload.sessionId` and `slug` name it. | `routine`; `privileged` when the template holds bound credentials |
+| `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills? })` | replaces the template's instructions or skill list; never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine` (`privileged` with bound credentials) on the owner's own turn; `never` otherwise |
+
+A grant on either reaches that one template only. Things to act on:
+
+- **`spawn_agent` takes no task.** Once it has `Succeeded`, give the child its task with
+  `platform.send_to_session`; if that refuses because no link exists, call
+  `platform.link_to_session` with the child first. Your messages do not count as a person
+  writing there, so this session can close the child until a person does.
+- **A shared template reports back with `send`, not `ask`.** Ask the child to send you its
+  result when done, and use `platform.notify_when_idle` to learn that it has finished.
+- **Bound credentials narrow who can spawn.** A template that holds them spawns only on the
+  owner's own turn or an automation acting for them; a project member's request is refused.
+- **A limit refusal is not final.** Depth, fan-out and concurrency limits clear once an
+  instance closes.
+- **An edit is based on a version.** A refusal naming another version means the template
+  changed: rebase on that version and propose again. An edit asked for by anyone but the owner
+  in their own turn always gets a card. Instructions are capped at 8000 characters per edit.
+
 ### Boundaries that are real, not conservatism
 
 These are refusals by design — proposing around them wastes the owner's approval:
