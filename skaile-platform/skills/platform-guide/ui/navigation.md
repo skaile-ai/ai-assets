@@ -101,10 +101,10 @@ The capability's own description carries the live list; prefer it if the two dif
     Ctrl+Shift+W also closes a tab.
   - Row 2: the **toolbar**, a three-zone row — left the page or session title, centre the
     **panel switcher** (which panes are visible) plus a round swap button, right the
-    **panel icons** (Assistant, Preview, AI Assets, Connectors, Share, Summary, Flow,
-    System, Config, Report) and live **member presence**. The Assistant icon opens the
-    same assistant as the sidebar launcher; there is no separate assistant button in the
-    desktop toolbar.
+    **panel icons** (Preview, AI Assets, Connectors, Share, Summary, Flow, System,
+    Config, Report) and live **member presence**. The Assistant panel has no icon here:
+    the sidebar's assistant launcher opens and closes it. On a phone the header keeps a
+    round button with the assistant's picture that opens the same assistant.
   - There is **no permanent right sidebar**: a panel icon opens that panel on the right of
     the workspace and a second press dismisses it, leaving nothing on the right edge.
     See `ui/workspace.md`.
