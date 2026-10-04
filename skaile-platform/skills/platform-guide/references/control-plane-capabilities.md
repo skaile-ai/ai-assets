@@ -676,4 +676,6 @@ skaile-ai/platform#6273 (a template's model: `modelOverridable` and the spawn `m
 skaile-ai/platform#6251 (the personal assistant's `projectId`: `assistant-project-target.ts`),
 and phase 3 of agent templates, part of skaile-ai/platform#6216: #6245
 (`platform.spawn_subagent`: `spawn-subagent.handler.ts`), #6242 (the template reads:
-`agent-template-read.handler.ts`) and #6263 (siblings: `spawn-channel.ts`).
+`agent-template-read.handler.ts`) and #6263 (siblings: `spawn-channel.ts`); skaile-ai/platform#6312
+(the job description, temporary hire and helper vocabulary) and #6315 (the renamed labels,
+including **Edit job description…**).

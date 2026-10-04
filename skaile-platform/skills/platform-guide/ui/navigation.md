@@ -339,4 +339,5 @@ The **Report a problem** review-or-send-directly choice: platform `main` @ `c59f
 The run-group detail page's controls: `pages/run-board/run-group-detail.page.tsx` and
 `pages/run-board/parts/group-controls.tsx` (platform #6061).
 The sidebar's job description nodes and their **...** menu: `workspace-explorer/sidebar-instance-rows.tsx`;
-labels as renamed in platform #6315 (skaile-ai/platform#6312).
+labels as renamed in skaile-ai/platform#6315 (the
+labels) and #6312 (the vocabulary).
