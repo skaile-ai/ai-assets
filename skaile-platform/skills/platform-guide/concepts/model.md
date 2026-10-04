@@ -170,4 +170,6 @@ seats), #6008 (private projects: `canAccessMySpaceProject`), #6044 (a leaver's H
 archived, not inherited, and deleted after 30 days), `team-sharing.service.ts`. Work and
 Private spaces with the rollout flag on: `landing.utils.ts`, `my-space.utils.ts`,
 `private-sponsorship.service.ts`, `sidebar-projects-tree.helpers.ts`,
-`orphaned-my-space.page.tsx`.
+`orphaned-my-space.page.tsx`. Job descriptions on the project graph (card dialog, pen, Add menu entries):
+`pages/project-graph/`, `agent-templates/start-instance-dialog.tsx`; labels as renamed in
+platform #6315 (skaile-ai/platform#6312).

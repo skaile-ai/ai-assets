@@ -338,3 +338,5 @@ Former members' My space tabs, Company mark, Archived spaces, the read-only noti
 The **Report a problem** review-or-send-directly choice: platform `main` @ `c59fd243b` (2026-09-28).
 The run-group detail page's controls: `pages/run-board/run-group-detail.page.tsx` and
 `pages/run-board/parts/group-controls.tsx` (platform #6061).
+The sidebar's job description nodes and their **...** menu: `workspace-explorer/sidebar-instance-rows.tsx`;
+labels as renamed in platform #6315 (skaile-ai/platform#6312).
