@@ -42,6 +42,7 @@ keywords:
   - calendar
   - send-draft
   - connector-mount
+  - project-graph
   - agent-graph
   - personal-flow
   - notifications

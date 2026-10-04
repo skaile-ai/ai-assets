@@ -77,8 +77,8 @@ generation configured. The agent can propose renaming itself; the user approves 
 
 The **Project graph** (project menu or Cmd+K) shows a project's agents as cards, their
 agent-to-agent links as arrows, and the project's agent templates, apps and flows in boxes
-alongside. A project Owner can arrange it: cards drag, and every box (the Agent templates, Apps
-and Flows boxes as well as groups the user adds with **New Group**) moves, resizes, renames
+alongside. A project Owner can arrange it: cards drag, and every box (the **Agent templates**, **Apps**
+and **Flows** boxes as well as groups the user adds with **New Group**) moves, resizes, renames
 and deletes; **Reset layout** restores the automatic arrangement.
 
 ## Connectors vs. mounts
@@ -160,7 +160,7 @@ Grounded in: `platform/docs/roles-permissions-matrix.md`, `platform/docs/scoped-
 `platform/docs/mount-connection-binding.md` (owner invariant), the new-project wizard's
 source picker, the `is_personal` organization field, platform PRs #3760 (org creation),
 #4281 (last Owner), #5023 (Personal/Business), #5076/#5354 (Explorer sections), #5251
-(project graph), #5336/#5352 (agent rename, picture generation), #5988 (Private workspace
+(agent graph, renamed Project graph in #6240; editable boxes #6244), #5336/#5352 (agent rename, picture generation), #5988 (Private workspace
 seats), #6008 (private projects: `canAccessMySpaceProject`), #6044 (a leaver's Home is
 archived, not inherited, and deleted after 30 days), `team-sharing.service.ts`. Work and
 Private spaces with the rollout flag on: `landing.utils.ts`, `my-space.utils.ts`,
