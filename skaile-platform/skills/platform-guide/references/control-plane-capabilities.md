@@ -139,7 +139,7 @@ what decides whether an autonomy grant can ever cover it (see *Consent and auton
 | `platform.update_organization_branding({ organizationId, name?, logoUrl?, iconSvg? })` | a new name, logo URL or icon for an organization; at least one field, and an empty string removes the logo or icon | `routine` | that exact target only |
 | `platform.create_project({ organizationId, name, sourceType, description?, visibility?, agentName?, agentAvatarUrl?, initialMessage? })` | a new project. `sourceType` is `Empty` or `OnSkaile`; `visibility` `Private` (default) or `Shared`. | `routine` | that target, its organization, or everything reachable |
 | `platform.create_session({ projectId, name, slug?, followMain?, visibility? })` | a new session; once `Succeeded`, `result.payload.url` links to it and `result.payload.sessionId` names it — share the link, or bring it up with `platform.navigate({ route: "session", params: { session: result.payload.sessionId } })` when the owner asked to go there. In a private project (the assistant's Home or a My space project) the session is always Private and `visibility: "Shared"` is refused. | `routine` | that target, its project, its organization, or everything reachable |
-| `platform.invite_to_organization({ organizationId, email, role? })` | an invitation email | `external` | that target, its organization, or everything reachable |
+| `platform.invite_to_organization({ organizationId, email, role?, personalMessage? })` | an invitation email | `external`; `never` when `role` is `Owner` or a `personalMessage` is set | that target, its organization, or everything reachable — never an Owner invitation or one with a message |
 | `platform.invite_to_project({ projectId, email, role? })` | an invitation email | `external` | that target, its project, its organization, or everything reachable |
 | `platform.invite_to_session({ sessionId, email, role? })` | an invitation email; the invitee can then read that session's whole history | `external` | that target, its project, its organization, or everything reachable |
 | `platform.begin_connector_setup({ organizationId, providerType, providerLinkId? })` | reuses an already-usable connector, otherwise parks on the owner. `result.payload.reused` says which happened. | `routine` | that target, its organization, or everything reachable |
@@ -330,6 +330,11 @@ A grant on `spawn_agent` or `update_agent_template` reaches that one template on
   changed: rebase on that version and propose again. A standing grant covers an edit only when
   the owner asks for it in their own turn; an edit set off by anyone or anything else always gets
   a card. Instructions are capped at 8000 characters per edit.
+- **The rest of a template is changed by a person.** Its name, picture, identity, who may start
+  it, whether its instances are listed, its limits, and archiving it are not reachable here. Point
+  the person to **Edit template…** in the template's menu in the sidebar, or the pen on its card
+  in the project graph. Only a project owner may change who may start it or its limits, or
+  archive it.
 
 ### Boundaries that are real, not conservatism
 
@@ -339,11 +344,23 @@ These are refusals by design — proposing around them wastes the owner's approv
   (Git, SharePoint, Google Drive, Box, NextCloud) is created from the web app. Re-pointing only
   moves a project that *already has* a Git source onto a different, already-usable connector —
   it cannot add a source, create a connector, or create a project.
-- **Roles on invite.** `Viewer` (default) or `User`, at all three levels. `Owner` is not
-  assignable through any of these. Note that a **session** invite uses this same
-  `Viewer`/`User` vocabulary through the capability — not the Owner/Participant labels the
-  Share tab shows (`concepts/collaboration.md`). No personal note, personal message, or
-  display name can be attached — the human adds those from the web app.
+- **Roles on invite.** `Viewer` (default) or `User` for projects and sessions; `Owner` is not
+  assignable through a project or session invite, even though the web app's Members tab offers
+  it to a human. Note that a
+  **session** invite uses this same `Viewer`/`User` vocabulary through the capability — not
+  the Owner/Participant labels the Share tab shows (`concepts/collaboration.md`).
+  An **organization** invite also takes `Owner`, for handing an organization over (for
+  example, to a customer taking over a workspace you set up for them). It needs the owner to
+  hold a real Owner membership there — a platform administrator's access without one does not
+  count — and it is refused for a Private workspace. Check the owner's live role first with
+  `platform.list_my_organizations`, so the approval is not spent on a predictable refusal. No
+  standing approval covers an Owner invitation: it is carded or refused, never dispatched
+  silently. Leaving the organization afterwards is the owner's own step in the web app.
+- **Personal message.** Only an organization invite takes one (`personalMessage`, at most
+  1,000 characters). Write it in the owner's voice and keep it short. An invitation that
+  carries one is never covered by a standing approval, and any approval shows the message in
+  full. The `context` note and a display name cannot be attached at any level — the human adds
+  those from the web app.
 - **Private projects.** The project the personal assistant lives in (its Home), any project
   in the owner's My space, and every session in them, cannot be invited into, shared, or
   shared with a team, and none of those sessions can be made Shared. The refusal reads "this
@@ -559,5 +576,6 @@ and #6165, part of #6152 (agent templates: `spawn-agent.handler.ts`,
 (finishing a spawned instance: `finish-spawned-instance.handler.ts`,
 `finish-spawned-instance-policy.service.ts`) and #6189 (the `archived` status, and the close
 before the archive: `session.update.service.ts`, whose archive closes a running or hibernated
-session first), and platform #6253 (organization branding:
+session first), skaile-ai/platform#6265 (editing a template from the UI:
+`edit-agent-template-dialog.tsx`) and skaile-ai/platform#6253 (organization branding:
 `update-organization-branding.handler.ts`, `update-organization-branding-policy.service.ts`).
