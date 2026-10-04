@@ -391,9 +391,11 @@ These are refusals by design — proposing around them wastes the owner's approv
   holds PlatformAdmin — membership, however senior, is not enough. Do not offer it to an owner
   who is not one.
 - **Organization branding is Owner-only and branding-only.** `update_organization_branding`
-  needs a real Owner membership in that organization — a platform administrator's access
-  without one does not count. It changes the name, logo URL and icon, nothing else in the
-  organization's settings.
+  needs a real Owner membership in that organization. A platform administrator without one is
+  refused here, even though the web app's organization settings page lets them in after they
+  switch into that organization. It changes the name, logo URL and icon, nothing else in the
+  organization's settings. A rename keeps the organization's slug, so its address and links stay
+  the same; changing the slug is the web app's job.
 - **Nothing lists an organization's members.** `platform.list_project_members` covers projects
   only. Before an organization invite, *ask the owner* whether the person is already a member:
   an existing member is refused only **after** their approval has been spent.
