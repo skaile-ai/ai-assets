@@ -136,7 +136,7 @@ what decides whether an autonomy grant can ever cover it (see *Consent and auton
 | Call | Effect | Effect class | Grant may reach |
 | --- | --- | --- | --- |
 | `platform.create_organization({ name, slug?, logoUrl?, iconSvg? })` | a new organization | `privileged` | only the widest scope: every target of that kind the owner can reach |
-| `platform.update_organization_branding({ organizationId, name?, logoUrl?, iconSvg? })` | a new name, logo URL or icon for an organization; at least one field, and an empty string removes the logo or icon. The platform keeps the logo's URL, not the image, so prefer a stable address. | `routine` | that exact target only |
+| `platform.update_organization_branding({ organizationId, name?, logoUrl?, iconSvg? })` | a new name, logo URL or icon for an organization; at least one field. An empty string removes the logo or icon, but an empty `name` is refused: an organization always has a name. A rename keeps the organization's slug, so its address and links stay the same. The platform keeps the logo's URL, not the image, so prefer a stable address. | `routine` | that exact target only |
 | `platform.create_project({ organizationId, name, sourceType, description?, visibility?, agentName?, agentAvatarUrl?, initialMessage? })` | a new project. `sourceType` is `Empty` or `OnSkaile`; `visibility` `Private` (default) or `Shared`. | `routine` | that target, its organization, or everything reachable |
 | `platform.create_session({ projectId, name, slug?, followMain?, visibility? })` | a new session; once `Succeeded`, `result.payload.url` links to it and `result.payload.sessionId` names it — share the link, or bring it up with `platform.navigate({ route: "session", params: { session: result.payload.sessionId } })` when the owner asked to go there. In a private project (the assistant's Home or a My space project) the session is always Private and `visibility: "Shared"` is refused. | `routine` | that target, its project, its organization, or everything reachable |
 | `platform.invite_to_organization({ organizationId, email, role?, personalMessage? })` | an invitation email | `external`; `never` when `role` is `Owner` or a `personalMessage` is set | that target, its organization, or everything reachable — never an Owner invitation or one with a message |
@@ -256,8 +256,9 @@ only for this session, and executed as the session owner. Detail is in `concepts
 ### Agent templates — also in ordinary sessions
 
 An agent template is a reusable agent in a project: instructions, skills and the connectors it
-needs. Four effects create a template or act on one or its instances, from any session in that project,
-as the session owner; only the session owner decides their cards. `create_agent_template`,
+needs. Four effects create a template or act on one or its instances, from any session in that
+project, as the session owner; only the session owner decides their cards. Your personal assistant
+can also create or edit a template in another project by naming it with `projectId` (below). `create_agent_template`,
 `spawn_agent` and `update_agent_template` are durable: each returns an operation receipt, read with
 `platform.get_operation` (*The operation lifecycle* below), and `result.payload` is set once it
 has `Succeeded`. `finish_spawned_instance` is not: once it runs it returns its result itself,
@@ -282,14 +283,23 @@ it.
 
 | Call | Effect | Effect class |
 | --- | --- | --- |
-| `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl? })` | a new template in this session's project. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit template…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL (or a path starting with `/`), since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it. | `routine` on the owner's own turn; `never` on any other turn |
+| `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl?, projectId? })` | a new template in this session's project, or, from the personal assistant, in the project `projectId` names. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit template…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL (or a path starting with `/`), since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it. | `routine` on the owner's own turn; `never` on any other turn |
 | `platform.spawn_agent({ templateId, name?, visibility?, task?, model? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
-| `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills? })` | replaces the template's instructions or skill list; never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
+| `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills?, projectId? })` | replaces the template's instructions or skill list (from the personal assistant, `projectId` finds the template in that project); never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
 | `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine` |
 
-A grant on `create_agent_template` reaches this project only. A grant on `spawn_agent` or
+A grant on `create_agent_template` reaches that one project only. A grant on `spawn_agent` or
 `update_agent_template` reaches that one template only; a grant on
 `finish_spawned_instance` covers this session finishing its own children. Things to act on:
+
+- **Setting up another project (personal assistant only).** From the owner's personal
+  assistant, pass `projectId` to `create_agent_template` or `update_agent_template` to act in a
+  project the owner chose, for example one you just created with `platform.create_project`.
+  The owner's role is checked on that project, and its organization must allow you **Full**
+  reach (`concepts/agent.md` § *Assistant reach*).
+  Any other session that passes `projectId` is refused. `spawn_agent` takes no `projectId`: an
+  instance is a child of the session that started it, so ask a session in that project to spawn
+  it (`platform.delegate_to_session`).
 
 - **Give the child its work as `task`.** The owner sees it on the card (the first 600
   characters). A `task` over 8000 characters is refused as invalid input, so shorten it or
@@ -459,8 +469,7 @@ These are refusals by design — proposing around them wastes the owner's approv
   needs a real Owner membership in that organization. A platform administrator without one is
   refused here, even though the web app's organization settings page lets them in after they
   switch into that organization. It changes the name, logo URL and icon, nothing else in the
-  organization's settings. A rename keeps the organization's slug, so its address and links stay
-  the same.
+  organization's settings.
 - **Nothing lists an organization's members.** `platform.list_project_members` covers projects
   only. Before an organization invite, *ask the owner* whether the person is already a member:
   an existing member is refused only **after** their approval has been spent.
@@ -648,7 +657,8 @@ session first), skaile-ai/platform#6265 (editing a template from the UI:
 skaile-ai/platform#6267 (the spawn task: `spawn-agent-policy.service.ts`, `sendTask`),
 skaile-ai/platform#6243 (the spawner and child channel, which needs no link) and
 skaile-ai/platform#6273 (a template's model: `modelOverridable` and the spawn `model`), skaile-ai/platform#6278 (`platform.create_agent_template`:
-`create-agent-template-policy.service.ts`, `create-agent-template.handler.ts`), and phase 3 of
-agent templates, part of skaile-ai/platform#6216: #6245 (`platform.spawn_subagent`:
-`spawn-subagent.handler.ts`), #6242 (the template reads: `agent-template-read.handler.ts`) and
-#6263 (siblings: `spawn-channel.ts`).
+`create-agent-template-policy.service.ts`, `create-agent-template.handler.ts`),
+skaile-ai/platform#6251 (the personal assistant's `projectId`: `assistant-project-target.ts`),
+and phase 3 of agent templates, part of skaile-ai/platform#6216: #6245
+(`platform.spawn_subagent`: `spawn-subagent.handler.ts`), #6242 (the template reads:
+`agent-template-read.handler.ts`) and #6263 (siblings: `spawn-channel.ts`).
