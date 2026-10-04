@@ -264,14 +264,15 @@ with no operation id and nothing to poll. A fourth effect, `platform.spawn_subag
 copy of this session rather than of a template (*Subagents* below).
 
 Two reads need no card. `platform.list_agent_templates({})` lists all of this project's live
-templates in one reply (it takes no paging arguments):
-each one's `id`, `name`, `version`, `listed`, `invokeRole`, `siblingAwareness`,
-`credentialBearing`, and `canSpawn` (whether the session owner may start it now; it does not
-predict a limit or owner-turn refusal). `platform.get_agent_template({ templateId })` reads one:
-the same fields without `canSpawn`, plus its `instructions`, `skills`, limits (`null` means the
-platform default) and model fields. Read it before an edit and send its `version`. Another
-project's template, an archived one and an unknown one all come back as not found. `templateId`
-takes the template's id or its exact name everywhere.
+templates in one reply (it takes no paging arguments): each one's `id`, `name`, `version`,
+`listed`, `invokeRole`, `siblingAwareness`, `credentialBearing`, and `canSpawn` (whether the
+session owner may start it now; it does not predict a limit or owner-turn refusal).
+`platform.get_agent_template({ templateId })` reads one: the same fields without `canSpawn`,
+plus its `instructions`, `skills`, limits (`null` means the platform default) and model fields.
+Read it before an edit and send its `version`. Another project's template, an archived one and
+an unknown one all come back as not found. `templateId` takes the template's id or its exact
+name everywhere.
+
 A template **holds bound credentials** when connector credentials are attached to the template
 itself, so every instance reaches those systems on the template's connection, whoever spawned
 it.

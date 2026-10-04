@@ -104,8 +104,10 @@ Sessions can talk to each other's agents through directed, two-sided opt-in link
   with `platform.spawn_subagent`, and the instances of one agent template that one person owns,
   when the template's `siblingAwareness` is on (*Agent templates* in
   `references/control-plane-capabilities.md`). The hop, cycle and budget bounds above apply to
-  them unchanged, and archiving either end closes the pair's exchanges. `platform.list_peers`
-  lists them with a `relation` (`"spawner"`, `"child"` or `"sibling"`); a linked peer has none.
+  them unchanged, and archiving either end closes the pair's exchanges. In
+  `platform.list_peers`, a peer related to you through a spawn carries a `relation` label
+  (`"spawner"`, `"child"` or `"sibling"`); a peer you reach only through a link carries none.
+  The label describes the peer; it does not say whether a link is needed.
 
 Source of truth: `platform/docs/protocol-extensions.md`,
 `platform/docs/public-file-preview-sharing.md`, `platform/backend/libs/agent-to-agent/`,
