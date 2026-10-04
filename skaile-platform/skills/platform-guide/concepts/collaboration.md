@@ -65,9 +65,9 @@ file preview (e.g. a report) with someone **outside** the platform — no login 
 
 ## Agent-to-Agent (A2A)
 
-Sessions can talk to each other's agents through directed, two-sided opt-in links. The one
-exception is a session and an agent it spawned from a template, which can message each other
-with no link (*Agent templates* in `references/control-plane-capabilities.md`).
+Sessions can talk to each other's agents through directed, two-sided opt-in links. Three kinds
+of pair need no link: a session and an agent it spawned from a template, a session and a
+subagent it started, and sibling instances of one template (the last bullet below).
 
 - A session must be opened to peers (**Allow other sessions to reach this one**) and may
   declare a **Scope** describing what it is willing to do for them before it can be linked.

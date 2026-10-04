@@ -481,8 +481,9 @@ Fuller treatment: `ai-assets/docs/flows.md`.
 ## Run groups (batch / unattended processing)
 
 - A run group = one flow + one **recipe** (or an **agent template**, below) + a list of
-  inputs. Each input runs in its own temporary session; a scheduler limits how many run at once. Groups can be paused,
-  cancelled, retried per item, and new inputs can be appended while running.
+  inputs. Each input runs in its own temporary session; a scheduler limits how many run at
+  once. Groups can be paused, cancelled, retried per item, and new inputs can be appended
+  while running.
 - Every group has a mode, fixed at creation: **Batch** (a fixed set of inputs; the group
   finishes when every run has finished) or **Standing** (trigger-fed and long-running; it
   keeps taking new inputs until someone clicks **Close**). A Standing group can mint its
@@ -535,9 +536,9 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   credentials (`credentialBearing`), the session owner must also be a project **Owner**, the
   card is `privileged`, and only the owner's own turn can propose it. Unlike other `privileged`
   cards, no standing grant ever covers this one, even with the opt-in on: every run uses those
-  credentials, and anyone who works in a run session uses them too. The check is
-  repeated before every run; if the creator has lost the right, that run fails, nothing starts,
-  and the group pauses (the detail page says the creator is no longer authorized). A project
+  credentials, and anyone who works in a run session uses them too. The check is repeated
+  before every run; if the creator has lost the right, that run fails, nothing starts, and the
+  group pauses (the detail page says the creator is no longer authorized). A project
   Owner then creates a new group. A run's session is not one of the template's instances: it
   does not count toward the template's limits, and it cannot spawn agents or subagents.
 

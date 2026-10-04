@@ -386,8 +386,10 @@ for splitting work across parallel copies. It is durable like `spawn_agent`, and
   for this session.
 - **It takes no task.** Once it has `Succeeded`, send it its task with
   `platform.send_to_session`. You and it reach each other (`send_to_session`,
-  `notify_when_idle`) with no link for as long as neither is archived; ask it to `send` you its
-  result, and close it with `platform.finish_spawned_instance` when its work is done.
+  `notify_when_idle`) with no link for as long as neither is archived, and
+  `platform.list_peers` shows it to you with `relation: "child"` and you to it with
+  `"spawner"`; ask it to `send` you its result, and close it with
+  `platform.finish_spawned_instance` when its work is done.
 - **Class `routine`**, and `privileged` when this session has a connector on a shared service
   account: then only the owner's own turn (or an automation acting for them) can have one
   spawned, and a member's request is refused before any card (`owner_turn_required`). A grant
@@ -644,4 +646,7 @@ session first), skaile-ai/platform#6265 (editing a template from the UI:
 skaile-ai/platform#6267 (the spawn task: `spawn-agent-policy.service.ts`, `sendTask`),
 skaile-ai/platform#6243 (the spawner and child channel, which needs no link) and
 skaile-ai/platform#6273 (a template's model: `modelOverridable` and the spawn `model`), skaile-ai/platform#6278 (`platform.create_agent_template`:
-`create-agent-template-policy.service.ts`, `create-agent-template.handler.ts`).
+`create-agent-template-policy.service.ts`, `create-agent-template.handler.ts`), and phase 3 of
+agent templates, part of skaile-ai/platform#6216: #6245 (`platform.spawn_subagent`:
+`spawn-subagent.handler.ts`), #6242 (the template reads: `agent-template-read.handler.ts`) and
+#6263 (siblings: `spawn-channel.ts`).
