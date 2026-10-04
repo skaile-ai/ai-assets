@@ -260,10 +260,17 @@ session owner; only the session owner decides their cards. `spawn_agent` and
 `update_agent_template` are durable: each returns an operation receipt, read with
 `platform.get_operation` (*The operation lifecycle* below), and `result.payload` is set once it
 has `Succeeded`. `finish_spawned_instance` is not: once it runs it returns its result itself,
-with no operation id and nothing to poll.
+with no operation id and nothing to poll. A fourth effect, `platform.spawn_subagent`, starts a
+copy of this session rather than of a template (*Subagents* below).
 
-There is no call that lists a project's templates. `templateId` takes the template's id or its
-exact name, so use the name or id the person gives you, and ask them when you have neither.
+Two reads need no card. `platform.list_agent_templates({})` lists this project's templates:
+each one's `id`, `name`, `version`, `listed`, `invokeRole`, `siblingAwareness`,
+`credentialBearing`, and `canSpawn` (whether the session owner may start it now; it does not
+predict a limit or owner-turn refusal). `platform.get_agent_template({ templateId })` reads one:
+the same fields without `canSpawn`, plus its `instructions`, `skills`, limits (`null` means the
+platform default) and model fields. Read it before an edit and send its `version`. Another
+project's template, an archived one and an unknown one all come back as not found. `templateId`
+takes the template's id or its exact name everywhere.
 A template **holds bound credentials** when connector credentials are attached to the template
 itself, so every instance reaches those systems on the template's connection, whoever spawned
 it.
@@ -335,6 +342,41 @@ A grant on `spawn_agent` or `update_agent_template` reaches that one template on
   the person to **Edit template…** in the template's menu in the sidebar, or the pen on its card
   in the project graph. Only a project owner may change who may start it or its limits, or
   archive it.
+- **Instances of one template can talk to each other when the template allows it.** Where
+  `siblingAwareness` is true, the live instances of that template that **one person** owns in
+  this project can `send_to_session`, `notify_when_idle` and `ask_session` each other with no
+  link, and `platform.list_peers` shows them with `relation: "sibling"`. Instances another
+  member owns are never siblings: a send to one is refused (`no_link`). Turning the setting off
+  or archiving the template ends it. `list_peers` shows at most the per-person instance limit;
+  a sibling past it is still reachable by id.
+
+#### Subagents: a copy of this session
+
+`platform.spawn_subagent` starts a child from **this session's own setup**, no template needed,
+for splitting work across parallel copies. It is durable like `spawn_agent`, and once it has
+`Succeeded`, `result.payload.sessionId` and `slug` name the child.
+
+- **`mode: "clone"`** copies this session's setup whole. **`mode: "adhoc"`** narrows it:
+  `instructions` replaces your instructions, and `skills`, `connectors` (connector ids) and
+  `mcpServers` (ids) each keep only what you list; leave a list out to keep all of it. A
+  narrowing field on a `clone` is invalid input.
+- **It never has more than this session.** Any name this session lacks refuses the whole
+  request (`widening_refused`), and the refusal names what is missing; nothing is created, so
+  correct the list rather than retrying it. The `workspace` connector is always kept, and this
+  session's stored secrets are never copied. It runs on the project's model, not a model picked
+  for this session.
+- **It takes no task.** Once it has `Succeeded`, send it its task with
+  `platform.send_to_session`. You and it reach each other with no link, as with a child spawned
+  from a template; ask it to `send` you its result, and close it with
+  `platform.finish_spawned_instance` when its work is done.
+- **Class `routine`**, and `privileged` when this session has a connector on a shared service
+  account: then only the owner's own turn (or an automation acting for them) can have one
+  spawned, and a member's request is refused before any card (`owner_turn_required`). A grant
+  covers this session spawning subagents, for requests of the class it was granted at.
+- **Refused by design:** a session limited to a folder (`scoped_session_unsupported`; the copy
+  would see the whole project), a run group's session, and an archived session. The depth and
+  fan-out limits apply as for templates, plus a limit on one person's live subagents across all
+  their sessions; a limit refusal clears once a subagent is finished.
 
 ### Boundaries that are real, not conservatism
 

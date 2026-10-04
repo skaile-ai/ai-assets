@@ -100,10 +100,15 @@ Sessions can talk to each other's agents through directed, two-sided opt-in link
   another organization can be linked by hand. The agent itself only links within its own
   organization. The home assistant can still find the owner's sessions in other organizations
   (as far as each one's reach allows) and message a session linked to it there by hand.
+- Two more pairs need no link, both inside one project: an agent and a **subagent** it started
+  with `platform.spawn_subagent`, and the instances of one agent template that one person owns,
+  when the template's `siblingAwareness` is on (*Agent templates* in
+  `references/control-plane-capabilities.md`). The hop, cycle and budget bounds above apply to
+  them unchanged, and archiving either end closes the pair's exchanges.
 
 Source of truth: `platform/docs/protocol-extensions.md`,
 `platform/docs/public-file-preview-sharing.md`, `platform/backend/libs/agent-to-agent/`,
 platform PRs #4917 (notification modes), #4566 (cross-org A2A), #5152 (share wake budget),
 #5876 (idle subscriptions), #6008 (private projects not shareable), #6261 (send refusals
-and the not-delivered notice), `platform/docs/roles-permissions-matrix.md` (share and invite
+and the not-delivered notice), #6263 (sibling instances of a template, `spawn-channel.ts`), `platform/docs/roles-permissions-matrix.md` (share and invite
 permissions).

@@ -71,6 +71,12 @@ full text is in the new agent's **Edit agent** dialog. It does not link the new 
 calling session — propose an agent-to-agent link separately (see *Agent-to-Agent* in
 `concepts/collaboration.md`).
 
+An agent can also start a copy of itself, to split work across parallel sessions, with
+`platform.spawn_subagent`: a clone of its own setup, or a narrowed one with its own
+instructions and fewer skills, connectors or MCP servers, never more than it has. The copy is a
+child of the calling session, runs as the session owner, and is finished the same way
+(*Subagents* in `references/control-plane-capabilities.md`).
+
 ## Scoped sessions
 
 A **scoped session** mounts only a **subfolder** of the project's workspace instead of
@@ -112,4 +118,5 @@ Source of truth: `platform/docs/session-lifecycle.md`, `platform/docs/scoped-ses
 `isProjectSessionCreateRole` (who can create sessions), platform #6065 (agents create agents),
 platform #6165, part of #6152 (spawning from agent templates: `spawn-agent.handler.ts`,
 `spawn-agent-policy.service.ts`), platform #6185 and #6189, part of #6152 (finishing a
-spawned instance: `finish-spawned-instance.handler.ts`).
+spawned instance: `finish-spawned-instance.handler.ts`), platform #6245 (subagents:
+`spawn-subagent.handler.ts`, `subagent-payload.ts`).
