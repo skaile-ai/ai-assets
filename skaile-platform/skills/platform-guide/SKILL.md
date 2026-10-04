@@ -7,8 +7,9 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   Exchange mail and calendar (triage, drafting, sending, shared mailboxes), the project graph,
   Skailify apps, sharing and inviting, connecting a data source, AI providers and Claude
   seats, skills/assets, scoped sessions, agent-to-agent, notifications, roles and permissions,
-  Work vs Private workspaces, My space and the Home, assistant reach, hibernation, agent templates, or any platform surface; before creating a
-  project/session/organization, inviting someone, starting a connector setup or mount, or
+  Work vs Private workspaces, My space and the Home, assistant reach, hibernation, job
+  descriptions (agent templates), temporary hires and helpers, or any platform surface; before
+  creating a project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
 version: 0.16.13
@@ -54,6 +55,9 @@ keywords:
   - my-space
   - assistant-reach
   - agent-template
+  - job-description
+  - temporary-hire
+  - helper
   - spawn-agent
   - spawn-subagent
   - subagent
@@ -80,7 +84,9 @@ Speak in user-facing business terms (project / session / project data), not inte
 (mounts / worktrees / containers), and never narrate implementation mechanics — model and
 version names, resolution or parameter tweaks, retries, or step-by-step tool chatter — in a
 user-facing turn; report only the user-meaningful outcome. Surface internal terms or
-mechanics only when the user is technical or `expertMode=true`.
+mechanics only when the user is technical or `expertMode=true`. Say **job description** (not
+agent template), **temporary hire** (not instance) and **helper** (not subagent) to people;
+capability names, ids and fields keep the code words.
 
 ## Detail files
 
@@ -103,7 +109,7 @@ mechanics only when the user is technical or `expertMode=true`.
 | `references/agent-action-catalog.md` | You are about to search for or run a platform action (`platform.find_actions`, `platform.invoke`, `platform.batch`), or pass a file by reference — and need the call shapes, `$ref` syntax, per-step consent, file transfers and shared-session rules. |
 | `references/exchange-mail-calendar.md` | You are about to read, triage, file, draft or send mail, or read or change a calendar event, in a connected Microsoft 365 mailbox — and need mailbox selection, the approval tiers, the send grant, and how to read a send result. |
 | `references/classifier.md` | You are about to classify many items with closed questions (`platform.classify`) and need the call shape, limits, and how to read `calibrated` / `p`. |
-| `references/control-plane-capabilities.md` | You are about to create a project/session/organization, change an organization's name, logo or icon, invite someone, start or repair a connector, propose a connector mount or an asset configuration, run a flow in another session, read or write a text file in another of the owner's sessions, change the assistant profile, create an agent template, list or read the project's templates, spawn an agent from one or a copy of yourself (`platform.spawn_subagent`), finish an instance you spawned, edit a template's instructions or skills, or read an operation back — and need the family's shape, effect classes, real boundaries, the operation lifecycle, and the `AwaitingUser` handoff. |
+| `references/control-plane-capabilities.md` | You are about to create a project/session/organization, change an organization's name, logo or icon, invite someone, start or repair a connector, propose a connector mount or an asset configuration, run a flow in another session, read or write a text file in another of the owner's sessions, change the assistant profile, create a job description (agent template), list or read the project's job descriptions, take on a temporary hire from one or start a helper (`platform.spawn_subagent`), finish a temporary hire or helper you started, edit a job description's instructions or skills, or read an operation back — and need the family's shape, effect classes, real boundaries, the operation lifecycle, and the `AwaitingUser` handoff. |
 
 ### UI (where things live, click-paths)
 

@@ -61,6 +61,11 @@ The capability's own description carries the live list; prefer it if the two dif
     its sessions declare; a green **Running** dot marks one that is serving — clicking an
     app opens its session with only that app's preview showing), the project's sessions,
     **Flows** (each flow with its run groups), and **Archive** (archived sessions — only in expert mode).
+    Each of the project's job descriptions is a node among the sessions, with its running
+    temporary hires nested under it (an unlisted one shows no hires). Its name opens the latest
+    running temporary hire, or offers to take one on; the **+** beside it is **Take on a
+    temporary hire: \<name\>**, and its **...** menu has **Open latest temporary hire**, **Take on
+    a temporary hire** and **Edit job description…**.
     A section with one item shows it directly under the project instead of in a group row;
     empty sections are omitted. Clicking the name of a project with exactly one session
     opens that session; its expand toggle still expands it.
@@ -135,7 +140,7 @@ The capability's own description carries the live list; prefer it if the two dif
 | **Run groups**    | `/<org>/runs`                 | Batch / unattended processing: the status board for every run group, with click-through into a group's detail page, which holds its controls: **Activate** (a Draft only), **Pause** / **Resume**, **Close** (Standing groups), **Cancel group**, and the **Autonomous** switch. See `concepts/flows.md`. |
 | **Flows**         | `/<org>/flows`                | Browse and author flow definitions; open a flow's graph view/editor. See `concepts/flows.md`. |
 | **Sessions**      | `/<org>/sessions`             | The org sessions report (Cmd+K: **Sessions report**): one row per agent session — project, agent, type, owner, members, default connector and folder, message count, cost, last activity — with per-column filters, search, a cost period (**7d** / **30d** / **90d** / **365d** or custom dates) and **Export to Excel** of the filtered rows. Org Owners see every session in the org except other members' private ones (in their assistant's Home or their My space); everyone else sees the sessions they have access to. Personal-assistant sessions are not listed. |
-| **Project graph** | `/<org>/<project>/graph`      | From a project's **...** menu or Cmd+K: the project's agents as cards, agent-to-agent links as arrows, and its agent templates, apps and flows in boxes beside them. A project Owner can move cards and boxes, and resize, rename or delete any box. |
+| **Project graph** | `/<org>/<project>/graph`      | From a project's **...** menu or Cmd+K: the project's agents as cards, agent-to-agent links as arrows, and its job descriptions, apps and flows in boxes beside them. A project Owner can move cards and boxes, and resize, rename or delete any box. |
 | **Open-source licenses** | `/licenses`            | Third-party components shipped to the browser, with licenses and source links. From **Info** in the avatar menu. |
 
 ### Shared Exchange mailboxes
@@ -333,3 +338,6 @@ Former members' My space tabs, Company mark, Archived spaces, the read-only noti
 The **Report a problem** review-or-send-directly choice: platform `main` @ `c59fd243b` (2026-09-28).
 The run-group detail page's controls: `pages/run-board/run-group-detail.page.tsx` and
 `pages/run-board/parts/group-controls.tsx` (platform #6061).
+The sidebar's job description nodes and their **...** menu:
+`workspace-explorer/sidebar-instance-rows.tsx`; skaile-ai/platform#6315 (the labels) and #6312
+(the vocabulary).

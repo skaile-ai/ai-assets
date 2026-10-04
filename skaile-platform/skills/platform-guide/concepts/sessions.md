@@ -52,10 +52,11 @@ In the UI a session is presented as an agent: creating one is **New agent**. It 
 project role of **User** or **Owner**, and the project must not be archived.
 
 An agent can create one too, from any session and not only the home assistant, in one of three
-ways. From one of the project's **agent templates**, it calls `platform.spawn_agent`: the new
-agent becomes a child of the calling session, runs as the session owner, and gets its task in
-the same call (`task`), sent as the spawner's first message to it; the two can message each
-other with no agent-to-agent link (*Agent templates* in
+ways. From one of the project's **job descriptions** (agent templates), it takes on a
+**temporary hire** for one job with `platform.spawn_agent`: the new agent becomes a child of
+the calling session, runs as the session owner, and gets its task in the same call (`task`),
+sent as the spawner's first message to it; the two can message each other with no
+agent-to-agent link (*Job descriptions* in
 `references/control-plane-capabilities.md`). When its work is done, the spawning session ends it
 with `platform.finish_spawned_instance`, which closes it (with the usual sync-back) and archives
 it or, once a person has written there, asks the owner to mark it done (same section). From
@@ -72,11 +73,11 @@ full text is in the new agent's **Edit agent** dialog. It does not link the new 
 calling session — propose an agent-to-agent link separately (see *Agent-to-Agent* in
 `concepts/collaboration.md`).
 
-An agent can also start a copy of itself, to split work across parallel sessions, with
-`platform.spawn_subagent`: a clone of its own setup, or a narrowed one with its own
-instructions and fewer skills, connectors or MCP servers, never more than it has. The copy is a
-child of the calling session, runs as the session owner, and is finished the same way
-(*Subagents* in `references/control-plane-capabilities.md`).
+An agent can also start a **helper**, a copy of itself as extra hands for volume work across
+parallel sessions, with `platform.spawn_subagent`: a clone of its own setup, or a narrowed one
+with its own instructions and fewer skills, connectors or MCP servers, never more than it has.
+The copy is a child of the calling session, runs as the session owner, and is finished the same way
+(*Helpers* in `references/control-plane-capabilities.md`).
 
 ## Scoped sessions
 

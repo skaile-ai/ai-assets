@@ -76,10 +76,15 @@ can be generated from a text prompt with **Generate** where the deployment has i
 generation configured. The agent can propose renaming itself; the user approves it.
 
 The **Project graph** (project menu or Cmd+K) shows a project's agents as cards, their
-agent-to-agent links as arrows, and the project's agent templates, apps and flows in boxes
-alongside. A project Owner can arrange it: cards drag, and every box (the **Agent templates**, **Apps**
-and **Flows** boxes as well as groups the user adds with **New Group**) moves, resizes, renames
-and deletes; **Reset layout** restores the automatic arrangement.
+agent-to-agent links as arrows, and the project's job descriptions, apps and flows in boxes
+alongside. Clicking a job description's card opens a dialog whose button is **Take on a
+temporary hire**, with an optional first message, and **Open latest** when one is running; the
+pen on the card opens the job description's edit dialog, as **Edit job description…** does; the
+graph's Add menu has **New job description** and **New temporary hire…** (which first asks
+which job description). A project Owner can arrange the graph: cards drag, and every box (the
+**Job descriptions**, **Apps** and **Flows** boxes as well as groups the user adds with **New
+Group**) moves, resizes, renames and deletes; **Reset layout** restores the
+automatic arrangement.
 
 ## Connectors vs. mounts
 
@@ -166,3 +171,6 @@ archived, not inherited, and deleted after 30 days), `team-sharing.service.ts`. 
 Private spaces with the rollout flag on: `landing.utils.ts`, `my-space.utils.ts`,
 `private-sponsorship.service.ts`, `sidebar-projects-tree.helpers.ts`,
 `orphaned-my-space.page.tsx`.
+Job descriptions on the project graph (card dialog, pen, Add menu entries):
+`pages/project-graph/`, `agent-templates/start-instance-dialog.tsx`; skaile-ai/platform#6315
+(the labels) and #6312 (the vocabulary).
