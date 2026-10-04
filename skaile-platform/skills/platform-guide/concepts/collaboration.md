@@ -74,8 +74,8 @@ Sessions can talk to each other's agents through directed, two-sided opt-in link
   refused (no link; a reply on an exchange an unlink has closed; the hop or budget bounds below)
   says so in its result, and the message was not sent. One that is accepted can still fail to
   arrive if the peer's session cannot be started; the platform then starts a new turn in the
-  sender with a *not delivered* notice. That notice does not count toward the pair's budget (the
-  send it reports already did). Sends from one session to one peer arrive in the order they were
+  sender with a *not delivered* notice. That notice counts toward the pair's budget below, like
+  an idle notice, so resending against a peer that keeps failing to start stops there. Sends from one session to one peer arrive in the order they were
   made.
 - An agent can also **subscribe** to a linked peer (a link in either direction counts): once
   the peer finishes its current work, the platform starts one new turn in the subscriber
