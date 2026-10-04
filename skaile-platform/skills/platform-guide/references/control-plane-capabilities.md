@@ -136,7 +136,7 @@ what decides whether an autonomy grant can ever cover it (see *Consent and auton
 | Call | Effect | Effect class | Grant may reach |
 | --- | --- | --- | --- |
 | `platform.create_organization({ name, slug?, logoUrl?, iconSvg? })` | a new organization | `privileged` | only the widest scope: every target of that kind the owner can reach |
-| `platform.update_organization_branding({ organizationId, name?, logoUrl?, iconSvg? })` | a new name, logo URL or icon for an organization; at least one field, and an empty string removes the logo or icon | `routine` | that exact target only |
+| `platform.update_organization_branding({ organizationId, name?, logoUrl?, iconSvg? })` | a new name, logo URL or icon for an organization; at least one field, and an empty string removes the logo or icon. The platform keeps the logo's URL, not the image, so prefer a stable address. | `routine` | that exact target only |
 | `platform.create_project({ organizationId, name, sourceType, description?, visibility?, agentName?, agentAvatarUrl?, initialMessage? })` | a new project. `sourceType` is `Empty` or `OnSkaile`; `visibility` `Private` (default) or `Shared`. | `routine` | that target, its organization, or everything reachable |
 | `platform.create_session({ projectId, name, slug?, followMain?, visibility? })` | a new session; once `Succeeded`, `result.payload.url` links to it and `result.payload.sessionId` names it — share the link, or bring it up with `platform.navigate({ route: "session", params: { session: result.payload.sessionId } })` when the owner asked to go there. In a private project (the assistant's Home or a My space project) the session is always Private and `visibility: "Shared"` is refused. | `routine` | that target, its project, its organization, or everything reachable |
 | `platform.invite_to_organization({ organizationId, email, role?, personalMessage? })` | an invitation email | `external`; `never` when `role` is `Owner` or a `personalMessage` is set | that target, its organization, or everything reachable — never an Owner invitation or one with a message |
@@ -393,8 +393,7 @@ These are refusals by design — proposing around them wastes the owner's approv
 - **Organization branding is Owner-only and branding-only.** `update_organization_branding`
   needs a real Owner membership in that organization — a platform administrator's access
   without one does not count. It changes the name, logo URL and icon, nothing else in the
-  organization's settings. The platform keeps the logo's URL, not the image, so a logo on a
-  site that later changes breaks; prefer a stable address.
+  organization's settings.
 - **Nothing lists an organization's members.** `platform.list_project_members` covers projects
   only. Before an organization invite, *ask the owner* whether the person is already a member:
   an existing member is refused only **after** their approval has been spent.
