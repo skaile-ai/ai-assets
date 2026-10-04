@@ -263,7 +263,7 @@ as the session owner; only the session owner decides their cards. `create_agent_
 has `Succeeded`. `finish_spawned_instance` is not: once it runs it returns its result itself,
 with no operation id and nothing to poll.
 
-Besides those three, a fourth effect, `platform.spawn_subagent`, starts a copy of this session
+Besides those four, a fifth effect, `platform.spawn_subagent`, starts a copy of this session
 rather than of a template (*Subagents* below).
 
 Two reads need no card. `platform.list_agent_templates({})` lists all of this project's
@@ -283,7 +283,7 @@ it.
 | Call | Effect | Effect class |
 | --- | --- | --- |
 | `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl? })` | a new template in this session's project. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit template…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL, since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it. | `routine` on the owner's own turn; `never` on any other turn |
-| `platform.spawn_agent({ templateId, name?, visibility?, task? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
+| `platform.spawn_agent({ templateId, name?, visibility?, task?, model? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
 | `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills? })` | replaces the template's instructions or skill list; never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
 | `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine` |
 
