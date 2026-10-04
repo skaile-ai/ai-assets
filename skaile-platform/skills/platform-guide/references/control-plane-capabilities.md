@@ -273,8 +273,13 @@ live templates in one reply (it takes no paging arguments): each one's `id`, `na
 session owner may start it now; it does not predict a limit or owner-turn refusal).
 `platform.get_agent_template({ templateId })` reads one: the same fields without `canSpawn`,
 plus its `instructions`, `skills`, limits (`null` means the platform default) and model fields.
-Read it before an edit and send its `version`. Another project's template, an archived one and
-an unknown one all come back as not found. `templateId` takes the template's id or its exact
+Read it before an edit and send its `version`. Both reads cover this session's project only:
+another project's template, an archived one and an unknown one all come back as not found. So
+the personal assistant, editing in another project with `projectId`, takes `basedOnVersion` from
+the last result it has for that template (`result.payload.version` of the create, which is `1`,
+or of the last update). After an edit someone else made, the refusal names the current version,
+but the assistant cannot read what changed there, so it asks the person rather than editing over
+it. `templateId` takes the template's id or its exact
 name everywhere.
 
 A template **holds bound credentials** when connector credentials are attached to the template
