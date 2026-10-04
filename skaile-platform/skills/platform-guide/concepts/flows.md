@@ -545,8 +545,9 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   the session owner must also be a project **Owner**, the card is `privileged`, and only the
   owner's own turn can propose it. Unlike other `privileged` cards, no standing grant ever
   covers this one, even with the opt-in on: every run uses those credentials, and anyone who
-  works in a run session uses them too. The check is repeated before every run; if the creator has lost the right, that run fails, nothing starts, and the
-  group pauses (the detail page says the creator is no longer authorized). A project
+  works in a run session uses them too. The check is repeated before every run; if the creator
+  has lost the right, that run fails, nothing starts, and the group pauses (the detail page
+  says the creator is no longer authorized). A project
   Owner then creates a new group. A run's session is not a temporary hire: it does not count
   toward the job description's limits, and it cannot take on temporary hires or start helpers.
 
