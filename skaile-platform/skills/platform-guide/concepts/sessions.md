@@ -53,9 +53,10 @@ project role of **User** or **Owner**, and the project must not be archived.
 
 An agent can create one too, from any session and not only the home assistant, in one of three
 ways. From one of the project's **job descriptions** (agent templates), it takes on a
-**temporary hire** for one job with `platform.spawn_agent`: the new agent becomes a child of the calling session, runs as the session owner, and gets its task in
-the same call (`task`), sent as the spawner's first message to it; the two can message each
-other with no agent-to-agent link (*Job descriptions* in
+**temporary hire** for one job with `platform.spawn_agent`: the new agent becomes a child of
+the calling session, runs as the session owner, and gets its task in the same call (`task`),
+sent as the spawner's first message to it; the two can message each other with no
+agent-to-agent link (*Job descriptions* in
 `references/control-plane-capabilities.md`). When its work is done, the spawning session ends it
 with `platform.finish_spawned_instance`, which closes it (with the usual sync-back) and archives
 it or, once a person has written there, asks the owner to mark it done (same section). From

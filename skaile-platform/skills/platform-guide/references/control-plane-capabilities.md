@@ -257,11 +257,10 @@ only for this session, and executed as the session owner. Detail is in `concepts
 
 **Words to use with people.** The app calls an agent template a **job description**: a saved role
 in a project, with instructions, skills and the connectors it needs. A session started from one
-to do one job is a **temporary hire**, finished ("Mark done") when that job is done; the app says
-**Take on a temporary hire** where it used to say "Start new instance", and counts read "3
-temporary hires". A copy of yourself started with `platform.spawn_subagent` is a **helper**, your
-extra hands for volume work — never call it an assistant. A long-lived agent is a **hire** only
-where you have to tell it apart from those two. Capability names, ids and fields keep the code
+to do one job is a **temporary hire**, finished ("Mark done") when that job is done. A copy of
+yourself started with `platform.spawn_subagent` is a **helper**, your extra hands for volume
+work — never call it an assistant. A long-lived agent is a **hire** only where you have to tell
+it apart from those two. Capability names, ids and fields keep the code
 words (`agent_template`, `templateId`, `instance`, `subagent`); say the product words to people.
 
 Four effects create a template or act on one or its instances, from any session in that
@@ -297,7 +296,7 @@ it.
 
 | Call | Effect | Effect class |
 | --- | --- | --- |
-| `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl?, projectId? })` | a new template in this session's project, or, from the personal assistant, in the project `projectId` names. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit template…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL (or a path starting with `/`), since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it and `result.payload.version` is `1`. | `routine` on the owner's own turn; `never` on any other turn |
+| `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl?, projectId? })` | a new template in this session's project, or, from the personal assistant, in the project `projectId` names. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit job description…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL (or a path starting with `/`), since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it and `result.payload.version` is `1`. | `routine` on the owner's own turn; `never` on any other turn |
 | `platform.spawn_agent({ templateId, name?, visibility?, task?, model? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
 | `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills?, projectId? })` | replaces the template's instructions or skill list (from the personal assistant, `projectId` finds the template in that project); never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
 | `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine` |
@@ -397,8 +396,9 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
 #### Helpers: a copy of this session (`spawn_subagent`)
 
 `platform.spawn_subagent` starts a **helper**: a child from **this session's own setup**, no job
-description needed, as extra hands for splitting volume work across parallel copies. Its input is `{ mode, name?, visibility?,
-instructions?, skills?, connectors?, mcpServers? }`, and only `mode` is required. It is durable
+description needed, as extra hands for splitting volume work across parallel copies. Its input
+is `{ mode, name?, visibility?, instructions?, skills?, connectors?, mcpServers? }`, and only
+`mode` is required. It is durable
 like `spawn_agent`, and once it has `Succeeded`, `result.payload.sessionId` and `slug` name the
 child.
 

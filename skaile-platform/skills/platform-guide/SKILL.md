@@ -7,8 +7,9 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   Exchange mail and calendar (triage, drafting, sending, shared mailboxes), the project graph,
   Skailify apps, sharing and inviting, connecting a data source, AI providers and Claude
   seats, skills/assets, scoped sessions, agent-to-agent, notifications, roles and permissions,
-  Work vs Private workspaces, My space and the Home, assistant reach, hibernation, job descriptions (agent templates), temporary hires and helpers, or any platform surface; before creating a
-  project/session/organization, inviting someone, starting a connector setup or mount, or
+  Work vs Private workspaces, My space and the Home, assistant reach, hibernation, job
+  descriptions (agent templates), temporary hires and helpers, or any platform surface; before
+  creating a project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
 version: 0.16.13
@@ -83,7 +84,9 @@ Speak in user-facing business terms (project / session / project data), not inte
 (mounts / worktrees / containers), and never narrate implementation mechanics — model and
 version names, resolution or parameter tweaks, retries, or step-by-step tool chatter — in a
 user-facing turn; report only the user-meaningful outcome. Surface internal terms or
-mechanics only when the user is technical or `expertMode=true`.
+mechanics only when the user is technical or `expertMode=true`. Say **job description** (not
+agent template), **temporary hire** (not instance) and **helper** (not subagent) to people;
+capability names, ids and fields keep the code words.
 
 ## Detail files
 

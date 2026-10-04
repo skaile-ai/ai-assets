@@ -67,8 +67,8 @@ file preview (e.g. a report) with someone **outside** the platform — no login 
 
 Sessions can talk to each other's agents through directed, two-sided opt-in links. Three kinds
 of pair made by a spawn need no link: a session and a temporary hire it took on from a job
-description, a session and a helper it started, and sibling temporary hires from one job description (the last two are in
-the last bullet below).
+description, a session and a helper it started, and sibling temporary hires from one job
+description (the last two are in the last bullet below).
 
 - A session must be opened to peers (**Allow other sessions to reach this one**) and may
   declare a **Scope** describing what it is willing to do for them before it can be linked.

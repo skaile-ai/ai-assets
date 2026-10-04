@@ -537,12 +537,12 @@ Fuller treatment: `ai-assets/docs/flows.md`.
 - A person does the same on the group's detail page (click through from the board):
   **Activate**, and the **Autonomous** switch.
 - **A run group can run on a job description** (an agent template) instead of a recipe: the
-  wizard lists them under **Job description**, and `platform.create_run_group` takes `agentTemplateId`
-  (not together with `skaileConfigId`; find it with `platform.list_agent_templates`). Every run
-  then starts from the template's instructions, skills and connectors as they read when the run
-  starts. The session owner must be allowed to start the template. On a template with bound
-  credentials (`credentialBearing`), the session owner must also be a project **Owner**, the
-  card is `privileged`, and only the owner's own turn can propose it. Unlike other `privileged`
+  wizard lists them under **Job description**, and `platform.create_run_group` takes
+  `agentTemplateId` (not together with `skaileConfigId`; find it with
+  `platform.list_agent_templates`). Every run then starts from the job description's
+  instructions, skills and connectors as they read when the run starts. The session owner must
+  be allowed to start the job description. On one with bound credentials (`credentialBearing`),
+  the session owner must also be a project **Owner**, the card is `privileged`, and only the owner's own turn can propose it. Unlike other `privileged`
   cards, no standing grant ever covers this one, even with the opt-in on: every run uses those
   credentials, and anyone who works in a run session uses them too. The check is repeated
   before every run; if the creator has lost the right, that run fails, nothing starts, and the
