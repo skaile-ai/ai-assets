@@ -597,4 +597,5 @@ session first), skaile-ai/platform#6265 (editing a template from the UI:
 `update-organization-branding.handler.ts`, `update-organization-branding-policy.service.ts`) and
 skaile-ai/platform#6267 (the spawn task: `spawn-agent-policy.service.ts`, `sendTask`),
 skaile-ai/platform#6243 (the spawner and child channel, which needs no link) and
-skaile-ai/platform#6273 (a template's model: `modelOverridable` and the spawn `model`).
+skaile-ai/platform#6273 (a template's model: `modelOverridable` and the spawn `model`), skaile-ai/platform#6278 (`platform.create_agent_template`:
+`create-agent-template-policy.service.ts`, `create-agent-template.handler.ts`).
