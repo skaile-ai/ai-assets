@@ -138,7 +138,7 @@ what decides whether an autonomy grant can ever cover it (see *Consent and auton
 | `platform.create_organization({ name, slug?, logoUrl?, iconSvg? })` | a new organization | `privileged` | only the widest scope: every target of that kind the owner can reach |
 | `platform.create_project({ organizationId, name, sourceType, description?, visibility?, agentName?, agentAvatarUrl?, initialMessage? })` | a new project. `sourceType` is `Empty` or `OnSkaile`; `visibility` `Private` (default) or `Shared`. | `routine` | that target, its organization, or everything reachable |
 | `platform.create_session({ projectId, name, slug?, followMain?, visibility? })` | a new session; once `Succeeded`, `result.payload.url` links to it and `result.payload.sessionId` names it — share the link, or bring it up with `platform.navigate({ route: "session", params: { session: result.payload.sessionId } })` when the owner asked to go there. In a private project (the assistant's Home or a My space project) the session is always Private and `visibility: "Shared"` is refused. | `routine` | that target, its project, its organization, or everything reachable |
-| `platform.invite_to_organization({ organizationId, email, role? })` | an invitation email | `external` | that target, its organization, or everything reachable |
+| `platform.invite_to_organization({ organizationId, email, role?, personalMessage? })` | an invitation email | `external`; `never` when `role` is `Owner` or a `personalMessage` is set | that target, its organization, or everything reachable — never an Owner invitation or one with a message |
 | `platform.invite_to_project({ projectId, email, role? })` | an invitation email | `external` | that target, its project, its organization, or everything reachable |
 | `platform.invite_to_session({ sessionId, email, role? })` | an invitation email; the invitee can then read that session's whole history | `external` | that target, its project, its organization, or everything reachable |
 | `platform.begin_connector_setup({ organizationId, providerType, providerLinkId? })` | reuses an already-usable connector, otherwise parks on the owner. `result.payload.reused` says which happened. | `routine` | that target, its organization, or everything reachable |
@@ -338,11 +338,19 @@ These are refusals by design — proposing around them wastes the owner's approv
   (Git, SharePoint, Google Drive, Box, NextCloud) is created from the web app. Re-pointing only
   moves a project that *already has* a Git source onto a different, already-usable connector —
   it cannot add a source, create a connector, or create a project.
-- **Roles on invite.** `Viewer` (default) or `User`, at all three levels. `Owner` is not
-  assignable through any of these. Note that a **session** invite uses this same
-  `Viewer`/`User` vocabulary through the capability — not the Owner/Participant labels the
-  Share tab shows (`concepts/collaboration.md`). No personal note, personal message, or
-  display name can be attached — the human adds those from the web app.
+- **Roles on invite.** `Viewer` (default) or `User` for projects and sessions. Note that a
+  **session** invite uses this same `Viewer`/`User` vocabulary through the capability — not
+  the Owner/Participant labels the Share tab shows (`concepts/collaboration.md`).
+  An **organization** invite also takes `Owner`, for handing an organization over (for
+  example, to a customer taking over a workspace you set up for them). It needs the owner to
+  hold a real Owner membership there — a platform administrator's access without one does not
+  count — and it is refused for a Private workspace. The owner approves every Owner invitation
+  on a card; no standing approval covers one. Leaving the organization afterwards is the
+  owner's own step in the web app.
+- **Personal message.** Only an organization invite takes one (`personalMessage`, at most
+  1,000 characters). Write it in the owner's voice and keep it short; the card shows it in
+  full and it is approved every time. No inviter note about the invitee and no display name
+  can be attached at any level — the human adds those from the web app.
 - **Private projects.** The project the personal assistant lives in (its Home), any project
   in the owner's My space, and every session in them, cannot be invited into, shared, or
   shared with a team, and none of those sessions can be made Shared. The refusal reads "this
