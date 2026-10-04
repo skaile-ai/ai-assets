@@ -66,7 +66,7 @@ The capability's own description carries the live list; prefer it if the two dif
     opens that session; its expand toggle still expands it.
   - A project's **...** menu: **Pin to dashboard**, **Star** / **Unstar**, **Mark all
     sessions as read**, **New agent** (opens the **New agent** dialog, which creates a
-    session), **New flow**, **Flows**, **Run groups**, **Agent graph**, **Project
+    session), **New flow**, **Flows**, **Run groups**, **Project graph**, **Project
     settings** (Owner only), and a **Notifications** submenu. There is no standalone New
     Project row, and no per-session star. Pins decide what the dashboard shows; stars only
     reorder the sidebar's org and project lists.
@@ -135,7 +135,7 @@ The capability's own description carries the live list; prefer it if the two dif
 | **Run groups**    | `/<org>/runs`                 | Batch / unattended processing: the status board for every run group, with click-through into a group's detail page, which holds its controls: **Activate** (a Draft only), **Pause** / **Resume**, **Close** (Standing groups), **Cancel group**, and the **Autonomous** switch. See `concepts/flows.md`. |
 | **Flows**         | `/<org>/flows`                | Browse and author flow definitions; open a flow's graph view/editor. See `concepts/flows.md`. |
 | **Sessions**      | `/<org>/sessions`             | The org sessions report (Cmd+K: **Sessions report**): one row per agent session — project, agent, type, owner, members, default connector and folder, message count, cost, last activity — with per-column filters, search, a cost period (**7d** / **30d** / **90d** / **365d** or custom dates) and **Export to Excel** of the filtered rows. Org Owners see every session in the org except other members' private ones (in their assistant's Home or their My space); everyone else sees the sessions they have access to. Personal-assistant sessions are not listed. |
-| **Agent graph**   | `/<org>/<project>/graph`      | From a project's **...** menu or Cmd+K: the project's agents as cards, agent-to-agent links as arrows, and its apps and flows in side columns. |
+| **Project graph** | `/<org>/<project>/graph`      | From a project's **...** menu or Cmd+K: the project's agents as cards, agent-to-agent links as arrows, and its agent templates, apps and flows in boxes beside them. A project Owner can move cards and boxes, and resize, rename or delete any box. |
 | **Open-source licenses** | `/licenses`            | Third-party components shipped to the browser, with licenses and source links. From **Info** in the avatar menu. |
 
 ### Shared Exchange mailboxes
