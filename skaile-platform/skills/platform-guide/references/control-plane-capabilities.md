@@ -338,19 +338,23 @@ These are refusals by design — proposing around them wastes the owner's approv
   (Git, SharePoint, Google Drive, Box, NextCloud) is created from the web app. Re-pointing only
   moves a project that *already has* a Git source onto a different, already-usable connector —
   it cannot add a source, create a connector, or create a project.
-- **Roles on invite.** `Viewer` (default) or `User` for projects and sessions. Note that a
+- **Roles on invite.** `Viewer` (default) or `User` for projects and sessions; `Owner` is not
+  assignable through a project or session invite, even though the web app's Members tab offers
+  it to a human. Note that a
   **session** invite uses this same `Viewer`/`User` vocabulary through the capability — not
   the Owner/Participant labels the Share tab shows (`concepts/collaboration.md`).
   An **organization** invite also takes `Owner`, for handing an organization over (for
   example, to a customer taking over a workspace you set up for them). It needs the owner to
   hold a real Owner membership there — a platform administrator's access without one does not
-  count — and it is refused for a Private workspace. The owner approves every Owner invitation
-  on a card; no standing approval covers one. Leaving the organization afterwards is the
-  owner's own step in the web app.
+  count — and it is refused for a Private workspace. Check the owner's live role first with
+  `platform.list_my_organizations`, so the approval is not spent on a predictable refusal. No
+  standing approval covers an Owner invitation: it is carded or refused, never dispatched
+  silently. Leaving the organization afterwards is the owner's own step in the web app.
 - **Personal message.** Only an organization invite takes one (`personalMessage`, at most
-  1,000 characters). Write it in the owner's voice and keep it short; the card shows it in
-  full and it is approved every time. No inviter note about the invitee and no display name
-  can be attached at any level — the human adds those from the web app.
+  1,000 characters). Write it in the owner's voice and keep it short. An invitation that
+  carries one is never covered by a standing approval, and any approval shows the message in
+  full. The `context` note and a display name cannot be attached at any level — the human adds
+  those from the web app.
 - **Private projects.** The project the personal assistant lives in (its Home), any project
   in the owner's My space, and every session in them, cannot be invited into, shared, or
   shared with a team, and none of those sessions can be made Shared. The refusal reads "this
