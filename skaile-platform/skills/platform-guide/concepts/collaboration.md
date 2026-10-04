@@ -70,7 +70,10 @@ Sessions can talk to each other's agents through directed, two-sided opt-in link
 - A session must be opened to peers (**Allow other sessions to reach this one**) and may
   declare a **Scope** describing what it is willing to do for them before it can be linked.
 - Once linked, the agent can **ask** a peer session's agent (waits up to 5 minutes for the
-  answer, then reports it as pending) or **send** to it (fire-and-forget).
+  answer, then reports it as pending) or **send** to it (no wait for an answer). A send that is
+  refused (no link, a closed exchange, the budget below) says so in its result, and the message
+  was not sent. One that is accepted can still fail to arrive if the peer's session cannot be
+  started; the platform then starts a new turn in the sender with a *not delivered* notice.
 - An agent can also **subscribe** to a linked peer (a link in either direction counts): once
   the peer finishes its current work, the platform starts one new turn in the subscriber
   with an idle notice, waking it if it has hibernated. It can subscribe on its own or as
