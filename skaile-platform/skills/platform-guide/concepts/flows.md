@@ -240,6 +240,13 @@ session owner must administer the project, checked at the same three points, and
 reaches that exact target only. Unassigning a skill unloads it from the project's running
 sessions at once; other kinds leave on each session's next wake.
 
+From the owner's personal assistant, `platform.create_flow` with scope `project`,
+`platform.assign_project_asset` and `platform.unassign_project_asset` also take a `projectId`,
+so you can set up a project you just created without handing each step to it. The same rule is
+judged on that project, and its organization must allow you full reach. A project the owner
+does not administer is refused as unavailable. Any other session that passes `projectId` is
+refused.
+
 **Personal flows are the exception.** `platform.create_flow` with scope `personal` saves the
 flow to the session owner's own library, visible only to them (the UI labels this scope
 **Only me**; "Private" means the Private workspace, so do not call it that), and needs no
