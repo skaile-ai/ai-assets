@@ -372,8 +372,10 @@ A grant on `create_agent_template` reaches this project only. A grant on `spawn_
 #### Subagents: a copy of this session
 
 `platform.spawn_subagent` starts a child from **this session's own setup**, no template needed,
-for splitting work across parallel copies. It is durable like `spawn_agent`, and once it has
-`Succeeded`, `result.payload.sessionId` and `slug` name the child.
+for splitting work across parallel copies. Its input is `{ mode, name?, visibility?,
+instructions?, skills?, connectors?, mcpServers? }`, and only `mode` is required. It is durable
+like `spawn_agent`, and once it has `Succeeded`, `result.payload.sessionId` and `slug` name the
+child.
 
 - **`mode: "clone"`** copies this session's setup whole. **`mode: "adhoc"`** narrows it:
   `instructions` replaces your instructions, and `skills`, `connectors` (connector ids) and

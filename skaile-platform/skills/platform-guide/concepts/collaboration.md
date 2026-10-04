@@ -65,9 +65,10 @@ file preview (e.g. a report) with someone **outside** the platform — no login 
 
 ## Agent-to-Agent (A2A)
 
-Sessions can talk to each other's agents through directed, two-sided opt-in links. Three kinds
-of pair need no link: a session and an agent it spawned from a template, a session and a
-subagent it started, and sibling instances of one template (the last bullet below).
+Sessions can talk to each other's agents through directed, two-sided opt-in links. Some pairs
+need no link: a session and an agent it spawned from a template, a session and a subagent it
+started, and sibling instances of one template (the last bullet below covers the last two). The
+home assistant also reaches its owner's own sessions without one.
 
 - A session must be opened to peers (**Allow other sessions to reach this one**) and may
   declare a **Scope** describing what it is willing to do for them before it can be linked.
@@ -102,7 +103,7 @@ subagent it started, and sibling instances of one template (the last bullet belo
   another organization can be linked by hand. The agent itself only links within its own
   organization. The home assistant can still find the owner's sessions in other organizations
   (as far as each one's reach allows) and message a session linked to it there by hand.
-- Two more pairs need no link, both inside one project: an agent and a **subagent** it started
+- The subagent and sibling pairs, both inside one project: an agent and a **subagent** it started
   with `platform.spawn_subagent`, and the instances of one agent template that one person owns,
   when the template's `siblingAwareness` is on (*Agent templates* in
   `references/control-plane-capabilities.md`). The hop, cycle and budget bounds above apply to
