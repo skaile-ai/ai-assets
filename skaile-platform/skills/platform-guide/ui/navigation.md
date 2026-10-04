@@ -64,7 +64,7 @@ The capability's own description carries the live list; prefer it if the two dif
     Each of the project's job descriptions is a node among the sessions, with its running
     temporary hires nested under it (an unlisted one shows no hires). Its name opens the latest
     running temporary hire, or offers to take one on; the **+** beside it is **Take on a
-    temporary hire: <name>**, and its **...** menu has **Open latest temporary hire**, **Take on
+    temporary hire: \<name\>**, and its **...** menu has **Open latest temporary hire**, **Take on
     a temporary hire** and **Edit job description…**.
     A section with one item shows it directly under the project instead of in a group row;
     empty sections are omitted. Clicking the name of a project with exactly one session

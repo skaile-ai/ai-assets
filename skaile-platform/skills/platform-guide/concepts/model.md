@@ -79,6 +79,7 @@ The **Project graph** (project menu or Cmd+K) shows a project's agents as cards,
 agent-to-agent links as arrows, and the project's job descriptions, apps and flows in boxes
 alongside. Clicking a job description's card opens a dialog whose button is **Take on a
 temporary hire**, with an optional first message, and **Open latest** when one is running; the
+pen on the card opens the job description's edit dialog, as **Edit job description…** does; the
 graph's Add menu has **New job description** and **New temporary hire…** (which first asks
 which job description). A project Owner can arrange the graph: cards drag, and every box (the
 **Job descriptions**, **Apps** and **Flows** boxes as well as groups the user adds with **New
