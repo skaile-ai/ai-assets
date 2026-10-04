@@ -303,13 +303,13 @@ A grant on `spawn_agent` or `update_agent_template` reaches that one template on
   - `archived`: no person had written in the child, so it is closed exactly as a person closing
     it would (its work is synced back to the project, the **Closed** step in
     `concepts/sessions.md`) and then archived: its conversation is kept, and the owner can
-    unarchive it (in expert mode, from the project's **Archive** group in the sidebar). A child
-    that was already closed but not archived (an owner closed it, or it sat hibernated for 30
-    days) also comes back `archived`, but only the archive happens: its work was synced back
-    when it closed.
+    unarchive it (in expert mode, from the project's **Archive** group in the sidebar). If no
+    person had written in it but it was already closed (an owner closed it, or it sat hibernated
+    for 30 days), only the archive happens: its work was synced back when it closed.
   - `proposed`: a person has written there, even while the card waited, so the child is not
-    archived and the owner is asked in it to mark it done. Do not call again: it posts that
-    request once until a person answers there, so a repeat changes nothing.
+    archived and the owner is asked in it to mark it done. This is checked first, so it holds
+    for an already-closed child too. Do not call again: it posts that request once until a
+    person answers there, so a repeat changes nothing.
   - `already_done`: the child was archived while the card waited. Nothing more to do.
 
   One refusal comes only when it runs: `not_delivered`, a code, not a `status`. A person has
