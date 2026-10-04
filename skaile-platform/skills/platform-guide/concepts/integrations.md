@@ -85,14 +85,17 @@ by default, so a mount the user connects is read-write unless they turn it on. A
 connection has no such switch: it is always read-write today, and the platform has no
 read-only Git mount. Never tell a user a Git repo can be connected read-only.
 
-Only the **workspace** mount can be edited in place. Its pencil (**Edit mount**) is on the
-**Mounts** card of **Project settings → Session defaults** (project Owners; the default for
-new sessions, existing sessions keep theirs) and of **Session settings → Config** (this
+Only the **workspace** mount (the project's source: the folder or repo picked in the project
+wizard's **Source** step) has an editor on the **Mounts** card. Its pencil (**Edit mount**)
+is on that card in **Project settings → Session defaults** (project Owners; the default for
+new sessions, existing sessions keep theirs) and in **Session settings → Config** (this
 session only). The editor changes its driver, folder (with **Browse**), target path,
 credential, access level (a Git workspace is always read-write), the watch switch, and the
 Git sync options. Every other mount is listed on the same card with only **Remove**, plus an
 account picker for a linked cloud drive. To change such a mount's folder or access level,
-the user removes it and connects it again via **Connect**.
+the user removes it on the **Mounts** card and connects it again from the workspace
+**Connectors** panel (it attaches on the next reload/restart). The raw Skaile config editor
+(the workspace **Config** panel) can change any mount, but that is for users who edit YAML.
 
 Practical rules for the agent:
 - Respect read-only connectors and read-only mounts — never attempt a write.
