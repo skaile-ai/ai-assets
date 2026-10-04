@@ -6,6 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Enhancements
+- `ship` STEP 10b no longer treats a `whats-new-fix:` changeset marker as user-visible, matching the platform CI guard.
 - `ship` 1.7.0: the platform capability-docs sync moved from post-merge Phase 13b (conditional, "only if accessible") to Phase 8b, before the commit. The capabilities doc now rides in the same PR, the `platform-guide` skill gets its own ai-assets PR (cloned when no checkout exists) merged with the platform PR, and the PR body carries a `## Docs` section that platform CI parses. Headless or forked runs stop before the merge gate and never reached the old step, which is why the docs were never updated.
 
 ### Docs

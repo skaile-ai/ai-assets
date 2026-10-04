@@ -533,7 +533,8 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
   reaches it).
 
   Decide `docs_impact`:
-    user-visible  IF ANY holds — the changeset carries a `whats-new*` marker (user OR agent);
+    user-visible  IF ANY holds — the changeset carries a `whats-new:`, `whats-new-highlight:` or `whats-new-agent:` marker
+                  (NOT `whats-new-fix:` — a bug fix changes no documented capability, and CI asks for no docs on it);
                   the diff adds / renames / removes / changes the behaviour of a `platform.*`
                   capability, a connector, a provider, a UI surface, a role or permission, or
                   anything an agent or user would be told or could newly do.
