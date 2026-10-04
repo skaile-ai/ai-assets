@@ -256,9 +256,9 @@ only for this session, and executed as the session owner. Detail is in `concepts
 ### Agent templates — also in ordinary sessions
 
 An agent template is a reusable agent in a project: instructions, skills and the connectors it
-needs. Three effects act on one or its instances, from any session in that project, as the
-session owner; only the session owner decides their cards. `spawn_agent` and
-`update_agent_template` are durable: each returns an operation receipt, read with
+needs. Four effects create a template or act on one or its instances, from any session in that project,
+as the session owner; only the session owner decides their cards. `create_agent_template`,
+`spawn_agent` and `update_agent_template` are durable: each returns an operation receipt, read with
 `platform.get_operation` (*The operation lifecycle* below), and `result.payload` is set once it
 has `Succeeded`. `finish_spawned_instance` is not: once it runs it returns its result itself,
 with no operation id and nothing to poll.
@@ -282,11 +282,13 @@ it.
 
 | Call | Effect | Effect class |
 | --- | --- | --- |
+| `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl? })` | a new template in this session's project. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit template…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL, since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it. | `routine` on the owner's own turn; `never` on any other turn |
 | `platform.spawn_agent({ templateId, name?, visibility?, task? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
 | `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills? })` | replaces the template's instructions or skill list; never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
 | `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine` |
 
-A grant on `spawn_agent` or `update_agent_template` reaches that one template only; a grant on
+A grant on `create_agent_template` reaches this project only. A grant on `spawn_agent` or
+`update_agent_template` reaches that one template only; a grant on
 `finish_spawned_instance` covers this session finishing its own children. Things to act on:
 
 - **Give the child its work as `task`.** The owner sees it on the card (the first 600
@@ -360,11 +362,12 @@ A grant on `spawn_agent` or `update_agent_template` reaches that one template on
   changed: rebase on that version and propose again. A standing grant covers an edit only when
   the owner asks for it in their own turn; an edit set off by anyone or anything else always gets
   a card. Instructions are capped at 8000 characters per edit.
-- **The rest of a template is changed by a person.** Its name, picture, identity, who may start
-  it, whether its instances are listed, its limits, and archiving it are not reachable here. Point
-  the person to **Edit template…** in the template's menu in the sidebar, or the pen on its card
-  in the project graph. Only a project owner may change who may start it or its limits, or
-  archive it.
+- **The rest of an existing template is changed by a person.** Once it exists, only its
+  instructions and skills are reachable here (`update_agent_template`); its name, picture,
+  identity, who may start it and whether its instances are listed are set at creation or by a
+  person. Its limits and archiving it are never reachable. Point the person to **Edit template…**
+  in the template's menu in the sidebar, or the pen on its card in the project graph. Only a
+  project owner may change who may start it or its limits, or archive it.
 
 #### Subagents: a copy of this session
 
@@ -640,4 +643,5 @@ session first), skaile-ai/platform#6265 (editing a template from the UI:
 `update-organization-branding.handler.ts`, `update-organization-branding-policy.service.ts`) and
 skaile-ai/platform#6267 (the spawn task: `spawn-agent-policy.service.ts`, `sendTask`),
 skaile-ai/platform#6243 (the spawner and child channel, which needs no link) and
-skaile-ai/platform#6273 (a template's model: `modelOverridable` and the spawn `model`).
+skaile-ai/platform#6273 (a template's model: `modelOverridable` and the spawn `model`), skaile-ai/platform#6278 (`platform.create_agent_template`:
+`create-agent-template-policy.service.ts`, `create-agent-template.handler.ts`).
