@@ -16,7 +16,7 @@ description: >-
   existing code, for plans or design proposals, for filing an issue when implementation is
   explicitly deferred, for throwaway local experiments, or for work spanning several
   repositories.
-version: 1.6.0
+version: 1.7.0
 metadata:
   tags:
   - "ship"
@@ -126,13 +126,14 @@ metadata:
 | 6 | Dispatch a fresh subagent to implement the plan (gets only the plan + context — no parent history) |
 | 7 | Dispatch a fresh subagent to review the diff (skippable for trivial work) |
 | 8 | Triage review findings, apply valid fixes inline |
+| 8b | **Docs impact** (platform only): decide `user-visible` vs `none`; when user-visible, update the capabilities doc in this PR and open an ai-assets PR for the `platform-guide` skill |
 | 9 | Delete the plan; run the repo's lint + affected tests; commit (work only); push the branch |
 | 9b | Fetch latest `origin/main`, merge into the branch, resolve conflicts, re-push |
-| 10 | Open a PR against `main` that `Closes #<number>` (respect PR template + changeset rules) |
+| 10 | Open a PR against `main` that `Closes #<number>` (respect PR template + changeset rules; platform PRs carry the `## Docs` section) |
 | 11 | **Report the implementation summary** to the user |
 | 12 | **Babysit the PR**: act on whichever lands first — a review or CI — instead of waiting out the suite; drive CI to green and fix every related change-request in a loop (nits for the first three fix pushes, substantive only from the fourth); report unrelated/architectural problems without fixing them |
 | 12b | Sweep for follow-ups: ship the small leftovers into this PR; propose as issues only the ones that clear the **issue bar** (user harm / money / stability / security / team drag / significant benefit, with evidence), at most 3 |
-| 13 | **Recap in plain language** (no jargon — for a person returning after hours away), then ask the user: **squash-merge + clean up** \| **clean up only** \| **stop here** (plus **reading diff first** via the `meat` skill, if installed) — then execute the choice, and file the follow-ups the user picked |
+| 13 | **Recap in plain language** (no jargon — for a person returning after hours away), then ask the user: **squash-merge + clean up** \| **clean up only** \| **stop here** (plus **reading diff first** via the `meat` skill, if installed) — then execute the choice (a merge also merges the linked ai-assets guide PR), and file the follow-ups the user picked |
 | 14 | Final report |
 
 The worktree and local branch **persist** through phases 9–12 (they are where babysit
@@ -237,7 +238,8 @@ MUST  fix only items RELATED to the change (e.g. lint/type/test failures the cha
 MUST  converge the babysit loop — cap fix rounds, and if CI stays red on something unrelated or a review item recurs after a good-faith fix, stop and ask (gate #8)
 MUST  print the plain-language recap (Phase 13, STEP 14d) immediately BEFORE the final question — jargon-free, no paths or symbols, written for someone who was not watching
 MUST  ask the user at the end (Phase 13) to choose: squash-merge + cleanup | cleanup only | stop here — and execute exactly that
-MUST  after a MERGE of user-visible platform work, sync the capability docs (Phase 13b) — `platform/features/SKAILE-PLATFORM-CAPABILITIES.md` is the LEADING copy and is always updated; the business doc mirror and the platform-guide skill only when their paths are accessible on this machine
+MUST  for platform work, decide `docs_impact` BEFORE committing (Phase 8b) and, when user-visible, update `features/SKAILE-PLATFORM-CAPABILITIES.md` (+ its `features/<NN-section>/` doc) IN THE SAME PR and open an ai-assets PR for the `platform-guide` skill — docs are part of the change, not a post-merge chore; the platform PR body carries a `## Docs` section the CI guard parses
+NEVER skip the platform-guide update because the ai-assets checkout is "not accessible" — clone `skaile-ai/ai-assets` into a scratch dir; stop and ask (gate #10) only if that clone itself fails
 MUST  use squash-and-merge (`gh pr merge <n> --squash`) when merging
 MUST  on cleanup: remove the worktree and delete the local branch; on merge+cleanup also delete the remote branch
 MUST  report back with: repo, issue number + URL, branch, PR URL + final state (merged / open), 1-2 line summary, deferred/unrelated items
@@ -387,7 +389,9 @@ STEP 3b: Resume detection (skip building if a PR already exists for this work)
       Print: > "Resuming PR <pr_url> for #<issue_number> — skipping to babysitting."
       SKIP STEP 4..STEP 13 and JUMP to Phase 12 (STEP 14). Everything from there runs
       normally: Phase 12b (follow-up sweep), Phase 13 (STEP 14c body refresh, STEP 14d
-      recap, STEP 15 disposition), Phase 13b (capability-docs sync) and Phase 14.
+      recap, STEP 15 disposition), Phase 13b (post-merge doc publication) and Phase 14.
+      If the resumed PR has no `## Docs` section, run STEP 10b against its diff first and add
+      the docs commit + section before the gate.
       Note for STEP 14c: `fix_rounds` starts at 0 on this path, but the body was written
       by a PREVIOUS session, so it still needs the refresh — that is the case with the
       widest gap between what the body says and what the diff does.
@@ -507,7 +511,7 @@ EMIT [ship] review_done important=<N> nits=<N>
 # ── Phase 8: Triage + Apply ───────────────────────────────────────
 
 STEP 10: Triage (PROCEDURE triage_finding) — decide silently
-  IF review was skipped in STEP 9 (review_findings empty): nothing to triage — continue to STEP 11.
+  IF review was skipped in STEP 9 (review_findings empty): nothing to triage — continue to STEP 10b (platform) / STEP 11. A skipped review never skips the docs decision.
   Otherwise, for each finding:
   | Verdict | When | Action |
   |---------|------|--------|
@@ -519,6 +523,68 @@ STEP 10: Triage (PROCEDURE triage_finding) — decide silently
   apply-large or when rejecting an `important` finding. Else: > "Triaged: <a>/<d>/<r>. Continuing."
 
 EMIT [ship] triage_done applied=<N> deferred=<N> rejected=<N>
+
+# ── Phase 8b: Docs Impact (platform only) ─────────────────────────
+
+STEP 10b: Decide docs_impact, and ship the docs in THIS PR
+  Run when repo = platform. Otherwise print > "Docs impact: n/a (not platform)." and continue.
+  This runs BEFORE the commit on purpose: docs that wait until after the merge are the
+  docs that never get written (a headless/forked run stops at the merge gate and never
+  reaches it).
+
+  Decide `docs_impact`:
+    user-visible  IF ANY holds — the changeset carries a `whats-new*` marker (user OR agent);
+                  the diff adds / renames / removes / changes the behaviour of a `platform.*`
+                  capability, a connector, a provider, a UI surface, a role or permission, or
+                  anything an agent or user would be told or could newly do.
+    none          ONLY for internal refactors, tests, CI, infra, and fixes with no behaviour a
+                  user or agent could notice. Write the one-sentence reason now — it goes in
+                  the PR body and a reviewer will read it.
+  When unsure, it is `user-visible`. The cost of one extra paragraph is lower than a stale guide.
+
+  IF none: record `docs_impact=none reason=<…>` and continue.
+
+  IF user-visible:
+    1. Capabilities doc — IN the worktree, staged with the rest of the change:
+       `features/SKAILE-PLATFORM-CAPABILITIES.md` (business/use-case voice: what it does /
+       capabilities / business value; no code-level detail; bump `updated:`) AND the matching
+       feature doc under `features/<NN-section>/` (for a `platform.*` capability that is
+       `features/06-agent-runtime/platform-capabilities.md`).
+    2. Platform-guide skill — a SEPARATE repo (`skaile-ai/ai-assets`), so a separate PR:
+       - (a) Locate a checkout: `<repo_path>/../ai-assets` if it is a git repo whose `origin` is
+         `skaile-ai/ai-assets`; otherwise `gh repo clone skaile-ai/ai-assets <scratch>/ai-assets`.
+         NEVER edit inside a shared checkout — it may be dirty or parked on another session's
+         branch. Then `git fetch origin` there.
+       - (b) Look for an existing guide PR — an open ai-assets PR whose body has
+         `Refs skaile-ai/platform#<issue_number>`. If one exists (babysit delta, resume), add a
+         worktree on ITS branch (no `-b`), push to it and reuse its URL; never open a second
+         guide PR. Skip (c).
+       - (c) Only if (b) found none: create a worktree off `origin/main` with
+         `-b docs/platform-guide-<issue_number>`.
+       - Edit `skaile-platform/skills/platform-guide/` — the matching `concepts/`, `ui/` or
+         `references/` file (SKILL.md index + keywords only if a new topic area appeared).
+         Hard rules from that skill: real UI labels in **bold**; never enumerate live
+         `platform.*` capabilities from memory (point at `platform.find_actions` instead).
+       - Clone failure (`gh repo clone` / fetch) is gate #10: STOP and ask — do not fall back to "n/a".
+       - Commit `docs(platform-guide): <what> (skaile-ai/platform#<issue_number>)`, push, and
+         `gh pr create --repo skaile-ai/ai-assets` with `Refs skaile-ai/platform#<issue_number>`
+         in the body — a reference, NEVER a closing keyword. Capture `guide_pr_url`.
+       - Do NOT hand-edit `backend/libs/library/src/seed/platform-guide-skill-content.ts`: the
+         `Sync builtin skills` workflow regenerates it from ai-assets/main every 6 h once the
+         guide PR is merged.
+       - IF nothing in the change is something a user would ask the assistant about,
+         `Platform guide: n/a — <reason>` is allowed; say why.
+    3. Babysit rounds that change user-visible behaviour re-open this step for the delta.
+    4. Resume path (STEP 3b skipped STEP 4–5): the worktree from STEP 3b is the checkout for
+       the docs commit; push to the PR branch as for any babysit fix.
+
+  The platform PR body MUST contain this section (STEP 12) — the CI guard parses these exact lines:
+    ## Docs
+    Capabilities doc: updated            OR   Capabilities doc: n/a — <reason, ≥ 10 characters>
+    Platform guide: <guide_pr_url>       OR   Platform guide: n/a — <reason, ≥ 10 characters>
+  Write ONE alternative per line, with no angle brackets or `|` left in the final text.
+
+EMIT [ship] docs_impact value=<user-visible|none> guide_pr=<url|n/a>
 
 # ── Phase 9: Lint, Test, Commit, Push (NO cleanup) ────────────────
 
@@ -591,6 +657,8 @@ EMIT [ship] synced_with_main incoming=<N>
 STEP 12: Open the PR
   Title type by category (matches commit type): bug/issue/ui → fix, chore → chore, feature → feat.
   IF pr_template exists: fill its sections; otherwise use the default body below.
+  Platform, either way: the body MUST contain the `## Docs` section from STEP 10b — append it
+  after the template's sections when the template lacks it. CI parses it.
   $ cd <repo_path>
   $ gh pr create --base <default_branch> --head <branch_name> \
       --title "<type>(<scope>): <title> (#<issue_number>)" \
@@ -605,6 +673,10 @@ Closes #<issue_number>: <refined description>
 - [ ] Tests pass locally
 - [ ] Manually verified <observable behavior>
 - [ ] No regression in <adjacent surface>
+## Docs
+[platform only — see STEP 10b; omit for other repos]
+Capabilities doc: <"updated" or "n/a — reason"; write the chosen text only>
+Platform guide: <ai-assets PR URL, or "n/a — reason"; chosen text only>
 ## Deferred Follow-ups
 [only if any] - <finding> — <reason>
 EOF
@@ -927,6 +999,9 @@ STEP 14c: Refresh the PR description with what ACTUALLY shipped
   whole body, and after a loop that may have run ten rounds the memory of it is the least
   reliable thing in the session. The live body may also carry a human's edit from the
   babysit window or a PR-template section honored at open time.
+  Platform PRs: the `## Docs` section is machine-parsed by CI — carry its two lines over
+  verbatim, changing a value only to reflect a STEP 10b re-run; grep the new body for both
+  `Capabilities doc:` and `Platform guide:` before editing, as for `Closes #`.
     $ gh pr view <pr_number> --repo <github_slug> --json body -q .body > <tmp>
     IF that command fails or <tmp> comes back EMPTY, STOP — do NOT run the edit. The two
     commands are independent: a failed fetch prints nothing, the redirect leaves <tmp>
@@ -1093,36 +1168,25 @@ STEP 15: Ask the user how to finish (gate #9)
 
 EMIT [ship] finished disposition=<merge+cleanup|cleanup|stop> followups=<list of #n>
 
-# ── Phase 13b: Capability-Docs Sync (conditional) ─────────────────
+# ── Phase 13b: Post-merge doc publication ─────────────────────────
 
-STEP 15b: Sync the platform capability docs
-  Run ONLY if BOTH hold:
-    - disposition = merge+cleanup (the change is on main)
-    - repo = platform AND the change adds/alters a USER-VISIBLE capability
-      (new feature, new provider/connector/integration, new agent capability, new UI
-      surface — NOT internal refactors, bug fixes without behavior change, CI/chores)
-  Otherwise print > "Capability docs: skipped (<not merged | not platform | not user-visible>)." and continue.
+STEP 15b: Publish what Phase 8b prepared
+  The capabilities doc already merged with the PR; this step covers only what lives outside it.
+  Run ONLY IF disposition = merge+cleanup AND repo = platform. Otherwise print
+  > "Post-merge docs: skipped (<not merged | not platform>)." and continue.
 
-  1. Platform capabilities doc — the LEADING copy, always available (it lives in the repo):
-     `platform/features/SKAILE-PLATFORM-CAPABILITIES.md`
-     — add or extend the matching section in its business/use-case voice (What it does /
-     Capabilities / Business value; no code-level detail); bump the `updated:` frontmatter
-     date. Also add/refresh the matching feature doc under `platform/features/<NN-section>/`.
-  2. Business mirror (SharePoint-synced; edit = publish) — ONLY if accessible
-     (`test -e <path>`; absent on most machines, skip with a one-line note):
+  1. Guide PR — IF STEP 10b opened one: `gh pr merge <guide_pr> --repo skaile-ai/ai-assets --squash`
+     (after confirming its checks/review the same way as the platform PR; never leave it dangling).
+     On `cleanup`/`stop` this whole step is skipped: the guide PR stays open, and STEP 16's
+     `Guide PR:` line says so.
+  2. Business mirror (SharePoint-synced; edit = publish) — ONLY if accessible (`test -e <path>`;
+     absent on most machines, skip with a one-line note):
      `/mnt/c/Users/peter/Skaile GmbH/Management - Documents/General/concept/SKAILE-PLATFORM-CAPABILITIES.md`
-     — copy the updated leading doc there verbatim.
-  3. Platform-guide skill — ONLY if the ai-assets checkout is accessible:
-     `<skaile-dev-root>/ai-assets/skaile-platform/skills/platform-guide/`
-     — update the matching `concepts/` or `ui/` detail file (and the SKILL.md index +
-     keywords only if a new topic area appeared). Honor its hard rules: real UI labels in
-     **bold**, never enumerate live `platform.*` capabilities from memory. If the
-     ai-assets checkout is clean, commit there with a one-line message; else leave the
-     edit uncommitted and note it.
+     — copy the merged leading doc there verbatim.
 
-  Print: > "Capability docs: <updated all | updated <X>, skipped <Y> (not accessible)>."
+  Print: > "Post-merge docs: guide PR <merged | none | open>; mirror <updated | skipped (not accessible)>."
 
-EMIT [ship] capability_docs_synced targets=<N>
+EMIT [ship] docs_published guide_pr=<merged|none|open>
 
 # ── Phase 14: Final Report ────────────────────────────────────────
 
@@ -1133,6 +1197,7 @@ STEP 16: Print the final block
   Issue:   #<issue_number> (<category>) — <title>   <issue_url>
   Branch:  <branch_name>   [removed | kept]
   PR:      <pr_url>   [merged (squash) | open]
+  Guide PR: <ai-assets url>   [merged | open | none]   (platform only)
   Disposition: <merge+cleanup | cleanup | stop>
 
   What shipped: <1-2 sentences, plain language — what the change DOES, as merged.
@@ -1219,7 +1284,7 @@ CHECKLIST
   - [ ] Follow-up sweep done BEFORE the gate: small leftovers shipped into this PR; ≤3 follow-ups proposed, each with a cited issue-bar YES or a specific open question, YESes first (or none); only user-selected ones filed, unassigned, no closing keyword in the body
   - [ ] Plain-language recap printed before the final question (asked for / what was wrong / what I did / still open; no jargon, no paths, no symbols)
   - [ ] Final disposition asked (merge+cleanup / cleanup / stop; reading-diff option offered iff the `meat` skill is available) and executed; squash used for merge
-  - [ ] Capability docs synced after a merged user-visible platform change: `platform/features/` leading doc always; business mirror + platform-guide skill skipped gracefully when not accessible
+  - [ ] Platform only: `docs_impact` decided BEFORE the commit (STEP 10b); when user-visible, the capabilities doc is in the PR and an ai-assets guide PR is open and linked; the PR body has the `## Docs` section; on merge the guide PR merged too (never skipped as "not accessible" — cloned instead)
   - [ ] Cleanup (when chosen) removed worktree + local branch (+ remote branch on merge); worktree/branches kept on "stop"
   - [ ] Final report printed
 
@@ -1260,5 +1325,5 @@ CHECKLIST
 - **Uses:** `gh` CLI for issue + PR + CI/review state + merge; `git` directly for repo/worktree/branch/commit/push
 - **Reads:** the target repo's `CLAUDE.md` + `package.json`, the root `skaile-dev/CLAUDE.md` Formatting/Testing tables, affected source, `gh label/issue/pr` state
 - **Writes:** a GitHub issue + a PR on the target repo, any user-approved follow-up issues, implementation + babysit commits on the branch, a transient plan file (deleted); on merge, a squashed commit on the repo's main
-- **Writes (conditional, Phase 13b):** after merging user-visible platform work — `platform/features/SKAILE-PLATFORM-CAPABILITIES.md` (the leading copy, always) plus its `features/<NN-section>/` doc; mirrored to the business doc (`/mnt/c/.../concept/`) and reflected in the ai-assets `platform-guide` skill only when those paths are accessible
+- **Writes (platform, Phase 8b):** in the PR — `features/SKAILE-PLATFORM-CAPABILITIES.md` plus its `features/<NN-section>/` doc; plus an ai-assets PR for the `platform-guide` skill, merged with the platform PR; the business doc mirror (`/mnt/c/.../concept/`) post-merge only when accessible
 - **Never writes:** any repo's legacy markdown issue folder — tracking is GitHub Issues
