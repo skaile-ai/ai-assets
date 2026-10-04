@@ -264,17 +264,33 @@ can also create or edit a template in another project by naming it with `project
 has `Succeeded`. `finish_spawned_instance` is not: once it runs it returns its result itself,
 with no operation id and nothing to poll.
 
-`platform.list_agent_templates` lists the project's templates and `platform.get_agent_template`
-reads one, including the `version` an edit is based on. `templateId` takes the template's id or
-its exact name.
+Besides those four, a fifth effect, `platform.spawn_subagent`, starts a copy of this session
+rather than of a template (*Subagents* below).
+
+Two reads need no card. `platform.list_agent_templates({})` lists all of this project's
+live templates in one reply (it takes no paging arguments): each one's `id`, `name`, `version`,
+`listed`, `invokeRole`, `siblingAwareness`, `credentialBearing`, and `canSpawn` (whether the
+session owner may start it now; it does not predict a limit or owner-turn refusal).
+`platform.get_agent_template({ templateId })` reads one: the same fields without `canSpawn`,
+plus its `instructions`, `skills`, limits (`null` means the platform default) and model fields.
+Read it before an edit and send its `version`. Another project's template, an archived one and
+an unknown one all come back as not found from `get`, and `list` leaves them out. `templateId`
+takes the template's id or its exact name everywhere.
+
+Both reads cover this session's project only; neither takes a `projectId`. So the personal
+assistant, editing in another project with `projectId`, takes `basedOnVersion` from the last
+result it has for that template: `result.payload.version` of its create or of its last update.
+If that edit is refused because someone else changed the template, it cannot read the change,
+so it asks the person instead of rebasing as below.
+
 A template **holds bound credentials** when connector credentials are attached to the template
 itself, so every instance reaches those systems on the template's connection, whoever spawned
 it.
 
 | Call | Effect | Effect class |
 | --- | --- | --- |
-| `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl?, projectId? })` | a new template in this session's project, or, from the personal assistant, in the project `projectId` names. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit template…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL, since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it. | `routine` on the owner's own turn; `never` on any other turn |
-| `platform.spawn_agent({ templateId, name?, visibility?, task? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
+| `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl?, projectId? })` | a new template in this session's project, or, from the personal assistant, in the project `projectId` names. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit template…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL (or a path starting with `/`), since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it and `result.payload.version` is `1`. | `routine` on the owner's own turn; `never` on any other turn |
+| `platform.spawn_agent({ templateId, name?, visibility?, task?, model? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
 | `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills?, projectId? })` | replaces the template's instructions or skill list (from the personal assistant, `projectId` finds the template in that project); never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
 | `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine` |
 
@@ -351,16 +367,56 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   lower ones); the refusal says which was hit. It clears once an instance is closed: finish
   one of this session's own children whose work is done with `platform.finish_spawned_instance`,
   or tell the person which one to mark done, rather than retrying.
+- **Instances of one template can talk to each other when the template allows it.** Where
+  `siblingAwareness` is true, the live instances of that template that **one person** owns in
+  this project can `send_to_session`, `notify_when_idle` and `ask_session` each other with no
+  link, and `platform.list_peers` shows them with `relation: "sibling"`. Instances another
+  member owns are never siblings: a send to one is refused (`no_link`). Turning the setting off
+  or archiving the template ends it. `list_peers` shows at most the per-person instance limit;
+  a sibling past it is still reachable by id.
 - **An edit is based on a version.** A refusal naming another version means the template
-  changed: rebase on that version and propose again. A standing grant covers an edit only when
-  the owner asks for it in their own turn; an edit set off by anyone or anything else always gets
-  a card. Instructions are capped at 8000 characters per edit.
+  changed: rebase on that version and propose again (in another project, ask the person, as
+  above). A standing grant covers an edit only when the owner asks for it in their own turn; an
+  edit set off by anyone or anything else always gets a card. Instructions are capped at 8000
+  characters per edit.
 - **The rest of an existing template is changed by a person.** Once it exists, only its
   instructions and skills are reachable here (`update_agent_template`); its name, picture,
   identity, who may start it and whether its instances are listed are set at creation or by a
   person. Its limits and archiving it are never reachable. Point the person to **Edit template…**
   in the template's menu in the sidebar, or the pen on its card in the project graph. Only a
   project owner may change who may start it or its limits, or archive it.
+
+#### Subagents: a copy of this session
+
+`platform.spawn_subagent` starts a child from **this session's own setup**, no template needed,
+for splitting work across parallel copies. Its input is `{ mode, name?, visibility?,
+instructions?, skills?, connectors?, mcpServers? }`, and only `mode` is required. It is durable
+like `spawn_agent`, and once it has `Succeeded`, `result.payload.sessionId` and `slug` name the
+child.
+
+- **`mode: "clone"`** copies this session's setup whole. **`mode: "adhoc"`** narrows it:
+  `instructions` replaces your instructions, and `skills`, `connectors` (connector ids) and
+  `mcpServers` (ids) each keep only what you list; leave a list out to keep all of it. A
+  narrowing field on a `clone` is invalid input.
+- **It never has more than this session.** Any name this session lacks refuses the whole
+  request (`widening_refused`), and the refusal names what is missing; nothing is created, so
+  correct the list rather than retrying it. The `workspace` connector is always kept, and this
+  session's stored secrets are never copied. It runs on the project's model, not a model picked
+  for this session.
+- **It takes no task.** Once it has `Succeeded`, send it its task with
+  `platform.send_to_session`. You and it reach each other (`send_to_session`,
+  `notify_when_idle`) with no link for as long as neither is archived, and
+  `platform.list_peers` shows it to you with `relation: "child"` and you to it with
+  `"spawner"`; ask it to `send` you its result, and close it with
+  `platform.finish_spawned_instance` when its work is done.
+- **Class `routine`**, and `privileged` when this session has a connector on a shared service
+  account: then only the owner's own turn (or an automation acting for them) can have one
+  spawned, and a member's request is refused before any card (`owner_turn_required`). A grant
+  covers this session spawning subagents, for requests of the class it was granted at.
+- **Refused by design:** a session limited to a folder (`scoped_session_unsupported`; the copy
+  would see the whole project), a run group's session, and an archived session. The depth and
+  fan-out limits apply as for templates, plus a limit on one person's live subagents across all
+  their sessions; a limit refusal clears once a subagent is finished.
 
 ### Boundaries that are real, not conservatism
 
@@ -608,5 +664,8 @@ session first), skaile-ai/platform#6265 (editing a template from the UI:
 skaile-ai/platform#6267 (the spawn task: `spawn-agent-policy.service.ts`, `sendTask`),
 skaile-ai/platform#6243 (the spawner and child channel, which needs no link) and
 skaile-ai/platform#6273 (a template's model: `modelOverridable` and the spawn `model`), skaile-ai/platform#6278 (`platform.create_agent_template`:
-`create-agent-template-policy.service.ts`, `create-agent-template.handler.ts`) and
-skaile-ai/platform#6251 (the personal assistant's `projectId`: `assistant-project-target.ts`).
+`create-agent-template-policy.service.ts`, `create-agent-template.handler.ts`),
+skaile-ai/platform#6251 (the personal assistant's `projectId`: `assistant-project-target.ts`),
+and phase 3 of agent templates, part of skaile-ai/platform#6216: #6245
+(`platform.spawn_subagent`: `spawn-subagent.handler.ts`), #6242 (the template reads:
+`agent-template-read.handler.ts`) and #6263 (siblings: `spawn-channel.ts`).
