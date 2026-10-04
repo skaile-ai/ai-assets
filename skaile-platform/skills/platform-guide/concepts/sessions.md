@@ -74,9 +74,9 @@ calling session — propose an agent-to-agent link separately (see *Agent-to-Age
 `concepts/collaboration.md`).
 
 An agent can also start a **helper**, a copy of itself as extra hands for volume work across
-parallel sessions, with `platform.spawn_subagent`: a clone of its own setup, or a narrowed one with its own
-instructions and fewer skills, connectors or MCP servers, never more than it has. The copy is a
-child of the calling session, runs as the session owner, and is finished the same way
+parallel sessions, with `platform.spawn_subagent`: a clone of its own setup, or a narrowed one
+with its own instructions and fewer skills, connectors or MCP servers, never more than it has.
+The copy is a child of the calling session, runs as the session owner, and is finished the same way
 (*Helpers* in `references/control-plane-capabilities.md`).
 
 ## Scoped sessions
