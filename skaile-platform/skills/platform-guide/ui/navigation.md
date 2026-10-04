@@ -203,7 +203,7 @@ Path: `/<org>/projects/<project>/settings` (Owner-only). Tabs:
 | **Sessions**      | List/manage all sessions in the project; bulk mark-read / delete. |
 | **Members**       | Invite users, set Owner/User/Viewer, team access. For a My space project there are no share controls: **Only you can open this project**, and, except on the Home, **Move to Projects** — one-way, after which it stays **Invited only** and can be shared. The Home can never be moved. |
 | **Project**       | Name, slug, description, **Visibility** (**Invited only** / **Everyone in \<Org\>**), delete. For an org Owner in a business organization (not on a My space project) who can open this page (it needs Owner authority on the project), a **Company project** card with **Mark as company project** / **Unmark as company project**: it changes only where the project is listed (under **Company**), not who can open it. |
-| **Session defaults** | Skaile config template applied to new sessions — including additional mounts — plus the default asset assignments for the project's sessions. (There is no separate "Assets" tab; asset defaults live here.) |
+| **Session defaults** | Skaile config template applied to new sessions — including additional mounts — plus the default asset assignments for the project's sessions. (There is no separate "Assets" tab; asset defaults live here.) Its **Mounts** card edits the workspace mount (**Edit mount**) and removes other mounts; see `concepts/integrations.md`. |
 | **Security**      | **Network egress**: **Open**, **Off — LLM provider only**, or **Allowlist specific domains**. |
 | **Connectors**    | Project-level connector enablement and account selection (today: Exchange — the project's mailbox access switch, and per-mailbox enable/disable including shared mailboxes admitted in My Connections). For file mounts use the workspace **Connectors** panel instead. |
 | **Costs**         | Cost tracking/attribution. |
@@ -216,7 +216,7 @@ Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner).
 | Tab          | Purpose |
 | ------------ | ------- |
 | **Members**  | Session-scoped role overrides on top of project membership; add session-only members. |
-| **Config**   | Session-scoped Skaile config (overrides project defaults). |
+| **Config**   | Session-scoped Skaile config (overrides project defaults). Its **Mounts** card edits this session's workspace mount (**Edit mount**) and removes other mounts; see `concepts/integrations.md`. |
 | **Shares**   | Session visibility (**Everyone in the project** / **Invited only**) and public file-preview links. |
 
 In the user's own assistant session, a **Your assistant** card above the tabs links to the
