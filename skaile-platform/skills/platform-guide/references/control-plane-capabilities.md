@@ -255,9 +255,9 @@ only for this session, and executed as the session owner. Detail is in `concepts
 ### Agent templates — also in ordinary sessions
 
 An agent template is a reusable agent in a project: instructions, skills and the connectors it
-needs. Three effects act on one or its instances, from any session in that project, as the
-session owner; only the session owner decides their cards. `spawn_agent` and
-`update_agent_template` are durable: each returns an operation receipt, read with
+needs. Four effects create one or act on one or its instances, from any session in that project,
+as the session owner; only the session owner decides their cards. `create_agent_template`,
+`spawn_agent` and `update_agent_template` are durable: each returns an operation receipt, read with
 `platform.get_operation` (*The operation lifecycle* below), and `result.payload` is set once it
 has `Succeeded`. `finish_spawned_instance` is not: once it runs it returns its result itself,
 with no operation id and nothing to poll.
@@ -270,11 +270,13 @@ it.
 
 | Call | Effect | Effect class |
 | --- | --- | --- |
+| `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl? })` | a new template in this session's project. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits or sibling awareness (a project owner does that in the builder). `name` must be free in the project; `invokeRole` is `User` or `Owner`; `avatarUrl` is an http(s) URL. Once `Succeeded`, `result.payload.templateId` names it. | `routine` on the owner's own turn; `never` on any other turn |
 | `platform.spawn_agent({ templateId, name?, visibility? })` | a new session from the template, a child of this one. Once `Succeeded`, `result.payload.sessionId` and `slug` name it. | `routine`; `privileged` when the template holds bound credentials |
 | `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills? })` | replaces the template's instructions or skill list; never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
 | `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine` |
 
-A grant on `spawn_agent` or `update_agent_template` reaches that one template only; a grant on
+A grant on `create_agent_template` reaches this project only. A grant on `spawn_agent` or
+`update_agent_template` reaches that one template only; a grant on
 `finish_spawned_instance` covers this session finishing its own children. Things to act on:
 
 - **`spawn_agent` takes no task.** Once it has `Succeeded`, give the child its task by sending
