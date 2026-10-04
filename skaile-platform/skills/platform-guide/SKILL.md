@@ -4,14 +4,14 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   assistant can guide users and act on their behalf. Use for 'how do I...', 'where is...',
   'walk me through...' or 'help me with the platform'; for projects, sessions, workspaces,
   flows (run groups, batch runs, recipes, webhooks, personal flows), previews, classifiers,
-  Exchange mail and calendar (triage, drafting, sending, shared mailboxes), the agent graph,
+  Exchange mail and calendar (triage, drafting, sending, shared mailboxes), the project graph,
   Skailify apps, sharing and inviting, connecting a data source, AI providers and Claude
   seats, skills/assets, scoped sessions, agent-to-agent, notifications, roles and permissions,
   Work vs Private workspaces, My space and the Home, assistant reach, hibernation, agent templates, or any platform surface; before creating a
   project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
-version: 0.16.4
+version: 0.16.6
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -42,6 +42,7 @@ keywords:
   - calendar
   - send-draft
   - connector-mount
+  - project-graph
   - agent-graph
   - personal-flow
   - notifications
@@ -83,7 +84,7 @@ mechanics only when the user is technical or `expertMode=true`.
 
 | File | Use when the user asks about... |
 | ---- | -------------------------------- |
-| `concepts/model.md` | The big picture: org/project/session/workspace, source types, mounts vs connectors, assets/skills, agents and the agent graph, flows, roles & permissions, business organizations vs Private workspaces, the Home and My space. Start here for orientation. |
+| `concepts/model.md` | The big picture: org/project/session/workspace, source types, mounts vs connectors, assets/skills, agents and the project graph, flows, roles & permissions, business organizations vs Private workspaces, the Home and My space. Start here for orientation. |
 | `concepts/sessions.md` | Session lifecycle (hibernate/wake/close), what a sleeping session shows and how it wakes, multiple sessions, **scoped sessions**, forking/renaming. |
 | `concepts/flows.md` | Flows and the Flows page/editor, **authoring a flow definition** (the seven node kinds, contracts, gates vs checks, provenance), runs and gates, **classifier nodes**, **run groups** (batch / standing / unattended processing), **personal flows**, running a flow inside an existing session, recipes, webhook triggers and the session webhook inbox. |
 | `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels, whose connection a mount runs on, **Reconnect**, Exchange mail and shared mailboxes, AI providers and subscription seats, classifier providers. |
@@ -104,7 +105,7 @@ mechanics only when the user is technical or `expertMode=true`.
 
 | File | Use when the user asks... |
 | ---- | -------------------------- |
-| `ui/navigation.md` | "Where is...", "how do I get to...", the **Work** / **Private** switch, the sidebar's Company / Projects / My space sections and the assistant launcher, project/session/org settings (incl. **Classifiers**, **Assistants**), a read-only Private workspace, creating a project, connecting a data source, shared Exchange mailboxes, the org **Sessions** report, **Agent graph**, Escape and Cmd+K switching — the app shell, sidebar, command palette, settings hierarchy. |
+| `ui/navigation.md` | "Where is...", "how do I get to...", the **Work** / **Private** switch, the sidebar's Company / Projects / My space sections and the assistant launcher, project/session/org settings (incl. **Classifiers**, **Assistants**), a read-only Private workspace, creating a project, connecting a data source, shared Exchange mailboxes, the org **Sessions** report, **Project graph**, Escape and Cmd+K switching — the app shell, sidebar, command palette, settings hierarchy. |
 | `ui/workspace.md` | Anything about the workspace itself: chat composer, the workspace panel and its file explorer, the preview pane, the side panels opened from the toolbar icons, presence, mobile, common in-workspace click-paths. |
 
 ## Hard rules

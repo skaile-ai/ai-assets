@@ -329,6 +329,11 @@ A grant on `spawn_agent` or `update_agent_template` reaches that one template on
   changed: rebase on that version and propose again. A standing grant covers an edit only when
   the owner asks for it in their own turn; an edit set off by anyone or anything else always gets
   a card. Instructions are capped at 8000 characters per edit.
+- **The rest of a template is changed by a person.** Its name, picture, identity, who may start
+  it, whether its instances are listed, its limits, and archiving it are not reachable here. Point
+  the person to **Edit template…** in the template's menu in the sidebar, or the pen on its card
+  in the project graph. Only a project owner may change who may start it or its limits, or
+  archive it.
 
 ### Boundaries that are real, not conservatism
 
@@ -563,4 +568,4 @@ and #6165, part of #6152 (agent templates: `spawn-agent.handler.ts`,
 (finishing a spawned instance: `finish-spawned-instance.handler.ts`,
 `finish-spawned-instance-policy.service.ts`) and #6189 (the `archived` status, and the close
 before the archive: `session.update.service.ts`, whose archive closes a running or hibernated
-session first).
+session first), and skaile-ai/platform#6265 (editing a template from the UI: `edit-agent-template-dialog.tsx`).
