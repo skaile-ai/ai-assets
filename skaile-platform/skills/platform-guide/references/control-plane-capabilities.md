@@ -136,6 +136,7 @@ what decides whether an autonomy grant can ever cover it (see *Consent and auton
 | Call | Effect | Effect class | Grant may reach |
 | --- | --- | --- | --- |
 | `platform.create_organization({ name, slug?, logoUrl?, iconSvg? })` | a new organization | `privileged` | only the widest scope: every target of that kind the owner can reach |
+| `platform.update_organization_branding({ organizationId, name?, logoUrl?, iconSvg? })` | a new name, logo URL or icon for an organization; at least one field, and an empty string removes the logo or icon. The platform keeps the logo's URL, not the image, so prefer a stable address. | `routine` | that exact target only |
 | `platform.create_project({ organizationId, name, sourceType, description?, visibility?, agentName?, agentAvatarUrl?, initialMessage? })` | a new project. `sourceType` is `Empty` or `OnSkaile`; `visibility` `Private` (default) or `Shared`. | `routine` | that target, its organization, or everything reachable |
 | `platform.create_session({ projectId, name, slug?, followMain?, visibility? })` | a new session; once `Succeeded`, `result.payload.url` links to it and `result.payload.sessionId` names it — share the link, or bring it up with `platform.navigate({ route: "session", params: { session: result.payload.sessionId } })` when the owner asked to go there. In a private project (the assistant's Home or a My space project) the session is always Private and `visibility: "Shared"` is refused. | `routine` | that target, its project, its organization, or everything reachable |
 | `platform.invite_to_organization({ organizationId, email, role?, personalMessage? })` | an invitation email | `external`; `never` when `role` is `Owner` or a `personalMessage` is set | that target, its organization, or everything reachable — never an Owner invitation or one with a message |
@@ -389,6 +390,12 @@ These are refusals by design — proposing around them wastes the owner's approv
 - **Creating an organization is PlatformAdmin-only.** The server verifies the owner currently
   holds PlatformAdmin — membership, however senior, is not enough. Do not offer it to an owner
   who is not one.
+- **Organization branding is Owner-only and branding-only.** `update_organization_branding`
+  needs a real Owner membership in that organization. A platform administrator without one is
+  refused here, even though the web app's organization settings page lets them in after they
+  switch into that organization. It changes the name, logo URL and icon, nothing else in the
+  organization's settings. A rename keeps the organization's slug, so its address and links stay
+  the same.
 - **Nothing lists an organization's members.** `platform.list_project_members` covers projects
   only. Before an organization invite, *ask the owner* whether the person is already a member:
   an existing member is refused only **after** their approval has been spent.
@@ -542,7 +549,9 @@ operation fail with `operation_target_not_authorized`.
 
 It is not generic CRUD over the data model, and it is not a lifecycle escape hatch. This file
 lists nothing for deleting an organization, project, or session; for changing or removing a
-membership; for editing an organization's settings; or for handling a credential.
+membership; for editing an organization's settings beyond its branding
+(`platform.update_organization_branding`: name, logo URL and icon); or for handling a
+credential.
 **Check the live registry before telling the owner any of those is impossible** — this file is
 a map, and the registry moves — and search the platform actions with `platform.find_actions`
 (`references/agent-action-catalog.md`), which grow every deploy. If neither has it, guide them to
@@ -568,4 +577,6 @@ and #6165, part of #6152 (agent templates: `spawn-agent.handler.ts`,
 (finishing a spawned instance: `finish-spawned-instance.handler.ts`,
 `finish-spawned-instance-policy.service.ts`) and #6189 (the `archived` status, and the close
 before the archive: `session.update.service.ts`, whose archive closes a running or hibernated
-session first), and skaile-ai/platform#6265 (editing a template from the UI: `edit-agent-template-dialog.tsx`).
+session first), skaile-ai/platform#6265 (editing a template from the UI:
+`edit-agent-template-dialog.tsx`) and skaile-ai/platform#6253 (organization branding:
+`update-organization-branding.handler.ts`, `update-organization-branding-policy.service.ts`).
