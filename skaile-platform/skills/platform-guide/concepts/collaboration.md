@@ -65,12 +65,22 @@ file preview (e.g. a report) with someone **outside** the platform — no login 
 
 ## Agent-to-Agent (A2A)
 
-Sessions can talk to each other's agents through directed, two-sided opt-in links.
+Sessions can talk to each other's agents through directed, two-sided opt-in links. The one
+exception is a session and an agent it spawned from a template, which can message each other
+with no link (*Agent templates* in `references/control-plane-capabilities.md`).
 
 - A session must be opened to peers (**Allow other sessions to reach this one**) and may
   declare a **Scope** describing what it is willing to do for them before it can be linked.
 - Once linked, the agent can **ask** a peer session's agent (waits up to 5 minutes for the
-  answer, then reports it as pending) or **send** to it (fire-and-forget).
+  answer, then reports it as pending) or **send** to it (no wait for an answer). A send that is
+  refused (no link; a reply on an exchange an unlink has closed; the bounds below) says so in
+  its result, and the message was not sent. One that is accepted can still fail to arrive if
+  the peer's session cannot be started; the platform then starts a new turn in the sender with
+  a *not delivered* notice. The undelivered send itself is not counted, but the notice counts
+  toward the pair's budget below as an idle notice does, and like one it carries no hop count.
+  So each failed send costs the pair one message, and resending to a peer that never starts
+  runs the budget out, after which further sends are refused. Sends from one session to one
+  peer arrive in the order they were made.
 - An agent can also **subscribe** to a linked peer (a link in either direction counts): once
   the peer finishes its current work, the platform starts one new turn in the subscriber
   with an idle notice, waking it if it has hibernated. It can subscribe on its own or as
@@ -96,5 +106,6 @@ Sessions can talk to each other's agents through directed, two-sided opt-in link
 Source of truth: `platform/docs/protocol-extensions.md`,
 `platform/docs/public-file-preview-sharing.md`, `platform/backend/libs/agent-to-agent/`,
 platform PRs #4917 (notification modes), #4566 (cross-org A2A), #5152 (share wake budget),
-#5876 (idle subscriptions), #6008 (private projects not shareable),
-`platform/docs/roles-permissions-matrix.md` (share and invite permissions).
+#5876 (idle subscriptions), #6008 (private projects not shareable), #6261 (send refusals
+and the not-delivered notice), `platform/docs/roles-permissions-matrix.md` (share and invite
+permissions).

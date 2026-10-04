@@ -53,8 +53,9 @@ project role of **User** or **Owner**, and the project must not be archived.
 
 An agent can create one too, from any session and not only the home assistant, in one of two
 ways. From one of the project's **agent templates**, it calls `platform.spawn_agent`: the new
-agent becomes a child of the calling session, runs as the session owner, and gets its task by a
-send afterwards, after an agent-to-agent link if there is none yet (*Agent templates* in
+agent becomes a child of the calling session, runs as the session owner, and gets its task in
+the same call (`task`), sent as the spawner's first message to it; the two can message each
+other with no agent-to-agent link (*Agent templates* in
 `references/control-plane-capabilities.md`). When its work is done, the spawning session ends it
 with `platform.finish_spawned_instance`, which closes it (with the usual sync-back) and archives
 it or, once a person has written there, asks the owner to mark it done (same section). From
