@@ -13,7 +13,7 @@ replaces the page they are on) or `tab` (opens a new tab and keeps the current o
 | --- | --- | --- |
 | `dashboard` | Dashboard | — |
 | `projects`, `sessions`, `flows`, `store`, `preferences`, `myConnections` | that organization page (`myConnections` takes `search: { link }` to highlight one connection) | `org?` |
-| `org.settings` | Organization settings (org Owners only; `search: { tab }`, e.g. `ai-providers`, `assistants`, or `orphaned-my-space` for the former members' My space review) | `org?` |
+| `org.settings` | Organization settings (org Owners and platform admins; `search: { tab }`, e.g. `ai-providers`, `assistants`, or `orphaned-my-space` for the former members' My space review) | `org?` |
 | `project`, `project.settings`, `project.runs` | a project's main session, its settings, its run board | `project` |
 | `runGroup` | one run group's board | `project`, `runGroup` |
 | `session` | one session | `session` (a slug resolves in this session's project; elsewhere pass its id or `project`) |

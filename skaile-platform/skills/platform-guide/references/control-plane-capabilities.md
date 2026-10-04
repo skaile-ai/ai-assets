@@ -395,7 +395,7 @@ These are refusals by design — proposing around them wastes the owner's approv
   refused here, even though the web app's organization settings page lets them in after they
   switch into that organization. It changes the name, logo URL and icon, nothing else in the
   organization's settings. A rename keeps the organization's slug, so its address and links stay
-  the same; changing the slug is the web app's job.
+  the same.
 - **Nothing lists an organization's members.** `platform.list_project_members` covers projects
   only. Before an organization invite, *ask the owner* whether the person is already a member:
   an existing member is refused only **after** their approval has been spent.
