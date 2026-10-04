@@ -534,15 +534,16 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
 
   Decide `docs_impact`:
     user-visible  IF ANY holds — the changeset carries a `whats-new*` marker other than
-                  `whats-new-fix:`; the diff adds / renames / removes / changes the behaviour
-                  of a `platform.*` capability, a connector, a provider, a UI surface, a role
-                  or permission, or anything an agent or user could newly do.
-    none          internal refactors, tests, CI, infra, and bug fixes — including a fix whose
-                  changeset carries `whats-new-fix:`: it restores behaviour the docs already
-                  describe, and CI asks for no docs on it. A fix that CHANGES what is
+                  `whats-new-fix:`; the diff adds / renames / removes / changes the DOCUMENTED
+                  behaviour of a `platform.*` capability, a connector, a provider, a UI
+                  surface, a role or permission, or anything an agent or user could newly do.
+    none          ONLY for internal refactors, tests, CI, infra, and bug fixes that restore
+                  behaviour the docs already describe — including a `whats-new-fix:`
+                  changeset, for which CI asks for no docs. A fix that CHANGES what is
                   documented (a new option, a different limit) is user-visible. Write the
                   one-sentence reason now — it goes in the PR body and a reviewer will read it.
-  When unsure whether a change alters what the docs say, it is `user-visible`. The cost of one extra paragraph is lower than a stale guide.
+  When unsure whether a change alters what the docs say, it is `user-visible`; the cost of
+  one extra paragraph is lower than a stale guide.
 
   IF none: record `docs_impact=none reason=<…>` and continue.
 
