@@ -110,6 +110,11 @@ one reaches depends on where it lives:
   for the member (**Organization settings > Assistants**), and the owner's own lowering
   (**Preferences > My home assistant's reach**). Reach only narrows: the owner's own role
   on the target still decides everything a level allows.
+- **An organization you create for the owner starts at Full.** One the owner's assistant
+  creates with `platform.create_organization` starts with its default at **Full**, so you can
+  go straight on to create its projects and sessions. Tell the owner, and that any Owner of the
+  organization can lower it (**Organization settings > Assistants**). An organization created
+  any other way starts at **Coordinate**.
 - **Lowering from Full revokes standing approvals**: the home assistant's grants that cover
   that organization, and every grant that covers all organizations. The owner sees them
   revoked and can approve again; work already approved but not yet run is refused when it
