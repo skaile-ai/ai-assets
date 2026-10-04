@@ -261,11 +261,11 @@ session owner; only the session owner decides their cards. `spawn_agent` and
 `update_agent_template` are durable: each returns an operation receipt, read with
 `platform.get_operation` (*The operation lifecycle* below), and `result.payload` is set once it
 has `Succeeded`. `finish_spawned_instance` is not: once it runs it returns its result itself,
-with no operation id and nothing to poll. A fourth effect, `platform.spawn_subagent`, starts a
-copy of this session rather than of a template (*Subagents* below).
+with no operation id and nothing to poll.
 
-Two reads need no card. `platform.list_agent_templates({})` lists all of this project's live
-templates in one reply (it takes no paging arguments): each one's `id`, `name`, `version`,
+`platform.spawn_subagent` starts a copy of this session rather than of a template (*Subagents*
+below). Two reads need no card. `platform.list_agent_templates({})` lists all of this project's
+live templates in one reply (it takes no paging arguments): each one's `id`, `name`, `version`,
 `listed`, `invokeRole`, `siblingAwareness`, `credentialBearing`, and `canSpawn` (whether the
 session owner may start it now; it does not predict a limit or owner-turn refusal).
 `platform.get_agent_template({ templateId })` reads one: the same fields without `canSpawn`,
@@ -347,6 +347,13 @@ A grant on `spawn_agent` or `update_agent_template` reaches that one template on
   lower ones); the refusal says which was hit. It clears once an instance is closed: finish
   one of this session's own children whose work is done with `platform.finish_spawned_instance`,
   or tell the person which one to mark done, rather than retrying.
+- **Instances of one template can talk to each other when the template allows it.** Where
+  `siblingAwareness` is true, the live instances of that template that **one person** owns in
+  this project can `send_to_session`, `notify_when_idle` and `ask_session` each other with no
+  link, and `platform.list_peers` shows them with `relation: "sibling"`. Instances another
+  member owns are never siblings: a send to one is refused (`no_link`). Turning the setting off
+  or archiving the template ends it. `list_peers` shows at most the per-person instance limit;
+  a sibling past it is still reachable by id.
 - **An edit is based on a version.** A refusal naming another version means the template
   changed: rebase on that version and propose again. A standing grant covers an edit only when
   the owner asks for it in their own turn; an edit set off by anyone or anything else always gets
@@ -356,13 +363,6 @@ A grant on `spawn_agent` or `update_agent_template` reaches that one template on
   the person to **Edit template…** in the template's menu in the sidebar, or the pen on its card
   in the project graph. Only a project owner may change who may start it or its limits, or
   archive it.
-- **Instances of one template can talk to each other when the template allows it.** Where
-  `siblingAwareness` is true, the live instances of that template that **one person** owns in
-  this project can `send_to_session`, `notify_when_idle` and `ask_session` each other with no
-  link, and `platform.list_peers` shows them with `relation: "sibling"`. Instances another
-  member owns are never siblings: a send to one is refused (`no_link`). Turning the setting off
-  or archiving the template ends it. `list_peers` shows at most the per-person instance limit;
-  a sibling past it is still reachable by id.
 
 #### Subagents: a copy of this session
 

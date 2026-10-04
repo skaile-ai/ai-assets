@@ -55,10 +55,10 @@ keywords:
   - assistant-reach
   - agent-template
   - spawn-agent
-  - finish-spawned-instance
-  - organization-branding
   - spawn-subagent
   - subagent
+  - finish-spawned-instance
+  - organization-branding
 ---
 
 # Skaile Platform Guide
@@ -102,7 +102,7 @@ mechanics only when the user is technical or `expertMode=true`.
 | `references/agent-action-catalog.md` | You are about to search for or run a platform action (`platform.find_actions`, `platform.invoke`, `platform.batch`), or pass a file by reference — and need the call shapes, `$ref` syntax, per-step consent, file transfers and shared-session rules. |
 | `references/exchange-mail-calendar.md` | You are about to read, triage, file, draft or send mail, or read or change a calendar event, in a connected Microsoft 365 mailbox — and need mailbox selection, the approval tiers, the send grant, and how to read a send result. |
 | `references/classifier.md` | You are about to classify many items with closed questions (`platform.classify`) and need the call shape, limits, and how to read `calibrated` / `p`. |
-| `references/control-plane-capabilities.md` | You are about to create a project/session/organization, change an organization's name, logo or icon, invite someone, start or repair a connector, propose a connector mount or an asset configuration, run a flow in another session, read or write a text file in another of the owner's sessions, change the assistant profile, list or read agent templates, spawn an agent from an agent template or a copy of yourself (`platform.spawn_subagent`), finish an instance you spawned, edit a template's instructions or skills, or read an operation back — and need the family's shape, effect classes, real boundaries, the operation lifecycle, and the `AwaitingUser` handoff. |
+| `references/control-plane-capabilities.md` | You are about to create a project/session/organization, change an organization's name, logo or icon, invite someone, start or repair a connector, propose a connector mount or an asset configuration, run a flow in another session, read or write a text file in another of the owner's sessions, change the assistant profile, spawn an agent from an agent template, finish an instance you spawned, edit a template's instructions or skills, or read an operation back — and need the family's shape, effect classes, real boundaries, the operation lifecycle, and the `AwaitingUser` handoff. |
 
 ### UI (where things live, click-paths)
 
