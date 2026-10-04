@@ -215,7 +215,8 @@ Creating an agent from an ordinary session is not `create_session` (above, assis
 and it takes one of two routes. From scratch, it is the platform action **Create a new agent in
 a project**, found through `platform.find_actions` (`concepts/sessions.md`). From one of the
 project's agent templates, it is `platform.spawn_agent` (*Agent templates* below), which makes
-the new agent a child of this session; neither route links the new agent to this session.
+the new agent a child of this session that it can message with no link. An agent created from
+scratch is not linked to this session.
 
 | Call | Effect | Returns |
 | --- | --- | --- |
@@ -278,13 +279,19 @@ A grant on `spawn_agent` or `update_agent_template` reaches that one template on
 `finish_spawned_instance` covers this session finishing its own children. Things to act on:
 
 - **Give the child its work as `task`.** The owner sees it on the card (the first 600
-  characters; up to 8000 are sent). Once the child exists it is sent as your first message to
-  it, shown in its chat as from this session, so it starts working and can reply to you.
-  `result.payload.task` is `{ status: 'sent' }`, or `{ status: 'not_sent', error, hint? }` when
+  characters). A `task` over 8000 characters is refused as invalid input, so shorten it or
+  send the rest afterwards. Once the child exists it is sent as your first message to it, shown
+  in its chat as from this session, so it starts working and can reply to you.
+  `result.payload.task` is `{ status: "sent" }`, or `{ status: "not_sent", error, hint? }` when
   the send was refused: the child exists, so send it the task yourself
   (`platform.send_to_session`) rather than spawning again. A sent task that then cannot be
-  delivered comes back as a `[peer-undelivered]` notice. Without a `task`, send it one the same
-  way once the spawn has `Succeeded`.
+  delivered arrives later as a new turn in this session, a `[peer-undelivered]` notice. Without a
+  `task`, send it one the same way once the spawn has `Succeeded`.
+- **Choose its model only where the template allows it.** A template either follows the
+  project's model or pins one. Where `platform.get_agent_template` shows `modelOverridable:
+  true`, pass `model` (a Claude alias such as `"sonnet"` or `"haiku"`, never `"custom"`) to run
+  the child on another model; the card names it. On any other template a `model` is refused
+  before a card exists, so leave it out.
 - **No link is needed between you and a child.** You and it can `send_to_session` and
   `notify_when_idle` each other for as long as neither is archived; do not propose a link. Your
   messages, the task included, never count as the human turn, so this session keeps the right to
@@ -585,4 +592,6 @@ before the archive: `session.update.service.ts`, whose archive closes a running 
 session first), skaile-ai/platform#6265 (editing a template from the UI:
 `edit-agent-template-dialog.tsx`), skaile-ai/platform#6253 (organization branding:
 `update-organization-branding.handler.ts`, `update-organization-branding-policy.service.ts`) and
-skaile-ai/platform#6267 (the spawn task: `spawn-agent-policy.service.ts`, `sendTask`).
+skaile-ai/platform#6267 (the spawn task: `spawn-agent-policy.service.ts`, `sendTask`),
+skaile-ai/platform#6243 (the spawner and child channel, which needs no link) and
+skaile-ai/platform#6273 (a template's model: `modelOverridable` and the spawn `model`).
