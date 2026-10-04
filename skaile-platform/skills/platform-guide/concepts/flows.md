@@ -480,7 +480,7 @@ Fuller treatment: `ai-assets/docs/flows.md`.
 
 ## Run groups (batch / unattended processing)
 
-- A run group = one flow + one **recipe** + a list of inputs. Each input runs in its own
+- A run group = one flow + one **recipe** (or an **agent template**, below) + a list of inputs. Each input runs in its own
   temporary session; a scheduler limits how many run at once. Groups can be paused,
   cancelled, retried per item, and new inputs can be appended while running.
 - Every group has a mode, fixed at creation: **Batch** (a fixed set of inputs; the group
@@ -555,6 +555,8 @@ as `@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.sche
 `platform/features/31-run-groups/`, `platform/features/09-flow-execution/in-session-flow-runs.md`
 (platform #5233), `platform/docs/flow-authoring-v2.md` "Personal flows" (platform #5252),
 the "Only me" scope label (platform #5989), agent activation and autonomous mode for run groups (platform #6061),
-the run-group create wizard (Batch / Standing), `RunGroupRecipePreflightService`, run groups on an agent template (platform #6271, `run-template-authority.service.ts`). For on-disk discovery: `loadFlowEntriesFromDir` in
+the run-group create wizard (Batch / Standing), `RunGroupRecipePreflightService`, run groups
+on an agent template (platform #6271, `run-template-authority.service.ts`). For on-disk
+discovery: `loadFlowEntriesFromDir` in
 `@skaile/workspaces` → `factory-assets/connectors/flow/engine/loader.ts`, and `aiResourceRoots`
 in `cli/src/paths.ts`.

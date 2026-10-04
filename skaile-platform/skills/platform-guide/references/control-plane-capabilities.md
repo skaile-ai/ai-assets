@@ -263,7 +263,8 @@ has `Succeeded`. `finish_spawned_instance` is not: once it runs it returns its r
 with no operation id and nothing to poll. A fourth effect, `platform.spawn_subagent`, starts a
 copy of this session rather than of a template (*Subagents* below).
 
-Two reads need no card. `platform.list_agent_templates({})` lists this project's templates:
+Two reads need no card. `platform.list_agent_templates({})` lists all of this project's live
+templates in one reply (it takes no paging arguments):
 each one's `id`, `name`, `version`, `listed`, `invokeRole`, `siblingAwareness`,
 `credentialBearing`, and `canSpawn` (whether the session owner may start it now; it does not
 predict a limit or owner-turn refusal). `platform.get_agent_template({ templateId })` reads one:
@@ -366,9 +367,9 @@ for splitting work across parallel copies. It is durable like `spawn_agent`, and
   session's stored secrets are never copied. It runs on the project's model, not a model picked
   for this session.
 - **It takes no task.** Once it has `Succeeded`, send it its task with
-  `platform.send_to_session`. You and it reach each other with no link, as with a child spawned
-  from a template; ask it to `send` you its result, and close it with
-  `platform.finish_spawned_instance` when its work is done.
+  `platform.send_to_session`. You and it reach each other (`send_to_session`,
+  `notify_when_idle`) with no link for as long as neither is archived; ask it to `send` you its
+  result, and close it with `platform.finish_spawned_instance` when its work is done.
 - **Class `routine`**, and `privileged` when this session has a connector on a shared service
   account: then only the owner's own turn (or an automation acting for them) can have one
   spawned, and a member's request is refused before any card (`owner_turn_required`). A grant

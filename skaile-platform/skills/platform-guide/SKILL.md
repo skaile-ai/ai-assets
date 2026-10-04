@@ -57,6 +57,8 @@ keywords:
   - spawn-agent
   - finish-spawned-instance
   - organization-branding
+  - spawn-subagent
+  - subagent
 ---
 
 # Skaile Platform Guide

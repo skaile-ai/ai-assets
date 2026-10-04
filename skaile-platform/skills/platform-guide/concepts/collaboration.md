@@ -104,11 +104,13 @@ Sessions can talk to each other's agents through directed, two-sided opt-in link
   with `platform.spawn_subagent`, and the instances of one agent template that one person owns,
   when the template's `siblingAwareness` is on (*Agent templates* in
   `references/control-plane-capabilities.md`). The hop, cycle and budget bounds above apply to
-  them unchanged, and archiving either end closes the pair's exchanges.
+  them unchanged, and archiving either end closes the pair's exchanges. `platform.list_peers`
+  lists them with a `relation` (`"spawner"`, `"child"` or `"sibling"`); a linked peer has none.
 
 Source of truth: `platform/docs/protocol-extensions.md`,
 `platform/docs/public-file-preview-sharing.md`, `platform/backend/libs/agent-to-agent/`,
 platform PRs #4917 (notification modes), #4566 (cross-org A2A), #5152 (share wake budget),
 #5876 (idle subscriptions), #6008 (private projects not shareable), #6261 (send refusals
-and the not-delivered notice), #6263 (sibling instances of a template, `spawn-channel.ts`), `platform/docs/roles-permissions-matrix.md` (share and invite
+and the not-delivered notice), #6263 (sibling instances of a template, `spawn-channel.ts`),
+`platform/docs/roles-permissions-matrix.md` (share and invite
 permissions).
