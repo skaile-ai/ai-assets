@@ -273,14 +273,15 @@ live templates in one reply (it takes no paging arguments): each one's `id`, `na
 session owner may start it now; it does not predict a limit or owner-turn refusal).
 `platform.get_agent_template({ templateId })` reads one: the same fields without `canSpawn`,
 plus its `instructions`, `skills`, limits (`null` means the platform default) and model fields.
-Read it before an edit and send its `version`. Both reads cover this session's project only:
-another project's template, an archived one and an unknown one all come back as not found. So
-the personal assistant, editing in another project with `projectId`, takes `basedOnVersion` from
-the last result it has for that template (`result.payload.version` of the create, which is `1`,
-or of the last update). After an edit someone else made, the refusal names the current version,
-but the assistant cannot read what changed there, so it asks the person rather than editing over
-it. `templateId` takes the template's id or its exact
-name everywhere.
+Read it before an edit and send its `version`. Another project's template, an archived one and
+an unknown one all come back as not found from `get`, and `list` leaves them out. `templateId`
+takes the template's id or its exact name everywhere.
+
+Both reads cover this session's project only; neither takes a `projectId`. So the personal
+assistant, editing in another project with `projectId`, takes `basedOnVersion` from the last
+result it has for that template: `result.payload.version` of its create or of its last update.
+If that edit is refused because someone else changed the template, it cannot read the change,
+so it asks the person instead of rebasing as below.
 
 A template **holds bound credentials** when connector credentials are attached to the template
 itself, so every instance reaches those systems on the template's connection, whoever spawned
@@ -288,7 +289,7 @@ it.
 
 | Call | Effect | Effect class |
 | --- | --- | --- |
-| `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl?, projectId? })` | a new template in this session's project, or, from the personal assistant, in the project `projectId` names. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit template…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL (or a path starting with `/`), since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it. | `routine` on the owner's own turn; `never` on any other turn |
+| `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl?, projectId? })` | a new template in this session's project, or, from the personal assistant, in the project `projectId` names. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit template…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL (or a path starting with `/`), since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it and `result.payload.version` is `1`. | `routine` on the owner's own turn; `never` on any other turn |
 | `platform.spawn_agent({ templateId, name?, visibility?, task?, model? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
 | `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills?, projectId? })` | replaces the template's instructions or skill list (from the personal assistant, `projectId` finds the template in that project); never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
 | `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine` |
@@ -374,9 +375,10 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   or archiving the template ends it. `list_peers` shows at most the per-person instance limit;
   a sibling past it is still reachable by id.
 - **An edit is based on a version.** A refusal naming another version means the template
-  changed: rebase on that version and propose again. A standing grant covers an edit only when
-  the owner asks for it in their own turn; an edit set off by anyone or anything else always gets
-  a card. Instructions are capped at 8000 characters per edit.
+  changed: rebase on that version and propose again (in another project, ask the person, as
+  above). A standing grant covers an edit only when the owner asks for it in their own turn; an
+  edit set off by anyone or anything else always gets a card. Instructions are capped at 8000
+  characters per edit.
 - **The rest of an existing template is changed by a person.** Once it exists, only its
   instructions and skills are reachable here (`update_agent_template`); its name, picture,
   identity, who may start it and whether its instances are listed are set at creation or by a
