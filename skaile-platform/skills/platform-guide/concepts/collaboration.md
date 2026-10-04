@@ -68,8 +68,7 @@ file preview (e.g. a report) with someone **outside** the platform — no login 
 Sessions can talk to each other's agents through directed, two-sided opt-in links. Three kinds
 of pair made by a spawn need no link: a session and an agent it spawned from a template, a
 session and a subagent it started, and sibling instances of one template (the last two are in
-the last bullet below). Apart from those, the home assistant needs no link to message a session
-its owner can see in its own Private workspace (*The home assistant* in `concepts/agent.md`).
+the last bullet below).
 
 - A session must be opened to peers (**Allow other sessions to reach this one**) and may
   declare a **Scope** describing what it is willing to do for them before it can be linked.
