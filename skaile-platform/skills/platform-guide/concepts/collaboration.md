@@ -105,9 +105,9 @@ its owner can see in its own Private workspace (*The home assistant* in `concept
   organization. The home assistant can still find the owner's sessions in other organizations
   (as far as each one's reach allows) and message a session linked to it there by hand.
 - Two of those three pairs sit inside one project and need no link: an agent and a
-  **subagent** it started with `platform.spawn_subagent`, and the instances of one agent template that one person owns,
-  when the template's `siblingAwareness` is on (*Agent templates* in
-  `references/control-plane-capabilities.md`). The hop, cycle and budget bounds above apply to
+  **subagent** it started with `platform.spawn_subagent`, and the instances of one agent
+  template that one person owns, when the template's `siblingAwareness` is on (*Agent
+  templates* in `references/control-plane-capabilities.md`). The hop, cycle and budget bounds above apply to
   them unchanged, and archiving either end closes the pair's exchanges. In
   `platform.list_peers`, a peer related to you through a spawn carries a `relation` label
   (`"spawner"`, `"child"` or `"sibling"`); a peer you reach only through a link carries none.
