@@ -263,8 +263,10 @@ session owner; only the session owner decides their cards. `spawn_agent` and
 has `Succeeded`. `finish_spawned_instance` is not: once it runs it returns its result itself,
 with no operation id and nothing to poll.
 
-`platform.spawn_subagent` starts a copy of this session rather than of a template (*Subagents*
-below). Two reads need no card. `platform.list_agent_templates({})` lists all of this project's
+Besides those three, a fourth effect, `platform.spawn_subagent`, starts a copy of this session
+rather than of a template (*Subagents* below).
+
+Two reads need no card. `platform.list_agent_templates({})` lists all of this project's
 live templates in one reply (it takes no paging arguments): each one's `id`, `name`, `version`,
 `listed`, `invokeRole`, `siblingAwareness`, `credentialBearing`, and `canSpawn` (whether the
 session owner may start it now; it does not predict a limit or owner-turn refusal).
