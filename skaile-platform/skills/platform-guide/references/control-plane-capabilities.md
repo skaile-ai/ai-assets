@@ -256,8 +256,9 @@ only for this session, and executed as the session owner. Detail is in `concepts
 ### Agent templates — also in ordinary sessions
 
 An agent template is a reusable agent in a project: instructions, skills and the connectors it
-needs. Four effects create a template or act on one or its instances, from any session in that project,
-as the session owner; only the session owner decides their cards. `create_agent_template`,
+needs. Four effects create a template or act on one or its instances, from any session in that
+project, as the session owner; only the session owner decides their cards. Your personal assistant
+can also create or edit a template in another project by naming it with `projectId` (below). `create_agent_template`,
 `spawn_agent` and `update_agent_template` are durable: each returns an operation receipt, read with
 `platform.get_operation` (*The operation lifecycle* below), and `result.payload` is set once it
 has `Succeeded`. `finish_spawned_instance` is not: once it runs it returns its result itself,
@@ -284,7 +285,8 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
 - **Setting up another project (personal assistant only).** From the owner's personal
   assistant, pass `projectId` to `create_agent_template` or `update_agent_template` to act in a
   project the owner chose, for example one you just created with `platform.create_project`.
-  The owner's role is checked on that project, and its organization must allow you full reach.
+  The owner's role is checked on that project, and its organization must allow you **Full**
+  reach (`concepts/agent.md` § *Assistant reach*).
   Any other session that passes `projectId` is refused. `spawn_agent` takes no `projectId`: an
   instance is a child of the session that started it, so ask a session in that project to spawn
   it (`platform.delegate_to_session`).
