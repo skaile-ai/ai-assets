@@ -16,7 +16,7 @@ description: >-
   existing code, for plans or design proposals, for filing an issue when implementation is
   explicitly deferred, for throwaway local experiments, or for work spanning several
   repositories.
-version: 1.7.0
+version: 1.7.1
 metadata:
   tags:
   - "ship"
@@ -533,15 +533,16 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
   reaches it).
 
   Decide `docs_impact`:
-    user-visible  IF ANY holds — the changeset carries a `whats-new:`, `whats-new-highlight:` or `whats-new-agent:` marker
-                  (NOT `whats-new-fix:` — a bug fix changes no documented capability, and CI asks for no docs on it);
-                  the diff adds / renames / removes / changes the behaviour of a `platform.*`
-                  capability, a connector, a provider, a UI surface, a role or permission, or
-                  anything an agent or user would be told or could newly do.
-    none          ONLY for internal refactors, tests, CI, infra, and fixes with no behaviour a
-                  user or agent could notice. Write the one-sentence reason now — it goes in
-                  the PR body and a reviewer will read it.
-  When unsure, it is `user-visible`. The cost of one extra paragraph is lower than a stale guide.
+    user-visible  IF ANY holds — the changeset carries a `whats-new*` marker other than
+                  `whats-new-fix:`; the diff adds / renames / removes / changes the behaviour
+                  of a `platform.*` capability, a connector, a provider, a UI surface, a role
+                  or permission, or anything an agent or user could newly do.
+    none          internal refactors, tests, CI, infra, and bug fixes — including a fix whose
+                  changeset carries `whats-new-fix:`: it restores behaviour the docs already
+                  describe, and CI asks for no docs on it. A fix that CHANGES what is
+                  documented (a new option, a different limit) is user-visible. Write the
+                  one-sentence reason now — it goes in the PR body and a reviewer will read it.
+  When unsure whether a change alters what the docs say, it is `user-visible`. The cost of one extra paragraph is lower than a stale guide.
 
   IF none: record `docs_impact=none reason=<…>` and continue.
 
