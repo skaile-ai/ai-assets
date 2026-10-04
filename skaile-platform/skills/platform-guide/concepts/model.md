@@ -76,8 +76,8 @@ can be generated from a text prompt with **Generate** where the deployment has i
 generation configured. The agent can propose renaming itself; the user approves it.
 
 The **Project graph** (project menu or Cmd+K) shows a project's agents as cards, their
-agent-to-agent links as arrows, and the project's agent templates, apps and flows in boxes
-alongside. A project Owner can arrange it: cards drag, and every box (the **Agent templates**, **Apps**
+agent-to-agent links as arrows, and the project's job descriptions, apps and flows in boxes
+alongside. A project Owner can arrange it: cards drag, and every box (the **Job descriptions**, **Apps**
 and **Flows** boxes as well as groups the user adds with **New Group**) moves, resizes, renames
 and deletes; **Reset layout** restores the automatic arrangement.
 

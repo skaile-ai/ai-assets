@@ -7,11 +7,11 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   Exchange mail and calendar (triage, drafting, sending, shared mailboxes), the project graph,
   Skailify apps, sharing and inviting, connecting a data source, AI providers and Claude
   seats, skills/assets, scoped sessions, agent-to-agent, notifications, roles and permissions,
-  Work vs Private workspaces, My space and the Home, assistant reach, hibernation, agent templates, or any platform surface; before creating a
+  Work vs Private workspaces, My space and the Home, assistant reach, hibernation, job descriptions (agent templates), temporary hires and helpers, or any platform surface; before creating a
   project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
-version: 0.16.12
+version: 0.16.13
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -54,6 +54,9 @@ keywords:
   - my-space
   - assistant-reach
   - agent-template
+  - job-description
+  - temporary-hire
+  - helper
   - spawn-agent
   - spawn-subagent
   - subagent
