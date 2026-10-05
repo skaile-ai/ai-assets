@@ -280,8 +280,9 @@ live templates in one reply (it takes no paging arguments): each one's `id`, `na
 session owner may start it now; it does not predict a limit or owner-turn refusal).
 `platform.get_agent_template({ templateId })` reads one: the same fields without `canSpawn`,
 plus its `instructions`, `skills`, limits (`null` means the platform default) and model fields.
-Read it before an edit and send its `version`. Another project's template, an archived one and
-an unknown one all come back as not found from `get`, and `list` leaves them out. `templateId`
+Read it before an edit and send its `version`. Without a `projectId` (below), another project's
+template, an archived one and an unknown one all come back as not found from `get`, and `list`
+leaves them out. `templateId`
 takes the template's id or its exact name everywhere.
 
 Both reads cover this session's project. From the personal assistant they also take a
@@ -309,9 +310,10 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
 
 - **Setting up another project (personal assistant only).** From the owner's personal
   assistant, pass `projectId` to `create_agent_template` or `update_agent_template` to act in a
-  project the owner chose (and to the two reads to check what is there), for example one you just created with `platform.create_project`.
+  project the owner chose, for example one you just created with `platform.create_project`.
   The owner's role is checked on that project, and its organization must allow you **Full**
-  reach (`concepts/agent.md` § *Assistant reach*).
+  reach (`concepts/agent.md` § *Assistant reach*). The two reads take the same `projectId` at
+  their own reach levels (above).
   Any other session that passes `projectId` is refused. `spawn_agent` takes no `projectId`: an
   instance is a child of the session that started it, so ask a session in that project to spawn
   it (`platform.delegate_to_session`).
