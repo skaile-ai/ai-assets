@@ -312,7 +312,8 @@ an admin acknowledges the new one.
   project-scope add), or org **Settings > Catalog** (see `ui/workspace.md`).
 - **Turn off a company default (e.g. the Word or Excel tools)** → org **Settings >
   Catalog > Company defaults > Unpin**, or **Filter rules** to hide it for good; for one
-  session only, **Disable here** in the workspace **AI Assets** panel.
+  session only, hover the asset's row in the workspace **AI Assets** panel and click the
+  disable icon (tooltip **Disable here**) — see `ui/workspace.md`.
 
 Grounded in: `frontend/src/components/ui/app-sidebar-navigation/app-sidebar-navigation.tsx`,
 `frontend/src/components/ui/org-actions-menu/org-actions-menu.tsx`,
@@ -327,9 +328,7 @@ sections), `frontend/src/components/ui/project-actions-menu/project-actions-menu
 `frontend/src/pages/project-graph/project-graph.page.tsx`,
 `frontend/src/pages/licenses/licenses.page.tsx`,
 `frontend/src/pages/store/store.page.tsx`, `frontend/src/pages/settings/` (incl.
-`org-settings-shell.page.tsx` (tab labels), `store-config.page.tsx` (**Company defaults**,
-**Filter rules**; **Unpin** is in
-`frontend/src/components/ui/asset-defaults-manager/asset-defaults-manager.tsx`), `my-connections.page.tsx`, `ai-providers.page.tsx`, `classifier-providers.page.tsx`),
+`my-connections.page.tsx`, `ai-providers.page.tsx`, `classifier-providers.page.tsx`),
 `frontend/src/components/ui/exchange-connect-card/`,
 `frontend/src/components/ui/provider-reauth-notice/provider-reauth-notice.tsx`,
 `frontend/src/pages/projects/project-setup.page.tsx`,
@@ -349,3 +348,8 @@ The run-group detail page's controls: `pages/run-board/run-group-detail.page.tsx
 The sidebar's job description nodes and their **...** menu:
 `workspace-explorer/sidebar-instance-rows.tsx`; skaile-ai/platform#6315 (the labels) and #6312
 (the vocabulary).
+The org settings **Catalog** tab's **Company defaults** card (**Unpin** per row) and
+**Filter rules**: `pages/settings/store-config.page.tsx` and
+`components/ui/asset-defaults-manager/asset-defaults-manager.tsx`, with the tab label from
+`pages/settings/org-settings-shell.page.tsx`; platform `main` @ `2409579c2` (2026-10-05),
+skaile-ai/platform#6382. The session-only disable control is grounded in `ui/workspace.md`.
