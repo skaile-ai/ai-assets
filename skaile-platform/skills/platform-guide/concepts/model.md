@@ -32,8 +32,9 @@ Session      ──1:1── Workspace (the session's working view of the projec
 - **Home and the assistant** — in every organization where they are a User or Owner, a
   member has a **Home**: a private project, first in their **My space**, whose main session
   is their **assistant** there. The assistant in their home Private workspace is their
-  **home assistant**; every other one is an organization assistant. A Viewer has no Home. All of a user's assistants share one profile (name,
-  picture, voice; the **Your assistant** page). The assistant is opened from the round
+  **home assistant**; every other one is an organization assistant. A Viewer has no Home. All of a user's assistants share one profile (picture,
+  voice; the **Your assistant** page), but each has a name of its own, so the Private one and a
+  work one can be called differently, and renaming one never renames another. The assistant is opened from the round
   launcher button at the end of the user row in the sidebar. The member can add more
   projects to My space (**New My space project**); they open only for their owner, and one
   can be moved to Projects (one-way) to share it. A Home never moves.
