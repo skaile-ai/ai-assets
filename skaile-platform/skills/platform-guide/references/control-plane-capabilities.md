@@ -288,8 +288,9 @@ name everywhere.
 Both reads cover this session's project. From the personal assistant they also take a
 `projectId`, as the edits do, so list or read a template there before you edit it there:
 `platform.list_agent_templates({ projectId })` and
-`platform.get_agent_template({ templateId, projectId })`. Both need **Full** reach on that project's organization, as the edits do; they
-are not among the structural lists **Coordinate** allows. A project you cannot reach or the
+`platform.get_agent_template({ templateId, projectId })`. Both need **Full** reach on that
+project's organization, as the edits do; they are not among the structural lists **Coordinate**
+allows. A project you cannot reach or the
 owner cannot see comes back as unavailable from `list` and as not found from `get`. `canSpawn`
 there only reflects whether the owner's role in that project would let them start it; it can
 read `true`, and you still cannot spawn from that project (below).
@@ -313,11 +314,10 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   assistant, pass `projectId` to `create_agent_template` or `update_agent_template` to act in a
   project the owner chose, for example one you just created with `platform.create_project`.
   The owner's role is checked on that project, and its organization must allow you **Full**
-  reach (`concepts/agent.md` § *Assistant reach*). The two reads take the same `projectId` and
-  need the same **Full** reach (above).
-  Any other session that passes `projectId` is refused. `spawn_agent` takes no `projectId`: an
-  instance is a child of the session that started it, so ask a session in that project to spawn
-  it (`platform.delegate_to_session`).
+  reach (`concepts/agent.md` § *Assistant reach*). Any other session that passes `projectId` is
+  refused. The two reads take the same `projectId` and need the same **Full** reach (above).
+  `spawn_agent` takes no `projectId`: an instance is a child of the session that started it, so
+  ask a session in that project to spawn it (`platform.delegate_to_session`).
 
 - **Give the child its work as `task`.** The owner sees it on the card (the first 600
   characters). A `task` over 8000 characters is refused as invalid input, so shorten it or
