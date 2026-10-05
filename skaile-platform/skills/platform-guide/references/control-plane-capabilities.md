@@ -292,9 +292,8 @@ Both reads default to this session's project. From the personal assistant they a
 `platform.get_agent_template({ templateId, projectId })`. Both need **Full** reach on that
 project's organization, as the edits do; they are not among the structural lists **Coordinate**
 allows. A project below **Full**, one you cannot reach at all, or one the owner cannot see
-comes back as unavailable from `list` and as not found from `get`. `canSpawn` there only
-reflects whether the owner's role in that project would let them start it; it can read `true`,
-and you still cannot spawn from that project (below).
+comes back as unavailable from `list` and as not found from `get`. `canSpawn` is always
+`false` there: you cannot spawn from another project (below).
 
 A template **holds bound credentials** when connector credentials are attached to the template
 itself, so every instance reaches those systems on the template's connection, whoever spawned
