@@ -91,7 +91,7 @@ workspace". In Expert mode the session's **context meter** (a ring and a percent
 | -------------- | ------- |
 | **Assistant**  | A mini chat with the user's assistant — the same one the sidebar's assistant launcher opens on this page (in a business org where the user has a Home, that org's assistant; otherwise their home assistant), shown with that assistant's own name and the picture from their assistant profile; **Open full session** opens its full session. The launcher button in the sidebar opens and closes this panel. Shown only when the viewer has an assistant and is not already in its session. |
 | **Preview**    | Capability-render previews (fallback when the main layout hides the workspace). |
-| **AI Assets**  | Skills, MCP servers, agents and contracts for this session — the place to enable an asset, for **This session** or the **Whole project**. Connectors are *not* here; they have their own panel. |
+| **AI Assets**  | Skills, MCP servers, agents and contracts for this session — the place to enable an asset, for **This session** or the **Whole project**. A row the organization added carries a badge; unless the organization locked it, hovering the row shows a disable icon (tooltip **Disable here**) that turns it off for this session only, and **Re-enable** undoes that. Connectors are *not* here; they have their own panel. |
 | **Connectors** | The session's data-source mounts: shows what is mounted and on whose account, and offers **Connect Box / SharePoint / Google Drive / NextCloud / Git** flows — pick the account/connection and folder, scope **This session** or **Whole project**. New mounts attach on the next reload/restart (the panel prompts). If the user's sign-in has lapsed, the folder picker shows **Reconnect** (or **Connect account**). It also holds **Exchange project access**: the project Owner's switch for the project's mailbox, and per-mailbox enable/disable (shared mailboxes are added in **My Connections** first). This is the answer to "I connected my \<provider\> in My Connections — now what?". |
 | **Share**      | Sharing pane: visibility toggle, team access, project/session members + roles, invites, and public preview-share links. |
 | **Summary**    | Session snapshot and resume strategy. |
@@ -157,7 +157,8 @@ preview-list, workspace-content, mobile-header-panel),
 `frontend/src/components/ui/application-toolbar/` (application-toolbar,
 toolbar-sidebar-actions), `frontend/src/components/ui/presence-bar/presence-bar.tsx`,
 `frontend/src/components/ui/ai-assets-panel/ai-assets-panel.tsx` (AI Assets +
-Connectors panels), `frontend/src/components/ui/sharing-sidepanel/sharing-sidepanel.tsx`,
+Connectors panels; row controls in `ai-assets-panel.view.tsx` and
+`installedRowControls` in `ai-assets-panel.helpers.ts`), `frontend/src/components/ui/sharing-sidepanel/sharing-sidepanel.tsx`,
 `frontend/src/components/ui/error-agent-companion-tab/error-agent-companion-tab.tsx`,
 `frontend/src/pages/projects/settings/project-connectors-workspace.tsx`,
 `frontend/src/components/ui/provider-reauth-notice/provider-reauth-notice.tsx`.

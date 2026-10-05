@@ -144,6 +144,21 @@ limit resets, and the chat shows a notice when a seat is parked.
 Classifier providers (the models behind flow classifier steps) are configured separately
 under organization settings, **Classifiers** — see `concepts/flows.md`.
 
+## Word and Excel tools
+
+Every organization has the **word** and **excel** MCP servers as recommended company
+defaults, so a session normally has tools for creating, editing and reviewing `.docx` and
+`.xlsx` files in place (the Excel tools also open `.xlsm` and `.xls`). Use them for any
+Word or Excel file rather than writing a script or editing the file's XML yourself. File
+paths you pass to these tools must be paths inside the session workspace, not paths on
+the user's computer. If they are missing from a session, someone opted out: an org Owner manages them
+under organization settings, **Catalog**, in **Company defaults** (**Unpin** removes one
+from the defaults; it stays in the organization's catalog and can be pinned again) or
+hides them for the whole organization with **Filter rules**, which is the lasting
+opt-out. Unless the organization locked it, a member can turn one off for a single session
+only (not the whole project) from its row in the workspace **AI Assets** panel (see
+`ui/workspace.md`). PowerPoint is available in the catalog but is not a company default.
+
 ## Mounts vs. connectors (recap)
 
 - **Mounts** = external data surfaced as **files** in the workspace (git, local, S3,
@@ -161,4 +176,5 @@ Source of truth: `platform/docs/integration_architecture.md`,
 #5337/#5357 (Reconnect), #5364 (shared mailboxes per org),
 #5531 (shared-mail admin approval link), #4703 (setup-token seats),
 #5099/#5109/#5139 (seat health and routing), #5305 (classifier providers),
-#6133 (cycle_session without an approval card).
+#6133 (cycle_session without an approval card), #6382 (Word and Excel as company
+defaults).
