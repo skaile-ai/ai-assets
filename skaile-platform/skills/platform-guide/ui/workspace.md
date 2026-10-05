@@ -84,7 +84,8 @@ There is **no permanent right sidebar**. The header toolbar's right zone shows *
 icon per panel**; clicking an icon opens that panel on the right of the workspace, and
 closing it (the X, or clicking the icon again) leaves nothing behind on the right edge.
 When guiding a user, name the icon: "the row of icons at the top right of the
-workspace". Panels (in icon order):
+workspace". In Expert mode the session's **context meter** (a ring and a percentage, see
+`concepts/sessions.md`) sits just left of these icons. Panels (in icon order):
 
 | Panel          | Purpose |
 | -------------- | ------- |
