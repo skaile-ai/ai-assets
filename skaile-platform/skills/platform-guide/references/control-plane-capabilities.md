@@ -263,35 +263,35 @@ work — never call it an assistant. A long-lived agent is a **hire** only where
 it apart from those two. Capability names, ids and fields keep the code
 words (`agent_template`, `templateId`, `instance`, `subagent`); say the product words to people.
 
-Four effects create a template or act on one or its instances, from any session in that
-project, as the session owner; only the session owner decides their cards. Your personal assistant
-can also create or edit a template in another project by naming it with `projectId` (below). `create_agent_template`,
-`spawn_agent` and `update_agent_template` are durable: each returns an operation receipt, read with
-`platform.get_operation` (*The operation lifecycle* below), and `result.payload` is set once it
-has `Succeeded`. `finish_spawned_instance` is not: once it runs it returns its result itself,
-with no operation id and nothing to poll.
+Four effects create a template or act on one or its instances, from any session in that project,
+as the session owner; only the session owner decides their cards. Your personal assistant can
+also read, create or edit a template in another project by naming it with `projectId` (below).
+`create_agent_template`, `spawn_agent` and `update_agent_template` are durable: each returns an
+operation receipt, read with `platform.get_operation` (*The operation lifecycle* below), and
+`result.payload` is set once it has `Succeeded`. `finish_spawned_instance` is not: once it runs
+it returns its result itself, with no operation id and nothing to poll.
 
 Besides those four, a fifth effect, `platform.spawn_subagent`, starts a helper, a copy of this
 session rather than a temporary hire from a job description (*Helpers* below).
 
-Two reads need no card. `platform.list_agent_templates({})` lists all of this project's
-live templates in one reply (it takes no paging arguments): each one's `id`, `name`, `version`,
-`listed`, `invokeRole`, `siblingAwareness`, `credentialBearing`, and `canSpawn` (whether the
-session owner may start it now; it does not predict a limit or owner-turn refusal).
-`platform.get_agent_template({ templateId })` reads one: the same fields without `canSpawn`,
-plus its `instructions`, `skills`, limits (`null` means the platform default) and model fields.
-Read it before an edit and send its `version`. Without a `projectId` (below), another project's
-template, an archived one and an unknown one all come back as not found from `get`, and `list`
-leaves them out. `templateId`
-takes the template's id or its exact name everywhere.
+Two reads need no card. `platform.list_agent_templates({ projectId? })` lists all of this
+project's live templates in one reply (it takes no paging arguments): each one's `id`, `name`,
+`version`, `listed`, `invokeRole`, `siblingAwareness`, `credentialBearing`, and `canSpawn`
+(whether the session owner may start it now; it does not predict a limit or owner-turn refusal).
+`platform.get_agent_template({ templateId, projectId? })` reads one: the same fields without
+`canSpawn`, plus its `instructions`, `skills`, limits (`null` means the platform default) and
+model fields. Read it before an edit and send its `version`. Without a `projectId` (below),
+another project's template, an archived one and an unknown one all come back as not found from
+`get`, and `list` leaves them out. `templateId` takes the template's id or its exact name
+everywhere.
 
 Both reads cover this session's project. From the personal assistant they also take a
 `projectId`, as the edits do, so read a template there before you edit it there:
 `platform.get_agent_template({ templateId, projectId })`. Listing another project's templates
 needs **Coordinate** reach on its organization, and reading one's instructions needs **Full**. A
 project you cannot reach or the owner cannot see comes back as unavailable from `list` and as not
-found from `get`. `canSpawn` there is the owner's role in that project; you still cannot spawn
-from it (below).
+found from `get`. `canSpawn` there only says whether the owner's role in that project would let
+them start it; it can read `true`, and you still cannot spawn from that project (below).
 
 A template **holds bound credentials** when connector credentials are attached to the template
 itself, so every instance reaches those systems on the template's connection, whoever spawned
