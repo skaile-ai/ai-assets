@@ -17,6 +17,9 @@ args:
   - ${recipe:ppt:lib}/ppt-mcp.jar
 env:
   MCPO_ALLOWED_ROOT: /skaile/workspace
+  # Must sit under MCPO_ALLOWED_ROOT: unset, the server defaults it to
+  # $HOME/.mcpo-ppt/templates, outside the root, and exits at startup.
+  MCPO_TEMPLATE_DIR: /skaile/workspace/.mcpo-ppt/templates
   SOFFICE_PATH: ${recipe:ppt:bin}/soffice
   JAVA_HOME: ${recipe:ppt}
 keywords:
@@ -113,7 +116,7 @@ the docker image there (`docker build -t ppt-mcp:dev .`), and override
 | Var | Meaning |
 |---|---|
 | `MCPO_ALLOWED_ROOT` | Sandbox root under which every path argument must resolve. On the Skaile platform the runner sets it to the session workspace root (`/skaile/workspace`, from this manifest); the standalone Docker image defaults to `/workspace/resources`. |
-| `MCPO_TEMPLATE_DIR` | Optional. Template store for `ppt.upload_template`. Default: `<allowed_root>/.mcpo-ppt/templates`. |
+| `MCPO_TEMPLATE_DIR` | Template store for `ppt.upload_template`. Must be under `MCPO_ALLOWED_ROOT`; the server's own default is `$HOME/.mcpo-ppt/templates`, so this entry sets it to `/skaile/workspace/.mcpo-ppt/templates`. |
 | `MCPO_DEFAULT_TEMPLATE_CONFIG` | Optional. Persisted default-template pointer. Default: `<allowed_root>/.mcpo-ppt/default-template.json`. |
 | `MCPO_MAX_OPEN_DOCS` | Optional. Concurrent open-session cap. Default: 100. |
 | `SOFFICE_PATH` | Optional. LibreOffice binary path. Default: `/usr/bin/soffice` (set in the shipped image). If missing, soffice-dependent tools return `SOFFICE_UNAVAILABLE`. |
