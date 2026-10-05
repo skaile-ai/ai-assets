@@ -17,7 +17,11 @@ platform.
   an embedded frame. Each app moves independently through
   `building -> starting -> ready -> stopped`; refresh = stop + start.
 - Apps also appear under their project in the Explorer, with a green dot while serving.
-  Opening one there (or with Cmd+K **Go to app**) shows that preview on its own.
+  Opening one there (or with Cmd+K **Go to app**) shows that preview on its own and
+  starts the app if it is stopped. If the agent hosting it is asleep, the preview says
+  **Starting <app>…**, wakes the agent, and opens the app once it is ready.
+- Each app row in the Explorer has a **Start** or **Stop** button; Cmd+K **Stop app**
+  stops a running app.
 - The preview toolbar's pin control adds the preview to the dashboard's **Pinned
   Previews** tile.
 - Deployments running agents on the broker do not offer previews; the preview check
