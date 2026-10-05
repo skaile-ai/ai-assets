@@ -98,8 +98,8 @@ one reaches depends on where it lives:
     messaging a session linked to it there, and delegating a message into one. The assistant
     cannot link across organizations itself; such a link is made by hand in Expert Mode.
   - **Full** — also content and effects: searching and reading session history, reading
-    and writing files in sessions there, passing a file from there by reference, and every
-    approval-gated effect.
+    and writing files in sessions there, passing a file from there by reference, listing and
+    reading the job descriptions of a project there, and every approval-gated effect.
 
   Below **Full**, a content read reads as not reachable, and an effect is refused before
   any card; the level is checked again at the owner's decision and when the operation

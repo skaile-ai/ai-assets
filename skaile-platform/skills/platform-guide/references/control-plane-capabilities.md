@@ -28,8 +28,9 @@ workspace's assistant, the home assistant. The home assistant reaches each other
 organization the owner belongs to (an invited Private workspace too) only as far as that organization's **reach** level allows
 (`concepts/agent.md` § *Assistant reach*): at **Off** the organization is left out of every
 list below; at **Coordinate** (the default) the seven structural lists include it, but
-`platform.search_my_sessions`, `platform.read_session_history`, the file calls and every
-effect in this family do not reach it; only **Full** opens those.
+`platform.search_my_sessions`, `platform.read_session_history`, the file calls, the two
+job-description reads with a `projectId` and every effect in this family do not reach it; only
+**Full** opens those.
 
 | Call | Gives you |
 | --- | --- |
@@ -285,7 +286,7 @@ one come back as not found from `get`, and `list` leaves them out; so does anoth
 template unless you pass a `projectId` (below). `templateId` takes the template's id or its exact
 name everywhere.
 
-Both reads cover this session's project. From the personal assistant they also take a
+Both reads default to this session's project. From the personal assistant they also take a
 `projectId`, as the edits do, so list or read a template there before you edit it there:
 `platform.list_agent_templates({ projectId })` and
 `platform.get_agent_template({ templateId, projectId })`. Both need **Full** reach on that
