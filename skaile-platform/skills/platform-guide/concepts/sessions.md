@@ -34,6 +34,15 @@ PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
   in" step. A non-main session left hibernated for 30 days is closed automatically; the main
   session never is.
 
+After a gap of an hour or more, the agent is told how long it has been since the previous
+turn. Treat anything time-sensitive from before such a gap as possibly out of date.
+
+What to tell users:
+- "Sleeping/hibernated"/**Suspended** is normal and safe — just send a message or click
+  **Resume session**; it wakes automatically.
+- "Closing" is not "pausing" — it finalizes and syncs the work back. To pause, just leave
+  it; it hibernates on its own.
+
 ## Context compaction
 
 A long conversation is compacted: the agent summarizes its earlier turns and continues from
@@ -50,15 +59,6 @@ later). Models with smaller windows always keep the default.
 
 Either change takes effect the next time the session starts or wakes. Choosing **Balanced
 (default)** returns to the platform default.
-
-After a gap of an hour or more, the agent is told how long it has been since the previous
-turn. Treat anything time-sensitive from before such a gap as possibly out of date.
-
-What to tell users:
-- "Sleeping/hibernated"/**Suspended** is normal and safe — just send a message or click
-  **Resume session**; it wakes automatically.
-- "Closing" is not "pausing" — it finalizes and syncs the work back. To pause, just leave
-  it; it hibernates on its own.
 
 ## Multiple sessions per project
 
@@ -138,4 +138,5 @@ Source of truth: `platform/docs/session-lifecycle.md`, `platform/docs/scoped-ses
 platform #6165, part of #6152 (spawning from agent templates: `spawn-agent.handler.ts`,
 `spawn-agent-policy.service.ts`), platform #6185 and #6189, part of #6152 (finishing a
 spawned instance: `finish-spawned-instance.handler.ts`), platform #6245 (subagents:
-`spawn-subagent.handler.ts`, `subagent-payload.ts`).
+`spawn-subagent.handler.ts`, `subagent-payload.ts`), platform #6352, closing #6350 (context
+compaction per agent: `compaction-card.tsx`, `edit-agent-dialog.tsx`).
