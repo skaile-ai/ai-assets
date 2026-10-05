@@ -60,6 +60,14 @@ later). Models with smaller windows always keep the default.
 Either change takes effect the next time the session starts or wakes. Choosing **Balanced
 (default)** returns to the platform default.
 
+In **Expert mode** (the sidebar toggle) the same setting has a fourth choice, **Custom**,
+with a **Compact at** field for the exact point: a percentage (`45`, `45%`) or a token count
+on the 1M window (`450k`, `450000`), from 10% to 90%. The field shows the equivalent
+(45% = 450k tokens). The command palette has it as **Set context compaction to a custom
+threshold**. Without Expert mode a stored custom value shows as **Custom (45%, 450k
+tokens)**; it can be replaced with a preset but not edited, so a user who wants to change
+it needs Expert mode on.
+
 ## Multiple sessions per project
 
 A project can have many sessions running at once, each an isolated copy. This is how
@@ -139,4 +147,5 @@ platform #6165, part of #6152 (spawning from agent templates: `spawn-agent.handl
 `spawn-agent-policy.service.ts`), platform #6185 and #6189, part of #6152 (finishing a
 spawned instance: `finish-spawned-instance.handler.ts`), platform #6245 (subagents:
 `spawn-subagent.handler.ts`, `subagent-payload.ts`), platform #6352, closing #6350 (context
-compaction per agent: `compaction-card.tsx`, `edit-agent-dialog.tsx`).
+compaction per agent: `compaction-card.tsx`, `edit-agent-dialog.tsx`), platform #6355 (custom
+threshold in Expert mode, 10–90%: `compaction-card.helpers.ts`, `skaile-config-ops.route.ts`).
