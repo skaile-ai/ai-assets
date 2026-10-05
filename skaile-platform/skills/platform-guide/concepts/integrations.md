@@ -155,9 +155,9 @@ computer. If they are missing from a session, someone opted out: an org Owner ma
 under organization settings, **Catalog**, in **Company defaults** (**Unpin** removes one
 from the defaults; it stays in the organization's catalog and can be pinned again) or
 hides them for the whole organization with **Filter rules**, which is the lasting
-opt-out. A member can turn one off for a single session in the workspace **AI Assets**
-panel (**Disable here**). PowerPoint is available in the catalog but is not a company
-default yet.
+opt-out. A member can turn one off for a single session only (not the whole project) from
+its row in the workspace **AI Assets** panel (see `ui/workspace.md`). PowerPoint is
+available in the catalog but is not a company default yet.
 
 ## Mounts vs. connectors (recap)
 
