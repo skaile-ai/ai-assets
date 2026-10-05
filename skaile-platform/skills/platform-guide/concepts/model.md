@@ -32,9 +32,10 @@ Session      ──1:1── Workspace (the session's working view of the projec
 - **Home and the assistant** — in every organization where they are a User or Owner, a
   member has a **Home**: a private project, first in their **My space**, whose main session
   is their **assistant** there. The assistant in their home Private workspace is their
-  **home assistant**; every other one is an organization assistant. A Viewer has no Home. All of a user's assistants share one profile (picture,
-  voice; the **Your assistant** page), but each has a name of its own, so the Private one and a
-  work one can be called differently, and renaming one never renames another. The assistant is opened from the round
+  **home assistant**; every other one is an organization assistant. A Viewer has no Home.
+  All of a user's assistants share one profile (picture, voice; the **Your assistant** page),
+  but each has a name of its own, so the Private one and a work one can be called
+  differently, and renaming one never renames another. The assistant is opened from the round
   launcher button at the end of the user row in the sidebar. The member can add more
   projects to My space (**New My space project**); they open only for their owner, and one
   can be moved to Projects (one-way) to share it. A Home never moves.
@@ -166,7 +167,7 @@ Grounded in: `platform/docs/roles-permissions-matrix.md`, `platform/docs/scoped-
 `platform/docs/mount-connection-binding.md` (owner invariant), the new-project wizard's
 source picker, the `is_personal` organization field, platform PRs #3760 (org creation),
 #4281 (last Owner), #5023 (Personal/Business), #5076/#5354 (Explorer sections), #5251
-(agent graph, renamed Project graph in #6240; editable boxes #6244), #5336/#5352 (agent rename, picture generation), #5988 (Private workspace
+(agent graph, renamed Project graph in #6240; editable boxes #6244), #5336/#5352 (agent rename, picture generation), #6228 (each assistant has its own name), #5988 (Private workspace
 seats), #6008 (private projects: `canAccessMySpaceProject`), #6044 (a leaver's Home is
 archived, not inherited, and deleted after 30 days), `team-sharing.service.ts`. Work and
 Private spaces with the rollout flag on: `landing.utils.ts`, `my-space.utils.ts`,
