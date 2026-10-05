@@ -34,6 +34,23 @@ PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
   in" step. A non-main session left hibernated for 30 days is closed automatically; the main
   session never is.
 
+## Context compaction
+
+A long conversation is compacted: the agent summarizes its earlier turns and continues from
+the summary. On models with a 1M-token context the user can choose when that happens,
+trading per-turn cost against how much raw conversation the agent keeps:
+**Lower cost** (compact earlier), **Balanced (default)**, or **More context** (compact
+later). Models with smaller windows always keep the default.
+
+- **For the whole project** — project settings, **Project** tab > **Context compaction**
+  (project Owner).
+- **For one agent** — session settings, **Config** tab > **Context compaction**, or the agent
+  dialog's **Settings** tab > **Context compaction** (session or project Owner). This is
+  stored on that session only and replaces the project's choice for it.
+
+Either change takes effect the next time the session starts or wakes. Choosing **Balanced
+(default)** returns to the platform default.
+
 After a gap of an hour or more, the agent is told how long it has been since the previous
 turn. Treat anything time-sensitive from before such a gap as possibly out of date.
 

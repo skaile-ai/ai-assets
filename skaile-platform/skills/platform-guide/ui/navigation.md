@@ -221,7 +221,7 @@ Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner).
 | Tab          | Purpose |
 | ------------ | ------- |
 | **Members**  | Session-scoped role overrides on top of project membership; add session-only members. |
-| **Config**   | Session-scoped Skaile config (overrides project defaults). Its **Mounts** card edits this session's workspace mount (**Edit mount**) and removes other mounts; see `concepts/integrations.md`. |
+| **Config**   | Session-scoped Skaile config (overrides project defaults). Its **Mounts** card edits this session's workspace mount (**Edit mount**) and removes other mounts; see `concepts/integrations.md`. Its **Context compaction** card sets when this agent compacts; see `concepts/sessions.md`. |
 | **Shares**   | Session visibility (**Everyone in the project** / **Invited only**) and public file-preview links. |
 
 In the user's own assistant session, a **Your assistant** card above the tabs links to the
