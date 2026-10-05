@@ -60,9 +60,10 @@ later). Models with smaller windows always keep the default.
 Either change takes effect the next time the session starts or wakes. Choosing **Balanced
 (default)** returns to the platform default.
 
-In **Expert mode** (the sidebar toggle) the same setting has a fourth choice, **Custom**,
-with a **Compact at** field for the exact point: a percentage (`45`, `45%`) or a token count
-on the 1M window (`450k`, `450000`), from 10% to 90%. The field shows the equivalent
+In **Expert mode** (the toggle in the user menu, under the avatar) the same setting, on the
+project tab and per agent, has a fourth choice, **Custom**, with a **Compact at** field for
+the exact point, from 10% to 90%: a percentage (`45`, `45%`) or a token count on the 1M
+window (`450k`, `450000`). The field shows the equivalent
 (45% = 450k tokens). The command palette has it as **Set context compaction to a custom
 threshold**. Without Expert mode a stored custom value shows as **Custom (45%, 450k
 tokens)**; it can be replaced with a preset but not edited, so a user who wants to change
