@@ -28,8 +28,9 @@ workspace's assistant, the home assistant. The home assistant reaches each other
 organization the owner belongs to (an invited Private workspace too) only as far as that organization's **reach** level allows
 (`concepts/agent.md` § *Assistant reach*): at **Off** the organization is left out of every
 list below; at **Coordinate** (the default) the seven structural lists include it, but
-`platform.search_my_sessions`, `platform.read_session_history`, the file calls and every
-effect in this family do not reach it; only **Full** opens those.
+`platform.search_my_sessions`, `platform.read_session_history`, the file calls, the two
+job-description reads with a `projectId` and every effect in this family do not reach it; only
+**Full** opens those.
 
 | Call | Gives you |
 | --- | --- |
@@ -263,32 +264,36 @@ work — never call it an assistant. A long-lived agent is a **hire** only where
 it apart from those two. Capability names, ids and fields keep the code
 words (`agent_template`, `templateId`, `instance`, `subagent`); say the product words to people.
 
-Four effects create a template or act on one or its instances, from any session in that
-project, as the session owner; only the session owner decides their cards. Your personal assistant
-can also create or edit a template in another project by naming it with `projectId` (below). `create_agent_template`,
-`spawn_agent` and `update_agent_template` are durable: each returns an operation receipt, read with
-`platform.get_operation` (*The operation lifecycle* below), and `result.payload` is set once it
-has `Succeeded`. `finish_spawned_instance` is not: once it runs it returns its result itself,
-with no operation id and nothing to poll.
+Four effects create a template or act on one or its instances, from any session in that project,
+as the session owner; only the session owner decides their cards. Your personal assistant can
+also read, create or edit a template in another project by naming it with `projectId` (below).
+`create_agent_template`, `spawn_agent` and `update_agent_template` are durable: each returns an
+operation receipt, read with `platform.get_operation` (*The operation lifecycle* below), and
+`result.payload` is set once it has `Succeeded`. `finish_spawned_instance` is not: once it runs
+it returns its result itself, with no operation id and nothing to poll.
 
 Besides those four, a fifth effect, `platform.spawn_subagent`, starts a helper, a copy of this
 session rather than a temporary hire from a job description (*Helpers* below).
 
-Two reads need no card. `platform.list_agent_templates({})` lists all of this project's
-live templates in one reply (it takes no paging arguments): each one's `id`, `name`, `version`,
-`listed`, `invokeRole`, `siblingAwareness`, `credentialBearing`, and `canSpawn` (whether the
-session owner may start it now; it does not predict a limit or owner-turn refusal).
-`platform.get_agent_template({ templateId })` reads one: the same fields without `canSpawn`,
-plus its `instructions`, `skills`, limits (`null` means the platform default) and model fields.
-Read it before an edit and send its `version`. Another project's template, an archived one and
-an unknown one all come back as not found from `get`, and `list` leaves them out. `templateId`
-takes the template's id or its exact name everywhere.
+Two reads need no card. `platform.list_agent_templates({ projectId? })` lists all of this
+project's live templates in one reply (it takes no paging arguments): each one's `id`, `name`,
+`version`, `listed`, `invokeRole`, `siblingAwareness`, `credentialBearing`, and `canSpawn`
+(whether the session owner may start it now; it does not predict a limit or owner-turn refusal).
+`platform.get_agent_template({ templateId, projectId? })` reads one: the same fields without
+`canSpawn`, plus its `instructions`, `skills`, limits (`null` means the platform default) and
+model fields. Read it before an edit and send its `version`. An archived template and an unknown
+one come back as not found from `get`, and `list` leaves them out; so does another project's
+template unless you pass a `projectId` (below). `templateId` takes the template's id or its exact
+name everywhere.
 
-Both reads cover this session's project only; neither takes a `projectId`. So the personal
-assistant, editing in another project with `projectId`, takes `basedOnVersion` from the last
-result it has for that template: `result.payload.version` of its create or of its last update.
-If that edit is refused because someone else changed the template, it cannot read the change,
-so it asks the person instead of rebasing as below.
+Both reads default to this session's project. From the personal assistant they also take a
+`projectId`, as the edits do, so list or read a template there before you edit it there:
+`platform.list_agent_templates({ projectId })` and
+`platform.get_agent_template({ templateId, projectId })`. Both need **Full** reach on that
+project's organization, as the edits do; they are not among the structural lists **Coordinate**
+allows. A project below **Full**, one you cannot reach at all, or one the owner cannot see
+comes back as unavailable from `list` and as not found from `get`. `canSpawn` is always
+`false` there: you cannot spawn from another project (below).
 
 A template **holds bound credentials** when connector credentials are attached to the template
 itself, so every instance reaches those systems on the template's connection, whoever spawned
@@ -309,10 +314,10 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   assistant, pass `projectId` to `create_agent_template` or `update_agent_template` to act in a
   project the owner chose, for example one you just created with `platform.create_project`.
   The owner's role is checked on that project, and its organization must allow you **Full**
-  reach (`concepts/agent.md` § *Assistant reach*).
-  Any other session that passes `projectId` is refused. `spawn_agent` takes no `projectId`: an
-  instance is a child of the session that started it, so ask a session in that project to spawn
-  it (`platform.delegate_to_session`).
+  reach (`concepts/agent.md` § *Assistant reach*). Any other session that passes `projectId` is
+  refused. The two reads take the same `projectId` and need the same **Full** reach (above).
+  `spawn_agent` takes no `projectId`: an instance is a child of the session that started it, so
+  ask a session in that project to spawn it (`platform.delegate_to_session`).
 
 - **Give the child its work as `task`.** The owner sees it on the card (the first 600
   characters). A `task` over 8000 characters is refused as invalid input, so shorten it or
@@ -382,10 +387,11 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   or archiving the template ends it. `list_peers` shows at most the per-person instance limit;
   a sibling past it is still reachable by id.
 - **An edit is based on a version.** A refusal naming another version means the template
-  changed: rebase on that version and propose again (in another project, ask the person, as
-  above). A standing grant covers an edit only when the owner asks for it in their own turn; an
-  edit set off by anyone or anything else always gets a card. Instructions are capped at 8000
-  characters per edit.
+  changed: read it again (with the same `projectId` in another project), rebase on that version
+  and propose again. If that read is refused (the owner's reach or role there changed), stop and
+  ask the person. A standing grant covers an edit only when the owner asks for it in their own
+  turn; an edit set off by anyone or anything else always gets a card. Instructions are capped at
+  8000 characters per edit.
 - **The rest of an existing template is changed by a person.** Once it exists, only its
   instructions and skills are reachable here (`update_agent_template`); its name, picture,
   identity, who may start it and whether its instances are listed are set at creation or by a
@@ -678,6 +684,7 @@ skaile-ai/platform#6243 (the spawner and child channel, which needs no link) and
 skaile-ai/platform#6273 (a template's model: `modelOverridable` and the spawn `model`), skaile-ai/platform#6278 (`platform.create_agent_template`:
 `create-agent-template-policy.service.ts`, `create-agent-template.handler.ts`),
 skaile-ai/platform#6251 (the personal assistant's `projectId`: `assistant-project-target.ts`),
+skaile-ai/platform#6310 (the same `projectId` on the template reads),
 and phase 3 of agent templates, part of skaile-ai/platform#6216: #6245
 (`platform.spawn_subagent`: `spawn-subagent.handler.ts`), #6242 (the template reads:
 `agent-template-read.handler.ts`) and #6263 (siblings: `spawn-channel.ts`); skaile-ai/platform#6312
