@@ -103,7 +103,7 @@ workspace". In Expert mode the session's **context meter** (a ring and a percent
 ## Header & presence
 
 There is no separate session header row on desktop. The toolbar's **left zone** carries the
-session name (plus its git-sync state, and a **Suspended** badge while it sleeps); its **right zone** carries the panel icons and,
+session name (plus its git-sync state, and a **Suspended** badge while it sleeps); its **right zone** carries (in Expert mode) the context meter, the panel icons and,
 closing the row, live **member presence** — avatars showing who is online, idle or offline.
 Click presence to see everyone with access to the session and, with the right, to add
 members.
