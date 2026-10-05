@@ -69,7 +69,7 @@ as "look harder", never as a complete answer.
 `platform.read_session_file` write a personal-assistant read audit naming the owner, the target
 session's ancestry and how much came back — and so does reading another session's file by
 reference (`platform.add_draft_attachment`, an upload through
-`platform.invoke`). Reading a colleague's conversation on the owner's behalf
+`platform.invoke`, a `logoFile` with a `sessionId`). Reading a colleague's conversation on the owner's behalf
 leaves a record. That is not a reason to avoid it when the owner asks — it is a reason not to
 go trawling sessions speculatively.
 
@@ -135,8 +135,8 @@ what decides whether an autonomy grant can ever cover it (see *Consent and auton
 
 | Call | Effect | Effect class | Grant may reach |
 | --- | --- | --- | --- |
-| `platform.create_organization({ name, slug?, logoUrl?, iconSvg? })` | a new organization | `privileged` | only the widest scope: every target of that kind the owner can reach |
-| `platform.update_organization_branding({ organizationId, name?, logoUrl?, iconSvg? })` | a new name, logo URL or icon for an organization; at least one field. An empty string removes the logo or icon, but an empty `name` is refused: an organization always has a name. A rename keeps the organization's slug, so its address and links stay the same. The platform keeps the logo's URL, not the image, so prefer a stable address. | `routine` | that exact target only |
+| `platform.create_organization({ name, slug?, logoUrl?, logoFile?, iconSvg? })` | a new organization; a `logoFile` works as on `update_organization_branding` | `privileged`; `never` with `logoFile` | only the widest scope: every target of that kind the owner can reach — never a call with `logoFile` |
+| `platform.update_organization_branding({ organizationId, name?, logoUrl?, logoFile?, iconSvg? })` | a new name, logo or icon for an organization; at least one field. An empty string removes the logo or icon, but an empty `name` is refused: an organization always has a name. A rename keeps the organization's slug, so its address and links stay the same. Prefer `logoFile: { path, sessionId? }`, an image in this session's workspace, or, from the personal assistant only, in another of the owner's sessions named by `sessionId` (`path` relative to that workspace, the path convention of *Files in the owner's other sessions* above; a session you cannot reach is refused before any card; PNG, JPEG, GIF or WebP, at most 512 KB; never SVG): the platform keeps a copy at its own public address, so the logo survives the source site changing. With `logoUrl` the platform keeps the URL, not the image. Pass one, never both. A call with `logoFile` always needs the owner's approval, even under a standing approval, and the file is used only if it has not changed since the card: a refusal saying it changed means read it again and propose anew. | `routine`; `never` with `logoFile` | that exact target only — never a call with `logoFile` |
 | `platform.create_project({ organizationId, name, sourceType, description?, visibility?, agentName?, agentAvatarUrl?, initialMessage? })` | a new project. `sourceType` is `Empty` or `OnSkaile`; `visibility` `Private` (default) or `Shared`. | `routine` | that target, its organization, or everything reachable |
 | `platform.create_session({ projectId, name, slug?, followMain?, visibility? })` | a new session; once `Succeeded`, `result.payload.url` links to it and `result.payload.sessionId` names it — share the link, or bring it up with `platform.navigate({ route: "session", params: { session: result.payload.sessionId } })` when the owner asked to go there. In a private project (the assistant's Home or a My space project) the session is always Private and `visibility: "Shared"` is refused. | `routine` | that target, its project, its organization, or everything reachable |
 | `platform.invite_to_organization({ organizationId, email, role?, personalMessage? })` | an invitation email | `external`; `never` when `role` is `Owner` or a `personalMessage` is set | that target, its organization, or everything reachable — never an Owner invitation or one with a message |
@@ -483,8 +483,10 @@ These are refusals by design — proposing around them wastes the owner's approv
 - **Organization branding is Owner-only and branding-only.** `update_organization_branding`
   needs a real Owner membership in that organization. A platform administrator without one is
   refused here, even though the web app's organization settings page lets them in after they
-  switch into that organization. It changes the name, logo URL and icon, nothing else in the
-  organization's settings.
+  switch into that organization. It changes the name, logo and icon, nothing else in the
+  organization's settings. An uploaded logo is public: anyone with its address can open it, and a
+  call with `logoFile` always gets a card, even under a standing approval; the same holds for a
+  `logoFile` on `create_organization`.
 - **Nothing lists an organization's members.** `platform.list_project_members` covers projects
   only. Before an organization invite, *ask the owner* whether the person is already a member:
   an existing member is refused only **after** their approval has been spent.
@@ -639,7 +641,7 @@ operation fail with `operation_target_not_authorized`.
 It is not generic CRUD over the data model, and it is not a lifecycle escape hatch. This file
 lists nothing for deleting an organization, project, or session; for changing or removing a
 membership; for editing an organization's settings beyond its branding
-(`platform.update_organization_branding`: name, logo URL and icon); or for handling a
+(`platform.update_organization_branding`: name, logo and icon); or for handling a
 credential.
 **Check the live registry before telling the owner any of those is impossible** — this file is
 a map, and the registry moves — and search the platform actions with `platform.find_actions`
@@ -668,7 +670,9 @@ and #6165, part of #6152 (agent templates: `spawn-agent.handler.ts`,
 before the archive: `session.update.service.ts`, whose archive closes a running or hibernated
 session first), skaile-ai/platform#6265 (editing a template from the UI:
 `edit-agent-template-dialog.tsx`), skaile-ai/platform#6253 (organization branding:
-`update-organization-branding.handler.ts`, `update-organization-branding-policy.service.ts`) and
+`update-organization-branding.handler.ts`, `update-organization-branding-policy.service.ts`),
+skaile-ai/platform#6309, for #6275 (`logoFile` and platform-stored logos: `organization-logo-file.service.ts`,
+`organization-logo.service.ts`, `organization-logo.controller.ts`) and
 skaile-ai/platform#6267 (the spawn task: `spawn-agent-policy.service.ts`, `sendTask`),
 skaile-ai/platform#6243 (the spawner and child channel, which needs no link) and
 skaile-ai/platform#6273 (a template's model: `modelOverridable` and the spawn `model`), skaile-ai/platform#6278 (`platform.create_agent_template`:
