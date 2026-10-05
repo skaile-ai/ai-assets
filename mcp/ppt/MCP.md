@@ -19,6 +19,8 @@ env:
   MCPO_ALLOWED_ROOT: /skaile/workspace
   # Must sit under MCPO_ALLOWED_ROOT: unset, the server defaults it to
   # $HOME/.mcpo-ppt/templates, outside the root, and exits at startup.
+  # Keep the prefix in sync with MCPO_ALLOWED_ROOT: a mismatch is a startup
+  # crash, not a fallback.
   MCPO_TEMPLATE_DIR: /skaile/workspace/.mcpo-ppt/templates
   SOFFICE_PATH: ${recipe:ppt:bin}/soffice
   JAVA_HOME: ${recipe:ppt}
@@ -117,7 +119,7 @@ the docker image there (`docker build -t ppt-mcp:dev .`), and override
 |---|---|
 | `MCPO_ALLOWED_ROOT` | Sandbox root under which every path argument must resolve. On the Skaile platform the runner sets it to the session workspace root (`/skaile/workspace`, from this manifest); the standalone Docker image defaults to `/workspace/resources`. |
 | `MCPO_TEMPLATE_DIR` | Template store for `ppt.upload_template`. Must be under `MCPO_ALLOWED_ROOT`; the server's own default is `$HOME/.mcpo-ppt/templates`, so this entry sets it to `/skaile/workspace/.mcpo-ppt/templates`. |
-| `MCPO_DEFAULT_TEMPLATE_CONFIG` | Optional. Persisted default-template pointer. Default: `<allowed_root>/.mcpo-ppt/default-template.json`. |
+| `MCPO_DEFAULT_TEMPLATE_CONFIG` | Optional. Persisted default-template pointer. Must be under `MCPO_ALLOWED_ROOT`; the default is derived from the root (`<allowed_root>/.mcpo-ppt-default-template.json`), so it needs no setting here. |
 | `MCPO_MAX_OPEN_DOCS` | Optional. Concurrent open-session cap. Default: 100. |
 | `SOFFICE_PATH` | Optional. LibreOffice binary path. Default: `/usr/bin/soffice` (set in the shipped image). If missing, soffice-dependent tools return `SOFFICE_UNAVAILABLE`. |
 | `LOG_LEVEL` | Optional. Logback root level: ERROR / WARN / INFO / DEBUG. Default: INFO. |
@@ -133,7 +135,7 @@ dependencies:
 mcp_servers:
   - id: ppt
     command: docker
-    args: [run, --rm, -i, -v, "/projects:/workspace/resources:rw", -e, MCPO_ALLOWED_ROOT=/workspace/resources, ppt-mcp:dev]
+    args: [run, --rm, -i, -v, "/projects:/workspace/resources:rw", -e, MCPO_ALLOWED_ROOT=/workspace/resources, -e, MCPO_TEMPLATE_DIR=/workspace/resources/.mcpo-ppt/templates, ppt-mcp:dev]
 ```
 
 The standalone image recommends `--user 1000:1000` (or matching host UID) so
@@ -329,6 +331,7 @@ Enforced server-side and surfaced via `ppt.capabilities.limits`:
 
 ## Troubleshooting
 
+- **The server exits before `initialize` returns (`MCP error -32000: Connection closed`):** a configured path resolves outside `MCPO_ALLOWED_ROOT`, and startup validation throws (`Template directory is outside allowed root`, or the same for the default-template config). Set `MCPO_TEMPLATE_DIR` under the root; the directory need not exist yet.
 - **Every path-bearing call returns `PATH_NOT_ALLOWED`:** the bind-mount isn't wired through or `MCPO_ALLOWED_ROOT` doesn't match the mount. Verify `-v` maps to `/workspace/resources` and that the in-tool path starts with `/workspace/resources/`.
 - **PDF/HTML/image-batch export returns `SOFFICE_UNAVAILABLE`:** the image was built without LibreOffice, or `SOFFICE_PATH` points at a missing binary. Check `ppt.capabilities.soffice_available`.
 - **High-fidelity CJK or emoji text renders as tofu:** fonts weren't baked into the image. The shipped `Dockerfile` installs `fonts-noto fonts-noto-cjk fonts-noto-color-emoji fonts-liberation`.
