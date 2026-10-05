@@ -107,7 +107,8 @@ The capability's own description carries the live list; prefer it if the two dif
   - Row 2: the **toolbar**, a three-zone row — left the page or session title, centre the
     **panel switcher** (which panes are visible) plus a round swap button, right the
     **panel icons** (Preview, AI Assets, Connectors, Share, Summary, Flow, System,
-    Config, Report) and live **member presence**. The Assistant panel has no icon here:
+    Config, Report) and live **member presence**; in Expert mode a workspace also shows its
+    **context meter** just left of the panel icons. The Assistant panel has no icon here:
     the sidebar's assistant launcher opens and closes it. On a phone the header keeps a
     round button with the assistant's picture that opens the same assistant.
   - There is **no permanent right sidebar**: a panel icon opens that panel on the right of

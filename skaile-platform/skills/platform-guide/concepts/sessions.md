@@ -71,10 +71,10 @@ it needs Expert mode on.
 
 ### Seeing how full the context is
 
-In **Expert mode** a small context meter (a ring and a percentage) sits in the session's chat
-header and in the assistant side panel's header. 100% is the point where the session
-compacts — on a 1M window compacting at 40%, 100% is 400k tokens — or the full window when the
-agent does not compact. It turns yellow at 60%, orange at 75% and red at 90%, updates after
+In **Expert mode** a small context meter (a ring and a percentage) sits in the workspace
+toolbar's right zone, just left of the panel icons, and in the assistant side panel's header.
+100% is the point where the session compacts — on a 1M window compacting at 40%, 100% is 400k
+tokens — or the full window when the agent does not compact. It turns yellow at 60%, orange at 75% and red at 90%, updates after
 every turn, and works for every agent provider, not only Claude.
 
 Clicking the meter, or **Show context usage** in the command palette, opens a breakdown beside
@@ -86,6 +86,11 @@ refresh button, ask the provider for an exact count, which can take up to 30 sec
 fails the estimate stays and the reason is shown. A hibernated session shows its last breakdown
 with its age, and refresh stays disabled until it wakes. Breakdowns are never stored: a
 platform restart clears them until the next turn.
+
+Below the breakdown, **Compact now** compacts the session straight away — the same action as
+the **System** panel's compact and **Compact session** in the command palette. The platform
+allows it for a session Owner or User, a project Owner, or a platform admin. **Compaction settings** opens the agent dialog at
+its Context compaction section — also **Open compaction settings** in the command palette.
 
 ## Multiple sessions per project
 
