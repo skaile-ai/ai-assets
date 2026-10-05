@@ -387,9 +387,10 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   a sibling past it is still reachable by id.
 - **An edit is based on a version.** A refusal naming another version means the template
   changed: read it again (with the same `projectId` in another project), rebase on that version
-  and propose again. A standing grant covers an edit only when the owner asks for it in their own turn; an
-  edit set off by anyone or anything else always gets a card. Instructions are capped at 8000
-  characters per edit.
+  and propose again. If that read is refused (the owner's reach or role there changed), stop and
+  ask the person. A standing grant covers an edit only when the owner asks for it in their own
+  turn; an edit set off by anyone or anything else always gets a card. Instructions are capped at
+  8000 characters per edit.
 - **The rest of an existing template is changed by a person.** Once it exists, only its
   instructions and skills are reachable here (`update_agent_template`); its name, picture,
   identity, who may start it and whether its instances are listed are set at creation or by a
