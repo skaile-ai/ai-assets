@@ -69,6 +69,24 @@ threshold**. Without Expert mode a stored custom value shows as **Custom (45%, 4
 tokens)**; it can be replaced with a preset but not edited, so a user who wants to change
 it needs Expert mode on.
 
+### Seeing how full the context is
+
+In **Expert mode** a small context meter (a ring and a percentage) sits in the session's chat
+header and in the assistant side panel's header. 100% is the point where the session
+compacts — on a 1M window compacting at 40%, 100% is 400k tokens — or the full window when the
+agent does not compact. It turns yellow at 60%, orange at 75% and red at 90%, updates after
+every turn, and works for every agent provider, not only Claude.
+
+Clicking the meter, or **Show context usage** in the command palette, opens a breakdown beside
+the chat (in the assistant side panel it covers the transcript; the composer stays usable):
+provider and Skaile system prompts, agent prompt, memory, skills, MCP tools, built-in tools,
+subagents, conversation, free space and the reserve above the compaction point. Each figure is
+marked measured, estimated (`≈`), a remainder (`∼`) or not reported (`?`). Opening it, and its
+refresh button, ask the provider for an exact count, which can take up to 30 seconds; if that
+fails the estimate stays and the reason is shown. A hibernated session shows its last breakdown
+with its age, and refresh stays disabled until it wakes. Breakdowns are never stored: a
+platform restart clears them until the next turn.
+
 ## Multiple sessions per project
 
 A project can have many sessions running at once, each an isolated copy. This is how
@@ -149,4 +167,6 @@ platform #6165, part of #6152 (spawning from agent templates: `spawn-agent.handl
 spawned instance: `finish-spawned-instance.handler.ts`), platform #6245 (subagents:
 `spawn-subagent.handler.ts`, `subagent-payload.ts`), platform #6352, closing #6350 (context
 compaction per agent: `compaction-card.tsx`, `edit-agent-dialog.tsx`), platform #6355 (custom
-threshold in Expert mode, 10–90%: `compaction-card.helpers.ts`, `skaile-config-ops.route.ts`).
+threshold in Expert mode, 10–90%: `compaction-card.helpers.ts`, `skaile-config-ops.route.ts`), platform #6359 (context
+meter and breakdown: `session-context-usage.tsx`, `workspace.getContextUsage` /
+`workspace.measureContextUsage`).
