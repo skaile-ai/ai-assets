@@ -61,6 +61,11 @@ The capability's own description carries the live list; prefer it if the two dif
     its sessions declare; a green **Running** dot marks one that is serving — clicking an
     app opens its session with only that app's preview showing), the project's sessions,
     **Flows** (each flow with its run groups), and **Archive** (archived sessions — only in expert mode).
+    Each of the project's job descriptions is a node among the sessions, with its running
+    temporary hires nested under it (an unlisted one shows no hires). Its name opens the latest
+    running temporary hire, or offers to take one on; the **+** beside it is **Take on a
+    temporary hire: \<name\>**, and its **...** menu has **Open latest temporary hire**, **Take on
+    a temporary hire** and **Edit job description…**.
     A section with one item shows it directly under the project instead of in a group row;
     empty sections are omitted. Clicking the name of a project with exactly one session
     opens that session; its expand toggle still expands it.
@@ -135,7 +140,7 @@ The capability's own description carries the live list; prefer it if the two dif
 | **Run groups**    | `/<org>/runs`                 | Batch / unattended processing: the status board for every run group, with click-through into a group's detail page, which holds its controls: **Activate** (a Draft only), **Pause** / **Resume**, **Close** (Standing groups), **Cancel group**, and the **Autonomous** switch. See `concepts/flows.md`. |
 | **Flows**         | `/<org>/flows`                | Browse and author flow definitions; open a flow's graph view/editor. See `concepts/flows.md`. |
 | **Sessions**      | `/<org>/sessions`             | The org sessions report (Cmd+K: **Sessions report**): one row per agent session — project, agent, type, owner, members, default connector and folder, message count, cost, last activity — with per-column filters, search, a cost period (**7d** / **30d** / **90d** / **365d** or custom dates) and **Export to Excel** of the filtered rows. Org Owners see every session in the org except other members' private ones (in their assistant's Home or their My space); everyone else sees the sessions they have access to. Personal-assistant sessions are not listed. |
-| **Project graph** | `/<org>/<project>/graph`      | From a project's **...** menu or Cmd+K: the project's agents as cards, agent-to-agent links as arrows, and its agent templates, apps and flows in boxes beside them. A project Owner can move cards and boxes, and resize, rename or delete any box. |
+| **Project graph** | `/<org>/<project>/graph`      | From a project's **...** menu or Cmd+K: the project's agents as cards, agent-to-agent links as arrows, and its job descriptions, apps and flows in boxes beside them. A project Owner can move cards and boxes, and resize, rename or delete any box. |
 | **Open-source licenses** | `/licenses`            | Third-party components shipped to the browser, with licenses and source links. From **Info** in the avatar menu. |
 
 ### Shared Exchange mailboxes
@@ -203,7 +208,7 @@ Path: `/<org>/projects/<project>/settings` (Owner-only). Tabs:
 | **Sessions**      | List/manage all sessions in the project; bulk mark-read / delete. |
 | **Members**       | Invite users, set Owner/User/Viewer, team access. For a My space project there are no share controls: **Only you can open this project**, and, except on the Home, **Move to Projects** — one-way, after which it stays **Invited only** and can be shared. The Home can never be moved. |
 | **Project**       | Name, slug, description, **Visibility** (**Invited only** / **Everyone in \<Org\>**), delete. For an org Owner in a business organization (not on a My space project) who can open this page (it needs Owner authority on the project), a **Company project** card with **Mark as company project** / **Unmark as company project**: it changes only where the project is listed (under **Company**), not who can open it. |
-| **Session defaults** | Skaile config template applied to new sessions — including additional mounts — plus the default asset assignments for the project's sessions. (There is no separate "Assets" tab; asset defaults live here.) |
+| **Session defaults** | Skaile config template applied to new sessions — including additional mounts — plus the default asset assignments for the project's sessions. (There is no separate "Assets" tab; asset defaults live here.) Its **Mounts** card edits the workspace mount (**Edit mount**) and removes other mounts; see `concepts/integrations.md`. |
 | **Security**      | **Network egress**: **Open**, **Off — LLM provider only**, or **Allowlist specific domains**. |
 | **Connectors**    | Project-level connector enablement and account selection (today: Exchange — the project's mailbox access switch, and per-mailbox enable/disable including shared mailboxes admitted in My Connections). For file mounts use the workspace **Connectors** panel instead. |
 | **Costs**         | Cost tracking/attribution. |
@@ -216,7 +221,7 @@ Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner).
 | Tab          | Purpose |
 | ------------ | ------- |
 | **Members**  | Session-scoped role overrides on top of project membership; add session-only members. |
-| **Config**   | Session-scoped Skaile config (overrides project defaults). |
+| **Config**   | Session-scoped Skaile config (overrides project defaults). Its **Mounts** card edits this session's workspace mount (**Edit mount**) and removes other mounts; see `concepts/integrations.md`. |
 | **Shares**   | Session visibility (**Everyone in the project** / **Invited only**) and public file-preview links. |
 
 In the user's own assistant session, a **Your assistant** card above the tabs links to the
@@ -333,3 +338,6 @@ Former members' My space tabs, Company mark, Archived spaces, the read-only noti
 The **Report a problem** review-or-send-directly choice: platform `main` @ `c59fd243b` (2026-09-28).
 The run-group detail page's controls: `pages/run-board/run-group-detail.page.tsx` and
 `pages/run-board/parts/group-controls.tsx` (platform #6061).
+The sidebar's job description nodes and their **...** menu:
+`workspace-explorer/sidebar-instance-rows.tsx`; skaile-ai/platform#6315 (the labels) and #6312
+(the vocabulary).

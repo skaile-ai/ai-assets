@@ -65,9 +65,10 @@ file preview (e.g. a report) with someone **outside** the platform — no login 
 
 ## Agent-to-Agent (A2A)
 
-Sessions can talk to each other's agents through directed, two-sided opt-in links. The one
-exception is a session and an agent it spawned from a template, which can message each other
-with no link (*Agent templates* in `references/control-plane-capabilities.md`).
+Sessions can talk to each other's agents through directed, two-sided opt-in links. Three kinds
+of pair made by a spawn need no link: a session and a temporary hire it took on from a job
+description, a session and a helper it started, and sibling temporary hires from one job
+description (the last two are in the last bullet below).
 
 - A session must be opened to peers (**Allow other sessions to reach this one**) and may
   declare a **Scope** describing what it is willing to do for them before it can be linked.
@@ -102,10 +103,19 @@ with no link (*Agent templates* in `references/control-plane-capabilities.md`).
   another organization can be linked by hand. The agent itself only links within its own
   organization. The home assistant can still find the owner's sessions in other organizations
   (as far as each one's reach allows) and message a session linked to it there by hand.
+- Two of those three pairs sit inside one project and need no link: an agent and a
+  **helper** it started with `platform.spawn_subagent`, and the temporary hires from one job
+  description that one person owns, when its `siblingAwareness` is on (*Job
+  descriptions* in `references/control-plane-capabilities.md`). The hop, cycle and budget bounds
+  above apply to them unchanged, and archiving either end closes the pair's exchanges. In
+  `platform.list_peers`, a peer related to you through a spawn carries a `relation` label
+  (`"spawner"`, `"child"` or `"sibling"`); a peer you reach only through a link carries none.
+  The label describes the peer; it does not say whether a link is needed.
 
 Source of truth: `platform/docs/protocol-extensions.md`,
 `platform/docs/public-file-preview-sharing.md`, `platform/backend/libs/agent-to-agent/`,
 platform PRs #4917 (notification modes), #4566 (cross-org A2A), #5152 (share wake budget),
 #5876 (idle subscriptions), #6008 (private projects not shareable), #6261 (send refusals
-and the not-delivered notice), `platform/docs/roles-permissions-matrix.md` (share and invite
+and the not-delivered notice), #6263 (sibling instances of a template, `spawn-channel.ts`),
+`platform/docs/roles-permissions-matrix.md` (share and invite
 permissions).
