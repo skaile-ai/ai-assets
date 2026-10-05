@@ -153,9 +153,10 @@ Word or Excel file rather than writing a script or editing the file's XML yourse
 paths you pass to these tools must be paths inside the session workspace, not paths on
 the user's computer. If they are missing from a session, someone opted out: an org Owner manages them
 under organization settings, **Catalog**, in **Company defaults** (**Unpin** removes one
-from the defaults; it stays in the organization's catalog and can be pinned again) or
-hides them for the whole organization with **Filter rules**, which is the lasting
-opt-out. Unless the organization locked it, a member can turn one off for a single session
+from the defaults; it stays in the organization's catalog and can be pinned again),
+removes one from the organization with **Unadopt from organization** on its catalog entry
+(it stays removed across restarts until someone uses **Adopt into organization** again),
+or hides them for the whole organization with **Filter rules**. Unless the organization locked it, a member can turn one off for a single session
 only (not the whole project) from its row in the workspace **AI Assets** panel (see
 `ui/workspace.md`). PowerPoint is available in the catalog but is not a company default.
 
@@ -177,4 +178,4 @@ Source of truth: `platform/docs/integration_architecture.md`,
 #5531 (shared-mail admin approval link), #4703 (setup-token seats),
 #5099/#5109/#5139 (seat health and routing), #5305 (classifier providers),
 #6133 (cycle_session without an approval card), #6382 (Word and Excel as company
-defaults).
+defaults), #6435 (an unadopted company default stays removed).
