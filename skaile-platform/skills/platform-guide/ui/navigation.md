@@ -240,7 +240,9 @@ Vertex, Azure AI Foundry, custom gateway — with per-config health checks; a **
 subscription** seat is bound by pasting the output of `claude setup-token`, with the
 credentials-file upload as the alternative), **Classifiers** (classifier providers — see below), **Costs**,
 **Deployment Targets**, **Catalog** (manage reusable assets/skills, assign to
-teams/projects), and, in a business organization, **Assistants** (below). The org sessions
+teams/projects; its **Company defaults** card lists the assets every session in the
+organization loads, with **Unpin** per row, and **Filter rules** hides catalog assets
+for the whole organization), and, in a business organization, **Assistants** (below). The org sessions
 report is not a tab — it is **Sessions** in the org kebab.
 
 **Former members' My space** is a tab reached only by link: while projects that people
@@ -308,6 +310,9 @@ an admin acknowledges the new one.
 - **Classifier provider (TypeSafe Jev)** → org **Settings > Classifiers**.
 - **Enable an asset/skill** → the workspace **AI Assets** panel (session- or
   project-scope add), or org **Settings > Catalog** (see `ui/workspace.md`).
+- **Turn off a company default (e.g. the Word or Excel tools)** → org **Settings >
+  Catalog > Company defaults > Unpin**, or **Filter rules** to hide it for good; for one
+  session only, **Disable here** in the workspace **AI Assets** panel.
 
 Grounded in: `frontend/src/components/ui/app-sidebar-navigation/app-sidebar-navigation.tsx`,
 `frontend/src/components/ui/org-actions-menu/org-actions-menu.tsx`,
