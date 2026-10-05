@@ -148,7 +148,7 @@ under organization settings, **Classifiers** — see `concepts/flows.md`.
 
 Every organization has the **word** and **excel** MCP servers as recommended company
 defaults, so a session normally has tools for creating, editing and reviewing `.docx` and
-`.xlsx` files in place (the Excel tools also open `.xlsm`). Use them for any Word or Excel
+`.xlsx` files in place (the Excel tools also open `.xlsm` and `.xls`). Use them for any Word or Excel
 file rather than writing a script or editing the file's XML yourself. File paths you pass
 to these tools must be paths inside the session workspace, not paths on the user's
 computer. If they are missing from a session, someone opted out: an org Owner manages them

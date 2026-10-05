@@ -327,7 +327,9 @@ sections), `frontend/src/components/ui/project-actions-menu/project-actions-menu
 `frontend/src/pages/project-graph/project-graph.page.tsx`,
 `frontend/src/pages/licenses/licenses.page.tsx`,
 `frontend/src/pages/store/store.page.tsx`, `frontend/src/pages/settings/` (incl.
-`my-connections.page.tsx`, `ai-providers.page.tsx`, `classifier-providers.page.tsx`),
+`org-settings-shell.page.tsx` (tab labels), `store-config.page.tsx` (**Company defaults**,
+**Filter rules**; **Unpin** is in
+`frontend/src/components/ui/asset-defaults-manager/asset-defaults-manager.tsx`), `my-connections.page.tsx`, `ai-providers.page.tsx`, `classifier-providers.page.tsx`),
 `frontend/src/components/ui/exchange-connect-card/`,
 `frontend/src/components/ui/provider-reauth-notice/provider-reauth-notice.tsx`,
 `frontend/src/pages/projects/project-setup.page.tsx`,

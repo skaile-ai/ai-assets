@@ -6,7 +6,7 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   flows (run groups, batch runs, recipes, webhooks, personal flows), previews, classifiers,
   Exchange mail and calendar (triage, drafting, sending, shared mailboxes), the project graph,
   Skailify apps, sharing and inviting, connecting a data source, AI providers and Claude
-  seats, skills/assets, scoped sessions, agent-to-agent, notifications, roles and permissions,
+  seats, skills/assets, the Word and Excel document tools, scoped sessions, agent-to-agent, notifications, roles and permissions,
   Work vs Private workspaces, My space and the Home, assistant reach, hibernation, job
   descriptions (agent templates), temporary hires and helpers, or any platform surface; before
   creating a project/session/organization, inviting someone, starting a connector setup or mount, or
@@ -122,7 +122,7 @@ capability names, ids and fields keep the code words.
 
 | File | Use when the user asks... |
 | ---- | -------------------------- |
-| `ui/navigation.md` | "Where is...", "how do I get to...", the **Work** / **Private** switch, the sidebar's Company / Projects / My space sections and the assistant launcher, project/session/org settings (incl. **Classifiers**, **Assistants**), a read-only Private workspace, creating a project, connecting a data source, shared Exchange mailboxes, the org **Sessions** report, **Project graph**, Escape and Cmd+K switching — the app shell, sidebar, command palette, settings hierarchy. |
+| `ui/navigation.md` | "Where is...", "how do I get to...", the **Work** / **Private** switch, the sidebar's Company / Projects / My space sections and the assistant launcher, project/session/org settings (incl. **Classifiers**, **Catalog** and its company defaults, **Assistants**), a read-only Private workspace, creating a project, connecting a data source, shared Exchange mailboxes, the org **Sessions** report, **Project graph**, Escape and Cmd+K switching — the app shell, sidebar, command palette, settings hierarchy. |
 | `ui/workspace.md` | Anything about the workspace itself: chat composer, the workspace panel and its file explorer, the preview pane, the side panels opened from the toolbar icons, presence, mobile, common in-workspace click-paths. |
 
 ## Hard rules
