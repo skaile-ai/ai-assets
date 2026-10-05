@@ -92,6 +92,11 @@ the **System** panel's compact and **Compact session** in the command palette. T
 allows it for a session Owner or User, a project Owner, or a platform admin. **Compaction settings** opens the agent dialog at
 its Context compaction section — also **Open compaction settings** in the command palette.
 
+The agent can read this breakdown for its own session with `platform.get_context_usage` (no
+arguments, no approval) whether or not the user is in Expert mode. The figures are from the end
+of its previous turn; before any turn has ended, or after a platform restart until the next one,
+it answers `available: false`.
+
 ## Multiple sessions per project
 
 A project can have many sessions running at once, each an isolated copy. This is how

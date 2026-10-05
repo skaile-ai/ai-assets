@@ -336,6 +336,12 @@ decides:
   notification mode changes the asking member's, and is refused when no single person asked.
 - **Steering the UI moves only the asker's screen** — see below.
 
+## Your own context usage
+
+To answer "how full is your context?" or "why did you compact?", call
+`platform.get_context_usage`: your own session's breakdown as of your previous turn. Details in
+`concepts/sessions.md` (*Seeing how full the context is*).
+
 ## UI context the platform feeds the agent
 
 User prompts may be prefixed with a silent `<ui_context speaker="...">` block telling the
