@@ -331,7 +331,7 @@ Enforced server-side and surfaced via `ppt.capabilities.limits`:
 
 ## Troubleshooting
 
-- **The server exits before `initialize` returns (`MCP error -32000: Connection closed`):** a configured path resolves outside `MCPO_ALLOWED_ROOT`, and startup validation throws (`Template directory is outside allowed root`, or the same for the default-template config). Set `MCPO_TEMPLATE_DIR` under the root; the directory need not exist yet.
+- **The server exits before `initialize` returns (`MCP error -32000: Connection closed`):** a configured path resolves outside `MCPO_ALLOWED_ROOT`, and startup validation throws (`Template directory is outside allowed root`, or the same for the default-template config). Point `MCPO_TEMPLATE_DIR` — and `MCPO_DEFAULT_TEMPLATE_CONFIG`, if you set it — under the root; neither path need exist yet.
 - **Every path-bearing call returns `PATH_NOT_ALLOWED`:** the bind-mount isn't wired through or `MCPO_ALLOWED_ROOT` doesn't match the mount. Verify `-v` maps to `/workspace/resources` and that the in-tool path starts with `/workspace/resources/`.
 - **PDF/HTML/image-batch export returns `SOFFICE_UNAVAILABLE`:** the image was built without LibreOffice, or `SOFFICE_PATH` points at a missing binary. Check `ppt.capabilities.soffice_available`.
 - **High-fidelity CJK or emoji text renders as tofu:** fonts weren't baked into the image. The shipped `Dockerfile` installs `fonts-noto fonts-noto-cjk fonts-noto-color-emoji fonts-liberation`.
