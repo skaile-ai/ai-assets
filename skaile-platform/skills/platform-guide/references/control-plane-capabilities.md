@@ -284,11 +284,13 @@ Read it before an edit and send its `version`. Another project's template, an ar
 an unknown one all come back as not found from `get`, and `list` leaves them out. `templateId`
 takes the template's id or its exact name everywhere.
 
-Both reads cover this session's project only; neither takes a `projectId`. So the personal
-assistant, editing in another project with `projectId`, takes `basedOnVersion` from the last
-result it has for that template: `result.payload.version` of its create or of its last update.
-If that edit is refused because someone else changed the template, it cannot read the change,
-so it asks the person instead of rebasing as below.
+Both reads cover this session's project. From the personal assistant they also take a
+`projectId`, as the edits do, so read a template there before you edit it there:
+`platform.get_agent_template({ templateId, projectId })`. Listing another project's templates
+needs **Coordinate** reach on its organization, and reading one's instructions needs **Full**. A
+project you cannot reach or the owner cannot see comes back as unavailable from `list` and as not
+found from `get`. `canSpawn` there is the owner's role in that project; you still cannot spawn
+from it (below).
 
 A template **holds bound credentials** when connector credentials are attached to the template
 itself, so every instance reaches those systems on the template's connection, whoever spawned
@@ -307,7 +309,7 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
 
 - **Setting up another project (personal assistant only).** From the owner's personal
   assistant, pass `projectId` to `create_agent_template` or `update_agent_template` to act in a
-  project the owner chose, for example one you just created with `platform.create_project`.
+  project the owner chose (and to the two reads to check what is there), for example one you just created with `platform.create_project`.
   The owner's role is checked on that project, and its organization must allow you **Full**
   reach (`concepts/agent.md` § *Assistant reach*).
   Any other session that passes `projectId` is refused. `spawn_agent` takes no `projectId`: an
@@ -382,8 +384,8 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   or archiving the template ends it. `list_peers` shows at most the per-person instance limit;
   a sibling past it is still reachable by id.
 - **An edit is based on a version.** A refusal naming another version means the template
-  changed: rebase on that version and propose again (in another project, ask the person, as
-  above). A standing grant covers an edit only when the owner asks for it in their own turn; an
+  changed: read it again (with the same `projectId` in another project), rebase on that version
+  and propose again. A standing grant covers an edit only when the owner asks for it in their own turn; an
   edit set off by anyone or anything else always gets a card. Instructions are capped at 8000
   characters per edit.
 - **The rest of an existing template is changed by a person.** Once it exists, only its
@@ -678,6 +680,7 @@ skaile-ai/platform#6243 (the spawner and child channel, which needs no link) and
 skaile-ai/platform#6273 (a template's model: `modelOverridable` and the spawn `model`), skaile-ai/platform#6278 (`platform.create_agent_template`:
 `create-agent-template-policy.service.ts`, `create-agent-template.handler.ts`),
 skaile-ai/platform#6251 (the personal assistant's `projectId`: `assistant-project-target.ts`),
+skaile-ai/platform#6310 (the same `projectId` on the template reads),
 and phase 3 of agent templates, part of skaile-ai/platform#6216: #6245
 (`platform.spawn_subagent`: `spawn-subagent.handler.ts`), #6242 (the template reads:
 `agent-template-read.handler.ts`) and #6263 (siblings: `spawn-channel.ts`); skaile-ai/platform#6312
