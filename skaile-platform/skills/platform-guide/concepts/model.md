@@ -167,9 +167,11 @@ Grounded in: `platform/docs/roles-permissions-matrix.md`, `platform/docs/scoped-
 `platform/docs/mount-connection-binding.md` (owner invariant), the new-project wizard's
 source picker, the `is_personal` organization field, platform PRs #3760 (org creation),
 #4281 (last Owner), #5023 (Personal/Business), #5076/#5354 (Explorer sections), #5251
-(agent graph, renamed Project graph in #6240; editable boxes #6244), #5336/#5352 (agent rename, picture generation), #6228 (each assistant has its own name), #5988 (Private workspace
-seats), #6008 (private projects: `canAccessMySpaceProject`), #6044 (a leaver's Home is
-archived, not inherited, and deleted after 30 days), `team-sharing.service.ts`. Work and
+(agent graph, renamed Project graph in #6240; editable boxes #6244), #5336/#5352 (agent
+rename, picture generation), #5988 (Private workspace seats), #6008 (private projects:
+`canAccessMySpaceProject`), #6044 (a leaver's Home is
+archived, not inherited, and deleted after 30 days), #6228 (each assistant has its own name),
+`team-sharing.service.ts`. Work and
 Private spaces with the rollout flag on: `landing.utils.ts`, `my-space.utils.ts`,
 `private-sponsorship.service.ts`, `sidebar-projects-tree.helpers.ts`,
 `orphaned-my-space.page.tsx`.
