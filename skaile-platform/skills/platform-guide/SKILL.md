@@ -12,7 +12,7 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   creating a project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
-version: 0.16.15
+version: 0.16.16
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -23,6 +23,7 @@ keywords:
   - navigation
   - workspace
   - session
+  - context-compaction
   - project
   - flow
   - run-group
@@ -95,7 +96,7 @@ capability names, ids and fields keep the code words.
 | File | Use when the user asks about... |
 | ---- | -------------------------------- |
 | `concepts/model.md` | The big picture: org/project/session/workspace, source types, mounts vs connectors, assets/skills, agents and the project graph, flows, roles & permissions, business organizations vs Private workspaces, the Home and My space. Start here for orientation. |
-| `concepts/sessions.md` | Session lifecycle (hibernate/wake/close), what a sleeping session shows and how it wakes, multiple sessions, **scoped sessions**, forking/renaming. |
+| `concepts/sessions.md` | Session lifecycle (hibernate/wake/close), what a sleeping session shows and how it wakes, context compaction (when a long session summarizes, per project or per agent), multiple sessions, **scoped sessions**, forking/renaming. |
 | `concepts/flows.md` | Flows and the Flows page/editor, **authoring a flow definition** (the seven node kinds, contracts, gates vs checks, provenance), runs and gates, **classifier nodes**, **run groups** (batch / standing / unattended processing), **personal flows**, running a flow inside an existing session, recipes, webhook triggers and the session webhook inbox. |
 | `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels, editing an existing mount, whose connection a mount runs on, **Reconnect**, Exchange mail and shared mailboxes, AI providers and subscription seats, classifier providers. |
 | `concepts/collaboration.md` | Multi-user sessions (mentions/reactions/threading/presence), sharing with people, public file-preview links, agent-to-agent (A2A). |

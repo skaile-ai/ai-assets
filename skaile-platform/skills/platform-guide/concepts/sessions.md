@@ -43,6 +43,23 @@ What to tell users:
 - "Closing" is not "pausing" — it finalizes and syncs the work back. To pause, just leave
   it; it hibernates on its own.
 
+## Context compaction
+
+A long conversation is compacted: the agent summarizes its earlier turns and continues from
+the summary. On models with a 1M-token context the user can choose when that happens,
+trading per-turn cost against how much raw conversation the agent keeps:
+**Lower cost** (compact earlier), **Balanced (default)**, or **More context** (compact
+later). Models with smaller windows always keep the default.
+
+- **For the whole project** — project settings, **Project** tab > **Context compaction**
+  (project Owner).
+- **For one agent** — session settings, **Config** tab > **Context compaction**, or the agent
+  dialog's **Settings** tab > **Context compaction** (session or project Owner). This is
+  stored on that session only and replaces the project's choice for it.
+
+Either change takes effect the next time the session starts or wakes. Choosing **Balanced
+(default)** returns to the platform default.
+
 ## Multiple sessions per project
 
 A project can have many sessions running at once, each an isolated copy. This is how
@@ -121,4 +138,5 @@ Source of truth: `platform/docs/session-lifecycle.md`, `platform/docs/scoped-ses
 platform #6165, part of #6152 (spawning from agent templates: `spawn-agent.handler.ts`,
 `spawn-agent-policy.service.ts`), platform #6185 and #6189, part of #6152 (finishing a
 spawned instance: `finish-spawned-instance.handler.ts`), platform #6245 (subagents:
-`spawn-subagent.handler.ts`, `subagent-payload.ts`).
+`spawn-subagent.handler.ts`, `subagent-payload.ts`), platform #6352, closing #6350 (context
+compaction per agent: `compaction-card.tsx`, `edit-agent-dialog.tsx`).
