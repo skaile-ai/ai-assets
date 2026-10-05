@@ -10,9 +10,9 @@ declares:
 
 - **Category**: Git / Files / Transport / Chat / Mail.
 - **Provider type**: GitHub, GitLab, Bitbucket, SharePoint, Google Drive, S3, SSH,
-  WebDAV, NextCloud, Box, Exchange (mail), and remote MCP servers. **Dropbox is work in progress — not usable yet**: it still
-  appears in some provider pickers, but no runtime driver exists, so a Dropbox
-  connection cannot bring files into any session today. Say that plainly and steer the
+  WebDAV, NextCloud, Box, Exchange (mail), and remote MCP servers. **Dropbox is work in progress — not usable yet**: no
+  runtime driver exists, so it is no longer offered in **Providers** or **My Connections**,
+  and a Dropbox provider an admin added earlier still cannot bring files into any session. Say that plainly and steer the
   user to Box, SharePoint, Google Drive or NextCloud instead; never walk them into
   creating a Dropbox provider.
 - **Credential mechanism**: how auth works (see below).
