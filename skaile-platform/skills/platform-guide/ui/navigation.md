@@ -311,7 +311,8 @@ an admin acknowledges the new one.
 - **Enable an asset/skill** → the workspace **AI Assets** panel (session- or
   project-scope add), or org **Settings > Catalog** (see `ui/workspace.md`).
 - **Turn off a company default (e.g. the Word or Excel tools)** → org **Settings >
-  Catalog > Company defaults > Unpin**, or **Filter rules** to hide it for good; for one
+  Catalog > Company defaults > Unpin**, **Unadopt from organization** on its catalog entry
+  to remove it (it is not added back on restart), or **Filter rules** to hide it; for one
   session only, hover the asset's row in the workspace **AI Assets** panel and click the
   disable icon (tooltip **Disable here**) — see `ui/workspace.md`.
 
