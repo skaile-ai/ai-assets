@@ -97,6 +97,21 @@ arguments, no approval) whether or not the user is in Expert mode. The figures a
 of its previous turn; before any turn has ended, or after a platform restart until the next one,
 it answers `available: false`.
 
+## Changing the model of a running session
+
+The model, thinking mode and effort live under **Agent runtime**: session settings,
+**Config** tab (one session), or project settings, **Session defaults** tab (every session
+that does not set its own value).
+
+- A change to one of those three reaches a running session from its **next message** — no
+  restart. A turn already in progress finishes on the old settings.
+- A project change only reaches sessions that follow the project's value; a session that set
+  its own model (or thinking, or effort) keeps it.
+- The amber **restart to apply** note still appears when the change cannot apply live: a
+  change of AI provider or agent, or an agent that cannot switch on the fly. Then the new
+  value applies when the session restarts or next wakes. A sleeping session just picks it up
+  when it wakes.
+
 ## Multiple sessions per project
 
 A project can have many sessions running at once, each an isolated copy. This is how
