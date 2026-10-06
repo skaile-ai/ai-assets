@@ -594,7 +594,7 @@ IF mode = add
     For each approved item:
 
     1. **Pick a template** from existing specs that most closely matches the pattern:
-       - Navigation + content → `specs/dashboard.spec.ts`
+       - Navigation + content → `specs/admin-sidebar-swap.spec.ts`, `specs/new-project-modal.spec.ts`
        - Workspace/chat → `specs/message-flow.spec.ts`
        - Admin tRPC + UI mix → `specs/multi-user/invite-lifecycle.spec.ts`
        - Session lifecycle → `specs/session-lifecycle.spec.ts`
