@@ -86,8 +86,10 @@ Real refusals, not conservatism:
 
 - `create_draft` writes a new mail, or a `reply` / `replyAll` / `forward` of `replyToMessageId`.
   `body` is plain text unless `bodyFormat: "markdown"`, which is sent as sanitised HTML: bold,
-  italic, links, lists, headings, block quotes, simple tables. Raw HTML and images are dropped
-  and strike-through is not rendered — do not use them.
+  italic, links, lists, headings, block quotes, simple tables. A link shows only its text, as in
+  Outlook (`[the report](https://…)` reads "the report"); link text that itself looks like a
+  different address also shows the real one. Raw HTML and images are dropped and strike-through
+  is not rendered — do not use them.
 - `add_draft_attachment` takes a **file reference**, never bytes: a mount-relative `path` of this
   session (with `resourceId` defaulting to `workspace`), or — in the personal assistant only —
   `file: { sessionId, path }` for a file in another of the owner's sessions' workspace (find it
@@ -99,7 +101,7 @@ Real refusals, not conservatism:
   re-creating the forward.
 - `send_draft({ draftId })` sends any draft, including one the owner wrote themselves. It is
   **not undoable**. Its card is built from the draft as Exchange holds it now and names every
-  attachment; a draft edited after approval invalidates that approval.
+  attachment and every link destination; a draft edited after approval invalidates that approval.
 - **Standing grant for sending.** The owner can mint one from the card's advanced options only:
   bound to that session, with an expiry or *Unlimited*, and only with external communication
   explicitly allowed. For the **own** mailbox it is pinned to that mailbox or to the project.
