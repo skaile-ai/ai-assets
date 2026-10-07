@@ -411,7 +411,7 @@ description needed, as extra hands for splitting volume work across parallel cop
 is `{ mode, name?, visibility?, instructions?, skills?, connectors?, mcpServers? }`, and only
 `mode` is required. It is durable
 like `spawn_agent`, and once it has `Succeeded`, `result.payload.sessionId` and `slug` name the
-child.
+child, and `result.payload.notCarried` lists what it did not get (below).
 
 - **`mode: "clone"`** copies this session's setup whole. **`mode: "adhoc"`** narrows it:
   `instructions` replaces your instructions, and `skills`, `connectors` (connector ids) and
@@ -422,6 +422,15 @@ child.
   correct the list rather than retrying it. The `workspace` connector is always kept, and this
   session's stored secrets are never copied. It runs on the project's model, not a model picked
   for this session.
+- **It also gets what was added to this session alone**: a mount (for example a SharePoint
+  folder attached from **Connectors**), a skill or an MCP server added to this one session comes
+  along at the same path, on the same connection. Four things keep one behind: a `connectors`,
+  `skills` or `mcpServers` list for that kind (a list keeps only this session's own setup, and
+  naming such a mount in it is a `widening_refused`, so leave the list out); a private session
+  starting a shared helper (ask with `visibility: "Private"`); a trusted shared credential; and
+  something that exists in this session only. `result.payload.notCarried` lists each one left
+  behind as `{ kind, name, reason, why }`, and the card says the same; tell the helper what it
+  lacks instead of handing it paths it cannot reach.
 - **It takes no task.** Once it has `Succeeded`, send it its task with
   `platform.send_to_session`. You and it reach each other (`send_to_session`,
   `notify_when_idle`) with no link for as long as neither is archived, and
