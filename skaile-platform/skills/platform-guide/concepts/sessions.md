@@ -59,7 +59,7 @@ later). Models with smaller windows always keep the default.
   stored on that session only and replaces the project's choice for it.
 
 Either change takes effect the next time the session starts or wakes. Choosing **Balanced
-(default)** returns to the platform default. Both places show only in **Expert mode** (the
+(default)** returns to the platform default. Every one of these places shows only in **Expert mode** (the
 toggle in the user menu, under the avatar); outside it the choice is hidden but still applies.
 
 In Expert mode the same setting, on the project **General** tab and per agent, has a fourth
