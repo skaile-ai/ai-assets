@@ -266,8 +266,9 @@ on. The org sessions report is not a tab — it is **Sessions** in the org kebab
 
 **Former members' My space** is a tab reached only by link: while projects that people
 left behind in their My space are waiting, the **Users** tab shows a callout with
-**Review** (in Expert mode; the callout and the former members list are hidden in the
-standard view, but the tab still opens by link). Each listed project offers **Take over** (it moves to Projects, **Invited
+**Review**. In the standard view the **Users** tab hides that callout and its own **Former
+members** card; the Former members' My space tab itself still opens by link and lists the
+waiting projects in either view. Each listed project offers **Take over** (it moves to Projects, **Invited
 only**, with that Owner as its owner) or **Delete** (with its sessions and files; cannot be
 undone). Nobody can open those projects until then. Homes are never listed.
 
@@ -383,4 +384,4 @@ order, which tabs and cards each view shows, the session Permissions tab):
 `pages/settings/resolve-org-settings-tab.ts`, `pages/projects/settings/resolve-default-tab.ts`,
 `pages/sessions/settings/resolve-default-tab.ts`, `lib/settings-view`,
 `pages/sessions/settings/session-config-tab.tsx`, `pages/projects/settings/project-metadata-tab.tsx`;
-skaile-ai/platform#6690.
+platform `main` @ `f8cbab8fb` (2026-10-08), skaile-ai/platform#6690.
