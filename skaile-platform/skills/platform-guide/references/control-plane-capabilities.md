@@ -418,7 +418,9 @@ project (the assistant's Home or a My space project) it is always `Private`, and
 added to this session alone stays behind (`private_to_shared`, below). Pass the helper's role as
 `name` (for example `"Quality lane"`): it names both the helper's session and its agent, so people
 in a shared chat can tell the two of you apart and `@`-mention the right one. Left out, the helper
-is named after this session plus " (helper)". It is durable
+is named after this session plus " (helper)". A name that cannot work as a handle (it starts
+with a digit, it is a group mention such as "All", or a person in this session already answers to
+it) is refused before any card, with the codes `platform.set_agent_name` uses. It is durable
 like `spawn_agent`, and once it has `Succeeded`, `result.payload.sessionId` and `slug` name the
 child, `result.payload.agentName` and `handle` are the name and `@handle` it answers to, and
 `result.payload.notCarried` lists what it did not get (below).
