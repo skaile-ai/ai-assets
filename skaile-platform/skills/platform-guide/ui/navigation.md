@@ -248,7 +248,7 @@ In the user's own assistant session, a **Your assistant** card above the tabs li
 Path: `/<org>/settings` (org Owners and platform admins). It opens on **General**. The
 standard view has two tabs: **General** (branding; formerly **Organization**, and
 `?tab=organization` links still open it; the **Agent voice**, **Organization Details** and
-**Danger Zone** cards show only in Expert mode) and **Users** (invite/roles/revoke; a
+**Danger zone** cards show only in Expert mode) and **Users** (invite/roles/revoke; a
 member's role is **User**, **Viewer** or **Owner**). Expert mode adds, in this order:
 **Teams**, **Providers** (org-level connectors:
 Git / Files / Transport, with UserDelegation or ServiceAccount credentials), **AI Providers** (model endpoints: Anthropic/OpenAI/Custom,
@@ -261,8 +261,7 @@ the driver/provider/model defaults inherited by all projects), **Classifiers** (
 teams/projects; its **Company defaults** card lists the assets every session in the
 organization loads, with **Unpin** per row, and **Filter rules** hides catalog assets
 for the whole organization), and, in a business organization, **Assistants** (below).
-So **Providers**, **AI Providers**, **Classifiers**, **Catalog** and **Assistants** all need
-Expert mode on. The org sessions report is not a tab — it is **Sessions** in the org kebab.
+So every org settings tab except **General** and **Users** needs Expert mode on. The org sessions report is not a tab — it is **Sessions** in the org kebab.
 
 **Former members' My space** is a tab reached only by link: while projects that people
 left behind in their My space are waiting, the **Users** tab shows a callout with
@@ -313,7 +312,7 @@ an admin acknowledges the new one.
 
 ## Where to connect a data source (cheat sheet)
 
-Every org **Settings** tab named here except **Users** needs Expert mode on, as do project
+Every org **Settings** tab named here needs Expert mode on, as do project
 **Settings > Session defaults** and the session settings cards outside the standard view
 (see *Settings pages: standard view and Expert mode*).
 

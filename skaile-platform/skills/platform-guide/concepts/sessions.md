@@ -58,14 +58,12 @@ later). Models with smaller windows always keep the default.
   dialog's **Settings** tab > **Context compaction** (session or project Owner). This is
   stored on that session only and replaces the project's choice for it.
 
-All three show only in **Expert mode** (the toggle in the user menu, under the avatar). Outside
-it the choice is hidden but still applies.
-
 Either change takes effect the next time the session starts or wakes. Choosing **Balanced
-(default)** returns to the platform default.
+(default)** returns to the platform default. Both places show only in **Expert mode** (the
+toggle in the user menu, under the avatar); outside it the choice is hidden but still applies.
 
-In Expert mode the same setting, on the project tab and per agent, has a fourth choice, **Custom**, with a **Compact at** field for
-the exact point, from 10% to 90%: a percentage (`45`, `45%`) or a token count on the 1M
+In Expert mode the same setting, on the project **General** tab and per agent, has a fourth
+choice, **Custom**, with a **Compact at** field for the exact point, from 10% to 90%: a percentage (`45`, `45%`) or a token count on the 1M
 window (`450k`, `450000`). The field shows the equivalent
 (45% = 450k tokens). The command palette has it as **Set context compaction to a custom
 threshold**. A user who wants to see or change any compaction choice needs Expert mode on.

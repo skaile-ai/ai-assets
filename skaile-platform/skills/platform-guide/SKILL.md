@@ -12,7 +12,7 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   creating a project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
-version: 0.16.18
+version: 0.16.19
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
