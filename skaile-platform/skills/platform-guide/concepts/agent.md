@@ -186,7 +186,9 @@ Each capability declares an **effect class** that decides how far a grant may re
 A grant is narrow: it names **one capability** and one target scope — that exact target, its
 project, and so on up, or for Exchange mail one mailbox. It either has an absolute expiry or,
 when the owner explicitly chose *Unlimited*, lasts until they revoke it; it may carry use and
-budget caps. It stays anchored to the session it was approved in, and it covers only calls on
+budget caps. The card's one-click choice lasts as long as the capability's risk allows: **90
+days** for a low-risk capability, **7 days** for a medium-risk one and **1 hour** for a high-risk
+one, never longer than the organization permits. The owner can pick another window on the card. It stays anchored to the session it was approved in, and it covers only calls on
 **the owner's own turns** (or a trigger the owner set up) — see *Shared sessions* below. Standing
 approvals live
 only on cards: the former `preApprovedCapabilities` agent-config list is retired, and any
