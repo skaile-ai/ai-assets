@@ -132,9 +132,10 @@ mailboxes, the owner picks which mailboxes the project may use.
 
 ## AI providers
 
-The models the agents run on are configured under the organization's settings, **AI**
-section, **AI Providers** tab (Expert mode), at global, organization, or project scope. A
-project's or session's AI provider list shows Global providers only to platform admins. A Claude
+The models the agents run on are configured in organization settings on the **AI Providers**
+tab (Expert mode), at global, organization, or project scope. A project's or session's AI
+provider list shows Global providers only to platform admins; that is a permission, not
+Expert mode, so turning Expert mode on does not reveal them. A Claude
 subscription seat can be connected by pasting a token from `claude setup-token` (the
 default) or a credentials file. A setup-token seat does not refresh itself: when it stops
 working, the owner re-runs `claude setup-token` and pastes the new token. Each credential

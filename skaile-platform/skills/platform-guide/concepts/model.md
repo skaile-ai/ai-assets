@@ -145,7 +145,7 @@ scope wins instead, and one rule above all of them:
   other My space projects in a business organization stay closed until an org Owner takes
   one over (it moves to Projects as theirs) or deletes it, under **Organization settings >
   Former members' My space** (the **Users** tab's callout to it shows only in Expert mode;
-  the tab itself still opens by link).
+  the Former members' My space tab still opens by link).
 
 - **Sending messages / talking to the agent** — a Session (or Project) Viewer is
   write-locked even if they are an Org User/Owner; the composer goes read-only.

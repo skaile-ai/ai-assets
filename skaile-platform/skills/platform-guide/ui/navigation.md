@@ -261,7 +261,8 @@ the driver/provider/model defaults inherited by all projects), **Classifiers** (
 teams/projects; its **Company defaults** card lists the assets every session in the
 organization loads, with **Unpin** per row, and **Filter rules** hides catalog assets
 for the whole organization), and, in a business organization, **Assistants** (below).
-So every org settings tab except **General** and **Users** needs Expert mode on. The org sessions report is not a tab — it is **Sessions** in the org kebab.
+So every tab in the org settings strip except **General** and **Users** needs Expert mode
+on. The org sessions report is not a tab — it is **Sessions** in the org kebab.
 
 **Former members' My space** is a tab reached only by link: while projects that people
 left behind in their My space are waiting, the **Users** tab shows a callout with
