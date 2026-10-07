@@ -87,9 +87,9 @@ read-only Git mount. Never tell a user a Git repo can be connected read-only.
 
 Only the **workspace** mount (the project's source: the folder or repo picked in the project
 wizard's **Source** step) has an editor on the **Mounts** card. Its pencil (**Edit mount**)
-is on that card in **Project settings → Session defaults** (project Owners; the default for
-new sessions, existing sessions keep theirs) and in **Session settings → Config** (this
-session only). The editor changes its driver, folder (with **Browse**), target path,
+is on that card in **Project settings → Session defaults** (project Owners, Expert mode; the
+default for new sessions, existing sessions keep theirs) and in **Session settings → General**
+(this session only). The editor changes its driver, folder (with **Browse**), target path,
 credential, access level (a Git workspace is always read-write), the watch switch, and the
 Git sync options. Every other mount is listed on the same card with only **Remove**, plus an
 account picker for a linked cloud drive. To change such a mount's folder or access level,
@@ -133,7 +133,8 @@ mailboxes, the owner picks which mailboxes the project may use.
 ## AI providers
 
 The models the agents run on are configured under the organization's settings, **AI**
-section, **AI Providers** tab, at global, organization, or project scope. A Claude
+section, **AI Providers** tab (Expert mode), at global, organization, or project scope. A
+project's or session's AI provider list shows Global providers only to platform admins. A Claude
 subscription seat can be connected by pasting a token from `claude setup-token` (the
 default) or a credentials file. A setup-token seat does not refresh itself: when it stops
 working, the owner re-runs `claude setup-token` and pastes the new token. Each credential
@@ -142,7 +143,7 @@ last means re-enter it). Seats that hit their usage limit are routed around unti
 limit resets, and the chat shows a notice when a seat is parked.
 
 Classifier providers (the models behind flow classifier steps) are configured separately
-under organization settings, **Classifiers** — see `concepts/flows.md`.
+under organization settings, **Classifiers** (Expert mode) — see `concepts/flows.md`.
 
 ## Word and Excel tools
 
@@ -152,7 +153,7 @@ defaults, so a session normally has tools for creating, editing and reviewing `.
 Word or Excel file rather than writing a script or editing the file's XML yourself. File
 paths you pass to these tools must be paths inside the session workspace, not paths on
 the user's computer. If they are missing from a session, someone opted out: an org Owner manages them
-under organization settings, **Catalog**, in **Company defaults** (**Unpin** removes one
+under organization settings, **Catalog** (Expert mode), in **Company defaults** (**Unpin** removes one
 from the defaults; it stays in the organization's catalog and can be pinned again),
 removes one from the organization with **Unadopt from organization** on its catalog entry
 (it stays removed across restarts until someone uses **Adopt into organization** again),
@@ -178,4 +179,6 @@ Source of truth: `platform/docs/integration_architecture.md`,
 #5531 (shared-mail admin approval link), #4703 (setup-token seats),
 #5099/#5109/#5139 (seat health and routing), #5305 (classifier providers),
 #6133 (cycle_session without an approval card), #6382 (Word and Excel as company
-defaults), #6435 (an unadopted company default stays removed).
+defaults), #6435 (an unadopted company default stays removed), #6690 (settings standard view: the
+session **General** tab, org AI Providers, Classifiers and Catalog shown only in Expert mode,
+Global providers listed to platform admins only).

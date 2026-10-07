@@ -144,7 +144,8 @@ scope wins instead, and one rule above all of them:
   archived. It comes back if they rejoin within 30 days; after that it is deleted. Their
   other My space projects in a business organization stay closed until an org Owner takes
   one over (it moves to Projects as theirs) or deletes it, under **Organization settings >
-  Former members' My space**.
+  Former members' My space** (the **Users** tab's callout to it shows only in Expert mode;
+  the tab itself still opens by link).
 
 - **Sending messages / talking to the agent** — a Session (or Project) Viewer is
   write-locked even if they are an Org User/Owner; the composer goes read-only.
@@ -178,3 +179,4 @@ Private spaces with the rollout flag on: `landing.utils.ts`, `my-space.utils.ts`
 Job descriptions on the project graph (card dialog, pen, Add menu entries):
 `pages/project-graph/`, `agent-templates/start-instance-dialog.tsx`; skaile-ai/platform#6315
 (the labels) and #6312 (the vocabulary).
+The former members callout on the Users tab, shown only in Expert mode: skaile-ai/platform#6690.
