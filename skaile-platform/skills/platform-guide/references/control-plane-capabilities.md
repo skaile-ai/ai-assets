@@ -634,8 +634,9 @@ themselves approved — and it is narrow by construction:
   computed on the server. *Unlimited* — no expiry, lasting until revoked — is one of those
   names, never the default, and only when the owner explicitly chooses it. The one-click
   option alongside "approve once" is deliberately narrow — time-boxed, that exact target,
-  both effect opt-ins off — and its length is server-chosen per capability, so do not quote
-  a number at the owner.
+  both effect opt-ins off — and its length follows the capability's risk: 90 days for low,
+  7 days for medium, 1 hour for high, never above the organization's maximum. You may not know
+  a capability's risk, so point the owner at the window the card names rather than guessing.
 - **Optional use and budget caps**, clamped down to the server's own ceilings.
 - **Effect opt-ins.** Because the safe default leaves both off, an `external` or `privileged`
   effect has no one-click option at all — the owner has to widen it deliberately. An effect
