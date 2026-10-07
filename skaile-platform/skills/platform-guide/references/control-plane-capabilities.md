@@ -307,7 +307,7 @@ it.
 | Call | Effect | Effect class |
 | --- | --- | --- |
 | `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl?, projectId? })` | a new template in this session's project, or, from the personal assistant, in the project `projectId` names. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit job description…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL (or a path starting with `/`), since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it and `result.payload.version` is `1`. | `routine` on the owner's own turn; `never` on any other turn |
-| `platform.spawn_agent({ templateId, name?, visibility?, task?, model? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, `agentName` and `handle` are the name and `@handle` it answers to (the job description's own agent name, or else `name`), and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
+| `platform.spawn_agent({ templateId, name?, visibility?, task?, model? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, `agentName` and `handle` are the name and `@handle` it answers to (the agent name the job description carries, which it takes from its own name when it is created; else `name`), and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
 | `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills?, projectId? })` | replaces the template's instructions or skill list (from the personal assistant, `projectId` finds the template in that project); never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
 | `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine` |
 
@@ -418,11 +418,14 @@ project (the assistant's Home or a My space project) it is always `Private`, and
 added to this session alone stays behind (`private_to_shared`, below). Pass the helper's role as
 `name` (for example `"Quality lane"`): it names both the helper's session and its agent, so people
 in a shared chat can tell the two of you apart and `@`-mention the right one. Left out, the helper
-is named after this session plus " (helper)". A name that cannot work as a handle (it starts
-with a digit, it is a group mention such as "All", or a person in this session already answers to
-it) is refused before any card, with the codes `platform.set_agent_name` uses. It is durable
-like `spawn_agent`, and once it has `Succeeded`, `result.payload.sessionId` and `slug` name the
-child, `result.payload.agentName` and `handle` are the name and `@handle` it answers to, and
+is named `<this session's name> (helper)`. Names are not de-duplicated between helpers: two helpers
+given the same `name`, or several left unnamed, share one name and `@handle`, so give each parallel
+helper its own `name`. A name that cannot work as a handle is refused before any card, with
+`code` naming the rule: `name_not_mentionable` (its handle would be empty or start with a digit),
+`handle_reserved` (it is a group mention such as `All`), `handle_taken` (a person in this session
+already answers to it), `empty_name` or `name_too_long` (over 120 characters). It is durable like
+`spawn_agent`, and once it has `Succeeded`, `result.payload.sessionId` and `slug` name the child,
+`result.payload.agentName` and `handle` are the name and `@handle` it answers to, and
 `result.payload.notCarried` lists what it did not get (below).
 
 - **`mode: "clone"`** copies this session's setup whole. **`mode: "adhoc"`** narrows it:
@@ -724,4 +727,6 @@ and phase 3 of agent templates, part of skaile-ai/platform#6216: #6245
 (`platform.spawn_subagent`: `spawn-subagent.handler.ts`), #6242 (the template reads:
 `agent-template-read.handler.ts`) and #6263 (siblings: `spawn-channel.ts`); skaile-ai/platform#6312
 (the job description, temporary hire and helper vocabulary) and #6315 (the renamed labels,
-including **Edit job description…**).
+including **Edit job description…**); skaile-ai/platform#6653 (what a helper carries:
+`session-carry.ts`) and #6654 (a helper's own agent name and the name check: `agent-spawn.service.ts`,
+`spawn-subagent-policy.service.ts`).
