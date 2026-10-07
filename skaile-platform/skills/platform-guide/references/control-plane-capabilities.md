@@ -407,21 +407,44 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
 #### Helpers: a copy of this session (`spawn_subagent`)
 
 `platform.spawn_subagent` starts a **helper**: a child from **this session's own setup**, no job
-description needed, as extra hands for splitting volume work across parallel copies. Its input
+description needed, as extra hands for splitting volume work across parallel copies. That setup
+has two parts: the **configured setup** (the skills, connectors and MCP servers that come with
+the session's configuration from its project and library assets) and what was **added to this
+session alone** (below). Its input
 is `{ mode, name?, visibility?, instructions?, skills?, connectors?, mcpServers? }`, and only
-`mode` is required. It is durable
+`mode` is required. A helper is `Shared` unless you pass `visibility: "Private"`; in a private
+project (the assistant's Home or a My space project) it is always `Private`, and asking for
+`Shared` there is refused. From a `Private` session, pass `visibility: "Private"`, or what was
+added to this session alone stays behind (`private_to_shared`, below). It is durable
 like `spawn_agent`, and once it has `Succeeded`, `result.payload.sessionId` and `slug` name the
-child.
+child, and `result.payload.notCarried` lists what it did not get (below).
 
 - **`mode: "clone"`** copies this session's setup whole. **`mode: "adhoc"`** narrows it:
   `instructions` replaces your instructions, and `skills`, `connectors` (connector ids) and
   `mcpServers` (ids) each keep only what you list; leave a list out to keep all of it. A
   narrowing field on a `clone` is invalid input.
-- **It never has more than this session.** Any name this session lacks refuses the whole
-  request (`widening_refused`), and the refusal names what is missing; nothing is created, so
-  correct the list rather than retrying it. The `workspace` connector is always kept, and this
-  session's stored secrets are never copied. It runs on the project's model, not a model picked
-  for this session.
+- **It never has more than this session.** A list ranges over the configured setup only. Any
+  name outside it refuses the whole request (`widening_refused`), and the refusal names what is
+  missing; nothing is created, so correct the list rather than retrying it. The `workspace`
+  connector is always kept, and this session's stored secrets are never copied. It runs on the
+  project's model, not a model picked for this session.
+- **It also gets what was added to this session alone**: a mount (for example a SharePoint
+  folder attached from **Connectors**), a skill or an MCP server added to this one session comes
+  along at the same path, on the same connection. A narrowing list does not reach these: naming
+  a mount added to this session alone in `connectors` (or such a skill or MCP server in its list)
+  is a `widening_refused` even though this session has it, and nothing is created. To carry
+  one, leave the list for its kind out. Each one left behind is in `result.payload.notCarried`
+  as `{ kind, name, reason, why }`, and the card says the same. Branch on `reason`:
+  - `narrowed`: you gave a list for its kind, so it stayed behind; leave that list out to carry it.
+  - `private_to_shared`: this session is `Private` and the helper would be `Shared`; ask again
+    with `visibility: "Private"`.
+  - `trusted_credential`: its grant lets this session use a key the organization shares on that
+    asset, and a helper never inherits that permission.
+  - `session_only`: the asset or its configuration was created inside this session itself
+    rather than enabled from the library, so there is nothing for the helper to be pointed at.
+  - `not_added`: it could not be written onto the helper; the helper exists without it.
+
+  In every case tell the helper what it lacks instead of handing it paths it cannot reach.
 - **It takes no task.** Once it has `Succeeded`, send it its task with
   `platform.send_to_session`. You and it reach each other (`send_to_session`,
   `notify_when_idle`) with no link for as long as neither is archived, and
