@@ -188,7 +188,9 @@ project, and so on up, or for Exchange mail one mailbox. It either has an absolu
 when the owner explicitly chose *Unlimited*, lasts until they revoke it; it may carry use and
 budget caps. The card's one-click choice lasts as long as the capability's risk allows: **90
 days** for a low-risk capability, **7 days** for a medium-risk one and **1 hour** for a high-risk
-one, never longer than the organization permits. The owner can pick another window on the card. It stays anchored to the session it was approved in, and it covers only calls on
+one, never longer than the organization permits. The owner can pick another window on the card;
+widening the grant beyond the one target, or making it autonomous, starts it on the shortest
+window, so a long window on a wide grant is always the owner's own pick. It stays anchored to the session it was approved in, and it covers only calls on
 **the owner's own turns** (or a trigger the owner set up) — see *Shared sessions* below. Standing
 approvals live
 only on cards: the former `preApprovedCapabilities` agent-config list is retired, and any
