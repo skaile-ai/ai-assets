@@ -632,10 +632,15 @@ themselves approved — and it is narrow by construction:
 - **Anchored to one session** — the one whose card minted it.
 - **A named window.** The owner picks a duration by name from a server-owned list; the expiry is
   computed on the server. *Unlimited* — no expiry, lasting until revoked — is one of those
-  names, never the default, and only when the owner explicitly chooses it. The one-click
-  option alongside "approve once" is deliberately narrow — time-boxed, that exact target,
-  both effect opt-ins off — and its length is server-chosen per capability, so do not quote
-  a number at the owner.
+  names, never the default, and only when the owner explicitly chooses it. Every finite window
+  is capped by the organization's maximum grant duration (one year today); a longer one is
+  never offered. The one-click option alongside "approve once" is narrow by scope — that
+  exact target, both effect opt-ins off — and always time-boxed, its window following the
+  capability's risk: 90 days for low, 7 days for medium, 1 hour for high, within that
+  maximum. You may not know a capability's risk, so point the owner at the window the card
+  names rather than guessing. On the card's advanced options, widening the scope or choosing
+  autonomous mode resets the window to the shortest one, so a long window on a wide grant is
+  always picked by hand.
 - **Optional use and budget caps**, clamped down to the server's own ceilings.
 - **Effect opt-ins.** Because the safe default leaves both off, an `external` or `privileged`
   effect has no one-click option at all — the owner has to widen it deliberately. An effect

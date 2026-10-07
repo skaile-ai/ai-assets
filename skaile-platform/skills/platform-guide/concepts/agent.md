@@ -187,7 +187,11 @@ A grant is narrow: it names **one capability** and one target scope — that exa
 project, and so on up, or for Exchange mail one mailbox. It either has an absolute expiry or,
 when the owner explicitly chose *Unlimited*, lasts until they revoke it; it may carry use and
 budget caps. It stays anchored to the session it was approved in, and it covers only calls on
-**the owner's own turns** (or a trigger the owner set up) — see *Shared sessions* below. Standing
+**the owner's own turns** (or a trigger the owner set up) — see *Shared sessions* below. The
+card's one-click choice is time-boxed to a window the capability's risk decides, and the card
+names it: read the window off the card rather than inferring one from the capability. Widening
+the grant past that one target, or making it autonomous, starts it on the shortest window, so a
+long window on a wide grant is always the owner's own pick. Standing
 approvals live
 only on cards: the former `preApprovedCapabilities` agent-config list is retired, and any
 entries still in a config are ignored.
