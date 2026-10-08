@@ -144,6 +144,20 @@ The capability's own description carries the live list; prefer it if the two dif
 | **Project graph** | `/<org>/<project>/graph`      | From a project's **...** menu or Cmd+K: the project's agents as cards, agent-to-agent links as arrows, and its job descriptions, apps and flows in boxes beside them. A project Owner can move cards and boxes, and resize, rename or delete any box. |
 | **Open-source licenses** | `/licenses`            | Third-party components shipped to the browser, with licenses and source links. From **Info** in the avatar menu. |
 
+### Several Microsoft 365 organizations
+
+On the **SharePoint** and **Exchange** tabs of **My Connections**, every Microsoft 365
+organization an administrator has approved for Skaile has its own section, even when the
+user has no account connected there yet. Its **Connect** button goes straight to the
+Microsoft sign-in, with no new approval. **Connect another organization** (also in Cmd+K)
+lists those approved organizations first, then **A different organization (needs
+administrator approval)**, the only path that asks for a new administrator approval. An
+organization nobody has connected through yet shows as **Microsoft 365 organization
+approved \<date\>** with a shortened tenant ID, because Microsoft does not tell Skaile its
+name. If the administrator approves in a private window or another browser, the user just
+returns to the original tab: it checks the approval and continues the connection without
+another click.
+
 ### Shared Exchange mailboxes
 
 A shared mailbox is added **once per Connection** in **My Connections > Exchange >
