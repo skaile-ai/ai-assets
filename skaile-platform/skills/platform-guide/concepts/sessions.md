@@ -34,6 +34,11 @@ PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
   sources), then the workspace is cleaned up. Closing is the "I'm done, fold this work back
   in" step. A non-main session left hibernated for 30 days is closed automatically; the main
   session never is.
+- **Archived** — hidden from the default lists, conversation and files kept (archived from the
+  Danger zone, by marking a temporary hire or helper done, or when an idle one is tidied away).
+  An archived session is **read-only**: opening it shows its history without starting it, and it
+  takes no messages. Its owner clicks **Restore** in the composer (or **Restore session** in the
+  session menu) to work in it again; anyone else has to ask the owner.
 
 After a gap of an hour or more, the agent is told how long it has been since the previous
 turn. Treat anything time-sensitive from before such a gap as possibly out of date.
