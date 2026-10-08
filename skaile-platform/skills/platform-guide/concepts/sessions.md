@@ -34,6 +34,22 @@ PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
   sources), then the workspace is cleaned up. Closing is the "I'm done, fold this work back
   in" step. A non-main session left hibernated for 30 days is closed automatically; the main
   session never is.
+- **Archived** — not a lifecycle step but a flag on top of one: hidden from the default lists,
+  conversation kept. Archiving a running or hibernated session closes it first, so its work is
+  synced back as in **Closed** above. Sessions are archived from the **Danger zone** at the
+  bottom of the session settings **General** tab (Expert mode), or by marking a temporary hire
+  or helper done. A temporary hire or helper is also archived automatically once it has sat
+  stopped (hibernated, closed or errored) past its idle threshold: the job description's, for a
+  hire whose job description sets one, otherwise the platform's (4 hours by default). This idle
+  archive does not check whether a person wrote in it — that check belongs to the agent finishing
+  a child itself (`references/control-plane-capabilities.md`). The owner can always **Restore** it.
+  Ordinary sessions are never archived automatically; the 30-day rule above only closes them.
+  An archived session is **read-only**: opening it shows its history without starting it, and it
+  takes no messages. Its owner finds it in the project's **Archive** group in the sidebar (Expert
+  mode) and clicks **Restore** on the archived screen or composer, or **Restore session** in the
+  session menu or command palette. Restoring only lifts the flag: a restored session that was
+  closed still has to be reopened, and reopening needs **Org Owner** (see below). Anyone else has
+  to ask the owner.
 
 After a gap of an hour or more, the agent is told how long it has been since the previous
 turn. Treat anything time-sensitive from before such a gap as possibly out of date.
@@ -197,4 +213,7 @@ threshold in Expert mode, 10–90%: `compaction-card.helpers.ts`, `skaile-config
 meter and breakdown: `session-context-usage.tsx`, `workspace.getContextUsage` /
 `workspace.measureContextUsage`), platform #6690 (settings standard view: the session
 **General** tab, formerly Config, and the Idle timeout, Agent runtime, Context compaction and
-agent dialog AI Configuration controls shown only in Expert mode).
+agent dialog AI Configuration controls shown only in Expert mode), platform #6810 (archived
+sessions are read-only: `session-lifecycle.service.ts` `SESSION_ARCHIVED`,
+`session-message.service.ts`, `workspace-status-screens.tsx`, `chat-input-area-banner.tsx`;
+the idle archive of spawned instances: `instance-lifecycle.service.ts` `runIdleSweep`).
