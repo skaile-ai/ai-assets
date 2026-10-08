@@ -34,11 +34,15 @@ PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
   sources), then the workspace is cleaned up. Closing is the "I'm done, fold this work back
   in" step. A non-main session left hibernated for 30 days is closed automatically; the main
   session never is.
-- **Archived** — hidden from the default lists, conversation and files kept (archived from the
-  Danger zone, by marking a temporary hire or helper done, or when an idle one is tidied away).
+- **Archived** — not a lifecycle step but a flag on top of one: hidden from the default lists,
+  conversation kept. Archiving a running or hibernated session closes it first, so its work is
+  synced back as in **Closed** above. Sessions are archived from the session **Danger zone**
+  (Expert mode), by marking a temporary hire or helper done, or when an idle one is tidied away.
   An archived session is **read-only**: opening it shows its history without starting it, and it
-  takes no messages. Its owner clicks **Restore** in the composer (or **Restore session** in the
-  session menu) to work in it again; anyone else has to ask the owner.
+  takes no messages. Its owner finds it in the project's **Archive** group in the sidebar (Expert
+  mode) and clicks **Restore** on the archived screen or composer, or **Restore session** in the
+  session menu or command palette. A restored closed session is then reopened as usual. Anyone
+  else has to ask the owner.
 
 After a gap of an hour or more, the agent is told how long it has been since the previous
 turn. Treat anything time-sensitive from before such a gap as possibly out of date.
@@ -202,4 +206,6 @@ threshold in Expert mode, 10–90%: `compaction-card.helpers.ts`, `skaile-config
 meter and breakdown: `session-context-usage.tsx`, `workspace.getContextUsage` /
 `workspace.measureContextUsage`), platform #6690 (settings standard view: the session
 **General** tab, formerly Config, and the Idle timeout, Agent runtime, Context compaction and
-agent dialog AI Configuration controls shown only in Expert mode).
+agent dialog AI Configuration controls shown only in Expert mode), platform #6810 (archived
+sessions are read-only: `session-lifecycle.service.ts` `SESSION_ARCHIVED`,
+`session-message.service.ts`, `workspace-status-screens.tsx`, `chat-input-area-banner.tsx`).
