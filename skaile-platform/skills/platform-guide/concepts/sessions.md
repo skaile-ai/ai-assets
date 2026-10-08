@@ -39,8 +39,11 @@ PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
   synced back as in **Closed** above. Sessions are archived from the **Danger zone** at the
   bottom of the session settings **General** tab (Expert mode), or by marking a temporary hire
   or helper done. A temporary hire or helper is also archived automatically once it has sat
-  stopped past its idle threshold (4 hours unless its job description sets one). Ordinary
-  sessions are never archived automatically; the 30-day rule above only closes them.
+  stopped (hibernated, closed or errored) past its idle threshold: the job description's, for a
+  hire whose job description sets one, otherwise the platform's (4 hours by default). This idle
+  archive does not check whether a person wrote in it — that check belongs to the agent finishing
+  a child itself (`references/control-plane-capabilities.md`). The owner can always **Restore** it.
+  Ordinary sessions are never archived automatically; the 30-day rule above only closes them.
   An archived session is **read-only**: opening it shows its history without starting it, and it
   takes no messages. Its owner finds it in the project's **Archive** group in the sidebar (Expert
   mode) and clicks **Restore** on the archived screen or composer, or **Restore session** in the
