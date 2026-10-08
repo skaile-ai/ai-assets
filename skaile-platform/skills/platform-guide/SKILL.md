@@ -12,7 +12,7 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   creating a project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
-version: 0.16.18
+version: 0.16.19
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -122,7 +122,7 @@ capability names, ids and fields keep the code words.
 
 | File | Use when the user asks... |
 | ---- | -------------------------- |
-| `ui/navigation.md` | "Where is...", "how do I get to...", the **Work** / **Private** switch, the sidebar's Company / Projects / My space sections and the assistant launcher, project/session/org settings (incl. **Classifiers**, **Catalog** and its company defaults, **Assistants**), a read-only Private workspace, creating a project, connecting a data source, shared Exchange mailboxes, the org **Sessions** report, **Project graph**, Escape and Cmd+K switching — the app shell, sidebar, command palette, settings hierarchy. |
+| `ui/navigation.md` | "Where is...", "how do I get to...", the **Work** / **Private** switch, the sidebar's Company / Projects / My space sections and the assistant launcher, project/session/org settings (their **General** tabs, the standard view vs **Expert mode**, incl. **Classifiers**, **Catalog** and its company defaults, **Assistants**), a read-only Private workspace, creating a project, connecting a data source, shared Exchange mailboxes, the org **Sessions** report, **Project graph**, Escape and Cmd+K switching — the app shell, sidebar, command palette, settings hierarchy. |
 | `ui/workspace.md` | Anything about the workspace itself: chat composer, the workspace panel and its file explorer, the preview pane, the side panels opened from the toolbar icons, presence, mobile, common in-workspace click-paths. |
 
 ## Hard rules

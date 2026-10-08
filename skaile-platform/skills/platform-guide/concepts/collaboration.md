@@ -95,7 +95,7 @@ description (the last two are in the last bullet below).
 - Exchanges are bounded: at most 4 hops, cycle detection, and a budget of 20 messages
   between a pair with no human turn in either session — after that the agent stops,
   summarizes, and reports back to its user.
-- Users manage this in session settings, **Config** tab > **Agent to agent communication**
+- Users manage this in session settings, **General** tab > **Agent to agent communication**
   (open-state, scope, linked agents, **Incoming links**), and per agent in the agent
   dialog's **Agent communication** toggles. Inbound A2A messages render distinctly in the
   chat.
@@ -118,4 +118,4 @@ platform PRs #4917 (notification modes), #4566 (cross-org A2A), #5152 (share wak
 #5876 (idle subscriptions), #6008 (private projects not shareable), #6261 (send refusals
 and the not-delivered notice), #6263 (sibling instances of a template, `spawn-channel.ts`),
 `platform/docs/roles-permissions-matrix.md` (share and invite
-permissions).
+permissions), platform #6690 (the session settings Config tab renamed **General**).

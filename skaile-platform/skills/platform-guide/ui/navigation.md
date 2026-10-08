@@ -200,60 +200,81 @@ a whole workspace). Once it is read-only, write buttons such as **Create Project
 Nothing is deleted, everything stays readable, and it unlocks as soon as someone sponsors
 it again.
 
+## Settings pages: standard view and Expert mode
+
+Organization, project and session settings each open on a **General** tab and come in two
+views. The standard view (Expert mode off, the default) shows the tabs and cards most people
+need; turning on **Expert mode** (the toggle in the user menu, under the avatar) shows the
+full set. Hiding is presentation only: a hidden setting keeps its value and still applies,
+nobody's permissions change, and a hidden tab still opens from a link (`?tab=...`) and shows
+in the tab strip while it is open. So when a user cannot find a tab or card listed below as
+Expert mode only, tell them to turn Expert mode on, not that they lack access. The tab strip
+stays visible while the page scrolls.
+
 ## Project settings
 
-Path: `/<org>/projects/<project>/settings` (Owner-only). Tabs:
+Path: `/<org>/projects/<project>/settings` (Owner-only). It opens on **General**. Tabs, in
+order; the standard view shows the first four, and Expert mode adds the rest:
 
 | Tab               | Purpose |
 | ----------------- | ------- |
-| **Sessions**      | List/manage all sessions in the project; bulk mark-read / delete. |
+| **General**       | Name, slug, description, **Visibility** (**Invited only** / **Everyone in \<Org\>**). For an org Owner in a business organization (not on a My space project) who can open this page (it needs Owner authority on the project), a **Company project** card with **Mark as company project** / **Unmark as company project**: it changes only where the project is listed (under **Company**), not who can open it. In Expert mode only: the **Git provider**, **Debug logging** and **Context compaction** cards (the last sets when the project's long sessions compact; see `concepts/sessions.md`) and the **Danger zone** (delete). Formerly the **Project** tab; `?tab=project` links still open it. |
 | **Members**       | Invite users, set Owner/User/Viewer, team access. For a My space project there are no share controls: **Only you can open this project**, and, except on the Home, **Move to Projects** — one-way, after which it stays **Invited only** and can be shared. The Home can never be moved. |
-| **Project**       | Name, slug, description, **Visibility** (**Invited only** / **Everyone in \<Org\>**), delete. For an org Owner in a business organization (not on a My space project) who can open this page (it needs Owner authority on the project), a **Company project** card with **Mark as company project** / **Unmark as company project**: it changes only where the project is listed (under **Company**), not who can open it. A **Context compaction** card (project Owner) sets when the project's long sessions compact; see `concepts/sessions.md`. |
-| **Session defaults** | Skaile config template applied to new sessions — including additional mounts — plus the default asset assignments for the project's sessions. (There is no separate "Assets" tab; asset defaults live here.) Its **Mounts** card edits the workspace mount (**Edit mount**) and removes other mounts; see `concepts/integrations.md`. |
-| **Security**      | **Network egress**: **Open**, **Off — LLM provider only**, or **Allowlist specific domains**. |
 | **Connectors**    | Project-level connector enablement and account selection (today: Exchange — the project's mailbox access switch, and per-mailbox enable/disable including shared mailboxes admitted in My Connections). For file mounts use the workspace **Connectors** panel instead. |
-| **Costs**         | Cost tracking/attribution. |
 | **Shares**        | Manage public preview-share links. |
+| **Sessions**      | Expert mode. List/manage all sessions in the project; bulk mark-read / delete. |
+| **Session defaults** | Expert mode. Skaile config template applied to new sessions — including additional mounts — plus the default asset assignments for the project's sessions. (There is no separate "Assets" tab; asset defaults live here.) Its **Mounts** card edits the workspace mount (**Edit mount**) and removes other mounts; see `concepts/integrations.md`. |
+| **Security**      | Expert mode. **Network egress**: **Open**, **Off — LLM provider only**, or **Allowlist specific domains**. |
+| **Costs**         | Expert mode. Cost tracking/attribution. |
+| **Schedules**     | Expert mode. The project's scheduled actions. |
 
 ## Session settings
 
-Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner). Tabs:
+Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner). It opens on
+**General**. Tabs (the same in both views):
 
 | Tab          | Purpose |
 | ------------ | ------- |
+| **General**  | Session-scoped Skaile config (overrides project defaults). Always shown: **Session address**, the **Agent** card (its AI configuration row only in Expert mode), **Mounts** (edits this session's workspace mount with **Edit mount** and removes other mounts; see `concepts/integrations.md`) and **Agent to agent communication**. In Expert mode only: **Idle timeout**, **AI provider**, **Agent runtime**, **Context compaction** (when this agent compacts; see `concepts/sessions.md`), **Git provider**, **Connectors**, and the **Danger zone** (archive), which sits at the bottom of the tab. Formerly the **Config** tab; `?tab=config` links still open it. |
 | **Members**  | Session-scoped role overrides on top of project membership; add session-only members. |
-| **Config**   | Session-scoped Skaile config (overrides project defaults). Its **Mounts** card edits this session's workspace mount (**Edit mount**) and removes other mounts; see `concepts/integrations.md`. Its **Context compaction** card sets when this agent compacts; see `concepts/sessions.md`. |
 | **Shares**   | Session visibility (**Everyone in the project** / **Invited only**) and public file-preview links. |
+| **Permissions** | The session's standing autonomy grants: revoke one, or stop all. |
 
 In the user's own assistant session, a **Your assistant** card above the tabs links to the
 **Your assistant** page.
 
 ## Organization settings
 
-Path: `/<org>/settings` (org Owners and platform admins). Tabs: **Organization**
-(branding), **Users** (invite/roles/revoke), **Teams**, **Providers** (org-level connectors:
-Git / Files / Transport, with UserDelegation or ServiceAccount credentials), **AI** (org-wide
-AI defaults: available clouds and the driver/provider/model defaults inherited by all
-projects), **AI Providers** (model endpoints: Anthropic/OpenAI/Custom,
+Path: `/<org>/settings` (org Owners and platform admins). It opens on **General**. The
+standard view has two tabs: **General** (branding; formerly **Organization**, and
+`?tab=organization` links still open it; the **Agent voice**, **Organization Details** and
+**Danger zone** cards show only in Expert mode) and **Users** (invite/roles/revoke; a
+member's role is **User**, **Viewer** or **Owner**). Expert mode adds, in this order:
+**Teams**, **Providers** (org-level connectors:
+Git / Files / Transport, with UserDelegation or ServiceAccount credentials), **AI Providers** (model endpoints: Anthropic/OpenAI/Custom,
 scoped Global/Org/Project, delivered direct or via a cloud transport — AWS Bedrock, GCP
 Vertex, Azure AI Foundry, custom gateway — with per-config health checks; a **Claude
 subscription** seat is bound by pasting the output of `claude setup-token`, with the
-credentials-file upload as the alternative), **Classifiers** (classifier providers — see below), **Costs**,
+credentials-file upload as the alternative), **AI** (org-wide AI defaults: available clouds and
+the driver/provider/model defaults inherited by all projects), **Classifiers** (classifier providers — see below), **Costs**,
 **Deployment Targets**, **Catalog** (manage reusable assets/skills, assign to
 teams/projects; its **Company defaults** card lists the assets every session in the
 organization loads, with **Unpin** per row, and **Filter rules** hides catalog assets
-for the whole organization), and, in a business organization, **Assistants** (below). The org sessions
-report is not a tab — it is **Sessions** in the org kebab.
+for the whole organization), and, in a business organization, **Assistants** (below).
+So every tab in the org settings strip except **General** and **Users** needs Expert mode
+on. The org sessions report is not a tab — it is **Sessions** in the org kebab.
 
 **Former members' My space** is a tab reached only by link: while projects that people
 left behind in their My space are waiting, the **Users** tab shows a callout with
-**Review**. Each listed project offers **Take over** (it moves to Projects, **Invited
+**Review**. In the standard view the **Users** tab hides that callout and its own **Former
+members** card; the Former members' My space tab itself still opens by link and lists the
+waiting projects in either view. Each listed project offers **Take over** (it moves to Projects, **Invited
 only**, with that Owner as its owner) or **Delete** (with its sessions and files; cannot be
 undone). Nobody can open those projects until then. Homes are never listed.
 
 ### Assistants
 
-**Settings > Assistants** (business organizations only) governs members' assistants:
+**Settings > Assistants** (business organizations only, Expert mode) governs members' assistants:
 
 - **Assistant reach** — **Default for every member**: how far each member's home
   assistant (the one in their home Private workspace) may reach into this organization:
@@ -275,7 +296,7 @@ in this organization; reach governs only the home assistant coming in from outsi
 
 ### Classifiers
 
-**Settings > Classifiers** (org admin only) holds the organization's **classifier
+**Settings > Classifiers** (org admin only, Expert mode) holds the organization's **classifier
 providers** — the fast, cheap yes/no/choice/score answerers behind classifier flow nodes and
 `platform.classify` (`references/classifier.md`). **Add Provider** asks for the **Provider**
 (**TypeSafe Jev**, or a **Jev-compatible endpoint** plus its **Endpoint**), a **Name**, a
@@ -292,6 +313,10 @@ exists, classifier flow nodes run on the generative fallback and `platform.class
 an admin acknowledges the new one.
 
 ## Where to connect a data source (cheat sheet)
+
+Every org **Settings** tab named here needs Expert mode on, as do project
+**Settings > Session defaults** and the session settings cards outside the standard view
+(see *Settings pages: standard view and Expert mode*).
 
 - **Personal OAuth for myself** → **My Connections** (`/<org>/my-connections`), on that
   provider's tab. The assistant can also start this in-conversation and hand over the
@@ -354,3 +379,9 @@ The org settings **Catalog** tab's **Company defaults** card (**Unpin** per row)
 `components/ui/asset-defaults-manager/asset-defaults-manager.tsx`, with the tab label from
 `pages/settings/org-settings-shell.page.tsx`; platform `main` @ `2409579c2` (2026-10-05),
 skaile-ai/platform#6382. The session-only disable control is grounded in `ui/workspace.md`.
+The settings standard view and Expert mode (the General tabs and their `?tab=` aliases, tab
+order, which tabs and cards each view shows, the session Permissions tab):
+`pages/settings/resolve-org-settings-tab.ts`, `pages/projects/settings/resolve-default-tab.ts`,
+`pages/sessions/settings/resolve-default-tab.ts`, `lib/settings-view`,
+`pages/sessions/settings/session-config-tab.tsx`, `pages/projects/settings/project-metadata-tab.tsx`;
+platform `main` @ `f8cbab8fb` (2026-10-08), skaile-ai/platform#6690.

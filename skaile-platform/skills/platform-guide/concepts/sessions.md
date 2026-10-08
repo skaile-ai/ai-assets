@@ -19,8 +19,9 @@ PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
   stopped to save resources. Files persist on disk; conversation history persists in the
   database. Nothing is lost. Recent file edits count as activity, and a session in the
   middle of an agent turn is not hibernated (a turn stalled for 2 hours is). A session
-  owner can override the timeout per session in session settings, **Config** tab >
-  **Idle timeout** (5–1440 minutes; blank uses the workspace default).
+  owner can override the timeout per session in session settings, **General** tab >
+  **Idle timeout** (5–1440 minutes; blank uses the workspace default). The card shows only
+  in **Expert mode**.
 - **Waking** — a hibernated session shows its stored conversation immediately, marked
   **Suspended** next to the title, and the composer stays usable. Sending a message wakes
   it (typing already starts the wake in the background; a message sent during the wake
@@ -51,23 +52,22 @@ trading per-turn cost against how much raw conversation the agent keeps:
 **Lower cost** (compact earlier), **Balanced (default)**, or **More context** (compact
 later). Models with smaller windows always keep the default.
 
-- **For the whole project** — project settings, **Project** tab > **Context compaction**
+- **For the whole project** — project settings, **General** tab > **Context compaction**
   (project Owner).
-- **For one agent** — session settings, **Config** tab > **Context compaction**, or the agent
+- **For one agent** — session settings, **General** tab > **Context compaction**, or the agent
   dialog's **Settings** tab > **Context compaction** (session or project Owner). This is
   stored on that session only and replaces the project's choice for it.
 
 Either change takes effect the next time the session starts or wakes. Choosing **Balanced
-(default)** returns to the platform default.
+(default)** returns to the platform default. Every one of these places shows only in
+**Expert mode** (the toggle in the user menu, under the avatar); outside it the choice is
+hidden but still applies.
 
-In **Expert mode** (the toggle in the user menu, under the avatar) the same setting, on the
-project tab and per agent, has a fourth choice, **Custom**, with a **Compact at** field for
-the exact point, from 10% to 90%: a percentage (`45`, `45%`) or a token count on the 1M
-window (`450k`, `450000`). The field shows the equivalent
-(45% = 450k tokens). The command palette has it as **Set context compaction to a custom
-threshold**. Without Expert mode a stored custom value shows as **Custom (45%, 450k
-tokens)**; it can be replaced with a preset but not edited, so a user who wants to change
-it needs Expert mode on.
+In Expert mode the same setting, on the project **General** tab and per agent, has a fourth
+choice, **Custom**, with a **Compact at** field for the exact point, from 10% to 90%: a
+percentage (`45`, `45%`) or a token count on the 1M window (`450k`, `450000`). The field
+shows the equivalent (45% = 450k tokens). The command palette has it as **Set context
+compaction to a custom threshold**.
 
 ### Seeing how full the context is
 
@@ -100,8 +100,9 @@ it answers `available: false`.
 ## Changing the model of a running session
 
 The model, thinking mode and effort live under **Agent runtime**: session settings,
-**Config** tab (one session), or project settings, **Session defaults** tab (every session
-that does not set its own value).
+**General** tab (one session), or project settings, **Session defaults** tab (every session
+that does not set its own value). Both need **Expert mode** on; the agent dialog's **AI
+Configuration** section is Expert mode only too.
 
 - A change to one of those three reaches a running session from its **next message** — no
   restart. A turn already in progress finishes on the old settings.
@@ -194,4 +195,6 @@ spawned instance: `finish-spawned-instance.handler.ts`), platform #6245 (subagen
 compaction per agent: `compaction-card.tsx`, `edit-agent-dialog.tsx`), platform #6355 (custom
 threshold in Expert mode, 10–90%: `compaction-card.helpers.ts`, `skaile-config-ops.route.ts`), platform #6359 (context
 meter and breakdown: `session-context-usage.tsx`, `workspace.getContextUsage` /
-`workspace.measureContextUsage`).
+`workspace.measureContextUsage`), platform #6690 (settings standard view: the session
+**General** tab, formerly Config, and the Idle timeout, Agent runtime, Context compaction and
+agent dialog AI Configuration controls shown only in Expert mode).
