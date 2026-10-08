@@ -37,7 +37,10 @@ PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
 - **Archived** — not a lifecycle step but a flag on top of one: hidden from the default lists,
   conversation kept. Archiving a running or hibernated session closes it first, so its work is
   synced back as in **Closed** above. Sessions are archived from the **Danger zone** at the
-  bottom of the session settings **General** tab (Expert mode), by marking a temporary hire or helper done, or when an idle one is tidied away.
+  bottom of the session settings **General** tab (Expert mode), or by marking a temporary hire
+  or helper done. A temporary hire or helper is also archived automatically once it has sat
+  stopped past its idle threshold (4 hours unless its job description sets one). Ordinary
+  sessions are never archived automatically; the 30-day rule above only closes them.
   An archived session is **read-only**: opening it shows its history without starting it, and it
   takes no messages. Its owner finds it in the project's **Archive** group in the sidebar (Expert
   mode) and clicks **Restore** on the archived screen or composer, or **Restore session** in the
@@ -209,4 +212,5 @@ meter and breakdown: `session-context-usage.tsx`, `workspace.getContextUsage` /
 **General** tab, formerly Config, and the Idle timeout, Agent runtime, Context compaction and
 agent dialog AI Configuration controls shown only in Expert mode), platform #6810 (archived
 sessions are read-only: `session-lifecycle.service.ts` `SESSION_ARCHIVED`,
-`session-message.service.ts`, `workspace-status-screens.tsx`, `chat-input-area-banner.tsx`).
+`session-message.service.ts`, `workspace-status-screens.tsx`, `chat-input-area-banner.tsx`;
+the idle archive of spawned instances: `instance-lifecycle.service.ts` `runIdleSweep`).

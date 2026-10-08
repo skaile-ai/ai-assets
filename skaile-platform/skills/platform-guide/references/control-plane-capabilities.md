@@ -362,7 +362,8 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   - `archived`: no person had written in the child, so it is closed exactly as a person closing
     it would (its work is synced back to the project, the **Closed** step in
     `concepts/sessions.md`) and then archived: its conversation is kept, it is read-only, and the owner can
-    restore it (**Restore**; in expert mode it is in the project's **Archive** group in the sidebar). If no
+    restore it (**Restore**; in expert mode it is in the project's **Archive** group in the sidebar),
+    then reopen it, which needs **Org Owner** (`concepts/sessions.md`). If no
     person had written in it but it was already closed (an owner closed it, or it sat hibernated
     for 30 days), only the archive happens: its work was synced back when it closed.
   - `proposed`: a person has written there, even while the card waited, so the child is not
