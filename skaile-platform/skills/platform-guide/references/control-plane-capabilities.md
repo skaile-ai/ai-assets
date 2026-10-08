@@ -355,7 +355,8 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   `platform.get_operation({ invocationId })` tells you only that they approved, not whether the
   child was archived or asked to be marked done. Read the child instead:
   `platform.list_my_sessions({ archived: true })` lists it if it was archived (by this call, or by
-  the idle archive below, which does not mean nobody wrote in it); otherwise it is
+  the idle archive in `concepts/sessions.md`, which does not mean nobody wrote in it; its history,
+  `platform.read_session_history`, shows whether the owner was asked to mark it done); otherwise it is
   still open, and either the owner was asked in it to mark it done or the request could not be
   posted (`not_delivered`, below). Read its history (`platform.read_session_history`) for the
   request; if it is not there or you cannot read it, tell the owner in this session that the
@@ -378,7 +379,9 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
 
   One refusal comes only when it runs: `not_delivered`, a code, not a `status`. A person has
   written in the child and the request to mark it done could not be posted there, so the child
-  is not archived. Do not retry; tell the owner in this session that the child is done.
+  is not archived by this call. Do not retry; tell the owner in this session that the child is
+  done, and that it will be archived on its own once left stopped past its idle threshold
+  (`concepts/sessions.md`, **Archived**) unless they keep working in it.
 - **A shared template reports back with a send, not an ask.** Ask the child to send you its
   result when done, and subscribe to it (`platform.notify_when_idle`) to hear that it has
   finished.
@@ -740,4 +743,6 @@ and phase 3 of agent templates, part of skaile-ai/platform#6216: #6245
 (the job description, temporary hire and helper vocabulary) and #6315 (the renamed labels,
 including **Edit job description…**); skaile-ai/platform#6653 (what a helper carries:
 `session-carry.ts`) and #6654 (a helper's own agent name and the name check: `agent-spawn.service.ts`,
-`spawn-subagent-policy.service.ts`).
+`spawn-subagent-policy.service.ts`); skaile-ai/platform#6810 (archived sessions are read-only, the
+**Restore** label, the idle archive of spawned instances: `instance-lifecycle.service.ts`
+`sweepIdleInstances`).

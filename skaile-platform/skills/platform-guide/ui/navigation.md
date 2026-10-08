@@ -384,4 +384,6 @@ order, which tabs and cards each view shows, the session Permissions tab):
 `pages/settings/resolve-org-settings-tab.ts`, `pages/projects/settings/resolve-default-tab.ts`,
 `pages/sessions/settings/resolve-default-tab.ts`, `lib/settings-view`,
 `pages/sessions/settings/session-config-tab.tsx`, `pages/projects/settings/project-metadata-tab.tsx`;
-platform `main` @ `f8cbab8fb` (2026-10-08), skaile-ai/platform#6690.
+platform `main` @ `f8cbab8fb` (2026-10-08), skaile-ai/platform#6690. The **Restore** route for an
+archived session and the read-only note on the Danger zone: skaile-ai/platform#6810
+(`workspace-status-screens.tsx`, `chat-input-area-banner.tsx`).
