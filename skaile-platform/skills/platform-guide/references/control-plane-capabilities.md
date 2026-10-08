@@ -339,7 +339,8 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   the child on another model; the card names it. On any other template a `model` is refused
   before a card exists, so leave it out.
 - **No link is needed between you and a child.** You and it can `send_to_session` and
-  `notify_when_idle` each other for as long as neither is archived; do not propose a link. Your
+  `notify_when_idle` each other for as long as neither is archived (a child left stopped past its
+  idle threshold is archived on its own, `concepts/sessions.md`); do not propose a link. Your
   messages, the task included, never count as the human turn, so this session keeps the right to
   close and archive the child (see *Finish a child* below) until a person writes in it. The send
   and budget rules are the ordinary ones in *Agent-to-Agent* (`concepts/collaboration.md`).
@@ -353,7 +354,8 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   after that, it still runs, but its result is not kept:
   `platform.get_operation({ invocationId })` tells you only that they approved, not whether the
   child was archived or asked to be marked done. Read the child instead:
-  `platform.list_my_sessions({ archived: true })` lists it if it was archived; otherwise it is
+  `platform.list_my_sessions({ archived: true })` lists it if it was archived (by this call, or by
+  the idle archive below, which does not mean nobody wrote in it); otherwise it is
   still open, and either the owner was asked in it to mark it done or the request could not be
   posted (`not_delivered`, below). Read its history (`platform.read_session_history`) for the
   request; if it is not there or you cannot read it, tell the owner in this session that the
@@ -367,8 +369,10 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
     person had written in it but it was already closed (an owner closed it, or it sat hibernated
     for 30 days), only the archive happens: its work was synced back when it closed.
   - `proposed`: a person has written there, even while the card waited, so the child is not
-    archived and the owner is asked in it to mark it done. This is checked first, so it holds
-    for an already-closed child too. Do not call again: it posts that request once until a
+    archived by this call and the owner is asked in it to mark it done. This is checked first, so
+    it holds for an already-closed child too. It does not protect the child from the idle archive:
+    a child left stopped past its idle threshold is archived anyway (`concepts/sessions.md`,
+    **Archived**), and its owner can **Restore** it. Do not call again: it posts that request once until a
     person answers there, so a repeat changes nothing.
   - `already_done`: the child was archived while the card waited. Nothing more to do.
 
@@ -457,7 +461,8 @@ already answers to it), `empty_name` or `name_too_long` (over 120 characters). I
   In every case tell the helper what it lacks instead of handing it paths it cannot reach.
 - **It takes no task.** Once it has `Succeeded`, send it its task with
   `platform.send_to_session`. You and it reach each other (`send_to_session`,
-  `notify_when_idle`) with no link for as long as neither is archived, and
+  `notify_when_idle`) with no link for as long as neither is archived (it is archived on its own
+  once left stopped past its idle threshold), and
   `platform.list_peers` shows it to you with `relation: "child"` and you to it with
   `"spawner"`; ask it to `send` you its result, and close it with
   `platform.finish_spawned_instance` when its work is done.
