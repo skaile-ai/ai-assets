@@ -36,13 +36,14 @@ PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
   session never is.
 - **Archived** — not a lifecycle step but a flag on top of one: hidden from the default lists,
   conversation kept. Archiving a running or hibernated session closes it first, so its work is
-  synced back as in **Closed** above. Sessions are archived from the session **Danger zone**
-  (Expert mode), by marking a temporary hire or helper done, or when an idle one is tidied away.
+  synced back as in **Closed** above. Sessions are archived from the **Danger zone** at the
+  bottom of the session settings **General** tab (Expert mode), by marking a temporary hire or helper done, or when an idle one is tidied away.
   An archived session is **read-only**: opening it shows its history without starting it, and it
   takes no messages. Its owner finds it in the project's **Archive** group in the sidebar (Expert
   mode) and clicks **Restore** on the archived screen or composer, or **Restore session** in the
-  session menu or command palette. A restored closed session is then reopened as usual. Anyone
-  else has to ask the owner.
+  session menu or command palette. Restoring only lifts the flag: a restored session that was
+  closed still has to be reopened, and reopening needs **Org Owner** (see below). Anyone else has
+  to ask the owner.
 
 After a gap of an hour or more, the agent is told how long it has been since the previous
 turn. Treat anything time-sensitive from before such a gap as possibly out of date.

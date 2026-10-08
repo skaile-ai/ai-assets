@@ -60,7 +60,7 @@ The capability's own description carries the live list; prefer it if the two dif
     its **+** stays reachable). Expanding a project shows, in order: **Apps** (the apps
     its sessions declare; a green **Running** dot marks one that is serving — clicking an
     app opens its session with only that app's preview showing), the project's sessions,
-    **Flows** (each flow with its run groups), and **Archive** (archived sessions — only in expert mode).
+    **Flows** (each flow with its run groups), and **Archive** (archived sessions — only in expert mode; open one and click **Restore** to bring it back, see `concepts/sessions.md`).
     Each of the project's job descriptions is a node among the sessions, with its running
     temporary hires nested under it (an unlisted one shows no hires). Its name opens the latest
     running temporary hire, or offers to take one on; the **+** beside it is **Take on a
@@ -235,7 +235,7 @@ Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner).
 
 | Tab          | Purpose |
 | ------------ | ------- |
-| **General**  | Session-scoped Skaile config (overrides project defaults). Always shown: **Session address**, the **Agent** card (its AI configuration row only in Expert mode), **Mounts** (edits this session's workspace mount with **Edit mount** and removes other mounts; see `concepts/integrations.md`) and **Agent to agent communication**. In Expert mode only: **Idle timeout**, **AI provider**, **Agent runtime**, **Context compaction** (when this agent compacts; see `concepts/sessions.md`), **Git provider**, **Connectors**, and the **Danger zone** (archive), which sits at the bottom of the tab. Formerly the **Config** tab; `?tab=config` links still open it. |
+| **General**  | Session-scoped Skaile config (overrides project defaults). Always shown: **Session address**, the **Agent** card (its AI configuration row only in Expert mode), **Mounts** (edits this session's workspace mount with **Edit mount** and removes other mounts; see `concepts/integrations.md`) and **Agent to agent communication**. In Expert mode only: **Idle timeout**, **AI provider**, **Agent runtime**, **Context compaction** (when this agent compacts; see `concepts/sessions.md`), **Git provider**, **Connectors**, and the **Danger zone** (archive; an archived session is read-only until its owner restores it), which sits at the bottom of the tab. Formerly the **Config** tab; `?tab=config` links still open it. |
 | **Members**  | Session-scoped role overrides on top of project membership; add session-only members. |
 | **Shares**   | Session visibility (**Everyone in the project** / **Invited only**) and public file-preview links. |
 | **Permissions** | The session's standing autonomy grants: revoke one, or stop all. |
