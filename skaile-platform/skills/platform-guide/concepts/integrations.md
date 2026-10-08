@@ -162,6 +162,27 @@ or hides them for the whole organization with **Filter rules**. Unless the organ
 only (not the whole project) from its row in the workspace **AI Assets** panel (see
 `ui/workspace.md`). PowerPoint is available in the catalog but is not a company default.
 
+## Remote MCP server tokens
+
+A remote MCP server that needs a static token or API key gets it as a secret, never as a
+plain header. In the workspace **AI Assets** panel, connect a remote MCP server and choose
+**Authentication** → **Token / API key**: the user pastes the token into a masked field
+(it is stored encrypted and never shown again) and sets the header name and scheme (default
+**Authorization** with **Bearer**). Plain **Headers** rows are for values that are not secret.
+
+A project owner also chooses who receives the token:
+
+- **Only me** (the default) — only that person's own sessions.
+- **Job descriptions I give it to** — no session gets it until a project owner gives it to a
+  job description: open the job description for editing, then its **Credentials** section, and
+  use **Give to this job description**. Only that job description's temporary hires receive it.
+  An organization-level credential needs an organization admin to give it. **Remove** takes it
+  away again and pauses the job description's running temporary hires so they lose it.
+- **Every session in this project** — every session, including other people's. Prefer giving
+  it to a job description when only one kind of agent needs it.
+
+The agent cannot enter, see or move such a token: point the user at these screens.
+
 ## Mounts vs. connectors (recap)
 
 - **Mounts** = external data surfaced as **files** in the workspace (git, local, S3,
@@ -179,7 +200,7 @@ Source of truth: `platform/docs/integration_architecture.md`,
 #5337/#5357 (Reconnect), #5364 (shared mailboxes per org),
 #5531 (shared-mail admin approval link), #4703 (setup-token seats),
 #5099/#5109/#5139 (seat health and routing), #5305 (classifier providers),
-#6133 (cycle_session without an approval card), #6382 (Word and Excel as company
+#6133 (cycle_session without an approval card), #6849 (remote MCP tokens as secrets, job description credentials), #6382 (Word and Excel as company
 defaults), #6435 (an unadopted company default stays removed), #6690 (settings standard view: the
 session **General** tab, org AI Providers, Classifiers and Catalog shown only in Expert mode,
 Global providers listed to platform admins only).
