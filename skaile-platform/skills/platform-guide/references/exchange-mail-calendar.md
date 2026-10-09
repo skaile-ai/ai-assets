@@ -18,6 +18,16 @@ call:
 So if no mail capability is in your live set, the fix is the project owner's, in the web app.
 Say so; do not claim mail is unsupported. Revoking either fact takes the family away mid-session.
 
+**A third fact, per mailbox: whether this session may use it.** Enabling a mailbox opens it to the
+project, not automatically to every agent in it. In the project's **Connectors** settings the owner
+lets each mailbox be used by every agent, by only their own sessions that nobody else can send turns
+to, or by only the agents and sessions they grant. A grant can cover the agents a session starts and
+can expire. `platform.list_mailboxes` lists only the mailboxes this session may use, and a call
+naming any other is refused as unavailable. If the user wants mail and none is listed, tell them the
+owner can grant this agent or session access there; you cannot grant it yourself. A new grant reaches
+a running session only after it restarts; a revoke takes effect at once and also withdraws any card
+or standing approval you still held for that mailbox.
+
 **In a session someone besides the owner can read**, the mailbox is still the owner's: every mail
 or calendar read goes to the owner as a card per read (no standing approval), and the uncarded
 changes below (flagging, categories, drafts and their attachments) are refused unless the owner
