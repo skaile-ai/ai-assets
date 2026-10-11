@@ -60,7 +60,7 @@ current status without making changes.
 | CLAUDE.md | `<package>/CLAUDE.md` | Developers + AI agents | Architecture, conventions, environment setup |
 | Starlight docs | `docs/src/content/docs/` | All | In-depth reference (commands, API, config) |
 | DOMAIN.md / SKILL.md | `ai-assets/<domain>/` | AI agents + skill authors | Domain purpose, skill inventory, skill behavior |
-| _devlog | `_devlog/DEVLOG.md` | Developers | Historical record of what changed and why |
+| _devlog | `_devlog/entries/` | Developers | Historical record of what changed and why |
 
 ### Modes
 
