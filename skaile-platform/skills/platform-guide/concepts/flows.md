@@ -224,6 +224,10 @@ decided, and again immediately before the write.
 
 For `platform.revise_flow` the scope is the stored flow's own, not the session's project.
 
+**Renaming a flow.** `platform.revise_flow` with only `name` renames a flow without resending
+its nodes. The new name is what the flow list shows, and the owner's card says "Renames the flow
+from … to …". It is a revision like any other: the same admin rule and the same card or grant.
+
 So an owner who is not an admin of that scope is refused **before any card appears**, and
 someone else approving cannot change that. The refusal is prose that names the role, plus a
 structured `remedy` (`capability`, `requiredScope`, `requiredRole`) that no screen renders;
