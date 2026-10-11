@@ -153,7 +153,7 @@ Every change in skaile-dev may affect up to five documentation surfaces. See
 | Dev guide | `CLAUDE.md`              | Architecture, conventions, or environment changes  |
 | Reference | `docs/<pkg>/`            | New commands, configuration options, component API |
 | AI guide  | `DOMAIN.md` / `SKILL.md` | Changes to AI resource structure or skill behavior |
-| Dev log   | `_devlog/DEVLOG.md`      | After every meaningful change (always)             |
+| Dev log   | `_devlog/entries/`       | After every meaningful change (always)             |
 
 The `doc` skill covers tiers 1-4. The `devlog` skill handles the dev log tier.
 The `sync-docs` skill repairs cross-references between tiers.

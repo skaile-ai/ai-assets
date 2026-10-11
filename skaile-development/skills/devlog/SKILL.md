@@ -1,7 +1,7 @@
 ---
 name: "devlog"
 description: "Maintains the human-readable _devlog for the skaile-dev monorepo. Writes
-  short plain-language entries to _devlog/DEVLOG.md after every meaningful change.
+  short plain-language entry files to _devlog/entries/ after every meaningful change.
   Generates detailed reports in _devlog/reports/ when architectural concepts, shared
   contracts, or core patterns change. Run after completing any implementation work."
 metadata:
@@ -18,8 +18,6 @@ metadata:
   produces:
   - path: "_devlog/entries/<date>-<slug>.md"
     description: "Individual devlog entry file (one per change)"
-  - path: "_devlog/DEVLOG.md"
-    description: "Index file linking to all entries (newest first)"
   - path: "_devlog/reports/<date>-<topic>.md"
     description: "Detailed report for conceptual/architectural changes (only when
       needed)"
@@ -65,11 +63,12 @@ Three output types:
 | Type | When | Location |
 |------|------|---------|
 | Entry file | Every meaningful change | `_devlog/entries/<date>-<slug>.md` |
-| Index line | Every entry | `_devlog/DEVLOG.md` (prepend link) |
 | Detailed report | Conceptual/architectural changes | `_devlog/reports/<date>-<topic>.md` |
 
-**Every meaningful change gets its own entry file.** `DEVLOG.md` is an index of links,
-not a monolithic log. Detailed reports are reserved for changes that alter how the system
+**Every meaningful change gets its own entry file.** There is no index file: the dated file
+names in `_devlog/entries/` are the index. Never create or edit a `_devlog/DEVLOG.md`. An
+index that every PR edits makes open PRs collide, and it drifted out of date (platform#4227).
+Detailed reports are reserved for changes that alter how the system
 fundamentally works - shared contracts, architectural patterns, breaking API changes,
 new development paradigms.
 
@@ -100,49 +99,29 @@ ROLE  Development log writer — records changes in plain language with implicat
 
 READS
   git log / git diff                         — recent commits and changes for context
-  _devlog/DEVLOG.md                          — index file (read to check for duplicates)
-  _devlog/entries/                           — existing entry files
+  _devlog/entries/                           — existing entry files (read to check for duplicates)
   _implementation/decisions.md              — decisions and concerns to incorporate
   ? <package>/CLAUDE.md                     — context for architectural change reports
 
 WRITES
   _devlog/entries/<date>-<slug>.md          — new entry file (one per change)
-  _devlog/DEVLOG.md                         — prepend link to new entry at top of list
   _devlog/reports/<date>-<topic>.md         — detailed report (when report_needed=yes)
 
 MUST  create each entry as a separate file in _devlog/entries/
-MUST  prepend a link to DEVLOG.md index (newest entries first)
 MUST  use plain language — no jargon, no implementation detail dumps
 MUST  include: what changed, why, affected packages, implications
 MUST  write reports for architectural/conceptual changes
-NEVER put entry content directly in DEVLOG.md — it is an index only
+NEVER create or edit _devlog/DEVLOG.md — there is no index file
 NEVER duplicate an entry for the same change
 NEVER write entries that are just git commit messages
 NEVER write entries without a "why" — the reason matters most
 
 EMIT [devlog] started
 
-# ── DEVLOG.md Initialization ─────────────────────────────────────
+# ── Initialization ───────────────────────────────────────────────
 
-IF _devlog/DEVLOG.md does not exist:
-  - Create _devlog/ directory, _devlog/entries/, _devlog/reports/
-  - Create _devlog/DEVLOG.md with header:
-
-    ```
-    # skaile-dev Development Log
-
-    Human-readable record of what changed in this codebase, why it changed,
-    and what the implications are. Newest entries first.
-
-    For architecture, see CLAUDE.md. For usage, see README.md.
-    For in-depth reference, see the Starlight docs.
-    This log is the *why* - not a replacement for any of the above.
-
-    Each entry is a separate file in `_devlog/entries/`. Detailed architectural
-    reports live in `_devlog/reports/`.
-
-    ---
-    ```
+IF _devlog/entries/ does not exist:
+  - Create _devlog/entries/ and _devlog/reports/. Create no index file.
 
 # ── Short Entry ──────────────────────────────────────────────────
 
@@ -164,7 +143,7 @@ STEP 2: Assess implications
       - Does this require migration steps for existing users? → document them
     - Write a concise implications sentence
 
-STEP 3: Write entry file + update index
+STEP 3: Write the entry file
 
   3a. Generate filename:
     - slug = title lowercased, non-alphanumeric replaced with hyphens, max 60 chars
@@ -187,21 +166,13 @@ STEP 3: Write entry file + update index
 
   ```
 
-  3c. Prepend a link to `_devlog/DEVLOG.md` (after the `---` header separator):
-
-  ```markdown
-  - [YYYY-MM-DD - <Title>](entries/<filename>)
-  ```
-
-  The link must be the FIRST list item (newest first). Do not put entry content in DEVLOG.md.
-
   Examples of good entry files (in `_devlog/entries/`):
 
   ```markdown
   ## 2026-03-25 — Add devlog skill to skaile-dev-ops domain
 
   **What changed:** A new `devlog` skill is available in the `skaile-dev-ops` domain. It
-  maintains `_devlog/DEVLOG.md` with short entries and generates detailed reports for
+  writes short entry files to `_devlog/entries/` and generates detailed reports for
   architectural changes.
 
   **Why:** Developers and AI agents starting a new session had no quick way to understand
@@ -248,7 +219,7 @@ STEP 4: Assess if report is needed
 
 STEP 5: Write detailed report
   - Create: `_devlog/reports/<YYYY-MM-DD>-<topic-slug>.md`
-  - Link from the entry file (not DEVLOG.md): append `See report: [_devlog/reports/<filename>]`
+  - Link from the entry file: append `See report: [_devlog/reports/<filename>]`
 
   Report structure:
 
@@ -314,12 +285,11 @@ STEP 6: Commit devlog updates
 EMIT [devlog] completed entry=<title> report=<yes|no>
 
 CHECKLIST
-  - [ ] DEVLOG.md exists (created if needed)
-  - [ ] New entry prepended at top (newest first)
+  - [ ] Entry written as its own dated file in `_devlog/entries/`; no index file touched
   - [ ] Entry has: what changed, why, affected, implications
   - [ ] Plain language — no internal jargon
   - [ ] Detailed report generated when report_needed=yes
-  - [ ] Report linked from DEVLOG.md entry
+  - [ ] Report linked from the entry file
   - [ ] Changes committed with "docs(devlog): ..." message
 
 ---
@@ -345,7 +315,7 @@ CHECKLIST
 |---------|-------------------|
 | Writing git-commit-style entries ("feat: add X") | Write in plain language: "Added X to forge/skaile-forge, which allows users to..." |
 | Skipping the "why" | The why is the most valuable part — always include it |
-| Overwriting DEVLOG.md | Always prepend — never overwrite or truncate |
+| Creating or editing `_devlog/DEVLOG.md` | There is no index file; write only the entry file |
 | Writing reports for every change | Reports are for conceptual/architectural changes only |
 | Treating devlog as a substitute for docs | The devlog is history. README/CLAUDE.md/Starlight are current truth. |
 

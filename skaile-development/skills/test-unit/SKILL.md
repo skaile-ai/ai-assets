@@ -587,7 +587,7 @@ STEP 11: Present report
 STEP 12: Recommend follow-ups
 
   After generation:
-  - Run the `devlog` skill to record the test addition in `_devlog/DEVLOG.md`.
+  - Run the `devlog` skill to record the test addition in a `_devlog/entries/` file.
   - If coverage improved meaningfully, edit `_devlog/reports/coverage-baseline-2026-04-22/summary.json`
     in the same PR to lock in the gain.
   - If L3-layer deferrals exist, recommend the user invoke `test-integration target=<pkg>`.

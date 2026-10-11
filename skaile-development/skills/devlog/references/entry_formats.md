@@ -4,9 +4,9 @@ Quick reference for writing devlog entries and reports. See `SKILL.md` for the f
 
 ---
 
-## Short Entry (DEVLOG.md)
+## Short Entry (entry file)
 
-**Use for:** every meaningful change. Prepend to `_devlog/DEVLOG.md`.
+**Use for:** every meaningful change. Write it as its own file, `_devlog/entries/<YYYY-MM-DD>-<slug>.md`. There is no index file.
 
 ```markdown
 ## YYYY-MM-DD — <Title>
@@ -94,7 +94,7 @@ What else needs updating as a consequence.
 
 ---
 
-## Linking Report from DEVLOG.md Entry
+## Linking a Report from the Entry File
 
 When a report exists, add a link line to the short entry:
 

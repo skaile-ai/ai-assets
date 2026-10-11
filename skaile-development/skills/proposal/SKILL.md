@@ -43,7 +43,7 @@ metadata:
     description: "The design spec with structured frontmatter"
   - path: "_devlog/reports/YYYY-MM-DD-<topic>.md"
     description: "Detailed devlog report (for architectural proposals)"
-  - path: "_devlog/DEVLOG.md"
+  - path: "_devlog/entries/<date>-<slug>.md"
     description: "Short devlog entry linking to spec and report"
 ---
 
@@ -55,13 +55,13 @@ READS
   skaile-dev/CLAUDE.md                       — monorepo structure and conventions
   <affected-package>/CLAUDE.md               — package architecture for context
   docs/superpowers/specs/                    — existing specs for format reference
-  _devlog/DEVLOG.md                          — recent changes for context
+  _devlog/entries/                           — recent changes for context (newest file names)
   references/spec-template.md                — the canonical spec template
 
 WRITES
   docs/superpowers/specs/<date>-<topic>-design.md  — the spec itself
   _devlog/reports/<date>-<topic>.md          — detailed report (if architectural)
-  _devlog/DEVLOG.md                          — short entry (prepended)
+  _devlog/entries/<date>-<slug>.md           — short entry
 
 MUST  use the frontmatter format from references/spec-template.md
 MUST  set author field to the person creating the spec
@@ -121,7 +121,7 @@ STEP 6: Devlog
   - If the proposal is architectural (new packages, new patterns, breaking changes):
     - Write a detailed report to _devlog/reports/<date>-<topic>.md
     - Include "Thought Process" section documenting the reasoning path
-  - Always write a short entry to _devlog/DEVLOG.md with status "(proposal)"
+  - Always write a short entry file to _devlog/entries/ with status "(proposal)"
   - Trigger the `devlog` skill or write entries directly
 
 STEP 7: Commit

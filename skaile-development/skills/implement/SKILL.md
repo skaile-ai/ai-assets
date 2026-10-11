@@ -40,7 +40,7 @@ metadata:
   produces:
   - path: "_implementation/skaile-plan.md"
     description: "Structured plan for this implementation task"
-  - path: "_devlog/DEVLOG.md"
+  - path: "_devlog/entries/<date>-<slug>.md"
     description: "Devlog entry added after completion"
   user_inputs:
     dialog:
@@ -104,7 +104,7 @@ WRITES
   _implementation/skaile-plan.md                         — task plan with checklist
   _implementation/decisions.md                           — decisions and concerns log
   <target source files>                                   — actual code changes
-  _devlog/DEVLOG.md                                      — devlog entry on completion
+  _devlog/entries/<date>-<slug>.md                       — devlog entry on completion
 
 REFERENCES
   skaileup-shared/contracts/golden_principles.md              — naming and structure rules
