@@ -42,7 +42,10 @@ PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
   stopped (hibernated, closed or errored) past its idle threshold: the job description's, for a
   hire whose job description sets one, otherwise the platform's (4 hours by default). This idle
   archive does not check whether a person wrote in it — that check belongs to the agent finishing
-  a child itself (`references/control-plane-capabilities.md`). The owner can always **Restore** it.
+  a child itself (`references/control-plane-capabilities.md`). Five minutes before the archive,
+  the hire is warned in its chat and woken for one turn to hand its open work to the agent that
+  started it. A message from that agent or from a person keeps it; its own messages do not. The
+  owner can always **Restore** it.
   Ordinary sessions are never archived automatically; the 30-day rule above only closes them.
   An archived session is **read-only**: opening it shows its history without starting it, and it
   takes no messages. Its owner finds it in the project's **Archive** group in the sidebar (Expert
