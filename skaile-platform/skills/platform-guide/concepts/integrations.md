@@ -138,7 +138,11 @@ provider list shows Global providers only to platform admins; that is a permissi
 Expert mode, so turning Expert mode on does not reveal them. A Claude
 subscription seat can be connected by pasting a token from `claude setup-token` (the
 default) or a credentials file. A setup-token seat does not refresh itself: when it stops
-working, the owner re-runs `claude setup-token` and pastes the new token. Each credential
+working, the owner re-runs `claude setup-token` and pastes the new token. Such a token lasts
+about a year, so the people who manage the seat (platform admins for a global provider,
+organization Owners, or project Owners) get an email a week and a day before it is expected to
+expire; they then use **Rotate credential** and **Paste a setup token**. The date is an
+estimate, and no email is sent while the platform's mail is off. Each credential
 shows a health status (healthy, rate limited, authentication failed, or unreadable — the
 last means re-enter it). Seats that hit their usage limit are routed around until the
 limit resets, and the chat shows a notice when a seat is parked.
