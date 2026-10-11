@@ -540,6 +540,11 @@ Fuller treatment: `ai-assets/docs/flows.md`.
     person from that page.
 - A person does the same on the group's detail page (click through from the board):
   **Activate**, and the **Autonomous** switch.
+- **Renaming a run group, or changing its limits after creation:** `platform.revise_run_group`
+  takes the group and a new `name`, a `policy` holding only the fields to change, or both.
+  It is approval-gated, and the reply's `change` lists each field before and after, so
+  report that rather than what you asked for. No separate rename capability exists for run
+  groups.
 - **A run group can run on a job description** (an agent template) instead of a recipe: the
   wizard lists them under **Job description**, and `platform.create_run_group` takes
   `agentTemplateId` (not together with `skaileConfigId`; find it with
