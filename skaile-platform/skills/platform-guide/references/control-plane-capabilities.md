@@ -344,6 +344,16 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   messages, the task included, never count as the human turn, so this session keeps the right to
   close and archive the child (see *Finish a child* below) until a person writes in it. The send
   and budget rules are the ordinary ones in *Agent-to-Agent* (`concepts/collaboration.md`).
+- **Rename a child with the "Rename a temporary hire" action** (`platform.find_actions` with
+  "rename helper", then `platform.invoke`), never with `platform.set_agent_name`, which only ever
+  renames you. The new name becomes the child's session name, its agent name and its `@handle`
+  together, and the owner approves it on a card unless a standing approval covers that child. The
+  handle is checked against the people in the child's own chat: a name whose handle is already a
+  person's (`handle_taken`), a group mention such as `@all` (`handle_reserved`), or a name with no
+  usable handle (`name_not_mentionable`, `empty_name`) is refused before anything changes, so
+  propose a different name. For a temporary hire the new name replaces its job description's name
+  for that hire only. Links and messages between you and the child keep working: they go by
+  session, not by name.
 - **Finish a child with `platform.finish_spawned_instance({ sessionId })`** once its work is
   done. Use it rather than the **Archive** action from `platform.find_actions`, which is the
   owner's. Only the session that spawned it may call it, and only on its own children: a child
