@@ -523,6 +523,13 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   `platform.pause_run_group`, `platform.cancel_run_group`), each approval-gated and
   grantable. The session owner must be among those the group's **startableBy** allows (for
   a new group, the startableBy being set), or the call is refused before any card appears.
+- **Who `startableBy` and `approvers` name:** user ids, organization roles (`Owner`, `User`,
+  `Viewer`, `PlatformAdmin`: the person's role in the organization), or project roles
+  (`project:Owner`, `project:User`: the person's role in the group's project, checked when
+  they act). Each names one role only, so list both project roles to admit both. Use
+  `project:Owner` when the group should belong to whoever owns the project, so a second owner
+  is not locked out: a project Owner is often only a `User` of the organization, and the bare
+  `Owner` then refuses them. An empty list is not the same as `project:Owner`.
 - A group the agent creates is a **Draft**: it runs nothing until it is activated (the
   board's create wizard activates straight away). The order is create, then optionally
   switch autonomous mode on, then activate:
