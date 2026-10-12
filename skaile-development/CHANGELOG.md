@@ -6,6 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Fixes
+- `ship` 1.7.2: STEP 15 puts `Closes #<issue_number>` in the squash-merge body and then reads the issue state, closing the issue by hand with a comment if the merge left it open. Before, the skill left the keyword out of the squash body, and merged issues stayed open.
 - `ship` 1.7.1: STEP 10b treats a `whats-new-fix:`-only changeset as `docs_impact=none`, matching the platform CI guard, instead of demanding a capabilities-doc edit and an ai-assets PR.
 
 ### Enhancements

@@ -686,8 +686,9 @@ Platform guide: <ai-assets PR URL, or "n/a — reason"; chosen text only>
 EOF
 )"
   Capture pr_url and pr_number. `Closes #<n>` here links the PR to the issue and lets STEP 3b
-  find the PR again. It does NOT close the issue on a squash-merge with a custom body —
-  STEP 15 puts the keyword in the squash body too and then verifies the issue closed.
+  find the PR again. It should close the issue on merge, but squash-merges with a custom
+  body have left issues open, so STEP 15 also puts the keyword in the squash body and then
+  verifies the issue closed.
 
 EMIT [ship] pr_opened url=<pr_url> number=<pr_number>
 
@@ -1024,8 +1025,8 @@ STEP 14c: Refresh the PR description with what ACTUALLY shipped
   it fails SILENTLY in two places: the PR loses its link to the issue, so the issue shows
   no linked PR and loses the body's auto-close path (STEP 15's post-merge check catches an
   open issue, but only after the merge); and STEP 3b finds an existing PR with
-  `--search "Closes #<n> in:body"`, so a
-  mangled line makes a later `ship` on the same issue match zero PRs and open a SECOND
+  `--search "Closes #<n> in:body"`, so a mangled line makes a later `ship` on the same
+  issue match zero PRs and open a SECOND
   branch and PR for work that already has one. Update
   anything the babysit rounds made false (version numbers, counts, "only X changes"
   claims, described behaviour that was later corrected), and ADD a short recap at the top:
@@ -1137,25 +1138,33 @@ STEP 15: Ask the user how to finish (gate #9)
       rather than a concatenation of every babysit fix commit:
         $ gh pr merge <pr_number> --repo <github_slug> --squash \
             --subject "<type>(<scope>): <title> (#<issue_number>)" \
-            --body "$(printf '%s\n\nCloses #%s' "<one-line summary of what shipped>" "<issue_number>")"
+            --body "$(cat <<'EOF'
+<one-line summary of what shipped>
+
+Closes #<issue_number>
+EOF
+)"
         The squash body MUST carry `Closes #<issue_number>`. A custom `--body` replaces
         the PR body as the commit message. Observed in skaile-ai/platform: PRs merged into
         `main` this way, with `Closes #<n>` in the PR body and the issue listed in the PR's
         closing references, still left the issue open (platform#5787, platform#5800); other
         merges that day with the keyword in the squash body closed their issues 1 s after
-        the merge (platform#2517, platform#5776). So do
-        not rely on the PR body alone — the keyword in the commit is the path that worked,
-        and the check below is what proves the issue closed.
+        the merge (platform#2517, platform#5776). So do not rely on the PR body alone —
+        the keyword in the commit is the path that worked, and the check below is what
+        proves the issue closed.
         Use the keyword ONLY for <issue_number>, the issue this run shipped. Never put a
         closing keyword next to any other number in the subject or body (an umbrella or
         parent issue that must stay open gets a bare `#<n>` or `Part of #<n>`): GitHub's
         parser ignores negation and backticks, so `not Closes #<n>` still closes it.
       Verify the issue closed (the merge closes it about 1 s later, so check, wait, re-check):
         $ gh issue view <issue_number> --repo <github_slug> --json state -q .state
-        IF `OPEN`: wait 10 s and read it again. IF still `OPEN`, close it by hand and say why:
+        IF `OPEN`, wait and read it again:
+        $ sleep 10
+        $ gh issue view <issue_number> --repo <github_slug> --json state -q .state
+        IF still `OPEN`, close it by hand and say why:
+        $ gh pr view <pr_number> --repo <github_slug> --json mergeCommit -q .mergeCommit.oid   # -> <merge_sha>
         $ gh issue close <issue_number> --repo <github_slug> --reason completed \
             --comment "Shipped in <pr_url> (squash commit <merge_sha>). The merge did not close this issue, so I closed it by hand."
-        Read <merge_sha> from `gh pr view <pr_number> --repo <github_slug> --json mergeCommit -q .mergeCommit.oid`.
         Do this check on EVERY merge, keyword or not: it is the only step that proves the
         issue closed. Record the result as issue_state=<closed by merge | closed by hand>
         for STEP 16. IF the hand close fails, do not retry in a loop — report it in STEP 16
@@ -1346,7 +1355,7 @@ CHECKLIST
 | Asking the user to confirm description / category / repo (when inferable) / branch / plan | Decide silently. The only planned checkpoint is the final merge/cleanup/stop choice. |
 | Passing parent conversation to the implementer/reviewer | Build self-contained MVC prompts. |
 | Putting `Closes #<n>` in the branch's commit messages | Reference `#<n>` (no keyword) in branch commits. The keyword goes in the PR body (STEP 12) and in the squash body at merge (STEP 15) — nowhere else. |
-| Trusting the PR body's `Closes #<n>` to close the issue on a squash-merge | A custom `--body` on `gh pr merge --squash` becomes the commit message, and GitHub closes the issue only from a keyword in that commit. Put `Closes #<issue_number>` in the squash body, then read the issue state and close it by hand if it is still open. |
+| Trusting the PR body's `Closes #<n>` to close the issue on a squash-merge | A custom `--body` on `gh pr merge --squash` becomes the commit message. The PR body's keyword should close the issue on merge, but such merges have left issues open while merges with the keyword in the squash body closed theirs. Put `Closes #<issue_number>` in the squash body, then read the issue state and close it by hand if it is still open. |
 | A closing keyword next to an issue that must stay open | GitHub's parser ignores negation and backticks: `not Closes #<n>` closes #<n>. Write a bare `#<n>` or `Part of #<n>` for any issue other than the one this run shipped. |
 
 ## Integration
