@@ -16,7 +16,7 @@ description: >-
   existing code, for plans or design proposals, for filing an issue when implementation is
   explicitly deferred, for throwaway local experiments, or for work spanning several
   repositories.
-version: 1.7.1
+version: 1.7.2
 metadata:
   tags:
   - "ship"
@@ -684,7 +684,9 @@ Platform guide: <ai-assets PR URL, or "n/a — reason"; chosen text only>
 [only if any] - <finding> — <reason>
 EOF
 )"
-  Capture pr_url and pr_number. `Closes #<n>` auto-closes the issue on merge.
+  Capture pr_url and pr_number. `Closes #<n>` here links the PR to the issue and lets STEP 3b
+  find the PR again. It does NOT close the issue on a squash-merge with a custom body —
+  STEP 15 puts the keyword in the squash body too and then verifies the issue closed.
 
 EMIT [ship] pr_opened url=<pr_url> number=<pr_number>
 
@@ -1018,9 +1020,7 @@ STEP 14c: Refresh the PR description with what ACTUALLY shipped
     IF it is absent, restore it before editing. Never push a body without it.
     $ gh pr edit <pr_number> --repo <github_slug> --body-file <tmp>
   Keep the original structure and keep `Closes #<issue_number>` EXACTLY as it was. Losing
-  it fails SILENTLY in two places that both assume it is there: STEP 15 deliberately does
-  not close the issue after merging because the body does it, so the issue simply stays
-  open; and STEP 3b finds an existing PR with `--search "Closes #<n> in:body"`, so a
+  it fails SILENTLY: STEP 3b finds an existing PR with `--search "Closes #<n> in:body"`, so a
   mangled line makes a later `ship` on the same issue match zero PRs and open a SECOND
   branch and PR for work that already has one. Update
   anything the babysit rounds made false (version numbers, counts, "only X changes"
@@ -1133,9 +1133,25 @@ STEP 15: Ask the user how to finish (gate #9)
       rather than a concatenation of every babysit fix commit:
         $ gh pr merge <pr_number> --repo <github_slug> --squash \
             --subject "<type>(<scope>): <title> (#<issue_number>)" \
-            --body "<one-line summary of what shipped>"
-        (The issue closes via the PR body's `Closes #<issue_number>` — don't repeat the
-        keyword in the squash body.)
+            --body "$(printf '%s\n\nCloses #%s' "<one-line summary of what shipped>" "<issue_number>")"
+        The squash body MUST carry `Closes #<issue_number>`. A custom `--body` replaces
+        the PR body as the commit message, and GitHub then closes the issue only from the
+        keyword in the COMMIT — the PR body's `Closes #<n>` and the PR's link to the issue
+        do not close it. Merges that dropped the keyword left their issues open, silently.
+        Use the keyword ONLY for <issue_number>, the issue this run shipped. Never put a
+        closing keyword next to any other number in the subject or body (an umbrella or
+        parent issue that must stay open gets a bare `#<n>` or `Part of #<n>`): GitHub's
+        parser ignores negation and backticks, so `not Closes #<n>` still closes it.
+      Verify the issue closed (the merge closes it about 1 s later, so check, wait, re-check):
+        $ gh issue view <issue_number> --repo <github_slug> --json state -q .state
+        IF `OPEN`: wait 10 s and read it again. IF still `OPEN`, close it by hand and say why:
+        $ gh issue close <issue_number> --repo <github_slug> --reason completed \
+            --comment "Shipped in <pr_url> (squash commit <merge_sha>). The merge did not close this issue, so I closed it by hand."
+        Read <merge_sha> from `gh pr view <pr_number> --repo <github_slug> --json mergeCommit -q .mergeCommit.oid`.
+        Do this check on EVERY merge, keyword or not: it is the only step that proves the
+        issue closed. Record the result as issue_state=<closed by merge | closed by hand>
+        for STEP 16. IF the hand close fails, do not retry in a loop — report it in STEP 16
+        as `issue_state=OPEN (close failed: <error>)` so the user closes it.
       Cleanup, in this EXACT order:
         $ cd <repo_path>
         Guard (submodule worktree commits are local-only — losing them is unrecoverable):
@@ -1198,6 +1214,7 @@ STEP 16: Print the final block
   ── Ship Complete ───────────────────────────────────────────────
   Repo:    <repo> (<github_slug>)
   Issue:   #<issue_number> (<category>) — <title>   <issue_url>
+           [closed by merge | closed by hand | OPEN (close failed: <error>) | open (not merged)]
   Branch:  <branch_name>   [removed | kept]
   PR:      <pr_url>   [merged (squash) | open]
   Guide PR: <ai-assets url>   [merged | open | none]   (platform only)
@@ -1286,7 +1303,7 @@ CHECKLIST
   - [ ] PR description refreshed to match what actually shipped (recap added; stale claims from the babysit rounds corrected; `Closes #<number>` preserved)
   - [ ] Follow-up sweep done BEFORE the gate: small leftovers shipped into this PR; ≤3 follow-ups proposed, each with a cited issue-bar YES or a specific open question, YESes first (or none); only user-selected ones filed, unassigned, no closing keyword in the body
   - [ ] Plain-language recap printed before the final question (asked for / what was wrong / what I did / still open; no jargon, no paths, no symbols)
-  - [ ] Final disposition asked (merge+cleanup / cleanup / stop; reading-diff option offered iff the `meat` skill is available) and executed; squash used for merge
+  - [ ] Final disposition asked (merge+cleanup / cleanup / stop; reading-diff option offered iff the `meat` skill is available) and executed; squash used for merge, squash body carries `Closes #<number>`, issue state verified after the merge (closed by hand if the merge left it open)
   - [ ] Platform only: `docs_impact` decided BEFORE the commit (STEP 10b); when user-visible, the capabilities doc is in the PR and an ai-assets guide PR is open and linked; the PR body has the `## Docs` section; on merge the guide PR merged too (never skipped as "not accessible" — cloned instead)
   - [ ] Cleanup (when chosen) removed worktree + local branch (+ remote branch on merge); worktree/branches kept on "stop"
   - [ ] Final report printed
@@ -1318,7 +1335,9 @@ CHECKLIST
 | Opening the issue before the clean-tree pre-flight | A dirty tree would STOP with a dangling issue. Pre-flight first, then open the issue. |
 | Asking the user to confirm description / category / repo (when inferable) / branch / plan | Decide silently. The only planned checkpoint is the final merge/cleanup/stop choice. |
 | Passing parent conversation to the implementer/reviewer | Build self-contained MVC prompts. |
-| Putting `Closes #<n>` in both the commit and the PR body | Keep the auto-close keyword in the PR body only; reference `#<n>` (no keyword) in the commit title. |
+| Putting `Closes #<n>` in the branch's commit messages | Reference `#<n>` (no keyword) in branch commits. The keyword goes in the PR body (STEP 12) and in the squash body at merge (STEP 15) — nowhere else. |
+| Trusting the PR body's `Closes #<n>` to close the issue on a squash-merge | A custom `--body` on `gh pr merge --squash` becomes the commit message, and GitHub closes the issue only from a keyword in that commit. Put `Closes #<issue_number>` in the squash body, then read the issue state and close it by hand if it is still open. |
+| A closing keyword next to an issue that must stay open | GitHub's parser ignores negation and backticks: `not Closes #<n>` closes #<n>. Write a bare `#<n>` or `Part of #<n>` for any issue other than the one this run shipped. |
 
 ## Integration
 
