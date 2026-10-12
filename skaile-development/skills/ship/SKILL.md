@@ -613,8 +613,9 @@ STEP 11: Drop plan, lint, test, commit, push
 
     <1-3 sentence explanation (root cause + fix, or motivation + outline)>
     ```
-    (Reference `#<issue_number>` in the title; the auto-close `Closes #<n>` goes in the
-    PR body only, so the issue closes exactly once, on merge. Follow the repo's commit
+    (Reference `#<issue_number>` in the title, never a closing keyword in a branch commit.
+    `Closes #<n>` goes in the PR body (STEP 12) and in the squash body at merge (STEP 15),
+    and STEP 15 then checks that the issue closed. Follow the repo's commit
     convention — read skills/git/references/commit-spec.md and the repo's CLAUDE.md.)
     $ git commit -m "<message>"
 
@@ -1020,7 +1021,10 @@ STEP 14c: Refresh the PR description with what ACTUALLY shipped
     IF it is absent, restore it before editing. Never push a body without it.
     $ gh pr edit <pr_number> --repo <github_slug> --body-file <tmp>
   Keep the original structure and keep `Closes #<issue_number>` EXACTLY as it was. Losing
-  it fails SILENTLY: STEP 3b finds an existing PR with `--search "Closes #<n> in:body"`, so a
+  it fails SILENTLY in two places: the PR loses its link to the issue, so the issue shows
+  no linked PR and loses the body's auto-close path (STEP 15's post-merge check catches an
+  open issue, but only after the merge); and STEP 3b finds an existing PR with
+  `--search "Closes #<n> in:body"`, so a
   mangled line makes a later `ship` on the same issue match zero PRs and open a SECOND
   branch and PR for work that already has one. Update
   anything the babysit rounds made false (version numbers, counts, "only X changes"
@@ -1135,9 +1139,13 @@ STEP 15: Ask the user how to finish (gate #9)
             --subject "<type>(<scope>): <title> (#<issue_number>)" \
             --body "$(printf '%s\n\nCloses #%s' "<one-line summary of what shipped>" "<issue_number>")"
         The squash body MUST carry `Closes #<issue_number>`. A custom `--body` replaces
-        the PR body as the commit message, and GitHub then closes the issue only from the
-        keyword in the COMMIT — the PR body's `Closes #<n>` and the PR's link to the issue
-        do not close it. Merges that dropped the keyword left their issues open, silently.
+        the PR body as the commit message. Observed in skaile-ai/platform: PRs merged into
+        `main` this way, with `Closes #<n>` in the PR body and the issue listed in the PR's
+        closing references, still left the issue open (platform#5787, platform#5800); other
+        merges that day with the keyword in the squash body closed their issues 1 s after
+        the merge (platform#2517, platform#5776). So do
+        not rely on the PR body alone — the keyword in the commit is the path that worked,
+        and the check below is what proves the issue closed.
         Use the keyword ONLY for <issue_number>, the issue this run shipped. Never put a
         closing keyword next to any other number in the subject or body (an umbrella or
         parent issue that must stay open gets a bare `#<n>` or `Part of #<n>`): GitHub's
@@ -1215,6 +1223,8 @@ STEP 16: Print the final block
   Repo:    <repo> (<github_slug>)
   Issue:   #<issue_number> (<category>) — <title>   <issue_url>
            [closed by merge | closed by hand | OPEN (close failed: <error>) | open (not merged)]
+           (`open (not merged)` for the cleanup and stop dispositions — STEP 15 sets
+           issue_state only on a merge)
   Branch:  <branch_name>   [removed | kept]
   PR:      <pr_url>   [merged (squash) | open]
   Guide PR: <ai-assets url>   [merged | open | none]   (platform only)
