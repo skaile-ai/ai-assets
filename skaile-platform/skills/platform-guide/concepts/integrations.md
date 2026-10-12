@@ -192,9 +192,10 @@ Some servers put the key in the address itself (a "personal URL": `?api_key=…`
 whole when the server is saved, and the **AI Assets** panel and the edit dialog show it with
 the key replaced by `***`. Saving it unchanged keeps the stored address; to change anything
 in it, the user pastes the full address again, key included. It follows the same rules for
-who receives it as a token. A server delivers one credential, so if it also uses
-**Token / API key** or a connected account, its address is kept as typed (still shown with
-the key hidden).
+who receives it as a token. A server delivers one credential: an address with an obvious
+key (a password, `api_key=`, `token=`, a `sk-…` token) is refused on a server that also
+uses **Token / API key** or a connected account, and for an OAuth server this happens before
+the sign-in starts. Remove the key from the address, or use the other credential only.
 
 ## Mounts vs. connectors (recap)
 
