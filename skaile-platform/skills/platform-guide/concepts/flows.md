@@ -540,6 +540,13 @@ Fuller treatment: `ai-assets/docs/flows.md`.
     person from that page.
 - A person does the same on the group's detail page (click through from the board):
   **Activate**, and the **Autonomous** switch.
+- **Telling a run what to do** (for example "fix the merge conflict on your PR"): read the
+  run's `sessionId` from `platform.list_run_instances`, then `platform.send_to_session` or
+  `platform.ask_session` to it. No link is needed when the session owner is among those the
+  group's **startableBy** allows and may also write in that run's session. Being only an
+  approver is not enough, and a message never answers an approval gate: a person still decides
+  those. Anything else gets `no_link`; do not look for another route, tell your human. The
+  usual limit on agent back-and-forth without a human turn applies.
 - **Renaming a run group, or changing its limits after creation:** `platform.revise_run_group`
   takes the group and a new `name`, a `policy` holding only the fields to change, or both.
   It is approval-gated, and the reply's `change` lists each field before and after, so
@@ -576,7 +583,8 @@ as `@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.sche
 (platform #5233), `platform/docs/flow-authoring-v2.md` "Personal flows" (platform #5252),
 the "Only me" scope label (platform #5989), agent activation and autonomous mode for run groups (platform #6061),
 the run-group create wizard (Batch / Standing), `RunGroupRecipePreflightService`, run groups
-on an agent template (platform #6271, `run-template-authority.service.ts`). For on-disk
+on an agent template (platform #6271, `run-template-authority.service.ts`), messaging a run
+session by run-operator admission (platform #6766). For on-disk
 discovery: `loadFlowEntriesFromDir` in
 `@skaile/workspaces` → `factory-assets/connectors/flow/engine/loader.ts`, and `aiResourceRoots`
 in `cli/src/paths.ts`.
