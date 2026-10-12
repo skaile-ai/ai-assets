@@ -187,6 +187,14 @@ A project owner also chooses who receives the token:
 
 The agent cannot enter, see or move such a token: point the user at these screens.
 
+Some servers put the key in the address itself (a "personal URL": `?api_key=…`,
+`user:password@…`, or a long token in the path). Such an address is stored encrypted as a
+whole when the server is saved, and the **AI Assets** panel and the edit dialog show it with
+the key replaced by `***`. Saving it unchanged keeps the stored address; to change anything
+in it, the user pastes the full address again, key included. It follows the same rules for
+who receives it as a token, and it is the server's one credential: it cannot be combined
+with **Token / API key** or a connected account.
+
 ## Mounts vs. connectors (recap)
 
 - **Mounts** = external data surfaced as **files** in the workspace (git, local, S3,
