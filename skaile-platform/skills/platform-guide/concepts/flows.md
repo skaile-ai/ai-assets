@@ -529,7 +529,10 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   they act). Each names one role only, so list both project roles to admit both. Use
   `project:Owner` when the group should belong to whoever owns the project, so a second owner
   is not locked out: a project Owner is often only a `User` of the organization, and the bare
-  `Owner` then refuses them. An empty list is not the same as `project:Owner`.
+  `Owner` then refuses them. An empty (unset) list means the group's creator, its project's Owners, organization
+  Owners and platform admins, everywhere: board, approvals, inside a run and for agents. It
+  does not include project Users; name `project:User` to let them decide gates. The creator
+  or a project Owner can always revise the group, even when `startableBy` leaves them out.
 - A group the agent creates is a **Draft**: it runs nothing until it is activated (the
   board's create wizard activates straight away). The order is create, then optionally
   switch autonomous mode on, then activate:
