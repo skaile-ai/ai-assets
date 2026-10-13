@@ -154,6 +154,17 @@ Two distinct concepts, deliberately not two flavours of one.
 someone" and "never merge with red CI" are different requirements. A check in a locked flow
 cannot be modified by an executing agent, because a locked flow cannot be modified at all.
 
+An escalated check has exactly two decisions. **Reject** is terminal. **Approve** is a *human
+override*, not a pass: it needs a non-empty written reason, completes the node so the run
+continues, and records only the decision. The attempt's `CheckEvidence.passed` stays `false` and
+the failure stays in the node's history, so do not reason about later state as if the check had
+passed. The reason is required to approve **any** check node that parks, including one that
+passed and stops on its own `gate.approval`. The platform refuses the override when a downstream
+node consumes the check's declared `contract.output.fields` and the failed attempt does not
+satisfy them: there is no value to hand that consumer, so the only decision left is reject. So
+before you wire a check's outputs into a later node, accept that a failed check then cannot be
+overridden.
+
 ### GitHub access from a `function` or `check` node
 
 The node runs in the session workspace with the same Git credential helper the agent has. The
@@ -587,7 +598,8 @@ it is managed via the API/agent.
 
 Source of truth: the published contract — `platform.get_flow_schema` at runtime, shipped
 as `@skaile/workspaces/dist/factory-assets/connectors/flow/contract/flow.v2.schema.json` —
-`platform/docs/flow-authoring-v2.md` (incl. git credentials in nodes, platform #5603),
+`platform/docs/flow-authoring-v2.md` (incl. git credentials in nodes, platform #5603;
+escalated-check override, platform #4005, `applyApproval` in the flow connector's `adapter.ts`),
 `platform/features/09-flow-execution/`,
 `platform/features/31-run-groups/`, `platform/features/09-flow-execution/in-session-flow-runs.md`
 (platform #5233), `platform/docs/flow-authoring-v2.md` "Personal flows" (platform #5252),
