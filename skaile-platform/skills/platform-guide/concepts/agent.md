@@ -165,9 +165,9 @@ An **autonomy grant** is a human pre-authorizing one exact capability so matchin
 without a card. Only a human can mint one — an owner of this session, from a card they
 themselves approved. Every approval-gated capability's card offers one — *approve once*, or
 *approve and grant* — except a few ungrantable by design (a disclosure read of calendar, the
-owner's other sessions or another owner-scoped list, a file leaving its organization) and
-`platform.batch`, which is never granted whole: each of its
-steps is matched against that action's own grants. **You cannot create, extend or widen a grant
+owner's other sessions or another owner-scoped list — the mail reads and the project's session
+list are the exception, see *Shared sessions*; a file leaving its organization) and
+`platform.batch`, which is never granted whole: each of its steps is matched against that action's own grants. **You cannot create, extend or widen a grant
 yourself.** You can ask the owner for one with `platform.request_standing_approval`, and only
 the owner can grant it, from the card. Ask ahead when a workflow will run unattended — a
 scheduled mail digest, say — because nobody will be there to answer a card for the real call.
@@ -182,11 +182,11 @@ Each capability declares an **effect class** that decides how far a grant may re
 | `routine` | Effect stays inside the owner's own platform surface. | Yes — this is what an ordinary grant covers. |
 | `external` | Reaches a person or system outside Skaile (an invitation email, a sent mail, a calendar invitation, GitHub or another third-party API). A message delivered into another Skaile session is not external. | Only if the owner **explicitly widened** the grant to external communication. |
 | `privileged` | Administrative — changes who or what exists at organization level. | Only if the owner **explicitly widened** the grant to privileged administration. |
-| `never` | Never auto-approvable — a disclosure read in a shared session (except the mail reads and the session list, which are `routine` there: see *Shared sessions*), a file attached across organizations. | No — it is carded, or refused outright. Never dispatched silently. |
+| `never` | Never auto-approvable — a disclosure read in a shared session other than the two standing sources (see *Shared sessions*), a file attached across organizations. | No — it is carded, or refused outright. Never dispatched silently. |
 
 A grant is narrow: it names **one capability** and one target scope — that exact target, its
 project, and so on up, or for Exchange mail one mailbox. (The one exception is a standing
-disclosure grant: it names one source — one mailbox, or the owner's session list — and covers
+disclosure grant: it names one source — one mailbox, or this project's session list — and covers
 every read of that source; see *Shared sessions*.) It either has an absolute expiry or,
 when the owner explicitly chose *Unlimited*, lasts until they revoke it; it may carry use and
 budget caps. It stays anchored to the session it was approved in, and it covers only calls on
@@ -341,14 +341,15 @@ decides:
   asked. Most of these cards cover one read only (no standing approval): calendar, the owner's
   other sessions and the other owner-scoped lists. Two sources are the exception, a **standing
   disclosure grant**: one Exchange mailbox (`list_mail`, `search_mail`, `read_mail`,
-  `read_mail_attachment`, `list_mail_folders`; not `list_mail_categories`) and the owner's
-  list of sessions in this project (`platform.list_sessions`). Their card offers *approve and grant* for that one source in this
-  session only (one click: 90 days), and one grant covers every read of the source. Unlike any
-  other grant, it covers a turn started by any one member who can act in the session (not a
-  Viewer), including people who join later, as well as the owner's own turns. A turn no single
-  person started — a schedule, a webhook, another agent, a mixed turn — still gets a card, the
-  owner's included. The owner revokes it in the session settings; the next read is carded
-  again. Small effects that normally run with no card — drafting and filing mail, attaching a
+  `read_mail_attachment`, `list_mail_folders`; not `list_mail_categories`) and the list of
+  this project's sessions (`platform.list_sessions` — not `platform.list_my_sessions`, which
+  stays per read). Their card offers *approve and grant* for that one source in this session
+  only (the card names the one-click window; today that is 90 days), and one grant covers every
+  read of the source. Unlike any other grant, it covers a turn started by any one member who
+  can act in the session (not a Viewer, re-checked on every call), including people who join
+  later, as well as the owner's own turns. A turn no single person started — a schedule, a
+  webhook, another agent, a mixed turn — still gets a card, the owner's included. The owner
+  revokes it in session settings, **Permissions** tab; the next read is carded again. Small effects that normally run with no card — drafting and filing mail, attaching a
   file, messaging a linked peer, renaming the assistant — are refused unless the owner asked
   ("Only `<owner>` can ask for this"). In a session only the owner can read, such as the
   personal assistant, all of this runs as before.

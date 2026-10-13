@@ -649,9 +649,10 @@ themselves approved — and it is narrow by construction:
 
 - **One capability.** A grant never spans a family. The one exception is a standing
   disclosure grant: it names one source (`disclosure.source.exchangeMailbox` for one mailbox,
-  `disclosure.source.sessionList` for the owner's session list) and covers every read of it —
-  for a mailbox `list_mail`, `search_mail`, `read_mail`, `read_mail_attachment` and
-  `list_mail_folders`; for the session list `list_sessions`.
+  `disclosure.source.sessionList` for the list of this project's sessions) and covers every
+  read of it — for a mailbox `platform.list_mail`, `search_mail`, `read_mail`,
+  `read_mail_attachment` and `list_mail_folders`; for the session list `platform.list_sessions`
+  (not `platform.list_my_sessions`, which stays per read).
 - **One scope** — that exact target, everything under its project, everything under its
   organization, everything of that kind the owner can reach, or, for Exchange mail, everything
   in one mailbox. Only the scopes a capability declares, and its own target's ancestry supports,

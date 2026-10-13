@@ -47,13 +47,16 @@ nothing to pass on.
 
 **In a session someone besides the owner can read**, the mailbox is still the owner's: every mail
 or calendar read goes to the owner as a card, and the uncarded changes below (flagging,
-categories, drafts and their attachments) are refused unless the owner asked. A calendar read,
-and `list_mail_categories`, is carded per read (no standing approval). A mail read
-(`list_mail`, `search_mail`, `read_mail`, `read_mail_attachment`, `list_mail_folders`) has a card that names the mailbox and offers *approve and grant* for that
-one mailbox in this session (one click: 90 days). One such grant covers every one of those
-reads of that mailbox, on the turn of any member who can act in the session (not a Viewer),
-including people who join later. Turns started by a schedule, a webhook or another agent still
-ask every time. Only the owner decides the card, and revokes the grant in the session settings.
+categories, drafts and their attachments) are refused unless the owner asked. Calendar reads
+and `platform.list_mail_categories` are carded per read (no standing approval). A mail read
+(`platform.list_mail`, `search_mail`, `read_mail`, `read_mail_attachment`, `list_mail_folders`)
+has a card that names the mailbox and offers *approve and grant* for that one mailbox in this
+session (the card names the one-click window; today that is 90 days). One such grant covers
+every one of those reads of that mailbox, on the turn of any member who can act in the session
+(not a Viewer, re-checked on every call), including people who join later. Turns started by a
+schedule, a webhook or another agent still ask every time. Only the owner decides the card, and
+revokes the grant in session settings, **Permissions** tab; a mailbox-access revoke (above) ends
+it too.
 See *Shared sessions* in `concepts/agent.md`.
 
 ## Choosing the mailbox
