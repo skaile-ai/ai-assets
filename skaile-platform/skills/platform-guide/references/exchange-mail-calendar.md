@@ -46,9 +46,18 @@ the owner marked as covering the agents a session starts already reaches your he
 nothing to pass on.
 
 **In a session someone besides the owner can read**, the mailbox is still the owner's: every mail
-or calendar read goes to the owner as a card per read (no standing approval), and the uncarded
-changes below (flagging, categories, drafts and their attachments) are refused unless the owner
-asked. See *Shared sessions* in `concepts/agent.md`.
+or calendar read goes to the owner as a card, and the uncarded changes below (flagging,
+categories, drafts and their attachments) are refused unless the owner asked. Calendar reads
+and `platform.list_mail_categories` are carded per read (no standing approval). A mail read
+(`platform.list_mail`, `search_mail`, `read_mail`, `read_mail_attachment`, `list_mail_folders`)
+has a card that names the mailbox and offers *approve and grant* for that one mailbox in this
+session (the card names the one-click window; today that is 90 days). One such grant covers
+every one of those reads of that mailbox, on the turn of any member who can act in the session
+(not a Viewer, re-checked on every call), including people who join later. Turns started by a
+schedule, a webhook or another agent still ask every time. Only the owner decides the card, and
+revokes the grant in session settings, **Permissions** tab; a mailbox-access revoke (above) ends
+it too.
+See *Shared sessions* in `concepts/agent.md`.
 
 ## Choosing the mailbox
 
@@ -71,7 +80,8 @@ shared mailbox; the owner does, and nothing is ever discovered from delegations.
 `platform.read_mail`, `platform.read_mail_attachment`, `platform.list_mail_categories`,
 `platform.list_calendar_events`. Reads carry no card on purpose — the owner's enablement is
 the consent, and a card per message would make triage unusable. Once anyone besides the owner
-can read the session, each read is carded to the owner instead (see the caveat above).
+can read the session, each read is carded to the owner instead, and a mail read's card can
+grant that mailbox for a period (see the caveat above).
 
 - Call `list_mail_folders` once before guessing a folder; well-known names (`inbox`,
   `sentitems`, `drafts`, `archive`) also work. It returns unread counts, so it answers "anything
@@ -146,4 +156,6 @@ live registry before telling the owner any of those is impossible — then guide
 
 Grounded in: `platform/docs/exchange-connector.md`,
 `platform/backend/libs/capabilities/src/handlers/exchange-mail.handler.ts` and
-`exchange-calendar.handler.ts`.
+`exchange-calendar.handler.ts`; standing disclosure grants for mail reads in a shared session:
+skaile-ai/platform#6962 (`disclosure-policy.ts`, `disclosure-preparer.ts`),
+`platform/decisions/2026-10-08-standing-disclosure-grants.md`.

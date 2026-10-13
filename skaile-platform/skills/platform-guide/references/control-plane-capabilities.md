@@ -647,7 +647,13 @@ and no grant reaches it.
 A grant is minted only by a human — an owner of the session the card was shown in, from a card they
 themselves approved — and it is narrow by construction:
 
-- **One capability.** A grant never spans a family.
+- **One capability.** A grant never spans a family. The one exception is a standing
+  disclosure grant: it names one source (`disclosure.source.exchangeMailbox` for one mailbox,
+  `disclosure.source.sessionList` for the owner's session list for this project) and covers
+  every read of it — for a mailbox `platform.list_mail`, `search_mail`, `read_mail`,
+  `read_mail_attachment` and `list_mail_folders`; for the session list `platform.list_sessions`
+  — the sessions of this project the owner can see, the owner's Private ones included (not
+  `platform.list_my_sessions`, which stays per read).
 - **One scope** — that exact target, everything under its project, everything under its
   organization, everything of that kind the owner can reach, or, for Exchange mail, everything
   in one mailbox. Only the scopes a capability declares, and its own target's ancestry supports,
@@ -667,9 +673,12 @@ themselves approved — and it is narrow by construction:
 - **Optional use and budget caps**, clamped down to the server's own ceilings.
 - **Effect opt-ins.** Because the safe default leaves both off, an `external` or `privileged`
   effect has no one-click option at all — the owner has to widen it deliberately. An effect
-  classed `never` is ungrantable, and so is `platform.batch` as a whole (each step matches its
-  own action's grants). Ungrantable means it can only be carded or refused — never dispatched
-  silently. (`cycle_session` is not ungrantable in this sense: it has no consent step at all.)
+  classed `never` is ungrantable — in a shared session that includes every disclosure read of
+  the owner's private data except the two standing sources above, which prepare as `routine`,
+  grantable for that exact source only — and so is `platform.batch` as a whole (each step
+  matches its own action's grants). Ungrantable means it can only be carded or refused — never
+  dispatched silently. (`cycle_session` is not ungrantable in this sense: it has no consent
+  step at all.)
 - **Only on a card.** Config pre-approvals (`preApprovedCapabilities`) are retired and ignored;
   the card is the one place a standing approval comes from.
 
@@ -679,7 +688,10 @@ back parked on approval** — that means it is no longer covered, not that somet
 
 A grant covers a call only on **the owner's own turn**, or a trigger the owner set up: when
 another member, several members, or nobody attributable set off the turn, the call is carded
-whatever grants exist (`concepts/agent.md`, *Shared sessions*).
+whatever grants exist (`concepts/agent.md`, *Shared sessions*). A standing disclosure grant is
+the one exception: it also covers a turn started by one member who can act in the session
+(not a Viewer). A schedule, a webhook, another agent or a mixed turn still gets a card, the
+owner's included.
 
 You see grants only on turns a human sent, in the `<AUTONOMY>` block: which capability, how far
 it reaches, until when, and what is left of any caps, plus notice when one has been **revoked**.
@@ -761,4 +773,7 @@ including **Edit job description…**); skaile-ai/platform#6653 (what a helper c
 **Restore** label, the idle archive of spawned instances: `instance-lifecycle.service.ts`
 `sweepIdleInstances`); skaile-ai/platform#7348 (`canWrite: false` and `readOnlyReason` for a
 read-only Private workspace: `owner-scoped-discovery.handler.ts`) and #7342
-(`operation_create_project_space_read_only`: `create-project-policy.service.ts`).
+(`operation_create_project_space_read_only`: `create-project-policy.service.ts`), and
+skaile-ai/platform#6962 (standing disclosure grants: `disclosure-policy.ts`,
+`disclosure-preparer.ts`, `ungrantable-by-design.ts`, `approval-policy.service.ts`;
+`platform/decisions/2026-10-08-standing-disclosure-grants.md`).
