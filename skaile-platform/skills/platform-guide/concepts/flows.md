@@ -161,9 +161,9 @@ the failure stays in the node's history, so do not reason about later state as i
 passed. The reason is required to approve **any** check node that parks, including one that
 passed and stops on its own `gate.approval`. The platform refuses the override when a downstream
 node consumes the check's declared `contract.output.fields` and the failed attempt does not
-satisfy them: there is no value to hand that consumer, so the only decision left is reject. So
-before you wire a check's outputs into a later node, accept that a failed check then cannot be
-overridden.
+satisfy them: there is no value to hand that consumer, so the only decision left is reject. A
+check that fails but still returns output conforming to its declared fields stays overridable —
+wiring a check's outputs downstream narrows the override, it does not remove it.
 
 ### GitHub access from a `function` or `check` node
 
