@@ -33,9 +33,10 @@ owner is notified and now has a request to approve or decline in the Connectors 
 again while it is open), and `already_reachable` means this session may use it. If the mail tools are missing,
 follow the result's `note`: it says whether they are already there, arrive on your next turn, or still need
 one `platform.cycle_session` (call it once and end your turn; `queued: "already"` means a restart is still
-waiting, so do not call it again that turn). Tell the user the owner decides. If a `pending` request is approved
-later and the mail tools are still missing, call `platform.request_mailbox_access` again: it now answers
-`already_reachable` with that `note`. A revoke takes effect at once and also
+waiting, so do not call it again that turn). Tell the user the owner decides. If the user says the owner approved
+a `pending` request and the mail tools are still missing, call `platform.request_mailbox_access` again:
+it checks access before asking anyone, so an approved mailbox answers `already_reachable` with that
+`note` and notifies no one (unapproved, it would ask the owner again, so do not call it on a guess). A revoke takes effect at once and also
 withdraws any card or standing approval you still held for that mailbox, as does a change of project
 owner. When you no longer need a
 mailbox you were granted, `platform.release_mailbox_access` gives it up for this session, or with

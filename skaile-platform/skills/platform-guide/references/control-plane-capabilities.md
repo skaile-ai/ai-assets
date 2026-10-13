@@ -244,7 +244,8 @@ nothing to restart), and trying again in the same turn will not change that. The
 happens once no turn is running in this session (yours, a person's or a linked peer's), so finish
 your reply briefly; in a busy session that can take minutes. It is skipped if the session stays
 busy for ten minutes or an approval card is still pending. `queued: "already"` means a restart was
-already waiting, and calling again before it has run does not speed it up. Call it again only if
+already waiting, and calling again before it has run does not speed it up; the result's `note`
+says what to expect, so read it before you tell the user anything. Call it again only if
 what you needed the restart for (a mount, an asset) is still missing on a later turn — never twice
 in one turn, and never just to make sure it happened. Two things to act on:
 
