@@ -223,7 +223,11 @@ Source of truth: `platform/docs/integration_architecture.md`,
 #5337/#5357 (Reconnect), #5364 (shared mailboxes per org),
 #5531 (shared-mail admin approval link), #4703 (setup-token seats),
 #5099/#5109/#5139 (seat health and routing), #5305 (classifier providers),
-#6133 (cycle_session without an approval card), #6849 (remote MCP tokens as secrets, job description credentials), #6382 (Word and Excel as company
-defaults), #6714 (`qpdf` in the `stacks-baseline` closure of `nix/flake.nix`, which `docker/agent/build.sh` ships in the production agent image), #6435 (an unadopted company default stays removed), #6690 (settings standard view: the
+#6133 (cycle_session without an approval card), #6849 (remote MCP tokens as secrets, job
+description credentials), #6382 (Word and Excel as company defaults),
+#6435 (an unadopted company default stays removed), #6713 and #6714 (the **Locked PDFs**
+guidance; `qpdf` in the `stacks-baseline` closure of `nix/flake.nix`, which
+`docker/agent/build.sh` ships into the production agent image `skaile-vm-agent:thin`),
+#6690 (settings standard view: the
 session **General** tab, org AI Providers, Classifiers and Catalog shown only in Expert mode,
 Global providers listed to platform admins only).

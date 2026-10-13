@@ -215,7 +215,8 @@ during the 30 days and once it is read-only. It holds conversations only, no fil
 downloaded one at a time from each project's file explorer. Someone with a seat in another
 person's Private workspace gets the explanation only; its owner is the one who can export. The
 agent cannot run this download: point the owner at the notice. Once it is read-only, write
-buttons such as **Create Project** and **Move to Projects** are disabled with the tooltip "This Private workspace is read-only."
+buttons such as **Create Project** and **Move to Projects** are disabled with the tooltip
+"This Private workspace is read-only."
 Nothing is deleted, everything stays readable, and it unlocks as soon as someone sponsors
 it again.
 
@@ -387,6 +388,9 @@ Former members' My space tabs, Company mark, Archived spaces, the read-only noti
 `my-assistant-reach-card.tsx`, `archived-spaces-card.tsx`, `preferences.page.tsx`),
 `pages/projects/my-space-project-controls.tsx`, `private-status-notice/`, and backend
 `landing.utils.ts`; platform `main` @ `7687851fb` (2026-10-02), with the rollout flag on.
+The owner's **Download conversations**: `mySpace.exportPrivateWorkspace` in backend
+`my-space-export.route.ts` and `private-status-notice/` (skaile-ai/platform#7118); platform
+`main` @ `ffa608b61` (2026-10-13).
 The **Report a problem** review-or-send-directly choice: platform `main` @ `c59fd243b` (2026-09-28).
 The run-group detail page's controls: `pages/run-board/run-group-detail.page.tsx` and
 `pages/run-board/parts/group-controls.tsx` (platform #6061).
