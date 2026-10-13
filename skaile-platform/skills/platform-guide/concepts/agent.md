@@ -19,9 +19,9 @@ at runtime**, never assumed from memory.
     their home Private workspace like any project; nobody else's Home is ever listed), a
     session's ancestry, a project's members, a session's resources, an organization's
     connectors, and searching or reading the history of a session the owner can reach (those
-    last reads are audited) — all limited by assistant reach (below);
+    last reads are recorded best-effort in the central logs) — all limited by assistant reach (below);
   - **files in the owner's other sessions** (personal assistant only) — reading one text file,
-    and, after the owner approves the change, creating or replacing one (the read is audited;
+    and, after the owner approves the change, creating or replacing one (the read is recorded best-effort in the central logs;
     see `references/control-plane-capabilities.md`);
   - **control-plane changes** — creating an organization, a project or a session; inviting
     someone at any of those three levels; starting a connector setup; re-pointing a project's

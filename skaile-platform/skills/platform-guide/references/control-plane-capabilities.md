@@ -65,14 +65,13 @@ scans the 50 most-recently-active sessions and returns at most 100 hits, and `tr
 means it hit one of those two caps — not that nothing else matched. So treat a truncated search
 as "look harder", never as a complete answer.
 
-**These reads are audited.** `platform.search_my_sessions`, `platform.read_session_history`,
-`platform.get_session_context`, `platform.list_session_resources` and
-`platform.read_session_file` write a personal-assistant read audit naming the owner, the target
-session's ancestry and how much came back — and so does reading another session's file by
-reference (`platform.add_draft_attachment`, an upload through
-`platform.invoke`, a `logoFile` with a `sessionId`). Reading a colleague's conversation on the owner's behalf
-leaves a record. That is not a reason to avoid it when the owner asks — it is a reason not to
-go trawling sessions speculatively.
+**These reads are recorded, best-effort.** `platform.search_my_sessions`, `platform.read_session_history`,
+`platform.get_session_context`, `platform.list_session_resources` and `platform.read_session_file`
+(and reading another session's file by reference) write a personal-assistant read record to the
+platform's central logs. It names the owner, the target session (for a search: each session that
+produced hits) and how much came back. The record is best-effort: a log-pipeline outage can lose
+it, and it is kept for 90 days. That is not a reason to avoid a read when the owner asks — it is a
+reason not to go trawling sessions speculatively.
 
 Do not confuse `platform.read_session_history` with `platform.read_own_session_history`. The
 latter is **not** part of this family: it is available in ordinary project sessions, always

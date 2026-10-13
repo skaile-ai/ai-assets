@@ -71,7 +71,7 @@ session, `resourceId` to `workspace`, and `path` is mount-relative (`reports/Q3.
 `workspace/reports/Q3.pdf`). The platform reads the bytes itself. Another session can be named
 only from the personal assistant, only its workspace, and only one the owner can reach, in an
 organization where the assistant has **Full** reach (find it with `platform.search_my_sessions` /
-`platform.read_session_history`); that read is audited, and a
+`platform.read_session_history`); that read is recorded best-effort in the central logs, and a
 sleeping session is never woken for it — if it cannot be read, ask the owner to open it.
 
 Two catalogue actions move files, at most 10 MiB each, and the bytes never reach you:
