@@ -167,6 +167,14 @@ or hides them for the whole organization with **Filter rules**. Unless the organ
 only (not the whole project) from its row in the workspace **AI Assets** panel (see
 `ui/workspace.md`). PowerPoint is available in the catalog but is not a company default.
 
+## Locked PDFs
+
+A PDF that is permission-locked (restricted printing or editing, but it opens without a
+password) can be rewritten with `qpdf --decrypt in.pdf out.pdf`; the agent image includes
+`qpdf`. This invalidates any digital signature on the file, so keep the original and only do
+it when the user confirms they may edit the document. A PDF with an open password cannot be
+unlocked without that password; say so.
+
 ## Remote MCP server tokens
 
 A remote MCP server that needs a static token or API key gets it as a secret, never as a
@@ -215,7 +223,11 @@ Source of truth: `platform/docs/integration_architecture.md`,
 #5337/#5357 (Reconnect), #5364 (shared mailboxes per org),
 #5531 (shared-mail admin approval link), #4703 (setup-token seats),
 #5099/#5109/#5139 (seat health and routing), #5305 (classifier providers),
-#6133 (cycle_session without an approval card), #6849 (remote MCP tokens as secrets, job description credentials), #6382 (Word and Excel as company
-defaults), #6435 (an unadopted company default stays removed), #6690 (settings standard view: the
+#6133 (cycle_session without an approval card), #6849 (remote MCP tokens as secrets, job
+description credentials), #6382 (Word and Excel as company defaults),
+#6435 (an unadopted company default stays removed), #6713 and #6714 (the **Locked PDFs**
+guidance; `qpdf` in the `stacks-baseline` closure of `nix/flake.nix`, which
+`docker/agent/build.sh` ships into the production agent image `skaile-vm-agent:thin`),
+#6690 (settings standard view: the
 session **General** tab, org AI Providers, Classifiers and Catalog shown only in Expert mode,
 Global providers listed to platform admins only).
