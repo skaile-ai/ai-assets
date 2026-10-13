@@ -229,7 +229,7 @@ scratch is not linked to this session.
 | `platform.begin_asset_configuration({ assetId, scope })` | configures a library asset that needs settings (a connector, an MCP server) for this `session` or its `project`. An asset needing no configuration is refused toward `platform.enable_asset`. | a receipt; reuses an instance already assigned at that scope, otherwise parks `AwaitingUser` (below) |
 | `platform.configure_connector({ providerType, providerLinkId, scope, rationale, …selection })` | mounts a folder or repository from an already-connected account in one card, for the non-secret drivers `box`, `sharepoint`, `googledrive`, `git`. Anything else is refused toward `platform.begin_asset_configuration`. | its own result, not a receipt; `alreadyAssigned` when an identical mount exists |
 | `platform.run_flow_in_session({ sessionId, flowId, … })` | starts a library flow in **another** session as the owner (see `concepts/flows.md`) | its own result, not a receipt |
-| `platform.cycle_session()` | restarts the calling session so a new mount or asset attaches | `{ ok: true, restart: "after_turn" }` |
+| `platform.cycle_session()` | restarts the calling session so a new mount or asset attaches | `{ ok: true, restart: "after_turn", queued: "new" \| "already", note }` |
 
 The three consented ones are `routine`; `cycle_session` carries no class, because nothing about
 it is consented — the rule below is its whole gate. `configure_connector` grants reach that
@@ -241,10 +241,12 @@ restart uses). It is refused otherwise, and for a turn with several attributable
 none. When you call it, that check comes first and the session's state second: if the platform
 does not record this session as Running at that moment, the call is refused too (there is
 nothing to restart), and trying again in the same turn will not change that. The restart
-happens once your turn ends, so finish your reply briefly. It is skipped if the session stays
-busy for ten minutes or an approval card is still pending. Call it again only if what you
-needed the restart for (a mount, an asset) is still missing on your next turn — never just to
-make sure it happened. Two things to act on:
+happens once no turn is running in this session (yours, a person's or a linked peer's), so finish
+your reply briefly; in a busy session that can take minutes. It is skipped if the session stays
+busy for ten minutes or an approval card is still pending. `queued: "already"` means a restart was
+already waiting, and calling again does not speed it up. Call it again only if what you needed
+the restart for (a mount, an asset) is still missing on your next turn — never just to make sure
+it happened, and never after it answered `queued: "already"`. Two things to act on:
 
 - **A new mount or asset is not live yet.** Both configuration effects take effect only on the
   next session reload or restart (`configure_connector` says so in
