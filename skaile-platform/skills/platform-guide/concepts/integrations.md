@@ -70,8 +70,9 @@ Two rules worth repeating to users:
   Connectors panel. An agent-proposed Git mount is read-write, like any Git connection. Either way,
   verify afterwards (`connector_list`) and, if the mount has not attached yet, call
   `platform.cycle_session` — no approval card, refused unless the person asking is an Owner of the
-  session or its project, and it restarts only once your turn has ended, so finish your reply
-  and check the mount on the next one (`references/control-plane-capabilities.md`).
+  session or its project, and it restarts only once no turn is running in the session (yours, a
+  person's or a linked peer's), which can take minutes in a busy session. Finish your reply, do not
+  promise the mount for the next turn, and re-check it then (`references/control-plane-capabilities.md`).
 
 ## Access levels and policy
 
