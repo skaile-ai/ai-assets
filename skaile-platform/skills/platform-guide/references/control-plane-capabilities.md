@@ -34,7 +34,7 @@ job-description reads with a `projectId` and every effect in this family do not 
 
 | Call | Gives you |
 | --- | --- |
-| `platform.list_my_organizations({ search?, cursor?, limit? })` | `organizationId`, the owner's live role, a permissions summary |
+| `platform.list_my_organizations({ search?, cursor?, limit? })` | `organizationId`, the owner's live role, a permissions summary. A read-only Private workspace has `permissions.canWrite: false` and a `readOnlyReason`: do not try to create anything there, tell the owner the reason |
 | `platform.list_my_projects({ organizationId?, search?, cursor?, limit? })` | `projectId`, `organizationId`, status, visibility, source type, live role. The Home in the owner's home Private workspace is never listed; the owner's Homes anywhere else (a business organization, or a Private workspace they were invited into) are listed like any project. Nobody else's Home is ever listed. |
 | `platform.list_my_sessions({ organizationId?, projectId?, archived?, search?, cursor?, limit? })` | `sessionId` with full ancestry (organization → project → session), live role. Omit `archived` for both. |
 | `platform.get_session_context({ sessionId })` | one session's ancestry plus the owner's effective role at each level. Not paged. |
