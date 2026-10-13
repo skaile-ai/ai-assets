@@ -165,9 +165,10 @@ An **autonomy grant** is a human pre-authorizing one exact capability so matchin
 without a card. Only a human can mint one — an owner of this session, from a card they
 themselves approved. Every approval-gated capability's card offers one — *approve once*, or
 *approve and grant* — except a few ungrantable by design (a disclosure read of calendar, the
-owner's other sessions or another owner-scoped list — the mail reads and the project's session
-list are the exception, see *Shared sessions*; a file leaving its organization) and
-`platform.batch`, which is never granted whole: each of its steps is matched against that action's own grants. **You cannot create, extend or widen a grant
+owner's other sessions or another owner-scoped list — the mail reads and the owner's session
+list for this project are the exception, see *Shared sessions*; a file leaving its
+organization) and `platform.batch`, which is never granted whole: each of its steps is
+matched against that action's own grants. **You cannot create, extend or widen a grant
 yourself.** You can ask the owner for one with `platform.request_standing_approval`, and only
 the owner can grant it, from the card. Ask ahead when a workflow will run unattended — a
 scheduled mail digest, say — because nobody will be there to answer a card for the real call.
@@ -186,10 +187,10 @@ Each capability declares an **effect class** that decides how far a grant may re
 
 A grant is narrow: it names **one capability** and one target scope — that exact target, its
 project, and so on up, or for Exchange mail one mailbox. (The one exception is a standing
-disclosure grant: it names one source — one mailbox, or this project's session list — and covers
-every read of that source; see *Shared sessions*.) It either has an absolute expiry or,
-when the owner explicitly chose *Unlimited*, lasts until they revoke it; it may carry use and
-budget caps. It stays anchored to the session it was approved in, and it covers only calls on
+disclosure grant: it names one source — one mailbox, or the owner's session list for this
+project — and covers every read of that source; see *Shared sessions*.) It either has an
+absolute expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it
+may carry use and budget caps. It stays anchored to the session it was approved in, and it covers only calls on
 **the owner's own turns** (or a trigger the owner set up), except a standing disclosure grant,
 which also covers a member's turn — see *Shared sessions* below. The
 card's one-click choice is time-boxed to a window the capability's risk decides, and the card
@@ -341,8 +342,9 @@ decides:
   asked. Most of these cards cover one read only (no standing approval): calendar, the owner's
   other sessions and the other owner-scoped lists. Two sources are the exception, a **standing
   disclosure grant**: one Exchange mailbox (`list_mail`, `search_mail`, `read_mail`,
-  `read_mail_attachment`, `list_mail_folders`; not `list_mail_categories`) and the list of
-  this project's sessions (`platform.list_sessions` — not `platform.list_my_sessions`, which
+  `read_mail_attachment`, `list_mail_folders`; not `list_mail_categories`) and the owner's
+  session list for this project (`platform.list_sessions`: the sessions of this project the
+  owner can see, the owner's Private ones included — not `platform.list_my_sessions`, which
   stays per read). Their card offers *approve and grant* for that one source in this session
   only (the card names the one-click window; today that is 90 days), and one grant covers every
   read of the source. Unlike any other grant, it covers a turn started by any one member who
