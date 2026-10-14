@@ -72,7 +72,7 @@ is the authority for its formatter, test command and commit rule. Works in five 
 | `pr` | Open a pull request with structured description | When change needs review before merging |
 | `finish` | Close a branch: merge, PR, keep, or discard | After implementation is verified |
 | `sync` | **Retired** — synced the shell and its submodules | Use `git -C <repo> pull --ff-only` per clone |
-| `deploy` | **Retired** — merged the shell's `main` into `deploy` | Platform deploys when its Version PR merges |
+| `deploy` | **Retired** — merged the shell's `main` into `deploy` | Never push `deploy`; the platform deploys when its Version PR merges (06:00-07:00 Berlin) |
 
 ## When to Use
 
@@ -591,10 +591,12 @@ IF mode = sync
 
 IF mode = deploy
 
-  STOP: "`deploy` is retired. It merged the shell's `main` into its `deploy` branch. Each
-  repo now deploys on its own. The platform deploys when its changesets Version PR merges
-  (its `version.yml` fast-forwards `deploy`); never merge `main` into `deploy` by hand,
-  because that races the release job. See the platform `CLAUDE.md` and
+  STOP: "`deploy` is retired. Do not push `deploy`. It merged the shell's `main` into its
+  `deploy` branch. Each repo now deploys on its own. A platform release deploys when its
+  changesets Version PR merges: `version.yml` merges `main` into `deploy`. Merge the
+  Version PR only in the 06:00-07:00 Berlin window, except for an outage, security or
+  data-loss hotfix. The platform's `deploy` branch is protected by the `deploy-protection`
+  ruleset, so a hand push, merge or force-push is rejected. See
   `docs/versioning-and-releases.md` in the platform repo."
 
 # ── End Modes ────────────────────────────────────────────────────
