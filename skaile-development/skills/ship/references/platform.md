@@ -91,8 +91,10 @@ Nothing deploys on a plain merge to `main`. The release and the deploy are one e
 
 - **Platform change:** merging the changesets Version PR (`chore: version platform`,
   branch `changeset-release/main`) changes the version, and `version.yml` then
-  fast-forwards `deploy`. Jenkins watches `deploy`. Never merge `main` into `deploy`
-  by hand — it races that job.
+  fast-forwards `deploy`. Jenkins watches `deploy`. Merge the Version PR only in the
+  06:00-07:00 Berlin window (an outage, security or data-loss hotfix is the exception).
+  Never push `deploy` by hand: the `deploy-protection` ruleset rejects it, and only
+  `version.yml` may update the branch. See the platform `docs/versioning-and-releases.md`.
 - **`@skaile/workspaces` change** takes three hops before it can reach production:
   (1) merge the workspaces PR and then its Version Packages PR, which publishes to npm;
   (2) merge a platform PR that bumps the pin in `backend/package.json` and
