@@ -60,7 +60,7 @@ worktree are visible in the main checkout via `git log feature/<pkg>/<slug>`.
 
 ## Merging Back
 
-After work in the worktree is complete and tests pass: the default branch is protected, so
+After work in the worktree is complete and tests pass: changes land by PR, so
 push the branch, open a PR and let GitHub squash-merge it. There is no local merge. The `git`
 skill's `finish` mode (CASE merge) does this and then cleans up in a safe order: remove the
 worktree (never `--force`), check out the default branch, `pull --ff-only`, then delete the
