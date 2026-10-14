@@ -107,9 +107,8 @@ test-harness particularities (session modes, impersonation,
 org-scoped slug URLs, coverage fixture, per-spec backend isolation).
 
 PATHS  The platform is a standalone repo (`skaile-ai/platform`; the skaile-dev shell is
-retired). A path written `platform/<x>` below means `<x>` under the platform repo's root.
-Run every shell snippet from that root and drop the `platform/` prefix (e.g.
-`cd platform/backend` → `cd backend`). Install with `bun install` at that root.
+retired). Every shell snippet below runs from the platform repo's root. In prose, a path
+written `platform/<x>` names `<x>` under that root. Install with `bun install` at that root.
 
 READS
   ! platform/e2e/CLAUDE.md                   — scaffolding rules
@@ -193,8 +192,8 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
        >   1. bun install  (at the platform repo root)                      ← always run, even if deps look clean
        >   2. invoke /kill-backend skill (kills the whole backend chain cleanly)
        >   3. pkill -f 'vite preview'
-       >   4. cd platform/backend && rm -rf dist && bun run build && bun run e2e:stateless    ← clean rebuild; incremental `bun run build` leaves orphaned `.js` files, `nest start --watch` rebuilds nothing
-       >   5. cd platform/frontend && bun run build && bun run preview --port 3000
+       >   4. cd backend && rm -rf dist && bun run build && bun run e2e:stateless    ← clean rebuild; incremental `bun run build` leaves orphaned `.js` files, `nest start --watch` rebuilds nothing
+       >   5. cd frontend && bun run build && bun run preview --port 3000
        > Then re-invoke this skill."
      STOP. Auto-start of *missing* services (Step 2) is fine; killing and restarting *already-running* services to clear staleness is destructive (drops in-flight requests, may interrupt parallel dev work) and requires explicit user authorization.
 
@@ -206,16 +205,16 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
    Detect all three by comparing the trampoline against `tsconfig.json` **and** against backend source:
    ```bash
-   TRAMP=platform/backend/dist/apps/api/apps/api/src/e2e.js
-   TSCONF=platform/backend/tsconfig.json
+   TRAMP=backend/dist/apps/api/apps/api/src/e2e.js
+   TSCONF=backend/tsconfig.json
    [ -f "$TRAMP" ] || echo "MISSING_DIST"
    [ -f "$TRAMP" ] && [ "$TSCONF" -nt "$TRAMP" ] && echo "STALE_DIST (tsconfig)"
-   [ -f "$TRAMP" ] && [ -n "$(find platform/backend/apps platform/backend/libs -name '*.ts' -newer "$TRAMP" -print -quit)" ] && echo "STALE_DIST (source)"
+   [ -f "$TRAMP" ] && [ -n "$(find backend/apps backend/libs -name '*.ts' -newer "$TRAMP" -print -quit)" ] && echo "STALE_DIST (source)"
    ```
    IF any `MISSING_DIST` / `STALE_DIST`:
      This is non-destructive (only `dist/` is touched). Run a **clean** rebuild without prompting — a plain incremental `bun run build` does not prune orphaned files and will not fix the rename case:
      ```bash
-     cd platform/backend && rm -rf dist && bun run build
+     cd backend && rm -rf dist && bun run build
      ```
      If services were already running against the stale `dist/`, the running backend still has the stale code/alias map in memory — fixing `dist/` isn't enough. After the rebuild, also restart the backend (treat as a stale-service event: route through the recovery recipe in Step 3 with explicit user authorization, since restarting drops in-flight state).
 
@@ -226,7 +225,8 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
    # From the platform repo root. `node_modules/.bun` is the store bun rewrites on install.
    LOCK=bun.lock
    MARK=node_modules/.bun
-   [ -f "$LOCK" ] && [ -f "$MARK" ] && [ "$LOCK" -nt "$MARK" ] && echo STALE_DEPS
+   [ -e "$LOCK" ] && [ -e "$MARK" ] && [ "$LOCK" -nt "$MARK" ] && echo STALE_DEPS   # -e: MARK is a directory
+   [ -e "$MARK" ] || echo STALE_DEPS   # no install at all
    ```
 
    (b) Critical `@skaile/*` packages missing — the mtime check above cannot detect a dependency that was added or renamed without a fresh install. The platform consumes `@skaile/workspaces` and `@skaile/brand` from npm (not from a shell workspace).
@@ -257,11 +257,11 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
 7. Check seed staleness:
    ```bash
-   SRC=platform/backend/test-data.json
-   DST=platform/backend/dist/backend/test-data.json
+   SRC=backend/test-data.json
+   DST=backend/dist/backend/test-data.json
    [ -f "$DST" ] && [ "$SRC" -nt "$DST" ] && echo STALE
    ```
-   IF STALE: run `cd platform/backend && bun run sync-seed`.
+   IF STALE: run `cd backend && bun run sync-seed`.
 
 8. Detect proxy-stuck "stopping" slots:
    ```bash
@@ -272,7 +272,7 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
      IF yes:
        ```bash
        pkill -f 'node.*e2e.js'; pkill -f 'nest start'
-       cd platform/backend && bun run e2e:stateless &
+       cd backend && bun run e2e:stateless &
        ```
        Wait for `:3001` to accept connections again before continuing.
 
@@ -284,7 +284,7 @@ IF mode = run
 
   STEP R1: Execute
     ```bash
-    cd platform/e2e
+    cd e2e
     BASE_URL='http://localhost:3000' API_URL='http://localhost:3001' \
       bunx playwright test <scope> --retries=0 --workers=1 --reporter=dot --max-failures=3 \
       2>&1 | tail -60
@@ -623,7 +623,7 @@ IF mode = add
   STEP A6: Verify the new specs
     Run ONLY the newly-written / edited specs (not the full suite) for faster feedback:
     ```bash
-    cd platform/e2e
+    cd e2e
     bunx playwright test <new-spec-paths> --retries=0 --workers=1 --reporter=dot --max-failures=3 \
       2>&1 | tail -60
     ```
@@ -706,7 +706,7 @@ CHECKLIST
 
 | Mistake | Instead |
 |---|---|
-| Running `bun run e2e:stateless` against a stale `dist/` | Backend crashes at boot — `Cannot find module .../e2e.js` (missing trampoline) or `Cannot find module '@skaile/...'` (orphaned output from a package rename). Use `./scripts/e2e.sh` (it clean-rebuilds when `dist/` is stale), or run `cd platform/backend && rm -rf dist && bun run build` first. A plain incremental `bun run build` does not prune orphaned files. |
+| Running `bun run e2e:stateless` against a stale `dist/` | Backend crashes at boot — `Cannot find module .../e2e.js` (missing trampoline) or `Cannot find module '@skaile/...'` (orphaned output from a package rename). Use `./scripts/e2e.sh` (it clean-rebuilds when `dist/` is stale), or run `cd backend && rm -rf dist && bun run build` first. A plain incremental `bun run build` does not prune orphaned files. |
 | Writing specs without live-verifying selectors | Use chrome-devtools MCP first; UI drifts faster than specs |
 | `browser.newContext()` for impersonation | `page.addInitScript` on the shared `page` fixture (coverage depends on it) |
 | Asserting on `getByText('Dashboard')` etc. | Use `getByRole('heading', { name: ... })` or enabled interactive elements — sidebar links match text before page body loads |

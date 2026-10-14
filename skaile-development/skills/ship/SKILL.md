@@ -16,7 +16,7 @@ description: >-
   existing code, for plans or design proposals, for filing an issue when implementation is
   explicitly deferred, for throwaway local experiments, or for work spanning several
   repositories.
-version: 1.8.1
+version: 1.9.0
 metadata:
   tags:
   - "ship"
@@ -326,14 +326,21 @@ STEP 0b: Resolve the target repo + profile
        land in?" with the candidate repos.
 
   Validate + build the profile (derive, do NOT hardcode):
-    repo_path     = the local clone of <repo>:
-                    1. the current checkout (`git rev-parse --show-toplevel`) when its
-                       origin is <repo>;
-                    2. ELSE `<repos_root>/<repo>`, where <repos_root> is the parent
-                       directory of the current checkout (clones usually sit side by side);
+    repo_path     = the MAIN checkout of the local clone of <repo>, never a linked worktree:
+                    main_of(dir) = dirname of the absolute
+                                   `git -C <dir> rev-parse --path-format=absolute --git-common-dir`
+                                   (from a linked worktree such as `.worktrees/platform-123`
+                                   this still names the main checkout; `--show-toplevel`
+                                   would name the worktree)
+                    1. main_of(cwd) when the current directory is in a checkout whose
+                       origin slug names <repo>;
+                    2. ELSE `<parent of main_of(cwd)>/<repo>` (clones usually sit side by
+                       side; `<repo>` here is the directory name of that clone);
                     3. ELSE ASK for the path.
     IF repo_path is not a git checkout with an `origin` remote → STOP: "No such repo '<repo>'."
     repos_root    = parent directory of repo_path (the worktree goes under it, STEP 5)
+    <repo> stays the resolved repo name (input, inference, or the clone directory from 2.) —
+    never the name of the directory the session happens to sit in.
     github_slug   = parse `git -C <repo_path> remote get-url origin`
                     (e.g. git@github.com:skaile-ai/skaile-store.git → skaile-ai/skaile-store)
     default_branch= `gh repo view <github_slug> --json defaultBranchRef -q .defaultBranchRef.name`
@@ -351,8 +358,8 @@ STEP 0b: Resolve the target repo + profile
                          changeset-check workflow is present
     pr_template = `<repo_path>/.github/PULL_REQUEST_TEMPLATE.md` if present
 
-  IF `references/<repo>.md` exists beside this skill (`<repo>` = the clone's directory
-  name resolved above, so `references/platform.md` — not the GitHub slug): read it now.
+  IF `references/<repo>.md` exists beside this skill (`<repo>` = the repo name
+  resolved above, never a worktree directory name, so `references/platform.md` — not the GitHub slug): read it now.
   It holds the facts this generic flow must not hardcode, and later steps refer to it as
   "the profile reference".
 
@@ -1374,7 +1381,7 @@ EMIT [ship] complete number=<issue_number> pr=<pr_url> disposition=<…>
 # ── Procedures ────────────────────────────────────────────────────
 
 PROCEDURE resolve_repo_profile(repo)   # STEP 0b is authoritative; this is the summary
-  - repo_path = the local clone of <repo> (current checkout, else <repos_root>/<repo>, else ask); validate it is a git checkout with an origin remote
+  - repo_path = the MAIN checkout of the local clone of <repo> (resolved via `--git-common-dir`, so a linked worktree never counts; current clone, else a sibling clone, else ask); validate it is a git checkout with an origin remote
   - github_slug = parse `git -C <repo_path> remote get-url origin`
   - default_branch = `gh repo view <github_slug> --json defaultBranchRef -q .defaultBranchRef.name` (fallback: origin/HEAD; final fallback main)
   - formatter / lint_cmd / test_cmd / format_cmd = from <repo_path>/package.json scripts

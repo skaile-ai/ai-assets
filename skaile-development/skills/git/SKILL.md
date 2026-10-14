@@ -13,7 +13,6 @@ metadata:
   - "worktree"
   - "pull-request"
   - "skaile-development"
-  - "deploy"
   source: "MERGED"
   stage: "beta"
   user_inputs:
@@ -205,6 +204,7 @@ IF mode = commit
     | Repo (path) | Tool | Command (run from that repo's root) |
     |---|---|---|
     | workspaces | Biome | `bun run format && bun run lint` |
+    | platform (root) | Prettier | `bun run prettier:check` (`bun run prettier:format` to fix) |
     | platform `backend/` | Prettier + ESLint | `cd backend && bun run lint` |
     | platform `frontend/` | Prettier + ESLint | `cd frontend && bun run lint` |
     | store | Prettier + ESLint | `bun run lint` |
@@ -331,14 +331,22 @@ IF mode = worktree
 
   STEP 3: Create branch + worktree
     The worktree goes BESIDE the clone, not inside it (same rule as the `ship` skill):
-      repo_root     = $ git rev-parse --show-toplevel
-      repo          = basename of repo_root
-      worktree_path = <dirname repo_root>/.worktrees/<repo>-<slug>
+      repo_root      = dirname of `git rev-parse --path-format=absolute --git-common-dir`
+                       (the MAIN checkout, also when run from inside a linked worktree;
+                       `--show-toplevel` would name the worktree and nest `.worktrees/`)
+      repo           = basename of repo_root
+      default_branch = `git -C <repo_root> symbolic-ref --short refs/remotes/origin/HEAD`
+                       with "origin/" stripped; IF unset → `gh repo view --json
+                       defaultBranchRef -q .defaultBranchRef.name`. Do NOT assume "main".
+      worktree_path  = <dirname repo_root>/.worktrees/<repo>-<slug>
     Outside the clone, it needs no `.gitignore` entry (brand and ai-assets do not ignore
     `.worktrees/`) and the main checkout stays clean.
-    $ git fetch origin
+    The new branch starts from `origin/<default_branch>`, not from the current HEAD (the
+    old recipe branched off HEAD). To build on local unpushed work, say so and use the
+    current branch as the base instead.
+    $ git -C <repo_root> fetch origin
     $ mkdir -p <dirname repo_root>/.worktrees
-    $ git worktree add <worktree_path> -b <branch-name> origin/main
+    $ git -C <repo_root> worktree add <worktree_path> -b <branch-name> origin/<default_branch>
 
   STEP 4: Write git-state.json
     { "branch": "<name>", "mode": "worktree", "worktree_path": "<worktree_path>", "created_at": "<ISO>", "status": "active" }
@@ -353,7 +361,8 @@ IF mode = pr
 
   STEP 1: Pre-flight
     $ git status   — must be clean
-    - Run the repo's test command from its `CLAUDE.md` (see `references/test_stack_map.md` for a quick map)
+    - default_branch = the same probe as worktree STEP 3 (never assume "main")
+    - Run the repo's test command from its `CLAUDE.md` (the domain's `references/test_stack_map.md` is a quick map)
     IF tests fail
       - STOP: "Tests must pass before opening a PR. Fix failing tests first."
 
@@ -398,7 +407,7 @@ IF mode = pr
     $ gh pr create \
         --title "<title>" \
         --body "<body>" \
-        --base main \
+        --base <default_branch> \
         --head <branch-name>
     > "Pull request opened: <URL>"
 
@@ -410,18 +419,22 @@ IF mode = finish
 
   STEP 1: Pre-flight
     - Read git-state.json: branch, mode, worktree_path
+    - default_branch = the same probe as worktree STEP 3 (never assume "main")
     - Run full test suite
     IF tests fail -> STOP
 
   STEP 1a: Unpushed-commit safeguard (CRITICAL for worktree branches)
     Commits made in a worktree exist ONLY locally until the branch is pushed. Removing
-    the worktree and deleting the branch destroys them.
+    the worktree and deleting the branch destroys them. `pull-request` and `keep` run
+    PUSH_BRANCH before they remove the worktree. `merge` squashes the commits into the
+    default branch first, and `discard` deletes them on purpose, so neither pushes.
 
-    This step MUST run before presenting options — even "keep" removes the worktree.
-
-    $ git log --oneline @{upstream}..HEAD 2>/dev/null
-    IF there is no upstream, or the output is non-empty:
-      $ git push -u origin <branch-name>
+    PUSH_BRANCH:
+      upstream ← $ git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null
+      IF upstream is empty (no upstream):
+        $ git push -u origin <branch-name>
+      ELSE IF `git log --oneline @{upstream}..HEAD` is non-empty:
+        $ git push origin <branch-name>
       IF the push fails:
         STOP: "Failed to push <branch-name>. Fix the push error before finishing —
                removing the worktree without pushing will permanently lose those commits."
@@ -429,7 +442,7 @@ IF mode = finish
   STEP 2: Present options
     > "Implementation complete. What would you like to do with <branch-name>?
     >
-    > 1. merge — squash-merge to main and delete branch
+    > 1. merge — squash-merge to <default_branch> and delete branch
     > 2. pull-request — open PR for review (branch stays open)
     > 3. keep — leave branch as-is; come back later
     > 4. discard — delete branch (requires typed 'discard' confirmation)"
@@ -437,12 +450,12 @@ IF mode = finish
   STEP 3: Execute
 
     CASE merge:
-      IF the repo protects main (`gh api repos/<owner>/<repo>/branches/main --jq .protected`
-        is true — platform and workspaces) → use CASE pull-request instead; the squash
-        merge happens on GitHub.
+      IF the repo protects its default branch (`gh api
+        repos/<owner>/<repo>/branches/<default_branch> --jq .protected` is true) → use
+        CASE pull-request instead; the squash merge happens on GitHub.
       - Ask: "Type 'merge' to confirm:"
       IF not confirmed -> STOP
-      $ git checkout main
+      $ git checkout <default_branch>
       $ git merge --squash <branch-name>
       - Generate commit message using mode=commit
       $ git branch -d <branch-name>
@@ -450,20 +463,25 @@ IF mode = finish
       - Update git-state.json: status=merged
 
     CASE pull-request:
+      RUN PUSH_BRANCH (STEP 1a)
       - RUN mode=pr
       IF worktree_path exists -> $ git worktree remove <worktree_path>
       - Update git-state.json: status=pr_open
 
     CASE keep:
+      RUN PUSH_BRANCH (STEP 1a)
       IF worktree_path exists -> $ git worktree remove <worktree_path>
       - Update git-state.json: status=kept
 
     CASE discard:
-      - Ask: "Type 'discard' to permanently delete <branch-name>:"
+      - Ask: "Type 'discard' to permanently delete <branch-name> (local, and on origin if
+        it was pushed):"
       IF not confirmed -> STOP
       IF worktree_path exists -> $ git worktree remove <worktree_path> --force
-      $ git checkout main
+      $ git checkout <default_branch>
       $ git branch -D <branch-name>
+      IF `git ls-remote --heads origin <branch-name>` is non-empty:
+        $ git push origin --delete <branch-name>
       - Update git-state.json: status=discarded
 
   EMIT [git] finish_complete action=<merge|pr|keep|discard>

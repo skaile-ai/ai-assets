@@ -38,7 +38,7 @@ tested and deployed on its own. "skaile-dev" survives only as a name for this fa
 
 Reach for `skaile-development` when you are:
 
-- Implementing a feature or fix in a skaile-dev package (platform, forge-_, CLI, agent-_)
+- Implementing a feature or fix in a skaile repo (platform, workspaces, store, brand, ai-assets, forge)
 - Adding or modifying an AI skill or domain in `ai-assets/`
 - Committing changes with a conventional-commits message in the target repo's format
 - Managing git branches, worktrees, or opening PRs

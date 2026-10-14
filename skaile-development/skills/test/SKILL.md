@@ -2,12 +2,11 @@
 name: "test"
 description: "Test construction and execution for the standalone skaile repos. Two modes:
   'run' executes the test suite for one or more packages and reports results; 'construct'
-  generates new tests for recently implemented code. Knows the full test stack: Vitest
-  3.2.4 (agent-framework + forge/L4-assistant + _scripts), Vitest
-  4.1 (forge/skaile-forge + forge/L5-concept), Jest (platform backend), Vitest (platform frontend), Playwright
-  (E2E), and how to run each from its own repo root. Coverage is collected under Bun
-  with @vitest/coverage-istanbul (not v8) and ratcheted against the committed baseline
-  via _scripts/check-coverage-ratchet.ts."
+  generates new tests for recently implemented code. Knows each repo's test stack and runs
+  it from that repo's root: Vitest in workspaces (Biome repo; coverage via
+  @vitest/coverage-istanbul under Bun, ratcheted by packages/workspaces/_scripts/check-coverage-ratchet.ts),
+  Jest (platform backend), Vitest (platform frontend), Playwright (platform e2e), plus the
+  forge apps' own scoped Vitest and Playwright runs."
 metadata:
   tags:
   - "testing"
@@ -15,7 +14,6 @@ metadata:
   - "jest"
   - "playwright"
   - "bun"
-  - "monorepo"
   - "skaile-development"
   source: "MERGED"
   stage: "beta"
@@ -23,7 +21,7 @@ metadata:
     files:
     - path: "package.json"
       gate: hard
-      description: "Monorepo root package.json required"
+      description: "The target repo's root package.json required"
   user_inputs:
     dialog:
     - id: "mode"
@@ -120,6 +118,8 @@ map is `references/test_stack_map.md`.
 | ai-assets | shell tests | `bash scripts/run-tests.sh` |
 | `forge/skaile-forge` (standalone repo `skaile-ai/skaile-forge`) | Vitest 4.1 + `happy-dom` | `bun run test`; e2e `bun run test:e2e` |
 | `forge/common-ui` | Vitest 3.2.4 (unit) + Playwright CT (e2e) | `bun x --bun vitest run` (unit); `bun run test:e2e` (CT) |
+| `forge/L4-assistant` | Vitest 3.2.4 + `happy-dom` | `bun run --filter @skaile/forge-assistant test` (from the forge workspace root) |
+| `forge/L5-concept` | Vitest 4.1 | `bun run --filter @skaile/forge-concept test` (from the forge workspace root) |
 
 A fresh clone or worktree has no `node_modules`: run `bun install` at its root first.
 
@@ -491,8 +491,8 @@ bun x --bun vitest run \
   --coverage.reportsDirectory=_devlog/reports/coverage-ci \
   2>&1 | tail -40
 
-# Check the ratchet against the committed baseline (workspaces repo, inside packages/workspaces)
-bun _scripts/check-coverage-ratchet.ts
+# Check the ratchet against the committed baseline (workspaces repo)
+(cd packages/workspaces && bun _scripts/check-coverage-ratchet.ts)
 # Options: --ci <path> --baseline <path> --tolerance <pct>
 # Exit codes: 0 pass, 1 regression, 2 invalid input
 ```

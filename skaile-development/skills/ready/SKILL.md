@@ -170,9 +170,9 @@ STEP 3: Per-package required criteria (1–12 from readiness_criteria.md)
 
 STEP 4: Global checks (G1-G5 from readiness_criteria.md)
   (every repo is standalone — run these at the target repo's root; no repo has submodules)
-  - G1: parse the repo's root package.json workspaces glob; ensure every package.json in the repo matched
+  - G1: parse the repo's root package.json workspaces glob; ensure every tracked package.json (`git ls-files '*/package.json'`) matched
   - G2: `git status --short` — any output → fail
-  - G3: the repo's format-check script from its CLAUDE.md (workspaces: `bun run format:check`) — any diff → fail; skip when the repo has none
+  - G3: the repo's format-check script (workspaces: `bun run format:check`; platform: `bun run prettier:check`) — any diff → fail; skip when the repo has none
   - G4: ai-assets only — parse the root CLAUDE.md structure list vs. `ls */DOMAIN.md`
   - G5: parse skaile.yaml path fields — verify each path resolves on disk
 

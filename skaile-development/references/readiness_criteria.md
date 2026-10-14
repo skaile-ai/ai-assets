@@ -50,9 +50,9 @@ shell is archived; no repo has submodules), so "root" means the target repo's ro
 
 | # | Criterion | Check |
 |---|---|---|
-| G1 | The repo's root `package.json` workspaces include every package that has a `package.json` | Workspace glob check (skip in a repo with no workspaces) |
+| G1 | The repo's root `package.json` workspaces include every package that has a `package.json` | Workspace glob check over tracked files only (`git ls-files '*/package.json'`, so `node_modules/` and `dist/` never count); skip in a repo with no workspaces |
 | G2 | Working tree clean against the tracked commit | `git status --short` is empty |
-| G3 | The repo's format check produces no diff | The format-check script its `CLAUDE.md` names (workspaces: `bun run format:check`); skip in repos without one (platform: ESLint covers it) |
+| G3 | The repo's format check produces no diff | The format-check script the repo has (workspaces: `bun run format:check`; platform: `bun run prettier:check`); skip in repos without one |
 | G4 | ai-assets only: root `CLAUDE.md` structure list matches `*/DOMAIN.md` | Table vs. filesystem cross-check; skip in other repos |
 | G5 | `skaile.yaml` references exist on disk | Path validation |
 

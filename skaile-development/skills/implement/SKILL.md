@@ -140,15 +140,14 @@ STEP 1: Parse task
   - Identify: what type of change (feature, fix, refactor, skill/domain, infrastructure)
   - Identify: target package(s) from task_description or target_package input
   IF target_package is not provided
-    - Infer from task_description by matching keywords against the monorepo package map:
-      - forge/skaile-forge / forge/L5-concept → forge apps (Nuxt 4)
-      - platform/backend → NestJS + Fastify + Prisma
-      - platform/frontend → React 19 + Vite + TanStack
-      - agent-framework/* → agent runtime stack
-      - agent-framework/asset-manager → asset management library
-      - ai-assets/<domain> → AI skill/domain
-      - docs/ → Starlight docs site
-      - agent-framework/cli → CLI tool
+    - Infer from task_description by matching keywords against the repo/package map
+      (each is a standalone repo; paths are relative to that repo's root):
+      - forge: skaile-forge / L5-concept → forge apps (Nuxt 4)
+      - platform: backend/ → NestJS + Fastify + Prisma
+      - platform: frontend/ → React 19 + Vite + TanStack
+      - workspaces: packages/workspaces/<folder> → agent runtime stack (runner, bridge, cli, core, asset-manager, …)
+      - ai-assets: <domain>/ → AI skill/domain
+      - workspaces: docs/ → Starlight docs site
 
 STEP 2: Load context
   - Read the target repo's root CLAUDE.md (overview, conventions). Ignore a parent-directory
@@ -160,13 +159,13 @@ STEP 2: Load context
   | Package | Stack | Prog Expert |
   |---------|-------|-------------|
   | forge/skaile-forge, forge/L5-concept | Nuxt 4, drizzle-orm, SQLite (skaile-forge: PrimeVue; L5-concept: UnoCSS) | prog-expert-nuxt |
-  | platform/backend | NestJS, Fastify, Prisma, tRPC, Jest (PostXL-generated) | postxl + (read platform/CLAUDE.md) |
-  | platform/frontend | React 19, Vite, TanStack, Tailwind CSS 4, Vitest (PostXL-generated) | postxl + (read platform/CLAUDE.md) |
-  | store/backend | NestJS, Prisma (PostXL-generated, in progress) | postxl + (read store/CLAUDE.md) |
-  | agent-framework/* | TypeScript, Bun, OMP | prog-expert-omp |
-  | agent-framework/cli | TypeScript, Bun, Commander | (read package CLAUDE.md) |
-  | ai-assets/<domain> | Markdown, YAML (skill conventions) | (follow CLAUDE.md skill conventions) |
-  | docs/ | Astro, Starlight | (follow doc) |
+  | platform `backend/` | NestJS, Fastify, Prisma, tRPC, Jest (PostXL-generated) | postxl + (read the platform CLAUDE.md) |
+  | platform `frontend/` | React 19, Vite, TanStack, Tailwind CSS 4, Vitest (PostXL-generated) | postxl + (read the platform CLAUDE.md) |
+  | store `backend/` | NestJS, Prisma (PostXL-generated) | postxl + (read the store CLAUDE.md) |
+  | workspaces `packages/workspaces/*` | TypeScript, Bun, Biome | prog-expert-omp |
+  | workspaces `packages/workspaces/cli` | TypeScript, Bun, Commander | (read the folder CLAUDE.md) |
+  | ai-assets `<domain>/` | Markdown, YAML (skill conventions) | (follow CLAUDE.md skill conventions) |
+  | workspaces `docs/` | Astro, Starlight | (follow doc) |
 
 STEP 2a: PostXL gate (conditional)
   IF any target package is platform/backend, platform/frontend, or store/backend
