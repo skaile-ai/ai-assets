@@ -1,9 +1,16 @@
 # Structured Commit Message Spec (v2)
 
-This document defines the commit message format for the skaile-dev monorepo. It serves as the shared contract between:
+This document defines the commit message format for the standalone skaile repos (platform, workspaces, ai-assets, store, brand, …). It serves as the shared contract between:
 
 - The **git skill, commit mode** (primary path - agent writes the message)
-- The **commit-msg git hook** (safety net - validates title format on main)
+- The repo's **commit-msg git hook**, where it has one (safety net - validates the title format on the default branch)
+
+The target repo's own `CLAUDE.md` wins where it says more. Changes land by squash merge on
+GitHub, so GitHub builds the commit from the **PR title**. The PR title must follow the same
+title rules.
+
+There is **no `---agent---` YAML block**. It belonged to the retired `skaile-dev` shell; no
+standalone repo requires or consumes it, and nothing extracts decisions from commit messages.
 
 ## Format
 
@@ -18,7 +25,7 @@ This document defines the commit message format for the skaile-dev monorepo. It 
 Conventional-commits style. Max 72 characters.
 
 - `type`: one of `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `build`
-- `scope`: comma-separated package paths relative to repo root (e.g. `agent-framework/session, agent-framework/types`)
+- `scope`: short package or area name(s) in the target repo, comma-separated (e.g. `session, types` in workspaces; `frontend` or `flows` in platform)
 - `title`: imperative mood, lowercase, no period
 
 ### Human Description

@@ -16,7 +16,7 @@ description: >-
   existing code, for plans or design proposals, for filing an issue when implementation is
   explicitly deferred, for throwaway local experiments, or for work spanning several
   repositories.
-version: 1.8.0
+version: 1.9.0
 metadata:
   tags:
   - "ship"
@@ -47,11 +47,11 @@ metadata:
       type: "text"
       required: true
     - id: "repo"
-      label: "Target repo / submodule (e.g. platform, store, workspaces, brand). Leave
-        empty to auto-infer from the description"
+      label: "Target repo (e.g. platform, store, workspaces, brand). Leave empty to
+        auto-infer from the description"
       type: "text"
       required: false
-      hint: "The skaile-dev submodule the work lands in. Auto-inferred from the
+      hint: "The standalone repo the work lands in. Auto-inferred from the
         description when obvious (named package, 'platform', 'store frontend', a CLI
         command…); the skill confirms or asks only when it cannot tell."
     - id: "issue"
@@ -108,7 +108,7 @@ metadata:
 > One skill, one work item, all the way to merged. `ship` **implements** the change and
 > then **ships** it: it files the work item, builds it, opens the PR, drives the PR
 > through CI and review, and merges it. It is repo-agnostic — it works against any
-> skaile-dev submodule (platform, store, workspaces, brand, …), adapting to each repo's
+> standalone skaile repo (platform, store, workspaces, brand, …), adapting to each repo's
 > own conventions, formatter, and lint/test commands. The category (bug / feature / ui /
 > chore / issue) only changes the GitHub label, branch prefix, and commit type.
 
@@ -122,6 +122,9 @@ metadata:
 - **The target repo is resolved at runtime** (input `repo`, else inferred from the
   description, else asked). Its GitHub slug, default branch, conventions, formatter, and
   lint/test commands are **derived from that repo** — never hardcoded to platform.
+- **Every repo is standalone.** The `skaile-dev` shell repo is retired (its GitHub remote
+  is archived), so there is no shell root, no shell `CLAUDE.md` to read, and no submodule
+  to bump. The target repo's own `CLAUDE.md` is the authority for its toolchain.
 
 ## Overview
 
@@ -130,7 +133,7 @@ metadata:
 | 0 | Read inputs, verify `gh` auth, resolve the **target repo + its profile**, auto-classify category |
 | 1 | Pre-flight the target repo's main (fetch + clean-tree check; paths in `allowed_dirty` are left alone, never stashed) |
 | 2 | Refine the description; open the GitHub issue (or reuse `issue`) → capture issue **number** + URL |
-| 3 | Derive branch name from the issue number; create the worktree + branch (off the repo's `origin/main`) |
+| 3 | Derive branch name from the issue number; create the worktree + branch (off the repo's `origin/<default_branch>`) |
 | 4 | Investigate: load the repo's CLAUDE.md + relevant files; identify root cause / design surface |
 | 5 | Write an **uncommitted** plan markdown into the worktree |
 | 6 | Dispatch a fresh subagent to implement the plan (gets only the plan + context — no parent history) |
@@ -138,8 +141,8 @@ metadata:
 | 8 | Triage review findings, apply valid fixes inline |
 | 8b | **Docs impact** (platform only): decide `user-visible` vs `none`; when user-visible, update the capabilities doc in this PR and open an ai-assets PR for the `platform-guide` skill |
 | 9 | Delete the plan; run the repo's lint + affected tests; commit (work only); push the branch |
-| 9b | Fetch latest `origin/main`, merge into the branch, resolve conflicts, re-push |
-| 10 | Open a PR against `main` that `Closes #<number>` (respect PR template + changeset rules; platform PRs carry the `## Docs` section) |
+| 9b | Fetch latest `origin/<default_branch>`, merge into the branch, resolve conflicts, re-push |
+| 10 | Open a PR against `<default_branch>` that `Closes #<number>` (respect PR template + changeset rules; platform PRs carry the `## Docs` section) |
 | 11 | **Report the implementation summary** to the user |
 | 12 | **Babysit the PR**: act on whichever lands first — a review or CI — instead of waiting out the suite; drive CI to green and fix every related change-request in a loop (nits for the first three fix pushes, substantive only from the fourth); report unrelated/architectural problems without fixing them |
 | 12b | Sweep for follow-ups: ship the small leftovers into this PR; propose as issues only the ones that clear the **issue bar** (user harm / money / stability / security / team drag / significant benefit, with evidence), at most 3 |
@@ -151,7 +154,7 @@ fixes are made) and are torn down only by the Phase 13 choice — never automati
 
 ## When to Use
 
-- The user describes a work item in any skaile-dev repo: a bug, a missing capability
+- The user describes a work item in any skaile repo: a bug, a missing capability
   ("issue"), a cosmetic fix ("UI"), a maintenance task ("chore"), or a small/medium feature
 - They want it filed as a GitHub issue, implemented, and **driven to merge** in one continuous flow
 - It is contained enough for one implementation pass + one review pass — not a multi-week refactor
@@ -180,7 +183,7 @@ Only stop and ask when continuing needs a judgment the evidence cannot settle. T
 complete list of legitimate stop-and-ask gates is:
 
 1. **`gh` is not authenticated** — the issue/PR cannot be created. Tell the user to run `gh auth login`.
-2. **The target repo cannot be determined** — input absent and the description is ambiguous across submodules. Ask which repo.
+2. **The target repo cannot be determined** — input absent and the description is ambiguous across repos. Ask which repo.
 3. **Working tree of the target repo is dirty outside `allowed_dirty`** — the worktree branches off `origin/<default_branch>` so a dirty checkout doesn't strictly block it, but an unexpected dirty state is ambiguous (in-progress work, a failed earlier run, another session's files); stop so the user resolves it consciously. Paths listed in `allowed_dirty` are pre-authorized and never stop the run.
 4. **Investigation inconclusive** — root cause / design surface cannot be located; report (issue stays open, labelled `needs-info`) and stop.
 5. **A review finding is "apply-large"** — spawning a second implementation subagent is a meaningful escalation; confirm scope.
@@ -223,11 +226,10 @@ CAN spawn children keeps STEP 8 and STEP 9 as written.
 
 ---
 
-ROLE  End-to-end work-item shipper for any skaile-dev repo. Owns the full cycle: resolve repo → GitHub issue → worktree → plan → implement → review → PR → babysit (CI + reviews) → merge/cleanup. Category only influences the GitHub label, branch prefix, and commit type.
+ROLE  End-to-end work-item shipper for any standalone skaile repo. Owns the full cycle: resolve repo → GitHub issue → worktree → plan → implement → review → PR → babysit (CI + reviews) → merge/cleanup. Category only influences the GitHub label, branch prefix, and commit type.
 
 READS
-  skaile-dev/CLAUDE.md                            — monorepo conventions, the Formatting + Testing tables (per-repo formatter/lint/test)
-  <repo>/CLAUDE.md                                — target repo architecture, conventions, lint/test recipes
+  <repo>/CLAUDE.md                                — target repo architecture, conventions, formatter, lint/test recipes, commit rule (the authority)
   <repo>/package.json                             — the repo's lint / test / format scripts
   <repo>/.changeset/, <repo>/.github/             — changeset enforcement + PR template detection
   <repo>/<files-relevant-to-work-item>            — for investigation
@@ -254,16 +256,16 @@ NEVER WRITES
   platform/issues/ or any repo's legacy markdown issue folder — tracking is GitHub Issues now
 
 MUST  verify `gh auth status` succeeds before opening the issue or PR
-MUST  resolve the target repo (input `repo` → inference from description → ask) and validate the submodule path + GitHub remote exist
+MUST  resolve the target repo (input `repo` → inference from description → ask) and validate that its local clone + GitHub remote exist
 MUST  derive the repo profile from the repo itself — GitHub slug (`git -C <repo> remote get-url origin`), default branch, formatter, lint/test/format commands, changeset requirement — and NEVER hardcode platform's toolchain onto another repo
 MUST  read `references/<repo>.md` beside this skill when it exists for the target repo, and follow it — repo-specific facts (changeset names, boot checks, known flaky CI signatures, the deploy path) live there, NOT inline in this generic flow
-MUST  respect each repo's formatter: platform = Prettier + ESLint (NEVER Biome); workspaces / brand / docs = Biome; defer to the repo's CLAUDE.md + package.json scripts when unsure
+MUST  respect each repo's formatter: platform and store = Prettier + ESLint (NEVER Biome); workspaces = Biome; defer to the repo's CLAUDE.md + package.json scripts when unsure
 MUST  refine the user's description before filing it — 1-3 sentences for bug/issue/ui/chore (up to 5 short for features), technical and specific, no marketing fluff
 MUST  auto-classify the category without asking; the `category` input only overrides
 MUST  open the work item as a GitHub issue on the target repo (or reuse `issue`), capturing the **number** and URL; apply the category label if it exists in the repo, plus `agent`; assign `@me`
 MUST  derive the work item's identity from the GitHub issue **number** (`#<n>`) for branch, commit reference, and PR
 MUST  open the issue BEFORE the worktree (branch name needs the number) but AFTER the clean-tree pre-flight (so a dirty tree never leaves a dangling issue)
-MUST  create the worktree at <skaile-dev-root>/.worktrees/<repo>-<number> (gitignored) — outside the repo so its checkout stays clean, but INSIDE the skaile-dev tree so dispatched subagents auto-load the repo's CLAUDE.md via on-demand memory discovery
+MUST  create the worktree at <repos_root>/.worktrees/<repo>-<number>, where <repos_root> is the parent directory of <repo_path> — outside the clone, so its checkout stays clean without a `.gitignore` entry (brand and ai-assets do not ignore `.worktrees/`); on a machine where the clones sit side by side this is the path existing tooling and open worktrees already use. The worktree root holds the repo's own CLAUDE.md, so subagents load it from there
 MUST  keep the worktree and local branch ALIVE through the PR + babysit phases — tear them down ONLY in Phase 13 per the user's choice
 MUST  write the plan in the worktree and treat it as ephemeral — never commit it, delete it before the final commit
 MUST  dispatch implementation as a fresh, self-contained subagent (paste the plan + repo conventions + acceptance criteria; do NOT pass parent conversation) — except under NO-CHILDREN (a fork), which implements inline (see Running Headless)
@@ -271,7 +273,7 @@ MUST  dispatch review as a fresh subagent that only sees the diff + review focus
 MUST  triage review findings explicitly: each gets a verdict (apply / defer / reject) with a one-line reason
 MUST  run the repo's lint AND affected tests locally before pushing; add a changeset if the repo enforces them
 MUST  push the branch before opening the PR
-MUST  fetch origin/main and merge it into the branch BEFORE opening the PR, resolving conflicts while the full local context is available
+MUST  fetch origin/<default_branch> and merge it into the branch BEFORE opening the PR, resolving conflicts while the full local context is available
 MUST  open the PR with `gh pr create --base <default_branch> --head <branch>`, body containing `Closes #<number>`, honoring the repo's PR template if present
 MUST  report a clear implementation summary to the user after the PR is opened (Phase 11) — before babysitting
 MUST  babysit the PR (Phase 12): poll for the FIRST signal — a review or CI completion, whichever lands first — and act on a review the moment it arrives instead of waiting out the whole check suite; fix every actionable item that relates to the work item, looping push → re-poll until CI is green and the only remaining review notes are ones the reviewer explicitly blesses as fine to keep
@@ -320,20 +322,34 @@ STEP 0b: Resolve the target repo + profile
     2. ELSE infer from the description: an explicitly named repo ("platform",
        "store", "workspaces", "brand"…), a package name, a CLI command, a file
        path, or a feature clearly owned by one repo.
-    3. IF still ambiguous across submodules → ASK (gate #2): "Which repo does this
-       land in?" with the candidate submodules.
+    3. IF still ambiguous across repos → ASK (gate #2): "Which repo does this
+       land in?" with the candidate repos.
 
   Validate + build the profile (derive, do NOT hardcode):
-    repo_path     = "<skaile-dev-root>/<repo>"
-    IF repo_path is not a git submodule/checkout → STOP: "No such repo '<repo>'."
+    repo_path     = the MAIN checkout of the local clone of <repo>, never a linked worktree:
+                    main_of(dir) = dirname of the absolute
+                                   `git -C <dir> rev-parse --path-format=absolute --git-common-dir`
+                                   (from a linked worktree such as `.worktrees/platform-123`
+                                   this still names the main checkout; `--show-toplevel`
+                                   would name the worktree)
+                    1. main_of(cwd) when the current directory is in a checkout whose
+                       origin slug names <repo>;
+                    2. ELSE `<parent of main_of(cwd)>/<repo>` (clones usually sit side by
+                       side; `<repo>` here is the directory name of that clone);
+                    3. ELSE ASK for the path.
+    IF repo_path is not a git checkout with an `origin` remote → STOP: "No such repo '<repo>'."
+    repos_root    = parent directory of repo_path (the worktree goes under it, STEP 5)
+    <repo> stays the resolved repo name (input, inference, or the clone directory from 2.) —
+    never the name of the directory the session happens to sit in.
     github_slug   = parse `git -C <repo_path> remote get-url origin`
                     (e.g. git@github.com:skaile-ai/skaile-store.git → skaile-ai/skaile-store)
     default_branch= `gh repo view <github_slug> --json defaultBranchRef -q .defaultBranchRef.name`
                     (fallback: `git -C <repo_path> symbolic-ref --short refs/remotes/origin/HEAD`
                     with "origin/" stripped; final fallback "main"). Do NOT assume "main" —
-                    some repos default elsewhere, and `origin/HEAD` is often unset in submodules.
-    Read `<repo_path>/CLAUDE.md` + `<repo_path>/package.json` "scripts" + the root
-    `skaile-dev/CLAUDE.md` Formatting + Testing tables to fill:
+                    some repos default elsewhere, and `origin/HEAD` is often unset in a clone.
+    Read `<repo_path>/CLAUDE.md` + `<repo_path>/package.json` "scripts" to fill (a
+    parent-directory `CLAUDE.md` from an old `skaile-dev` shell checkout is NOT a source —
+    it describes the retired shell):
       formatter   = Biome | Prettier+ESLint | (none, for non-JS content repos)
       lint_cmd    = how to lint the packages this change will touch
       test_cmd    = how to run the repo's (affected) tests
@@ -342,8 +358,8 @@ STEP 0b: Resolve the target repo + profile
                          changeset-check workflow is present
     pr_template = `<repo_path>/.github/PULL_REQUEST_TEMPLATE.md` if present
 
-  IF `references/<repo>.md` exists beside this skill (`<repo>` = the submodule directory
-  name resolved above, so `references/platform.md` — not the GitHub slug): read it now.
+  IF `references/<repo>.md` exists beside this skill (`<repo>` = the repo name
+  resolved above, never a worktree directory name, so `references/platform.md` — not the GitHub slug): read it now.
   It holds the facts this generic flow must not hardcode, and later steps refer to it as
   "the profile reference".
 
@@ -352,10 +368,13 @@ STEP 0b: Resolve the target repo + profile
       NEVER Biome; changesets enforced. Changeset package names, the invariant and
       boot checks, the known flaky CI signatures and the deploy path are in
       `references/platform.md`.
-    - store: its own backend/frontend/shared; check its scripts + changeset config.
-    - workspaces / brand / docs: Biome.
-    - marketing: workspace-isolated — run `bun install` / build inside `marketing/`.
-    - non-JS content repos (infra, ai-assets): may have no lint/test — skip gracefully.
+    - store: Prettier + ESLint (PostXL); its own backend/frontend/shared; `bun run lint` /
+      `bun run test` at the repo root; check its scripts + changeset config.
+    - workspaces: Biome (`bun run format`, `bun run lint`), `bun run test` at the repo root.
+    - brand: `bun run test` / `bun run typecheck`; no format script.
+    - marketing: run `bun install` / build at its repo root.
+    - ai-assets: no lint; tests via `bash scripts/run-tests.sh`.
+    - other non-JS content repos (infra): may have no lint/test — skip gracefully.
 
   Print: > "Targeting <repo> (<github_slug>, default branch <default_branch>, formatter <formatter>)."
 
@@ -497,7 +516,7 @@ STEP 4: Branch name
   branch_name = "<prefix><issue_number>-<slug>"   e.g. "feat/214-bulk-export", "fix/836-chat-link-wrap"
 
 STEP 5: Worktree (fresh flow; persists until Phase 13)
-  worktree_path = "<skaile-dev-root>/.worktrees/<repo>-<issue_number>"
+  worktree_path = "<repos_root>/.worktrees/<repo>-<issue_number>"   # sibling of the clone, never inside it
   $ cd <repo_path>
   $ git worktree prune   # clear any ghost entry from a prior force-removed run
   $ git worktree add <worktree_path> -b <branch_name> origin/<default_branch>
@@ -1269,7 +1288,7 @@ EOF
         as `issue_state=OPEN (close failed: <error>)` so the user closes it.
       Cleanup, in this EXACT order:
         $ cd <repo_path>
-        Guard (submodule worktree commits are local-only — losing them is unrecoverable):
+        Guard (unpushed worktree commits are local-only — losing them is unrecoverable):
         $ git -C <worktree_path> log @{upstream}..HEAD --oneline
         IF non-empty → STOP: "Unpushed commits in the worktree — refusing to remove. Push first." (do NOT --force)
         $ git worktree remove <worktree_path> --force   # --force: babysit/formatters may have left the tree dirty
@@ -1362,14 +1381,14 @@ EMIT [ship] complete number=<issue_number> pr=<pr_url> disposition=<…>
 # ── Procedures ────────────────────────────────────────────────────
 
 PROCEDURE resolve_repo_profile(repo)   # STEP 0b is authoritative; this is the summary
-  - repo_path = <skaile-dev-root>/<repo>; validate it is a checked-out submodule
+  - repo_path = the MAIN checkout of the local clone of <repo> (resolved via `--git-common-dir`, so a linked worktree never counts; current clone, else a sibling clone, else ask); validate it is a git checkout with an origin remote
   - github_slug = parse `git -C <repo_path> remote get-url origin`
   - default_branch = `gh repo view <github_slug> --json defaultBranchRef -q .defaultBranchRef.name` (fallback: origin/HEAD; final fallback main)
   - formatter / lint_cmd / test_cmd / format_cmd = from <repo_path>/package.json scripts
-    + <repo_path>/CLAUDE.md + root CLAUDE.md Formatting/Testing tables (NEVER hardcode)
+    + <repo_path>/CLAUDE.md (NEVER hardcode; never a parent shell CLAUDE.md)
   - changeset_required = .changeset/ + changeset-check workflow present
   - pr_template = .github/PULL_REQUEST_TEMPLATE.md if present
-  - Honor: platform never Biome; marketing workspace-isolated; content repos may have no lint/test
+  - Honor: platform never Biome; content repos may have no lint/test
 
 PROCEDURE refine_description(raw, category)
   - ≤3 sentences for bug/issue/ui/chore; ≤5 short for feature; ~280/~500 char caps
@@ -1411,7 +1430,7 @@ CHECKLIST
   - [ ] Clean-tree pre-flight done BEFORE opening the issue; dirty paths inside `allowed_dirty` left untouched; no `git stash` suggested or run
   - [ ] Profile reference (`references/<repo>.md`) read when it exists
   - [ ] GitHub issue opened/reused on the target repo (category label + `agent`, assigned @me); number + URL captured
-  - [ ] Worktree at <skaile-dev-root>/.worktrees/<repo>-<number> (gitignored, inside the tree), branched off origin/<default_branch>
+  - [ ] Worktree at <repos_root>/.worktrees/<repo>-<number> (sibling of the clone), branched off origin/<default_branch>
   - [ ] Branch name uses the issue number; nothing written to any legacy issue folder
   - [ ] Plan written in worktree, never staged
   - [ ] Implementation dispatched with self-contained MVC prompt (repo conventions, repo formatter, repo tests)
@@ -1473,11 +1492,11 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** the `skaile-development` agent when the user reports a bug, requests a feature, asks for a UI fix, files a chore, or raises an issue in any skaile-dev repo
+- **Called by:** the `skaile-development` agent when the user reports a bug, requests a feature, asks for a UI fix, files a chore, or raises an issue in any standalone skaile repo
 - **Calls (via Agent tool):** `implement` (or `general-purpose`) for the change; `review` for the diff review
 - **Calls (optional, soft dependency):** the `meat` skill for a reading diff at the Phase 13 gate — only offered when it is installed; ship works unchanged without it
 - **Uses:** `gh` CLI for issue + PR + CI/review state + merge; `git` directly for repo/worktree/branch/commit/push
-- **Reads:** the target repo's `CLAUDE.md` + `package.json`, the root `skaile-dev/CLAUDE.md` Formatting/Testing tables, affected source, `gh label/issue/pr` state
+- **Reads:** the target repo's `CLAUDE.md` + `package.json`, affected source, `gh label/issue/pr` state
 - **Writes:** a GitHub issue + a PR on the target repo, any user-approved follow-up issues, implementation + babysit commits on the branch, a transient plan file (deleted); on merge, a squashed commit on the repo's main
 - **Writes (platform, Phase 8b):** in the PR — `features/SKAILE-PLATFORM-CAPABILITIES.md` plus its `features/<NN-section>/` doc; plus an ai-assets PR for the `platform-guide` skill, merged with the platform PR; the business doc mirror (`/mnt/c/.../concept/`) post-merge only when accessible
 - **Never writes:** any repo's legacy markdown issue folder — tracking is GitHub Issues

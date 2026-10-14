@@ -8,7 +8,7 @@ description: "[skaile-development] Use when creating, building, modifying, or ex
   build a new full-stack TypeScript app on the PostXL stack (NestJS + Prisma + tRPC + React 19
   + Vite); or when a regeneration produced a confusing diff or merge conflict. Also covers the
   skaile-dev projects `platform/backend`, `platform/frontend`, and `store/backend`."
-version: 1.0.1
+version: 1.0.2
 metadata:
   tags:
   - "postxl"
@@ -38,12 +38,9 @@ metadata:
     - path: "schema/"
       gate: soft
       description: "Optional split-schema directory with per-model / per-enum JSON files."
-    - path: "platform/CLAUDE.md"
+    - path: "CLAUDE.md"
       gate: soft
-      description: "Read first when working inside skaile-dev's platform/."
-    - path: "store/CLAUDE.md"
-      gate: soft
-      description: "Read first when working inside skaile-dev's store/."
+      description: "Read first: the target repo's root CLAUDE.md (platform and store are standalone repos)."
   produces: []
   reads:
   - path: "postxl-schema.json"
@@ -55,8 +52,7 @@ metadata:
   - path: "ai-assets/skaile-development/skills/postxl/references/schema-grammar.md"
   - path: "ai-assets/skaile-development/skills/postxl/references/maintain.md"
   - path: "ai-assets/skaile-development/skills/postxl/references/skaile-dev-patterns.md"
-  - path: "platform/CLAUDE.md"
-  - path: "store/CLAUDE.md"
+  - path: "CLAUDE.md"
   - path: "node_modules/@postxl/ui-components/CLAUDE.md"
 ---
 
@@ -184,7 +180,6 @@ CHECKLIST
   - [ ] Custom blocks and new modules read/write via `modelViewService` / `modelUpdateService`, not raw Prisma
   - [ ] New user-facing `platform/frontend/` UI registered as a command palette action
   - [ ] Used `@postxl/ui-components` primitives for new UI
-  - [ ] Submodule pointer bumped in the shell repo after committing inside `platform/` or `store/`
 
 ---
 
@@ -192,7 +187,7 @@ CHECKLIST
 
 - **Called by:** `implement` (target = `platform/backend`, `platform/frontend`, `store/backend`);
   the user directly when creating or working on any PostXL project.
-- **Calls:** `git` (commits + submodule pointer bump), `test`, `audit` (scope=diff), `doc`,
+- **Calls:** `git` (commits), `test`, `audit` (scope=diff), `doc`,
   `verify-ui` / `e2e-platform` (when UI changed).
 - **Reference layout:** `references/{create-app,schema-grammar,maintain}.md` are portable to any
   PostXL project; `references/skaile-dev-patterns.md` is monorepo-specific and is the file to

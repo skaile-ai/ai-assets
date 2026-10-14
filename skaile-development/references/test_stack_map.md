@@ -1,6 +1,10 @@
 # Test Stack Map
 
-Authoritative map of every package in the skaile-dev monorepo to its test framework, test-file location convention, and command to run.
+Quick map of each skaile repo to its test framework, test-file location convention, and command to run.
+
+Every repo is standalone (the `skaile-dev` shell is archived). Run each command from **that repo's
+root** unless the row names a subdirectory. The target repo's own `CLAUDE.md` is the authority:
+when this map and that file disagree, the repo's `CLAUDE.md` wins — fix this map.
 
 Used by: `test`, `test-plan`, `test-unit`, `test-integration`, `test-e2e`, `audit`, `ready`, `quality`.
 
@@ -34,50 +38,49 @@ Forge E2E specs live in `tests/e2e/` (except `forge/L5-concept`: `test/e2e/`). I
 
 For `forge/common-ui`, E2E uses Playwright CT (component testing) instead of a full Nuxt dev server — see the Playwright Component Testing section below.
 
-## Agent Framework (TypeScript + Bun + OMP)
+## Workspaces (`skaile-ai/workspaces` — TypeScript + Bun, Biome)
 
-| Package | Framework | Test Dir | Pattern | Run Command |
+One Bun workspace; `packages/*` are the members. The runtime stack is the single package
+`packages/workspaces/`, with one folder per former package (`runner/`, `bridge/`, `cli/`, `core/`, …).
+
+| Target | Framework | Test Dir | Pattern | Run Command (from the repo root) |
 |---|---|---|---|---|
-| `agent-framework/cli` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-cli` |
-| `agent-framework/runner` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-runner` |
-| `agent-framework/bridge` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-bridge` |
-| `agent-framework/flow-engine` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-flow-engine` |
-| `agent-framework/resolver` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-resolver` |
-| `agent-framework/connectors` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-connectors` |
-| `agent-framework/session` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-session` |
-| `agent-framework/store` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-store` |
-| `agent-framework/asset-manager` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-asset-manager` |
-| `agent-framework/core` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-core` |
-| `agent-framework/types` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-types` |
-| `agent-framework/transport` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-transport` |
-| `agent-framework/workspace-plugin` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-workspace-plugin` |
-| `agent-framework/lab` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-lab` |
-| `agent-framework/sdk` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-sdk` |
-| `agent-framework/client` | Vitest | `tests/` | `*.test.ts` | `bun x --bun vitest run --project agent-client` |
+| every package | Vitest | `tests/` per folder (some colocated in `src/`) | `*.test.ts` | `bun run test` |
+| `packages/workspaces` only | Vitest | `<folder>/tests/` | `*.test.ts` | `cd packages/workspaces && bun run test` |
+| one folder or file | Vitest | — | — | `cd packages/workspaces && bun x --bun vitest run runner/tests/<file>.test.ts` |
 
-## Platform
+Format and lint with Biome: `bun run format`, `bun run lint`. Typecheck: `bun run typecheck`.
+CI fails when a package collects fewer tests than its floor in `scripts/test-count-floor.json`.
 
-| Package | Framework | Test Dir | Pattern | Run Command |
+## Platform (`skaile-ai/platform` — PostXL: NestJS + React, Prettier + ESLint)
+
+Install with `bun install` at the repo root. Never run Biome in this repo.
+
+| Package | Framework | Test Dir | Pattern | Run Command (from the repo root) |
 |---|---|---|---|---|
-| `platform/backend` | Jest | `libs/*/test`, `apps/*/test` | `*.spec.ts` | `bun run test --filter ./platform/backend` |
-| `platform/frontend` | Vitest | `src/**/__tests__` | `*.test.tsx` | `bun run test --filter ./platform/frontend` |
-| `platform/e2e` | Playwright | `tests/` | `*.spec.ts` | `bun run e2e --filter ./platform/e2e` |
+| `backend` | Jest | colocated in `libs/*/src`, `apps/*/src`, `test/` | `*.test.ts` | `cd backend && bun run test:jest -- --testPathPatterns <pattern>` |
+| `frontend` | Vitest | colocated in `src/` | `*.test.ts`, `*.test.tsx` | `cd frontend && bun run test:unit` |
+| `e2e` | Playwright | `specs/` | `*.spec.ts` | `cd e2e && bun run e2e:local` (see the `e2e-platform` skill) |
 
-## Whole Monorepo
+Typecheck both packages: `bun run typecheck` (root). Lint: `bun run lint` (root) or inside
+`backend/` / `frontend/`. A backend change is verified only when the app boots
+(`cd backend && bun run dev` reaches `API is running`) — see the platform `CLAUDE.md`.
 
-| Target | Command |
-|---|---|
-| All Vitest projects | `bun x --bun vitest run` |
-| Every package (incl. platform Jest) | `bun run test` (root script) |
-| Coverage | `bun x --bun vitest run --coverage` |
+## Other repos
+
+| Repo | Formatter / linter | Test command (from the repo root) |
+|---|---|---|
+| `skaile-ai/ai-assets` | — (prose + shell scripts) | `bash scripts/run-tests.sh` |
+| `skaile-ai/store` | Prettier + ESLint (PostXL) | `bun run test`; lint `bun run lint` |
+| `skaile-ai/brand` | — | `bun run test`; typecheck `bun run typecheck` |
 
 ## Test Infrastructure Conventions
 
-| Layer | Forge apps | Agent framework | Platform backend | Platform frontend |
+| Layer | Forge apps | Workspaces | Platform backend | Platform frontend |
 |---|---|---|---|---|
-| Unit | Vitest, `test/unit/` or `tests/` | Vitest, `tests/` | Jest, colocated `*.spec.ts` | Vitest, `__tests__/` |
+| Unit | Vitest, `test/unit/` or `tests/` | Vitest, `tests/` | Jest, colocated `*.test.ts` | Vitest, colocated `*.test.ts(x)` |
 | Integration | Vitest w/ real SQLite temp DB | Vitest w/ in-memory fixtures | Jest w/ PostgreSQL test container | — |
-| E2E | Playwright, `tests/e2e/` (L5-concept: `test/e2e/`) | — (N/A — library) | — (delegated to platform/e2e) | Playwright, via `platform/e2e/` |
+| E2E | Playwright, `tests/e2e/` (L5-concept: `test/e2e/`) | — (N/A — library) | — (delegated to `e2e/`) | Playwright, via the platform repo's `e2e/` |
 
 ## Playwright Component Testing (forge/common-ui)
 
@@ -103,4 +106,4 @@ server. Document with skip comments in `tests/e2e/useSkaileEditor.spec.ts`.
 
 - **Forge**: drizzle-orm + SQLite. Use `:memory:` or a per-test temp file via `fs.mkdtempSync()`. Migrations run via drizzle-kit in `beforeAll`.
 - **Platform backend**: PostgreSQL. Use a separate test DB (`DATABASE_URL_TEST`) with `prisma migrate deploy` in `beforeAll`. Truncate tables in `afterEach`.
-- **Agent framework**: No DB. State lives in temp dirs (`fs.mkdtempSync(os.tmpdir())`), cleaned in `afterEach`.
+- **Workspaces**: No DB. State lives in temp dirs (`fs.mkdtempSync(os.tmpdir())`), cleaned in `afterEach`.

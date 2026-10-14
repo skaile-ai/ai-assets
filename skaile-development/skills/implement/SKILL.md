@@ -18,9 +18,9 @@ metadata:
   stage: "beta"
   prerequisites:
     files:
-    - path: "skaile-dev/CLAUDE.md"
+    - path: "CLAUDE.md"
       gate: soft
-      description: "Monorepo CLAUDE.md for conventions — read before starting"
+      description: "The target repo's root CLAUDE.md for conventions — read before starting"
     inputs_required:
     - id: task_description
       label: "What needs to be implemented? (plain language)"
@@ -95,7 +95,7 @@ to build apps), this skill works on the codebase itself.
 ROLE  Monorepo-aware implementation orchestrator — reads context, plans, executes, and closes the loop with tests + docs + devlog.
 
 READS
-  skaile-dev/CLAUDE.md                                   — monorepo conventions, package map
+  <repo>/CLAUDE.md                                       — the target repo's conventions, package map (the authority; the skaile-dev shell is retired)
   <package>/CLAUDE.md                                     — package architecture, tech stack, key conventions
   <package>/README.md                                     — public API and usage patterns
   ? _implementation/skaile-plan.md                       — resume state if exists
@@ -125,11 +125,11 @@ MUST  update CLAUDE.md when architecture, conventions, or environment variables 
 MUST  add a devlog entry after every completed implementation
 MUST  create a git branch before implementing (via git skill)
 MUST  verify platform/backend starts (bun run dev) after any structural backend change before marking the phase complete — structural changes include: new @Injectable service, constructor parameter changes, *.module.ts providers/imports/exports changes, import path changes in a service or module
-MUST  run formatting and linting on all affected packages before each commit — the git skill's STEP 1c handles this, but ensure it runs: Biome (format+lint) for agent-framework/forge/docs/theme; Prettier+ESLint for platform
+MUST  run formatting and linting on all affected packages before each commit — the git skill's STEP 1c handles this, but ensure it runs: Biome (format+lint) for workspaces; Prettier+ESLint for platform and store
 NEVER implement across packages without reading each package's CLAUDE.md
 NEVER skip the plan phase for standard or large complexity
 NEVER commit to main directly — always use a feature branch
-NEVER run Biome (biome format / biome lint / bun run format) inside platform/ — platform uses Prettier + ESLint; run bun run lint from within platform/backend or platform/frontend instead
+NEVER run Biome (biome format / biome lint / bun run format) in the platform repo — platform uses Prettier + ESLint; run bun run lint from within its backend/ or frontend/ instead
 NEVER create barrel index.ts files in platform/backend/libs/ — import directly via subpath alias (@lib/file) instead; barrel files break NestJS DI module boundaries (exception: PostXL-generated barrels tracked in postxl-lock.json)
 
 EMIT [implement] started task=<slug> packages=<list> complexity=<tier>
@@ -140,18 +140,18 @@ STEP 1: Parse task
   - Identify: what type of change (feature, fix, refactor, skill/domain, infrastructure)
   - Identify: target package(s) from task_description or target_package input
   IF target_package is not provided
-    - Infer from task_description by matching keywords against the monorepo package map:
-      - forge/skaile-forge / forge/L5-concept → forge apps (Nuxt 4)
-      - platform/backend → NestJS + Fastify + Prisma
-      - platform/frontend → React 19 + Vite + TanStack
-      - agent-framework/* → agent runtime stack
-      - agent-framework/asset-manager → asset management library
-      - ai-assets/<domain> → AI skill/domain
-      - docs/ → Starlight docs site
-      - agent-framework/cli → CLI tool
+    - Infer from task_description by matching keywords against the repo/package map
+      (each is a standalone repo; paths are relative to that repo's root):
+      - forge: skaile-forge / L5-concept → forge apps (Nuxt 4)
+      - platform: backend/ → NestJS + Fastify + Prisma
+      - platform: frontend/ → React 19 + Vite + TanStack
+      - workspaces: packages/workspaces/<folder> → agent runtime stack (runner, bridge, cli, core, asset-manager, …)
+      - ai-assets: <domain>/ → AI skill/domain
+      - workspaces: docs/ → Starlight docs site
 
 STEP 2: Load context
-  - Read skaile-dev/CLAUDE.md (monorepo overview, conventions)
+  - Read the target repo's root CLAUDE.md (overview, conventions). Ignore a parent-directory
+    CLAUDE.md from an old skaile-dev shell checkout — it describes the retired shell
   - Read <package>/CLAUDE.md for each target package
   - If package has a `docs/` directory, note the doc structure
   - Identify tech stack per package:
@@ -159,13 +159,13 @@ STEP 2: Load context
   | Package | Stack | Prog Expert |
   |---------|-------|-------------|
   | forge/skaile-forge, forge/L5-concept | Nuxt 4, drizzle-orm, SQLite (skaile-forge: PrimeVue; L5-concept: UnoCSS) | prog-expert-nuxt |
-  | platform/backend | NestJS, Fastify, Prisma, tRPC, Jest (PostXL-generated) | postxl + (read platform/CLAUDE.md) |
-  | platform/frontend | React 19, Vite, TanStack, Tailwind CSS 4, Vitest (PostXL-generated) | postxl + (read platform/CLAUDE.md) |
-  | store/backend | NestJS, Prisma (PostXL-generated, in progress) | postxl + (read store/CLAUDE.md) |
-  | agent-framework/* | TypeScript, Bun, OMP | prog-expert-omp |
-  | agent-framework/cli | TypeScript, Bun, Commander | (read package CLAUDE.md) |
-  | ai-assets/<domain> | Markdown, YAML (skill conventions) | (follow CLAUDE.md skill conventions) |
-  | docs/ | Astro, Starlight | (follow doc) |
+  | platform `backend/` | NestJS, Fastify, Prisma, tRPC, Jest (PostXL-generated) | postxl + (read the platform CLAUDE.md) |
+  | platform `frontend/` | React 19, Vite, TanStack, Tailwind CSS 4, Vitest (PostXL-generated) | postxl + (read the platform CLAUDE.md) |
+  | store `backend/` | NestJS, Prisma (PostXL-generated) | postxl + (read the store CLAUDE.md) |
+  | workspaces `packages/workspaces/*` | TypeScript, Bun, Biome | prog-expert-omp |
+  | workspaces `packages/workspaces/cli` | TypeScript, Bun, Commander | (read the folder CLAUDE.md) |
+  | ai-assets `<domain>/` | Markdown, YAML (skill conventions) | (follow CLAUDE.md skill conventions) |
+  | workspaces `docs/` | Astro, Starlight | (follow doc) |
 
 STEP 2a: PostXL gate (conditional)
   IF any target package is platform/backend, platform/frontend, or store/backend
@@ -232,10 +232,11 @@ STEP 7: Execute
     - Read prog-expert skill recipes if applicable
     - Verify implementation compiles (typecheck)
     - Run formatting and linting for affected packages:
-      - agent-framework/: `cd agent-framework && bun run format && bun run lint`
-      - forge/: `cd forge && bun run format && bun run lint`
-      - platform/backend/: `cd platform/backend && bun run lint` (NEVER Biome)
-      - platform/frontend/: `cd platform/frontend && bun run lint` (NEVER Biome)
+      (run each from that repo's root)
+      - workspaces: `bun run format && bun run lint` (Biome)
+      - platform backend/: `cd backend && bun run lint` (NEVER Biome)
+      - platform frontend/: `cd frontend && bun run lint` (NEVER Biome)
+      - store: `bun run lint` (NEVER Biome)
     - $ git add -p
     - RUN git mode=commit to generate structured commit
 
@@ -351,8 +352,8 @@ STEP 8a: Verify platform/backend starts (conditional)
     - Import paths changed in a service or module file
 
   THEN:
-    RUN in background (15 s timeout): cd platform/backend && bun run dev
-    Watch for startup success ("Nest application successfully started") or an exception.
+    RUN in background (120 s timeout), from the platform repo root: cd backend && bun run dev
+    Watch for the startup line `API is running` or an exception.
 
     IF port 3001 already in use:
       ASK:
@@ -473,7 +474,7 @@ CHECKLIST
   - [ ] Sub-agent dispatch: decision table consulted, batch+parallel applied, MVC prompts written
   - [ ] /compact called before first Agent dispatch (if session has prior context)
   - [ ] Spec compliance review run for every task
-  - [ ] Formatting and linting run on all affected packages (Biome for agent-framework/forge; Prettier+ESLint for platform)
+  - [ ] Formatting and linting run on all affected packages (Biome for workspaces; Prettier+ESLint for platform and store)
   - [ ] Full test suite passing before audit
   - [ ] Backend start verified (or explicitly skipped) if structural platform/backend changes made
   - [ ] audit scope=diff run and verdict ≠ fail before docs sync

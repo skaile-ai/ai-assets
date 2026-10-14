@@ -43,16 +43,17 @@ Applied only to directories under `ai-assets/<domain>/`:
 | D4 | Every SKILL.md frontmatter valid | `name`, `description`, `metadata.version`, `metadata.source` |
 | D5 | Compiled validators up to date | If SKILL.md has MUST/NEVER and `validator.py` exists, check mtime |
 
-## Monorepo Global Criteria
+## Repo Global Criteria
 
-Evaluated once, not per-package:
+Evaluated once per target repo, not per-package. Every repo is standalone (the `skaile-dev`
+shell is archived; no repo has submodules), so "root" means the target repo's root.
 
 | # | Criterion | Check |
 |---|---|---|
-| G1 | Root `package.json` workspaces include every submodule | Workspace glob check |
-| G2 | All submodules cleanly pointing at their tracked commits | `git submodule status` no `+` or `-` prefix |
-| G3 | `bun run format` produces no diff | `bun run format --check` |
-| G4 | Root `CLAUDE.md` domain table matches `ai-assets/*/DOMAIN.md` | Table vs. filesystem cross-check |
+| G1 | The repo's root `package.json` workspaces include every package that has a `package.json` | Workspace glob check over tracked files only (`git ls-files '*/package.json'`, so `node_modules/` and `dist/` never count); skip in a repo with no workspaces |
+| G2 | Working tree clean against the tracked commit | `git status --short` is empty |
+| G3 | The repo's format check produces no diff | The format-check script the repo has (workspaces: `bun run format:check`; platform: `bun run prettier:check`); skip in repos without one |
+| G4 | ai-assets only: root `CLAUDE.md` structure list matches `*/DOMAIN.md` | Table vs. filesystem cross-check; skip in other repos |
 | G5 | `skaile.yaml` references exist on disk | Path validation |
 
 ---
@@ -86,7 +87,7 @@ The category is inferred from:
 
 ## Global
 - [x] G1 Root workspaces complete
-- [ ] G2 Submodules tracked cleanly — forge has uncommitted changes
+- [ ] G2 Working tree clean — 2 uncommitted files
 - ...
 
 ## Packages

@@ -10,11 +10,12 @@ description: 'Run, fix, or extend the Skaile platform e2e suite. Three modes: `r
   with a reason) while STOPPING and escalating regressions to the human — never
   weakening an assertion to force green; `add` analyzes a git diff, proposes a test
   plan, waits for explicit user approval, lives-inspects the UI via chrome-devtools
-  MCP, then writes new specs against the existing `platform/e2e/` harness. Use when
+  MCP, then writes new specs against the existing harness in the platform repo''s `e2e/`
+  directory. Use when
   the user says "run e2e tests", "fix the failing e2e tests", "the e2e suite is red",
   "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
-  version: '1.3.1'
+  version: '1.3.2'
   tags:
   - 'testing'
   - 'e2e'
@@ -25,15 +26,15 @@ metadata:
   stage: 'beta'
   prerequisites:
     files:
-    - path: 'platform/e2e/playwright.config.ts'
+    - path: 'e2e/playwright.config.ts'
       gate: hard
       description: 'Existing platform e2e harness must be in place (this skill extends
         it, does not scaffold it — see `test-e2e` for initial scaffolding).'
-    - path: 'platform/e2e/CLAUDE.md'
+    - path: 'e2e/CLAUDE.md'
       gate: soft
       description: 'Recommended knowledge source. The skill references its scaffolding
         rules.'
-    - path: 'platform/e2e/README.md'
+    - path: 'e2e/README.md'
       gate: soft
       description: 'Recommended knowledge source. The skill references its failure-mode
         table.'
@@ -53,7 +54,8 @@ metadata:
       required: false
       hint: "'run' mode: spec file path or test name filter (default: full suite).
         'fix' mode: failing spec file or test name filter (default: full failing suite).
-        'add' mode: feature area / merged PRs to focus on (default: git diff main…HEAD;
+        'add' mode: feature area / merged PRs to focus on (default: git diff origin/<default_branch>...HEAD,
+        run in the platform repo, whose default branch is main;
         falls back to gap-discovery over recently-merged features when the diff is empty)"
     - id: 'session_mode_hint'
       label: 'Session mode'
@@ -106,13 +108,19 @@ ROLE  Skaile platform e2e runner + spec writer. Knows the platform's
 test-harness particularities (session modes, impersonation,
 org-scoped slug URLs, coverage fixture, per-spec backend isolation).
 
+PATHS  The platform is a standalone repo (`skaile-ai/platform`; the skaile-dev shell is
+retired). Every shell snippet below runs from the platform repo's root. In prose and in the
+READS/WRITES lists, a path written `platform/<x>` names `<x>` under that root. Frontmatter
+gate paths are read literally by the CLI, so they are written root-relative (`e2e/...`)
+with no `platform/` prefix. Install with `bun install` at that root.
+
 READS
   ! platform/e2e/CLAUDE.md                   — scaffolding rules
   ! platform/e2e/README.md                   — env vars, session modes, failure-mode table
   ? platform/e2e/E2E-GUIDE.md                — seed data tables, keyword triggers
   ! platform/e2e/specs/**                    — existing specs as templates + coverage map
   ! platform/e2e/fixtures/{test-fixtures,handle-backend}.ts — auto-fixtures + startBackend/getTestHeaders
-  git diff main...HEAD                        — for `add` mode analysis
+  git diff origin/<default_branch>...HEAD     — for `add` mode analysis (platform root; default branch is main)
   (add mode) frontend routes + tRPC routes   — to derive URL patterns + selectors
   (fix mode) test-results/**/error-context.md — the failing run's assertion + stack
   (fix mode) the PR/commit that last changed the asserted behavior (git log -S / blame)
@@ -159,7 +167,7 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
      Run the bundled service helper. It is idempotent — only starts what's missing (backend in `e2e:stateless` mode, frontend in `dev:noAuth` mode), reuses already-running services, detaches via `nohup` so services survive after the script exits, and writes logs to `platform/.e2e-backend.log` / `platform/.e2e-frontend.log`. It also runs a **clean** backend rebuild (`rm -rf dist && bun run build` in `platform/backend`) whenever `dist/` is stale — detected by any of: the e2e entry-point trampoline (`dist/apps/api/apps/api/src/e2e.js`) is missing; the trampoline is older than `tsconfig.json`; or any backend source file is newer than the trampoline (the post-pull case). The clean build is required because `nest build` is incremental and never deletes orphaned `.js` files — after a pull that renames a workspace package (e.g. `@skaile/agent-sdk` → `@skaile/workspaces`) or restructures directories, stale output survives every incremental rebuild and the backend crashes at boot with `Cannot find module '@skaile/agent-sdk/...'`. `bun run e2e:stateless` never rebuilds anything on its own:
      ```bash
-     cd platform && ./scripts/e2e.sh
+     ./scripts/e2e.sh
      ```
      The script blocks until both ports listen (timeout 60s per service) and prints one line per service. After it returns, re-verify with the same `lsof` check.
      IF a port is still down after the script ran: read the last ~30 lines of the relevant log, report the startup error verbatim to the user, STOP. Do not retry blindly — startup failures usually mean missing migrations, port conflicts with another app, or a code bug, and looping won't fix any of those.
@@ -185,11 +193,11 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
    IF anything reports `STALE_*`:
      Report to user — do NOT run tests (they will mass-fail and waste 30+ seconds):
        > "Stale services detected after a recent code update. The suite will mass-fail. Run ALL steps below in order — do NOT skip step 1 even if Step 4 (stale-deps) reported clean. The lockfile-mtime check cannot detect missing workspace symlinks after a package relocation. Recipe:
-       >   1. cd skaile-dev && bun install                                  ← always run, even if deps look clean
+       >   1. bun install  (at the platform repo root)                      ← always run, even if deps look clean
        >   2. invoke /kill-backend skill (kills the whole backend chain cleanly)
        >   3. pkill -f 'vite preview'
-       >   4. cd platform/backend && rm -rf dist && bun run build && bun run e2e:stateless    ← clean rebuild; incremental `bun run build` leaves orphaned `.js` files, `nest start --watch` rebuilds nothing
-       >   5. cd platform/frontend && bun run build && bun run preview --port 3000
+       >   4. (cd backend && rm -rf dist && bun run build && bun run e2e:stateless)    ← clean rebuild; incremental `bun run build` leaves orphaned `.js` files, `nest start --watch` rebuilds nothing
+       >   5. (cd frontend && bun run build && bun run preview --port 3000)
        > Then re-invoke this skill."
      STOP. Auto-start of *missing* services (Step 2) is fine; killing and restarting *already-running* services to clear staleness is destructive (drops in-flight requests, may interrupt parallel dev work) and requires explicit user authorization.
 
@@ -201,16 +209,16 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
    Detect all three by comparing the trampoline against `tsconfig.json` **and** against backend source:
    ```bash
-   TRAMP=platform/backend/dist/apps/api/apps/api/src/e2e.js
-   TSCONF=platform/backend/tsconfig.json
+   TRAMP=backend/dist/apps/api/apps/api/src/e2e.js
+   TSCONF=backend/tsconfig.json
    [ -f "$TRAMP" ] || echo "MISSING_DIST"
    [ -f "$TRAMP" ] && [ "$TSCONF" -nt "$TRAMP" ] && echo "STALE_DIST (tsconfig)"
-   [ -f "$TRAMP" ] && [ -n "$(find platform/backend/apps platform/backend/libs -name '*.ts' -newer "$TRAMP" -print -quit)" ] && echo "STALE_DIST (source)"
+   [ -f "$TRAMP" ] && [ -n "$(find backend/apps backend/libs -name '*.ts' -newer "$TRAMP" -print -quit)" ] && echo "STALE_DIST (source)"
    ```
    IF any `MISSING_DIST` / `STALE_DIST`:
      This is non-destructive (only `dist/` is touched). Run a **clean** rebuild without prompting — a plain incremental `bun run build` does not prune orphaned files and will not fix the rename case:
      ```bash
-     cd platform/backend && rm -rf dist && bun run build
+     cd backend && rm -rf dist && bun run build
      ```
      If services were already running against the stale `dist/`, the running backend still has the stale code/alias map in memory — fixing `dist/` isn't enough. After the rebuild, also restart the backend (treat as a stale-service event: route through the recovery recipe in Step 3 with explicit user authorization, since restarting drops in-flight state).
 
@@ -218,21 +226,22 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
    (a) Lockfile newer than `node_modules` (typical post-pull symptom):
    ```bash
-   LOCK=skaile-dev/bun.lockb
-   MARK=skaile-dev/node_modules/.modules.yaml
-   [ -f "$LOCK" ] && [ -f "$MARK" ] && [ "$LOCK" -nt "$MARK" ] && echo STALE_DEPS
+   # From the platform repo root. `node_modules/.bun` is the store bun rewrites on install.
+   LOCK=bun.lock
+   MARK=node_modules/.bun
+   [ -e "$LOCK" ] && [ -e "$MARK" ] && [ "$LOCK" -nt "$MARK" ] && echo STALE_DEPS   # -e: MARK is a directory
+   [ -e "$MARK" ] || echo STALE_DEPS   # no install at all
    ```
 
-   (b) Critical workspace symlinks missing — the mtime check above cannot detect the case where a package was relocated within the workspace tree (e.g. `theme/` → `agent-framework/theme/`). Neither file's mtime moves, but the consumer-package `node_modules/@skaile/*` symlinks are missing entirely.
+   (b) Critical `@skaile/*` packages missing — the mtime check above cannot detect a dependency that was added or renamed without a fresh install. The platform consumes `@skaile/workspaces` and `@skaile/brand` from npm (not from a shell workspace).
 
-   **Important:** this Bun workspace does NOT hoist `@skaile/*` to the repo-root `node_modules/`. Workspace symlinks live in *per-package* `node_modules/` (e.g. `platform/frontend/node_modules/@skaile/theme`, `platform/backend/node_modules/@skaile/agent-sdk`). Checking `skaile-dev/node_modules/@skaile/` always reports missing on this layout — it's a false positive. Spot-check the consumer packages directly:
+   **Important:** bun does NOT hoist `@skaile/*` to the repo-root `node_modules/`. They live in *per-package* `node_modules/` (e.g. `frontend/node_modules/@skaile/brand`, `backend/node_modules/@skaile/workspaces`). Checking `node_modules/@skaile/` at the root always reports missing on this layout — it's a false positive. Spot-check the consumer packages directly:
    ```bash
-   # Spot-check critical workspace symlinks where they actually live.
-   # Adjust the prefix if running from a subfolder.
+   # From the platform repo root.
    for entry in \
-     platform/frontend/node_modules/@skaile/theme \
-     platform/frontend/node_modules/@skaile/agent-types \
-     platform/backend/node_modules/@skaile/agent-sdk \
+     frontend/node_modules/@skaile/brand \
+     frontend/node_modules/@skaile/workspaces \
+     backend/node_modules/@skaile/workspaces \
    ; do
      [ -e "$entry" ] || echo "MISSING_$entry"
    done
@@ -240,10 +249,10 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
    IF `STALE_DEPS` OR any `MISSING_*` from (b):
      Report:
-       > "Dependencies out of sync — run `bun install` from the skaile-dev root before tests, or this run will surface as opaque module-resolution errors (e.g. Vite '[Internal server error] Can't resolve @skaile/<pkg>'). The mtime check (a) and the per-package symlink check (b) catch different failure modes — either firing requires `bun install`."
+       > "Dependencies out of sync — run `bun install` at the platform repo root before tests, or this run will surface as opaque module-resolution errors (e.g. Vite '[Internal server error] Can't resolve @skaile/<pkg>'). The mtime check (a) and the per-package symlink check (b) catch different failure modes — either firing requires `bun install`."
      STOP unless the user has already authorized auto-install elsewhere. Do not run `bun install` without explicit permission.
 
-     IF the user authorizes `bun install`: run it from the skaile-dev root, then re-run BOTH (a) and (b). If `bun install` reports "no changes" AND (b) is still red on the same paths, treat that as catastrophic (the workspace topology has changed in a way `bun install` won't fix on its own — escalate to the user with the failing paths verbatim, do NOT loop).
+     IF the user authorizes `bun install`: run it at the platform repo root, then re-run BOTH (a) and (b). If `bun install` reports "no changes" AND (b) is still red on the same paths, treat that as catastrophic (the workspace topology has changed in a way `bun install` won't fix on its own — escalate to the user with the failing paths verbatim, do NOT loop).
 
 6. Kill stale `skaile serve` subprocesses (cheap hygiene):
    ```bash
@@ -252,11 +261,11 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
 7. Check seed staleness:
    ```bash
-   SRC=platform/backend/test-data.json
-   DST=platform/backend/dist/backend/test-data.json
+   SRC=backend/test-data.json
+   DST=backend/dist/backend/test-data.json
    [ -f "$DST" ] && [ "$SRC" -nt "$DST" ] && echo STALE
    ```
-   IF STALE: run `cd platform/backend && bun run sync-seed`.
+   IF STALE: run `cd backend && bun run sync-seed`.
 
 8. Detect proxy-stuck "stopping" slots:
    ```bash
@@ -267,7 +276,7 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
      IF yes:
        ```bash
        pkill -f 'node.*e2e.js'; pkill -f 'nest start'
-       cd platform/backend && bun run e2e:stateless &
+       cd backend && bun run e2e:stateless &
        ```
        Wait for `:3001` to accept connections again before continuing.
 
@@ -279,7 +288,7 @@ IF mode = run
 
   STEP R1: Execute
     ```bash
-    cd platform/e2e
+    cd e2e
     BASE_URL='http://localhost:3000' API_URL='http://localhost:3001' \
       bunx playwright test <scope> --retries=0 --workers=1 --reporter=dot --max-failures=3 \
       2>&1 | tail -60
@@ -335,9 +344,9 @@ IF mode = run
 
     | WE_STARTED_BACKEND | WE_STARTED_FRONTEND | Action |
     |---|---|---|
-    | true  | true  | `cd platform && ./scripts/e2e.sh --stop` |
-    | true  | false | `cd platform && ./scripts/e2e.sh --stop-backend` |
-    | false | true  | `cd platform && ./scripts/e2e.sh --stop-frontend` |
+    | true  | true  | `./scripts/e2e.sh --stop` |
+    | true  | false | `./scripts/e2e.sh --stop-backend` |
+    | false | true  | `./scripts/e2e.sh --stop-frontend` |
     | false | false | Skip — services were already up at preflight; leave them. |
 
     Print the script's output verbatim into the report so the user sees what was torn down. If the script reports a port "still up" after stopping, do NOT escalate (broader pkill could kill the user's parallel processes); just include the warning in the report's "Next steps" so the user can decide.
@@ -446,7 +455,7 @@ IF mode = add
 
     (a) **Branch-diff mode** (default — "add tests for my unmerged PR"):
     ```bash
-    git diff main...HEAD --name-only        # full branch diff
+    git diff origin/<default_branch>...HEAD --name-only        # full branch diff (platform: main)
     git diff --name-only                    # unstaged
     git diff --staged --name-only           # staged
     ```
@@ -454,7 +463,7 @@ IF mode = add
     (b) **Gap-discovery mode** — use when the branch diff above is EMPTY (you're on
     `main`, or the features already merged) OR the user asks "what recent features
     need e2e?" / names merged PRs. **Do NOT conclude "nothing to add" just because
-    `main...HEAD` is empty** — an empty branch diff means there's no *unmerged* work,
+    `origin/<default_branch>...HEAD` is empty** — an empty branch diff means there's no *unmerged* work,
     NOT that coverage is complete. Instead, discover recently-merged features and
     cross-reference them against existing specs to find gaps:
     ```bash
@@ -618,7 +627,7 @@ IF mode = add
   STEP A6: Verify the new specs
     Run ONLY the newly-written / edited specs (not the full suite) for faster feedback:
     ```bash
-    cd platform/e2e
+    cd e2e
     bunx playwright test <new-spec-paths> --retries=0 --workers=1 --reporter=dot --max-failures=3 \
       2>&1 | tail -60
     ```
@@ -632,7 +641,7 @@ IF mode = add
     ## E2E Add — <timestamp>
 
     ### Analysis
-    Diff scope: <main…HEAD | user scope>
+    Diff scope: <origin/<default_branch>...HEAD | user scope>
     Files changed: <N>, categorized:
     - frontend routes: <list>
     - frontend pages: <list>
@@ -701,7 +710,7 @@ CHECKLIST
 
 | Mistake | Instead |
 |---|---|
-| Running `bun run e2e:stateless` against a stale `dist/` | Backend crashes at boot — `Cannot find module .../e2e.js` (missing trampoline) or `Cannot find module '@skaile/...'` (orphaned output from a package rename). Use `./scripts/e2e.sh` (it clean-rebuilds when `dist/` is stale), or run `cd platform/backend && rm -rf dist && bun run build` first. A plain incremental `bun run build` does not prune orphaned files. |
+| Running `bun run e2e:stateless` against a stale `dist/` | Backend crashes at boot — `Cannot find module .../e2e.js` (missing trampoline) or `Cannot find module '@skaile/...'` (orphaned output from a package rename). Use `./scripts/e2e.sh` (it clean-rebuilds when `dist/` is stale), or run `cd backend && rm -rf dist && bun run build` first. A plain incremental `bun run build` does not prune orphaned files. |
 | Writing specs without live-verifying selectors | Use chrome-devtools MCP first; UI drifts faster than specs |
 | `browser.newContext()` for impersonation | `page.addInitScript` on the shared `page` fixture (coverage depends on it) |
 | Asserting on `getByText('Dashboard')` etc. | Use `getByRole('heading', { name: ... })` or enabled interactive elements — sidebar links match text before page body loads |

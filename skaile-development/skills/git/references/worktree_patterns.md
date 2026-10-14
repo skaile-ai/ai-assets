@@ -1,7 +1,21 @@
-# Worktree Patterns for skaile-dev
+# Worktree Patterns for the Skaile Repos
 
 Git worktrees let you check out multiple branches of the same repository simultaneously,
-each in its own directory. In skaile-dev, this is useful for parallel, unrelated work.
+each in its own directory. In a skaile repo, this is useful for parallel, unrelated work.
+
+Every skaile repo is standalone (the `skaile-dev` shell is archived; no repo has submodules).
+A worktree goes **beside** the clone, never inside it:
+
+```
+<repos_root>/                  ← parent directory of the clone
+  ├── platform/                ← the main checkout
+  └── .worktrees/
+      └── platform-<slug>/     ← one worktree per branch
+```
+
+Why beside, not inside: the main checkout stays clean without a `.gitignore` entry (brand and
+ai-assets do not ignore `.worktrees/`), and it is the same path the `ship` skill and existing
+tooling use. The worktree root holds the repo's own `CLAUDE.md`, so agents working there load it.
 
 ## When to Use Worktrees
 
@@ -18,24 +32,24 @@ each in its own directory. In skaile-dev, this is useful for parallel, unrelated
 ## Setup Pattern
 
 ```bash
-# 1. Create the feature branch (don't check it out in current directory)
-git checkout -b feature/<pkg>/<slug>
-git checkout -   # back to previous branch
-
-# 2. Create the worktree
-mkdir -p .worktrees
-git worktree add .worktrees/<slug> feature/<pkg>/<slug>
-
-# 3. (Ignore worktrees in git — they are local only)
-echo ".worktrees/" >> .gitignore
-git add .gitignore && git commit -m "chore: ignore local worktrees"
+# From the clone of <repo> or any of its worktrees.
+# --git-common-dir names the MAIN checkout even from inside a linked worktree.
+repo_root=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
+base=$(git -C "$repo_root" symbolic-ref --short refs/remotes/origin/HEAD)   # origin/<default>; never assume main
+git -C "$repo_root" fetch origin
+mkdir -p "$(dirname "$repo_root")/.worktrees"
+# Absolute path: `git -C <repo> worktree add <relpath>` resolves relative to <repo>
+git -C "$repo_root" worktree add "$(dirname "$repo_root")/.worktrees/<repo>-<slug>" \
+  -b feature/<pkg>/<slug> "$base"
 ```
+
+If `origin/HEAD` is unset, use `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`.
 
 ## Working Inside a Worktree
 
 ```bash
-cd .worktrees/<slug>
-bun install           # installs in the worktree context
+cd <repos_root>/.worktrees/<repo>-<slug>
+bun install           # a fresh worktree has no node_modules; install at the worktree root
 # ... make changes ...
 git add -p
 git commit -m "feat(<pkg>): <description>"
@@ -46,21 +60,17 @@ worktree are visible in the main checkout via `git log feature/<pkg>/<slug>`.
 
 ## Merging Back
 
-After work in the worktree is complete and tests pass:
-
-```bash
-# From the main checkout (not inside the worktree)
-git merge --squash feature/<pkg>/<slug>
-git commit -m "feat(<pkg>): <summary>"
-git branch -d feature/<pkg>/<slug>
-git worktree remove .worktrees/<slug>
-```
+After work in the worktree is complete and tests pass: the default branch is protected, so
+push the branch, open a PR and let GitHub squash-merge it. There is no local merge. The `git`
+skill's `finish` mode (CASE merge) does this and then cleans up in a safe order: remove the
+worktree (never `--force`), check out the default branch, `pull --ff-only`, then delete the
+local branch.
 
 ## Teardown (without merging)
 
 ```bash
 # Discard worktree and branch
-git worktree remove .worktrees/<slug> --force
+git worktree remove <repos_root>/.worktrees/<repo>-<slug> --force
 git branch -D feature/<pkg>/<slug>
 ```
 
@@ -70,9 +80,9 @@ When dispatching two independent subagents simultaneously (e.g., via `implement-
 with two unrelated task groups):
 
 ```
-Main checkout (./) ← orchestrator lives here, reads shared files
-  ├── .worktrees/task-a/ ← Subagent A works here (branch: feature/pkg/task-a)
-  └── .worktrees/task-b/ ← Subagent B works here (branch: feature/pkg/task-b)
+<repos_root>/<repo>/ ← main checkout; the orchestrator lives here, reads shared files
+<repos_root>/.worktrees/<repo>-task-a/ ← Subagent A works here (branch: feature/pkg/task-a)
+<repos_root>/.worktrees/<repo>-task-b/ ← Subagent B works here (branch: feature/pkg/task-b)
 ```
 
 After both agents complete:
@@ -84,27 +94,18 @@ After both agents complete:
 
 ## Cautions
 
-- **Submodule commits are local-only.** skaile-dev uses git submodules (platform/,
-  agent-framework/, forge/, etc.). Commits made inside a submodule in a worktree exist
-  ONLY in that worktree's local copy. Running `git worktree remove` destroys those
-  commits permanently. Always push submodule commits to their remotes before removing
-  a worktree. The `mode=finish` and `mode=pr` steps handle this automatically via the
-  submodule safeguard, but manual worktree cleanup must do this explicitly:
+- **Worktree commits are local-only until pushed.** `git worktree remove` plus
+  `git branch -D` destroys unpushed commits permanently. Check before cleanup:
 
   ```bash
-  # Before removing a worktree, check each submodule for unpushed commits
-  for path in $(git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}'); do
-    unpushed=$(git -C "$path" log --oneline @{upstream}..HEAD 2>/dev/null)
-    if [ -n "$unpushed" ]; then
-      echo "WARNING: $path has unpushed commits:"
-      echo "$unpushed"
-      git -C "$path" push -u origin "$(git -C "$path" rev-parse --abbrev-ref HEAD)"
-    fi
-  done
+  # Empty output = no upstream: the branch was never pushed, so nothing is safe yet.
+  git -C <worktree> rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null
+  # With an upstream, this must print nothing:
+  git -C <worktree> log --oneline @{upstream}..HEAD
   ```
 
-- `node_modules/` and `bun.lock` are shared via the workspace root; running `bun install`
-  in a worktree may cause lock file conflicts. Prefer running install from the main checkout.
+- A fresh worktree has no `node_modules`. Run `bun install` at the worktree root (not at a
+  parent directory) before tests, typecheck or lint, and again after merging the default branch.
 - Worktrees inherit `.env` files from the checked-out branch, not the main checkout.
   Verify environment setup inside the worktree before running services.
 - Stale worktrees that were forcefully removed can cause `git worktree list` to show ghost

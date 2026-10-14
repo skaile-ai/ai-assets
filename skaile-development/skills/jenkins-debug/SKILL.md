@@ -25,7 +25,8 @@ metadata:
     files:
     - path: ".git"
       gate: hard
-      description: "Must run from the skaile-dev shell repo (used for commit cross-reference)."
+      description: "Must run from a clone of the job's repo — platform (default) or store
+        (target=store) — used for commit cross-reference."
     inputs_optional:
     - id: target
       label: "Deployment to debug"
@@ -55,8 +56,7 @@ metadata:
     - path: "http://localhost:8090/job/<skaile_platform|skaile_store>/<n>/consoleText"
       description: "Console log of the target build."
     - path: ".git/logs"
-      description: "Local git history for ±2h commit cross-reference (skaile-dev shell
-        + submodules)."
+      description: "Local git history of the job's repo for ±2h commit cross-reference."
     produces: []
   user_inputs:
     dialog:
@@ -129,7 +129,7 @@ Hardcoded for this monorepo:
 | ---------------- | ------------------------------------------------------------- |
 | Jenkins base URL | `http://localhost:8090`                                       |
 | Job name         | `skaile_platform` (default) or `skaile_store` (`target=store`) |
-| Repo for commits | `.` (the skaile-dev shell repo)                               |
+| Repo for commits | `.` — a clone of the job's repo: platform, or store for `target=store` (the skaile-dev shell is archived) |
 
 Resolve the job name from the `target` input at the start of the procedure:
 
@@ -249,7 +249,7 @@ Identify and report:
 
 ### Step 5 - Cross-reference recent commits
 
-Use the build timestamp (Step 3) to find commits in the skaile-dev shell within ±2 hours.
+Use the build timestamp (Step 3) to find commits in the job's repo within ±2 hours.
 This catches the typical cause: a recent commit broke the deploy.
 
 ```bash
@@ -258,11 +258,11 @@ TS_S=$(( TS_MS / 1000 ))
 SINCE=$(date -u -r $((TS_S - 7200)) +'%Y-%m-%dT%H:%M:%SZ')
 UNTIL=$(date -u -r $((TS_S + 7200)) +'%Y-%m-%dT%H:%M:%SZ')
 
-git log --since="$SINCE" --until="$UNTIL" --pretty=format:'%h %ai %s' -n 20
-git -C platform log --since="$SINCE" --until="$UNTIL" --pretty=format:'%h %ai %s' -n 20 2>/dev/null
-git -C workspaces log --since="$SINCE" --until="$UNTIL" --pretty=format:'%h %ai %s' -n 20 2>/dev/null
-# For target=store, the store submodule is the most likely culprit:
-git -C store log --since="$SINCE" --until="$UNTIL" --pretty=format:'%h %ai %s' -n 20 2>/dev/null
+# Run in the clone of the job's repo (platform, or store for target=store).
+# Jenkins builds the `deploy` branch, so read its history, not only local main.
+git fetch -q origin
+git log origin/deploy --since="$SINCE" --until="$UNTIL" --pretty=format:'%h %ai %s' -n 20
+git log origin/main --since="$SINCE" --until="$UNTIL" --pretty=format:'%h %ai %s' -n 20
 ```
 
 If the build metadata included a SHA1, also run `git log -1 <sha>` to identify the exact
@@ -294,7 +294,7 @@ Print a single structured summary to chat in this exact shape (markdown):
 
 ### Recent commits around this build (±2h)
 
-- <sha> <date> <subject>     ← in skaile-dev / platform / agent-framework
+- <sha> <date> <subject>     ← in the job's repo (deploy or main)
 - ...
 
 ### Likely cause

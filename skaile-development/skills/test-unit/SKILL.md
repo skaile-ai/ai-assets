@@ -205,7 +205,7 @@ STEP 3 (skip if mode=generate): Scaffold missing infrastructure
       "@skaile/test-utils": "workspace:*"
     }
     ```
-  - Run `bun install` from the monorepo root afterwards.
+  - Run `bun install` at the target repo's root afterwards (every repo is standalone).
 
   **Vue composable tests (forge apps):**
   - Add `environment: "happy-dom"` to the package's `vitest.config.ts`.

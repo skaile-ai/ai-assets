@@ -16,9 +16,9 @@ metadata:
   stage: "beta"
   prerequisites:
     files:
-    - path: "skaile-dev/CLAUDE.md"
+    - path: "CLAUDE.md"
       gate: soft
-      description: "Monorepo CLAUDE.md for context on package structure and conventions"
+      description: "The target repo's root CLAUDE.md for context on package structure and conventions"
     inputs_required:
     - id: topic
       label: "What is the proposal about? (plain language)"
@@ -39,8 +39,8 @@ metadata:
       label: "Affected packages if known"
       type: text
   produces:
-  - path: "docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md"
-    description: "The design spec with structured frontmatter"
+  - path: "_devlog/specs/YYYY-MM-DD-<topic>.md"
+    description: "The design spec with structured frontmatter (in the target repo; where its CLAUDE.md files specs)"
   - path: "_devlog/reports/YYYY-MM-DD-<topic>.md"
     description: "Detailed devlog report (for architectural proposals)"
   - path: "_devlog/entries/<date>-<slug>.md"
@@ -52,14 +52,14 @@ explore alternatives, present a design with concrete types and interfaces, and t
 authorship and review status through frontmatter metadata.
 
 READS
-  skaile-dev/CLAUDE.md                       — monorepo structure and conventions
+  <repo>/CLAUDE.md                           — the target repo's structure and conventions (the skaile-dev shell is retired)
   <affected-package>/CLAUDE.md               — package architecture for context
-  docs/superpowers/specs/                    — existing specs for format reference
+  _devlog/specs/                             — existing specs for format reference (docs/superpowers/ in platform is a read-only archive)
   _devlog/entries/                           — recent changes for context (newest file names)
   references/spec-template.md                — the canonical spec template
 
 WRITES
-  docs/superpowers/specs/<date>-<topic>-design.md  — the spec itself
+  _devlog/specs/<date>-<topic>.md            — the spec itself (follow the target repo's CLAUDE.md "Where Docs Live" table when it has one)
   _devlog/reports/<date>-<topic>.md          — detailed report (if architectural)
   _devlog/entries/<date>-<slug>.md           — short entry
 
@@ -107,7 +107,8 @@ STEP 4: Write the spec
     - reviewer: leave empty
     - scope: affected packages
     - type: proposal | design | rfc | adr
-  - Save to docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md
+  - Save to _devlog/specs/YYYY-MM-DD-<topic>.md in the target repo (never under
+    docs/superpowers/, which the platform keeps as a read-only archive)
 
 STEP 5: Spec review
   - Run a spec-document-reviewer subagent to check for:

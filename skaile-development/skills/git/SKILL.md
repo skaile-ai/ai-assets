@@ -1,11 +1,10 @@
 ---
 name: "git"
-description: "Git operations for the skaile-dev monorepo. Seven modes: commit (structured
-  commit messages), branch (create/switch feature branches), worktree (parallel work
-  in isolated checkouts), pr (open a pull request), finish (merge/PR/keep/discard
-  branch), sync (two-way sync: pull + push shell repo and all submodules, print per-repo
-  summary of commits pulled and pushed), deploy (merge main into deploy branch and
-  push)."
+description: "Git operations for the standalone skaile repos (platform, workspaces,
+  ai-assets, store, brand, …). Five modes: commit (structured commit messages), branch
+  (create/switch feature branches), worktree (parallel work in isolated checkouts), pr
+  (open a pull request), finish (merge/PR/keep/discard branch). The former sync and
+  deploy modes served the retired skaile-dev shell and now stop with a pointer."
 metadata:
   tags:
   - "git"
@@ -13,10 +12,7 @@ metadata:
   - "branch"
   - "worktree"
   - "pull-request"
-  - "submodule"
-  - "monorepo"
   - "skaile-development"
-  - "deploy"
   source: "MERGED"
   stage: "beta"
   user_inputs:
@@ -35,7 +31,7 @@ metadata:
       required: true
       hint: "commit = structured commit message | branch = create/switch feature branch
         | worktree = isolated checkout | pr = open pull request | finish = merge/PR/keep/discard
-        | sync = update submodules | deploy = merge main into deploy branch and push"
+        | sync, deploy = retired (shell-only); they stop with a pointer"
     - id: "description"
       label: "Change description (plain language) — used to derive branch name and
         commit message"
@@ -60,21 +56,23 @@ metadata:
     files: []
 ---
 
-# Git — Monorepo Git Operations
+# Git — Git Operations for the Standalone Skaile Repos
 
 ## Overview
 
-Handles all git operations for the skaile-dev monorepo. Works in six modes:
+Handles git operations in any standalone skaile repo. The `skaile-dev` shell repo is retired
+(its GitHub remote is archived): no repo has submodules, and the target repo's own `CLAUDE.md`
+is the authority for its formatter, test command and commit rule. Works in five live modes:
 
 | Mode | What It Does | When to Use |
 |------|-------------|-------------|
-| `commit` | Generate a structured commit message with agent-readable metadata | After staging changes, before committing |
+| `commit` | Generate a conventional-commits message (title + prose body) | After staging changes, before committing |
 | `branch` | Create or switch to a feature branch | Before starting any code change |
 | `worktree` | Add an isolated git worktree for parallel work | Multiple unrelated changes simultaneously |
 | `pr` | Open a pull request with structured description | When change needs review before merging |
 | `finish` | Close a branch: merge, PR, keep, or discard | After implementation is verified |
-| `sync` | Fetch and update all submodules | After pulling, or to align submodule pointers |
-| `deploy` | Merge main into the `deploy` branch and push | When ready to ship current main to the deploy target |
+| `sync` | **Retired** — synced the shell and its submodules | Use `git -C <repo> pull --ff-only` per clone |
+| `deploy` | **Retired** — merged the shell's `main` into `deploy` | Platform deploys when its Version PR merges |
 
 ## When to Use
 
@@ -83,8 +81,6 @@ Handles all git operations for the skaile-dev monorepo. Works in six modes:
 - Parallel feature work: `mode=worktree` to work in isolation
 - Closing out an implementation: `mode=finish`
 - Team review: `mode=pr`
-- Submodule alignment: `mode=sync`
-- Shipping to deploy target: `mode=deploy`
 
 ## When NOT to Use
 
@@ -117,38 +113,41 @@ Always use the Agent tool for dispatch.
 
 ---
 
-ROLE  Git operations manager for the skaile-dev monorepo — enforces structured commit messages, branch naming, worktree conventions, PR templates, safe commit practices, and submodule synchronization.
+ROLE  Git operations manager for the standalone skaile repos — enforces structured commit messages, branch naming, worktree conventions, PR templates, and safe commit practices.
 
 READS
+  <repo>/CLAUDE.md                    — the repo's formatter, test command and commit rule (the authority)
   references/commit-spec.md           — structured commit message format
   references/branch_naming.md         — branch naming rules per change type
   references/worktree_patterns.md     — worktree setup and teardown patterns
   git status / git log / git diff     — current repository state
-  ? _implementation/git-state.json    — existing git state if present
+  ? <repo_root>/_implementation/git-state.json — existing git state if present (repo_root = the
+                                      main checkout, the worktree STEP 3 probe; never a relative path)
 
 WRITES
   .git/                               — commits, branches, worktrees
-  _implementation/git-state.json      — records active branch, mode, worktree path
+  <repo_root>/_implementation/git-state.json — records active branch, mode, worktree path, status
 
 MUST  follow the structured commit message format from references/commit-spec.md
 MUST  derive branch name from description using references/branch_naming.md rules
 MUST  check for dirty working tree before creating branches or worktrees
 MUST  require typed confirmation for destructive operations (force-delete, discard)
 MUST  write git-state.json when branch or worktree is created
-MUST  run full test suite before any merge to main
-MUST  verify platform/backend starts before committing any structural backend change - see STEP 1b in commit mode
+MUST  run full test suite before any merge to <default_branch>
+      (finish skips it when status=auto_merge: the suite ran before auto-merge was armed)
+MUST  verify the platform backend (`backend/` in the platform repo) starts before committing any structural backend change - see STEP 1b in commit mode
 MUST  run formatting and linting on all affected packages before committing — see STEP 1c in commit mode
-MUST  push submodule commits to their remotes before removing a worktree or opening a PR — submodule commits only exist locally and are lost when the worktree is cleaned up
+MUST  push the branch before removing a worktree — unpushed worktree commits exist only locally and are lost when the worktree is removed
 NEVER force-push or rewrite published history
-NEVER run Biome inside platform/ — platform uses Prettier + ESLint exclusively
-NEVER merge to main without tests passing
+NEVER run Biome in the platform or store repos — they use Prettier + ESLint exclusively
+NEVER merge to <default_branch> without tests passing
 NEVER delete a branch without typed confirmation
 NEVER create a worktree for sequential (non-parallel) work — use branch mode instead
 NEVER write commit messages without reading the diff first
 NEVER omit the scope or type fields in a commit message title
-NEVER remove a worktree that contains unpushed submodule commits - they will be permanently lost
+NEVER remove a worktree that contains unpushed commits - they will be permanently lost
+NEVER add a `---agent---` YAML block to a commit message — it belonged to the retired shell, and no standalone repo requires or consumes it
 NEVER allow format/lint to silently mutate workspace-root files (`bun.lock`, root `package.json`, `.skaile/lock` files). After STEP 1c, run `git status` and revert any side-effect mutations that weren't in the original staged set — they belong in separate, deliberate commits
-NEVER stage a submodule pointer bump without first running `git -C <submodule> fetch origin && git -C <submodule> log HEAD..origin/main --oneline` — if that output is non-empty, the bump would silently regress upstream commits
 
 EMIT [git] started mode=<mode>
 
@@ -156,17 +155,18 @@ EMIT [git] started mode=<mode>
 
 IF mode = commit
 
-  You are writing a structured commit message for the skaile-dev monorepo.
+  You are writing a structured commit message for a standalone skaile repo. Run every
+  command from that repo's root.
   The message must follow the format defined in `references/commit-spec.md`.
 
   STEP 1: Gather Context
-    1. Run `git diff --cached` (for staged commits) or `git diff main...HEAD` (for squash-merge prep) to see all changes.
-    2. Identify the packages modified by mapping changed file paths to their package roots (e.g. `agent-framework/session/src/foo.ts` -> `agent-framework/session`).
+    1. Run `git diff --cached` (for staged commits) or `git diff origin/<default_branch>...HEAD` (for a whole branch, e.g. a PR title; default_branch = the worktree STEP 3 probe) to see all changes.
+    2. Identify the packages modified by mapping changed file paths to their package roots (e.g. `backend/libs/session/src/foo.ts` -> `backend/libs/session` in platform, `packages/workspaces/runner/src/foo.ts` -> `runner` in workspaces).
     3. For each modified package, read its `CLAUDE.md` to understand architecture and conventions.
-    4. Identify downstream packages that import from or depend on the modified packages — these are candidates for the `affects` field.
+    4. Identify downstream packages that import from or depend on the modified packages — name them in the description when they must react.
 
   STEP 1b: Backend start verification (conditional)
-    Scan the diff for structural platform/backend changes — any of:
+    Platform repo only. Scan the diff for structural `backend/` changes — any of:
     - New or modified `@Injectable()` / `@Module()` class
     - Constructor parameter added, removed, or retyped in a service
     - `providers:`, `imports:`, or `exports:` arrays changed in a `*.module.ts`
@@ -176,8 +176,8 @@ IF mode = commit
 
     IF structural change detected:
       > "Structural backend change detected — verifying the backend starts."
-      RUN in background (15 s timeout): cd platform/backend && bun run dev
-      Watch stdout for either a startup success banner ("Nest application successfully started")
+      RUN in background (120 s timeout): cd backend && bun run dev
+      Watch stdout for either the startup line `API is running` (the marker the platform's boot-smoke greps for)
       or an exception / unresolved dependency error.
 
       IF port already in use (EADDRINUSE / port 3001 blocked):
@@ -203,15 +203,17 @@ IF mode = commit
   STEP 1c: Format and lint affected packages
     From the packages identified in STEP 1, determine which formatters to run.
 
-    | Path prefix | Tool | Command (run from monorepo root) |
+    | Repo (path) | Tool | Command (run from that repo's root) |
     |---|---|---|
-    | `agent-framework/` | Biome | `cd agent-framework && bun run format && bun run lint` |
-    | `forge/` | Biome | `cd forge && bun run format && bun run lint` |
-    | `docs/`, `theme/` | Biome | `biome format --write docs/ theme/` |
-    | `platform/backend/` | Prettier + ESLint | `cd platform/backend && bun run lint` |
-    | `platform/frontend/` | Prettier + ESLint | `cd platform/frontend && bun run lint` |
+    | workspaces | Biome | `bun run format && bun run lint` |
+    | platform (root) | Prettier | `bun run prettier:check` (`bun run prettier:format` to fix) |
+    | platform `backend/` | Prettier + ESLint | `cd backend && bun run lint` |
+    | platform `frontend/` | Prettier + ESLint | `cd frontend && bun run lint` |
+    | store | Prettier + ESLint | `bun run lint` |
+    | ai-assets, brand | — | no format script; skip |
 
-    NEVER run Biome on `platform/` — it uses Prettier + ESLint exclusively.
+    NEVER run Biome in platform or store — they use Prettier + ESLint exclusively.
+    A repo not in this table: use the format/lint scripts its `CLAUDE.md` names.
     Only run the commands for areas that have staged changes.
 
     Before running format/lint, snapshot files that lint chains can mutate as
@@ -235,11 +237,9 @@ IF mode = commit
         $ git checkout -- <those package.json files>
         Note the revert in the commit report.
 
-    This guard exists because lint chains in a Bun workspace silently rewrite
-    the root `bun.lock` (a single workspace-wide lockfile) when run from inside
-    a submodule. The submodule's commit comes out clean while the parent gains
-    an unrelated lockfile delta — observed concretely with a zod 4.4.3 → 4.3.6
-    re-resolution during a one-line walkDir fix.
+    This guard exists because lint chains in a Bun workspace can silently rewrite
+    `bun.lock` (one workspace-wide lockfile) — observed concretely with a zod
+    4.4.3 → 4.3.6 re-resolution during a one-line walkDir fix.
 
   STEP 2: Write the Message
     Follow this exact structure:
@@ -251,8 +251,11 @@ IF mode = commit
     ```
 
     Rules:
+    - **No `---agent---` block** and no YAML after the body. No repo requires or consumes it.
+    - Follow the repo's own `CLAUDE.md` where it says more (platform: ADRs are hand-written
+      under `decisions/`, never extracted from commit messages).
     - **Title**: max 72 chars, imperative mood, lowercase, no period
-    - **scope**: comma-separated package paths relative to repo root
+    - **scope**: short package or area name(s) in the target repo, comma-separated
     - **type**: `feat|fix|refactor|docs|test|chore|perf|build`
     - **Human description**: 1-3 sentences. What and why, not how.
 
@@ -264,7 +267,7 @@ IF mode = commit
     > "Run a quick review before committing? (y/n)"
 
     IF user says yes (or equivalent):
-      Run the `review` skill with target=staged (or target=branch for squash-merge prep).
+      Run the `review` skill with target=staged (or target=branch for a whole branch).
       Wait for review output.
       IF review finds Important issues:
         > "Review found <N> important issue(s). Fix before committing?"
@@ -276,7 +279,7 @@ IF mode = commit
     IF user says no (or equivalent):
       Proceed to commit without review.
 
-    IF committing to main:
+    IF committing to <default_branch>:
       Default to running the review (still skippable with explicit "no").
 
   EMIT [git] commit_ready
@@ -311,7 +314,7 @@ IF mode = branch
       > "Created and switched to: <branch-name>"
 
   STEP 4: Write git-state.json
-    - Write _implementation/git-state.json:
+    - Write <repo_root>/_implementation/git-state.json (repo_root = the worktree STEP 3 probe):
       { "branch": "<name>", "mode": "branch", "worktree_path": null, "created_at": "<ISO>", "status": "active" }
 
   EMIT [git] branch_ready name=<branch-name>
@@ -329,18 +332,30 @@ IF mode = worktree
     > Confirm? (yes / use branch mode instead)"
 
   STEP 3: Create branch + worktree
-    $ git checkout -b <branch-name>
-    $ git checkout -   (back to previous branch)
-    $ mkdir -p .worktrees
-    $ git worktree add .worktrees/<slug> <branch-name>
-    - Add .worktrees/ to .gitignore if not already present
+    The worktree goes BESIDE the clone, not inside it (same rule as the `ship` skill):
+      repo_root      = dirname of `git rev-parse --path-format=absolute --git-common-dir`
+                       (the MAIN checkout, also when run from inside a linked worktree;
+                       `--show-toplevel` would name the worktree and nest `.worktrees/`)
+      repo           = basename of repo_root
+      default_branch = `git -C <repo_root> symbolic-ref --short refs/remotes/origin/HEAD`
+                       with "origin/" stripped; IF unset → `gh repo view --json
+                       defaultBranchRef -q .defaultBranchRef.name`. Do NOT assume "main".
+      worktree_path  = <dirname repo_root>/.worktrees/<repo>-<slug>
+    Outside the clone, it needs no `.gitignore` entry (brand and ai-assets do not ignore
+    `.worktrees/`) and the main checkout stays clean.
+    The new branch starts from `origin/<default_branch>`, not from the current HEAD (the
+    old recipe branched off HEAD). To build on local unpushed work, say so and use the
+    current branch as the base instead.
+    $ git -C <repo_root> fetch origin
+    $ mkdir -p <dirname repo_root>/.worktrees
+    $ git -C <repo_root> worktree add <worktree_path> -b <branch-name> origin/<default_branch>
 
-  STEP 4: Write git-state.json
-    { "branch": "<name>", "mode": "worktree", "worktree_path": ".worktrees/<slug>", "created_at": "<ISO>", "status": "active" }
-    > "Worktree created at .worktrees/<slug>
+  STEP 4: Write <repo_root>/_implementation/git-state.json
+    { "branch": "<name>", "mode": "worktree", "worktree_path": "<worktree_path>", "created_at": "<ISO>", "status": "active" }
+    > "Worktree created at <worktree_path>
     > Work in that directory. Main checkout is unaffected."
 
-  EMIT [git] worktree_ready path=.worktrees/<slug>
+  EMIT [git] worktree_ready path=<worktree_path>
 
 # ── Mode: pr ─────────────────────────────────────────────────────
 
@@ -348,7 +363,8 @@ IF mode = pr
 
   STEP 1: Pre-flight
     $ git status   — must be clean
-    - Run full test suite: `bun x --bun vitest run` (or appropriate command for package)
+    - default_branch = the same probe as worktree STEP 3 (never assume "main")
+    - Run the repo's test command from its `CLAUDE.md` (the domain's `references/test_stack_map.md` is a quick map)
     IF tests fail
       - STOP: "Tests must pass before opening a PR. Fix failing tests first."
 
@@ -372,7 +388,7 @@ IF mode = pr
 
     ## Testing
 
-    - [ ] Tests pass locally (`bun x --bun vitest run`)
+    - [ ] Tests pass locally (<the repo's test command>)
     - [ ] Affected package manually tested
     - [ ] No regressions in other packages
 
@@ -388,31 +404,12 @@ IF mode = pr
     <optional: breaking changes, follow-up tasks, known limitations>
     ```
 
-  STEP 2a: Push submodule commits (if any)
-    Before pushing the shell repo, ensure submodule commits are on their remotes.
-    Without this, the PR's submodule pointer references commits that don't exist
-    on the submodule remote — the PR cannot be checked out by reviewers.
-
-    $ git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}'
-    FOR EACH submodule path:
-      $ git -C <path> log --oneline @{upstream}..HEAD 2>/dev/null
-      IF output is non-empty:
-        $ git -C <path> rev-parse --abbrev-ref HEAD -> sub_branch
-        IF sub_branch = HEAD (detached):
-          $ git -C <path> checkout -b <branch-name>
-          SET sub_branch = <branch-name>
-        $ git -C <path> push -u origin <sub_branch>
-        > "Pushed <N> commits in <path> to origin/<sub_branch>"
-
-    IF any push fails:
-      STOP: "Cannot open PR — submodule push failed for <path>. Fix before retrying."
-
   STEP 3: Open PR
     $ git push origin <branch-name>
     $ gh pr create \
         --title "<title>" \
         --body "<body>" \
-        --base main \
+        --base <default_branch> \
         --head <branch-name>
     > "Pull request opened: <URL>"
 
@@ -423,45 +420,44 @@ IF mode = pr
 IF mode = finish
 
   STEP 1: Pre-flight
-    - Read git-state.json: branch, mode, worktree_path
+    - repo_root = the same `--git-common-dir` probe as worktree STEP 3 (the main checkout)
+    - Read <repo_root>/_implementation/git-state.json: branch, mode, worktree_path, status
+    - default_branch = the same probe as worktree STEP 3 (never assume "main")
+    - slug = the `gh repo view` probe at the top of CASE merge. IF it fails (no `gh` auth,
+      no network) → say so and carry on: `keep` and `discard` need no `gh`; only `merge`
+      and `pull-request` do.
+    IF status is `auto_merge` or `merged` → skip the tests and STEP 2. Go straight to
+      "Already merged?" in CASE merge (no new confirmation: it was given before).
     - Run full test suite
     IF tests fail -> STOP
 
-  STEP 1a: Submodule safeguard (CRITICAL for worktree branches)
-    skaile-dev is a shell repo with git submodules. When work happens in a worktree,
-    commits inside submodules (e.g. platform/, agent-framework/, forge/) exist ONLY
-    in the worktree's local copy. Removing the worktree destroys those commits
-    permanently unless they have been pushed to the submodule's own remote.
+  STEP 1a: Unpushed-commit safeguard (CRITICAL for worktree branches)
+    Commits made in a worktree exist ONLY locally until the branch is pushed. Removing
+    the worktree and deleting the branch destroys them. `merge`, `pull-request` and `keep`
+    run PUSH_BRANCH before they remove the worktree. `discard` deletes them on purpose, so
+    it does not push the branch.
 
-    This step MUST run before presenting options — even "keep" removes the worktree.
-
-    $ git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}'
-    FOR EACH submodule path:
-      # Check if the submodule has commits not on the remote
-      $ git -C <path> log --oneline @{upstream}..HEAD 2>/dev/null
-      IF output is non-empty (unpushed commits exist):
-        # Determine current branch
-        $ git -C <path> rev-parse --abbrev-ref HEAD
-        IF branch = HEAD (detached):
-          # Create a branch from the detached commits so they can be pushed
-          $ git -C <path> checkout -b <shell-branch-name>
-        # Push submodule commits to the submodule's remote
-        $ git -C <path> push -u origin <submodule-branch>
-        Record: pushed_submodules += "<path> (<N> commits pushed to origin/<submodule-branch>)"
-
-    IF pushed_submodules is non-empty:
-      > "Submodule commits pushed to their remotes before cleanup:
-      > <list each pushed submodule and commit count>"
-
-    IF any push fails:
-      STOP: "Failed to push submodule commits in <path>. Fix the push error before
-             finishing — removing the worktree without pushing will permanently lose
-             those commits."
+    PUSH_BRANCH:
+      W = <worktree_path> if set, else the current checkout
+      upstream ← $ git -C <W> rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null
+      IF upstream is empty (no upstream):
+        $ git -C <W> push -u origin <branch-name>
+      ELSE IF `git -C <W> log --oneline @{upstream}..HEAD` is non-empty:
+        $ git -C <W> push origin <branch-name>
+      IF the push fails:
+        STOP: "Failed to push <branch-name>. Fix the push error before finishing —
+               removing the worktree without pushing will permanently lose those commits."
 
   STEP 2: Present options
+    armed ← $ gh pr list -R <slug> --head <branch-name> --state open --json autoMergeRequest
+      -q '[.[] | select(.autoMergeRequest != null)] | length'
+    IF armed is not 0 → print option 4 as "discard — unavailable while auto-merge is armed":
+      deleting the branch would silently cancel the armed auto-merge.
+    IF the probe fails (no slug, no `gh` auth) → print all four options and add a note that
+      the auto-merge state is unknown; check it before choosing `discard`.
     > "Implementation complete. What would you like to do with <branch-name>?
     >
-    > 1. merge — squash-merge to main and delete branch
+    > 1. merge — squash-merge on GitHub into <default_branch>, then delete the branch locally and on origin
     > 2. pull-request — open PR for review (branch stays open)
     > 3. keep — leave branch as-is; come back later
     > 4. discard — delete branch (requires typed 'discard' confirmation)"
@@ -469,278 +465,124 @@ IF mode = finish
   STEP 3: Execute
 
     CASE merge:
-      - Ask: "Type 'merge' to confirm:"
+      Changes land by PR in every repo: "always a PR". The merge happens on GitHub only.
+      There is no local squash, and never `--admin`. No `--delete-branch` either: CLEANUP
+      step 6 deletes the remote branch after the merge is confirmed.
+
+      slug ← $ gh repo view "$(git -C <repo_root> remote get-url origin)" --json nameWithOwner -q .nameWithOwner
+      - Ask: "Type 'merge' to confirm: <branch-name> is squash-merged into <default_branch>
+        on GitHub, then deleted locally and on origin:"
       IF not confirmed -> STOP
-      $ git checkout main
-      $ git merge --squash <branch-name>
-      - Generate commit message using mode=commit
-      $ git branch -d <branch-name>
-      IF worktree_path exists -> $ git worktree remove <worktree_path>
-      - Update git-state.json: status=merged
+
+      Already merged? (a re-run must not open a second PR)
+        merged_pr ← $ gh pr list -R <slug> --head <branch-name> --state merged --json number -q '.[0].number'
+        IF merged_pr is non-empty → say "already merged (#<merged_pr>)" and go to CLEANUP.
+        IF status was `auto_merge` and the open PR still has auto-merge armed → say
+          "auto-merge still armed; GitHub has not merged yet" and STOP. Do not wait or poll.
+
+      Merge on GitHub:
+        RUN PUSH_BRANCH (STEP 1a)
+        IF `gh pr list -R <slug> --head <branch-name> --state open --json number -q length` is 0:
+          RUN mode=pr
+        pr ← $ gh pr list -R <slug> --head <branch-name> --state open --json number -q '.[0].number'
+        Probe before any merge — `gh pr merge` gives the same BLOCKED error for pending
+        checks, red checks, a missing review and conflicts, so never classify its failure:
+        $ gh pr view <pr> -R <slug> --json mergeStateStatus,reviewDecision,statusCheckRollup
+        (A check run has `status`/`conclusion`; a commit status has `state`. `reviewDecision`
+        is `""`, not null, when no review is required. The REQUIRED checks alone:
+        `gh pr checks <pr> -R <slug> --required --json name,state,bucket`; it exits non-zero
+        with "no required checks reported" when the repo has none.)
+        Let mergeStateStatus pick the branch; it already says whether the required gates pass:
+        - CLEAN, UNSTABLE, HAS_HOOKS → mergeable now:
+          $ gh pr merge <pr> -R <slug> --squash
+          IF it fails → STOP and report the reason. Keep the branch and the worktree;
+            status=pr_open.
+        - BLOCKED → required gates are not met. Classify:
+          - any REQUIRED check with conclusion FAILURE/ERROR/TIMED_OUT/CANCELLED/
+            ACTION_REQUIRED/STARTUP_FAILURE, or reviewDecision CHANGES_REQUESTED
+            → STOP and say which; status=pr_open
+          - otherwise (required checks still QUEUED/IN_PROGRESS/WAITING/PENDING, or
+            reviewDecision REVIEW_REQUIRED) → $ gh pr merge <pr> -R <slug> --auto --squash
+            IF that succeeds → report "auto-merge armed". Say the merge may land on someone
+              else's approval when a review is still required. Keep the branch and the
+              worktree; status=auto_merge. Stop here: do not wait or poll. Re-run finish
+              after the merge to clean up.
+            IF arming fails → STOP; status=pr_open. IF `gh api repos/<slug> --jq
+              .allow_auto_merge` is false, say: "Turn on auto-merge in the repo settings or
+              merge by hand." A re-run will not help.
+        - DIRTY (conflicts), BEHIND (base moved; update the branch), DRAFT, UNKNOWN
+          → STOP and say which; status=pr_open
+        Confirm: `gh pr view <pr> -R <slug> --json state -q .state` is MERGED. IF not (for
+        example, a merge queue took it) → report it, status=auto_merge, and STOP.
+
+      CLEANUP — run every command from <repo_root> (`cd <repo_root>` first): the worktree
+      is removed here. Steps in this order:
+        1. IF `git -C <repo_root> status --porcelain` is non-empty → STOP: "Merged on GitHub,
+           but the main checkout has uncommitted changes. Clean it, then re-run finish."
+        2. IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
+           IF it refuses (untracked or modified files) → STOP and list the files. NEVER add
+           `--force`: the merge is done, but those files are not in it.
+        3. $ git -C <repo_root> checkout <default_branch>
+           IF it fails because <default_branch> is checked out in another worktree (`git -C
+           <repo_root> worktree list --porcelain` shows `branch refs/heads/<default_branch>`
+           at another path) → STOP with a note naming that worktree: the merge is on GitHub;
+           <branch-name> was kept locally; update <default_branch> in that worktree.
+        4. $ git -C <repo_root> pull --ff-only origin <default_branch>
+           IF it fails (local <default_branch> has diverged) → STOP with a note: the merge is
+           on GitHub; local <default_branch> and <branch-name> were left as they are.
+        5. IF `git -C <repo_root> worktree list --porcelain` still shows
+           `branch refs/heads/<branch-name>` → STOP and name that worktree. Never delete a
+           branch that is checked out.
+           ELSE IF the local branch exists:
+             $ git -C <repo_root> branch -D <branch-name>   # -D: a squash merge never marks the branch merged
+        6. IF `git -C <repo_root> ls-remote --heads origin <branch-name>` is non-empty:
+             $ git -C <repo_root> push origin --delete <branch-name>
+        - Update git-state.json: status=merged
 
     CASE pull-request:
+      RUN PUSH_BRANCH (STEP 1a)
       - RUN mode=pr
-      IF worktree_path exists -> $ git worktree remove <worktree_path>
+      Leave the worktree directory first (`cd <repo_root>`): it is removed next.
+      IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
       - Update git-state.json: status=pr_open
 
     CASE keep:
-      IF worktree_path exists -> $ git worktree remove <worktree_path>
+      RUN PUSH_BRANCH (STEP 1a)
+      Leave the worktree directory first (`cd <repo_root>`): it is removed next.
+      IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
       - Update git-state.json: status=kept
 
     CASE discard:
-      - Ask: "Type 'discard' to permanently delete <branch-name>:"
+      - Ask: "Type 'discard' to permanently delete <branch-name> (local, and on origin if
+        it was pushed):"
       IF not confirmed -> STOP
-      IF worktree_path exists -> $ git worktree remove <worktree_path> --force
-      $ git checkout main
-      $ git branch -D <branch-name>
+      IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path> --force
+      $ git -C <repo_root> checkout <default_branch>
+      $ git -C <repo_root> branch -D <branch-name>
+      IF `git -C <repo_root> ls-remote --heads origin <branch-name>` is non-empty:
+        $ git -C <repo_root> push origin --delete <branch-name>
       - Update git-state.json: status=discarded
 
   EMIT [git] finish_complete action=<merge|pr|keep|discard>
 
-# ── Mode: sync ───────────────────────────────────────────────────
+# ── Mode: sync (retired) ─────────────────────────────────────────
 
 IF mode = sync
 
-  You are performing a two-way synchronisation of the skaile-dev shell repo and all
-  its submodules: pull all remote changes, reinstall dependencies if needed, push all
-  local unpushed commits, then print a summary of what moved in each direction.
+  STOP: "`sync` is retired. It pulled and pushed the skaile-dev shell repo and its
+  submodules; the shell's GitHub remote is archived and no repo has submodules now.
+  Update each clone on its own: `git -C <repo> fetch origin && git -C <repo> pull --ff-only`
+  on its default branch, then `bun install` in that repo if its lockfile changed."
 
-  STEP 0: Pre-flight + submodule discovery
-    $ git rev-parse --abbrev-ref HEAD
-    IF result ≠ main
-      STOP: "✗ sync only runs on main — currently on <branch>. Switch to main first."
-    Discover all submodule paths (not names) from .gitmodules:
-    $ git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}'
-    Use these paths for all git -C calls and display labels.
-    Process submodules in the order they appear in .gitmodules.
-
-  STEP 1: Shell repo — fetch and snapshot
-    $ git fetch origin
-    Record shell_pre_sha: $ git rev-parse HEAD
-    unpushed_shell ← $ git log origin/main..HEAD --oneline
-    incoming_shell ← $ git log HEAD..origin/main --oneline
-
-  STEP 2: Shell repo — pull
-    $ git pull --rebase origin main
-    IF conflict
-      STOP: "✗ conflict in shell repo" + list conflicting files
-            + "Resolve conflicts and re-run sync."
-
-  STEP 3: Per-submodule — fetch, snapshot, pull
-    FOR EACH submodule path (in .gitmodules order):
-      a. Resolve branch and ensure on main:
-         $ git -C <path> rev-parse --abbrev-ref HEAD → branch
-         IF branch = HEAD (detached):
-           > "<path> is in detached HEAD — checking out main."
-           $ git -C <path> checkout main
-           IF fails (no local main branch):
-             $ git -C <path> checkout -b main origin/main
-           SET branch = main
-
-      b. Fetch:
-         $ git -C <path> fetch origin
-
-      c. Record old SHA:
-         $ git -C <path> rev-parse HEAD → old_sha[path]
-
-      d. Snapshot unpushed:
-         $ git -C <path> log origin/<branch>..<branch> --oneline → unpushed[path]
-
-      e. Pull this submodule:
-         First try: $ git submodule update --init --remote --merge -- <path>
-         The --init flag handles newly added submodules that haven't been cloned yet.
-         IF fails:
-           STOP: "✗ <path>: update failed — <error>"
-                 List which submodules updated vs. which did not.
-                 "Re-run sync after resolving the issue."
-
-         After update, the submodule may be in detached HEAD again (git submodule update
-         detaches by default). Re-attach to main:
-         $ git -C <path> rev-parse --abbrev-ref HEAD → post_branch
-         IF post_branch = HEAD (detached):
-           $ git -C <path> checkout main
-           $ git -C <path> merge HEAD@{1} --ff-only
-           (This moves the local main branch forward to the SHA that submodule update
-           checked out, keeping us on the named branch.)
-
-      f. Compute incoming:
-         $ git -C <path> log <old_sha[path]>..HEAD --oneline → incoming[path]
-
-  STEP 4: Post-pull dependency install
-    Collect changed files:
-      shell_changed   ← $ git diff <shell_pre_sha>..HEAD --name-only
-      FOR EACH submodule path:
-        sub_changed[path] ← $ git -C <path> diff <old_sha[path]>..HEAD --name-only
-
-    IF any package.json appears in shell_changed or any sub_changed[path]:
-      $ bun install   (run from monorepo root)
-      IF fails: STOP: "✗ bun install failed — <error>"
-      SET ran_bun_install = true
-
-    IF cli/package.json appears in sub_changed[agent-framework]:
-      $ bun link   (run from monorepo root — re-links the CLI globally)
-      IF fails: STOP: "✗ bun link failed — <error>"
-      SET ran_bun_link = true
-
-  STEP 5: Push submodules
-    FOR EACH submodule path where unpushed[path] is non-empty:
-      $ git -C <path> push origin <branch>
-      IF rejected:
-        STOP: "✗ push rejected: <path> — <error>"
-              Do NOT push remaining submodules.
-              Do NOT run step 6.
-
-  STEP 6: Push shell repo
-    $ git push origin main
-    IF rejected:
-      STOP: "✗ push rejected: shell repo — <error>. Re-run sync."
-
-  STEP 7: Print sync summary
-
-    Print the following format (fill in actual values):
-
-    ── Sync Summary ──────────────────────────────────────────────
-
-    Shell repo (skaile-dev)
-      [if incoming_shell OR unpushed_shell non-empty: expand to two direction lines]
-      ↓ pulled   N commits
-        [if N > 0: list as • <message> (<short-sha>) per commit]
-        [if N = 0: inline] ✓ up to date
-      ↑ pushed   N commits
-        [if N > 0: list as • <message> (<short-sha>) per commit]
-        [if N = 0: inline] ✓ nothing to push
-      [if both directions zero: single collapsed line]
-      Shell repo (skaile-dev)   ✓ up to date, nothing to push
-
-    [FOR EACH submodule path in .gitmodules order]
-      [if incoming[path] OR unpushed[path] non-empty: expand]
-      <path>
-        ↓ pulled   N commits [list if N > 0]
-        ↑ pushed   N commits [list if N > 0]
-      [if both zero: single collapsed line]
-      <path>          ✓ up to date, nothing to push
-
-    [if ran_bun_install OR ran_bun_link: print footer block]
-      [blank line]
-      [if ran_bun_install]      bun install        ✓ workspace deps reinstalled
-      [if ran_bun_link]         bun link           ✓ CLI re-linked (agent-framework/cli changed)
-
-    ──────────────────────────────────────────────────────────────
-
-  EMIT [git] sync_complete
-
-# ── Mode: deploy ─────────────────────────────────────────────────
+# ── Mode: deploy (retired) ───────────────────────────────────────
 
 IF mode = deploy
 
-  You are merging main into the `deploy` branch and pushing it.
-  This is the standard way to ship the current state of main to the deploy target.
-
-  STEP 1: Pre-flight — verify current branch
-    $ git rev-parse --abbrev-ref HEAD → current_branch
-
-    IF current_branch ≠ main
-      ASK:
-        > "You are on '<current_branch>', not main. What would you like to do?
-        >
-        > 1. merge-to-main — finish this branch and merge it to main first (runs mode=finish)
-        > 2. cancel — abort the deploy"
-
-      IF user chooses merge-to-main:
-        RUN mode=finish → let user complete the merge flow
-        THEN continue from STEP 2 (now on main)
-      IF user chooses cancel:
-        STOP: "Deploy cancelled."
-
-  STEP 2: Ensure all submodules and shell repo are pushed
-    CI checks out the deploy branch and recursively fetches submodules at the
-    committed SHAs. If any submodule or the shell repo has unpushed commits,
-    CI will fail because it cannot resolve those SHAs.
-
-    Discover submodule paths:
-    $ git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}'
-
-    FOR EACH submodule path:
-      $ git -C <path> rev-parse --abbrev-ref HEAD → branch
-      IF branch = HEAD (detached): skip (submodule points at a fixed SHA)
-      $ git -C <path> log origin/<branch>..<branch> --oneline → unpushed
-      IF unpushed is non-empty:
-        $ git -C <path> push origin <branch>
-        IF push fails:
-          STOP: "Cannot deploy: failed to push <path> -- <error>. Fix and retry."
-
-    Check shell repo:
-    $ git log origin/main..main --oneline → unpushed_shell
-    IF unpushed_shell is non-empty:
-      $ git push origin main
-      IF push fails:
-        STOP: "Cannot deploy: failed to push shell repo -- <error>. Fix and retry."
-
-  STEP 3: Stash working tree changes if needed
-    $ git status --short → status
-    IF any tracked files are modified (M lines):
-      $ git stash push -m "pre-deploy stash"
-      SET stashed = true
-    ELSE
-      SET stashed = false
-
-  STEP 4: Checkout and update deploy branch
-    $ git checkout deploy
-    $ git pull origin deploy
-    IF pull fails:
-      IF stashed: $ git stash pop
-      $ git checkout main
-      STOP: "✗ Failed to pull deploy branch — <error>. Returned to main."
-
-  STEP 5: Merge main into deploy
-    $ git merge main --no-edit
-    IF merge conflict:
-      $ git merge --abort
-      $ git checkout main
-      IF stashed: $ git stash pop
-      STOP: "✗ Merge conflict between main and deploy. Resolve on deploy branch manually."
-
-  STEP 5b: Normalize submodule URLs to HTTPS (CI cannot use SSH)
-    The Jenkins executors authenticate to GitHub over HTTPS via a GIT_ASKPASS
-    credential and have NO SSH deploy key. `main` tracks submodules with SSH URLs
-    (git@github.com:...), so any submodule newly merged into deploy arrives as SSH
-    and its checkout fails with "Permission denied (publickey)" — observed when the
-    `brand` submodule was first added. The deploy branch therefore keeps every
-    submodule URL on HTTPS. Re-apply that invariant after every merge so newly-added
-    submodules are converted automatically, not just the ones fixed by hand once.
-
-    Rewrite all SSH GitHub remotes in .gitmodules to HTTPS:
-      $ sed -i '' -E 's#git@github\.com:#https://github.com/#' .gitmodules    # macOS
-      # Linux/CI shells: $ sed -i -E 's#git@github\.com:#https://github.com/#' .gitmodules
-
-    Verify none remain (this must succeed):
-      $ ! grep -q 'git@github.com:' .gitmodules
-
-    IF .gitmodules changed (git diff --quiet .gitmodules returns non-zero):
-      $ git add .gitmodules
-      $ git commit -m "fix(gitmodules): normalize submodule URLs to HTTPS for CI checkout"
-      > "Converted <N> submodule URL(s) to HTTPS on deploy: <names>."
-    ELSE:
-      > "All submodule URLs already HTTPS — no normalization needed."
-
-    NOTE: this commit lives only on the deploy branch. `main` intentionally keeps
-    SSH URLs for local developer clones; never merge this normalization back to main.
-
-  STEP 6: Push deploy
-    $ git push origin deploy
-    IF push fails:
-      $ git checkout main
-      IF stashed: $ git stash pop
-      STOP: "✗ Push to deploy failed — <error>. Returned to main."
-
-  STEP 7: Return to main
-    $ git checkout main
-    IF stashed: $ git stash pop
-
-  EMIT [git] deploy_complete
-  REPORT:
-    > "Deployed: main merged into deploy and pushed.
-    > deploy is now at: <git rev-parse --short deploy>"
+  STOP: "`deploy` is retired. It merged the shell's `main` into its `deploy` branch. Each
+  repo now deploys on its own. The platform deploys when its changesets Version PR merges
+  (its `version.yml` fast-forwards `deploy`); never merge `main` into `deploy` by hand,
+  because that races the release job. See the platform `CLAUDE.md` and
+  `docs/versioning-and-releases.md` in the platform repo."
 
 # ── End Modes ────────────────────────────────────────────────────
 
@@ -750,14 +592,12 @@ CHECKLIST
   - [ ] Working tree was clean before branch/worktree creation
   - [ ] Tests pass before merge or PR
   - [ ] Typed confirmation received for merge and discard
-  - [ ] Worktree cleaned up after finish (merge, keep, discard)
+  - [ ] Worktree cleaned up after finish (merge, keep, discard) — except status=auto_merge, which keeps it until the merge lands
   - [ ] git-state.json written/updated
-  - [ ] deploy mode only runs from main (or after explicit merge-to-main)
-  - [ ] all submodules and shell repo pushed before deploy merge
-  - [ ] submodule URLs normalized to HTTPS on deploy after merge (no `git@github.com:` remains in .gitmodules)
-  - [ ] stash popped after deploy (even on failure)
-  - [ ] Backend start verified (or explicitly skipped) when structural platform/backend changes are present
-  - [ ] Formatting and linting run on all affected packages before commit (Biome for agent-framework/forge/docs/theme; Prettier+ESLint for platform)
+  - [ ] sync and deploy modes stop with their pointer (retired)
+  - [ ] No `---agent---` block in any commit message
+  - [ ] Backend start verified (or explicitly skipped) when structural platform `backend/` changes are present
+  - [ ] Formatting and linting run on all affected packages before commit (Biome for workspaces; Prettier+ESLint for platform and store)
 
 ---
 
@@ -765,17 +605,18 @@ CHECKLIST
 
 | Mistake | What to do instead |
 |---------|-------------------|
-| Committing directly to main | Always create a feature branch first |
+| Committing directly to <default_branch> | Always create a feature branch first |
 | Branch name too generic (`fix/stuff`) | Include package + specific description |
 | Using worktrees for sequential tasks | Worktrees add overhead; use branch mode for sequential work |
 | Merging without running tests | Full test suite must pass before any merge |
 | Force-pushing after rebase | Never rewrite history on shared branches |
 | Writing commit messages manually | Use `mode=commit` for structured messages |
-| Committing without formatting | Always run format+lint before committing — Biome for agent-framework/forge; Prettier+ESLint for platform |
-| Running Biome on platform/ | Platform uses Prettier + ESLint. Biome reformats it incorrectly. |
+| Committing without formatting | Always run format+lint before committing — Biome for workspaces; Prettier+ESLint for platform and store |
+| Running Biome in platform or store | They use Prettier + ESLint. Biome reformats them incorrectly. |
+| Adding a `---agent---` block | It belonged to the retired shell; write a conventional title + prose body only |
 
 ## Integration
 
 - **Called by:** `implement` (git setup, commit, finish branch)
-- **Calls:** `review` (optional review step in commit mode, default-on for main)
+- **Calls:** `review` (optional review step in commit mode, default-on for <default_branch>)
 - **Reads:** `references/commit-spec.md`, `references/branch_naming.md`, `references/worktree_patterns.md`

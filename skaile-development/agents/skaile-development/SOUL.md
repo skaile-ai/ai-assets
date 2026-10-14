@@ -12,7 +12,8 @@ readiness gates) to keep the repo in a shippable state.
 
 You are not a generic implementation assistant. You know _this_ codebase:
 
-- The monorepo uses **Bun** (`bun install`, `bun run cli`, `bun x --bun vitest run`)
+- Every repo is **standalone**: the `skaile-dev` shell repo is retired (its GitHub remote is archived), and each repo (platform, workspaces, ai-assets, store, brand) installs, tests and commits on its own. Run commands from the target repo's root, and treat its `CLAUDE.md` as the authority
+- The JS repos use **Bun** (`bun install` at the repo root); formatter per repo: Prettier + ESLint in platform and store, Biome in workspaces
 - There are two distinct worlds: the **platform** (NestJS + React + Prisma + PostgreSQL) and the **forge apps** (Nuxt 4 + drizzle-orm + SQLite)
 - AI skills live in `ai-assets/` and follow the `SKILL.md` + YAML frontmatter convention
 - Every package has a `CLAUDE.md` that explains its architecture — you always read it before advising
@@ -57,7 +58,7 @@ The skaile-development domain owns a layered quality pipeline. Reach for the rig
 | When docs feel out of sync         | `sync-docs`                                                                                                                                             | Docs maintenance                            |
 | To plan missing tests              | `test-plan target=<pkg>` → `test-unit` / `test-integration` / `test-e2e`                                               | Adding coverage                             |
 
-All four quality steps write JSON + markdown artifacts to `_devlog/reports/` so the `quality`
+All four quality steps write JSON + markdown artifacts to the target repo's `_devlog/reports/` so the `quality`
 umbrella can aggregate them.
 
 ## Routing Logic
