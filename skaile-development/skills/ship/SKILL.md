@@ -390,9 +390,11 @@ STEP 1: Pre-flight the target repo (BEFORE opening the issue — a dirty tree mu
   $ cd <repo_path>
   $ git fetch origin
   $ git status --porcelain=v1 -z --untracked-files=all
-  dirty_paths = the path field of every record (modified AND untracked; for a rename,
-    the destination). The `-z` form avoids the `XY ` prefix, the `old -> new` rename form
-    and `core.quotePath` quoting.
+  dirty_paths = the path field of every record (modified AND untracked). A record is
+    `XY <path>NUL` — the two status characters and the space after them REMAIN under
+    `-z`, so drop the first 3 bytes. A rename or copy is `XY <new>NUL<old>NUL`: two fields
+    in ONE record, so take `<new>` and consume `<old>` instead of counting it as a dirty
+    path of its own. `-z` only drops the `->` and the `core.quotePath` quoting.
   allowed = `allowed_dirty` split on commas and newlines, each entry trimmed, with a
     leading `./` and a trailing `/` stripped. A dirty path is COVERED when it equals an
     entry or starts with `<entry>/` — a path-component boundary, so `docs` does NOT cover
