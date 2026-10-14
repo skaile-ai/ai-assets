@@ -150,7 +150,7 @@ identifies affected packages, and generates a structured message with:
 No `---agent---` YAML block: that convention belonged to the retired shell, and nothing in the
 standalone repos reads it. The format spec lives in `skills/git/references/commit-spec.md`. Each
 repo's own `.githooks/commit-msg` (where it has one) validates the title on `main`; because
-`main` is protected and PRs land by squash merge, in practice the **PR title** must match.
+changes land by PR and GitHub squash-merges them, in practice the **PR title** must match.
 
 The `git` skill handles branch/worktree/PR/finish operations and also covers commit
 message generation - all unified under a single skill with mode selection.

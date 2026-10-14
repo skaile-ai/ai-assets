@@ -314,7 +314,9 @@ IF mode = branch
       > "Created and switched to: <branch-name>"
 
   STEP 4: Write git-state.json
-    - Write <repo_root>/_implementation/git-state.json (repo_root = the worktree STEP 3 probe):
+    - repo_root = dirname of `git rev-parse --path-format=absolute --git-common-dir` (the
+      main checkout, also from inside a linked worktree)
+    - Write <repo_root>/_implementation/git-state.json:
       { "branch": "<name>", "mode": "branch", "worktree_path": null, "created_at": "<ISO>", "status": "active" }
 
   EMIT [git] branch_ready name=<branch-name>
@@ -489,20 +491,22 @@ IF mode = finish
         checks, red checks, a missing review and conflicts, so never classify its failure:
         $ gh pr view <pr> -R <slug> --json mergeStateStatus,reviewDecision,statusCheckRollup
         (A check run has `status`/`conclusion`; a commit status has `state`. `reviewDecision`
-        is `""`, not null, when no review is required. The REQUIRED checks alone:
-        `gh pr checks <pr> -R <slug> --required --json name,state,bucket`; it exits non-zero
-        with "no required checks reported" when the repo has none.)
+        is `""`, not null, when no review is required.)
         Let mergeStateStatus pick the branch; it already says whether the required gates pass:
-        - CLEAN, UNSTABLE, HAS_HOOKS → mergeable now:
+        - CLEAN, UNSTABLE, HAS_HOOKS → mergeable now (UNSTABLE: only advisory checks are
+          pending or failing; advisory checks don't gate the merge):
           $ gh pr merge <pr> -R <slug> --squash
           IF it fails → STOP and report the reason. Keep the branch and the worktree;
             status=pr_open.
-        - BLOCKED → required gates are not met. Classify:
-          - any REQUIRED check with conclusion FAILURE/ERROR/TIMED_OUT/CANCELLED/
-            ACTION_REQUIRED/STARTUP_FAILURE, or reviewDecision CHANGES_REQUESTED
-            → STOP and say which; status=pr_open
-          - otherwise (required checks still QUEUED/IN_PROGRESS/WAITING/PENDING, or
-            reviewDecision REVIEW_REQUIRED) → $ gh pr merge <pr> -R <slug> --auto --squash
+        - BLOCKED → required gates are not met. Classify from the REQUIRED checks
+          (`gh pr checks <pr> -R <slug> --required --json name,bucket`) and reviewDecision.
+          Read its JSON, not its exit status: it exits non-zero both when a required check
+          is failing and when the repo has none ("no required checks reported").
+          - any required check in bucket `fail` or `cancel`, or reviewDecision
+            CHANGES_REQUESTED → STOP and name it; status=pr_open
+            (`statusCheckRollup` gives the detail for the message)
+          - otherwise (required checks in bucket `pending`, or reviewDecision
+            REVIEW_REQUIRED) → $ gh pr merge <pr> -R <slug> --auto --squash
             IF that succeeds → report "auto-merge armed". Say the merge may land on someone
               else's approval when a review is still required. Keep the branch and the
               worktree; status=auto_merge. Stop here: do not wait or poll. Re-run finish
@@ -510,7 +514,10 @@ IF mode = finish
             IF arming fails → STOP; status=pr_open. IF `gh api repos/<slug> --jq
               .allow_auto_merge` is false, say: "Turn on auto-merge in the repo settings or
               merge by hand." A re-run will not help.
-        - DIRTY (conflicts), BEHIND (base moved; update the branch), DRAFT, UNKNOWN
+        - UNKNOWN → GitHub has not finished computing mergeability (usual right after the
+          PR is created). Probe once more; if it is still UNKNOWN → STOP and say so;
+          status=pr_open
+        - DIRTY (conflicts), BEHIND (base moved; update the branch), DRAFT
           → STOP and say which; status=pr_open
         Confirm: `gh pr view <pr> -R <slug> --json state -q .state` is MERGED. IF not (for
         example, a merge queue took it) → report it, status=auto_merge, and STOP.
@@ -537,20 +544,20 @@ IF mode = finish
              $ git -C <repo_root> branch -D <branch-name>   # -D: a squash merge never marks the branch merged
         6. IF `git -C <repo_root> ls-remote --heads origin <branch-name>` is non-empty:
              $ git -C <repo_root> push origin --delete <branch-name>
-        - Update git-state.json: status=merged
+        - Update <repo_root>/_implementation/git-state.json: status=merged
 
     CASE pull-request:
       RUN PUSH_BRANCH (STEP 1a)
       - RUN mode=pr
       Leave the worktree directory first (`cd <repo_root>`): it is removed next.
       IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
-      - Update git-state.json: status=pr_open
+      - Update <repo_root>/_implementation/git-state.json: status=pr_open
 
     CASE keep:
       RUN PUSH_BRANCH (STEP 1a)
       Leave the worktree directory first (`cd <repo_root>`): it is removed next.
       IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
-      - Update git-state.json: status=kept
+      - Update <repo_root>/_implementation/git-state.json: status=kept
 
     CASE discard:
       - Ask: "Type 'discard' to permanently delete <branch-name> (local, and on origin if
@@ -561,7 +568,7 @@ IF mode = finish
       $ git -C <repo_root> branch -D <branch-name>
       IF `git -C <repo_root> ls-remote --heads origin <branch-name>` is non-empty:
         $ git -C <repo_root> push origin --delete <branch-name>
-      - Update git-state.json: status=discarded
+      - Update <repo_root>/_implementation/git-state.json: status=discarded
 
   EMIT [git] finish_complete action=<merge|pr|keep|discard>
 
