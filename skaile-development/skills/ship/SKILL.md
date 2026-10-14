@@ -133,7 +133,7 @@ metadata:
 | 0 | Read inputs, verify `gh` auth, resolve the **target repo + its profile**, auto-classify category |
 | 1 | Pre-flight the target repo's main (fetch + clean-tree check; paths in `allowed_dirty` are left alone, never stashed) |
 | 2 | Refine the description; open the GitHub issue (or reuse `issue`) → capture issue **number** + URL |
-| 3 | Derive branch name from the issue number; create the worktree + branch (off the repo's `origin/main`) |
+| 3 | Derive branch name from the issue number; create the worktree + branch (off the repo's `origin/<default_branch>`) |
 | 4 | Investigate: load the repo's CLAUDE.md + relevant files; identify root cause / design surface |
 | 5 | Write an **uncommitted** plan markdown into the worktree |
 | 6 | Dispatch a fresh subagent to implement the plan (gets only the plan + context — no parent history) |
@@ -141,8 +141,8 @@ metadata:
 | 8 | Triage review findings, apply valid fixes inline |
 | 8b | **Docs impact** (platform only): decide `user-visible` vs `none`; when user-visible, update the capabilities doc in this PR and open an ai-assets PR for the `platform-guide` skill |
 | 9 | Delete the plan; run the repo's lint + affected tests; commit (work only); push the branch |
-| 9b | Fetch latest `origin/main`, merge into the branch, resolve conflicts, re-push |
-| 10 | Open a PR against `main` that `Closes #<number>` (respect PR template + changeset rules; platform PRs carry the `## Docs` section) |
+| 9b | Fetch latest `origin/<default_branch>`, merge into the branch, resolve conflicts, re-push |
+| 10 | Open a PR against `<default_branch>` that `Closes #<number>` (respect PR template + changeset rules; platform PRs carry the `## Docs` section) |
 | 11 | **Report the implementation summary** to the user |
 | 12 | **Babysit the PR**: act on whichever lands first — a review or CI — instead of waiting out the suite; drive CI to green and fix every related change-request in a loop (nits for the first three fix pushes, substantive only from the fourth); report unrelated/architectural problems without fixing them |
 | 12b | Sweep for follow-ups: ship the small leftovers into this PR; propose as issues only the ones that clear the **issue bar** (user harm / money / stability / security / team drag / significant benefit, with evidence), at most 3 |
@@ -273,7 +273,7 @@ MUST  dispatch review as a fresh subagent that only sees the diff + review focus
 MUST  triage review findings explicitly: each gets a verdict (apply / defer / reject) with a one-line reason
 MUST  run the repo's lint AND affected tests locally before pushing; add a changeset if the repo enforces them
 MUST  push the branch before opening the PR
-MUST  fetch origin/main and merge it into the branch BEFORE opening the PR, resolving conflicts while the full local context is available
+MUST  fetch origin/<default_branch> and merge it into the branch BEFORE opening the PR, resolving conflicts while the full local context is available
 MUST  open the PR with `gh pr create --base <default_branch> --head <branch>`, body containing `Closes #<number>`, honoring the repo's PR template if present
 MUST  report a clear implementation summary to the user after the PR is opened (Phase 11) — before babysitting
 MUST  babysit the PR (Phase 12): poll for the FIRST signal — a review or CI completion, whichever lands first — and act on a review the moment it arrives instead of waiting out the whole check suite; fix every actionable item that relates to the work item, looping push → re-poll until CI is green and the only remaining review notes are ones the reviewer explicitly blesses as fine to keep

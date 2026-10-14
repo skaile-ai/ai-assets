@@ -32,12 +32,18 @@ tooling use. The worktree root holds the repo's own `CLAUDE.md`, so agents worki
 ## Setup Pattern
 
 ```bash
-# From the main checkout of <repo>
-git fetch origin
-mkdir -p ../.worktrees
-# Use an absolute path: `git -C <repo> worktree add <relpath>` resolves relative to <repo>
-git worktree add "$(cd .. && pwd)/.worktrees/<repo>-<slug>" -b feature/<pkg>/<slug> origin/main
+# From the clone of <repo> or any of its worktrees.
+# --git-common-dir names the MAIN checkout even from inside a linked worktree.
+repo_root=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
+base=$(git -C "$repo_root" symbolic-ref --short refs/remotes/origin/HEAD)   # origin/<default>; never assume main
+git -C "$repo_root" fetch origin
+mkdir -p "$(dirname "$repo_root")/.worktrees"
+# Absolute path: `git -C <repo> worktree add <relpath>` resolves relative to <repo>
+git -C "$repo_root" worktree add "$(dirname "$repo_root")/.worktrees/<repo>-<slug>" \
+  -b feature/<pkg>/<slug> "$base"
 ```
+
+If `origin/HEAD` is unset, use `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`.
 
 ## Working Inside a Worktree
 
@@ -99,11 +105,14 @@ After both agents complete:
   `git branch -D` destroys unpushed commits permanently. Check before cleanup:
 
   ```bash
-  git -C <worktree> log --oneline @{upstream}..HEAD   # must be empty
+  # Empty output = no upstream: the branch was never pushed, so nothing is safe yet.
+  git -C <worktree> rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null
+  # With an upstream, this must print nothing:
+  git -C <worktree> log --oneline @{upstream}..HEAD
   ```
 
 - A fresh worktree has no `node_modules`. Run `bun install` at the worktree root (not at a
-  parent directory) before tests, typecheck or lint, and again after merging `origin/main`.
+  parent directory) before tests, typecheck or lint, and again after merging the default branch.
 - Worktrees inherit `.env` files from the checked-out branch, not the main checkout.
   Verify environment setup inside the worktree before running services.
 - Stale worktrees that were forcefully removed can cause `git worktree list` to show ghost

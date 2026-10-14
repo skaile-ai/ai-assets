@@ -25,15 +25,15 @@ metadata:
   stage: 'beta'
   prerequisites:
     files:
-    - path: 'platform/e2e/playwright.config.ts'
+    - path: 'e2e/playwright.config.ts'
       gate: hard
       description: 'Existing platform e2e harness must be in place (this skill extends
         it, does not scaffold it — see `test-e2e` for initial scaffolding).'
-    - path: 'platform/e2e/CLAUDE.md'
+    - path: 'e2e/CLAUDE.md'
       gate: soft
       description: 'Recommended knowledge source. The skill references its scaffolding
         rules.'
-    - path: 'platform/e2e/README.md'
+    - path: 'e2e/README.md'
       gate: soft
       description: 'Recommended knowledge source. The skill references its failure-mode
         table.'
@@ -107,8 +107,10 @@ test-harness particularities (session modes, impersonation,
 org-scoped slug URLs, coverage fixture, per-spec backend isolation).
 
 PATHS  The platform is a standalone repo (`skaile-ai/platform`; the skaile-dev shell is
-retired). Every shell snippet below runs from the platform repo's root. In prose, a path
-written `platform/<x>` names `<x>` under that root. Install with `bun install` at that root.
+retired). Every shell snippet below runs from the platform repo's root. In prose and in the
+READS/WRITES lists, a path written `platform/<x>` names `<x>` under that root. Frontmatter
+gate paths are read literally by the CLI, so they are written root-relative (`e2e/...`)
+with no `platform/` prefix. Install with `bun install` at that root.
 
 READS
   ! platform/e2e/CLAUDE.md                   — scaffolding rules

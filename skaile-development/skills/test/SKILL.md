@@ -530,7 +530,7 @@ After finishing test work — especially construct mode — recommend:
      --coverage.enabled --coverage.provider=istanbul \
      --coverage.reporter=json-summary \
      --coverage.reportsDirectory=_devlog/reports/coverage-ci
-   bun _scripts/check-coverage-ratchet.ts
+   (cd packages/workspaces && bun _scripts/check-coverage-ratchet.ts)
    ```
    If the ratchet reports `baseline-improved` for a package and the gain is
    intentional, update that package's entry in

@@ -38,12 +38,9 @@ metadata:
     - path: "schema/"
       gate: soft
       description: "Optional split-schema directory with per-model / per-enum JSON files."
-    - path: "platform/CLAUDE.md"
+    - path: "CLAUDE.md"
       gate: soft
-      description: "Read first when working inside skaile-dev's platform/."
-    - path: "store/CLAUDE.md"
-      gate: soft
-      description: "Read first when working inside skaile-dev's store/."
+      description: "Read first: the target repo's root CLAUDE.md (platform and store are standalone repos)."
   produces: []
   reads:
   - path: "postxl-schema.json"

@@ -419,6 +419,7 @@ IF mode = finish
 
   STEP 1: Pre-flight
     - Read git-state.json: branch, mode, worktree_path
+    - repo_root = the same `--git-common-dir` probe as worktree STEP 3 (the main checkout)
     - default_branch = the same probe as worktree STEP 3 (never assume "main")
     - Run full test suite
     IF tests fail -> STOP
@@ -430,11 +431,12 @@ IF mode = finish
     default branch first, and `discard` deletes them on purpose, so neither pushes.
 
     PUSH_BRANCH:
-      upstream ← $ git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null
+      W = <worktree_path> if set, else the current checkout
+      upstream ← $ git -C <W> rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null
       IF upstream is empty (no upstream):
-        $ git push -u origin <branch-name>
-      ELSE IF `git log --oneline @{upstream}..HEAD` is non-empty:
-        $ git push origin <branch-name>
+        $ git -C <W> push -u origin <branch-name>
+      ELSE IF `git -C <W> log --oneline @{upstream}..HEAD` is non-empty:
+        $ git -C <W> push origin <branch-name>
       IF the push fails:
         STOP: "Failed to push <branch-name>. Fix the push error before finishing —
                removing the worktree without pushing will permanently lose those commits."
@@ -455,11 +457,13 @@ IF mode = finish
         CASE pull-request instead; the squash merge happens on GitHub.
       - Ask: "Type 'merge' to confirm:"
       IF not confirmed -> STOP
-      $ git checkout <default_branch>
-      $ git merge --squash <branch-name>
-      - Generate commit message using mode=commit
-      $ git branch -d <branch-name>
-      IF worktree_path exists -> $ git worktree remove <worktree_path>
+      Same order as CASE discard: a branch checked out in a worktree can be neither
+      checked out elsewhere nor deleted, so remove the worktree first.
+      IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
+      $ git -C <repo_root> checkout <default_branch>
+      $ git -C <repo_root> merge --squash <branch-name>
+      - Generate the commit message using mode=commit, then commit in <repo_root>
+      $ git -C <repo_root> branch -D <branch-name>   # -D: a squash merge never marks the branch merged; the squash commit just landed
       - Update git-state.json: status=merged
 
     CASE pull-request:
@@ -477,11 +481,11 @@ IF mode = finish
       - Ask: "Type 'discard' to permanently delete <branch-name> (local, and on origin if
         it was pushed):"
       IF not confirmed -> STOP
-      IF worktree_path exists -> $ git worktree remove <worktree_path> --force
-      $ git checkout <default_branch>
-      $ git branch -D <branch-name>
-      IF `git ls-remote --heads origin <branch-name>` is non-empty:
-        $ git push origin --delete <branch-name>
+      IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path> --force
+      $ git -C <repo_root> checkout <default_branch>
+      $ git -C <repo_root> branch -D <branch-name>
+      IF `git -C <repo_root> ls-remote --heads origin <branch-name>` is non-empty:
+        $ git -C <repo_root> push origin --delete <branch-name>
       - Update git-state.json: status=discarded
 
   EMIT [git] finish_complete action=<merge|pr|keep|discard>
