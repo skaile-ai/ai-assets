@@ -167,7 +167,7 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
      Run the bundled service helper. It is idempotent — only starts what's missing (backend in `e2e:stateless` mode, frontend in `dev:noAuth` mode), reuses already-running services, detaches via `nohup` so services survive after the script exits, and writes logs to `platform/.e2e-backend.log` / `platform/.e2e-frontend.log`. It also runs a **clean** backend rebuild (`rm -rf dist && bun run build` in `platform/backend`) whenever `dist/` is stale — detected by any of: the e2e entry-point trampoline (`dist/apps/api/apps/api/src/e2e.js`) is missing; the trampoline is older than `tsconfig.json`; or any backend source file is newer than the trampoline (the post-pull case). The clean build is required because `nest build` is incremental and never deletes orphaned `.js` files — after a pull that renames a workspace package (e.g. `@skaile/agent-sdk` → `@skaile/workspaces`) or restructures directories, stale output survives every incremental rebuild and the backend crashes at boot with `Cannot find module '@skaile/agent-sdk/...'`. `bun run e2e:stateless` never rebuilds anything on its own:
      ```bash
-     cd platform && ./scripts/e2e.sh
+     ./scripts/e2e.sh
      ```
      The script blocks until both ports listen (timeout 60s per service) and prints one line per service. After it returns, re-verify with the same `lsof` check.
      IF a port is still down after the script ran: read the last ~30 lines of the relevant log, report the startup error verbatim to the user, STOP. Do not retry blindly — startup failures usually mean missing migrations, port conflicts with another app, or a code bug, and looping won't fix any of those.
@@ -344,9 +344,9 @@ IF mode = run
 
     | WE_STARTED_BACKEND | WE_STARTED_FRONTEND | Action |
     |---|---|---|
-    | true  | true  | `cd platform && ./scripts/e2e.sh --stop` |
-    | true  | false | `cd platform && ./scripts/e2e.sh --stop-backend` |
-    | false | true  | `cd platform && ./scripts/e2e.sh --stop-frontend` |
+    | true  | true  | `./scripts/e2e.sh --stop` |
+    | true  | false | `./scripts/e2e.sh --stop-backend` |
+    | false | true  | `./scripts/e2e.sh --stop-frontend` |
     | false | false | Skip — services were already up at preflight; leave them. |
 
     Print the script's output verbatim into the report so the user sees what was torn down. If the script reports a port "still up" after stopping, do NOT escalate (broader pkill could kill the user's parallel processes); just include the warning in the report's "Next steps" so the user can decide.
@@ -455,7 +455,7 @@ IF mode = add
 
     (a) **Branch-diff mode** (default — "add tests for my unmerged PR"):
     ```bash
-    git diff main...HEAD --name-only        # full branch diff
+    git diff origin/<default_branch>...HEAD --name-only        # full branch diff (platform: main)
     git diff --name-only                    # unstaged
     git diff --staged --name-only           # staged
     ```
@@ -463,7 +463,7 @@ IF mode = add
     (b) **Gap-discovery mode** — use when the branch diff above is EMPTY (you're on
     `main`, or the features already merged) OR the user asks "what recent features
     need e2e?" / names merged PRs. **Do NOT conclude "nothing to add" just because
-    `main...HEAD` is empty** — an empty branch diff means there's no *unmerged* work,
+    `origin/<default_branch>...HEAD` is empty** — an empty branch diff means there's no *unmerged* work,
     NOT that coverage is complete. Instead, discover recently-merged features and
     cross-reference them against existing specs to find gaps:
     ```bash
@@ -641,7 +641,7 @@ IF mode = add
     ## E2E Add — <timestamp>
 
     ### Analysis
-    Diff scope: <main…HEAD | user scope>
+    Diff scope: <origin/<default_branch>...HEAD | user scope>
     Files changed: <N>, categorized:
     - frontend routes: <list>
     - frontend pages: <list>

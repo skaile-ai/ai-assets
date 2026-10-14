@@ -426,9 +426,10 @@ IF mode = finish
 
   STEP 1a: Unpushed-commit safeguard (CRITICAL for worktree branches)
     Commits made in a worktree exist ONLY locally until the branch is pushed. Removing
-    the worktree and deleting the branch destroys them. `pull-request` and `keep` run
-    PUSH_BRANCH before they remove the worktree. `merge` squashes the commits into the
-    default branch first, and `discard` deletes them on purpose, so neither pushes.
+    the worktree and deleting the branch destroys them. `pull-request`, `keep` and the
+    default `merge` path run PUSH_BRANCH before they remove the worktree. The local-squash
+    exception of `merge` puts the commits into the default branch instead, and `discard`
+    deletes them on purpose, so neither of those pushes the branch.
 
     PUSH_BRANCH:
       W = <worktree_path> if set, else the current checkout
@@ -444,7 +445,7 @@ IF mode = finish
   STEP 2: Present options
     > "Implementation complete. What would you like to do with <branch-name>?
     >
-    > 1. merge — squash-merge to <default_branch> and delete branch
+    > 1. merge — squash-merge on GitHub into <default_branch>, then delete the branch locally and on origin
     > 2. pull-request — open PR for review (branch stays open)
     > 3. keep — leave branch as-is; come back later
     > 4. discard — delete branch (requires typed 'discard' confirmation)"
@@ -452,40 +453,74 @@ IF mode = finish
   STEP 3: Execute
 
     CASE merge:
+      The working rule is "the default branch is protected, always PR". So the merge
+      happens on GitHub by default, in every repo. A local squash is an explicit exception.
+
       slug ← $ gh repo view "$(git -C <repo_root> remote get-url origin)" --json nameWithOwner -q .nameWithOwner
-      IF `gh api repos/<slug>/branches/<default_branch> --jq .protected` is true → use
-        CASE pull-request instead; the squash merge happens on GitHub (`gh pr merge`),
-        and this skill pushes nothing to <default_branch>.
-      - Ask: "Type 'merge' to confirm:"
+      - Ask: "Type 'merge' to confirm: <branch-name> is squash-merged into <default_branch>
+        on GitHub, then deleted locally and on origin (this closes its open PR, if any):"
       IF not confirmed -> STOP
-      From here on, run every command from <repo_root> (`cd <repo_root>` first): the
-      worktree is removed next, and mode=commit runs formatters and `git add`, which do
-      not all take `-C`.
-      Same order as CASE discard: a branch checked out in a worktree can be neither
-      checked out elsewhere nor deleted, so remove the worktree first.
-      IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
-        IF it refuses (untracked or modified files in the worktree) → STOP and report the
-        files. NEVER add `--force` here: unlike discard, the user asked to keep this work.
-      $ git -C <repo_root> checkout <default_branch>
-      $ git -C <repo_root> pull --ff-only origin <default_branch>
-        IF it fails (local <default_branch> has diverged from origin) → STOP; never push
-        a stale or diverged local <default_branch>.
-      $ git -C <repo_root> merge --squash <branch-name>
-      - Generate the commit message using mode=commit, then commit in <repo_root>
-      $ git -C <repo_root> push origin <default_branch>   # the squash commit exists only locally until this push
-      $ git -C <repo_root> branch -D <branch-name>   # -D: a squash merge never marks the branch merged; the squash commit just landed
-      IF `git -C <repo_root> ls-remote --heads origin <branch-name>` is non-empty:
-        $ git -C <repo_root> push origin --delete <branch-name>
-      - Update git-state.json: status=merged
+
+      DEFAULT — merge on GitHub:
+        RUN PUSH_BRANCH (STEP 1a)
+        IF `gh pr list -R <slug> --head <branch-name> --state open --json number -q length` is 0:
+          RUN mode=pr
+        $ gh pr merge <branch-name> -R <slug> --squash --delete-branch
+          IF it fails (checks pending or red, review required, conflicts) → STOP and report
+          the reason. Keep the branch and the worktree; status=pr_open. Never retry with
+          `--admin`.
+        From here on, run every command from <repo_root> (`cd <repo_root>` first): the
+        worktree is removed next.
+        IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
+          IF it refuses (untracked or modified files) → STOP and report the files. NEVER
+          add `--force`: the merge is done, but those files are not in it.
+        $ git -C <repo_root> branch -D <branch-name>   # -D: a squash merge never marks the branch merged
+        IF `git -C <repo_root> status --porcelain` is empty:
+          $ git -C <repo_root> checkout <default_branch>
+          $ git -C <repo_root> pull --ff-only origin <default_branch>
+        ELSE: say the main checkout is dirty, so its <default_branch> was not updated.
+        - Update git-state.json: status=merged
+
+      EXCEPTION — local squash. Only when the caller explicitly asked for a local merge
+      AND both checks say the default branch is unprotected:
+        `gh api repos/<slug>/branches/<default_branch> --jq .protected` is false, AND
+        `gh api repos/<slug>/rules/branches/<default_branch> --jq length` is 0.
+      IF either check fails or errors → use DEFAULT instead and say why.
+        IF `git -C <repo_root> status --porcelain` is non-empty → STOP before any checkout:
+          "The main checkout has uncommitted changes; clean it first."
+        From here on, run every command from <repo_root> (`cd <repo_root>` first): the
+        worktree is removed next, and mode=commit runs formatters and `git add`, which do
+        not all take `-C`.
+        Same order as CASE discard: a branch checked out in a worktree can be neither
+        checked out elsewhere nor deleted, so remove the worktree first.
+        IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
+          IF it refuses (untracked or modified files in the worktree) → STOP and report the
+          files. NEVER add `--force` here: unlike discard, the user asked to keep this work.
+        $ git -C <repo_root> checkout <default_branch>
+        $ git -C <repo_root> pull --ff-only origin <default_branch>
+          IF it fails (local <default_branch> has diverged from origin) → STOP; never push
+          a stale or diverged local <default_branch>.
+        $ git -C <repo_root> merge --squash <branch-name>
+        - Generate the commit message using mode=commit, then commit in <repo_root>
+        $ git -C <repo_root> push origin <default_branch>
+          IF the push is rejected → STOP and report it. Keep <branch-name> locally and on
+          origin (it is the only copy of the unsquashed history), and do NOT write
+          status=merged. The squash commit is on local <default_branch> only; say so.
+        $ git -C <repo_root> branch -D <branch-name>   # -D: a squash merge never marks the branch merged; the push just succeeded
+        IF `git -C <repo_root> ls-remote --heads origin <branch-name>` is non-empty:
+          $ git -C <repo_root> push origin --delete <branch-name>
+        - Update git-state.json: status=merged
 
     CASE pull-request:
       RUN PUSH_BRANCH (STEP 1a)
       - RUN mode=pr
+      Leave the worktree directory first (`cd <repo_root>`): it is removed next.
       IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
       - Update git-state.json: status=pr_open
 
     CASE keep:
       RUN PUSH_BRANCH (STEP 1a)
+      Leave the worktree directory first (`cd <repo_root>`): it is removed next.
       IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
       - Update git-state.json: status=kept
 
