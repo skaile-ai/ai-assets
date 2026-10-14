@@ -121,11 +121,12 @@ READS
   references/branch_naming.md         — branch naming rules per change type
   references/worktree_patterns.md     — worktree setup and teardown patterns
   git status / git log / git diff     — current repository state
-  ? _implementation/git-state.json    — existing git state if present
+  ? <repo_root>/_implementation/git-state.json — existing git state if present (repo_root = the
+                                      main checkout, the worktree STEP 3 probe; never a relative path)
 
 WRITES
   .git/                               — commits, branches, worktrees
-  _implementation/git-state.json      — records active branch, mode, worktree path
+  <repo_root>/_implementation/git-state.json — records active branch, mode, worktree path, status
 
 MUST  follow the structured commit message format from references/commit-spec.md
 MUST  derive branch name from description using references/branch_naming.md rules
@@ -133,6 +134,7 @@ MUST  check for dirty working tree before creating branches or worktrees
 MUST  require typed confirmation for destructive operations (force-delete, discard)
 MUST  write git-state.json when branch or worktree is created
 MUST  run full test suite before any merge to <default_branch>
+      (finish skips it when status=auto_merge: the suite ran before auto-merge was armed)
 MUST  verify the platform backend (`backend/` in the platform repo) starts before committing any structural backend change - see STEP 1b in commit mode
 MUST  run formatting and linting on all affected packages before committing — see STEP 1c in commit mode
 MUST  push the branch before removing a worktree — unpushed worktree commits exist only locally and are lost when the worktree is removed
@@ -312,7 +314,7 @@ IF mode = branch
       > "Created and switched to: <branch-name>"
 
   STEP 4: Write git-state.json
-    - Write _implementation/git-state.json:
+    - Write <repo_root>/_implementation/git-state.json (repo_root = the worktree STEP 3 probe):
       { "branch": "<name>", "mode": "branch", "worktree_path": null, "created_at": "<ISO>", "status": "active" }
 
   EMIT [git] branch_ready name=<branch-name>
@@ -348,7 +350,7 @@ IF mode = worktree
     $ mkdir -p <dirname repo_root>/.worktrees
     $ git -C <repo_root> worktree add <worktree_path> -b <branch-name> origin/<default_branch>
 
-  STEP 4: Write git-state.json
+  STEP 4: Write <repo_root>/_implementation/git-state.json
     { "branch": "<name>", "mode": "worktree", "worktree_path": "<worktree_path>", "created_at": "<ISO>", "status": "active" }
     > "Worktree created at <worktree_path>
     > Work in that directory. Main checkout is unaffected."
@@ -418,10 +420,12 @@ IF mode = pr
 IF mode = finish
 
   STEP 1: Pre-flight
-    - Read git-state.json: branch, mode, worktree_path, status
     - repo_root = the same `--git-common-dir` probe as worktree STEP 3 (the main checkout)
+    - Read <repo_root>/_implementation/git-state.json: branch, mode, worktree_path, status
     - default_branch = the same probe as worktree STEP 3 (never assume "main")
-    - slug = the `gh repo view` probe at the top of CASE merge
+    - slug = the `gh repo view` probe at the top of CASE merge. IF it fails (no `gh` auth,
+      no network) → say so and carry on: `keep` and `discard` need no `gh`; only `merge`
+      and `pull-request` do.
     IF status is `auto_merge` or `merged` → skip the tests and STEP 2. Go straight to
       "Already merged?" in CASE merge (no new confirmation: it was given before).
     - Run full test suite
@@ -445,9 +449,12 @@ IF mode = finish
                removing the worktree without pushing will permanently lose those commits."
 
   STEP 2: Present options
-    IF `gh pr list -R <slug> --head <branch-name> --state open --json autoMergeRequest
-      -q '[.[] | select(.autoMergeRequest != null)] | length'` is not 0 → do NOT offer
-      `discard`: deleting the branch would silently cancel the armed auto-merge.
+    armed ← $ gh pr list -R <slug> --head <branch-name> --state open --json autoMergeRequest
+      -q '[.[] | select(.autoMergeRequest != null)] | length'
+    IF armed is not 0 → print option 4 as "discard — unavailable while auto-merge is armed":
+      deleting the branch would silently cancel the armed auto-merge.
+    IF the probe fails (no slug, no `gh` auth) → print all four options and add a note that
+      the auto-merge state is unknown; check it before choosing `discard`.
     > "Implementation complete. What would you like to do with <branch-name>?
     >
     > 1. merge — squash-merge on GitHub into <default_branch>, then delete the branch locally and on origin
@@ -481,24 +488,30 @@ IF mode = finish
         Probe before any merge — `gh pr merge` gives the same BLOCKED error for pending
         checks, red checks, a missing review and conflicts, so never classify its failure:
         $ gh pr view <pr> -R <slug> --json mergeStateStatus,reviewDecision,statusCheckRollup
-        (A check run has `status`/`conclusion`; a commit status has `state`.)
-        - IF any check has conclusion FAILURE, ERROR, TIMED_OUT, CANCELLED, ACTION_REQUIRED
-          or STARTUP_FAILURE (state FAILURE or ERROR for a commit status), OR reviewDecision
-          is CHANGES_REQUESTED, OR mergeStateStatus is DIRTY (conflicts) or BEHIND →
-          STOP and say which. Keep the branch and the worktree; status=pr_open.
-        - ELSE IF any check is not finished (status QUEUED, IN_PROGRESS, WAITING or PENDING;
-          state PENDING or EXPECTED) OR reviewDecision is REVIEW_REQUIRED:
-          $ gh pr merge <pr> -R <slug> --auto --squash
-          IF that succeeds → report "auto-merge armed". Say the merge may land on someone
-            else's approval when a review is still required. Keep the branch and the
-            worktree; status=auto_merge. Stop here: do not wait or poll. Re-run finish
-            after the merge to clean up.
-          IF arming fails (for example, auto-merge is off for the repo) → STOP and say so;
-            status=pr_open.
-        - ELSE:
+        (A check run has `status`/`conclusion`; a commit status has `state`. `reviewDecision`
+        is `""`, not null, when no review is required. The REQUIRED checks alone:
+        `gh pr checks <pr> -R <slug> --required --json name,state,bucket`; it exits non-zero
+        with "no required checks reported" when the repo has none.)
+        Let mergeStateStatus pick the branch; it already says whether the required gates pass:
+        - CLEAN, UNSTABLE, HAS_HOOKS → mergeable now:
           $ gh pr merge <pr> -R <slug> --squash
           IF it fails → STOP and report the reason. Keep the branch and the worktree;
             status=pr_open.
+        - BLOCKED → required gates are not met. Classify:
+          - any REQUIRED check with conclusion FAILURE/ERROR/TIMED_OUT/CANCELLED/
+            ACTION_REQUIRED/STARTUP_FAILURE, or reviewDecision CHANGES_REQUESTED
+            → STOP and say which; status=pr_open
+          - otherwise (required checks still QUEUED/IN_PROGRESS/WAITING/PENDING, or
+            reviewDecision REVIEW_REQUIRED) → $ gh pr merge <pr> -R <slug> --auto --squash
+            IF that succeeds → report "auto-merge armed". Say the merge may land on someone
+              else's approval when a review is still required. Keep the branch and the
+              worktree; status=auto_merge. Stop here: do not wait or poll. Re-run finish
+              after the merge to clean up.
+            IF arming fails → STOP; status=pr_open. IF `gh api repos/<slug> --jq
+              .allow_auto_merge` is false, say: "Turn on auto-merge in the repo settings or
+              merge by hand." A re-run will not help.
+        - DIRTY (conflicts), BEHIND (base moved; update the branch), DRAFT, UNKNOWN
+          → STOP and say which; status=pr_open
         Confirm: `gh pr view <pr> -R <slug> --json state -q .state` is MERGED. IF not (for
         example, a merge queue took it) → report it, status=auto_merge, and STOP.
 
@@ -579,7 +592,7 @@ CHECKLIST
   - [ ] Working tree was clean before branch/worktree creation
   - [ ] Tests pass before merge or PR
   - [ ] Typed confirmation received for merge and discard
-  - [ ] Worktree cleaned up after finish (merge, keep, discard)
+  - [ ] Worktree cleaned up after finish (merge, keep, discard) — except status=auto_merge, which keeps it until the merge lands
   - [ ] git-state.json written/updated
   - [ ] sync and deploy modes stop with their pointer (retired)
   - [ ] No `---agent---` block in any commit message
