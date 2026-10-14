@@ -1,6 +1,7 @@
 ---
 name: "devlog"
-description: "Maintains the human-readable _devlog for the skaile-dev monorepo. Writes
+description: "Maintains the human-readable _devlog of the standalone skaile repo a change
+  landed in (workspaces: packages/workspaces/_devlog/). Writes
   short plain-language entry files to _devlog/entries/ after every meaningful change.
   Generates detailed reports in _devlog/reports/ when architectural concepts, shared
   contracts, or core patterns change. Run after completing any implementation work."
@@ -57,8 +58,9 @@ metadata:
 Maintains the `_devlog/` directory — the human-readable institutional memory of the
 target repo. Every skaile repo is standalone (the skaile-dev shell is archived), so the
 `_devlog/` is the one at **the root of the repo the change landed in** (workspaces keeps it
-at `packages/workspaces/_devlog/`); follow that repo's `CLAUDE.md` where it says more. Answers "what changed, why, and what are the implications" in plain
-language that any developer (or AI agent in a future session) can quickly scan.
+at `packages/workspaces/_devlog/`); follow that repo's `CLAUDE.md` where it says more.
+Answers "what changed, why, and what are the implications" in plain language that any
+developer (or AI agent in a future session) can quickly scan.
 
 Three output types:
 

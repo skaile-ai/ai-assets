@@ -52,8 +52,7 @@ metadata:
   - path: "ai-assets/skaile-development/skills/postxl/references/schema-grammar.md"
   - path: "ai-assets/skaile-development/skills/postxl/references/maintain.md"
   - path: "ai-assets/skaile-development/skills/postxl/references/skaile-dev-patterns.md"
-  - path: "platform/CLAUDE.md"
-  - path: "store/CLAUDE.md"
+  - path: "CLAUDE.md"
   - path: "node_modules/@postxl/ui-components/CLAUDE.md"
 ---
 

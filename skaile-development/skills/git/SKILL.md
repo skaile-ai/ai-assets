@@ -452,29 +452,41 @@ IF mode = finish
   STEP 3: Execute
 
     CASE merge:
-      IF the repo protects its default branch (`gh api
-        repos/<owner>/<repo>/branches/<default_branch> --jq .protected` is true) → use
-        CASE pull-request instead; the squash merge happens on GitHub.
+      slug ← $ gh repo view "$(git -C <repo_root> remote get-url origin)" --json nameWithOwner -q .nameWithOwner
+      IF `gh api repos/<slug>/branches/<default_branch> --jq .protected` is true → use
+        CASE pull-request instead; the squash merge happens on GitHub (`gh pr merge`),
+        and this skill pushes nothing to <default_branch>.
       - Ask: "Type 'merge' to confirm:"
       IF not confirmed -> STOP
+      From here on, run every command from <repo_root> (`cd <repo_root>` first): the
+      worktree is removed next, and mode=commit runs formatters and `git add`, which do
+      not all take `-C`.
       Same order as CASE discard: a branch checked out in a worktree can be neither
       checked out elsewhere nor deleted, so remove the worktree first.
       IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
+        IF it refuses (untracked or modified files in the worktree) → STOP and report the
+        files. NEVER add `--force` here: unlike discard, the user asked to keep this work.
       $ git -C <repo_root> checkout <default_branch>
+      $ git -C <repo_root> pull --ff-only origin <default_branch>
+        IF it fails (local <default_branch> has diverged from origin) → STOP; never push
+        a stale or diverged local <default_branch>.
       $ git -C <repo_root> merge --squash <branch-name>
       - Generate the commit message using mode=commit, then commit in <repo_root>
+      $ git -C <repo_root> push origin <default_branch>   # the squash commit exists only locally until this push
       $ git -C <repo_root> branch -D <branch-name>   # -D: a squash merge never marks the branch merged; the squash commit just landed
+      IF `git -C <repo_root> ls-remote --heads origin <branch-name>` is non-empty:
+        $ git -C <repo_root> push origin --delete <branch-name>
       - Update git-state.json: status=merged
 
     CASE pull-request:
       RUN PUSH_BRANCH (STEP 1a)
       - RUN mode=pr
-      IF worktree_path exists -> $ git worktree remove <worktree_path>
+      IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
       - Update git-state.json: status=pr_open
 
     CASE keep:
       RUN PUSH_BRANCH (STEP 1a)
-      IF worktree_path exists -> $ git worktree remove <worktree_path>
+      IF worktree_path exists -> $ git -C <repo_root> worktree remove <worktree_path>
       - Update git-state.json: status=kept
 
     CASE discard:

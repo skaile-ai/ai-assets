@@ -10,7 +10,8 @@ description: 'Run, fix, or extend the Skaile platform e2e suite. Three modes: `r
   with a reason) while STOPPING and escalating regressions to the human — never
   weakening an assertion to force green; `add` analyzes a git diff, proposes a test
   plan, waits for explicit user approval, lives-inspects the UI via chrome-devtools
-  MCP, then writes new specs against the existing `platform/e2e/` harness. Use when
+  MCP, then writes new specs against the existing harness in the platform repo''s `e2e/`
+  directory. Use when
   the user says "run e2e tests", "fix the failing e2e tests", "the e2e suite is red",
   "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
@@ -53,7 +54,8 @@ metadata:
       required: false
       hint: "'run' mode: spec file path or test name filter (default: full suite).
         'fix' mode: failing spec file or test name filter (default: full failing suite).
-        'add' mode: feature area / merged PRs to focus on (default: git diff main…HEAD;
+        'add' mode: feature area / merged PRs to focus on (default: git diff origin/<default_branch>...HEAD,
+        run in the platform repo, whose default branch is main;
         falls back to gap-discovery over recently-merged features when the diff is empty)"
     - id: 'session_mode_hint'
       label: 'Session mode'
@@ -118,7 +120,7 @@ READS
   ? platform/e2e/E2E-GUIDE.md                — seed data tables, keyword triggers
   ! platform/e2e/specs/**                    — existing specs as templates + coverage map
   ! platform/e2e/fixtures/{test-fixtures,handle-backend}.ts — auto-fixtures + startBackend/getTestHeaders
-  git diff main...HEAD                        — for `add` mode analysis
+  git diff origin/<default_branch>...HEAD     — for `add` mode analysis (platform root; default branch is main)
   (add mode) frontend routes + tRPC routes   — to derive URL patterns + selectors
   (fix mode) test-results/**/error-context.md — the failing run's assertion + stack
   (fix mode) the PR/commit that last changed the asserted behavior (git log -S / blame)
@@ -194,8 +196,8 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
        >   1. bun install  (at the platform repo root)                      ← always run, even if deps look clean
        >   2. invoke /kill-backend skill (kills the whole backend chain cleanly)
        >   3. pkill -f 'vite preview'
-       >   4. cd backend && rm -rf dist && bun run build && bun run e2e:stateless    ← clean rebuild; incremental `bun run build` leaves orphaned `.js` files, `nest start --watch` rebuilds nothing
-       >   5. cd frontend && bun run build && bun run preview --port 3000
+       >   4. (cd backend && rm -rf dist && bun run build && bun run e2e:stateless)    ← clean rebuild; incremental `bun run build` leaves orphaned `.js` files, `nest start --watch` rebuilds nothing
+       >   5. (cd frontend && bun run build && bun run preview --port 3000)
        > Then re-invoke this skill."
      STOP. Auto-start of *missing* services (Step 2) is fine; killing and restarting *already-running* services to clear staleness is destructive (drops in-flight requests, may interrupt parallel dev work) and requires explicit user authorization.
 
