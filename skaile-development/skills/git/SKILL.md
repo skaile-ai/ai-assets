@@ -418,9 +418,12 @@ IF mode = pr
 IF mode = finish
 
   STEP 1: Pre-flight
-    - Read git-state.json: branch, mode, worktree_path
+    - Read git-state.json: branch, mode, worktree_path, status
     - repo_root = the same `--git-common-dir` probe as worktree STEP 3 (the main checkout)
     - default_branch = the same probe as worktree STEP 3 (never assume "main")
+    - slug = the `gh repo view` probe at the top of CASE merge
+    IF status is `auto_merge` or `merged` → skip the tests and STEP 2. Go straight to
+      "Already merged?" in CASE merge (no new confirmation: it was given before).
     - Run full test suite
     IF tests fail -> STOP
 
@@ -442,6 +445,9 @@ IF mode = finish
                removing the worktree without pushing will permanently lose those commits."
 
   STEP 2: Present options
+    IF `gh pr list -R <slug> --head <branch-name> --state open --json autoMergeRequest
+      -q '[.[] | select(.autoMergeRequest != null)] | length'` is not 0 → do NOT offer
+      `discard`: deleting the branch would silently cancel the armed auto-merge.
     > "Implementation complete. What would you like to do with <branch-name>?
     >
     > 1. merge — squash-merge on GitHub into <default_branch>, then delete the branch locally and on origin
@@ -452,32 +458,49 @@ IF mode = finish
   STEP 3: Execute
 
     CASE merge:
-      The default branch is protected in every repo: "always a PR". The merge happens on
-      GitHub only. There is no local squash, and never `--admin`.
+      Changes land by PR in every repo: "always a PR". The merge happens on GitHub only.
+      There is no local squash, and never `--admin`. No `--delete-branch` either: CLEANUP
+      step 6 deletes the remote branch after the merge is confirmed.
 
       slug ← $ gh repo view "$(git -C <repo_root> remote get-url origin)" --json nameWithOwner -q .nameWithOwner
       - Ask: "Type 'merge' to confirm: <branch-name> is squash-merged into <default_branch>
-        on GitHub, then deleted locally and on origin (this closes its open PR, if any):"
+        on GitHub, then deleted locally and on origin:"
       IF not confirmed -> STOP
 
       Already merged? (a re-run must not open a second PR)
         merged_pr ← $ gh pr list -R <slug> --head <branch-name> --state merged --json number -q '.[0].number'
         IF merged_pr is non-empty → say "already merged (#<merged_pr>)" and go to CLEANUP.
+        IF status was `auto_merge` and the open PR still has auto-merge armed → say
+          "auto-merge still armed; GitHub has not merged yet" and STOP. Do not wait or poll.
 
       Merge on GitHub:
         RUN PUSH_BRANCH (STEP 1a)
         IF `gh pr list -R <slug> --head <branch-name> --state open --json number -q length` is 0:
           RUN mode=pr
-        $ gh pr merge <branch-name> -R <slug> --squash --delete-branch
-          (`-R` keeps gh away from the local checkout; CLEANUP does that in a safe order.)
-        IF it fails only because required checks are still pending:
-          $ gh pr merge <branch-name> -R <slug> --auto --squash --delete-branch
-          IF that succeeds → report "auto-merge armed". Keep the branch and the worktree;
-            status=auto_merge. Stop here: do not wait or poll. Re-run finish after the merge
-            to clean up (it lands on "Already merged?").
-        IF it fails for any other reason (checks red, review required, conflicts), or arming
-          auto-merge fails → STOP and report the reason. Keep the branch and the worktree;
-          status=pr_open.
+        pr ← $ gh pr list -R <slug> --head <branch-name> --state open --json number -q '.[0].number'
+        Probe before any merge — `gh pr merge` gives the same BLOCKED error for pending
+        checks, red checks, a missing review and conflicts, so never classify its failure:
+        $ gh pr view <pr> -R <slug> --json mergeStateStatus,reviewDecision,statusCheckRollup
+        (A check run has `status`/`conclusion`; a commit status has `state`.)
+        - IF any check has conclusion FAILURE, ERROR, TIMED_OUT, CANCELLED, ACTION_REQUIRED
+          or STARTUP_FAILURE (state FAILURE or ERROR for a commit status), OR reviewDecision
+          is CHANGES_REQUESTED, OR mergeStateStatus is DIRTY (conflicts) or BEHIND →
+          STOP and say which. Keep the branch and the worktree; status=pr_open.
+        - ELSE IF any check is not finished (status QUEUED, IN_PROGRESS, WAITING or PENDING;
+          state PENDING or EXPECTED) OR reviewDecision is REVIEW_REQUIRED:
+          $ gh pr merge <pr> -R <slug> --auto --squash
+          IF that succeeds → report "auto-merge armed". Say the merge may land on someone
+            else's approval when a review is still required. Keep the branch and the
+            worktree; status=auto_merge. Stop here: do not wait or poll. Re-run finish
+            after the merge to clean up.
+          IF arming fails (for example, auto-merge is off for the repo) → STOP and say so;
+            status=pr_open.
+        - ELSE:
+          $ gh pr merge <pr> -R <slug> --squash
+          IF it fails → STOP and report the reason. Keep the branch and the worktree;
+            status=pr_open.
+        Confirm: `gh pr view <pr> -R <slug> --json state -q .state` is MERGED. IF not (for
+        example, a merge queue took it) → report it, status=auto_merge, and STOP.
 
       CLEANUP — run every command from <repo_root> (`cd <repo_root>` first): the worktree
       is removed here. Steps in this order:
@@ -487,6 +510,10 @@ IF mode = finish
            IF it refuses (untracked or modified files) → STOP and list the files. NEVER add
            `--force`: the merge is done, but those files are not in it.
         3. $ git -C <repo_root> checkout <default_branch>
+           IF it fails because <default_branch> is checked out in another worktree (`git -C
+           <repo_root> worktree list --porcelain` shows `branch refs/heads/<default_branch>`
+           at another path) → STOP with a note naming that worktree: the merge is on GitHub;
+           <branch-name> was kept locally; update <default_branch> in that worktree.
         4. $ git -C <repo_root> pull --ff-only origin <default_branch>
            IF it fails (local <default_branch> has diverged) → STOP with a note: the merge is
            on GitHub; local <default_branch> and <branch-name> were left as they are.
