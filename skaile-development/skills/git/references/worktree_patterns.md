@@ -1,7 +1,21 @@
-# Worktree Patterns for skaile-dev
+# Worktree Patterns for the Skaile Repos
 
 Git worktrees let you check out multiple branches of the same repository simultaneously,
-each in its own directory. In skaile-dev, this is useful for parallel, unrelated work.
+each in its own directory. In a skaile repo, this is useful for parallel, unrelated work.
+
+Every skaile repo is standalone (the `skaile-dev` shell is archived; no repo has submodules).
+A worktree goes **beside** the clone, never inside it:
+
+```
+<repos_root>/                  ← parent directory of the clone
+  ├── platform/                ← the main checkout
+  └── .worktrees/
+      └── platform-<slug>/     ← one worktree per branch
+```
+
+Why beside, not inside: the main checkout stays clean without a `.gitignore` entry (brand and
+ai-assets do not ignore `.worktrees/`), and it is the same path the `ship` skill and existing
+tooling use. The worktree root holds the repo's own `CLAUDE.md`, so agents working there load it.
 
 ## When to Use Worktrees
 
@@ -18,24 +32,18 @@ each in its own directory. In skaile-dev, this is useful for parallel, unrelated
 ## Setup Pattern
 
 ```bash
-# 1. Create the feature branch (don't check it out in current directory)
-git checkout -b feature/<pkg>/<slug>
-git checkout -   # back to previous branch
-
-# 2. Create the worktree
-mkdir -p .worktrees
-git worktree add .worktrees/<slug> feature/<pkg>/<slug>
-
-# 3. (Ignore worktrees in git — they are local only)
-echo ".worktrees/" >> .gitignore
-git add .gitignore && git commit -m "chore: ignore local worktrees"
+# From the main checkout of <repo>
+git fetch origin
+mkdir -p ../.worktrees
+# Use an absolute path: `git -C <repo> worktree add <relpath>` resolves relative to <repo>
+git worktree add "$(cd .. && pwd)/.worktrees/<repo>-<slug>" -b feature/<pkg>/<slug> origin/main
 ```
 
 ## Working Inside a Worktree
 
 ```bash
-cd .worktrees/<slug>
-bun install           # installs in the worktree context
+cd <repos_root>/.worktrees/<repo>-<slug>
+bun install           # a fresh worktree has no node_modules; install at the worktree root
 # ... make changes ...
 git add -p
 git commit -m "feat(<pkg>): <description>"
@@ -53,14 +61,17 @@ After work in the worktree is complete and tests pass:
 git merge --squash feature/<pkg>/<slug>
 git commit -m "feat(<pkg>): <summary>"
 git branch -d feature/<pkg>/<slug>
-git worktree remove .worktrees/<slug>
+git worktree remove <repos_root>/.worktrees/<repo>-<slug>
 ```
+
+On a repo whose `main` is protected (platform, workspaces), push the branch and open a PR
+instead; the squash merge happens on GitHub.
 
 ## Teardown (without merging)
 
 ```bash
 # Discard worktree and branch
-git worktree remove .worktrees/<slug> --force
+git worktree remove <repos_root>/.worktrees/<repo>-<slug> --force
 git branch -D feature/<pkg>/<slug>
 ```
 
@@ -70,9 +81,9 @@ When dispatching two independent subagents simultaneously (e.g., via `implement-
 with two unrelated task groups):
 
 ```
-Main checkout (./) ← orchestrator lives here, reads shared files
-  ├── .worktrees/task-a/ ← Subagent A works here (branch: feature/pkg/task-a)
-  └── .worktrees/task-b/ ← Subagent B works here (branch: feature/pkg/task-b)
+<repos_root>/<repo>/ ← main checkout; the orchestrator lives here, reads shared files
+<repos_root>/.worktrees/<repo>-task-a/ ← Subagent A works here (branch: feature/pkg/task-a)
+<repos_root>/.worktrees/<repo>-task-b/ ← Subagent B works here (branch: feature/pkg/task-b)
 ```
 
 After both agents complete:
@@ -84,27 +95,15 @@ After both agents complete:
 
 ## Cautions
 
-- **Submodule commits are local-only.** skaile-dev uses git submodules (platform/,
-  agent-framework/, forge/, etc.). Commits made inside a submodule in a worktree exist
-  ONLY in that worktree's local copy. Running `git worktree remove` destroys those
-  commits permanently. Always push submodule commits to their remotes before removing
-  a worktree. The `mode=finish` and `mode=pr` steps handle this automatically via the
-  submodule safeguard, but manual worktree cleanup must do this explicitly:
+- **Worktree commits are local-only until pushed.** `git worktree remove` plus
+  `git branch -D` destroys unpushed commits permanently. Check before cleanup:
 
   ```bash
-  # Before removing a worktree, check each submodule for unpushed commits
-  for path in $(git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}'); do
-    unpushed=$(git -C "$path" log --oneline @{upstream}..HEAD 2>/dev/null)
-    if [ -n "$unpushed" ]; then
-      echo "WARNING: $path has unpushed commits:"
-      echo "$unpushed"
-      git -C "$path" push -u origin "$(git -C "$path" rev-parse --abbrev-ref HEAD)"
-    fi
-  done
+  git -C <worktree> log --oneline @{upstream}..HEAD   # must be empty
   ```
 
-- `node_modules/` and `bun.lock` are shared via the workspace root; running `bun install`
-  in a worktree may cause lock file conflicts. Prefer running install from the main checkout.
+- A fresh worktree has no `node_modules`. Run `bun install` at the worktree root (not at a
+  parent directory) before tests, typecheck or lint, and again after merging `origin/main`.
 - Worktrees inherit `.env` files from the checked-out branch, not the main checkout.
   Verify environment setup inside the worktree before running services.
 - Stale worktrees that were forcefully removed can cause `git worktree list` to show ghost

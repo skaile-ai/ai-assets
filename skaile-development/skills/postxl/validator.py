@@ -427,11 +427,6 @@ def validate(cwd: str) -> dict:
         rule_type="CHECKLIST",
         reason="semantic — UI element classification",
     )
-    v.skip(
-        "Submodule pointer bumped in shell repo after committing inside platform/ or store/",
-        rule_type="CHECKLIST",
-        reason="runtime — git state",
-    )
 
     return v.result()
 

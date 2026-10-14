@@ -14,7 +14,7 @@ description: 'Run, fix, or extend the Skaile platform e2e suite. Three modes: `r
   the user says "run e2e tests", "fix the failing e2e tests", "the e2e suite is red",
   "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
-  version: '1.3.1'
+  version: '1.3.2'
   tags:
   - 'testing'
   - 'e2e'
@@ -106,6 +106,11 @@ ROLE  Skaile platform e2e runner + spec writer. Knows the platform's
 test-harness particularities (session modes, impersonation,
 org-scoped slug URLs, coverage fixture, per-spec backend isolation).
 
+PATHS  The platform is a standalone repo (`skaile-ai/platform`; the skaile-dev shell is
+retired). A path written `platform/<x>` below means `<x>` under the platform repo's root.
+Run every shell snippet from that root and drop the `platform/` prefix (e.g.
+`cd platform/backend` → `cd backend`). Install with `bun install` at that root.
+
 READS
   ! platform/e2e/CLAUDE.md                   — scaffolding rules
   ! platform/e2e/README.md                   — env vars, session modes, failure-mode table
@@ -185,7 +190,7 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
    IF anything reports `STALE_*`:
      Report to user — do NOT run tests (they will mass-fail and waste 30+ seconds):
        > "Stale services detected after a recent code update. The suite will mass-fail. Run ALL steps below in order — do NOT skip step 1 even if Step 4 (stale-deps) reported clean. The lockfile-mtime check cannot detect missing workspace symlinks after a package relocation. Recipe:
-       >   1. cd skaile-dev && bun install                                  ← always run, even if deps look clean
+       >   1. bun install  (at the platform repo root)                      ← always run, even if deps look clean
        >   2. invoke /kill-backend skill (kills the whole backend chain cleanly)
        >   3. pkill -f 'vite preview'
        >   4. cd platform/backend && rm -rf dist && bun run build && bun run e2e:stateless    ← clean rebuild; incremental `bun run build` leaves orphaned `.js` files, `nest start --watch` rebuilds nothing
@@ -218,21 +223,21 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
    (a) Lockfile newer than `node_modules` (typical post-pull symptom):
    ```bash
-   LOCK=skaile-dev/bun.lockb
-   MARK=skaile-dev/node_modules/.modules.yaml
+   # From the platform repo root. `node_modules/.bun` is the store bun rewrites on install.
+   LOCK=bun.lock
+   MARK=node_modules/.bun
    [ -f "$LOCK" ] && [ -f "$MARK" ] && [ "$LOCK" -nt "$MARK" ] && echo STALE_DEPS
    ```
 
-   (b) Critical workspace symlinks missing — the mtime check above cannot detect the case where a package was relocated within the workspace tree (e.g. `theme/` → `agent-framework/theme/`). Neither file's mtime moves, but the consumer-package `node_modules/@skaile/*` symlinks are missing entirely.
+   (b) Critical `@skaile/*` packages missing — the mtime check above cannot detect a dependency that was added or renamed without a fresh install. The platform consumes `@skaile/workspaces` and `@skaile/brand` from npm (not from a shell workspace).
 
-   **Important:** this Bun workspace does NOT hoist `@skaile/*` to the repo-root `node_modules/`. Workspace symlinks live in *per-package* `node_modules/` (e.g. `platform/frontend/node_modules/@skaile/theme`, `platform/backend/node_modules/@skaile/agent-sdk`). Checking `skaile-dev/node_modules/@skaile/` always reports missing on this layout — it's a false positive. Spot-check the consumer packages directly:
+   **Important:** bun does NOT hoist `@skaile/*` to the repo-root `node_modules/`. They live in *per-package* `node_modules/` (e.g. `frontend/node_modules/@skaile/brand`, `backend/node_modules/@skaile/workspaces`). Checking `node_modules/@skaile/` at the root always reports missing on this layout — it's a false positive. Spot-check the consumer packages directly:
    ```bash
-   # Spot-check critical workspace symlinks where they actually live.
-   # Adjust the prefix if running from a subfolder.
+   # From the platform repo root.
    for entry in \
-     platform/frontend/node_modules/@skaile/theme \
-     platform/frontend/node_modules/@skaile/agent-types \
-     platform/backend/node_modules/@skaile/agent-sdk \
+     frontend/node_modules/@skaile/brand \
+     frontend/node_modules/@skaile/workspaces \
+     backend/node_modules/@skaile/workspaces \
    ; do
      [ -e "$entry" ] || echo "MISSING_$entry"
    done
@@ -240,10 +245,10 @@ EMIT   [e2e-platform] started mode=<mode> scope=<scope>
 
    IF `STALE_DEPS` OR any `MISSING_*` from (b):
      Report:
-       > "Dependencies out of sync — run `bun install` from the skaile-dev root before tests, or this run will surface as opaque module-resolution errors (e.g. Vite '[Internal server error] Can't resolve @skaile/<pkg>'). The mtime check (a) and the per-package symlink check (b) catch different failure modes — either firing requires `bun install`."
+       > "Dependencies out of sync — run `bun install` at the platform repo root before tests, or this run will surface as opaque module-resolution errors (e.g. Vite '[Internal server error] Can't resolve @skaile/<pkg>'). The mtime check (a) and the per-package symlink check (b) catch different failure modes — either firing requires `bun install`."
      STOP unless the user has already authorized auto-install elsewhere. Do not run `bun install` without explicit permission.
 
-     IF the user authorizes `bun install`: run it from the skaile-dev root, then re-run BOTH (a) and (b). If `bun install` reports "no changes" AND (b) is still red on the same paths, treat that as catastrophic (the workspace topology has changed in a way `bun install` won't fix on its own — escalate to the user with the failing paths verbatim, do NOT loop).
+     IF the user authorizes `bun install`: run it at the platform repo root, then re-run BOTH (a) and (b). If `bun install` reports "no changes" AND (b) is still red on the same paths, treat that as catastrophic (the workspace topology has changed in a way `bun install` won't fix on its own — escalate to the user with the failing paths verbatim, do NOT loop).
 
 6. Kill stale `skaile serve` subprocesses (cheap hygiene):
    ```bash

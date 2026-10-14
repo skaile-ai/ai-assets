@@ -1,7 +1,8 @@
 # Documentation Tier Roles in skaile-dev
 
-Every change to the skaile-dev monorepo may need to be reflected in up to five different
-documentation surfaces. Each has a distinct audience, scope, and update trigger.
+Every change to a skaile repo may need to be reflected in up to five different
+documentation surfaces, all inside that repo (every repo is standalone; the skaile-dev shell
+is archived, so nothing goes to a shell-level `_devlog/` or `docs/`). Each has a distinct audience, scope, and update trigger.
 
 > **TypeScript source documentation and README structure:** See `references/doc_pattern.md`.
 > That reference defines TSDoc conventions (Tier 0 — prerequisite before any surface update)
@@ -111,7 +112,7 @@ Only create new pages when there is enough material (≥ 3 significant topics).
 ### 5. _devlog — Development Log (Plain Language)
 
 **Audience:** Human developers reviewing what changed and why; AI agents needing session context.
-**Location:** `_devlog/entries/<date>-<slug>.md` (short entries, one file each; there is no index file) + `_devlog/reports/<date>-<topic>.md` (detailed reports)
+**Location (in the target repo):** `_devlog/entries/<date>-<slug>.md` (short entries, one file each; there is no index file) + `_devlog/reports/<date>-<topic>.md` (detailed reports)
 **Purpose:** Human-readable record of what changed, why it changed, and what the implications are.
 
 **Update after EVERY meaningful change** — no exceptions. This is the institutional memory.

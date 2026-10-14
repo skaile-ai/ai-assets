@@ -345,7 +345,7 @@ STEP 3c (ct, skip if mode=generate): Scaffold Playwright CT infrastructure
   4. Create `<target>/playwright/index.html` — standard Playwright CT bootstrap HTML
   5. Create `<target>/playwright/index.ts` — CT bootstrap entry with `beforeMount`/`afterMount` hooks
   6. Add to `.gitignore`: `**/playwright/.cache/`
-  7. Run `bun install` from the monorepo root.
+  7. Run `bun install` at the target repo's root (every repo is standalone).
 
   Reference: `forge/common-ui/playwright-ct.config.ts`
 

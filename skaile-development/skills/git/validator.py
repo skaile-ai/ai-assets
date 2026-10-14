@@ -50,7 +50,8 @@ def validate(cwd: str) -> dict:
     v.skip("Typed confirmation received for merge and discard", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")
     v.skip("Worktree cleaned up after finish (merge, keep, discard)", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")
     v.skip("git-state.json written/updated", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")
-    v.skip("submodule URLs normalized to HTTPS on deploy after merge (no git@github.com: remains in .gitmodules)", rule_type="CHECKLIST", reason="see SKILL.md — runtime git operation on the deploy branch, not a cwd artifact")
+    v.skip("sync and deploy modes stop with their pointer (retired)", rule_type="CHECKLIST", reason="see SKILL.md — runtime mode dispatch, not a cwd artifact")
+    v.skip("No ---agent--- block in any commit message", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")
     return v.result()
 
 

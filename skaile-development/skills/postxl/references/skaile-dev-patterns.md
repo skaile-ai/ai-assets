@@ -152,14 +152,11 @@ Never annotate a NestJS constructor parameter with `@Optional()` — it silently
 resolution failures, so broken wiring becomes invisible at runtime. When a dependency is
 unavailable in a test context, provide a mock or stub in the test module instead.
 
-## Submodule commit workflow
+## Commit workflow
 
-`platform/` and `store/` are git submodules of skaile-dev:
-
-1. Commit inside the submodule.
-2. Bump the submodule pointer with a `chore(submodules): bump …` commit in the shell repo.
-
-The `git` skill handles both — use it rather than rolling your own.
+`platform` and `store` are standalone repos (the skaile-dev shell is archived; there is no
+submodule pointer to bump). Commit on a branch in that repo and open a PR there; follow its
+`CLAUDE.md` for the commit format and the changeset rule. The `git` skill handles the commit.
 
 ## Two more sources of truth
 

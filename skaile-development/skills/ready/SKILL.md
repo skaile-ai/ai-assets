@@ -92,8 +92,8 @@ READS
   ! ai-assets/skaile-development/references/readiness_criteria.md
   ! <package>/README.md, CLAUDE.md, package.json, CHANGELOG.md
   ! docs/astro.config.mjs, docs/src/content/config.ts (for Starlight registration)
-  ! git status, git submodule status
-  ! root package.json workspaces
+  ! git status
+  ! the target repo's root package.json workspaces
 
 WRITES
   _devlog/reports/readiness-<YYYYMMDD-HHMM>.md
@@ -169,10 +169,11 @@ STEP 3: Per-package required criteria (1–12 from readiness_criteria.md)
 # ── Phase 3: Global Criteria ─────────────────────────────────────
 
 STEP 4: Global checks (G1-G5 from readiness_criteria.md)
-  - G1: parse root package.json workspaces glob; ensure every submodule package.json matched
-  - G2: `git submodule status` — look for `+` (uncommitted) or `-` (not initialized) prefixes
-  - G3: `bun run format --check` (dry run) — any diff → fail
-  - G4: parse root CLAUDE.md domain table vs. `ls ai-assets/*/DOMAIN.md`
+  (every repo is standalone — run these at the target repo's root; no repo has submodules)
+  - G1: parse the repo's root package.json workspaces glob; ensure every package.json in the repo matched
+  - G2: `git status --short` — any output → fail
+  - G3: the repo's format-check script from its CLAUDE.md (workspaces: `bun run format:check`) — any diff → fail; skip when the repo has none
+  - G4: ai-assets only — parse the root CLAUDE.md structure list vs. `ls */DOMAIN.md`
   - G5: parse skaile.yaml path fields — verify each path resolves on disk
 
 # ── Phase 4: Artifacts ───────────────────────────────────────────

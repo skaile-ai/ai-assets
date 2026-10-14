@@ -1,11 +1,11 @@
 ---
 name: "test"
-description: "Test construction and execution for the skaile-dev monorepo. Two modes:
+description: "Test construction and execution for the standalone skaile repos. Two modes:
   'run' executes the test suite for one or more packages and reports results; 'construct'
   generates new tests for recently implemented code. Knows the full test stack: Vitest
   3.2.4 (agent-framework + forge/L4-assistant + _scripts), Vitest
   4.1 (forge/skaile-forge + forge/L5-concept), Jest (platform backend), Vitest (platform frontend), Playwright
-  (E2E), and how to run each via the Bun workspace. Coverage is collected under Bun
+  (E2E), and how to run each from its own repo root. Coverage is collected under Bun
   with @vitest/coverage-istanbul (not v8) and ratcheted against the committed baseline
   via _scripts/check-coverage-ratchet.ts."
 metadata:
@@ -103,31 +103,25 @@ wants a few tests for recently changed files.
 
 ## Test Stack by Package
 
-The root `vitest.config.ts` aggregates every agent-framework package plus `_scripts/`.
-A single `bun x --bun vitest run` from the repo root runs them all. Packages that need
-a different environment (happy-dom for Vue composables, Nitro shims for forge routes,
-vitest 4.1 for forge/skaile-forge and forge/L5-concept) keep their own `vitest.config.ts` and their own
-`bun run test` script; those are scoped runs.
+Every skaile repo is standalone (the `skaile-dev` shell is archived). Install and run tests
+**from the target repo's root** (or the subdirectory named below), never from a parent
+directory that holds several clones. The repo's own `CLAUDE.md` is the authority; the quick
+map is `references/test_stack_map.md`.
 
-| Package | Framework | Run Command (from skaile-dev root) |
+| Repo / package | Framework | Run Command (from that repo's root) |
 |---------|-----------|-----------------------------------|
-| `agent-framework/*` (all packages under this tree) | Vitest 3.2.4 | `bun x --bun vitest run` |
-| `_scripts/` (check-coverage-ratchet etc.) | Vitest 3.2.4 | `bun x --bun vitest run` |
-| `forge/skaile-forge` (standalone repo `skaile-ai/skaile-forge`) | Vitest 4.1 + `happy-dom` | `cd forge/skaile-forge && bun run test` |
-| `forge/L4-assistant` | Vitest 3.2.4 + `happy-dom` | `bun run --filter @skaile/forge-assistant test` |
-| `forge/L5-concept` | Vitest 4.1 | `bun run --filter @skaile/forge-concept test` |
-| `forge/common-backend` | Vitest 3.2.4 | root `bun x --bun vitest run` (included via root config) |
-| `forge/common-ui` | Vitest 3.2.4 (unit) + Playwright CT (e2e) | `bun x --bun vitest run` (unit); `cd forge/common-ui && bun run test:e2e` (CT) |
-| `agent-framework/tui` | Vitest 3.2.4 | `bun run --filter @skaile/agent-tui test` |
-| `platform/backend` | Jest | `bun run --filter ./platform/backend test` |
-| `platform/frontend` | Vitest | `bun run --filter ./platform/frontend test` |
-| `platform/e2e` | Playwright | `bun run --filter ./platform/e2e test:e2e` |
-| `forge/skaile-forge/tests/e2e/` | Playwright | `cd forge/skaile-forge && bun run test:e2e` |
+| workspaces (all packages) | Vitest | `bun run test` |
+| workspaces `packages/workspaces` | Vitest | `cd packages/workspaces && bun run test` |
+| platform `backend` | Jest | `cd backend && bun run test:jest -- --testPathPatterns <pattern>` |
+| platform `frontend` | Vitest | `cd frontend && bun run test:unit` |
+| platform `e2e` | Playwright | `cd e2e && bun run e2e:local` (see the `e2e-platform` skill) |
+| store | Jest / Vitest per package | `bun run test` |
+| brand | Vitest | `bun run test` |
+| ai-assets | shell tests | `bash scripts/run-tests.sh` |
+| `forge/skaile-forge` (standalone repo `skaile-ai/skaile-forge`) | Vitest 4.1 + `happy-dom` | `bun run test`; e2e `bun run test:e2e` |
+| `forge/common-ui` | Vitest 3.2.4 (unit) + Playwright CT (e2e) | `bun x --bun vitest run` (unit); `bun run test:e2e` (CT) |
 
-**Never** run `vitest` from inside a submodule/package with `bun` — always invoke from
-the skaile-dev root so the workspace overrides resolve every `@skaile/*` dependency
-locally. The forge Nuxt-app scoped runs are the only exception because they use their
-own vitest config with setup files.
+A fresh clone or worktree has no `node_modules`: run `bun install` at its root first.
 
 **Forge/concept** uses vitest 4.1 which differs from the root's 3.2.4; it is NOT
 wired into the shared root config or the coverage ratchet. Run it only with its
@@ -454,8 +448,8 @@ it again.
 ## Bun Workspace Test Commands (Quick Reference)
 
 ```bash
-# Run all agent-framework + _scripts tests — truncate output to summary
-bun x --bun vitest run 2>&1 | tail -80
+# Run all workspaces tests (from the workspaces repo root) — truncate output to summary
+bun run test 2>&1 | tail -80
 
 # Run with watch mode (development)
 bun x --bun vitest
@@ -464,18 +458,21 @@ bun x --bun vitest
 bun x --bun vitest run -t "workspace rename" 2>&1 | tail -40
 
 # Run a single test file (full output is fine for a single file)
-bun x --bun vitest run agent-framework/core/src/manifest.test.ts
+(cd packages/workspaces && bun x --bun vitest run core/tests/<file>.test.ts)
 
 # Run a forge Nuxt app's suite (their own vitest config — happy-dom + Nitro shims)
 (cd forge/skaile-forge && bun run test 2>&1 | tail -60)
 bun run --filter @skaile/forge-assistant test 2>&1 | tail -60
 bun run --filter @skaile/forge-concept test 2>&1 | tail -60    # vitest@4.1, scoped only
 
-# Run platform backend (Jest)
-bun run --filter ./platform/backend test 2>&1 | tail -80
+# Run platform backend (Jest; from the platform repo root; never the full suite locally)
+(cd backend && bun run test:jest -- --testPathPatterns <pattern> 2>&1 | tail -80)
+
+# Run platform frontend unit tests (Vitest; from the platform repo root)
+(cd frontend && bun run test:unit 2>&1 | tail -60)
 
 # Run platform / skaile-forge E2E (Playwright)
-bun run --filter ./platform/e2e test:e2e 2>&1 | tail -60
+(cd e2e && bun run e2e:local 2>&1 | tail -60)
 (cd forge/skaile-forge && bun run test:e2e 2>&1 | tail -60)
 
 # Run forge/common-ui Playwright CT (TipTap/ProseMirror browser tests)
@@ -494,7 +491,7 @@ bun x --bun vitest run \
   --coverage.reportsDirectory=_devlog/reports/coverage-ci \
   2>&1 | tail -40
 
-# Check the ratchet against the committed baseline
+# Check the ratchet against the committed baseline (workspaces repo, inside packages/workspaces)
 bun _scripts/check-coverage-ratchet.ts
 # Options: --ci <path> --baseline <path> --tolerance <pct>
 # Exit codes: 0 pass, 1 regression, 2 invalid input

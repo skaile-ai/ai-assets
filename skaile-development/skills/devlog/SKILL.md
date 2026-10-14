@@ -55,7 +55,9 @@ metadata:
 ## Overview
 
 Maintains the `_devlog/` directory — the human-readable institutional memory of the
-skaile-dev monorepo. Answers "what changed, why, and what are the implications" in plain
+target repo. Every skaile repo is standalone (the skaile-dev shell is archived), so the
+`_devlog/` is the one at **the root of the repo the change landed in** (workspaces keeps it
+at `packages/workspaces/_devlog/`); follow that repo's `CLAUDE.md` where it says more. Answers "what changed, why, and what are the implications" in plain
 language that any developer (or AI agent in a future session) can quickly scan.
 
 Three output types:

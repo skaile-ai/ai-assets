@@ -1,6 +1,6 @@
 ---
 name: skaile-development
-description: 'Day-to-day development workflow for the skaile-dev monorepo — implementing changes, structured commits, git operations, documentation sync, test setup/generation/execution, code-quality audits, readiness gates, and development log maintenance.'
+description: 'Day-to-day development workflow for the standalone skaile repos (platform, workspaces, ai-assets, store, brand) — implementing changes, structured commits, git operations, documentation sync, test setup/generation/execution, code-quality audits, readiness gates, and development log maintenance.'
 type: domain
 building_blocks:
   agents: 'skaile-development — routes tasks to the right skills, maintains session context.'
@@ -11,7 +11,7 @@ stage: beta
 
 # Skaile Development
 
-Development workflow tools for working **on** the skaile-dev monorepo itself. These skills are
+Development workflow tools for working **on** the skaile repos themselves. These skills are
 for contributors implementing new features, fixing bugs, adding AI skills/domains, and maintaining
 the codebase — as opposed to `skaileup-implementation`, which is for building apps _using_ skaile.
 
@@ -20,13 +20,27 @@ Code-audit, test-planning, readiness-gate, and sync functionality that historica
 `skaileup-evaluate` has been copied and adapted into local skills here, tuned to the monorepo's
 actual tech stacks (Bun, Nuxt 4, NestJS, React, drizzle-orm, Prisma, Vitest, Jest, Playwright).
 
+### Every repo is standalone
+
+The `skaile-dev` shell repo is **retired**: its GitHub remote is archived and read-only. Each
+repo (`platform`, `workspaces`, `ai-assets`, `store`, `brand`, …) is cloned, installed, built,
+tested and deployed on its own. "skaile-dev" survives only as a name for this family of repos.
+
+- **The target repo's own `CLAUDE.md` is the authority** for its install, format, lint, test,
+  commit and doc rules. When a skill or reference here disagrees with it, the repo wins.
+- Run every command from the target repo's root (or the subdirectory its `CLAUDE.md` names),
+  never from a parent directory that happens to hold several clones.
+- No repo has submodules. There is no shell to push, no submodule pointer to bump.
+- A local clone may still sit inside an old shell checkout. Its parent `CLAUDE.md` then loads as
+  well and still describes the shell; ignore its install, format, commit and `_devlog` rules.
+
 ## When to Use This Domain
 
 Reach for `skaile-development` when you are:
 
 - Implementing a feature or fix in a skaile-dev package (platform, forge-_, CLI, agent-_)
 - Adding or modifying an AI skill or domain in `ai-assets/`
-- Committing changes with structured metadata for the decision log
+- Committing changes with a conventional-commits message in the target repo's format
 - Managing git branches, worktrees, or opening PRs
 - Keeping documentation accurate after code changes
 - Running, planning, generating, or scaffolding tests for any package
@@ -39,7 +53,7 @@ Reach for `skaile-development` when you are:
 | Folder                             | Purpose                                                                                                                           |
 | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `agents/`                          | `skaile-development` — routes to skills, orchestrates multi-step work                                                             |
-| `skills/git/`                      | `git` — unified git operations: commit, branch, worktree, PR, finish, sync                                             |
+| `skills/git/`                      | `git` — unified git operations: commit, branch, worktree, PR, finish (sync and deploy are retired)                    |
 | `skills/proposal/`                 | `proposal` — design specs and proposals with structured frontmatter, review tracking, and alternatives analysis     |
 | `skills/review/`                   | `review` — local code review for staged/committed changes (quality, security, scope)                              |
 | `skills/implement/`                | `implement` — monorepo-aware implementation orchestrator                                                               |
@@ -68,7 +82,7 @@ Reach for `skaile-development` when you are:
 | `skills/session-analysis/`         | `session-analysis` — session pattern analysis and workflow optimization recommendations                                |
 | `skills/verify-ui/`                | `verify-ui` — UI verification and visual regression checks                                                             |
 | `references/doc_tiers.md`          | Five-tier documentation role table                                                                                                |
-| `references/test_stack_map.md`     | Package → framework + run-command map (authoritative)                                                                             |
+| `references/test_stack_map.md`     | Repo → framework + run-command quick map (the target repo's `CLAUDE.md` wins on conflict)                                          |
 | `references/audit_checklists.md`   | Logic / security / UI-UX checklists per sub-agent                                                                                 |
 | `references/readiness_criteria.md` | Per-package and global readiness criteria                                                                                         |
 
@@ -76,7 +90,7 @@ Reach for `skaile-development` when you are:
 
 | Skill                         | When to Use                                                                                    |
 | ----------------------------- | ---------------------------------------------------------------------------------------------- |
-| `git`              | Any git operation — committing, branching, worktrees, opening PRs, finishing branches, syncing |
+| `git`              | Any git operation — committing, branching, worktrees, opening PRs, finishing branches          |
 | `proposal`      | Creating, reviewing, or updating design specs for new features or architectural changes        |
 | `review`      | Before committing or pushing — local quality/security review of changes                        |
 | `implement`        | Starting any non-trivial implementation task in the monorepo                                   |
@@ -127,16 +141,18 @@ Integration points:
 
 ## Commit Workflow
 
-The `git mode=commit` operation is the primary way to commit in skaile-dev. It reads the diff,
+The `git mode=commit` operation is the primary way to commit in a skaile repo. It reads the diff,
 identifies affected packages, and generates a structured message with:
 
 - Conventional-commits title line (`type(scope): description`)
 - Human description (what and why, 1-3 sentences)
 
-The format spec lives in `skills/git/references/commit-spec.md`. The `.githooks/commit-msg`
-hook validates the title format on merges to main.
+No `---agent---` YAML block: that convention belonged to the retired shell, and nothing in the
+standalone repos reads it. The format spec lives in `skills/git/references/commit-spec.md`. Each
+repo's own `.githooks/commit-msg` (where it has one) validates the title on `main`; because
+`main` is protected and PRs land by squash merge, in practice the **PR title** must match.
 
-The `git` skill handles branch/worktree/PR/finish/sync operations and also covers commit
+The `git` skill handles branch/worktree/PR/finish operations and also covers commit
 message generation - all unified under a single skill with mode selection.
 
 In commit mode, the `git` skill offers an optional review step (via the `review` skill) before
@@ -144,7 +160,7 @@ committing. This defaults to on when committing to main, and can be skipped with
 
 ## Documentation Tiers
 
-Every change in skaile-dev may affect up to five documentation surfaces. See
+Every change in a skaile repo may affect up to five documentation surfaces, all inside that repo. See
 `references/doc_tiers.md` for the full decision table. Short version:
 
 | Tier      | File                     | When to update                                     |
@@ -153,7 +169,7 @@ Every change in skaile-dev may affect up to five documentation surfaces. See
 | Dev guide | `CLAUDE.md`              | Architecture, conventions, or environment changes  |
 | Reference | `docs/<pkg>/`            | New commands, configuration options, component API |
 | AI guide  | `DOMAIN.md` / `SKILL.md` | Changes to AI resource structure or skill behavior |
-| Dev log   | `_devlog/entries/`       | After every meaningful change (always)             |
+| Dev log   | `_devlog/entries/` (in the target repo) | After every meaningful change (always)  |
 
 The `doc` skill covers tiers 1-4. The `devlog` skill handles the dev log tier.
 The `sync-docs` skill repairs cross-references between tiers.
@@ -181,4 +197,4 @@ The `sync-docs` skill repairs cross-references between tiers.
 - The `skaile-development` agent orchestrates multi-skill workflows. For single-skill operations, call skills directly.
 - `devlog` should run after any meaningful change. `implement` triggers it automatically.
 - Skills in this domain read `CLAUDE.md` files from affected packages before acting.
-- The four quality skills (`test`, `audit`, `doc --mode audit`, `ready`) all emit a JSON artifact to `_devlog/reports/` so `quality` can aggregate them.
+- The four quality skills (`test`, `audit`, `doc --mode audit`, `ready`) all emit a JSON artifact to the target repo's `_devlog/reports/` so `quality` can aggregate them.
