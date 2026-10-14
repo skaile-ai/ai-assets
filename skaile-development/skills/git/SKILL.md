@@ -593,7 +593,7 @@ IF mode = deploy
 
   STOP: "`deploy` is retired. Do not push `deploy`. It merged the shell's `main` into its
   `deploy` branch. Each repo now deploys on its own. A platform release deploys when its
-  changesets Version PR merges: `version.yml` merges `main` into `deploy`. Merge the
+  changesets Version PR merges: `version.yml` fast-forwards `deploy`. Merge the
   Version PR only in the 06:00-07:00 Berlin window, except for an outage, security or
   data-loss hotfix. The platform's `deploy` branch is protected by the `deploy-protection`
   ruleset, so a hand push, merge or force-push is rejected. See
