@@ -94,10 +94,12 @@ metadata:
       label: "Paths in the target repo's checkout that may be dirty (pre-authorized)"
       type: "text"
       required: false
-      hint: "A list of paths (files or directories, relative to the repo root) that
-        are modified or untracked in the shared checkout on purpose. If every dirty
-        path is inside this list, the pre-flight proceeds and never stashes, commits,
-        reverts or touches them. Leave empty when the checkout should be clean."
+      hint: "Paths (files or directories, relative to the repo root), separated by
+        commas or newlines, that are modified or untracked in the shared checkout on
+        purpose. A directory covers what is below it (`docs` covers `docs/a.md`, not
+        `docs-internal/a.md`). If every dirty path is covered, the pre-flight proceeds
+        and never stashes, commits, reverts or touches them. Leave empty when the
+        checkout should be clean."
     files: []
 ---
 
@@ -189,28 +191,35 @@ complete list of legitimate stop-and-ask gates is:
 
 Everything else you do silently. The user can always interrupt to redirect.
 
-## Running Headless (no one to ask)
+## Running Headless (NO-ASK and NO-CHILDREN)
 
 The flow above assumes an interactive session with one planned question at the end.
 Ship runs are often started by an orchestrator instead — as a subagent, a fork, or an
-unattended lane. Treat the run as HEADLESS when the `AskUserQuestion` tool is not
-available, or when the caller says the run is unattended.
+unattended lane. Two independent conditions change the flow, and a run can be in
+either, both, or neither:
 
+**NO-ASK** — the `AskUserQuestion` tool is not available, or the caller says the run is
+unattended. It changes what happens at the gates:
 - **Gate #9 becomes a hand-back.** Run Phase 12, Phase 12b, STEP 14c and STEP 14d as
-  usual, then STOP with the PR open. Do NOT run STEP 15: never merge, never clean up,
-  never file follow-ups. Return to the caller: the PR URL and head SHA, the CI and review
-  state, the recap from STEP 14d, the proposed follow-ups from STEP 14b, and the
-  disposition question STEP 15 would have asked. The caller decides.
+  usual, then print STEP 16's final block with `Disposition: handed back to caller` and
+  STOP with the PR open. Do NOT run STEP 15: never merge, never clean up, never file
+  follow-ups. Return to the caller: the PR URL and head SHA, the CI and review state, the
+  recap from STEP 14d, the proposed follow-ups from STEP 14b, and the disposition
+  question STEP 15 would have asked. The caller decides.
 - **Every other gate becomes stop-and-report.** Where the flow says ASK, stop at that
   point and report what you would have asked and the evidence, with the worktree and
   branch kept.
-- **Preferred mode for one PR: run as a fork, not as a fresh subagent.** A fork already
-  has the caller's context, so it needs no long hand-off prompt. Forks cannot spawn
-  children, so in a fork STEP 8 implements INLINE (no implementation subagent) and
-  STEP 9's review subagent is replaced by the PR's review bot as the independent
-  reviewer, read in Phase 12. That removes the class of runs that stalled while
-  dispatching a child. If the repo has no review bot, say so in the hand-back: the change
-  then had no independent review.
+
+**NO-CHILDREN** — the run cannot spawn subagents (a fork). It changes STEP 8 and STEP 9:
+- STEP 8 implements INLINE (no implementation subagent).
+- STEP 9's review subagent is replaced by the PR's review bot as the independent
+  reviewer, read in Phase 12. If the repo has no review bot, say so in the report: the
+  change then had no independent review.
+
+**Preferred mode for one unattended PR: run as a fork, not as a fresh subagent.** A fork
+already has the caller's context, so it needs no long hand-off prompt, and NO-CHILDREN
+removes the class of runs that stalled while dispatching a child. A fresh subagent that
+CAN spawn children keeps STEP 8 and STEP 9 as written.
 
 ---
 
@@ -257,8 +266,8 @@ MUST  open the issue BEFORE the worktree (branch name needs the number) but AFTE
 MUST  create the worktree at <skaile-dev-root>/.worktrees/<repo>-<number> (gitignored) — outside the repo so its checkout stays clean, but INSIDE the skaile-dev tree so dispatched subagents auto-load the repo's CLAUDE.md via on-demand memory discovery
 MUST  keep the worktree and local branch ALIVE through the PR + babysit phases — tear them down ONLY in Phase 13 per the user's choice
 MUST  write the plan in the worktree and treat it as ephemeral — never commit it, delete it before the final commit
-MUST  dispatch implementation as a fresh, self-contained subagent (paste the plan + repo conventions + acceptance criteria; do NOT pass parent conversation) — except in a fork, which cannot spawn children and implements inline (see Running Headless)
-MUST  dispatch review as a fresh subagent that only sees the diff + review focus — not the plan (skippable only for complexity=small AND ≤2 files AND ≤30 LOC; in a fork the PR's review bot is the independent reviewer instead — see Running Headless)
+MUST  dispatch implementation as a fresh, self-contained subagent (paste the plan + repo conventions + acceptance criteria; do NOT pass parent conversation) — except under NO-CHILDREN (a fork), which implements inline (see Running Headless)
+MUST  dispatch review as a fresh subagent that only sees the diff + review focus — not the plan (skippable only for complexity=small AND ≤2 files AND ≤30 LOC; under NO-CHILDREN the PR's review bot is the independent reviewer instead — see Running Headless)
 MUST  triage review findings explicitly: each gets a verdict (apply / defer / reject) with a one-line reason
 MUST  run the repo's lint AND affected tests locally before pushing; add a changeset if the repo enforces them
 MUST  push the branch before opening the PR
@@ -271,7 +280,7 @@ MUST  run the Phase 12b follow-up sweep BEFORE the disposition gate: ship small 
 MUST  fix only items RELATED to the change (e.g. lint/type/test failures the change caused, review nits on the diff); for unrelated/pre-existing/architectural problems, REPORT them to the user and do NOT fix them
 MUST  converge the babysit loop — cap fix rounds, and if CI stays red on something unrelated or a review item recurs after a good-faith fix, stop and ask (gate #8)
 MUST  print the plain-language recap (Phase 13, STEP 14d) immediately BEFORE the final question — jargon-free, no paths or symbols, written for someone who was not watching
-MUST  ask the user at the end (Phase 13) to choose: squash-merge + cleanup | cleanup only | stop here — and execute exactly that; in a HEADLESS run, stop after STEP 14d and hand that choice to the caller instead (see Running Headless)
+MUST  ask the user at the end (Phase 13) to choose: squash-merge + cleanup | cleanup only | stop here — and execute exactly that; under NO-ASK, stop after STEP 14d and hand that choice to the caller instead (see Running Headless)
 MUST  for platform work, decide `docs_impact` BEFORE committing (Phase 8b) and, when user-visible, update `features/SKAILE-PLATFORM-CAPABILITIES.md` (+ its `features/<NN-section>/` doc) IN THE SAME PR and open an ai-assets PR for the `platform-guide` skill — docs are part of the change, not a post-merge chore; the platform PR body carries a `## Docs` section the CI guard parses
 NEVER skip the platform-guide update because the ai-assets checkout is "not accessible" — clone `skaile-ai/ai-assets` into a scratch dir; stop and ask (gate #10) only if that clone itself fails
 MUST  use squash-and-merge (`gh pr merge <n> --squash`) when merging
@@ -333,9 +342,10 @@ STEP 0b: Resolve the target repo + profile
                          changeset-check workflow is present
     pr_template = `<repo_path>/.github/PULL_REQUEST_TEMPLATE.md` if present
 
-  IF `references/<repo>.md` exists beside this skill: read it now. It holds the facts
-  this generic flow must not hardcode, and later steps refer to it as "the profile
-  reference".
+  IF `references/<repo>.md` exists beside this skill (`<repo>` = the submodule directory
+  name resolved above, so `references/platform.md` — not the GitHub slug): read it now.
+  It holds the facts this generic flow must not hardcode, and later steps refer to it as
+  "the profile reference".
 
   Known specifics to honor (examples — always defer to the repo itself):
     - platform: Prettier + ESLint, `bun run lint` inside `backend/`/`frontend/`;
@@ -379,9 +389,15 @@ STEP 0c: Auto-classify the category (do NOT ask)
 STEP 1: Pre-flight the target repo (BEFORE opening the issue — a dirty tree must not leave a dangling issue)
   $ cd <repo_path>
   $ git fetch origin
-  $ git status --short
-  dirty_paths = every path in that output (modified AND untracked)
-  IF dirty_paths is empty, OR every entry is inside a path listed in `allowed_dirty`:
+  $ git status --porcelain=v1 -z --untracked-files=all
+  dirty_paths = the path field of every record (modified AND untracked; for a rename,
+    the destination). The `-z` form avoids the `XY ` prefix, the `old -> new` rename form
+    and `core.quotePath` quoting.
+  allowed = `allowed_dirty` split on commas and newlines, each entry trimmed, with a
+    leading `./` and a trailing `/` stripped. A dirty path is COVERED when it equals an
+    entry or starts with `<entry>/` — a path-component boundary, so `docs` does NOT cover
+    `docs-internal/x`.
+  IF dirty_paths is empty, OR every dirty path is COVERED:
     continue. Print > "Checkout has <N> pre-authorized dirty path(s) — leaving them alone."
     when N > 0. Never stash, commit, revert or touch those paths, now or later.
   ELSE: STOP (gate #3): "<repo> has uncommitted changes outside allowed_dirty: <paths>.
@@ -463,10 +479,12 @@ STEP 3b: Resume detection (skip building if a PR already exists for this work)
       reference; without one, say "deploy state unknown"). Then STOP.
     IF a counting match exists AND issue_state = OPEN → the merge did not close the issue,
       or the fix was partial. Check `origin/<default_branch>` for the change the issue
-      asks for. IF it is there → report the same NO-OP and say the issue needs a hand close
-      (do not close it yourself; the run did not ship it). IF it is not there → continue
-      to STEP 4 and name the earlier PR in the new PR body.
-  ELSE → continue to STEP 4 (fresh flow).
+      asks for. IF it is there → report the same NO-OP (merged PR URL, merge commit,
+      deploy state) and say the issue needs a hand close (do not close it yourself; the
+      run did not ship it). Then STOP. IF it is not there → continue to STEP 4 and name
+      the earlier PR in the new PR body.
+    IF no counting match exists → continue to STEP 4 (fresh flow).
+  IF `issue` was NOT passed → continue to STEP 4 (fresh flow).
 
 # ── Phase 3: Branch + Worktree ────────────────────────────────────
 
@@ -1315,11 +1333,11 @@ STEP 16: Print the final block
   Branch:  <branch_name>   [removed | kept]
   PR:      <pr_url>   [merged (squash) | open]
   Deployed: <no — waits for <next release step> | yes (<how verified>) | unknown>
-           Merged is NOT in production. Many repos deploy only on a release step after
-           the merge (platform: the next Version PR; a workspaces change needs three
-           hops). Take the path from the profile reference; without one, write `unknown`.
+           (Merged is NOT in production. Many repos deploy only on a release step after
+           the merge — platform: the next Version PR; a workspaces change needs three
+           hops. Take the path from the profile reference; without one, write `unknown`.)
   Guide PR: <ai-assets url>   [merged | open | none]   (platform only)
-  Disposition: <merge+cleanup | cleanup | stop>
+  Disposition: <merge+cleanup | cleanup | stop | handed back to caller>
 
   What shipped: <1-2 sentences, plain language — what the change DOES, as merged.
                  The same recap as the PR body's "What this does". Never a list of the
@@ -1411,7 +1429,7 @@ CHECKLIST
   - [ ] Platform only: `docs_impact` decided BEFORE the commit (STEP 10b); when user-visible, the capabilities doc is in the PR and an ai-assets guide PR is open and linked; the PR body has the `## Docs` section; on merge the guide PR merged too (never skipped as "not accessible" — cloned instead)
   - [ ] Cleanup (when chosen) removed worktree + local branch (+ remote branch on merge); worktree/branches kept on "stop"
   - [ ] Resume check covered MERGED PRs too: an already-shipped issue ended as a no-op with its deploy state, not a second branch
-  - [ ] Headless run (no AskUserQuestion): stopped after STEP 14d with the PR open and handed the disposition to the caller
+  - [ ] NO-ASK run: stopped after STEP 14d with the PR open, printed STEP 16 with `Disposition: handed back to caller`, and handed the choice to the caller (N/A on an interactive run)
   - [ ] Final report printed, with the `Deployed:` line (merged is not deployed)
 
 ---

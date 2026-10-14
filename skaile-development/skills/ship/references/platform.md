@@ -23,11 +23,12 @@ Backend libs have NO `package.json` of their own. Names like `@postxl/session` o
 ## Pre-push checks (STEP 11)
 
 In addition to lint and the affected tests, run the invariant suites. They are
-source scans that catch rule breaks the affected tests do not reach:
+source scans that catch rule breaks the affected tests do not reach. Run them from the
+platform repo root (`--testPathPatterns`, plural, is the Jest 30 flag the repo uses):
 
 ```bash
-cd backend  && bun run test:jest -- --testPathPatterns invariant
-cd frontend && bun run test:unit -- invariant
+(cd backend  && bun run test:jest -- --testPathPatterns invariant)
+(cd frontend && bun run test:unit -- invariant)
 ```
 
 ## Boot verification (STEP 11, any backend change)
@@ -51,6 +52,8 @@ be isolated, because parallel ship runs on one machine share ports and process n
 - **Kill by PID, never by pattern.** Get the PIDs from your own port only:
   `lsof -ti :<API_PORT> | xargs kill`. NEVER `pkill -f "nest start.*--watch"` or any
   other pattern kill — one run's pattern kill stopped the backend of every sibling run.
+  For the same reason, do NOT use the `kill-backend` skill during a ship run: it kills by
+  pattern on a fixed port 3001 and stops every sibling run's backend.
 - **Clean up the process chain.** `bun run dev` starts `dotenvx → nest start --watch`.
   Killing the listener can leave that pair alive, and every attempt leaves one more. Keep
   the PID of the `bun run dev` you started (`$!`) and kill its whole tree by parent PID,
