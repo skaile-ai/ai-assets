@@ -16,7 +16,7 @@ description: >-
   existing code, for plans or design proposals, for filing an issue when implementation is
   explicitly deferred, for throwaway local experiments, or for work spanning several
   repositories.
-version: 1.7.2
+version: 1.8.0
 metadata:
   tags:
   - "ship"
@@ -90,6 +90,16 @@ metadata:
       default: "standard"
       hint: "small = obvious, contained change (skips the review-subagent step) |
         standard = needs review cycle"
+    - id: "allowed_dirty"
+      label: "Paths in the target repo's checkout that may be dirty (pre-authorized)"
+      type: "text"
+      required: false
+      hint: "Paths (files or directories, relative to the repo root), separated by
+        commas or newlines, that are modified or untracked in the shared checkout on
+        purpose. A directory covers what is below it (`docs` covers `docs/a.md`, not
+        `docs-internal/a.md`). If every dirty path is covered, the pre-flight proceeds
+        and never stashes, commits, reverts or touches them. Leave empty when the
+        checkout should be clean."
     files: []
 ---
 
@@ -118,7 +128,7 @@ metadata:
 | Phase | What Happens |
 |-------|--------------|
 | 0 | Read inputs, verify `gh` auth, resolve the **target repo + its profile**, auto-classify category |
-| 1 | Pre-flight the target repo's main (fetch + clean-tree check) |
+| 1 | Pre-flight the target repo's main (fetch + clean-tree check; paths in `allowed_dirty` are left alone, never stashed) |
 | 2 | Refine the description; open the GitHub issue (or reuse `issue`) → capture issue **number** + URL |
 | 3 | Derive branch name from the issue number; create the worktree + branch (off the repo's `origin/main`) |
 | 4 | Investigate: load the repo's CLAUDE.md + relevant files; identify root cause / design surface |
@@ -171,7 +181,7 @@ complete list of legitimate stop-and-ask gates is:
 
 1. **`gh` is not authenticated** — the issue/PR cannot be created. Tell the user to run `gh auth login`.
 2. **The target repo cannot be determined** — input absent and the description is ambiguous across submodules. Ask which repo.
-3. **Working tree of the target repo is dirty** — the worktree branches off `origin/<default_branch>` so a dirty checkout doesn't strictly block it, but an unexpected dirty state is ambiguous (in-progress work, a failed earlier run); stop so the user resolves it consciously.
+3. **Working tree of the target repo is dirty outside `allowed_dirty`** — the worktree branches off `origin/<default_branch>` so a dirty checkout doesn't strictly block it, but an unexpected dirty state is ambiguous (in-progress work, a failed earlier run, another session's files); stop so the user resolves it consciously. Paths listed in `allowed_dirty` are pre-authorized and never stop the run.
 4. **Investigation inconclusive** — root cause / design surface cannot be located; report (issue stays open, labelled `needs-info`) and stop.
 5. **A review finding is "apply-large"** — spawning a second implementation subagent is a meaningful escalation; confirm scope.
 6. **A merge conflict on source code is genuinely mutually-exclusive** — both intents cannot stand; the user must pick.
@@ -180,6 +190,36 @@ complete list of legitimate stop-and-ask gates is:
 9. **The final disposition** — merge + cleanup / cleanup only / stop here (Phase 13), asked together with which proposed follow-ups to file. This is the ONE planned interactive checkpoint at the end; both questions go in a single AskUserQuestion call.
 
 Everything else you do silently. The user can always interrupt to redirect.
+
+## Running Headless (NO-ASK and NO-CHILDREN)
+
+The flow above assumes an interactive session with one planned question at the end.
+Ship runs are often started by an orchestrator instead — as a subagent, a fork, or an
+unattended lane. Two independent conditions change the flow, and a run can be in
+either, both, or neither:
+
+**NO-ASK** — the `AskUserQuestion` tool is not available, or the caller says the run is
+unattended. It changes what happens at the gates:
+- **Gate #9 becomes a hand-back.** Run Phase 12, Phase 12b, STEP 14c and STEP 14d as
+  usual, then print STEP 16's final block with `Disposition: handed back to caller` and
+  STOP with the PR open. Do NOT run STEP 15: never merge, never clean up, never file
+  follow-ups. Return to the caller: the PR URL and head SHA, the CI and review state, the
+  recap from STEP 14d, the proposed follow-ups from STEP 14b, and the disposition
+  question STEP 15 would have asked. The caller decides.
+- **Every other gate becomes stop-and-report.** Where the flow says ASK, stop at that
+  point and report what you would have asked and the evidence, with the worktree and
+  branch kept.
+
+**NO-CHILDREN** — the run cannot spawn subagents (a fork). It changes STEP 8 and STEP 9:
+- STEP 8 implements INLINE (no implementation subagent).
+- STEP 9's review subagent is replaced by the PR's review bot as the independent
+  reviewer, read in Phase 12. If the repo has no review bot, say so in the report: the
+  change then had no independent review.
+
+**Preferred mode for one unattended PR: run as a fork, not as a fresh subagent.** A fork
+already has the caller's context, so it needs no long hand-off prompt, and NO-CHILDREN
+removes the class of runs that stalled while dispatching a child. A fresh subagent that
+CAN spawn children keeps STEP 8 and STEP 9 as written.
 
 ---
 
@@ -195,6 +235,8 @@ READS
   skills/git/references/commit-spec.md            — commit message format
   gh auth status                                  — verify GitHub auth before issue/PR creation
   gh label list / gh issue list / gh pr ...       — labels, dup detection, PR + CI + review state
+  references/<repo>.md (this skill)               — repo-specific profile facts, when the file exists
+                                                    (today: references/platform.md)
   scripts/babysit-poll.sh (this skill)            — the Phase 12 poll: reads `gh pr view`, the pulls/ and issues/ comment
                                                     endpoints and `gh api user`; keeps its state in a per-PR dir
 
@@ -214,6 +256,7 @@ NEVER WRITES
 MUST  verify `gh auth status` succeeds before opening the issue or PR
 MUST  resolve the target repo (input `repo` → inference from description → ask) and validate the submodule path + GitHub remote exist
 MUST  derive the repo profile from the repo itself — GitHub slug (`git -C <repo> remote get-url origin`), default branch, formatter, lint/test/format commands, changeset requirement — and NEVER hardcode platform's toolchain onto another repo
+MUST  read `references/<repo>.md` beside this skill when it exists for the target repo, and follow it — repo-specific facts (changeset names, boot checks, known flaky CI signatures, the deploy path) live there, NOT inline in this generic flow
 MUST  respect each repo's formatter: platform = Prettier + ESLint (NEVER Biome); workspaces / brand / docs = Biome; defer to the repo's CLAUDE.md + package.json scripts when unsure
 MUST  refine the user's description before filing it — 1-3 sentences for bug/issue/ui/chore (up to 5 short for features), technical and specific, no marketing fluff
 MUST  auto-classify the category without asking; the `category` input only overrides
@@ -223,8 +266,8 @@ MUST  open the issue BEFORE the worktree (branch name needs the number) but AFTE
 MUST  create the worktree at <skaile-dev-root>/.worktrees/<repo>-<number> (gitignored) — outside the repo so its checkout stays clean, but INSIDE the skaile-dev tree so dispatched subagents auto-load the repo's CLAUDE.md via on-demand memory discovery
 MUST  keep the worktree and local branch ALIVE through the PR + babysit phases — tear them down ONLY in Phase 13 per the user's choice
 MUST  write the plan in the worktree and treat it as ephemeral — never commit it, delete it before the final commit
-MUST  dispatch implementation as a fresh, self-contained subagent (paste the plan + repo conventions + acceptance criteria; do NOT pass parent conversation)
-MUST  dispatch review as a fresh subagent that only sees the diff + review focus — not the plan (skippable only for complexity=small AND ≤2 files AND ≤30 LOC)
+MUST  dispatch implementation as a fresh, self-contained subagent (paste the plan + repo conventions + acceptance criteria; do NOT pass parent conversation) — except under NO-CHILDREN (a fork), which implements inline (see Running Headless)
+MUST  dispatch review as a fresh subagent that only sees the diff + review focus — not the plan (skippable only for complexity=small AND ≤2 files AND ≤30 LOC; under NO-CHILDREN the PR's review bot is the independent reviewer instead — see Running Headless)
 MUST  triage review findings explicitly: each gets a verdict (apply / defer / reject) with a one-line reason
 MUST  run the repo's lint AND affected tests locally before pushing; add a changeset if the repo enforces them
 MUST  push the branch before opening the PR
@@ -237,7 +280,7 @@ MUST  run the Phase 12b follow-up sweep BEFORE the disposition gate: ship small 
 MUST  fix only items RELATED to the change (e.g. lint/type/test failures the change caused, review nits on the diff); for unrelated/pre-existing/architectural problems, REPORT them to the user and do NOT fix them
 MUST  converge the babysit loop — cap fix rounds, and if CI stays red on something unrelated or a review item recurs after a good-faith fix, stop and ask (gate #8)
 MUST  print the plain-language recap (Phase 13, STEP 14d) immediately BEFORE the final question — jargon-free, no paths or symbols, written for someone who was not watching
-MUST  ask the user at the end (Phase 13) to choose: squash-merge + cleanup | cleanup only | stop here — and execute exactly that
+MUST  ask the user at the end (Phase 13) to choose: squash-merge + cleanup | cleanup only | stop here — and execute exactly that; under NO-ASK, stop after STEP 14d and hand that choice to the caller instead (see Running Headless)
 MUST  for platform work, decide `docs_impact` BEFORE committing (Phase 8b) and, when user-visible, update `features/SKAILE-PLATFORM-CAPABILITIES.md` (+ its `features/<NN-section>/` doc) IN THE SAME PR and open an ai-assets PR for the `platform-guide` skill — docs are part of the change, not a post-merge chore; the platform PR body carries a `## Docs` section the CI guard parses
 NEVER skip the platform-guide update because the ai-assets checkout is "not accessible" — clone `skaile-ai/ai-assets` into a scratch dir; stop and ask (gate #10) only if that clone itself fails
 MUST  use squash-and-merge (`gh pr merge <n> --squash`) when merging
@@ -250,6 +293,9 @@ NEVER  ask the user to confirm the refined description, category, branch name, p
 NEVER  remove the worktree or delete a branch before Phase 13 — fixes during babysitting need them
 NEVER  open a PR before the branch is pushed
 NEVER  force-push, rewrite history, or commit to the repo's main from inside the worktree
+NEVER  run `git stash` in a repo that may have sibling worktrees — the stash is shared by the whole repository, not one worktree, and a `git stash pop` once applied another session's `stash@{0}` into a ship worktree
+NEVER  discard edits with `git checkout -- <path>`: it restores from the index, which a background auto-commit may already hold the bad content in. Use `git restore --source=HEAD --staged --worktree <paths>`. (`git checkout --ours/--theirs <file>` while resolving a STEP 11b merge conflict is a different operation and stays allowed.)
+NEVER  stash, commit, revert, format or otherwise touch a path listed in `allowed_dirty`
 NEVER  start fixing problems that are out of the change's scope (broken CI architecture, pre-existing failures, unrelated tech debt) — report them instead
 
 EMIT [ship] started description="<short>"
@@ -258,7 +304,7 @@ EMIT [ship] started description="<short>"
 
 STEP 0: Resolve inputs + GitHub auth
   - Read `description` (required), `complexity` (default "standard"),
-    `repo`, `issue`, `category`, `branch_slug` (all optional).
+    `repo`, `issue`, `category`, `branch_slug`, `allowed_dirty` (all optional).
 
   Verify GitHub auth:
     $ gh auth status
@@ -296,9 +342,16 @@ STEP 0b: Resolve the target repo + profile
                          changeset-check workflow is present
     pr_template = `<repo_path>/.github/PULL_REQUEST_TEMPLATE.md` if present
 
+  IF `references/<repo>.md` exists beside this skill (`<repo>` = the submodule directory
+  name resolved above, so `references/platform.md` — not the GitHub slug): read it now.
+  It holds the facts this generic flow must not hardcode, and later steps refer to it as
+  "the profile reference".
+
   Known specifics to honor (examples — always defer to the repo itself):
     - platform: Prettier + ESLint, `bun run lint` inside `backend/`/`frontend/`;
-      NEVER Biome; changesets enforced (`'@postxl/...': patch`).
+      NEVER Biome; changesets enforced. Changeset package names, the invariant and
+      boot checks, the known flaky CI signatures and the deploy path are in
+      `references/platform.md`.
     - store: its own backend/frontend/shared; check its scripts + changeset config.
     - workspaces / brand / docs: Biome.
     - marketing: workspace-isolated — run `bun install` / build inside `marketing/`.
@@ -336,11 +389,26 @@ STEP 0c: Auto-classify the category (do NOT ask)
 STEP 1: Pre-flight the target repo (BEFORE opening the issue — a dirty tree must not leave a dangling issue)
   $ cd <repo_path>
   $ git fetch origin
-  $ git status --short
-  IF dirty: STOP (gate #3): "<repo> has uncommitted changes — ambiguous state. Stash or
-    commit them first." (The worktree itself branches off origin/<default_branch> and is
-    not contaminated by a dirty checkout; we stop because an unexpected dirty tree usually
-    means in-progress work or a failed earlier run the user should resolve consciously.)
+  $ git status --porcelain=v1 -z --untracked-files=all
+  dirty_paths = the path field of every record (modified AND untracked). A record is
+    `XY <path>NUL` — the two status characters and the space after them REMAIN under
+    `-z`, so drop the first 3 bytes. A rename or copy is `XY <new>NUL<old>NUL`: two fields
+    in ONE record, so take `<new>` and consume `<old>` instead of counting it as a dirty
+    path of its own. `-z` only drops the `->` and the `core.quotePath` quoting.
+  allowed = `allowed_dirty` split on commas and newlines, each entry trimmed, with a
+    leading `./` and a trailing `/` stripped. A dirty path is COVERED when it equals an
+    entry or starts with `<entry>/` — a path-component boundary, so `docs` does NOT cover
+    `docs-internal/x`.
+  IF dirty_paths is empty, OR every dirty path is COVERED:
+    continue. Print > "Checkout has <N> pre-authorized dirty path(s) — leaving them alone."
+    when N > 0. Never stash, commit, revert or touch those paths, now or later.
+  ELSE: STOP (gate #3): "<repo> has uncommitted changes outside allowed_dirty: <paths>.
+    Commit them, or leave them where they are and pass them in `allowed_dirty`."
+    Do NOT suggest `git stash` — the stash is shared by every worktree of the repo.
+    (The worktree itself branches off origin/<default_branch> and is not contaminated by a
+    dirty checkout; we stop because an unexpected dirty tree usually means in-progress
+    work, another session's files, or a failed earlier run the user should resolve
+    consciously.)
   (No need to checkout main — the worktree branches off origin/<default_branch>.)
 
 # ── Phase 2: Refine + Open the GitHub Issue ───────────────────────
@@ -355,9 +423,10 @@ STEP 2: Refine the description (PROCEDURE refine_description)
 
 STEP 3: Open (or reuse) the GitHub issue
   IF `issue` input given:
-    $ gh issue view <issue> --repo <github_slug> --json number,url,title
-    Reuse its number + URL; ensure it's open; add the `agent` label if missing.
-    Skip creation.
+    $ gh issue view <issue> --repo <github_slug> --json number,url,title,state
+    Reuse its number + URL; record issue_state; add the `agent` label if missing.
+    Skip creation. A CLOSED issue is NOT an error here: STEP 3b checks whether the work
+    already merged.
   ELSE:
     Optional cheap dup check (do NOT block):
       $ gh issue list --repo <github_slug> --state open --search "<2-3 key terms>"
@@ -396,7 +465,28 @@ STEP 3b: Resume detection (skip building if a PR already exists for this work)
       by a PREVIOUS session, so it still needs the refresh — that is the case with the
       widest gap between what the body says and what the diff does.
     IF more than one match → ASK which PR to resume.
-  ELSE → continue to STEP 4 (fresh flow).
+  IF `issue` was passed AND no open PR matched, look for a MERGED one too. When the issue
+  is already closed, the fix is often already on main and a new branch would duplicate it:
+    $ gh issue view <issue_number> --repo <github_slug> \
+        --json closedByPullRequestsReferences -q '.closedByPullRequestsReferences[].number'
+    $ gh pr list --repo <github_slug> --state merged \
+        --search "#<issue_number> in:body" --json number -q '.[].number'
+    For each PR number from either list: `gh pr view <n> --repo <github_slug> --json
+    state,url,body,mergeCommit`. It counts only if state = MERGED AND it either came from
+    the first list or its body carries a closing keyword for <issue_number> (a bare
+    `Refs`/`Part of` mention does not count).
+    IF a counting match exists AND issue_state = CLOSED → NO-OP. Do not create a branch,
+      worktree or PR. Report: the merged PR URL, its merge commit, and whether that commit
+      is DEPLOYED yet (merged is not deployed — use the deploy path in the profile
+      reference; without one, say "deploy state unknown"). Then STOP.
+    IF a counting match exists AND issue_state = OPEN → the merge did not close the issue,
+      or the fix was partial. Check `origin/<default_branch>` for the change the issue
+      asks for. IF it is there → report the same NO-OP (merged PR URL, merge commit,
+      deploy state) and say the issue needs a hand close (do not close it yourself; the
+      run did not ship it). Then STOP. IF it is not there → continue to STEP 4 and name
+      the earlier PR in the new PR body.
+    IF no counting match exists → continue to STEP 4 (fresh flow).
+  IF `issue` was NOT passed → continue to STEP 4 (fresh flow).
 
 # ── Phase 3: Branch + Worktree ────────────────────────────────────
 
@@ -598,11 +688,15 @@ STEP 11: Drop plan, lint, test, commit, push
   Lint + test the affected area using the REPO'S commands (from the profile):
     $ <lint_cmd>      # e.g. platform: cd backend && bun run lint / cd frontend && bun run lint
     $ <test_cmd>      # the repo's affected-tests command
+    Plus every pre-push check the profile reference lists (platform: the invariant
+    suites, and a boot of the backend for any backend change, isolated as it describes).
     IF lint/tests fail: make ONE focused fix attempt; if they still fail, STOP: "Lint/test
       failures persist after one fix attempt — worktree preserved at <worktree_path> for
       manual inspection." (Do not loop indefinitely trying to fix.)
     IF a formatter mutated files: $ git add <files>
-  IF changeset_required AND no changeset staged: add one now (repo's format), $ git add it.
+  IF changeset_required AND no changeset staged: add one now (repo's format; take the
+    package name from the profile reference or the changed half's package.json, never
+    from a path alias), $ git add it.
 
   Commit (work only — no issue file, no counter bump):
     $ git add -A
@@ -812,7 +906,11 @@ STEP 14: Drive the PR to a clean, reviewed state
                      line we touched, a missing changeset, a bot suggestion on our code, OR
                      a check that is green on origin/<default_branch> but red on the branch)
           UNRELATED→ failure that is ALSO red on main, flaky infra, broken CI architecture,
-                     tech debt elsewhere, a comment about code we didn't touch
+                     tech debt elsewhere, a comment about code we didn't touch, or a
+                     KNOWN FLAKY SIGNATURE the profile reference lists — but only after
+                     its discrimination test (failing file not in the diff AND a sibling
+                     PR on the same base passed the same job). Record a flake; do not
+                     chase the suite it names and do not add a retry.
 
     (c) IF there are RELATED actionable items:
         CHURN CHECK first, before severity. Count how many of this round's items fault
@@ -1236,8 +1334,12 @@ STEP 16: Print the final block
            issue_state only on a merge)
   Branch:  <branch_name>   [removed | kept]
   PR:      <pr_url>   [merged (squash) | open]
+  Deployed: <no — waits for <next release step> | yes (<how verified>) | unknown>
+           (Merged is NOT in production. Many repos deploy only on a release step after
+           the merge — platform: the next Version PR; a workspaces change needs three
+           hops. Take the path from the profile reference; without one, write `unknown`.)
   Guide PR: <ai-assets url>   [merged | open | none]   (platform only)
-  Disposition: <merge+cleanup | cleanup | stop>
+  Disposition: <merge+cleanup | cleanup | stop | handed back to caller>
 
   What shipped: <1-2 sentences, plain language — what the change DOES, as merged.
                  The same recap as the PR body's "What this does". Never a list of the
@@ -1295,7 +1397,9 @@ PROCEDURE classify_babysit_item(item)
     (see the cutoff).
   - Tie-breaker for ambiguous CI failures: if the check is GREEN on origin/<default_branch>
     but RED on the branch, it is RELATED regardless of which file fails (our change exposed
-    it) — fix it. Only checks ALSO red on main are UNRELATED.
+    it) — fix it. Only checks ALSO red on main are UNRELATED. The one exception is a known
+    flaky signature from the profile reference that passes its discrimination test there:
+    it is UNRELATED even when main is green, because a flake is green most of the time.
   - UNRELATED otherwise (failure also present on main, flaky infra, broken CI architecture,
     comment on untouched code, unrelated tech debt). Report; never fix here.
 
@@ -1304,7 +1408,8 @@ CHECKLIST
   - [ ] Target repo resolved (input / inferred / asked) and validated; profile derived (slug, branch, formatter, lint/test, changeset)
   - [ ] Category auto-classified; mapped to an existing repo label (or filed unlabeled, noted)
   - [ ] Description refined WITHOUT asking; ≤72-char title derived
-  - [ ] Clean-tree pre-flight done BEFORE opening the issue
+  - [ ] Clean-tree pre-flight done BEFORE opening the issue; dirty paths inside `allowed_dirty` left untouched; no `git stash` suggested or run
+  - [ ] Profile reference (`references/<repo>.md`) read when it exists
   - [ ] GitHub issue opened/reused on the target repo (category label + `agent`, assigned @me); number + URL captured
   - [ ] Worktree at <skaile-dev-root>/.worktrees/<repo>-<number> (gitignored, inside the tree), branched off origin/<default_branch>
   - [ ] Branch name uses the issue number; nothing written to any legacy issue folder
@@ -1325,7 +1430,9 @@ CHECKLIST
   - [ ] Final disposition asked (merge+cleanup / cleanup / stop; reading-diff option offered iff the `meat` skill is available) and executed; squash used for merge, squash body carries `Closes #<number>`, issue state verified after the merge (closed by hand if the merge left it open)
   - [ ] Platform only: `docs_impact` decided BEFORE the commit (STEP 10b); when user-visible, the capabilities doc is in the PR and an ai-assets guide PR is open and linked; the PR body has the `## Docs` section; on merge the guide PR merged too (never skipped as "not accessible" — cloned instead)
   - [ ] Cleanup (when chosen) removed worktree + local branch (+ remote branch on merge); worktree/branches kept on "stop"
-  - [ ] Final report printed
+  - [ ] Resume check covered MERGED PRs too: an already-shipped issue ended as a no-op with its deploy state, not a second branch
+  - [ ] NO-ASK run: stopped after STEP 14d with the PR open, printed STEP 16 with `Disposition: handed back to caller`, and handed the choice to the caller (N/A on an interactive run)
+  - [ ] Final report printed, with the `Deployed:` line (merged is not deployed)
 
 ---
 
@@ -1348,6 +1455,12 @@ CHECKLIST
 | Renaming a placeholder or rule and updating only where it is defined | Grep the changed files for the old form before committing. A stated rule contradicting another stated rule is a correctness defect — the reader cannot tell which is current — and it is worse than the ambiguity it replaced. |
 | Proposing follow-ups after the merge | Sweep in Phase 12b, before the gate. A follow-up proposed after the merge is a follow-up nobody files. |
 | Fixing unrelated/pre-existing/architectural problems during babysitting | Report them; don't fix. Scope is this change. (Fix our lint; don't rebuild a broken CI pipeline.) |
+| Telling the user to stash a dirty checkout | The stash is shared by every worktree of the repo; a `git stash pop` once applied another session's stash into a ship worktree. Commit the changes, or leave them and pass the paths in `allowed_dirty`. |
+| Undoing your own edit with `git checkout -- <path>` | It restores from the index, which an auto-commit may already hold the bad content in. Use `git restore --source=HEAD --staged --worktree <paths>`. |
+| Opening a second branch for an issue that is already closed | STEP 3b checks merged PRs too. If the fix is on main, the ship is a no-op: report the merged PR and its deploy state. |
+| Reporting "merged" as if it were live | Merged is not deployed. Say what release step the change still waits for (the profile reference names it). |
+| Chasing a known flaky CI signature | Check the profile reference. If the failing file is outside the diff and a sibling PR on the same base passed the same job, it is a flake: record it, do not fix it. |
+| Inlining one repo's toolchain facts into the generic flow | Put them in `references/<repo>.md` beside this skill and point at it from STEP 0b. |
 | Merging with a merge commit | Use squash-and-merge (`gh pr merge --squash`). |
 | Deleting a branch that's checked out in the worktree | Order: squash-merge → `git worktree remove --force` → `git branch -D` (local) → `git push origin --delete` (remote). Do NOT pass `--delete-branch` to `gh pr merge` while the branch is still checked out in the worktree. |
 | Force-merging past branch protection | If the PR isn't mergeable (needs an approval / a red required check), report exactly why and stop — don't force. |
