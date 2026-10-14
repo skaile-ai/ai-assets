@@ -500,13 +500,14 @@ IF mode = finish
             status=pr_open.
         - BLOCKED → required gates are not met. Classify from the REQUIRED checks
           (`gh pr checks <pr> -R <slug> --required --json name,bucket`) and reviewDecision.
-          Read its JSON, not its exit status: it exits non-zero both when a required check
-          is failing and when the repo has none ("no required checks reported").
+          Read its JSON, not its exit status: it exits non-zero when a required check is
+          failing, when one is still pending, and when the repo has none (that last case
+          prints no JSON at all — "no required checks reported").
           - any required check in bucket `fail` or `cancel`, or reviewDecision
             CHANGES_REQUESTED → STOP and name it; status=pr_open
             (`statusCheckRollup` gives the detail for the message)
-          - otherwise (required checks in bucket `pending`, or reviewDecision
-            REVIEW_REQUIRED) → $ gh pr merge <pr> -R <slug> --auto --squash
+          - a required check in bucket `pending`, or reviewDecision REVIEW_REQUIRED
+            → $ gh pr merge <pr> -R <slug> --auto --squash
             IF that succeeds → report "auto-merge armed". Say the merge may land on someone
               else's approval when a review is still required. Keep the branch and the
               worktree; status=auto_merge. Stop here: do not wait or poll. Re-run finish
@@ -514,9 +515,14 @@ IF mode = finish
             IF arming fails → STOP; status=pr_open. IF `gh api repos/<slug> --jq
               .allow_auto_merge` is false, say: "Turn on auto-merge in the repo settings or
               merge by hand." A re-run will not help.
-        - UNKNOWN → GitHub has not finished computing mergeability (usual right after the
-          PR is created). Probe once more; if it is still UNKNOWN → STOP and say so;
-          status=pr_open
+          - otherwise (no JSON at all — "no required checks reported" — or every required
+            check already in bucket `pass` or `skipping`) → nothing auto-merge waits on will
+            clear the block: an unresolved review conversation, a ruleset, a required
+            deployment or a code-owner gate. STOP and say which gate GitHub names;
+            status=pr_open
+        - UNKNOWN → GitHub has not finished computing mergeability (usually right after the
+          PR is created). Wait ~3s, run the probe above again and classify from the new
+          state; if it is still UNKNOWN → STOP and say so; status=pr_open
         - DIRTY (conflicts), BEHIND (base moved; update the branch), DRAFT
           → STOP and say which; status=pr_open
         Confirm: `gh pr view <pr> -R <slug> --json state -q .state` is MERGED. IF not (for
