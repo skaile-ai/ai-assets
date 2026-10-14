@@ -40,7 +40,7 @@ def validate(cwd: str) -> dict:
     v.skip("check for dirty working tree before creating branches or worktrees", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     v.skip("require typed confirmation for destructive operations (force-delete, discard)", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     v.skip("write git-state.json when branch or worktree is created", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
-    v.skip("run full test suite before any merge to main", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
+    v.skip("run full test suite before any merge to <default_branch>", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
 
     # ── CHECKLIST (runtime git operations — skipped) ──
     v.skip("Commit messages follow references/commit-spec.md format", rule_type="CHECKLIST", reason="see SKILL.md — semantic/runtime")

@@ -5,9 +5,9 @@ This document defines the commit message format for the standalone skaile repos 
 - The **git skill, commit mode** (primary path - agent writes the message)
 - The repo's **commit-msg git hook**, where it has one (safety net - validates the title format on the default branch)
 
-The target repo's own `CLAUDE.md` wins where it says more. The default branch is protected and PRs
-land by squash merge, so GitHub builds the commit from the **PR title**. The PR title must
-follow the same title rules.
+The target repo's own `CLAUDE.md` wins where it says more. Changes land by squash merge on
+GitHub, so GitHub builds the commit from the **PR title**. The PR title must follow the same
+title rules.
 
 There is **no `---agent---` YAML block**. It belonged to the retired `skaile-dev` shell; no
 standalone repo requires or consumes it, and nothing extracts decisions from commit messages.
