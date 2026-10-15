@@ -100,9 +100,11 @@ grant that mailbox for a period (see the caveat above).
 `save_mail_attachment` per attachment with the already-mounted SharePoint folder's mount id as
 `resourceId`, following the project's folder convention. Attachment names repeat
 (`image001.png`, `invoice.pdf`), so pass `onConflict: "rename"` when filing many mails into one
-folder. The bytes never pass through the conversation. A save into a running session's own `workspace` is still limited to
-about 12 MB (12,000,000 bytes); a SharePoint mount takes up to 100 MB. A read-only mount refuses
-the save.
+folder. The bytes never pass through the conversation. A save takes any attachment Exchange
+holds (up to 150 MB), into a SharePoint mount or the session's own `workspace`. One exception:
+a session whose agent runtime predates chunked writes refuses a `workspace` save above about
+12 MB (12,000,000 bytes) and says so — save that one to a SharePoint mount instead. A read-only
+mount refuses the save.
 
 ## Changing the mailbox — tiered
 
@@ -159,14 +161,16 @@ Real refusals, not conservatism:
 ## What is not here
 
 No permanent delete of a message, no delegated (other users') mailboxes, no shared-mailbox
-calendars, no attachment over 150 MB to a draft, no saved attachment over about 12 MB into a
-session's own `workspace` or over 100 MB into a SharePoint mount, and no recipient-restricted send grants. Check the
+calendars, no draft attachment over Exchange's 150 MB, no `workspace` save above about 12 MB
+on an agent runtime that predates chunked writes (save to a SharePoint mount), and no
+recipient-restricted send grants. Check the
 live registry before telling the owner any of those is impossible — then guide them to Outlook.
 
 Grounded in: `platform/docs/exchange-connector.md`,
 `platform/backend/libs/capabilities/src/handlers/exchange-mail.handler.ts` and
-`exchange-calendar.handler.ts`; `platform.save_mail_attachment`, the mount size ceilings and the
-150 MB `add_draft_attachment` limit: skaile-ai/platform#7617; standing disclosure grants for mail reads in a shared session:
+`exchange-calendar.handler.ts`; `platform.save_mail_attachment`'s mount write path and the
+150 MB `add_draft_attachment` limit: skaile-ai/platform#7617; chunked saves into a running
+session's `workspace`: skaile-ai/platform#7665; standing disclosure grants for mail reads in a shared session:
 skaile-ai/platform#6962 (`disclosure-policy.ts`, `disclosure-preparer.ts`),
 `platform/decisions/2026-10-08-standing-disclosure-grants.md`; marking mail read or unread:
 skaile-ai/platform#7597 (`platform.mark_mail_read`).
