@@ -129,7 +129,7 @@ mailboxes, the owner picks which mailboxes the project may use.
   access** again themselves.
 - Filing mail attachments into SharePoint is the agent combining steps (read the mail,
   save each attachment straight into a SharePoint mount) — there is no automatic filing
-  rule. Large attachments are saved without passing through the conversation.
+  rule. Attachments of any size are saved without passing through the conversation.
 - When the grant expires, the agent tells the user to reconnect.
 
 ## AI providers
