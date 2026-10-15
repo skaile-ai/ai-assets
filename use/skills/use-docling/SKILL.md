@@ -89,6 +89,9 @@ HF_HUB_OFFLINE=1 HF_HUB_DISABLE_TELEMETRY=1 \
     /path/to/document.pdf
 ```
 
+Run the whole block in **one** `bash` call: shell state does not persist between calls,
+so a split block runs with an empty `--output`.
+
 Defaults for this skill:
 
 - **Image export:** `placeholder` (no image files). Use `referenced` only when the user

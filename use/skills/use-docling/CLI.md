@@ -21,6 +21,9 @@ HF_HUB_OFFLINE=1 HF_HUB_DISABLE_TELEMETRY=1 \
     /path/to/document.pdf
 ```
 
+Run the whole block in **one** `bash` call: shell state does not persist between calls,
+so a split block runs with an empty `--output`.
+
 Change `--to` (`md`, `json`, `html`, `text`, `doctags`) for another format. Output goes to
 the scratch directory, never next to the source file.
 

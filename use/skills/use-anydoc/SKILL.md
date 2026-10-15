@@ -77,10 +77,12 @@ anydoc is the only read path we have.
 
 ## Setup
 
-No install and no API key. `npx` fetches the pinned package on first use:
+No install and no API key. `npx` fetches the pinned package on first use, so even
+`--help` gets the full prefix:
 
 ```bash
-npx -y @firecrawl/anydoc@0.2.4 --help
+env $(env | sed -n 's/^\(FIRECRAWL_[A-Za-z0-9_]*\)=.*/-u \1/p') -u NAPI_RS_NATIVE_LIBRARY_PATH \
+  timeout 120 npx -y @firecrawl/anydoc@0.2.4 --help
 ```
 
 ## Usage
