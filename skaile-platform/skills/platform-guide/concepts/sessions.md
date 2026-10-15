@@ -221,6 +221,6 @@ meter and breakdown: `session-context-usage.tsx`, `workspace.getContextUsage` /
 agent dialog AI Configuration controls shown only in Expert mode), platform #6810 (archived
 sessions are read-only: `session-lifecycle.service.ts` `SESSION_ARCHIVED`,
 `session-message.service.ts`, `workspace-status-screens.tsx`, `chat-input-area-banner.tsx`;
-the idle archive of spawned instances: `instance-lifecycle.service.ts` `runIdleSweep`), platform
+the idle archive of spawned instances: `instance-lifecycle.service.ts` `sweepIdleInstances`), platform
 #7546 (the idle archive skips a hire a person has written in and asks its owner to mark it done:
 `instance-lifecycle.service.ts` `keepForOwner`).
