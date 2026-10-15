@@ -38,14 +38,16 @@ PROVISIONING -> RUNNING -> HIBERNATING -> HIBERNATED -> WAKING -> RUNNING
   conversation kept. Archiving a running or hibernated session closes it first, so its work is
   synced back as in **Closed** above. Sessions are archived from the **Danger zone** at the
   bottom of the session settings **General** tab (Expert mode), or by marking a temporary hire
-  or helper done. A temporary hire or helper is also archived automatically once it has sat
-  stopped (hibernated, closed or errored) past its idle threshold: the job description's, for a
-  hire whose job description sets one, otherwise the platform's (4 hours by default). This idle
-  archive does not check whether a person wrote in it — that check belongs to the agent finishing
-  a child itself (`references/control-plane-capabilities.md`). Five minutes before the archive,
-  the hire is warned in its chat and woken for one turn to hand its open work to the agent that
-  started it. A message from that agent or from a person keeps it; its own messages do not. The
-  owner can always **Restore** it.
+  or helper done. A temporary hire or helper nobody has written in is also archived
+  automatically once it has sat stopped (hibernated, closed or errored) past its idle threshold:
+  the job description's, for a hire whose job description sets one, otherwise the platform's
+  (4 hours by default). Five minutes before the archive, the hire is warned in its chat and woken
+  for one turn to hand its open work to the agent that started it. A message from that agent
+  keeps it; its own messages do not. Once a person has written in it — the same rule the agent
+  finishing a child uses (`references/control-plane-capabilities.md`) — it is never archived for
+  being idle: it gets no warning, and when it passes its threshold its owner is asked in its chat
+  to mark it done (once per idle period, and not while an earlier request is still unanswered).
+  Only the owner ends it then. The owner can always **Restore** an archived hire.
   Ordinary sessions are never archived automatically; the 30-day rule above only closes them.
   An archived session is **read-only**: opening it shows its history without starting it, and it
   takes no messages. Its owner finds it in the project's **Archive** group in the sidebar (Expert
@@ -219,4 +221,6 @@ meter and breakdown: `session-context-usage.tsx`, `workspace.getContextUsage` /
 agent dialog AI Configuration controls shown only in Expert mode), platform #6810 (archived
 sessions are read-only: `session-lifecycle.service.ts` `SESSION_ARCHIVED`,
 `session-message.service.ts`, `workspace-status-screens.tsx`, `chat-input-area-banner.tsx`;
-the idle archive of spawned instances: `instance-lifecycle.service.ts` `runIdleSweep`).
+the idle archive of spawned instances: `instance-lifecycle.service.ts` `runIdleSweep`), platform
+#7546 (the idle archive skips a hire a person has written in and asks its owner to mark it done:
+`instance-lifecycle.service.ts` `keepForOwner`).

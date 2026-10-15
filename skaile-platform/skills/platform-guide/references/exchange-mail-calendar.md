@@ -47,7 +47,7 @@ nothing to pass on.
 
 **In a session someone besides the owner can read**, the mailbox is still the owner's: every mail
 or calendar read goes to the owner as a card, and the uncarded changes below (flagging,
-categories, saving attachments, drafts and their attachments) are refused unless the owner
+read/unread, categories, saving attachments, drafts and their attachments) are refused unless the owner
 asked. Calendar reads
 and `platform.list_mail_categories` are carded per read (no standing approval). A mail read
 (`platform.list_mail`, `search_mail`, `read_mail`, `read_mail_attachment`, `list_mail_folders`)
@@ -108,7 +108,7 @@ the save.
 
 | Tier | Capabilities | What happens |
 | --- | --- | --- |
-| No approval, reversible | `flag_mail`, `assign_mail_categories` | Runs directly. Category names are free text — a typo makes a new label. In a session others can read, refused unless the owner asked. |
+| No approval, reversible | `flag_mail`, `mark_mail_read`, `assign_mail_categories` | Runs directly. `mark_mail_read` takes up to 50 messages per call; `read_mail` never marks mail read. Category names are free text — a typo makes a new label. In a session others can read, refused unless the owner asked. |
 | No approval, writes a file | `save_mail_attachment({ messageId, attachmentId, path, resourceId?, onConflict? })` | Writes the attachment into a mount of this session (`resourceId` defaults to `workspace`) and returns only its path, size and SHA-256; the bytes never enter the conversation. An existing file is a conflict unless `onConflict` is `overwrite` or `rename`. In a session others can read, refused unless the owner asked, because the saved file is readable by everyone in the session. |
 | No approval, not outbound | `create_draft`, `add_draft_attachment`, `remove_draft_attachment` | Lands in that mailbox's real Outlook Drafts; nothing is sent. In a session others can read, refused unless the owner asked. Exception: attaching a file from another organization is carded every time, with no standing approval. |
 | Card, standing approval possible | `move_mail`, `copy_mail` (per destination folder); `create_mail_folder`, `rename_mail_folder`, `move_mail_folder`, `create_mail_category`, `delete_mail_category` (per mailbox) | Carded unless a standing approval already covers that shape; the card itself offers one. |
@@ -168,4 +168,5 @@ Grounded in: `platform/docs/exchange-connector.md`,
 `exchange-calendar.handler.ts`; `platform.save_mail_attachment`, the mount size ceilings and the
 150 MB `add_draft_attachment` limit: skaile-ai/platform#7617; standing disclosure grants for mail reads in a shared session:
 skaile-ai/platform#6962 (`disclosure-policy.ts`, `disclosure-preparer.ts`),
-`platform/decisions/2026-10-08-standing-disclosure-grants.md`.
+`platform/decisions/2026-10-08-standing-disclosure-grants.md`; marking mail read or unread:
+skaile-ai/platform#7597 (`platform.mark_mail_read`).
