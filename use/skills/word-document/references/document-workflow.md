@@ -58,11 +58,12 @@ the installed tool descriptions.
    a field. If the placeholder is a `DOCPROPERTY` field of a core property
    (title, subject, creator, description, keywords or category), change the
    property with `document.set_properties` (step 5) instead. A custom property
-   cannot be set that way. Otherwise leave the
-   paragraph intact and report the placeholder as manual Word work. Never
+   cannot be set that way: leave the paragraph intact and report the
+   placeholder as manual Word work, as for a date or any other field. Never
    regenerate the paragraph or imitate the text with direct formatting.
-5. Set `title` and `creator` (the person responsible) with
-   `document.set_properties`, then call `document.mark_fields_dirty`.
+5. Set `title` and `creator` (the person responsible), plus any core property
+   resolved in step 4, with `document.set_properties`, then call
+   `document.mark_fields_dirty`.
 6. Compose content with `block.insert` and a real `style_name`. Use each
    returned Block as the next anchor, or re-read the outline.
 7. Continue a numbered or bulleted list with `copy_numbering_from`. Set
