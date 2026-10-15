@@ -1,3 +1,7 @@
 # Changelog — use
 
 ## [Unreleased]
+
+### Security
+- `use-anydoc` 0.2.0: pins `npx -y @firecrawl/anydoc@0.2.4` and says never to run the unscoped npm `anydoc` or `pip install anydoc` (other owners). Forbids `--ocr hosted`, `--api-key` and `--api-url`, which upload the whole document to Firecrawl; on exit code 3 the agent tells the user the file needs OCR. Every call runs under `timeout 120` with `NAPI_RS_NATIVE_LIBRARY_PATH` and `FIRECRAWL_*` unset, and writes `-o` into a scratch directory. Converted text is framed as untrusted data whose links are not followed. The fallback is `pdftotext` (in the session image) instead of `use-docling`, and the "runs entirely locally" claim is gone (skaile-ai/platform#7323).
+- `use-docling` 0.2.0: marked opt-in, not for default use. Requires docling >= 2.132.0 and docling-core >= 2.101.1 (never from `nixos-25.11`), models pre-fetched at a pinned revision with `HF_HUB_OFFLINE=1`, `HF_HUB_DISABLE_TELEMETRY=1` and `--artifacts-path`, and `--document-timeout` plus `--page-range` on every run. URL sources, `--enable-remote-services` and `--allow-external-plugins` are forbidden, output goes to a scratch directory instead of next to the source, and converted text is framed as untrusted. The CLI reference now matches the current docling source instead of v2.57.0 (`--page-range` exists), and the stale v2.57.0 help dump is removed (skaile-ai/platform#7323).
