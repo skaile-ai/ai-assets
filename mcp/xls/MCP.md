@@ -80,7 +80,7 @@ useless as an opening move.
 
 - **`.xlsb` (binary workbooks)** — rejected at open; POI has no binary-workbook reader. Convert with `use-anydoc` for read-only extraction.
 - **`.csv`** — plain text with no cells, formulas or styling to preserve. Read and write it with ordinary file tools; neither this server nor an extraction path is needed.
-- **The file isn't a spreadsheet** (`.docx`, `.pdf`, `.odt`, `.rtf`, `.epub`) — `use-anydoc` reads all of these to Markdown; `use-docling` if it needs OCR.
+- **The file isn't a spreadsheet** (`.docx`, `.pdf`, `.odt`, `.rtf`, `.epub`) — `use-anydoc` reads all of these to Markdown; `use-docling` if it needs OCR, only where the project has opted into it.
 
 The two `use-anydoc` routes above are **read-only extraction paths, not a shortcut for editing**. Two traps if you use `use-anydoc` to orient before editing here:
 
