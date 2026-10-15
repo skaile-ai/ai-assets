@@ -64,8 +64,10 @@ absent — checking costs a call and changes nothing.)
 **SKIP** when — and only when — the task is reading with no edit intent (`use-anydoc` is cheaper —
 see **When NOT to reach for this** below), the file is not a `.docx`, or the user has explicitly
 asked for a script or a library rather than the result. A **house-Template deliverable is not a
-SKIP** — it still runs through this server; `use/skills/word-template/` sits on top of it and
-supplies the org template and writing guide.
+SKIP** — it still runs through this server. `use/skills/word-document/` sits on top of it: it finds
+the org's own template with `template.find` and adds generic writing rules.
+`use/skills/word-template/` is a client-specific example that bundles one house template and
+writing guide.
 
 ## When to reach for this
 

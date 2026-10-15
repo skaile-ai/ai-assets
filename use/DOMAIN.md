@@ -5,7 +5,7 @@ type: domain
 building_blocks:
   contracts: 'Integration skill conventions: output format (always JSON-compatible), error handling protocol, authentication patterns, and when to use CLI vs API variant.'
   docs: 'Service capability matrix, authentication setup guides, and rate-limit notes.'
-  skills: 'Service and tool-backed workflows: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), anydoc and docling (document extraction), word-template (template-derived Word production), elevenlabs (TTS), use-ideogram-image (image generation via REST), outline (wiki), decks (Skaile presentations), revealjs and slidev (other presentation workflows).'
+  skills: 'Service and tool-backed workflows: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), anydoc and docling (document extraction), word-document (generic organization Word documents) and word-template (a client-specific house-template example), elevenlabs (TTS), use-ideogram-image (image generation via REST), outline (wiki), decks (Skaile presentations), revealjs and slidev (other presentation workflows).'
   agents: 'TBD'
   prompts: 'TBD'
   tools: 'TBD'
@@ -43,7 +43,8 @@ This separation means service-specific knowledge (API quirks, rate limits, auth 
 | `decks`            | @skaile/decks               | Skaile presentations and customized batches with a pinned runtime |
 | `use-slidev`       | Slidev (sli.dev)            | Build slide decks in Skaile brand design                  |
 | `use-skills-sh`    | skills.sh                   | Discover and install agent skills from the open ecosystem |
-| `word-template`    | Word MCP                    | Produce Word documents from a bundled house template      |
+| `word-document`    | Word MCP                    | Create or edit org Word documents from the org's own template |
+| `word-template`    | Word MCP                    | Client-specific example: Word documents from a bundled house template |
 
 ## Conventions
 
