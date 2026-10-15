@@ -53,9 +53,10 @@ or for files that are not `.docx`.
 ## Core workflow
 
 1. **Find the organization's template.** Call `template.find`, which searches
-   under the sandbox root using `DOCX_MCP_TEMPLATE_GLOB`. Pick the file that is
-   clearly the organization's template; if several candidates remain and the
-   choice is not obvious, ask the user.
+   for `.docx` files under `DOCX_MCP_ROOT`, narrowed by `DOCX_MCP_TEMPLATE_GLOB`
+   only where the session sets it, so it may list every document in the
+   workspace. Use a file only if it is clearly the organization's template; if
+   the choice is not obvious, ask the user. Never derive from an ordinary draft.
 2. **Start the document.** If a template was found, call `document.create_from`
    with it. If none exists, call `document.create_blank` and tell the user the
    result uses the neutral baseline, not a house template. To change an existing

@@ -22,13 +22,19 @@ the installed tool descriptions.
 
 ## Choose the starting point
 
-1. Call `template.find`. It searches under `DOCX_MCP_ROOT` using
-   `DOCX_MCP_TEMPLATE_GLOB`.
+1. Call `template.find`. It searches for `.docx` files under `DOCX_MCP_ROOT`;
+   `DOCX_MCP_TEMPLATE_GLOB` narrows the search only where the session sets it,
+   so the result may be every document in the workspace rather than a curated
+   template list.
 2. Select the organization's template:
    - One clear candidate: use it.
    - Several candidates: prefer the one the user or the project names; if the
      choice is still ambiguous, ask the user rather than guess.
+   - Many unrelated documents and no file that is recognizably a template: do
+     not pick one. Ask the user which file is the template; if there is none,
+     treat it as no template found.
    - None: fall back to `document.create_blank`.
+   Never derive a new document from an ordinary draft or deliverable.
 3. A blank document is a neutral baseline (A4, Arial defaults, baseline Named
    styles, single-level number and bullet definitions, bordered `TableGrid`). It
    has no branding, headers, footers, organization metadata, automatic heading
@@ -47,7 +53,11 @@ the installed tool descriptions.
 3. Call `style.list` to learn the document's real Named styles. Use `style.get`
    when you need a style's resolved properties.
 4. Replace template placeholder text with block-scoped `text.replace`. There is
-   no whole-document replace.
+   no whole-document replace. `text.replace` refuses a paragraph that contains
+   a field. If the placeholder is a `DOCPROPERTY` field, change the property
+   with `document.set_properties` (step 5) instead; otherwise leave the
+   paragraph intact and report the placeholder as manual Word work. Never
+   regenerate the paragraph or imitate the text with direct formatting.
 5. Set `title` and `creator` (the person responsible) with
    `document.set_properties`, then call `document.mark_fields_dirty`.
 6. Compose content with `block.insert` and a real `style_name`. Use each

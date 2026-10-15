@@ -6,7 +6,8 @@ rule from this file only where the organization has not set its own.
 
 ## Structure
 
-- Headings go no deeper than three levels (`Heading1` to `Heading3`).
+- Headings go no deeper than three levels: the document's level-1 to level-3
+  heading styles, by their real names from `style.list`.
 - Headings have no full stop.
 
 ## Punctuation and typography
