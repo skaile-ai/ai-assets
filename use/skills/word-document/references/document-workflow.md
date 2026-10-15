@@ -47,9 +47,9 @@ the installed tool descriptions.
    response.
    - Template: find its title placeholder and the paragraph where content
      begins.
-   - Blank: the response names the initial paragraph (`p-1`). It is visible
-     content: insert the first real Block after it, then remove it with
-     `block.delete`.
+   - Blank: the response names the initial paragraph as `initial_block`
+     (currently `p-1`). It is visible content: insert the first real Block
+     after it, then remove it with `block.delete`.
 3. Call `style.list` to learn the document's real Named styles. Use `style.get`
    when you need a style's resolved properties.
 4. Replace template placeholder text with block-scoped `text.replace`. There is
