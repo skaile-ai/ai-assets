@@ -343,8 +343,8 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   the child on another model; the card names it. On any other template a `model` is refused
   before a card exists, so leave it out.
 - **No link is needed between you and a child.** You and it can `send_to_session` and
-  `notify_when_idle` each other for as long as neither is archived (a child left stopped past its
-  idle threshold is archived on its own, `concepts/sessions.md`); do not propose a link. Your
+  `notify_when_idle` each other for as long as neither is archived (a child nobody has written in is
+  archived on its own once left stopped past its idle threshold, `concepts/sessions.md`); do not propose a link. Your
   messages, the task included, never count as the human turn, so this session keeps the right to
   close and archive the child (see *Finish a child* below) until a person writes in it. The send
   and budget rules are the ordinary ones in *Agent-to-Agent* (`concepts/collaboration.md`).
@@ -368,8 +368,9 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
   after that, it still runs, but its result is not kept:
   `platform.get_operation({ invocationId })` tells you only that they approved, not whether the
   child was archived or asked to be marked done. Read the child instead:
-  `platform.list_my_sessions({ archived: true })` lists it if it was archived (by this call, or by
-  the idle archive in `concepts/sessions.md`, which does not mean nobody wrote in it; its history,
+  `platform.list_my_sessions({ archived: true })` lists it if it was archived (by this call, by its
+  owner marking it done, or by the idle archive in `concepts/sessions.md`, which only archives a
+  child nobody has written in; its history,
   `platform.read_session_history`, shows whether the owner was asked to mark it done); otherwise it is
   still open, and either the owner was asked in it to mark it done or the request could not be
   posted (`not_delivered`, below). Read its history (`platform.read_session_history`) for the
@@ -385,17 +386,18 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
     for 30 days), only the archive happens: its work was synced back when it closed.
   - `proposed`: a person has written there, even while the card waited, so the child is not
     archived by this call and the owner is asked in it to mark it done. This is checked first, so
-    it holds for an already-closed child too. It does not protect the child from the idle archive:
-    a child left stopped past its idle threshold is archived anyway (`concepts/sessions.md`,
-    **Archived**), and its owner can **Restore** it. Do not call again: it posts that request once until a
+    it holds for an already-closed child too. The child is not archived for being idle either:
+    once it passes its idle threshold the owner is reminded in it to mark it done, unless this
+    request is still unanswered (`concepts/sessions.md`, **Archived**). Only the owner ends it. Do not call again: it posts that request once until a
     person answers there, so a repeat changes nothing.
   - `already_done`: the child was archived while the card waited. Nothing more to do.
 
   One refusal comes only when it runs: `not_delivered`, a code, not a `status`. A person has
   written in the child and the request to mark it done could not be posted there, so the child
   is not archived by this call. Do not retry; tell the owner in this session that the child is
-  done, and that it will be archived on its own once left stopped past its idle threshold
-  (`concepts/sessions.md`, **Archived**) unless they keep working in it.
+  done and that only they can end it (mark it done in its chat, or archive it): a child a person
+  has written in is not archived for being idle. When it passes its idle threshold the platform
+  tries again to ask its owner, in it, to mark it done (`concepts/sessions.md`, **Archived**).
 - **A shared template reports back with a send, not an ask.** Ask the child to send you its
   result when done, and subscribe to it (`platform.notify_when_idle`) to hear that it has
   finished.
@@ -479,7 +481,7 @@ already answers to it), `empty_name` or `name_too_long` (over 120 characters). I
 - **It takes no task.** Once it has `Succeeded`, send it its task with
   `platform.send_to_session`. You and it reach each other (`send_to_session`,
   `notify_when_idle`) with no link for as long as neither is archived (it is archived on its own
-  once left stopped past its idle threshold), and
+  once left stopped past its idle threshold, unless a person has written in it), and
   `platform.list_peers` shows it to you with `relation: "child"` and you to it with
   `"spawner"`; ask it to `send` you its result, and close it with
   `platform.finish_spawned_instance` when its work is done.
@@ -771,7 +773,8 @@ including **Edit job description…**); skaile-ai/platform#6653 (what a helper c
 `session-carry.ts`) and #6654 (a helper's own agent name and the name check: `agent-spawn.service.ts`,
 `spawn-subagent-policy.service.ts`); skaile-ai/platform#6810 (archived sessions are read-only, the
 **Restore** label, the idle archive of spawned instances: `instance-lifecycle.service.ts`
-`sweepIdleInstances`); skaile-ai/platform#7348 (`canWrite: false` and `readOnlyReason` for a
+`sweepIdleInstances`); skaile-ai/platform#7546 (the idle archive skips a child a person has written
+in and asks its owner to mark it done: `keepForOwner`); skaile-ai/platform#7348 (`canWrite: false` and `readOnlyReason` for a
 read-only Private workspace: `owner-scoped-discovery.handler.ts`) and #7342
 (`operation_create_project_space_read_only`: `create-project-policy.service.ts`), and
 skaile-ai/platform#6962 (standing disclosure grants: `disclosure-policy.ts`,
