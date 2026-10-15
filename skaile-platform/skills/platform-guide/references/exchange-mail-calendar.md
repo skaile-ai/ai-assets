@@ -98,8 +98,9 @@ grant that mailbox for a period (see the caveat above).
 
 **Filing a mail into SharePoint** is composition, not a capability: `read_mail`, then
 `save_mail_attachment` per attachment with the already-mounted SharePoint folder's mount id as
-`resourceId`, following the project's folder convention. The bytes never pass
-through the conversation. A save into a running session's own `workspace` is still limited to
+`resourceId`, following the project's folder convention. Attachment names repeat
+(`image001.png`, `invoice.pdf`), so pass `onConflict: "rename"` when filing many mails into one
+folder. The bytes never pass through the conversation. A save into a running session's own `workspace` is still limited to
 about 12 MB (12,000,000 bytes); a SharePoint mount takes up to 100 MB. A read-only mount refuses
 the save.
 
@@ -158,7 +159,8 @@ Real refusals, not conservatism:
 ## What is not here
 
 No permanent delete of a message, no delegated (other users') mailboxes, no shared-mailbox
-calendars, no attachments over 150 MB, and no recipient-restricted send grants. Check the
+calendars, no attachment over 150 MB to a draft, no saved attachment over about 12 MB into a
+session's own `workspace` or over 100 MB into a SharePoint mount, and no recipient-restricted send grants. Check the
 live registry before telling the owner any of those is impossible — then guide them to Outlook.
 
 Grounded in: `platform/docs/exchange-connector.md`,
