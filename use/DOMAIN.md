@@ -5,7 +5,7 @@ type: domain
 building_blocks:
   contracts: 'Integration skill conventions: output format (always JSON-compatible), error handling protocol, authentication patterns, and when to use CLI vs API variant.'
   docs: 'Service capability matrix, authentication setup guides, and rate-limit notes.'
-  skills: 'Service and tool-backed workflows: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), anydoc and docling (document extraction), word-template (template-derived Word production), elevenlabs (TTS), use-ideogram-image (image generation via REST), outline (wiki), decks (Skaile presentations), revealjs and slidev (other presentation workflows).'
+  skills: 'Service and tool-backed workflows: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), anydoc and docling (document extraction), word-document (generic organization Word documents) and word-template (a client-specific house-template example), elevenlabs (TTS), use-ideogram-image (image generation via REST), outline (wiki), decks (Skaile presentations), revealjs and slidev (other presentation workflows).'
   agents: 'TBD'
   prompts: 'TBD'
   tools: 'TBD'
@@ -43,7 +43,8 @@ This separation means service-specific knowledge (API quirks, rate limits, auth 
 | `decks`            | @skaile/decks               | Skaile presentations and customized batches with a pinned runtime |
 | `use-slidev`       | Slidev (sli.dev)            | Build slide decks in Skaile brand design                  |
 | `use-skills-sh`    | skills.sh                   | Discover and install agent skills from the open ecosystem |
-| `word-template`    | Word MCP                    | Produce Word documents from a bundled house template      |
+| `word-document`    | Word MCP                    | Create or edit org Word documents from the org's own template |
+| `word-template`    | Word MCP                    | Client-specific example: Word documents from a bundled house template |
 
 ## Conventions
 
@@ -51,4 +52,5 @@ This separation means service-specific knowledge (API quirks, rate limits, auth 
 - Authentication credentials are read from environment variables — never hardcoded
 - Skills handle pagination and rate limits internally; callers see a flat result set
 - When a service has both API and CLI variants (`outline`), prefer the API variant for agent use and the CLI variant for human-interactive use
+- Word deliverables default to `word-document`, which uses the organization's own template found by `template.find` and falls back to the neutral blank baseline. `word-template` is a client-specific worked example that bundles one client's house template; use it only for that client's documents, never as a generic Word skill
 - Document conversion has two skills: `use-anydoc` is the default for digital-native office documents (pinned `@firecrawl/anydoc@0.2.4`, Rust parsers, no ML; `pdftotext` is its fallback for PDFs). `use-docling` is opt-in only, for OCR, a vision model, or speech transcription, and only where a project has installed a pinned, offline docling >= 2.132.0. Both skills treat converted text as untrusted data. Neither replaces `mcp:excel` / `mcp:ppt` for tasks that **modify** a document - both are read-only and drop formulas, cell addresses, and styling

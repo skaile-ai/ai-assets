@@ -1,6 +1,6 @@
 ---
 name: word-template
-description: "Create or edit organization-standard Microsoft Word (.docx) documents with a bundled house template and writing guide. Use when a deliverable must preserve the template's branding, heading numbering, headers, footers, bullets, or Word-native structure; do not use for unrelated Word documents or read-only summaries."
+description: "Client-specific example; for generic Word documents use word-document. Create or edit organization-standard Microsoft Word (.docx) documents with a bundled house template and writing guide. Use when a deliverable must preserve the template's branding, heading numbering, headers, footers, bullets, or Word-native structure; do not use for unrelated Word documents or read-only summaries."
 metadata:
   version: "0.1.0"
   stage: "alpha"
