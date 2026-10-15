@@ -6,7 +6,7 @@ Desired trigger for the skill:
 
 ## Workflow Execution
 
-1. **Ingestion & Deep Research**: The agent creates the folder `monolith_microservices_podcast/`. It calls the `pdf-to-markdown` skill (or uses `use-docling`) to extract the text from the PDF, saving it as `source_material.md`. It then uses the `web_search_deep` tool to find recent industry examples, related controversies, and background on the authors, saving these findings to `research_notes.md`.
+1. **Ingestion & Deep Research**: The agent creates the folder `monolith_microservices_podcast/`. It uses the `use-anydoc` skill to extract the text from the PDF, saving it as `source_material.md`. It then uses the `web_search_deep` tool to find recent industry examples, related controversies, and background on the authors, saving these findings to `research_notes.md`.
 2. **Configuration**: The agent analyzes both the source material and the research notes, then drafts `focus.md`, `host_a.json`, and `host_b.json` inside the episode folder, asking the user for approval.
 3. **Outlining**: The agent generates an `outline.md` defining 4 distinct chapters (Act I, Act IIa, Act IIb, Act III/Epilogue), complete with character limits, dialectical goals, and specific concepts to cover for each.
 4. **Delegation**: The agent uses the `task` tool, fanning out to 4 subagents. Each subagent is assigned one chapter from the outline.

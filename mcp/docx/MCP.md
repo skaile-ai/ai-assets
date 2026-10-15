@@ -89,8 +89,8 @@ supplies the org template and writing guide.
 ## When NOT to reach for this
 
 - **The file isn't a `.docx`** (`.xlsx`, `.pptx`, `.pdf`, `.odt`, `.rtf`) — use the matching
-  sibling MCP (`excel`, `ppt`) or `use-anydoc` / `use-docling` for read-only extraction of
-  other formats.
+  sibling MCP (`excel`, `ppt`) or `use-anydoc` for read-only extraction of other formats (`use-docling` only where
+  the project has opted into it).
 - **OOXML Strict documents** (rare; usually produced by non-Microsoft tooling) can't be opened
   at all without the `allow_convert` fallback — see Limitations.
 - **Quick prose reading with no edit intent** — `use-anydoc` is cheaper for "what does this

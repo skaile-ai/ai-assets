@@ -21,7 +21,7 @@ This skill relies purely on your agentic abilities and tools. You **MUST** execu
 1. **Initialize Project**: Use the `init-podcast.py` CLI to set up the directory structure and templates:
    `uv run .agent/tools/init-podcast.py <episode_name> --type writer`
    This creates `episodes/<episode_name>/` with `30_podcast_concept/en/setup/` and `30_podcast_concept/de/setup/` containing the required templates.
-2. **Document Conversion**: If the provided source is a PDF or other non-text format, use the `pdf-to-markdown` skill or `use-docling` to extract and convert the text. Save this as `10_source/<filename>.md`.
+2. **Document Conversion**: If the provided source is a PDF or other non-text format, use the `use-anydoc` skill to extract and convert the text. Save this as `10_source/<filename>.md`.
 3. **Web Context & Research**: Use `web_search`, `web_search_deep`, or `use-perplexity` to research the topic, authors, related controversies, and real-world applications. Synthesize these findings into `20_research/research_notes.md`.
 
 ### Phase 2: Planning & Setup

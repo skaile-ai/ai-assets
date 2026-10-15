@@ -47,10 +47,12 @@ If any of these checks fails, stop and tell the user. Do not work around it.
 
 - **Always run offline:** set `HF_HUB_OFFLINE=1` and `HF_HUB_DISABLE_TELEMETRY=1`, and pass
   `--artifacts-path <models dir>`.
-- **Always bound the work:** pass `--document-timeout <seconds>` (for example `300`) and
-  `--page-range <from>-<to>` (for example `1-50`; page numbers start at 1). docling has no
-  page or size limit by default, so a hostile or huge file can use up the container's CPU
-  and memory. Also wrap the call in `timeout`.
+- **Always bound the work:** pass `--document-timeout <seconds>` (for example `300`) on
+  every run, and `--page-range <from>-<to>` (for example `1-50`; page numbers start at 1)
+  on every PDF, XLSX or PPTX (the backends that honour it). Audio (`--pipeline asr`) and
+  other inputs without pages are bounded by `--document-timeout` and the outer `timeout`
+  alone. docling has no page or size limit by default, so a hostile or huge file can use
+  up the container's CPU and memory. Always wrap the call in `timeout`.
 - **Local files only.** Never pass a URL as the source. docling fetches URL sources itself.
 - **Never pass `--enable-remote-services`** (sends content to remote model services) or
   **`--allow-external-plugins`**, and keep `--html-image-fetch` at its default `none`.
@@ -115,18 +117,18 @@ the current working directory, so always pass `--output`.
 | `--output` | path | `.` | Output directory. Always a scratch dir |
 | `--artifacts-path` | path | none | Pre-fetched model directory. **Required here** |
 | `--document-timeout` | seconds (float) | none | **Required here** |
-| `--page-range` | `<from>-<to>`, e.g. `1-4` | all pages | **Required here.** Honoured by the PDF, XLSX and PPTX backends |
+| `--page-range` | `<from>-<to>`, e.g. `1-4` | all pages | **Required here** for PDF, XLSX and PPTX (the backends that honour it) |
 | `--image-export-mode` | `placeholder`, `embedded`, `referenced` | `embedded` | This skill uses `placeholder` |
 | `--table-mode` | `fast`, `accurate` | `accurate` | |
 | `--ocr` / `--no-ocr` | — | `--ocr` | |
-| `--ocr-engine` | `auto`, `easyocr`, `rapidocr`, `tesserocr`, `tesseract` | `auto` | |
+| `--ocr-engine` | e.g. `auto`, `easyocr`, `rapidocr`, `tesserocr`, `tesseract` | `auto` | The list is built at run time from the installed engines; `docling --help` shows it. Never an external engine (that needs `--allow-external-plugins`) |
 | `--pipeline` | `standard`, `vlm`, `asr` | `standard` | |
 | `--vlm-model` | e.g. `granite_docling`, `granite_vision`, `smoldocling` | `granite_docling` | Only when needed |
 | `--asr-model` | `whisper_tiny` ... `whisper_large`, `whisper_turbo` | `whisper_tiny` | Audio only |
 | `--html-image-fetch` | `none`, `local`, `remote`, `all` | `none` | Keep `none` |
 | `--enable-remote-services` | — | off | **Never** |
 | `--allow-external-plugins` | — | off | **Never** |
-| `--enrich-code` / `--enrich-formula` / `--enrich-picture-class` / `--enrich-picture-desc` | — | off | Each needs its model in the artifacts path |
+| `--enrich-code` / `--enrich-formula` / `--enrich-picture-classes` / `--enrich-picture-description` / `--enrich-chart-extraction` | — | off | Each needs its model in the artifacts path |
 | `--num-threads` | int | 4 | |
 | `--device` | `auto`, `cpu`, `cuda`, `mps` | `auto` | |
 | `--abort-on-error` | — | off | |

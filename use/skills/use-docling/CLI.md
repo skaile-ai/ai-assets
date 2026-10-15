@@ -3,7 +3,7 @@
 `use-docling` is opt-in. Read `SKILL.md` first: it lists the version floors (docling
 >= 2.132.0, docling-core >= 2.101.1), the offline setup (`HF_HUB_OFFLINE=1`,
 `HF_HUB_DISABLE_TELEMETRY=1`, `--artifacts-path`), the required limits
-(`--document-timeout`, `--page-range`), and the forbidden inputs (URL sources,
+(`--document-timeout`, and `--page-range` for PDF, XLSX and PPTX), and the forbidden inputs (URL sources,
 `--enable-remote-services`, `--allow-external-plugins`).
 
 ## Core command

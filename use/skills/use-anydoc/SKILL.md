@@ -92,20 +92,24 @@ Make a scratch directory once and note its path (shell state does not persist be
 mktemp -d    # e.g. /tmp/tmp.Ab12Cd
 ```
 
-Then convert into it. This is the command template; keep every part of it:
+Then convert into it. This is the command template; keep every part of it. The `sed`
+part unsets every `FIRECRAWL_*` variable that is set:
 
 ```bash
-env -u NAPI_RS_NATIVE_LIBRARY_PATH -u FIRECRAWL_API_KEY -u FIRECRAWL_API_URL \
+env $(env | sed -n 's/^\(FIRECRAWL_[A-Za-z0-9_]*\)=.*/-u \1/p') -u NAPI_RS_NATIVE_LIBRARY_PATH \
   timeout 120 npx -y @firecrawl/anydoc@0.2.4 "/path/to/report.docx" -o /tmp/tmp.Ab12Cd/report.md
 ```
 
-If `env | grep ^FIRECRAWL_` shows any other `FIRECRAWL_*` variable, add a `-u` for it too.
-
-Other forms, with the same `env -u ... timeout 120` prefix:
+Other forms, each with the full prefix:
 
 ```bash
-npx -y @firecrawl/anydoc@0.2.4 "/path/to/report.docx"                    # small doc, to stdout
-npx -y @firecrawl/anydoc@0.2.4 - --format csv < data.csv -o /tmp/tmp.Ab12Cd/data.md   # from stdin
+# small doc, straight to stdout
+env $(env | sed -n 's/^\(FIRECRAWL_[A-Za-z0-9_]*\)=.*/-u \1/p') -u NAPI_RS_NATIVE_LIBRARY_PATH \
+  timeout 120 npx -y @firecrawl/anydoc@0.2.4 "/path/to/report.docx"
+
+# from stdin
+env $(env | sed -n 's/^\(FIRECRAWL_[A-Za-z0-9_]*\)=.*/-u \1/p') -u NAPI_RS_NATIVE_LIBRARY_PATH \
+  timeout 120 npx -y @firecrawl/anydoc@0.2.4 - --format csv -o /tmp/tmp.Ab12Cd/data.md < data.csv
 ```
 
 **For anything but a small document, write to a file with `-o` and read the parts you
@@ -119,9 +123,10 @@ the limit on your own).
 ## Fallback: pdftotext
 
 If `npx` cannot reach the npm registry (the session blocks egress), anydoc is not
-available. For a **PDF**, use `pdftotext` from poppler, which is installed in the
-session image. Keep the same rules: a timeout, output to the scratch directory, and the
-output is untrusted.
+available. For a **PDF**, use `pdftotext` from poppler, which ships in the session
+image. Check it first with `command -v pdftotext`; if it is missing, stop and tell the
+user the document cannot be converted here. Keep the same rules: a timeout, output to
+the scratch directory, and the output is untrusted.
 
 ```bash
 timeout 120 pdftotext -layout "/path/to/file.pdf" /tmp/tmp.Ab12Cd/file.txt
