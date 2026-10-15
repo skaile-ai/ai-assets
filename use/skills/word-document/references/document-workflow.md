@@ -34,6 +34,7 @@ the installed tool descriptions.
      not pick one. Ask the user which file is the template; if there is none,
      treat it as no template found.
    - None: fall back to `document.create_blank`.
+
    Never derive a new document from an ordinary draft or deliverable.
 3. A blank document is a neutral baseline (A4, Arial defaults, baseline Named
    styles, single-level number and bullet definitions, bordered `TableGrid`). It
@@ -54,8 +55,10 @@ the installed tool descriptions.
    when you need a style's resolved properties.
 4. Replace template placeholder text with block-scoped `text.replace`. There is
    no whole-document replace. `text.replace` refuses a paragraph that contains
-   a field. If the placeholder is a `DOCPROPERTY` field, change the property
-   with `document.set_properties` (step 5) instead; otherwise leave the
+   a field. If the placeholder is a `DOCPROPERTY` field of a core property
+   (title, subject, creator, description, keywords or category), change the
+   property with `document.set_properties` (step 5) instead. A custom property
+   cannot be set that way. Otherwise leave the
    paragraph intact and report the placeholder as manual Word work. Never
    regenerate the paragraph or imitate the text with direct formatting.
 5. Set `title` and `creator` (the person responsible) with
