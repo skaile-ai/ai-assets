@@ -92,7 +92,7 @@ Reading connector readiness is the one that most often ends the task early:
 
 `platform.list_grants({ kind?, limit? })` answers "what have I approved?" and "who can use my
 mailbox?". It lists the grants the owner gave that are still in force, newest first. `kind`
-picks one of four:
+narrows it to one of four; leave it off for all four:
 
 - `standing_approval`: a standing approval of one capability, with its scope, expiry and caps.
 - `standing_disclosure`: a standing approval to show one source, such as a mailbox, in a shared
@@ -108,8 +108,8 @@ creation time and who may use it.
 - **Only in the owner's own assistant.** It is not offered elsewhere (`not_assistant_session`). It lists
   the owner's grants only, never anyone else's.
 - **It is confined like the lists above.** An assistant whose Home is in a business workspace
-  sees only that workspace's grants. The home assistant does not see an organization at
-  **Off** reach. So an empty list is not proof that nothing was granted.
+  sees only that workspace's grants. The home assistant sees an organization at **Coordinate**
+  or **Full** reach, not one at **Off**. So an empty list is not proof that nothing was granted.
 - **`truncated: true`** means older standing grants were not read at all, so they are not in
   `total` either.
 - **Not listed:** a mailbox shared with every agent of its project. That is a project setting,

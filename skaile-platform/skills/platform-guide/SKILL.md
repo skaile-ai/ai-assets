@@ -69,6 +69,10 @@ keywords:
   - spawn-subagent
   - subagent
   - finish-spawned-instance
+  - hire-agent
+  - permanent-hire
+  - retire
+  - list-grants
   - organization-branding
   - create-agent-template
 ---
