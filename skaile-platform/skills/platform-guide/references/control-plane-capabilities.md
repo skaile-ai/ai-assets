@@ -305,18 +305,16 @@ work — never call it an assistant. A long-lived agent is a **hire** only where
 it apart from those two. Capability names, ids and fields keep the code
 words (`agent_template`, `templateId`, `instance`, `subagent`); say the product words to people.
 
-Four effects create a template or act on one or its instances, from any session in that project,
+Six effects create a template or act on one or its instances, from any session in that project,
 as the session owner; only the session owner decides their cards. Your personal assistant can
 also read, create or edit a template in another project by naming it with `projectId` (below).
-`create_agent_template`, `spawn_agent` and `update_agent_template` are durable: each returns an
+`create_agent_template`, `spawn_agent`, `hire_agent` and `update_agent_template` are durable: each returns an
 operation receipt, read with `platform.get_operation` (*The operation lifecycle* below), and
-`result.payload` is set once it has `Succeeded`. `finish_spawned_instance` is not: once it runs
-it returns its result itself, with no operation id and nothing to poll.
+`result.payload` is set once it has `Succeeded`. `finish_spawned_instance` and `retire` are not:
+once one runs it returns its result itself, with no operation id and nothing to poll.
 
-Besides those four, a fifth effect, `platform.spawn_subagent`, starts a helper, a copy of this
-session rather than a temporary hire from a job description (*Helpers* below). A sixth,
-`platform.hire_agent`, hires from a job description as a temporary or a permanent hire (row
-below). It is durable too, and also runs as the session owner.
+Besides those six, one more effect, `platform.spawn_subagent`, starts a helper, a copy of this
+session rather than a hire from a job description (*Helpers* below).
 
 Two reads need no card. `platform.list_agent_templates({ projectId? })` lists all of this
 project's live templates in one reply (it takes no paging arguments): each one's `id`, `name`,

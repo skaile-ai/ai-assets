@@ -152,10 +152,11 @@ agent-to-agent link (*Job descriptions* in
 with `platform.finish_spawned_instance`, which closes it (with the usual sync-back) and archives
 it or, once a person has written there, asks the owner to mark it done (same section).
 `platform.hire_agent` hires from a job description too, with `kind: "temporary"` (the same as
-`spawn_agent`) or `kind: "permanent"`: a standing member of the team with no parent session,
-never archived when idle, ended with `platform.retire`. The owner approves every permanent hire
-on a card (same section). From
-scratch, it uses the platform action **Create a new agent in a project** (find it with
+`spawn_agent`) or `kind: "permanent"`: a standing member of the team that runs as the session
+owner, with no parent session, never archived when idle, ended with `platform.retire`. The owner
+approves every permanent hire on a card (same section).
+
+From scratch, an agent uses the platform action **Create a new agent in a project** (find it with
 `platform.find_actions`). That action takes the project id — listing the current project's
 sessions returns it as `projectId` — a name, and optionally a one-line description, instructions
 (the dialog's **Prompt**), an identity, and **Shared** (the default) or **Private**. In a
