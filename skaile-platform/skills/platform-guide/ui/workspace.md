@@ -31,8 +31,8 @@ title, actions) — not flush-joined panes.
    - **Stop** (the composer button), **Escape**, or **Stop the agent** in the command
      palette ends the agent's current turn. Escape stops only the session on screen —
      never one open in a background tab — and closes the tab once the agent is idle.
-     Every stop leaves a line in the chat naming who stopped the run. In a session that
-     runs a workflow, Skaile asks **Stop this workflow run?** first (**Stop the run** /
+     Every stop leaves a line in the chat naming who stopped the run. In a session running
+     a flow, Skaile asks **Stop this workflow run?** first (**Stop the run** /
      **Keep running**): a stopped step does not resume by itself, so afterwards the user
      asks the agent in chat to continue.
    - **A sleeping (hibernated) session** opens straight to its stored conversation, with a
