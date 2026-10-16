@@ -181,6 +181,8 @@ The Assistant panel with the Work and Private spaces flag on
 (`assistant-companion-tab/`, `assistant-launcher/`): platform `main` @ `7687851fb` (2026-10-02).
 The **Report a problem** review-or-send-directly choice: platform `main` @ `c59fd243b` (2026-09-28).
 The chat's turn progress, *Waiting for ...* line and queued-message **Stop current work**
-(`components/ui/agent-thinking-indicator/`, `components/ui/chat-message/chat-message.tsx`,
-`pages/workspace/parts/chat-message-list.controller.ts`, `hooks/turn-progress.helpers.ts`):
-platform#7746 @ `878d1889a` (2026-10-16). Quoted copy matches the rendered ASCII text.
+(`frontend/src/components/ui/agent-thinking-indicator/`,
+`frontend/src/components/ui/chat-message/chat-message.tsx`,
+`frontend/src/pages/workspace/parts/chat-message-list.controller.ts`,
+`frontend/src/hooks/turn-progress.helpers.ts`; issue platform#7740, PR platform#7746):
+platform `main` @ `cdab5a6b3` (2026-10-16). Quoted copy matches the rendered ASCII text.
