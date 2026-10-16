@@ -88,6 +88,37 @@ Reading connector readiness is the one that most often ends the task early:
   credential, so connecting it is an organization-level change. Say so; do not assume you can
   complete it.
 
+### The owner's grants
+
+`platform.list_grants({ kind?, limit? })` answers "what have I approved?" and "who can use my
+mailbox?". It lists the grants the owner gave that are still in force, newest first. `kind`
+narrows it to one of four; leave it off for all four:
+
+- `standing_approval`: a standing approval of one capability, with its scope, expiry and caps.
+- `standing_disclosure`: a standing approval to show one source, such as a mailbox, in a shared
+  session.
+- `agent_access`: a session or job description allowed to use a resource such as a mailbox;
+  `usableBy` says who.
+- `agent_link`: one session allowed to reach another.
+
+`limit` defaults to 50 and caps at 100. The reply has `total`, `returned`, `omitted` (grants
+past `limit`), `truncated` and `grants`; each grant has its kind, target, scope, expiry, caps,
+creation time and who may use it.
+
+- **Only in the owner's own assistant.** It is not offered elsewhere (`not_assistant_session`). It lists
+  the owner's grants only, never anyone else's.
+- **It is confined like the lists above.** An assistant whose Home is in a business workspace
+  sees only that workspace's grants. The home assistant sees an organization at **Coordinate**
+  or **Full** reach, not one at **Off**. So an empty list is not proof that nothing was granted.
+- **`truncated: true`** means older standing grants were not read at all, so they are not in
+  `total` either.
+- **Not listed:** a mailbox shared with every agent of its project. That is a project setting,
+  not a grant.
+- **Consent.** No card while the owner is the only reader of your session. Once anyone else can
+  read it, each call goes to the owner as a card, and no standing grant covers it.
+- **Read-only.** You cannot revoke a grant. Tell the owner to revoke it in Skaile; never call
+  another capability to undo one.
+
 ### Files in the owner's other sessions
 
 The personal assistant can read and change a text file in the `workspace` of another of the
@@ -221,8 +252,9 @@ session, while `run_flow_in_session` names another session and refuses the calli
 Creating an agent from an ordinary session is not `create_session` (above, assistant-only),
 and it takes one of two routes. From scratch, it is the platform action **Create a new agent in
 a project**, found through `platform.find_actions` (`concepts/sessions.md`). From one of the
-project's agent templates, it is `platform.spawn_agent` (*Job descriptions* below), which makes
-the new agent a child of this session that it can message with no link. An agent created from
+project's agent templates, it is `platform.spawn_agent` or `platform.hire_agent` (*Job
+descriptions* below). A temporary hire is a child of this session that it can message with no
+link. An agent created from
 scratch is not linked to this session.
 
 | Call | Effect | Returns |
@@ -269,20 +301,21 @@ only for this session, and executed as the session owner. Detail is in `concepts
 in a project, with instructions, skills and the connectors it needs. A session started from one
 to do one job is a **temporary hire**, finished ("Mark done") when that job is done. A copy of
 yourself started with `platform.spawn_subagent` is a **helper**, your extra hands for volume
-work — never call it an assistant. A long-lived agent is a **hire** only where you have to tell
-it apart from those two. Capability names, ids and fields keep the code
+work — never call it an assistant. One hired with `platform.hire_agent({ kind: "permanent" })` is a
+**permanent hire**: a standing member of the team. A long-lived agent is a **hire** only where
+you have to tell it apart from those. Capability names, ids and fields keep the code
 words (`agent_template`, `templateId`, `instance`, `subagent`); say the product words to people.
 
-Four effects create a template or act on one or its instances, from any session in that project,
+Six effects create a template or act on one or its instances, from any session in that project,
 as the session owner; only the session owner decides their cards. Your personal assistant can
 also read, create or edit a template in another project by naming it with `projectId` (below).
-`create_agent_template`, `spawn_agent` and `update_agent_template` are durable: each returns an
+`create_agent_template`, `spawn_agent`, `hire_agent` and `update_agent_template` are durable: each returns an
 operation receipt, read with `platform.get_operation` (*The operation lifecycle* below), and
-`result.payload` is set once it has `Succeeded`. `finish_spawned_instance` is not: once it runs
-it returns its result itself, with no operation id and nothing to poll.
+`result.payload` is set once it has `Succeeded`. `finish_spawned_instance` and `retire` are not:
+once one runs it returns its result itself, with no operation id and nothing to poll.
 
-Besides those four, a fifth effect, `platform.spawn_subagent`, starts a helper, a copy of this
-session rather than a temporary hire from a job description (*Helpers* below).
+Besides those six, one more effect, `platform.spawn_subagent`, starts a helper, a copy of this
+session rather than a hire from a job description (*Helpers* below).
 
 Two reads need no card. `platform.list_agent_templates({ projectId? })` lists all of this
 project's live templates in one reply (it takes no paging arguments): each one's `id`, `name`,
@@ -312,11 +345,15 @@ it.
 | --- | --- | --- |
 | `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl?, projectId? })` | a new template in this session's project, or, from the personal assistant, in the project `projectId` names. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit job description…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL (or a path starting with `/`), since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it and `result.payload.version` is `1`. | `routine` on the owner's own turn; `never` on any other turn |
 | `platform.spawn_agent({ templateId, name?, visibility?, task?, model? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, `agentName` and `handle` are the name and `@handle` it answers to (the agent name the job description carries, which it takes from its own name when it is created; else `name`), and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
+| `platform.hire_agent({ templateId, kind, name?, visibility?, task?, model?, autoArchive? })` | hires from the template. `kind: "temporary"` is one job as a child of this session, exactly like `spawn_agent`, so either call works for one; end it with `finish_spawned_instance` or `retire`. Only `hire_agent` makes a permanent hire. `kind: "permanent"` is a standing member of the team: it runs as the session owner, has no parent session, keeps running if this session is archived, and is never archived when idle. It does not count against the limit on running temporary hires, and `autoArchive` is refused for it. This session ends it with `platform.retire`, or a person archives it. The card is titled "Hire an agent: temporary" or "Hire an agent: permanent". Once `Succeeded`, `result.payload` has `sessionId`, `slug`, `agentName`, `handle`, its `kind`, and whether the `task` was sent. From the personal assistant, a permanent hire stays inside the assistant's reach. `task` and `model` work as for `spawn_agent` for both kinds, and this session and the hire message each other with `send_to_session` without a link. | temporary: as `spawn_agent`; permanent: `never`, so the owner decides every one on a card |
 | `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills?, projectId? })` | replaces the template's instructions or skill list (from the personal assistant, `projectId` finds the template in that project); never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
+| `platform.retire({ sessionId, handoff? })` | retires a hire this session took on with `hire_agent` or `spawn_agent`, temporary or permanent: it is archived, and if still open it is first closed, so its work is synced back to the project. Its conversation and the optional `handoff` note (kept in its chat) stay; the owner can unarchive it. Only the hiring session can retire a hire. It returns its result itself: `retired`, `proposed` (a person has written in this temporary hire, so the owner was asked there to mark it done; do not call again) or `already_retired` (it was archived while the approval waited). Refused before any card, each final for that session: `not_hirer`, `not_a_hire` (finish a helper with `finish_spawned_instance`), `cannot_retire_self`, and `already_retired` when it is archived already. For a temporary hire both calls work; `retire` adds the note. From this session, a permanent hire ends only with `retire`. | temporary: `routine`; permanent: `never` |
 | `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine` |
 
 A grant on `create_agent_template` reaches that one project only. A grant on `spawn_agent` or
-`update_agent_template` reaches that one template only; a grant on
+`update_agent_template` reaches that one template only. A grant on `hire_agent` reaches that one
+template and covers temporary hires only; a grant on `retire` covers retiring temporary hires
+from that one template. A grant on
 `finish_spawned_instance` covers this session finishing its own children. Things to act on:
 
 - **Setting up another project (personal assistant only).** From the owner's personal
@@ -401,8 +438,9 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
 - **A shared template reports back with a send, not an ask.** Ask the child to send you its
   result when done, and subscribe to it (`platform.notify_when_idle`) to hear that it has
   finished.
-- **Bound credentials narrow who can spawn.** A template that holds them spawns only on the
-  owner's own turn or an automation acting for them; a project member's request is refused.
+- **Bound credentials narrow who can spawn or hire.** A template that holds them spawns or hires
+  only on the owner's own turn or an automation acting for them; a project member's request is
+  refused before any card, and no standing approval can be asked for ahead.
 - **A limit refusal is not final.** The server sets a spawn-depth limit, a limit on live
   children per session and a limit on live instances per owner per template (a template may set
   lower ones); the refusal says which was hit. It clears once an instance is closed: finish
@@ -776,7 +814,10 @@ including **Edit job description…**); skaile-ai/platform#6653 (what a helper c
 `sweepIdleInstances`); skaile-ai/platform#7546 (the idle archive skips a child a person has written
 in and asks its owner to mark it done: `keepForOwner`); skaile-ai/platform#7348 (`canWrite: false` and `readOnlyReason` for a
 read-only Private workspace: `owner-scoped-discovery.handler.ts`) and #7342
-(`operation_create_project_space_read_only`: `create-project-policy.service.ts`), and
+(`operation_create_project_space_read_only`: `create-project-policy.service.ts`),
+skaile-ai/platform#7266 (`platform.hire_agent`: `hire-agent.handler.ts`, `spawn-agent-policy.service.ts`
+`hireContract`), skaile-ai/platform#7760 (`platform.list_grants`: `list-grants.handler.ts`,
+`owner-grant-overview.service.ts`), and
 skaile-ai/platform#6962 (standing disclosure grants: `disclosure-policy.ts`,
 `disclosure-preparer.ts`, `ungrantable-by-design.ts`, `approval-policy.service.ts`;
 `platform/decisions/2026-10-08-standing-disclosure-grants.md`).
