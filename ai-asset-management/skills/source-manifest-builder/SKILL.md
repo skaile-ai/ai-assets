@@ -53,12 +53,16 @@ the author, write + verify, suggest commit.
    - If absent: offer to scaffold a minimal v2 stub:
      ```yaml
      version: 2
-     publisher_default: "@<domain>"
+     publisher_default: "@acme"
      default_ref: main
+     publisher_overrides:
+       - path: research/
+         publisher: "@acme-research"
      ```
-     Ask the author to confirm the publisher template (often `@<domain>` to
-     derive from the first-level directory name, sometimes a fixed
-     `@skaile`-style namespace).
+     Ask the author for the publisher: one literal namespace, plus a
+     `publisher_overrides` entry for any folder that needs its own. The
+     publisher is never derived from a folder name, and `@skaile/workspaces`
+     5.0 rejects the old `"@<domain>"` template.
 3. If the file exists, read it and parse the current version.
    - `version: 1`: warn that running `--write` will bump to `version: 2`.
    - `version: 2` with no `assets:` block yet: normal upgrade path.
