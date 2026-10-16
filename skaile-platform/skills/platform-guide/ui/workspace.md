@@ -35,6 +35,15 @@ title, actions) — not flush-joined panes.
      a flow, Skaile asks **Stop this workflow run?** first (**Stop the run** /
      **Keep running**): a stopped step does not resume by itself, so afterwards the user
      asks the agent in chat to continue.
+   - While the agent works, the line under the conversation says what it is doing; after
+     about ten seconds it also shows how long the turn has run and how many steps it took
+     (for example *2m 05s · 34 steps*). While the agent waits on another agent it reads
+     *Waiting for \<agent\> to reply...*. A long count means the agent is busy, not stuck.
+   - A message sent while the agent is busy waits its turn and shows *Queued - \<agent\>
+     is still working and will read this next.* The sender's own queued message has a
+     **Stop current work** link, the same stop as the composer's: it ends the current
+     turn, and that person's queued messages are then marked *Not sent* (send them again
+     afterwards).
    - **A sleeping (hibernated) session** opens straight to its stored conversation, with a
      **Suspended** badge by the session title — no waiting to read. Typing starts waking
      it in the background; while it wakes the composer stays usable but sending is held,
@@ -171,3 +180,9 @@ Verified against platform `main` @ `bb6449b20` (2026-09-26).
 The Assistant panel with the Work and Private spaces flag on
 (`assistant-companion-tab/`, `assistant-launcher/`): platform `main` @ `7687851fb` (2026-10-02).
 The **Report a problem** review-or-send-directly choice: platform `main` @ `c59fd243b` (2026-09-28).
+The chat's turn progress, *Waiting for ...* line and queued-message **Stop current work**
+(`frontend/src/components/ui/agent-thinking-indicator/`,
+`frontend/src/components/ui/chat-message/chat-message.tsx`,
+`frontend/src/pages/workspace/parts/chat-message-list.controller.ts`,
+`frontend/src/hooks/turn-progress.helpers.ts`; issue platform#7740, PR platform#7746):
+platform `main` @ `cdab5a6b3` (2026-10-16). Quoted copy matches the rendered ASCII text.
