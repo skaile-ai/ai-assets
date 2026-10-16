@@ -102,7 +102,8 @@ The capability's own description carries the live list; prefer it if the two dif
     then the session name; a page tab shows a type icon. There is no breadcrumb and no
     inline org / project / session switcher. **Escape** closes the current tab when
     nothing else claims the key (not while typing, or while a dialog or menu is open);
-    in a session whose agent is working, the first Escape stops the agent instead.
+    in a session on screen whose agent is working, Escape stops the agent instead
+    (asking first in a flow run). A session in a background tab is never stopped.
     Ctrl+Shift+W also closes a tab.
   - Row 2: the **toolbar**, a three-zone row — left the page or session title, centre the
     **panel switcher** (which panes are visible) plus a round swap button, right the
