@@ -101,15 +101,17 @@ picks one of four:
   `usableBy` says who.
 - `agent_link`: one session allowed to reach another.
 
-`limit` defaults to 50 and caps at 100. The reply has `total`, `returned`, `omitted` and
-`grants`; each grant has its kind, target, scope, expiry, caps, creation time and who may use it.
+`limit` defaults to 50 and caps at 100. The reply has `total`, `returned`, `omitted` (grants
+past `limit`), `truncated` and `grants`; each grant has its kind, target, scope, expiry, caps,
+creation time and who may use it.
 
 - **Only in the owner's own assistant.** It is not offered elsewhere (`not_assistant_session`). It lists
   the owner's grants only, never anyone else's.
 - **It is confined like the lists above.** An assistant whose Home is in a business workspace
   sees only that workspace's grants. The home assistant does not see an organization at
   **Off** reach. So an empty list is not proof that nothing was granted.
-- **`truncated: true`** means older standing grants were not read.
+- **`truncated: true`** means older standing grants were not read at all, so they are not in
+  `total` either.
 - **Not listed:** a mailbox shared with every agent of its project. That is a project setting,
   not a grant.
 - **Consent.** No card while the owner is the only reader of your session. Once anyone else can
@@ -344,13 +346,14 @@ it.
 | --- | --- | --- |
 | `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl?, projectId? })` | a new template in this session's project, or, from the personal assistant, in the project `projectId` names. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit job description…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL (or a path starting with `/`), since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it and `result.payload.version` is `1`. | `routine` on the owner's own turn; `never` on any other turn |
 | `platform.spawn_agent({ templateId, name?, visibility?, task?, model? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, `agentName` and `handle` are the name and `@handle` it answers to (the agent name the job description carries, which it takes from its own name when it is created; else `name`), and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
-| `platform.hire_agent({ templateId, kind, name?, visibility?, task?, model?, autoArchive? })` | hires from the template. `kind: "temporary"` is one job as a child of this session, exactly like `spawn_agent`; finish it with `finish_spawned_instance`. `kind: "permanent"` is a standing member of the team: it runs as the session owner, has no parent session, keeps running if this session is archived, and is never archived when idle. It does not count against the limit on running temporary hires, and `autoArchive` is refused for it. This session ends it with `platform.retire`, or a person archives it. The card is titled "Hire an agent: temporary" or "Hire an agent: permanent". Once `Succeeded`, `result.payload` has `sessionId`, `slug`, `agentName`, `handle`, its `kind`, and whether the `task` was sent. From the personal assistant, a permanent hire stays inside the assistant's reach. | temporary: as `spawn_agent`; permanent: `never`, so the owner decides every one on a card |
+| `platform.hire_agent({ templateId, kind, name?, visibility?, task?, model?, autoArchive? })` | hires from the template. `kind: "temporary"` is one job as a child of this session, exactly like `spawn_agent`; finish it with `finish_spawned_instance`. `kind: "permanent"` is a standing member of the team: it runs as the session owner, has no parent session, keeps running if this session is archived, and is never archived when idle. It does not count against the limit on running temporary hires, and `autoArchive` is refused for it. This session ends it with `platform.retire`, or a person archives it. The card is titled "Hire an agent: temporary" or "Hire an agent: permanent". Once `Succeeded`, `result.payload` has `sessionId`, `slug`, `agentName`, `handle`, its `kind`, and whether the `task` was sent. From the personal assistant, a permanent hire stays inside the assistant's reach. `task` and `model` work as for `spawn_agent` for both kinds, and this session and the hire message each other with `send_to_session` without a link. | temporary: as `spawn_agent`; permanent: `never`, so the owner decides every one on a card |
 | `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills?, projectId? })` | replaces the template's instructions or skill list (from the personal assistant, `projectId` finds the template in that project); never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
+| `platform.retire({ sessionId, handoff? })` | retires a hire this session took on with `hire_agent` or `spawn_agent`, temporary or permanent: it is archived, closed first if still open, and its conversation and the optional `handoff` note (kept in its chat) stay; the owner can unarchive it. Only the hiring session can retire a hire. It returns its result itself: `retired`, `proposed` (a person has written in this temporary hire, so the owner was asked there to mark it done; do not call again) or `already_retired`. Refused before any card, each final for that session: `not_hirer`, `not_a_hire` (finish a helper with `finish_spawned_instance`), `cannot_retire_self`, `already_retired`. | temporary: `routine`; permanent: `never` |
 | `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine` |
 
 A grant on `create_agent_template` reaches that one project only. A grant on `spawn_agent` or
 `update_agent_template` reaches that one template only; a grant on `hire_agent` does too, and
-covers temporary hires only. A grant on
+covers temporary hires only, and so does one on `retire`. A grant on
 `finish_spawned_instance` covers this session finishing its own children. On a template that
 holds bound credentials, only the owner's own turn (or an automation acting for them) can
 spawn or hire from it; a member's request is refused before any card,
