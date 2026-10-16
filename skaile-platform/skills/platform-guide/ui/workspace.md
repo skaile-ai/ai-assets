@@ -36,7 +36,7 @@ title, actions) — not flush-joined panes.
      *Waiting for Franz to reply...*. A long count means the agent is busy, not stuck.
    - A message sent while the agent is busy waits its turn and shows *Queued - <agent> is
      still working and will read this next.* The sender's own queued message has a
-     **Stop** link: it stops the current work, and that person's queued messages are then
+     **Stop current work** link: it stops the current work, and that person's queued messages are then
      marked *Not sent* (send them again afterwards).
    - **A sleeping (hibernated) session** opens straight to its stored conversation, with a
      **Suspended** badge by the session title — no waiting to read. Typing starts waking
