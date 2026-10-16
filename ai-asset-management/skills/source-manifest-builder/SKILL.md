@@ -96,7 +96,7 @@ Walk the proposed entries with the author. For each entry ask:
 
 | Field | Question |
 |---|---|
-| `publisher` | Is `@<derived-domain>` correct, or should it be a different publisher namespace? Suggest the canonical publisher convention used elsewhere in the repo. |
+| `publisher` | Is the resolved publisher (from `publisher_default` + `publisher_overrides`) the intended one, or should it be a different publisher namespace? Suggest the canonical publisher convention used elsewhere in the repo. |
 | `name` | Confirm the asset name. The default comes from the manifest's `name:` field or the parent directory. |
 | `version` | Is the declared `version:` the one to publish? Authors sometimes forget to bump pre-publish. |
 | `files` | Walk through `files[]`. Are there same-directory files NOT included that should be? Are there files included that shouldn't ship (e.g. tests, scratch notes)? |

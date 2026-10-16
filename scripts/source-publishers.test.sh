@@ -14,9 +14,22 @@ CONFIG="$ROOT/.skaile-source.yaml"
 assert_true ".skaile-source.yaml exists" test -f "$CONFIG"
 [ -f "$CONFIG" ] || assert_done
 
-if grep -qE "^publisher_default:.*<domain>" "$CONFIG"; then
-  fail "publisher_default uses the '@<domain>' template, which workspaces 5.0 rejects"
+if grep -qE "^[[:space:]]*(publisher_default|publisher):.*<[a-z-]+>" "$CONFIG"; then
+  fail "a publisher value uses an '@<...>' template, which workspaces 5.0 rejects"
 fi
+
+# Only the publisher_overrides block, so a later v2 `assets:` block with its
+# own `path:` keys is not mistaken for an override.
+overrides="$(awk '/^publisher_overrides:/{a=1; next} a && /^[A-Za-z_]/{a=0} a' "$CONFIG")"
+
+# Each folder keeps the publisher its name gave it before 5.0. catalogs/ was
+# already overridden to @skaile before the switch.
+expected_publisher() {
+  case "$1" in
+    catalogs) echo "@skaile" ;;
+    *) echo "@$1" ;;
+  esac
+}
 
 # Folders that hold an asset manifest at any depth. _agent-parts holds mixin
 # fragments pulled in by relative path, not standalone assets.
@@ -32,7 +45,12 @@ if [ "$count" -lt 10 ]; then
 fi
 
 for f in $folders; do
-  assert_true "publisher_overrides covers $f/" grep -qE "^[[:space:]]*-[[:space:]]*path:[[:space:]]*['\"]?$f/['\"]?[[:space:]]*$" "$CONFIG"
+  # The publisher line directly follows its `- path:` line.
+  got="$(printf '%s\n' "$overrides" | awk -v want="$f/" '
+    found { sub(/^[[:space:]]*publisher:[[:space:]]*/, ""); gsub(/["'\'']/, ""); print; exit }
+    { line=$0; sub(/^[[:space:]]*-[[:space:]]*path:[[:space:]]*/, "", line); gsub(/["'\'' ]/, "", line)
+      if ($0 ~ /^[[:space:]]*-[[:space:]]*path:/ && line == want) found=1 }')"
+  assert_eq "$(expected_publisher "$f")" "$got" "publisher for $f/"
 done
 
 assert_done
