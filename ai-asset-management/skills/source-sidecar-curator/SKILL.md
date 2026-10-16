@@ -76,7 +76,7 @@ For each entry under `assets:`, walk through:
 
 | Field | Question | Action if changed |
 |---|---|---|
-| `publisher` | Is `@<derived-domain>` correct, or should it map to a different publisher? Look at the project's naming convention. | Set the right publisher per entry, or set `publisher_default` + `publisher_overrides` at the top of the manifest. |
+| `publisher` | Is the resolved publisher (from `publisher_default` + `publisher_overrides`) the intended one, or should it map to a different publisher? Look at the project's naming convention. | Set the right publisher per entry, or set `publisher_default` + `publisher_overrides` at the top of the manifest. |
 | `name` | Confirm the asset name. Defaults come from the asset's own manifest (frontmatter `name:` or parent dir). | Edit the entry's `name` field directly. |
 | `version` | Is the declared `version:` the one to publish? Authors sometimes forget to bump pre-publish. | Fix the upstream asset's manifest first, then rebuild the sidecar (`skaile source sidecar rebuild <slug>`) — or override here for sidecar-only purposes. |
 | `files` | Walk through `files[]`. Are there same-directory files NOT included that should be (e.g. a `validator.py` next to a SKILL.md)? Files that shouldn't ship (scratch notes, .DS_Store)? | Edit `files[]` directly — the sidecar is explicit (no wildcards). |
