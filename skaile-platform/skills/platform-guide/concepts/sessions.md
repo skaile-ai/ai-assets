@@ -154,7 +154,7 @@ it or, once a person has written there, asks the owner to mark it done (same sec
 `platform.hire_agent` hires from a job description too, with `kind: "temporary"` (the same as
 `spawn_agent`) or `kind: "permanent"`: a standing member of the team that runs as the session
 owner, with no parent session, never archived when idle, ended with `platform.retire`. The owner
-approves every permanent hire on a card (same section).
+approves every permanent hire, and every retire of one, on a card (same section).
 
 From scratch, an agent uses the platform action **Create a new agent in a project** (find it with
 `platform.find_actions`). That action takes the project id — listing the current project's

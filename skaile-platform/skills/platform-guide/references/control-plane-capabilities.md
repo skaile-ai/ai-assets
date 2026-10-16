@@ -352,10 +352,7 @@ it.
 A grant on `create_agent_template` reaches that one project only. A grant on `spawn_agent` or
 `update_agent_template` reaches that one template only; a grant on `hire_agent` does too, and
 covers temporary hires only, and so does one on `retire`. A grant on
-`finish_spawned_instance` covers this session finishing its own children. On a template that
-holds bound credentials, only the owner's own turn (or an automation acting for them) can
-spawn or hire from it; a member's request is refused before any card,
-and no standing approval can be asked for ahead. Things to act on:
+`finish_spawned_instance` covers this session finishing its own children. Things to act on:
 
 - **Setting up another project (personal assistant only).** From the owner's personal
   assistant, pass `projectId` to `create_agent_template` or `update_agent_template` to act in a
@@ -439,8 +436,9 @@ and no standing approval can be asked for ahead. Things to act on:
 - **A shared template reports back with a send, not an ask.** Ask the child to send you its
   result when done, and subscribe to it (`platform.notify_when_idle`) to hear that it has
   finished.
-- **Bound credentials narrow who can spawn.** A template that holds them spawns only on the
-  owner's own turn or an automation acting for them; a project member's request is refused.
+- **Bound credentials narrow who can spawn or hire.** A template that holds them spawns or hires
+  only on the owner's own turn or an automation acting for them; a project member's request is
+  refused before any card, and no standing approval can be asked for ahead.
 - **A limit refusal is not final.** The server sets a spawn-depth limit, a limit on live
   children per session and a limit on live instances per owner per template (a template may set
   lower ones); the refusal says which was hit. It clears once an instance is closed: finish
