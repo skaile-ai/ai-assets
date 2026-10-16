@@ -28,8 +28,13 @@ title, actions) — not flush-joined panes.
    - When the agent asks a question, the card shows its options as chips plus a dashed
      **Other answer…** chip (**Type an answer…** when there are no options) that opens a
      free-text field.
-   - **Escape** while the agent is working stops it (the same Escape closes the tab once
-     the agent is idle).
+   - **Stop** (the composer button), **Escape**, or **Stop the agent** in the command
+     palette ends the agent's current turn. Escape stops only the session on screen —
+     never one open in a background tab — and closes the tab once the agent is idle.
+     Every stop leaves a line in the chat naming who stopped the run. In a session that
+     runs a workflow, Skaile asks **Stop this workflow run?** first (**Stop the run** /
+     **Keep running**): a stopped step does not resume by itself, so afterwards the user
+     asks the agent in chat to continue.
    - **A sleeping (hibernated) session** opens straight to its stored conversation, with a
      **Suspended** badge by the session title — no waiting to read. Typing starts waking
      it in the background; while it wakes the composer stays usable but sending is held,
