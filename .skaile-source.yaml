@@ -1,15 +1,47 @@
 # Asset Source configuration for ai-assets
 # See: _devlog/specs/2026-05-03-ai-asset-store-v2-design.md
+#
+# Every top-level folder maps to its own publisher explicitly. Until
+# @skaile/workspaces 5.0 the publisher came from the folder name
+# (`publisher_default: '@<domain>'`); 5.0 rejects that template, so the
+# mapping is spelled out here to keep every `@<publisher>/<name>` ref unchanged.
+# A new top-level folder needs its own entry, or its assets land on the default.
 
 version: 1
-publisher_default: '@<domain>'
+publisher_default: '@skaile-ai'
 default_ref: main
 publisher_overrides:
-  - path: skaile-development/
-    publisher: '@skaile-development'
-  - path: skaile-platform/
-    publisher: '@skaile-platform'
+  - path: ai-asset-management/
+    publisher: '@ai-asset-management'
   - path: catalogs/
     publisher: '@skaile'
+  - path: data-extraction/
+    publisher: '@data-extraction'
+  - path: dev-implementation-experts/
+    publisher: '@dev-implementation-experts'
+  - path: dev-implementation-experts-js/
+    publisher: '@dev-implementation-experts-js'
+  - path: dev-implementation-experts-python/
+    publisher: '@dev-implementation-experts-python'
+  - path: dev-implementation-experts-typst/
+    publisher: '@dev-implementation-experts-typst'
+  - path: forge-mattermost/
+    publisher: '@forge-mattermost'
+  - path: github-ops/
+    publisher: '@github-ops'
+  - path: knowledge-research/
+    publisher: '@knowledge-research'
+  - path: mcp/
+    publisher: '@mcp'
+  - path: skaile-development/
+    publisher: '@skaile-development'
+  - path: skaile-forge/
+    publisher: '@skaile-forge'
+  - path: skaile-platform/
+    publisher: '@skaile-platform'
+  - path: testing/
+    publisher: '@testing'
+  - path: use/
+    publisher: '@use'
 sync:
   trigger: webhook
