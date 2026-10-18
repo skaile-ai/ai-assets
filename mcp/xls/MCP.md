@@ -55,9 +55,10 @@ in, and it is the only route that **evaluates formulas headlessly** rather than 
 back the stale cached values a library read returns. (On platform sessions those libraries
 are also simply absent — checking costs a call and changes nothing.)
 
-**SKIP** when — and only when — the file is a `.csv` (plain file tools are the right
-reach), the file is `.xlsb` or not a spreadsheet at all (see **When NOT to reach for this**
-below), or the user has explicitly asked for a script or a library rather than the result.
+**SKIP** when — and only when — the file is a `.csv` handled on its own, with no workbook
+involved (plain file tools are the right reach; a CSV going into or out of a workbook is
+`sheet.import` / `sheet.export`), the file is `.xlsb` or not a spreadsheet at all (see
+**When NOT to reach for this** below), or the user has explicitly asked for a script or a library rather than the result.
 
 `workbook.open` and `workbook.create` are pinned eager — both ship with
 `_meta: {"anthropic/alwaysLoad": true}` — so in a client that hides MCP tools behind a search step
@@ -81,7 +82,7 @@ useless as an opening move.
 ## When NOT to reach for this
 
 - **`.xlsb` (binary workbooks)** — rejected at open; POI has no binary-workbook reader. Convert with `use-anydoc` for read-only extraction.
-- **`.csv`** — plain text with no cells, formulas or styling to preserve. Read and write it with ordinary file tools; neither this server nor an extraction path is needed.
+- **`.csv` on its own** — plain text with no cells, formulas or styling to preserve. Read and write it with ordinary file tools; neither this server nor an extraction path is needed. When the CSV is going into a workbook or coming out of one, use `sheet.import` / `sheet.export` instead.
 - **The file isn't a spreadsheet** (`.docx`, `.pdf`, `.odt`, `.rtf`, `.epub`) — `use-anydoc` reads all of these to Markdown; `use-docling` if it needs OCR, only where the project has opted into it.
 
 The two `use-anydoc` routes above are **read-only extraction paths, not a shortcut for editing**. Two traps if you use `use-anydoc` to orient before editing here:
@@ -134,6 +135,7 @@ Every tool declares an MCP `outputSchema` and behaviour annotations (`readOnlyHi
 ### Known issues
 
 None open against the release named in `version:` above. Track them in [`skaile-ai/excel-mcp`](https://github.com/skaile-ai/excel-mcp/issues).
+
 ## Runtime
 
 Built and pinned by the platform Nix flake (`platform/nix/flake.nix`'s `mcps.excel` derivation).
@@ -249,7 +251,7 @@ workbook.open { path, mode: "stream" }   # read-only; loads nothing, no size lim
 - **`workbook.audit` defaults are deliberately noisy — narrow them before reporting.** Every literal on an assumptions sheet is a finding by the letter of the rule, and so is the `1` in `=B2*(1+growth)`. Pass `input_sheets: ["Assumptions"]` to exempt the sheets where constants belong, and `ignore_literals: [0, 1]` to drop the idiomatic ones. On a well-built model that is the difference between six findings and none; do not present the raw default as a verdict on someone's workbook.
 - **A row insert inside an array formula widens it.** `sheet.insert_rows` strictly inside a multi-cell array formula stretches the array over the new, blank rows and reports it in `reshaped_arrays`; an insert whose shift would move cells onto an array fails with `ARRAY_FORMULA_PROTECTED` and inserts nothing. Which one happens depends on `count`, not on the array — recalculate and read the array back after any insert inside one.
 - **A protected sheet refuses the write, it does not ignore it.** Call `workbook.get_protection` when a workbook may be protected: it lists what each protected sheet still allows and which cells are unlocked. On `SHEET_PROTECTED` / `WORKBOOK_PROTECTED`, either unprotect, write and protect again (`sheet.unprotect` returns `previous_allow` to pass back), or — only when the user intends the change — repeat that one call with `ignore_protection: true`; the protection and its password hash stay as they were.
-- **Keep workbook passwords out of the transcript.** An inline `password` passes through the agent's context; prefer `password_env` (an `EXCEL_MCP_PASSWORD_*` variable of the server) or `password_file`. A `batch` refuses an inline password.
+- **Keep workbook passwords out of the transcript.** An inline `password` passes through the agent's context; prefer `password_env` (an `EXCEL_MCP_PASSWORD_*` variable of the server), `password_file` (a one-line, owner-only file under `EXCEL_MCP_ROOT`), or `password_ref: "cli"` for the password the `run` command line read. A `batch` refuses an inline password.
 - **`chart.create` and the row/column inserts are not idempotent.** Calling `chart.create` twice makes two charts, and `sheet.insert_rows` twice inserts twice. Retry only after checking what actually landed — the tools declare this in their MCP `idempotentHint`, so a client that reads annotations already knows.
 - **Style through the MCP, never a second library.** Use `range.set_style` (fills, fonts, borders, number formats, alignment, wrap) and `sheet.set_format` (column widths, row heights, freeze panes, tab color) for all presentation. Do **not** post-process the saved file with openpyxl / exceljs / a second writer — two serializers over one file is exactly what produces the "Excel repaired records" corruption. `range.set_style` merges onto existing styles, so layer it in any order; styling is `.xlsx`/`.xlsm` only and rejects full-column/row ranges (pass a bounded range like `A1:N1`).
 
