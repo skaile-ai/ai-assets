@@ -235,7 +235,7 @@ workbook.open { path, mode: "stream" }   # read-only; loads nothing, no size lim
 - **Read forwards.** The handle remembers where its last read stopped, so consecutive `sheet.scan` pages — or `range.get` windows that each start where the previous one ended — read the sheet once in total. A read that starts *above* that point restarts from the top: about 45 s for a window a million rows down.
 - **Formulas come with their cached values**, never recalculated. A cell filled down from another (a shared-formula follower) reports its cached value without formula text, and so does a non-anchor cell of an array formula.
 - **To get a whole sheet out**, `sheet.export` writes it (or a range, or a table's data rows) to CSV, TSV or JSON Lines in one pass; a million rows take about as long as one `sheet.scan` pass. An existing destination file is refused unless `overwrite: true`, which is why the tool is flagged destructive.
-- **Nothing can be written.** To edit such a file, work on a smaller extract.
+- **Nothing can be written into the workbook.** To edit such a file, work on a smaller extract.
 
 ## Non-obvious gotchas the agent must respect
 
