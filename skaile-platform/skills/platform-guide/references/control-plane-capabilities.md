@@ -137,8 +137,10 @@ work as above; the reply also carries `organizationId`.
 - **The list lands in the conversation.** Everyone who can read the session sees it; the card says
   so.
 - **Not listed:** grants inside a member's **My space** or **Home** (so nothing a member's own
-  assistant holds), and grants that also reach another organization. An empty list is not proof
-  that nobody granted anything.
+  assistant holds), grants in a project the owner cannot see (an **Invited only** project they are
+  not in), access grants on providers other than Exchange, and grants that also reach another
+  organization. An empty list is not proof that nobody granted anything; `truncated: true` means
+  some grants were not read at all.
 - **Names.** Session names, target labels and mailbox addresses are shown only for the owner's own
   resources; other grants carry ids.
 - **Read-only.** Never revoke a grant or call another capability to undo one. Tell the owner which
