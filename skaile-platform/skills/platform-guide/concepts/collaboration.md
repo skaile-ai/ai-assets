@@ -12,7 +12,8 @@ carries context about who is online, who sent it, and whether the agent was @men
   word (`@jarvis`; "Miss Minutes" is `@missminutes`); each of their assistants has its own, so
   `@` offers the one in this organization under its one-word name. A name a member, a group
   or the session's agent already answers to addresses them, not the assistant. The agent responds when @mentioned or when it can meaningfully
-  contribute; it stays silent (internally `[PASS]`) when a message is human-to-human.
+  contribute; it stays silent (internally `[PASS]`) when a message is human-to-human. An
+  `@name` the agent itself writes is not a mention and notifies nobody (see *Notifications*).
 - **Reactions** — emoji reactions on messages (the agent can react too, as a lightweight
   acknowledgment).
 - **Threading** — replies can be threaded to a parent message.
@@ -47,6 +48,23 @@ Each member chooses when they are notified: **All**, **Mentions** (the default),
   declines when no single member asked — several wrote in the same turn, or a schedule or
   webhook started it — since it cannot tell whose setting to change.
 - Browser notifications name the project and session.
+- **Where a notification arrives.** Only in a Skaile browser tab that is open somewhere, as a
+  sound and a browser notification. Nothing reaches a phone or a closed browser: there is no
+  mobile or web push yet. A notification is also dropped for the session the member is looking
+  at; it fires only while the tab is hidden or shows another page. So a member who tests
+  notifications from inside the session being tested sees nothing. That is expected, not a fault.
+- **What the agent can trigger.** An `@name` in the agent's own reply is not read as a mention
+  and notifies nobody. An agent turn notifies in three cases. A finished reply notifies, but
+  only in a personal assistant session, and only the member whose message it answered. A
+  question to a member (`AskUserQuestion`) notifies the member asked, in any session. An
+  approval card notifies the session owner, in any session. None of these reach a person who
+  is not in the app: a question or a card waits in the session until they open a tab again. To
+  reach someone who is away, use a channel made for it, for example email, if the session has
+  a mail tool.
+- **Mention tokens.** A member is mentioned by `@` and their first name in lower case: `@peter`
+  for Peter Albert. Only when two members of the session share a first name is it the whole
+  name as one word (`@peteralbert`), so the same person can have a different token in another
+  session.
 
 ## Public file-preview sharing
 
@@ -118,4 +136,6 @@ platform PRs #4917 (notification modes), #4566 (cross-org A2A), #5152 (share wak
 #5876 (idle subscriptions), #6008 (private projects not shareable), #6261 (send refusals
 and the not-delivered notice), #6263 (sibling instances of a template, `spawn-channel.ts`),
 `platform/docs/roles-permissions-matrix.md` (share and invite
-permissions), platform #6690 (the session settings Config tab renamed **General**).
+permissions), platform #6690 (the session settings Config tab renamed **General**), platform
+issues #4754 (agent replies notify only in assistant sessions) and #2350 (phone push, not
+built yet).
