@@ -47,6 +47,21 @@ Each member chooses when they are notified: **All**, **Mentions** (the default),
   declines when no single member asked — several wrote in the same turn, or a schedule or
   webhook started it — since it cannot tell whose setting to change.
 - Browser notifications name the project and session.
+- **Where a notification arrives.** Only in a Skaile browser tab that is open somewhere, as a
+  sound and a browser notification. Nothing reaches a phone or a closed browser: there is no
+  mobile or web push yet. A notification is also dropped for the session the member is looking
+  at; it fires only while the tab is hidden or shows another page. So a member who tests
+  notifications from inside the session being tested sees nothing. That is expected, not a fault.
+- **What the agent can trigger.** An `@name` in the agent's own reply is not read as a mention
+  and notifies nobody. An agent turn notifies in three cases. A finished reply notifies, but
+  only in a personal assistant session, and only the member whose message it answered. A
+  question to a member (`AskUserQuestion`) notifies the member asked, in any session. An
+  approval card notifies the session owner, in any session. To reach a person who is away, ask
+  them a question, or use a channel made for it, for example email, if the session has a mail
+  tool.
+- **Mention tokens.** A member is mentioned by `@` and their first name in lower case: `@peter`
+  for Peter Albert. Only when two members share a first name is it the whole name as one word
+  (`@peteralbert`).
 
 ## Public file-preview sharing
 
@@ -114,7 +129,8 @@ description (the last two are in the last bullet below).
 
 Source of truth: `platform/docs/protocol-extensions.md`,
 `platform/docs/public-file-preview-sharing.md`, `platform/backend/libs/agent-to-agent/`,
-platform PRs #4917 (notification modes), #4566 (cross-org A2A), #5152 (share wake budget),
+platform PRs #4917 (notification modes), #4754 (agent replies notify only in assistant
+sessions), #2350 (phone push, not built yet), #4566 (cross-org A2A), #5152 (share wake budget),
 #5876 (idle subscriptions), #6008 (private projects not shareable), #6261 (send refusals
 and the not-delivered notice), #6263 (sibling instances of a template, `spawn-channel.ts`),
 `platform/docs/roles-permissions-matrix.md` (share and invite
