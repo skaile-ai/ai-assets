@@ -119,6 +119,34 @@ creation time and who may use it.
 - **Read-only.** You cannot revoke a grant. Tell the owner to revoke it in Skaile; never call
   another capability to undo one.
 
+### Grants across an organization
+
+`platform.list_org_grants({ organizationId, kind?, limit? })` answers "who in this organization
+allowed what?" for an organization the owner is an **Owner** of. It lists every grant in force
+inside that organization, newest first, in the same shape as `platform.list_grants`, plus
+`grantedBy` (the person who gave it; their name only while they are a member). `kind` and `limit`
+work as above; the reply also carries `organizationId`.
+
+- **Owners only.** Anyone else, including a platform administrator who is not an Owner there, is
+  refused before any card, with one message whether the organization does not exist or the owner
+  lacks the role. Do not retry with other ids; find the id with `platform.list_my_organizations`.
+- **Reach.** From the personal assistant, the organization must be at **Full** reach.
+- **A card every time, unless.** The owner approves each read, unless they gave a standing
+  approval for exactly this organization in this session. A project-wide or org-wide approval
+  never covers it. It is not limited to the personal assistant, so an agent the owner hired for a
+  security review can run it under its own standing approval.
+- **The list lands in the conversation.** Everyone who can read the session sees it; the card says
+  so.
+- **Not listed:** grants inside a member's **My space** or **Home** (so nothing a member's own
+  assistant holds), grants in a project or session the owner cannot see (an **Invited only**
+  project they are not in, or a member's private session), access grants on providers other than Exchange, and grants that also reach another
+  organization. An empty list is not proof that nobody granted anything; `truncated: true` means
+  some grants were not read at all.
+- **Names.** Session names, target labels and mailbox addresses are shown only for the owner's own
+  resources; other grants carry ids.
+- **Read-only.** Never revoke a grant or call another capability to undo one. Tell the owner which
+  grant looks risky; the owner, or the member who gave it, revokes it in Skaile.
+
 ### Files in the owner's other sessions
 
 The personal assistant can read and change a text file in the `workspace` of another of the
@@ -818,7 +846,9 @@ read-only Private workspace: `owner-scoped-discovery.handler.ts`) and #7342
 (`operation_create_project_space_read_only`: `create-project-policy.service.ts`),
 skaile-ai/platform#7266 (`platform.hire_agent`: `hire-agent.handler.ts`, `spawn-agent-policy.service.ts`
 `hireContract`), skaile-ai/platform#7760 (`platform.list_grants`: `list-grants.handler.ts`,
-`owner-grant-overview.service.ts`), and
+`owner-grant-overview.service.ts`), skaile-ai/platform#7738 (`platform.list_org_grants`:
+`list-org-grants.handler.ts`, `list-org-grants-policy.service.ts`, `owner-grant-overview.service.ts`
+`listForOrganization`), and
 skaile-ai/platform#6962 (standing disclosure grants: `disclosure-policy.ts`,
 `disclosure-preparer.ts`, `ungrantable-by-design.ts`, `approval-policy.service.ts`;
 `platform/decisions/2026-10-08-standing-disclosure-grants.md`).
