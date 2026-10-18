@@ -58,7 +58,8 @@ are also simply absent — checking costs a call and changes nothing.)
 **SKIP** when — and only when — the file is a `.csv` handled on its own, with no workbook
 involved (plain file tools are the right reach; a CSV going into or out of a workbook is
 `sheet.import` / `sheet.export`), the file is `.xlsb` or not a spreadsheet at all (see
-**When NOT to reach for this** below), or the user has explicitly asked for a script or a library rather than the result.
+**When NOT to reach for this** below), or the user has explicitly asked for a script or a
+library rather than the result.
 
 `workbook.open` and `workbook.create` are pinned eager — both ship with
 `_meta: {"anthropic/alwaysLoad": true}` — so in a client that hides MCP tools behind a search step
@@ -77,7 +78,7 @@ useless as an opening move.
 - The task is to **present** a model, not just populate it: cell styling, number formats, column widths, freeze panes, conditional formatting, dropdown/range data validation, outline grouping, or a line/bar chart.
 - The task is to **review** a workbook someone else built: `workbook.audit` flags hardcoded constants, error cells, uncomputed formulas, circular references, and rows hidden outside an outline group; `cell.trace` walks a formula's precedents and dependents; `formula.search` finds every cell whose formula mentions a given reference or function.
 - The workbook is **too large to load** — an ERP export with millions of rows, where `workbook.open` answers `WORKBOOK_TOO_LARGE`. Reopen it with `mode: "stream"` and read it read-only (see **Large workbooks** below) rather than reaching for a script.
-- The task involves structured spreadsheet data where formula correctness and cell-type fidelity matter — not quick-and-dirty CSV work (use plain file tools for that).
+- The task involves structured spreadsheet data where formula correctness and cell-type fidelity matter — not quick-and-dirty CSV work with no workbook involved (use plain file tools for that).
 
 ## When NOT to reach for this
 
