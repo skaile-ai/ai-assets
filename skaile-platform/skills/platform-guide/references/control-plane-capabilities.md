@@ -130,6 +130,7 @@ work as above; the reply also carries `organizationId`.
 - **Owners only.** Anyone else, including a platform administrator who is not an Owner there, is
   refused before any card, with one message whether the organization does not exist or the owner
   lacks the role. Do not retry with other ids; find the id with `platform.list_my_organizations`.
+- **Reach.** From the personal assistant, the organization must be at **Full** reach.
 - **A card every time, unless.** The owner approves each read, unless they gave a standing
   approval for exactly this organization in this session. A project-wide or org-wide approval
   never covers it. It is not limited to the personal assistant, so an agent the owner hired for a
@@ -137,8 +138,8 @@ work as above; the reply also carries `organizationId`.
 - **The list lands in the conversation.** Everyone who can read the session sees it; the card says
   so.
 - **Not listed:** grants inside a member's **My space** or **Home** (so nothing a member's own
-  assistant holds), grants in a project the owner cannot see (an **Invited only** project they are
-  not in), access grants on providers other than Exchange, and grants that also reach another
+  assistant holds), grants in a project or session the owner cannot see (an **Invited only**
+  project they are not in, or a member's private session), access grants on providers other than Exchange, and grants that also reach another
   organization. An empty list is not proof that nobody granted anything; `truncated: true` means
   some grants were not read at all.
 - **Names.** Session names, target labels and mailbox addresses are shown only for the owner's own
