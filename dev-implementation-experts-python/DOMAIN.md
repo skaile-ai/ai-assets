@@ -4,7 +4,6 @@ description: "Deep implementation expertise for Python frameworks and libraries 
 type: domain
 building_blocks:
   contracts: "Expert skill conventions: recipe format, atomic examples, reference implementations; same protocol as dev-implementation-experts-js."
-  docs: "Python version requirements, library compatibility notes, and ecosystem integration guidance."
   skills: "One expert skill per framework/library: python (core patterns), pydantic-ai (AI agent framework), marimo (reactive notebooks)."
   agents: "TBD"
   prompts: "TBD"
@@ -23,7 +22,6 @@ The same routing protocol applies as in `dev-implementation-experts-js`: feature
 | Folder | Purpose |
 |--------|---------|
 | `contracts/` | Expert skill conventions — recipe format, atomic example structure, reference implementation layout |
-| `docs/` | Python version matrices, uv/packaging notes, cross-library integration patterns |
 | `skills/` | One expert skill per technology |
 
 ## Skills

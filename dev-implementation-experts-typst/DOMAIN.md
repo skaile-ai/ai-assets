@@ -3,8 +3,7 @@ name: dev-implementation-experts-typst
 description: "Implementation expertise for Typst document composition and a general-purpose expert advisor that routes to the right specialist based on technology context."
 type: domain
 building_blocks:
-  contracts: "Expert skill conventions and routing protocol shared with other implementation-expert domains."
-  docs: "Typst version notes, integration patterns with data pipelines, and advisor routing logic."
+  contracts: "TBD"
   skills: "Typst implementation expert and the general expert-advisor router."
   agents: "TBD"
   prompts: "TBD"
@@ -20,8 +19,6 @@ This domain covers Typst document composition expertise and the cross-domain exp
 
 | Folder | Purpose |
 |--------|---------|
-| `contracts/` | Expert skill conventions and advisor routing protocol |
-| `docs/` | Typst version notes, template patterns, data pipeline integration |
 | `skills/` | Typst expert and advisor router |
 
 ## Skills

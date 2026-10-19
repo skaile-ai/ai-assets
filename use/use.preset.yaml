@@ -1,0 +1,24 @@
+publisher: skaile-ai
+name: use
+version: 1.0.0
+description: External service integrations — each skill wraps one service with an agent-friendly interface
+items:
+  - ref: contract:@skaile-ai/use-contract
+  - ref: skill:@skaile-ai/use-exa
+  - ref: skill:@skaile-ai/use-perplexity
+  - ref: skill:@skaile-ai/use-searxng
+  - ref: skill:@skaile-ai/use-outline
+  - ref: skill:@skaile-ai/use-outline-cli
+  - ref: skill:@skaile-ai/use-anydoc
+  - ref: skill:@skaile-ai/use-docling
+  - ref: skill:@skaile-ai/use-elevenlabs
+  - ref: skill:@skaile-ai/use-ideogram-image
+  - ref: skill:@skaile-ai/use-context7-api
+  - ref: skill:@skaile-ai/use-mcp2cli
+  - ref: skill:@skaile-ai/agent-browser
+  - ref: skill:@skaile-ai/use-skills-sh
+  - ref: skill:@skaile-ai/decks
+  - ref: skill:@skaile-ai/use-revealjs
+  - ref: skill:@skaile-ai/use-slidev
+  - ref: skill:@skaile-ai/word-document
+# Not listed on purpose: skill:@skaile-ai/word-template is a client-specific worked example (see DOMAIN.md), not a generic skill.

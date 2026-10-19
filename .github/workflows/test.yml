@@ -31,6 +31,12 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
+      # scripts/migrate-skaile-manifest.test.sh runs migrate.py, which declares its
+      # dependency inline (PEP 723) and so needs `uv`. pipx is preinstalled on
+      # ubuntu-latest; the test fails under CI if uv is missing.
+      - name: Install uv
+        run: pipx install 'uv==0.11.16'
+
       # `npm test` rather than `bash scripts/run-tests.sh` on purpose: the package.json
       # script is the documented entry point, so CI must be what proves it still
       # works. Invoking the runner directly would let that script rot unnoticed.

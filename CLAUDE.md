@@ -21,9 +21,14 @@ skaile-forge/                     ← skaile-forge app agents and skills
 dev-implementation-experts-js/    ← JS/TS framework experts
 dev-implementation-experts-python/ ← Python experts
 dev-implementation-experts-typst/  ← Typst expert
+dev-implementation-experts/       ← prog-expert skills with no DOMAIN.md and no preset (pre-existing orphan)
+data-extraction/                  ← data extraction skills (MS Access VBA)
+forge-mattermost/                 ← Mattermost workspace orchestrator agent
+github-ops/                       ← GitHub operations skills and the github-worker agent
+testing/                          ← testing skills and flows
+_agent-parts/                     ← shared persona and ruleset assets (PERSONA.md, RULESET.md) composed by agents
 external/                         ← tracked external resources
-knowledge-research/               ← deep research, paper extraction
-knowledge-writing/                ← book/podcast generation
+knowledge-research/               ← deep research, paper extraction; skills/knowledge-writing/ holds book/podcast generation
 use/                              ← external service integrations (exa, perplexity, outline, etc.)
 ```
 
@@ -46,8 +51,8 @@ Every asset shipped from this repo is identified by the canonical tuple
 
 | Field | Source of truth | Notes |
 |---|---|---|
-| `publisher` | `skaile.yaml` at the repo root | `skaile-ai` for everything here |
-| `kind` | `<domain>/skills/<name>/SKILL.md` (skill), `<domain>/<domain>.bundle.yaml` (bundle) | filename convention |
+| `publisher` | `skaile.manifest.yaml` at the repo root | `skaile-ai` for everything here |
+| `kind` | `<domain>/skills/<name>/SKILL.md` (skill), `<domain>/agents/<name>/agent.yaml` (agent), `<domain>/<domain>.preset.yaml` (preset), `<name>/PERSONA.md` (persona), `<name>/RULESET.md` (ruleset) | filename convention |
 | `name` | SKILL.md frontmatter `name:` (must match parent directory) | per-asset |
 | `version` | `git describe --tags --abbrev=0` of the resolved commit (repo-wide default); a per-asset frontmatter `version:` **overrides** it for that asset | cut a tag to release, or pin per-asset (see below) |
 
@@ -63,16 +68,27 @@ extensions (the agentskills.io convention the parser follows). MCP servers
 under `mcp/` source their version from `pom.xml` and mirror it into the
 `version` field of their single `MCP.md` — see `mcp/DOMAIN.md`.
 
-Consumer projects pull from this repo via a `sources:` entry in their own
-`skaile.yaml`:
+Agents (`agent.yaml`) and presets (`*.preset.yaml`) carry an explicit `version:`
+in the file. It is hand-managed: it does not follow the git tag, so bump it (and
+add a CHANGELOG entry) whenever the agent's content or the preset's `items:`
+change. Presets start at `1.0.0`; they never inherited the old bundle versions, so
+a consumer range written for a bundle (such as `#^2.0`) must become `#^1.0`.
+
+Two files carry the word "manifest", and they are different things. The
+**publisher** manifest is `skaile.manifest.yaml` in this repo: it names the
+publisher and nothing else (no `assets:` list; discovery walks the tree). The
+v1 file `.skaile-source.yaml` also declares a publisher (`publisher_default`); it
+must agree with the manifest, which `scripts/source-publishers.test.sh` checks. A
+**consuming** project's own workspace file stays `skaile.yaml`. Consumers pull
+from this repo via a `sources:` entry in it:
 
 ```yaml
 sources:
   - url: https://github.com/skaile-ai/ai-assets
     pin: v1.4.0     # branch | tag | 40-char sha; defaults to HEAD of default branch
 dependencies:
-  - bundle:skaile-development@skaile-ai#^2.0
-  - skill:audit@skaile-ai#~1.4
+  - preset:@skaile-ai/skaile-development#^1.0
+  - skill:@skaile-ai/audit#~1.4
 ```
 
 Full schema:

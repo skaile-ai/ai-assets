@@ -46,6 +46,13 @@ is skipped.
 You drive a five-step workflow: confirm context, run the build, review with
 the author, write + verify, suggest commit.
 
+**Not for the ai-assets repo itself.** That repo ships one publisher (from
+`skaile.manifest.yaml`) and relies on the glob walk: an `assets:` inventory
+would switch discovery to manifest mode and hide every asset left off the list,
+and `publisher_overrides` would contradict the single publisher.
+`scripts/skaile-manifest.test.sh` and `scripts/source-publishers.test.sh` fail
+on both. Use this skill for third-party asset repos that want a curated inventory.
+
 ## Step 0: Confirm context
 
 1. Resolve `repo_path` (default `.`).

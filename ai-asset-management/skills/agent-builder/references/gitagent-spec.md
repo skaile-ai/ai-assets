@@ -27,7 +27,7 @@ agent-name/
 ├── tools/                  # MCP-compatible schemas
 ├── workflows/              # SkillsFlow multi-step procedures
 ├── knowledge/              # Reference documents
-│   └── index.yaml          # Priority ordering
+│   └── index.yaml          # Listing order
 ├── memory/runtime/         # Live state (gitignored)
 ├── hooks/                  # Lifecycle handlers
 ├── config/                 # Environment overrides
@@ -40,7 +40,7 @@ agent-name/
 
 | Field | Description |
 |---|---|
-| `spec_version` | GitAgent spec version ("0.1.0") |
+| `spec_version` | Agent spec version: `"0.2"` for skaile assets (upstream GitAgent itself is "0.1.0") |
 | `name` | kebab-case identifier |
 | `version` | semver |
 | `description` | One-line description |
@@ -54,32 +54,38 @@ agent-name/
 | `tags` | Searchable keywords |
 | `extends` | Path to parent agent.yaml for inheritance |
 | `model` | LLM preferences: preferred, fallback, constraints |
-| `skills` | List of skill names the agent can invoke |
-| `delegation` | Mode: explicit, router, auto |
+| `composes` | Typed items the agent is built from: `{kind, ref, id?, as?, binding?}` (skills, sub-agents, personas, rulesets, connectors, ...) |
+| `lifecycle` | `standing` (default) or `role` (short-lived, callable; needs `io`) |
+| `io` | JSON Schemas `{input, output}` for a role |
+| `memory` | `blocks[{name, scope, max_chars, source?}]`, stored by the host and rendered as `<MEMORY>` |
+| `triggers` | Host-fired `schedule` / `webhook` / `channel` / `event` triggers, each with an `id` |
+| `delegation` | Mode: explicit, router, auto (descriptive only) |
 | `runtime` | max_turns, timeout |
-| `requires` | Dependencies (sub-agents, skills) |
 | `compliance` | Regulatory config (risk_tier, supervision, recordkeeping, SOD) |
 | `metadata` | Arbitrary extensions |
 
 ## Composition
 
 ```yaml
-# Inherit from parent
-extends: https://github.com/org/base-agent.git
+# Inherit from a parent agent.yaml (upstream GitAgent also accepts a git URL;
+# in ai-assets the path must be relative and stay inside the repo)
+extends: ../parent-agent/agent.yaml
 
-# Depend on sub-agents
-requires:
-  - name: fact-checker
-    source: https://github.com/org/fact-checker.git
-    version: ^1.0.0
-    mount: agents/fact-checker
+# Compose skills and sub-agents (0.2; replaces the 0.1 `skills:` and `requires:` lists)
+composes:
+  - { kind: skill, ref: skill:@skaile-ai/deep-research }
+  - { kind: agent, ref: "agent:@skaile-ai/fact-checker", as: fact-checker, binding: delegate }
 ```
+
+`skills:`, `requires:`, `persona:`, `rules:` and `abilities:` are deprecated 0.1 inputs.
 
 ## Export Targets
 
 system-prompt, claude-code, openai, crewai, lyzr, github, git, opencode, openclaw, nanobot
 
-## CLI
+## CLI (upstream GitAgent 0.1)
+
+This is the upstream tool and it only knows spec 0.1. For a Skaile 0.2 manifest run `skaile validate` instead.
 
 ```bash
 gitagent init --template standard
@@ -91,4 +97,4 @@ gitagent audit
 
 ## Spec Version
 
-v0.1.0 — https://github.com/open-gitagent/gitagent
+Upstream GitAgent: v0.1.0 — https://github.com/open-gitagent/gitagent. Skaile assets use `spec_version: "0.2"`, which adds `composes`, `lifecycle`, `io`, `memory` and `triggers` (see `docs/agents.md` in ai-assets).

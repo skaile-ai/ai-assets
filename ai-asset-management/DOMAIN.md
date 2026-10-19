@@ -4,11 +4,10 @@ description: "Meta-management of the skill ecosystem: scaffolding new skills, do
 type: domain
 building_blocks:
   contracts: "Skill folder structure, SKILL.md frontmatter, CLI.md format, and progressive disclosure loading strategy shared by all skill-creation skills."
-  docs: "Architecture notes for the skill ecosystem and how skills relate to each other."
-  skills: "Invocable skills for creating skills (skill-builder), creating domains (domain-builder), building CLI tools (uv-cli-implementer), and navigating the asset catalog (ai-resource-navigator)."
-  agents: "TBD"
+  skills: "Invocable skills for creating skills (skill-builder), creating domains (domain-builder), building CLI tools (uv-cli-implementer), writing agent definitions (agent-builder), and navigating the asset catalog (ai-resource-navigator)."
+  agents: "skaile, the root orchestrator: routes by intent to domain agents (the three skaileup pipeline delegates ship from ai-assets-skaileup)."
   prompts: "TBD"
-  tools: "scaffold_skill.py, scaffold_domain.py — uv-runnable scripts invoked by skill-builder and domain-builder."
+  tools: "scaffold_skill.py (skills/skill-builder/scripts/), scaffold_domain.py (skills/domain-builder/scripts/) — uv-runnable scripts invoked by skill-builder and domain-builder."
 stage: alpha
 ---
 
@@ -23,9 +22,8 @@ Everything that creates or manages AI assets lives here — from scaffolding a n
 | Folder | Purpose |
 |--------|---------|
 | `contracts/` | Shared contracts — the `skill-builder-contract` defines skill folder layout, frontmatter fields, and progressive disclosure loading for all skill-creation workflows |
-| `docs/` | Domain documentation — architecture notes on how the skill system is structured |
-| `skills/` | Invocable skills — `skill-builder`, `domain-builder`, `uv-cli-implementer`, `ai-resource-navigator` |
-| `tools/` | CLI tools — `scaffold_skill.py`, `scaffold_domain.py`; run with `uv run` by skills in this domain |
+| `skills/` | Invocable skills — `skill-builder`, `domain-builder`, `agent-builder`, `uv-cli-implementer`, `ai-resource-navigator`; the scaffold scripts `scaffold_skill.py` / `scaffold_domain.py` sit in `skill-builder/scripts/` and `domain-builder/scripts/` and run with `uv run` |
+| `agents/` | `skaile` — the root orchestrator agent: routes by intent to domain agents (see `docs/agents.md`) |
 
 ## Contract
 
@@ -42,11 +40,12 @@ The `skill-builder-contract` in `contracts/` is the shared bridge:
 | `skill-builder` | Scaffold and implement a new Agent skill from requirements |
 | `domain-builder` | Scaffold a new domain folder with DOMAIN.md and contract skeleton |
 | `uv-cli-implementer` | Build single-file Python CLI tools (uv + Typer) for agent invocation |
+| `agent-builder` | Scaffold and write a GitAgent definition (`agent.yaml` spec 0.2, `SOUL.md`, `RULES.md`, `composes:`) |
 | `ai-resource-navigator` | Browse, search, install, and deploy skills from the asset catalog |
 
 ## Conventions
 
 - All skills in this domain read `skill-builder-contract` before operating
-- Skills are named with a clear action verb: `skill-builder`, `domain-builder`, `uv-cli-implementer`, `ai-resource-navigator`
-- Tools in `tools/` are single-file Python scripts with PEP 723 inline deps, runnable via `uv run`
+- Skills are named with a clear action verb: `skill-builder`, `domain-builder`, `agent-builder`, `uv-cli-implementer`, `ai-resource-navigator`
+- The scaffold scripts (`skills/skill-builder/scripts/scaffold_skill.py`, `skills/domain-builder/scripts/scaffold_domain.py`) are single-file Python scripts with PEP 723 inline deps, runnable via `uv run`
 - Stage defaults to `alpha` — promote after validation

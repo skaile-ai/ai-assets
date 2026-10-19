@@ -4,7 +4,6 @@ description: "Deep implementation expertise for JavaScript and TypeScript framew
 type: domain
 building_blocks:
   contracts: "Expert skill conventions: how to structure recipes, atomic examples, and reference implementations; routing protocol for the advisor skill."
-  docs: "Framework version matrices, known breaking changes, and integration notes."
   skills: "One expert skill per framework/library (nuxt, directus, tiptap, uno, primevue, vueuse, omp, una, scadcn, tts-stt); plus an advisor skill for routing."
   agents: "TBD"
   prompts: "TBD"
@@ -23,7 +22,6 @@ Implementation skills in `skaileup-implementation` route to these experts when t
 | Folder | Purpose |
 |--------|---------|
 | `contracts/` | Expert skill conventions — recipe format, atomic example structure, reference implementation layout |
-| `docs/` | Framework version matrices, breaking-change notes, cross-expert integration patterns |
 | `skills/` | One expert skill per technology + the advisor router |
 
 ## Skills

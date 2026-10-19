@@ -70,13 +70,13 @@ Manages the release lifecycle for skaile-dev domains and packages. Three modes:
 ROLE  Release manager — reads structured commit history, determines version bumps, generates changelog entries, creates git tags.
 
 READS
-  <target>/bundle.yaml OR <target>/package.json    — current version
+  <target>/<target>.preset.yaml OR <target>/package.json — current version (domain without a preset: latest git tag)
   git log / git tag                                  — commit history and existing tags
   CHANGELOG.md                                       — existing changelog
   conventional-commits titles + descriptions           — commit classification
 
 WRITES
-  <target>/bundle.yaml OR <target>/package.json    — updated version
+  <target>/<target>.preset.yaml OR <target>/package.json — updated version
   CHANGELOG.md                                       — new version section with entries
   git tags                                           — annotated release tags
 
@@ -84,7 +84,7 @@ MUST  read conventional-commits titles and descriptions to auto-generate changel
 MUST  preserve existing CHANGELOG.md content — only prepend new version section
 MUST  ask for user confirmation before writing version bump
 MUST  use Keep Changelog format for CHANGELOG.md
-MUST  determine version source: bundle.yaml for ai-assets domains, package.json for code packages
+MUST  determine version source: `version:` in <domain>.preset.yaml for ai-assets domains (latest git tag when the domain ships no preset), package.json for code packages
 NEVER auto-push tags — let the user push explicitly
 NEVER tag without a clean working tree
 NEVER overwrite or truncate existing changelog entries
@@ -99,7 +99,7 @@ EMIT [release] started mode=<mode>
 IF mode = status
 
   STEP 1: Determine current version
-    - For ai-assets domains: read version from bundle.yaml
+    - For ai-assets domains: read `version:` from <domain>/<domain>.preset.yaml; if the domain ships no preset, use `git describe --tags --abbrev=0`
     - For code packages: read version from package.json
 
   STEP 2: Find last release tag
@@ -189,7 +189,7 @@ IF mode = bump
     ```
 
   STEP 6: Update version file
-    - For ai-assets domains: update version in bundle.yaml
+    - For ai-assets domains: update `version:` in <domain>/<domain>.preset.yaml (no preset: the tag in mode `tag` carries the version)
     - For code packages: update version in package.json
 
   STEP 7: Commit
@@ -207,7 +207,7 @@ IF mode = tag
   STEP 1: Verify preconditions
     $ git status --short
     IF dirty working tree → STOP: "Working tree must be clean before tagging."
-    - Read current version from bundle.yaml or package.json
+    - Read current version from <domain>.preset.yaml (or the planned tag) or package.json
     - Verify HEAD commit message matches "chore(*): release v<version>"
       IF not → WARN: "HEAD doesn't appear to be a release commit. Proceed? (yes/cancel)"
 
@@ -224,7 +224,7 @@ IF mode = tag
 ---
 
 CHECKLIST
-  - [ ] Current version determined from correct source (bundle.yaml vs package.json)
+  - [ ] Current version determined from correct source (<domain>.preset.yaml vs package.json)
   - [ ] Commits analyzed by conventional-commits title type
   - [ ] Version bump confirmed by user before writing
   - [ ] CHANGELOG.md entries grouped by type

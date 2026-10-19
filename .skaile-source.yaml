@@ -1,47 +1,14 @@
-# Asset Source configuration for ai-assets
-# See: _devlog/specs/2026-05-03-ai-asset-store-v2-design.md
+# Asset Source configuration for ai-assets (v1 file)
 #
-# Every top-level folder maps to its own publisher explicitly. Until
-# @skaile/workspaces 5.0 the publisher came from the folder name
-# (`publisher_default: '@<domain>'`); 5.0 rejects that template, so the
-# mapping is spelled out here to keep every `@<publisher>/<name>` ref unchanged.
-# A new top-level folder needs its own entry, or its assets land on the default.
+# skaile.manifest.yaml is the canonical publish manifest: it names the one
+# publisher (skaile-ai) every asset in this repo ships under, and the store's
+# sync reads it in preference to this file. This v1 file exists only for v1
+# readers (for example the store's curation preview) and must agree with it:
+# the default publisher is '@' + the manifest's publisher, and there are no
+# per-folder publisher overrides. scripts/source-publishers.test.sh enforces it.
 
 version: 1
 publisher_default: '@skaile-ai'
 default_ref: main
-publisher_overrides:
-  - path: ai-asset-management/
-    publisher: '@ai-asset-management'
-  - path: catalogs/
-    publisher: '@skaile'
-  - path: data-extraction/
-    publisher: '@data-extraction'
-  - path: dev-implementation-experts/
-    publisher: '@dev-implementation-experts'
-  - path: dev-implementation-experts-js/
-    publisher: '@dev-implementation-experts-js'
-  - path: dev-implementation-experts-python/
-    publisher: '@dev-implementation-experts-python'
-  - path: dev-implementation-experts-typst/
-    publisher: '@dev-implementation-experts-typst'
-  - path: forge-mattermost/
-    publisher: '@forge-mattermost'
-  - path: github-ops/
-    publisher: '@github-ops'
-  - path: knowledge-research/
-    publisher: '@knowledge-research'
-  - path: mcp/
-    publisher: '@mcp'
-  - path: skaile-development/
-    publisher: '@skaile-development'
-  - path: skaile-forge/
-    publisher: '@skaile-forge'
-  - path: skaile-platform/
-    publisher: '@skaile-platform'
-  - path: testing/
-    publisher: '@testing'
-  - path: use/
-    publisher: '@use'
 sync:
   trigger: webhook

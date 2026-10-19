@@ -19,7 +19,7 @@
 # `skaile-development/skills/ship/scripts/babysit-poll.sh` is that script's
 # neighbour, and a test for something repo-level lives here in `scripts/`.
 #
-# Know the one consequence: a skill directory named in `skaile.yaml` is copied
+# Know the one consequence: a skill directory installed from this repo is copied
 # into consumer repos wholesale (`cpSync` recursive, no filter and no exclude
 # mechanism anywhere in the installer), so a co-located test ships alongside the
 # script it covers. That is unavoidable while the script itself has to ship, and

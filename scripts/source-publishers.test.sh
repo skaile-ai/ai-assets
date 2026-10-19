@@ -1,56 +1,41 @@
 #!/usr/bin/env bash
 #
-# .skaile-source.yaml maps every top-level asset folder to its own publisher.
-# Until workspaces 5.0 that came from the folder name; now it is spelled out,
-# and a folder with no entry silently falls back to `publisher_default`,
-# changing every `@<publisher>/<name>` ref under it. This catches that at
-# author time.
+# .skaile-source.yaml is the v1 source file. skaile.manifest.yaml is the
+# canonical publish manifest and the store's sync prefers it, so every asset
+# here ships under its one publisher (skaile-ai). The v1 file must not say
+# anything different: a per-folder publisher_overrides entry would give
+# v1 readers (the store's curation preview) a namespace the published refs do
+# not use. This pins the agreement: the default publisher is '@' plus the
+# manifest's publisher, and there are no overrides.
 
 set -uo pipefail
 ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && git rev-parse --show-toplevel)}"
 source "$ROOT/scripts/lib/assert.sh"
 
 CONFIG="$ROOT/.skaile-source.yaml"
+MANIFEST="$ROOT/skaile.manifest.yaml"
 assert_true ".skaile-source.yaml exists" test -f "$CONFIG"
-[ -f "$CONFIG" ] || assert_done
+assert_true "skaile.manifest.yaml exists" test -f "$MANIFEST"
+[ -f "$CONFIG" ] && [ -f "$MANIFEST" ] || assert_done
+
+unquote() { awk -F: -v key="$2" '$1 == key { v=$2; sub(/[[:space:]]*#.*/, "", v); gsub(/[[:space:]"'"'"']/, "", v); print v; exit }' "$1"; }
+
+manifest_publisher="$(unquote "$MANIFEST" publisher)"
+assert_true "skaile.manifest.yaml names a publisher" test -n "$manifest_publisher"
+
+assert_eq "@$manifest_publisher" "$(unquote "$CONFIG" publisher_default)" \
+  "publisher_default is '@' + the skaile.manifest.yaml publisher"
+
+if grep -qE '^publisher_overrides:' "$CONFIG"; then
+  fail "publisher_overrides present - per-folder publishers contradict the one canonical publisher in skaile.manifest.yaml"
+else
+  pass "no publisher_overrides"
+fi
 
 if grep -qE "^[[:space:]]*(publisher_default|publisher):.*<[a-z-]+>" "$CONFIG"; then
   fail "a publisher value uses an '@<...>' template, which workspaces 5.0 rejects"
+else
+  pass "no '@<...>' publisher template"
 fi
-
-# Only the publisher_overrides block, so a later v2 `assets:` block with its
-# own `path:` keys is not mistaken for an override.
-overrides="$(awk '/^publisher_overrides:/{a=1; next} a && /^[A-Za-z_]/{a=0} a' "$CONFIG")"
-
-# Each folder keeps the publisher its name gave it before 5.0. catalogs/ was
-# already overridden to @skaile before the switch.
-expected_publisher() {
-  case "$1" in
-    catalogs) echo "@skaile" ;;
-    *) echo "@$1" ;;
-  esac
-}
-
-# Folders that hold an asset manifest at any depth. _agent-parts holds mixin
-# fragments pulled in by relative path, not standalone assets.
-folders="$(cd "$ROOT" && find . -mindepth 2 \( -name SKILL.md -o -name agent.yaml -o -name AGENT.md \
-  -o -name MCP.md -o -name CONTRACT.md -o -name BUNDLE.md -o -name CONNECTOR.md -o -name PROMPT.md \
-  -o -name '*.bundle.yaml' -o -name '*.catalog.yaml' \) -not -path './node_modules/*' -not -path './.*' \
-  | cut -d/ -f2 | grep -vx '_agent-parts' | sort -u)"
-
-count="$(printf '%s\n' "$folders" | grep -c . || true)"
-if [ "$count" -lt 10 ]; then
-  fail "expected at least 10 asset folders, found $count — the folder scan is broken"
-  assert_done
-fi
-
-for f in $folders; do
-  # The publisher line directly follows its `- path:` line.
-  got="$(printf '%s\n' "$overrides" | awk -v want="$f/" '
-    found { sub(/^[[:space:]]*publisher:[[:space:]]*/, ""); gsub(/["'\'']/, ""); print; exit }
-    { line=$0; sub(/^[[:space:]]*-[[:space:]]*path:[[:space:]]*/, "", line); gsub(/["'\'' ]/, "", line)
-      if ($0 ~ /^[[:space:]]*-[[:space:]]*path:/ && line == want) found=1 }')"
-  assert_eq "$(expected_publisher "$f")" "$got" "publisher for $f/"
-done
 
 assert_done

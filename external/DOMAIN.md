@@ -4,11 +4,10 @@ description: "Placeholder domain for third-party and externally sourced assets t
 type: domain
 building_blocks:
   contracts: "n/a — external assets follow their own conventions"
-  docs: "Registry of tracked external sources, their provenance, and any integration notes."
   skills: "n/a — external assets are not locally maintained skills"
-  agents: "n/a"
-  prompts: "n/a"
-  tools: "n/a"
+  agents: "n/a — external assets follow their own conventions"
+  prompts: "n/a — external assets follow their own conventions"
+  tools: "n/a — external assets follow their own conventions"
 stage: alpha
 ---
 
@@ -34,5 +33,5 @@ skaile source add ~/skills/external-skills
 ## Conventions
 
 - Do not copy external files into this folder — reference them via the Library (`skaile source add`)
-- Track provenance (source URL, version/commit) in a `docs/sources.md` file if external assets are referenced directly
+- Track provenance (source URL, version/commit) in a `sources.md` file next to this `DOMAIN.md` if external assets are referenced directly
 - External assets are not subject to the same frontmatter or structure conventions as local skills

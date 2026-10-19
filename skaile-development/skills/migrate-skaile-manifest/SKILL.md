@@ -1,6 +1,6 @@
 ---
 name: migrate-skaile-manifest
-description: "Use when you need to migrate a legacy skaile.yaml (schema 4.x and earlier, using `repositories:` or `ai_resources:`) into the new canonical-identity shape (`sources:` + `stores:` + canonical dep refs `kind:name@<publisher>[#pin]`). Triggers: 'migrate skaile.yaml', 'convert manifest', 'schema 4.x migration', 'update to canonical-identity', 'fix repositories: error', 'fix ai_resources: error', '@skaile to @skaile-ai rebrand'."
+description: "Use when you need to migrate a legacy skaile.yaml (schema 4.x and earlier, using `repositories:` or `ai_resources:`) into the new canonical-identity shape (`sources:` + `stores:` + canonical dep refs `kind:@<publisher>/name[#pin]`). Triggers: 'migrate skaile.yaml', 'convert manifest', 'schema 4.x migration', 'update to canonical-identity', 'fix repositories: error', 'fix ai_resources: error', '@skaile to @skaile-ai rebrand'."
 license: MIT
 metadata:
   author: skaile-ai
@@ -38,7 +38,7 @@ the workspaces repo. The old schema declared dependencies via per-project
 `repositories:` maps or `ai_resources:` lists; the new schema moves *identity*
 into a `(publisher, kind, name, version)` tuple, with sources declared under
 `sources:`, optional catalog fallbacks under `stores:`, and dependencies written
-as canonical refs `kind:name@<publisher>[#pin]`.
+as canonical refs `kind:@<publisher>/name[#pin]`.
 
 Your job is to rewrite the user's `skaile.yaml` into the new shape. The
 `metadata.version` strip in source SKILL.md files is a **separate concern** owned
@@ -65,19 +65,29 @@ legacy `ai_resources: { sources: [...], requires: [...] }` (legacy object shape)
 
 ── Dep refs ──────────────────────────────────────────────
 bare `skill:foo`
-  → `skill:foo@<publisher>` where <publisher> = inferred GitHub <org-or-user>
+  → `skill:@<publisher>/foo` where <publisher> = inferred GitHub <org-or-user>
     of the source URL. If multiple sources come from different GitHub orgs,
     ASK the user which publisher owns this dep.
 
-`kind:name@skaile`  (legacy curated namespace)
-  → `kind:name@skaile-ai`  (brand rebrand)
+`kind:name@skaile` or `kind:@skaile/name`  (legacy curated namespace)
+  → `kind:@skaile-ai/name`  (brand rebrand)
+
+legacy `kind:name@<publisher>` (the pre-scoped form)
+  → `kind:@<publisher>/name`; the `#pin` suffix is kept.
+
+`bundle:<name>@<publisher>[#pin]`  (the bundle kind no longer exists)
+  → `preset:@<publisher>/<name>`; DROP the `#pin` and warn: presets are
+    versioned on their own (starting at 1.0.0), so a bundle-era range such as
+    `#^2.0` can never match.
 
 pre-existing canonical refs already in the new shape pass through unchanged.
 
 ── Publication half (only if this repo IS also a source) ─
-write:
-  publisher: <inferred-from-URL-or-explicit>
+write `skaile.manifest.yaml` (the publisher manifest; a consuming project's own
+file stays `skaile.yaml`):
+  publisher: <inferred-from-URL-or-explicit>   # no leading @
   # version: omitted — git tag waterfall
+  # no `assets:` inventory — it would switch discovery off the tree walk
 
 ── SKILL.md frontmatter ──────────────────────────────────
 strip `metadata.version:` from every SKILL.md in this repo.
@@ -135,9 +145,11 @@ cd .../migrate-skaile-manifest
 uv run scripts/migrate.py \
   --in scripts/smoke_fixture/skaile.legacy.yaml \
   --out /tmp/migrated.yaml \
-  --publisher-map '{...see fixture comment...}'
+  --publisher-map '{"_bare_default": "skaile-ai"}'
 diff -u scripts/smoke_fixture/expected.yaml /tmp/migrated.yaml
 ```
 
-Empty diff = green. Update `expected.yaml` only when the spec's mapping
+Empty diff = green. `npm test` runs the same check
+(`scripts/migrate-skaile-manifest.test.sh` at the repo root; needs `uv`).
+Update `expected.yaml` only when the spec's mapping
 rules change; never to paper over a regression.

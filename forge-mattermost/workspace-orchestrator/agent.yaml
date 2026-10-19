@@ -1,6 +1,6 @@
-spec_version: "0.1.0"
+spec_version: "0.2"
 name: "workspace-orchestrator"
-version: "1.0.0"
+version: "1.1.0"
 description: "Channel workspace orchestrator — manages threads, shared state, and team coordination via Mattermost"
 model:
   preferred: "claude-sonnet-4-6"

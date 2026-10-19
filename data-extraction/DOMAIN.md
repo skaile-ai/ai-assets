@@ -4,7 +4,6 @@ description: "Extract structured content and source code from proprietary or bin
 type: domain
 building_blocks:
   contracts: "TBD - output layout conventions (complete/ vs partial/ split, per-artifact provenance)."
-  docs: "File-format reverse-engineering notes captured per skill under references/."
   skills: "One skill: msaccess-vba-extractor (VBA source out of ACE12 .accdb / legacy .mdb)."
   agents: "TBD"
   prompts: "TBD"

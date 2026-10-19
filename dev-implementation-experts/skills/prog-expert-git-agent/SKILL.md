@@ -8,6 +8,8 @@ description: "Use when you need to create, configure, or manage GitAgent-compati
 ## Goal
 Expert-level management of GitAgent agent definitions. Handles agent.yaml manifests, SOUL.md identity files, RULES.md constraints, SKILL.md capabilities, multi-agent hierarchies, knowledge injection, and cross-framework export. Maintains a repository of reusable patterns, recipes, and reference implementations for the GitAgent ecosystem.
 
+> **Scope.** This skill documents the upstream GitAgent open standard, spec v0.1.0 (`skills:`, `requires:`). Agents in the skaile ai-assets use `spec_version: "0.2"` with `composes:`, which this skill does not cover; for those, use the `agent-builder` skill (`ai-asset-management`).
+
 ## Core Workflow (Progressive Disclosure)
 1. **Context Analysis**: Analyze the current repository structure and existing agent definitions.
 2. **Knowledge Retrieval**:

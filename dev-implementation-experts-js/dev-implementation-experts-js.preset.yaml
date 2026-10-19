@@ -1,0 +1,16 @@
+publisher: skaile-ai
+name: dev-implementation-experts-js
+version: 1.0.0
+description: Deep implementation expertise for JavaScript and TypeScript frameworks
+items:
+  - ref: contract:@skaile-ai/impl-experts-js-contract
+  - ref: skill:@skaile-ai/prog-expert-nuxt
+  - ref: skill:@skaile-ai/prog-expert-directus
+  - ref: skill:@skaile-ai/prog-expert-tiptap
+  - ref: skill:@skaile-ai/prog-expert-primevue
+  - ref: skill:@skaile-ai/prog-expert-uno
+  - ref: skill:@skaile-ai/prog-expert-una
+  - ref: skill:@skaile-ai/prog-expert-scadcn
+  - ref: skill:@skaile-ai/prog-expert-vueuse
+  - ref: skill:@skaile-ai/prog-expert-omp
+  - ref: skill:@skaile-ai/prog-expert-tts-stt-integration

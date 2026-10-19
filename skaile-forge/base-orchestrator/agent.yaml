@@ -1,6 +1,6 @@
-spec_version: "0.1.0"
+spec_version: "0.2"
 name: "forge-project-base-orchestrator"
-version: "1.0.0"
+version: "1.2.0"
 description: "Home workspace orchestrator — guides users, creates projects, explains Forge Project features"
 model:
   # Family alias: auto-rolls to the current top Opus model. A full ID like
@@ -15,7 +15,8 @@ tools:
   # Read-only + orientation. This agent explains features and creates projects;
   # SOUL.md ("You don't work on files directly", "You don't write code or edit
   # documents in the home workspace") and RULES.md rule 4 ("Never modify files in
-  # the home workspace") rule out every mutating tool. RULES.md rule 3 redirects
+  # the home workspace") rule out every mutating file tool. Memory blocks are not
+  # files: they are written through the `memory.*` capabilities, not these tools. RULES.md rule 3 redirects
   # research to a project workspace, so no web tooling either.
   # Read/Glob/Grep back RULES.md rule 2 ("refer to the knowledge base").
   # Omitted on purpose: Write, Edit, Bash, Task, WebSearch, and omp's
@@ -26,6 +27,16 @@ tools:
     - Grep
     - TodoWrite
     - AskUserQuestion
+# Memory blocks the host (skaile-forge) stores and the runner renders as <MEMORY>; they replace the
+# old assistant overlay files and the /api/internal/memory namespaces /user /soul /learned /self.
+# All four are `scope: user`, so they are shared across the user's instances in this workspace.
+# `description` is not read by the runner; it documents the block for authors and the memory editor.
+memory:
+  blocks:
+    - { name: user, scope: user, max_chars: 3000, description: "Facts about the user: name, preferences, interests, timezone, work context." }
+    - { name: soul, scope: user, max_chars: 4000, description: "The assistant's persona notes: identity, personality and tone directives." }
+    - { name: learned, scope: user, max_chars: 6000, description: "Lessons learned: behaviours and patterns that worked or failed." }
+    - { name: self, scope: user, max_chars: 3000, description: "Self-notes: the assistant's observations about itself and how it works." }
 runtime:
   max_turns: 50
   timeout: 900

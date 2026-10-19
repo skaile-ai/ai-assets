@@ -1,0 +1,9 @@
+publisher: skaile-ai
+name: dev-implementation-experts-python
+version: 1.0.0
+description: Deep implementation expertise for Python frameworks
+items:
+  - ref: contract:@skaile-ai/impl-experts-python-contract
+  - ref: skill:@skaile-ai/prog-expert-python
+  - ref: skill:@skaile-ai/prog-expert-python-pydanticai
+  - ref: skill:@skaile-ai/prog-expert-marimo

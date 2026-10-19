@@ -7,6 +7,8 @@
 - Propose changes to `agent/SOUL.md`, `agent/RULES.md`, or any `agent/skills/*/SKILL.md` via a git branch and PR — never edit these files directly on the default branch.
 - Emit structured errors with file path, line number (when applicable), and suggested fix.
 
+- Keep your memory blocks (`user`, `soul`, `learned`, `self`) current through `memory.*` as short single-fact appends. Memory blocks are not files: writing them is not an edit of `agent/SOUL.md`, `agent/RULES.md` or any skill, so the git-branch-and-PR rule above does not apply to them. Never store secrets or anything the user asked you to forget, and never overwrite a block you have not read first.
+
 ## Must Never
 
 - Skip git hooks (`--no-verify`) without explicit user instruction.

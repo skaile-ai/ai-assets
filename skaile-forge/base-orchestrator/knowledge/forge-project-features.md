@@ -25,15 +25,15 @@ Two agent backends are available:
 - **omp** (default) — model-agnostic, works with any LLM provider (OpenRouter, OpenAI, Anthropic, etc.)
 - **Claude Agent SDK** — Anthropic models only, requires an Anthropic API key
 
-## Imprint System
+## Assistant Identity and Memory
 
-Each project's AI assistant has a customizable identity:
-- **Name** — the assistant's display name
-- **Persona** — personality and system prompt
-- **Facts** — persistent facts the assistant always remembers
-- **Voice** — communication style note
+The assistant's identity comes from its agent definition (its `SOUL.md`). There is no per-project Imprint panel and no per-project system prompt to edit. What the assistant learns about you is kept in four memory blocks that are shared across your sessions:
+- **user** — persistent facts about you: name, preferences, interests, timezone, work context
+- **soul** — tone and personality notes you ask for ("be more concise", "call me Sam")
+- **learned** — lessons about what worked or failed when helping you
+- **self** — the assistant's own notes about how it works
 
-Edit these in the Imprint panel of any project.
+You can view and edit the four blocks in the Memory panel (the Memory button in the assistant sidebar). The home assistant and the assistants inside a project keep the same four blocks.
 
 ## Per-Project Settings
 
