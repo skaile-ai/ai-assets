@@ -1,6 +1,6 @@
 spec_version: "0.2"
 name: "forge-project-orchestrator"
-version: "1.1.0"
+version: "1.2.0"
 description: "Project workspace assistant — helps with coding, writing, research, and file management"
 model:
   # Family alias: auto-rolls to the current top Opus model. A full ID like
@@ -46,6 +46,16 @@ composes:
   - { kind: skill, ref: skill:@skaile-ai/code-assistance }
   - { kind: skill, ref: skill:@skaile-ai/file-management }
   - { kind: skill, ref: skill:@skaile-ai/project-exploration }
+# Memory blocks the host (skaile-forge) stores and the runner renders as <MEMORY>; they replace the
+# old assistant overlay files and the /api/internal/memory namespaces /user /soul /learned /self.
+# All four are `scope: user`, so they are shared across the user's instances.
+# `description` is not read by the runner; it documents the block for authors and the memory editor.
+memory:
+  blocks:
+    - { name: user, scope: user, max_chars: 3000, description: "Facts about the user: name, preferences, interests, timezone, work context." }
+    - { name: soul, scope: user, max_chars: 4000, description: "The assistant's persona notes: identity, personality and tone directives." }
+    - { name: learned, scope: user, max_chars: 6000, description: "Lessons learned: behaviours and patterns that worked or failed." }
+    - { name: self, scope: user, max_chars: 3000, description: "Self-notes: the assistant's observations about itself and how it works." }
 runtime:
   max_turns: 100
   timeout: 1800
