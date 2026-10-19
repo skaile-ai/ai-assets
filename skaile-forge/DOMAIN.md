@@ -61,8 +61,6 @@ The last three live under the assistant agent's directory (`agent/skills/`), not
 
 The agent definition is loaded at runtime by `forge/skaile-forge/server/utils/agent-definition.ts` and injected as the system prompt for each coding session. The canonical path is `ai-assets/skaile-forge/agent` relative to the skaile-dev monorepo root.
 
-`agent.yaml` sets `imprint_on_project_open: true` — the imprint is rebuilt whenever a project is opened in skaile-forge.
-
 ## Notes
 
 The `forge-project-orchestrator` and `forge-project-base-orchestrator` are referenced by `forge/skaile-forge/server/utils/workspaces.ts` via scoped `agent:@skaile-ai/<name>` refs.

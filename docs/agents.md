@@ -290,15 +290,6 @@ after the agent's own `SOUL.md`, `RULES.md` and `DUTIES.md`; it supplements the 
 not replace it. `knowledge/` is discoverable and is not part of the prompt text. Empty parts are
 dropped, and missing convention files are silently skipped.
 
-A host may replace the assembled prompt. `skaile-forge/agent/hooks/hooks.yaml` declares an
-`imprint-on-open` hook on `project_open`, and `skaile-forge/agent/workflows/imprint-project.yaml`
-builds its own system prompt (`SOUL.md`, two inlined knowledge docs and the project `CLAUDE.md`,
-then `set_session_context`). That path bypasses this builder: it has no `<MEMORY>` section and no
-`## Constraints`. Neither `@skaile/workspaces` nor `skaile-forge` contains code that reads
-`hooks/hooks.yaml` or runs `set_session_context`, and the hook's `scripts/on-project-open.sh` does
-not exist, so this document treats the hook workflow as host-defined and unverified. If a host
-runs it, the agent loses its rules and memory blocks in that session.
-
 ## Agents in ai-assets
 
 | Agent                             | Path                                                        | Role                                                                           |

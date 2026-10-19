@@ -68,5 +68,4 @@ metadata:
   repo: "bitbucket.org/ecsplico/skaile-dev"
   canonical_path: "ai-assets/skaile-forge/project-orchestrator"
   app: "skaile-forge"
-  imprint_on_project_open: true
   stage: "alpha"
