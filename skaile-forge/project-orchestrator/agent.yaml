@@ -1,6 +1,6 @@
-spec_version: "0.1.0"
+spec_version: "0.2"
 name: "forge-project-orchestrator"
-version: "1.0.0"
+version: "1.1.0"
 description: "Project workspace assistant — helps with coding, writing, research, and file management"
 model:
   # Family alias: auto-rolls to the current top Opus model. A full ID like
@@ -42,10 +42,10 @@ tools:
     - WebFetch
     - TodoWrite
     - AskUserQuestion
-skills:
-  - "code-assistance"
-  - "file-management"
-  - "project-exploration"
+composes:
+  - { kind: skill, ref: skill:@skaile-ai/code-assistance }
+  - { kind: skill, ref: skill:@skaile-ai/file-management }
+  - { kind: skill, ref: skill:@skaile-ai/project-exploration }
 runtime:
   max_turns: 100
   timeout: 1800

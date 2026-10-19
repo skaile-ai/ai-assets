@@ -6,7 +6,7 @@ building_blocks:
   contracts: "Research output structure (findings/, summaries/), metadata fields for research artifacts, and citation conventions."
   docs: "Research workflow guides, quality criteria for sources, and synthesis patterns."
   skills: "Three skills: knowledge-deep-research (integrated 3-phase research), knowledge-paper-extractor (PDF metadata extraction), knowledge-paper-research (multi-phase paper knowledge extraction)."
-  agents: "TBD"
+  agents: "researcher — role agent (input {topic}, output {summary, sources?}) for one-shot research runs."
   prompts: "TBD"
   tools: "TBD"
 stage: alpha

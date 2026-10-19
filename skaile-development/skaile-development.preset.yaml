@@ -1,0 +1,23 @@
+publisher: skaile-ai
+name: skaile-development
+version: 1.0.0
+description: Day-to-day skaile-dev workflow — git ops, implementation, tests, docs, devlog, notifications, FAQ, and releases
+items:
+  - ref: skill:@skaile-ai/git
+  - ref: skill:@skaile-ai/review
+  - ref: skill:@skaile-ai/ship
+  - ref: skill:@skaile-ai/meat
+  - ref: skill:@skaile-ai/issue-bar
+  - ref: skill:@skaile-ai/test
+  - ref: skill:@skaile-ai/e2e-platform
+  - ref: skill:@skaile-ai/doc
+  - ref: skill:@skaile-ai/devlog
+  - ref: skill:@skaile-ai/notify
+  - ref: skill:@skaile-ai/faq
+  - ref: skill:@skaile-ai/release
+  - ref: skill:@skaile-ai/verify-ui
+  - ref: skill:@skaile-ai/kill-backend
+  - ref: skill:@skaile-ai/jenkins-debug
+  - ref: skill:@skaile-ai/postxl
+  - ref: skill:@skaile-ai/good-morning
+  - ref: agent:@skaile-ai/skaile-development

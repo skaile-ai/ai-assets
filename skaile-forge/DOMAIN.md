@@ -35,7 +35,7 @@ ai-assets/skaile-forge/
 │   └── RULES.md
 ├── skills/                        ← application-specific skills
 │   └── ui-rendering/
-└── skaile-forge.bundle.yaml
+└── skaile-forge.preset.yaml
 ```
 
 ## Agents

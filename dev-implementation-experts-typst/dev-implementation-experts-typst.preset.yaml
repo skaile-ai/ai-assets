@@ -1,0 +1,7 @@
+publisher: skaile-ai
+name: dev-implementation-experts-typst
+version: 1.0.0
+description: Typst document composition expertise and expert advisor routing
+items:
+  - ref: skill:@skaile-ai/prog-expert-typst
+  - ref: skill:@skaile-ai/prog-expert-advisor

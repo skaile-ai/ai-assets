@@ -18,7 +18,7 @@ their subjects in the platform repo.
 | subject | test |
 | --- | --- |
 | `skaile-development/skills/ship/scripts/babysit-poll.sh` | `skaile-development/skills/ship/scripts/babysit-poll.test.sh` |
-| something repo-level, like `skaile.yaml` | `scripts/<name>.test.sh` |
+| something repo-level, like `skaile.manifest.yaml` | `scripts/<name>.test.sh` |
 
 Discovery is a repo-wide `find` for `*.test.sh`, pruning `node_modules`, `.git`,
 `__pycache__` and `.venv`. Nothing registers a test; putting the file in place is
@@ -26,7 +26,7 @@ enough.
 
 ### The consequence to know about
 
-A skill directory named in `skaile.yaml` is copied into consumer repos
+A skill directory installed from this repo is copied into consumer repos
 **wholesale** — `installer.ts` calls `cpSync(dir, dest, { recursive: true })`,
 with no filter, and there is no exclude or ignore mechanism anywhere in the
 deploy path. So a co-located test ships into every consumer alongside the script

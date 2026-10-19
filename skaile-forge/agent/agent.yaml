@@ -1,6 +1,6 @@
-spec_version: "0.1.0"
+spec_version: "0.2"
 name: "forge-project-assistant"
-version: "1.0.0"
+version: "1.1.0"
 description: "Focused software development assistant — reads, writes, and explains code in developer project workspaces"
 model:
   # Family alias: auto-rolls to the current top Opus model. A full ID like
@@ -42,10 +42,16 @@ tools:
     - WebFetch
     - TodoWrite
     - AskUserQuestion
-skills:
-  - "code-assistance"
-  - "file-management"
-  - "project-exploration"
+composes:
+  - { kind: skill, ref: ./skills/code-assistance }
+  - { kind: skill, ref: ./skills/file-management }
+  - { kind: skill, ref: ./skills/project-exploration }
+# The former `session_error` hook (hooks/hooks.yaml: log-session-error) now runs as a trigger.
+triggers:
+  - kind: event
+    id: log-session-error
+    event: session_error
+    prompt: "A session error was reported for this project. Append one JSON line (timestamp, session id, error message) to data/projects/<slug>/errors.jsonl, then carry on."
 runtime:
   max_turns: 100
   timeout: 1800

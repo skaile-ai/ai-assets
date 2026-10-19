@@ -1,0 +1,9 @@
+publisher: skaile-ai
+name: skaile-forge
+version: 1.0.0
+description: skaile-forge AI assets — workspace assistant and orchestrators (assistant, workspace and concept modes)
+items:
+  - ref: skill:@skaile-ai/code-assistance
+  - ref: skill:@skaile-ai/file-management
+  - ref: skill:@skaile-ai/project-exploration
+  - ref: agent:@skaile-ai/forge-project-assistant

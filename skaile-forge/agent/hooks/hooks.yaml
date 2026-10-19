@@ -13,9 +13,3 @@ hooks:
     description: Route any agent self-modification request through the propose-change workflow
     workflow: workflows/propose-change.yaml
     async: false
-
-  - event: session_error
-    id: log-session-error
-    description: Log agent session errors to data/projects/[slug]/errors.jsonl
-    script: scripts/log-error.sh
-    async: true

@@ -1,7 +1,6 @@
 ---
 name: skaile-base
-type: persona
-version: 1.0.0
+version: 1.1.0
 description: Core Skaile agent identity — communication style, principles, and artifact-first mindset.
 ---
 

@@ -34,8 +34,8 @@ expected_publisher() {
 # Folders that hold an asset manifest at any depth. _agent-parts holds mixin
 # fragments pulled in by relative path, not standalone assets.
 folders="$(cd "$ROOT" && find . -mindepth 2 \( -name SKILL.md -o -name agent.yaml -o -name AGENT.md \
-  -o -name MCP.md -o -name CONTRACT.md -o -name BUNDLE.md -o -name CONNECTOR.md -o -name PROMPT.md \
-  -o -name '*.bundle.yaml' -o -name '*.catalog.yaml' \) -not -path './node_modules/*' -not -path './.*' \
+  -o -name MCP.md -o -name CONTRACT.md -o -name CONNECTOR.md -o -name PROMPT.md \
+  -o -name '*.preset.yaml' -o -name '*.catalog.yaml' \) -not -path './node_modules/*' -not -path './.*' \
   | cut -d/ -f2 | grep -vx '_agent-parts' | sort -u)"
 
 count="$(printf '%s\n' "$folders" | grep -c . || true)"

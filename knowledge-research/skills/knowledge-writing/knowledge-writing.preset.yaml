@@ -1,0 +1,9 @@
+publisher: skaile-ai
+name: knowledge-writing
+version: 1.0.0
+description: Content generation from research — podcast scripts, book chapters, and audio productions
+items:
+  - ref: contract:@skaile-ai/knowledge-writing-contract
+  - ref: skill:@skaile-ai/book-writer
+  - ref: skill:@skaile-ai/knowledge-paper-podcast
+  - ref: skill:@skaile-ai/knowledge-writer-podcast

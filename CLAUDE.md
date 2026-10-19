@@ -46,8 +46,8 @@ Every asset shipped from this repo is identified by the canonical tuple
 
 | Field | Source of truth | Notes |
 |---|---|---|
-| `publisher` | `skaile.yaml` at the repo root | `skaile-ai` for everything here |
-| `kind` | `<domain>/skills/<name>/SKILL.md` (skill), `<domain>/<domain>.bundle.yaml` (bundle) | filename convention |
+| `publisher` | `skaile.manifest.yaml` at the repo root | `skaile-ai` for everything here |
+| `kind` | `<domain>/skills/<name>/SKILL.md` (skill), `<domain>/agents/<name>/agent.yaml` (agent), `<domain>/<domain>.preset.yaml` (preset), `<name>/PERSONA.md` (persona), `<name>/RULESET.md` (ruleset) | filename convention |
 | `name` | SKILL.md frontmatter `name:` (must match parent directory) | per-asset |
 | `version` | `git describe --tags --abbrev=0` of the resolved commit (repo-wide default); a per-asset frontmatter `version:` **overrides** it for that asset | cut a tag to release, or pin per-asset (see below) |
 
@@ -71,7 +71,7 @@ sources:
   - url: https://github.com/skaile-ai/ai-assets
     pin: v1.4.0     # branch | tag | 40-char sha; defaults to HEAD of default branch
 dependencies:
-  - bundle:skaile-development@skaile-ai#^2.0
+  - preset:@skaile-ai/skaile-development#^1.0
   - skill:audit@skaile-ai#~1.4
 ```
 

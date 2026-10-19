@@ -1,0 +1,12 @@
+publisher: skaile-ai
+name: ai-asset-management
+version: 1.0.0
+description: Meta-management of the skill ecosystem — scaffolding, catalog navigation, and CLI tool building
+items:
+  - ref: contract:@skaile-ai/skill-builder-contract
+  - ref: skill:@skaile-ai/skill-builder
+  - ref: skill:@skaile-ai/domain-builder
+  - ref: skill:@skaile-ai/agent-builder
+  - ref: skill:@skaile-ai/ai-resource-navigator
+  - ref: skill:@skaile-ai/uv-cli-implementer
+  - ref: agent:@skaile-ai/skaile

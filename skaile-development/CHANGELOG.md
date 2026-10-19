@@ -5,6 +5,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- Agent `skaile-development` 1.2.0 moves to `spec_version: "0.2"`: `metadata.orchestrates` becomes `composes:` skill items; `routes_to` / `knows` prose moves to `metadata.routing_notes` / `knowledge_notes`.
+- `skaile-development.bundle.yaml` → `skaile-development.preset.yaml` (preset `@skaile-ai/skaile-development`). Consumers: replace `bundle:@skaile-ai/skaile-development` with `preset:@skaile-ai/skaile-development` in `dependencies:`.
+
 ### Fixes
 - `git` `deploy` (retired) now says never to push `deploy`: the platform `deploy` branch is protected by the `deploy-protection` ruleset, and a release deploys when the Version PR merges in the 06:00-07:00 Berlin window (#192). `ship` 1.9.1 `references/platform.md` says the same.
 - `git` `finish` merge: a BLOCKED PR is classified from `gh pr checks --required --json name,bucket` (read the JSON, not the exit status), so a red required check stops instead of arming auto-merge. Auto-merge is armed only for a pending required check or a required review; a block nothing will clear (no required checks, or all pass or skipping) stops and names the gate. An UNKNOWN merge state, usual right after the PR is created, gets one re-probe after about 3 s before it stops. Every `git-state.json` write is anchored at `<repo_root>`, and branch mode resolves `repo_root` itself. `DOMAIN.md` and `worktree_patterns.md` say changes land by PR instead of claiming every default branch is protected.
