@@ -5,9 +5,9 @@ type: domain
 building_blocks:
   contracts: "n/a — external assets follow their own conventions"
   skills: "n/a — external assets are not locally maintained skills"
-  agents: "TBD"
-  prompts: "TBD"
-  tools: "TBD"
+  agents: "n/a — external assets follow their own conventions"
+  prompts: "n/a — external assets follow their own conventions"
+  tools: "n/a — external assets follow their own conventions"
 stage: alpha
 ---
 

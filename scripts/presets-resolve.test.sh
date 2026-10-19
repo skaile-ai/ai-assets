@@ -6,7 +6,7 @@
 # the failure surfaces in the consumer's resolver, far from the edit that caused
 # it.
 #
-# This pins four properties, driven by a walk of the tree (no manifest list):
+# This pins five properties, driven by a walk of the tree (no manifest list):
 #
 #   1. every SKILL.md frontmatter `name:` equals its parent directory name
 #      (CLAUDE.md rule; the resolver depends on both agreeing),
@@ -19,7 +19,10 @@
 #      the directory of the file that declares it, stays inside this repo, and is
 #      a directory holding an asset manifest (refs) or a regular file (extends).
 #      A path that climbs one level too far is silently inert in the resolver
-#      (this is how an `extends:` once pointed above the repo root unnoticed).
+#      (this is how an `extends:` once pointed above the repo root unnoticed),
+#   5. every `assets:` entry and `include:` glob of catalogs/*.catalog.yaml
+#      resolves to a skill or flow in this tree (an entry from another repo goes
+#      on the allowlist as `catalog:<entry>`).
 #
 # How an asset is identified: skill = SKILL.md `name:`, agent = agent.yaml `name:`,
 # contract = CONTRACT.md `name:`, persona/ruleset = PERSONA.md/RULESET.md `name:`,
@@ -219,5 +222,48 @@ while IFS="$(printf '\t')" read -r src what ref; do
   fi
 done < "$PATHREFS"
 assert_eq 0 "$bad_paths" "every path ref and extends: exists inside the repo ($path_count checked)"
+
+# ── 5. catalogs/*.catalog.yaml entries resolve ──────────────────────────────
+# A catalog lists `assets:` as `<domain>/<name>` (the skill `<name>` or flow
+# `<name>.flow.yaml` somewhere under `<domain>/`; `*` allowed, e.g.
+# `knowledge-writing/*`) and `include:` as globs relative to the repo root. An
+# entry that names a domain which ships from another repo goes on EXTERNAL_REFS
+# as `catalog:<entry>`; like the ref allowlist, a listed entry that resolves
+# in-tree fails.
+CATALOG_COUNT=0
+bad_catalog=0
+for cat in "$ROOT"/catalogs/*.catalog.yaml; do
+  [ -f "$cat" ] || continue
+  crel="${cat#"$ROOT"/}"
+  grep -vE '^[[:space:]]*#' "$cat" > "$STRIPPED"
+  while IFS= read -r entry; do
+    CATALOG_COUNT=$((CATALOG_COUNT + 1))
+    dom="${entry%%/*}"
+    pat="${entry#*/}"
+    found=""
+    if [ -d "$ROOT/$dom" ]; then
+      found="$(find "$ROOT/$dom" \( -name node_modules -o -name '.*' \) -prune -o -type f \
+        \( -path "*/$pat/SKILL.md" -o -path "*/$pat.flow.yaml" -o -path "*/$pat/CONTRACT.md" \) -print | head -1)"
+    fi
+    if printf '%s' "$EXTERNAL_REFS" | grep -qxF "catalog:$entry"; then
+      [ -z "$found" ] || { fail "$crel — catalog:$entry is on the external allowlist but resolves in this tree; drop it from EXTERNAL_REFS"; bad_catalog=$((bad_catalog + 1)); }
+      continue
+    fi
+    [ -n "$found" ] || { fail "$crel — assets entry '$entry' matches no skill or flow under $dom/"; bad_catalog=$((bad_catalog + 1)); }
+  done < <(sed -nE 's/^[[:space:]]*-[[:space:]]*"([a-z0-9][^" ]*\/[^" ]+)"[[:space:]]*$/\1/p' "$STRIPPED" | grep -v '/SKILL\.md$' | grep -v '\.flow\.yaml$')
+  # include: globs (and only those: they end in SKILL.md or .flow.yaml)
+  while IFS= read -r glob; do
+    CATALOG_COUNT=$((CATALOG_COUNT + 1))
+    if ! compgen -G "$ROOT/$glob" > /dev/null; then
+      fail "$crel — include glob '$glob' matches no file"
+      bad_catalog=$((bad_catalog + 1))
+    fi
+  done < <(sed -nE 's/^[[:space:]]*-[[:space:]]*"([^" ]+(SKILL\.md|\.flow\.yaml))"[[:space:]]*$/\1/p' "$STRIPPED")
+done
+if [ "$CATALOG_COUNT" -lt 30 ]; then
+  fail "checked only $CATALOG_COUNT catalog entries and globs - the catalog scan is broken"
+  assert_done
+fi
+assert_eq 0 "$bad_catalog" "every catalogs/*.catalog.yaml asset entry and include glob resolves ($CATALOG_COUNT checked)"
 
 assert_done
