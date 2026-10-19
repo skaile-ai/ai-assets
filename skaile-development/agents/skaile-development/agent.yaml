@@ -2,16 +2,11 @@ spec_version: '0.2'
 name: 'skaile-development'
 version: '1.2.0'
 description: 'Expert advisor for the skaile-dev monorepo. Routes implementation tasks to the right skills and prog-experts, orchestrates multi-step workflows (implement → test → docs → devlog), and provides context-aware guidance grounded in the actual package CLAUDE.md files.'
-# Parent agent. `skaile install` merges it in (asset-manager install-agent.ts, applyExtendsMerge):
-# `composes` is parent + child (deduped by kind/ref/id), every other array is unioned, and every
-# object-valued key (e.g. `model`, `delegation`, `runtime`, `agents`) is replaced by the child's value.
-# `tags` is such a unioned array, and this is the agent where it fires: the merged agent carries the
-# parent's `ai-agent`, `skills`, `conceptualization`, `implementation` and `quality` tags next to its own.
-# The parent's three delegate agents therefore ship with this agent (they are in the
-# skaile-development preset). Its persona and ruleset items are inherited by the merge but never
-# rendered: the install renders no composed persona/ruleset blocks and the runner does not follow
-# `extends` (docs/agents.md, `extends`), so this agent's prompt is its own SOUL.md only (it has no RULES.md).
-extends: '../../../ai-asset-management/agents/skaile/agent.yaml'
+# Self-contained: no `extends`. The runner's composition resolver does not follow `extends`, only
+# `skaile install` does, so an inherited agent was built differently by the two. Everything this agent
+# uses is declared here: its skills, plus the shared `skaile-base` persona and `skaile-safety` ruleset
+# (the same two parts the `skaile` agent composes). The `skaile` agent's three pipeline delegates
+# (conceptualize / implement / quality) are not part of this agent: its SOUL.md routes to skills only.
 model:
   # Family alias: auto-rolls to the current top Opus model. A full ID like
   # claude-opus-5 fails ModelIdSchema today (see workspaces#03).
@@ -23,10 +18,6 @@ model:
     max_tokens: 8192
 delegation:
   mode: 'explicit'
-# The parent's `agents:` map describes three auto-delegating entries. It is metadata (nothing in the
-# runtime reads it), but inheriting it would make this `mode: explicit` agent contradict itself, so
-# the child replaces it with an empty map.
-agents: {}
 runtime:
   max_turns: 150
   timeout: 2400
@@ -40,6 +31,8 @@ tags:
   - 'orchestrator'
   - 'workspace'
 composes:
+  - { kind: persona, ref: ../../../_agent-parts/personas/skaile-base/PERSONA.md }
+  - { kind: ruleset, ref: ../../../_agent-parts/rules/skaile-safety/RULESET.md }
   - { kind: skill, ref: skill:@skaile-ai/git }
   - { kind: skill, ref: skill:@skaile-ai/implement }
   - { kind: skill, ref: skill:@skaile-ai/test }

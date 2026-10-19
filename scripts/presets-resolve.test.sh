@@ -18,8 +18,8 @@
 #      every `extends:` in an agent.yaml / *.preset.yaml exists, resolved against
 #      the directory of the file that declares it, stays inside this repo, and is
 #      a directory holding an asset manifest (refs) or a regular file (extends).
-#      A path that climbs one level too far is silently inert in the resolver,
-#      which is exactly how `skaile-development`'s `extends:` was broken.
+#      A path that climbs one level too far is silently inert in the resolver
+#      (this is how an `extends:` once pointed above the repo root unnoticed).
 #
 # How an asset is identified: skill = SKILL.md `name:`, agent = agent.yaml `name:`,
 # contract = CONTRACT.md `name:`, persona/ruleset = PERSONA.md/RULESET.md `name:`,
@@ -40,9 +40,7 @@ agent:impl-build-implement
 agent:quality
 "
 # ^ shipped from skaile-ai/ai-assets-skaileup (publisher skaile-ai). Referenced by
-#   ai-asset-management/agents/skaile/agent.yaml (composed as delegate agents) and
-#   by skaile-development/skaile-development.preset.yaml (items the agent inherits
-#   through `extends:`), so the allowlist also guards an installable artifact.
+#   ai-asset-management/agents/skaile/agent.yaml (composed as delegate agents).
 
 PUBLISHER="skaile-ai"
 INDEX="$(mktemp)"

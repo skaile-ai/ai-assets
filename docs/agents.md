@@ -7,7 +7,7 @@ _sources:
   - path: ai-assets/skaile-forge/agent/agent.yaml
     description: Forge-Project in-app dev assistant — composes of local skills, event trigger (report-session-error)
   - path: ai-assets/skaile-development/agents/skaile-development/agent.yaml
-    description: Skaile-dev workflow agent — extends the skaile agent
+    description: Skaile-dev workflow agent — self-contained: own skills plus the shared persona and ruleset parts
   - path: ai-assets/skaile-platform/agents/assistant/agent.yaml
     description: Platform assistant agent
   - path: ai-assets/knowledge-research/agents/researcher/agent.yaml
@@ -62,8 +62,8 @@ version: 1.0.0 # Semver
 description: >
   One or two sentences: what the agent does and when to use it.
 
-# optional inheritance (see `extends`); the path must stay inside the repo
-extends: ../../../ai-asset-management/agents/skaile/agent.yaml
+# optional inheritance (see `extends`; install only, the runner ignores it); the path must stay inside the repo
+extends: ../parent-agent/agent.yaml
 
 # Composition (optional) — shared persona/ruleset parts, skills, delegate agents
 composes:
@@ -101,8 +101,8 @@ metadata: # Freeform — domain, routing notes, knowledge notes
 ```
 
 This example is deliberately generic. The shipped agents are the faithful references:
-`skaile-development/agents/skaile-development/agent.yaml` (extends, family-alias model, delegation
-`explicit`), `ai-asset-management/agents/skaile/agent.yaml` (persona, ruleset and delegate
+`skaile-development/agents/skaile-development/agent.yaml` (self-contained, family-alias model, delegation
+`explicit`, persona and ruleset composed directly), `ai-asset-management/agents/skaile/agent.yaml` (persona, ruleset and delegate
 composition) and `knowledge-research/agents/researcher/agent.yaml` (a role).
 
 ## Field Reference
@@ -255,7 +255,7 @@ The 0.2 trigger schema has no async or background flag. Ids must be unique per a
 
 Inherits from a parent `agent.yaml`, resolved relative to the child's directory. Only `skaile install` reads it (the runner's composition resolver does not), and it skips the parent with a warning when the path does not exist. Merge rules: scalars and every object-valued key (e.g. `model`, `delegation`, `runtime`, `tools`, `metadata`) are replaced wholesale by the child's value, not deep-merged, so restate every sub-field you still want; `composes` is parent + child, deduplicated by kind, ref and slot id; every other array (e.g. `tags`) is unioned, so the child's `tags` carry the parent's too.
 
-Inheritance covers the manifest only. The parent's `SOUL.md`, `RULES.md`, `DUTIES.md` and `knowledge/` are not read: the install renders the child directory's own files. The merged `composes` drives the install (delegate sub-agent files, abilities, contracts, MCP servers) but the install renders no composed `persona` or `ruleset` blocks, and the runner builds those from the agent's own `agent.yaml` without resolving `extends` (see System Prompt Assembly). A `persona` or `ruleset` item that only arrives through `extends` is therefore never rendered; declare it in the child if it must reach the prompt. `skaile-development` inherits the `skaile` agent's persona and ruleset this way and ships without them.
+Inheritance covers the manifest only. The parent's `SOUL.md`, `RULES.md`, `DUTIES.md` and `knowledge/` are not read: the install renders the child directory's own files. The merged `composes` drives the install (delegate sub-agent files, abilities, contracts, MCP servers) but the install renders no composed `persona` or `ruleset` blocks, and the runner builds those from the agent's own `agent.yaml` without resolving `extends` (see System Prompt Assembly). A `persona` or `ruleset` item that only arrives through `extends` is therefore never rendered; declare it in the child if it must reach the prompt. Because the runner ignores `extends`, install and runner build different agents from an inheriting manifest; no shipped agent uses it for that reason (`skaile-development` composes its persona and ruleset directly).
 
 ## SOUL.md
 

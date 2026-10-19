@@ -275,9 +275,9 @@ Priority determines the order documents are listed in. Default priority is 99. K
 
 ### Extending a parent agent
 ```yaml
-extends: ../../../ai-asset-management/agents/skaile/agent.yaml
+extends: ../parent-agent/agent.yaml   # relative path, stays inside the repo
 ```
-The child inherits every key it does not declare. every object-valued key (e.g. `model`, `delegation`, `runtime`, `tools`, `metadata`) is replaced wholesale by the child's value, not deep-merged: restate every sub-field you still want (a child that sets only `model.preferred` loses the parent's `fallback` and `constraints`). `composes` is parent + child, and every other array (e.g. `tags`) is unioned. Only `skaile install` resolves `extends`, and it reads the manifest only: the parent's `SOUL.md` and `RULES.md` are not inherited, and a persona or ruleset item that arrives only through `extends` is not rendered into the prompt.
+Prefer composing the parts you need directly: only `skaile install` follows `extends`, so an inheriting agent is built differently by install and by the runner (no shipped agent uses it; `skaile-development` composes the shared persona and ruleset itself). The child inherits every key it does not declare. every object-valued key (e.g. `model`, `delegation`, `runtime`, `tools`, `metadata`) is replaced wholesale by the child's value, not deep-merged: restate every sub-field you still want (a child that sets only `model.preferred` loses the parent's `fallback` and `constraints`). `composes` is parent + child, and every other array (e.g. `tags`) is unioned. Only `skaile install` resolves `extends`, and it reads the manifest only: the parent's `SOUL.md` and `RULES.md` are not inherited, and a persona or ruleset item that arrives only through `extends` is not rendered into the prompt.
 
 ### Sub-agent delegation
 A delegate is a `composes` item of `kind: agent`. `skaile install` renders it as a sub-agent file next to the parent (`as:` names it).

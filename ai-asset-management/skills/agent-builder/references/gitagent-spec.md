@@ -69,7 +69,7 @@ agent-name/
 ```yaml
 # Inherit from a parent agent.yaml (upstream GitAgent also accepts a git URL;
 # in ai-assets the path must be relative and stay inside the repo)
-extends: ../../../ai-asset-management/agents/skaile/agent.yaml
+extends: ../parent-agent/agent.yaml
 
 # Compose skills and sub-agents (0.2; replaces the 0.1 `skills:` and `requires:` lists)
 composes:
