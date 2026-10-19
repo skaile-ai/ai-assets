@@ -67,4 +67,4 @@ metadata:
   spec_source: 'gitagent.sh'
   stage: 'alpha'
   dropped_delegates:
-    - 'architecture — no agent asset is published yet; the former requires entry pointed at a path that no longer exists. Its `agents:` block and routing triggers are gone too; Skaile answers architecture questions itself.'
+    - 'architecture — no agent asset is published yet; the former requires entry pointed at a path that no longer exists. Its descriptive `agents:` entry is gone too, so the metadata matches `composes:`; Skaile answers architecture questions itself.'

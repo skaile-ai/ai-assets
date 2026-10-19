@@ -19,8 +19,9 @@ model:
     max_tokens: 8192
 delegation:
   mode: 'explicit'
-# The parent declares four auto-delegating `agents:` entries; objects are replaced, not merged, so
-# an empty map here keeps this explicit-mode agent from inheriting them.
+# The parent's `agents:` map describes four auto-delegating entries. It is metadata (nothing in the
+# runtime reads it), but inheriting it would make this `mode: explicit` agent contradict itself, so
+# the child replaces it with an empty map.
 agents: {}
 runtime:
   max_turns: 150

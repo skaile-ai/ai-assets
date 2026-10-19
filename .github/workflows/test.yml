@@ -35,7 +35,7 @@ jobs:
       # dependency inline (PEP 723) and so needs `uv`. pipx is preinstalled on
       # ubuntu-latest; the test fails under CI if uv is missing.
       - name: Install uv
-        run: pipx install uv
+        run: pipx install 'uv==0.11.16'
 
       # `npm test` rather than `bash scripts/run-tests.sh` on purpose: the package.json
       # script is the documented entry point, so CI must be what proves it still

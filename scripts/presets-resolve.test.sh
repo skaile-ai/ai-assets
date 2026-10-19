@@ -39,8 +39,10 @@ agent:skaileup-conceptualize
 agent:impl-build-implement
 agent:quality
 "
-# ^ shipped from skaile-ai/ai-assets-skaileup (publisher skaile-ai); composed as
-#   delegate agents by ai-asset-management/agents/skaile/agent.yaml.
+# ^ shipped from skaile-ai/ai-assets-skaileup (publisher skaile-ai). Referenced by
+#   ai-asset-management/agents/skaile/agent.yaml (composed as delegate agents) and
+#   by skaile-development/skaile-development.preset.yaml (items the agent inherits
+#   through `extends:`), so the allowlist also guards an installable artifact.
 
 PUBLISHER="skaile-ai"
 INDEX="$(mktemp)"
@@ -79,55 +81,7 @@ done < <(find "$ROOT" -mindepth 1 \( -name node_modules -o -name '.*' \) -prune 
 indexed="$(grep -c . "$INDEX" || true)"
 if [ "$indexed" -lt 100 ]; then
   fail "indexed only $indexed assets — the tree walk is broken"
-  # ── 4. path refs and `extends:` exist ───────────────────────────────────────
-# `ref:` values that are neither catalog refs (`kind:@pub/name`) nor URLs, plus
-# every `extends:` value. Resolved against the declaring file's own directory.
-ROOT_REAL="$(cd "$ROOT" && pwd -P)"
-PATHREFS="$(mktemp)"
-trap 'rm -f "$INDEX" "$REFS" "$PATHREFS"' EXIT
-PATHREF_SED="s/.*(^|[^A-Za-z_])ref:[[:space:]]*[\"']?([^\"',} ]+).*/ref\t\2/p"
-EXTENDS_SED="s/^[[:space:]]*extends:[[:space:]]*[\"']?([^\"'[:space:]]+).*/extends\t\1/p"
-while IFS= read -r f; do
-  rel="${f#"$ROOT"/}"
-  grep -vE '^[[:space:]]*#' "$f" \
-    | { sed -nE "$PATHREF_SED"; sed -nE "$EXTENDS_SED" "$f"; } \
-    | awk -F'\t' -v src="$rel" '$2 !~ /^[a-z][a-z0-9-]*:/ {print src "\t" $1 "\t" $2}' >> "$PATHREFS"
-done < <(find "$ROOT" -mindepth 1 \( -name node_modules -o -name '.*' \) -prune -o -type f \
-  \( -name agent.yaml -o -name '*.preset.yaml' \) -print | sort)
-
-path_count="$(grep -c . "$PATHREFS" || true)"
-if [ "$path_count" -lt 5 ]; then
-  fail "found only $path_count path refs / extends — the path-ref scan is broken"
   assert_done
-fi
-
-bad_paths=0
-while IFS="$(printf '\t')" read -r src what ref; do
-  target="$(dirname "$ROOT/$src")/$ref"
-  if [ ! -e "$target" ]; then
-    fail "$src — $what '$ref' does not exist (resolved from $(dirname "$src")/)"
-    bad_paths=$((bad_paths + 1))
-    continue
-  fi
-  real="$(cd "$(dirname "$target")" && pwd -P)/$(basename "$target")"
-  case "$real" in
-    "$ROOT_REAL"/*) ;;
-    *) fail "$src — $what '$ref' resolves outside the repository ($real)"
-       bad_paths=$((bad_paths + 1)); continue ;;
-  esac
-  if [ "$what" = extends ]; then
-    [ -f "$target" ] || { fail "$src — extends '$ref' is not a file"; bad_paths=$((bad_paths + 1)); }
-  elif [ -d "$target" ]; then
-    found=0
-    for m in SKILL.md CONTRACT.md PERSONA.md RULESET.md MCP.md agent.yaml; do
-      [ -f "$target/$m" ] && found=1
-    done
-    [ "$found" -eq 1 ] || { fail "$src — ref '$ref' is a directory with no asset manifest"; bad_paths=$((bad_paths + 1)); }
-  fi
-done < "$PATHREFS"
-assert_eq 0 "$bad_paths" "every path ref and extends: exists inside the repo ($path_count checked)"
-
-assert_done
 fi
 pass "indexed $indexed assets"
 
@@ -176,55 +130,7 @@ done < <(find "$ROOT" -mindepth 1 \( -name node_modules -o -name '.*' \) -prune 
 ref_count="$(grep -c . "$REFS" || true)"
 if [ "$ref_count" -lt 50 ]; then
   fail "found only $ref_count catalog refs — the ref scan is broken"
-  # ── 4. path refs and `extends:` exist ───────────────────────────────────────
-# `ref:` values that are neither catalog refs (`kind:@pub/name`) nor URLs, plus
-# every `extends:` value. Resolved against the declaring file's own directory.
-ROOT_REAL="$(cd "$ROOT" && pwd -P)"
-PATHREFS="$(mktemp)"
-trap 'rm -f "$INDEX" "$REFS" "$PATHREFS"' EXIT
-PATHREF_SED="s/.*(^|[^A-Za-z_])ref:[[:space:]]*[\"']?([^\"',} ]+).*/ref\t\2/p"
-EXTENDS_SED="s/^[[:space:]]*extends:[[:space:]]*[\"']?([^\"'[:space:]]+).*/extends\t\1/p"
-while IFS= read -r f; do
-  rel="${f#"$ROOT"/}"
-  grep -vE '^[[:space:]]*#' "$f" \
-    | { sed -nE "$PATHREF_SED"; sed -nE "$EXTENDS_SED" "$f"; } \
-    | awk -F'\t' -v src="$rel" '$2 !~ /^[a-z][a-z0-9-]*:/ {print src "\t" $1 "\t" $2}' >> "$PATHREFS"
-done < <(find "$ROOT" -mindepth 1 \( -name node_modules -o -name '.*' \) -prune -o -type f \
-  \( -name agent.yaml -o -name '*.preset.yaml' \) -print | sort)
-
-path_count="$(grep -c . "$PATHREFS" || true)"
-if [ "$path_count" -lt 5 ]; then
-  fail "found only $path_count path refs / extends — the path-ref scan is broken"
   assert_done
-fi
-
-bad_paths=0
-while IFS="$(printf '\t')" read -r src what ref; do
-  target="$(dirname "$ROOT/$src")/$ref"
-  if [ ! -e "$target" ]; then
-    fail "$src — $what '$ref' does not exist (resolved from $(dirname "$src")/)"
-    bad_paths=$((bad_paths + 1))
-    continue
-  fi
-  real="$(cd "$(dirname "$target")" && pwd -P)/$(basename "$target")"
-  case "$real" in
-    "$ROOT_REAL"/*) ;;
-    *) fail "$src — $what '$ref' resolves outside the repository ($real)"
-       bad_paths=$((bad_paths + 1)); continue ;;
-  esac
-  if [ "$what" = extends ]; then
-    [ -f "$target" ] || { fail "$src — extends '$ref' is not a file"; bad_paths=$((bad_paths + 1)); }
-  elif [ -d "$target" ]; then
-    found=0
-    for m in SKILL.md CONTRACT.md PERSONA.md RULESET.md MCP.md agent.yaml; do
-      [ -f "$target/$m" ] && found=1
-    done
-    [ "$found" -eq 1 ] || { fail "$src — ref '$ref' is a directory with no asset manifest"; bad_paths=$((bad_paths + 1)); }
-  fi
-done < "$PATHREFS"
-assert_eq 0 "$bad_paths" "every path ref and extends: exists inside the repo ($path_count checked)"
-
-assert_done
 fi
 
 dangling=0
@@ -269,19 +175,23 @@ assert_eq 0 "$stale_external"  "no entry of the cross-repo allowlist resolves in
 # every `extends:` value. Resolved against the declaring file's own directory.
 ROOT_REAL="$(cd "$ROOT" && pwd -P)"
 PATHREFS="$(mktemp)"
-trap 'rm -f "$INDEX" "$REFS" "$PATHREFS"' EXIT
-PATHREF_SED="s/.*(^|[^A-Za-z_])ref:[[:space:]]*[\"']?([^\"',} ]+).*/ref\t\2/p"
-EXTENDS_SED="s/^[[:space:]]*extends:[[:space:]]*[\"']?([^\"'[:space:]]+).*/extends\t\1/p"
+STRIPPED="$(mktemp)"
+trap 'rm -f "$INDEX" "$REFS" "$PATHREFS" "$STRIPPED"' EXIT
+TAB="$(printf '\t')"
+# BSD sed has no `\t` in a replacement, so the sed prints "<what><TAB><value>" via a literal tab.
+PATHREF_SED="s/.*(^|[^A-Za-z_])ref:[[:space:]]*[\"']?([^\"',} ]+).*/ref${TAB}\\2/p"
+EXTENDS_SED="s/^[[:space:]]*extends:[[:space:]]*[\"']?([^\"'[:space:]]+).*/extends${TAB}\\1/p"
 while IFS= read -r f; do
   rel="${f#"$ROOT"/}"
-  grep -vE '^[[:space:]]*#' "$f" \
-    | { sed -nE "$PATHREF_SED"; sed -nE "$EXTENDS_SED" "$f"; } \
+  # One comment-stripped stream feeds both seds, like the catalog-ref scan above.
+  grep -vE '^[[:space:]]*#' "$f" > "$STRIPPED"
+  { sed -nE "$PATHREF_SED" "$STRIPPED"; sed -nE "$EXTENDS_SED" "$STRIPPED"; } \
     | awk -F'\t' -v src="$rel" '$2 !~ /^[a-z][a-z0-9-]*:/ {print src "\t" $1 "\t" $2}' >> "$PATHREFS"
 done < <(find "$ROOT" -mindepth 1 \( -name node_modules -o -name '.*' \) -prune -o -type f \
   \( -name agent.yaml -o -name '*.preset.yaml' \) -print | sort)
 
 path_count="$(grep -c . "$PATHREFS" || true)"
-if [ "$path_count" -lt 5 ]; then
+if [ "$path_count" -lt 6 ]; then
   fail "found only $path_count path refs / extends — the path-ref scan is broken"
   assert_done
 fi

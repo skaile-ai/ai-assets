@@ -113,7 +113,7 @@ asset). `scripts/presets-resolve.test.sh` checks that every ref and every `exten
 
 ### `delegation`
 
-Controls how the agent routes work to sub-agents:
+Descriptive metadata: it states how the author intends the agent to route work to sub-agents. No code in `@skaile/workspaces` (core, runner, asset-manager) acts on `mode`, `router` or `triggers`; `skaile install` only copies `delegation` verbatim into the rendered omp `agent.yaml`. What actually delegates is a `composes` item of `kind: agent` (see "Delegate agents" below). Keep the values accurate, because readers and other tooling rely on them, but do not expect them to change runtime behaviour.
 
 | Mode       | Behaviour                                                                       |
 | ---------- | ------------------------------------------------------------------------------- |
@@ -123,7 +123,7 @@ Controls how the agent routes work to sub-agents:
 
 ### `agents` (multi-agent only)
 
-Defined on orchestrator agents that manage sub-agents:
+Descriptive metadata on orchestrator agents (read by people, not by the runtime; see `delegation` above):
 
 ```yaml
 agents:
@@ -140,8 +140,7 @@ agents:
 
 A `composes` item with `kind: agent` and `binding: delegate` (the default) is rendered at
 `skaile install` as a sub-agent file next to the parent. `as:` sets the sub-agent's name.
-This replaces the 0.1 `requires:` list; the `agents:` map above is metadata only, since no
-runtime reads it.
+This replaces the 0.1 `requires:` list. The `agents:` map and `delegation` above stay metadata: removing a delegate means removing its `composes` item; its `agents:` entry is then just stale documentation to remove with it.
 
 ### `extends`
 

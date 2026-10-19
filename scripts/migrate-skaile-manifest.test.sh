@@ -12,7 +12,9 @@
 #
 # migrate.py declares its dependency (ruamel.yaml) inline (PEP 723), so it needs
 # `uv`. CI installs uv; a machine without it skips this file locally but fails
-# under CI=true, where a skipped lane would be false confidence.
+# under CI=true, where a skipped lane would be false confidence. `uv run` resolves
+# ruamel.yaml from PyPI on a cold cache, so this is the one test in the suite that
+# needs the network: a red run with a resolver error is a network blip, not a regression.
 set -uo pipefail
 ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && git rev-parse --show-toplevel)}"
 source "$ROOT/scripts/lib/assert.sh"
@@ -33,12 +35,19 @@ assert_true "smoke fixture input exists" test -f "$FIXTURE/skaile.legacy.yaml"
 assert_true "smoke fixture expectation exists" test -f "$FIXTURE/expected.yaml"
 
 out="$(mktemp)"
-trap 'rm -f "$out"' EXIT
+err="$(mktemp)"
+trap 'rm -f "$out" "$err"' EXIT
 (cd "$SKILL" && uv run scripts/migrate.py \
   --in scripts/smoke_fixture/skaile.legacy.yaml \
   --out "$out" \
-  --publisher-map '{"_bare_default": "skaile-ai"}') >/dev/null 2>&1
-assert_eq 0 "$?" "migrate.py exits 0 on the smoke fixture"
+  --publisher-map '{"_bare_default": "skaile-ai"}') >/dev/null 2>"$err"
+status=$?
+[ "$status" -eq 0 ] || echo "   migrate.py stderr: $(cat "$err")" >&2
+assert_eq 0 "$status" "migrate.py exits 0 on the smoke fixture"
+
+# The fixture's `bundle:skaile-development@skaile#^2.0` loses its bundle-era pin. That is an
+# absence in the output, which expected.yaml cannot encode, so the warning is the only signal.
+assert_true "migrate.py warns that the bundle-era pin was dropped" grep -q "dropped pin" "$err"
 
 diff_out="$(diff -u "$FIXTURE/expected.yaml" "$out" 2>&1)"
 assert_eq "" "$diff_out" "migrated output equals expected.yaml"

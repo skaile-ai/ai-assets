@@ -21,7 +21,9 @@ items:
   - ref: skill:@skaile-ai/postxl
   - ref: skill:@skaile-ai/good-morning
   - ref: agent:@skaile-ai/skaile-development
-  # Delegate agents the skaile-development agent inherits through `extends:` (ship from ai-assets-skaileup).
+  # Delegate agents the skaile-development agent inherits through `extends:`. They ship from the
+# separate skaile-ai/ai-assets-skaileup repo (same publisher, @skaile-ai), so a consumer needs a
+# second `sources:` entry for https://github.com/skaile-ai/ai-assets-skaileup to install this preset.
   - ref: agent:@skaile-ai/skaileup-conceptualize
   - ref: agent:@skaile-ai/impl-build-implement
   - ref: agent:@skaile-ai/quality
