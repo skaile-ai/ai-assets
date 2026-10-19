@@ -361,9 +361,10 @@ decides:
   only (the card names the one-click window; today that is 90 days), and one grant covers every
   read of the source. Unlike any other grant, it covers a turn started by any one member who
   can act in the session (not a Viewer, re-checked on every call), including people who join
-  later, as well as the owner's own turns. Even under this grant, a turn no single person
-  started — a schedule, a webhook, another agent, a mixed turn — still gets a card, the owner's
-  included. The owner
+  later, as well as the owner's own turns. But it covers only a message a person typed: unlike
+  an ordinary grant, it never covers a trigger turn, so a schedule, flow, peer agent or
+  delegation turn gets a card even when it is the owner's own, and so do a webhook and a mixed
+  turn. The owner
   revokes it in session settings, **Permissions** tab; the next read is carded again. Small effects that normally run with no card — drafting and filing mail, attaching a
   file, messaging a linked peer, renaming the assistant — are refused unless the owner asked
   ("Only `<owner>` can ask for this"). In a session only the owner can read, such as the

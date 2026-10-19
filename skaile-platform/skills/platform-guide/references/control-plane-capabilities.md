@@ -780,8 +780,9 @@ or mail, a session seed, a late result, or a relayed peer or delegated message â
 another member, several members, or nobody attributable set off, is carded whatever grants
 exist (`concepts/agent.md`, *Autonomy grants* and *Shared sessions*). A standing disclosure
 grant is the one exception: it also covers a turn started by one member who can act in the
-session (not a Viewer). Even under that exception, a schedule, a webhook, another agent or a
-mixed turn still gets a card, the owner's included.
+session (not a Viewer), but only on a message a person typed: unlike an ordinary grant it never
+covers a trigger turn, so even the owner's own schedule, flow, peer agent or delegation turn,
+a webhook and a mixed turn get a card.
 
 You see grants only on turns a human sent, in the `<AUTONOMY>` block: which capability, how far
 it reaches, until when, and what is left of any caps, plus notice when one has been **revoked**.
