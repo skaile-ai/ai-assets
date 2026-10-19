@@ -441,7 +441,7 @@ service-account connection. Things to act on:
   owner's. Only the session that spawned it may call it, and only on its own children: a child
   of another session (`not_spawner`), an ordinary session (`not_an_instance`) and an archived
   child (`already_done`) are refused before any card, and each is final, so do not retry. On a
-  member's turn, `principal_not_authorized` is different: that member cannot decide this card.
+  member's turn, `principal_not_authorized` is different: that member cannot ask for this card.
   It is not final for the child; tell them to ask the owner, or to use **Mark done** on the hire
   if they manage it. If
   nobody has decided the card by the time the call stops waiting, it comes back as
