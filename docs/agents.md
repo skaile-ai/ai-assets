@@ -14,9 +14,21 @@ _sources:
     description: Role agent — lifecycle, io, composes of skills
   - path: ai-assets/skaile-forge/base-orchestrator/agent.yaml
     description: Standing agent — memory.blocks
+  - path: workspaces/docs/concepts/agent-composition.md
+    description: Concept page for composition bindings, the compile manifest (schema 2), `skaile rebuild` and run snapshots
+  - path: workspaces/packages/workspaces/runner/src/composition/types.ts
+    description: Default binding per kind (persona inline-snapshot, ruleset inline-live)
+  - path: workspaces/packages/workspaces/runner/src/composition/resolve.ts
+    description: How inline-snapshot and inline-live items are served and when a run snapshot applies
+  - path: workspaces/packages/workspaces/runner/src/composition/compile.ts
+    description: Compile manifest entries and what `skaile rebuild` captures
+  - path: workspaces/packages/workspaces/cli/src/commands/rebuild.ts
+    description: The `skaile rebuild` command
 # The skaileup agents (skaileup, skaileup-conceptualize, skaileup-implement, quality) ship from the
 # ai-assets-skaileup repo and are not sourced here. The workspaces commit below is where
-# agent-prompt-sections.ts, install-agent.ts and the 0.2 manifest schema were read.
+# agent-prompt-sections.ts, install-agent.ts and the 0.2 manifest schema were read; the
+# composition sources above (binding defaults, compile manifest, run snapshots) were read at the
+# workspaces commit 85b3904b, and the concept page names the terms used in assembly row 8.
 _based_on_commit: ec12483
 _last_synced: '2026-10-19'
 sidebar:
@@ -305,7 +317,7 @@ uses it for the live prompt, so the two cannot disagree on order. The order is f
 | 5   | `## Duties`   | `DUTIES.md`                                                                            |
 | 6   | `## Installed Abilities` | composed skills, as slash commands                                          |
 | 7   | `## Contracts` | composed contracts                                                                    |
-| 8   | composed      | inline blocks from `composes:`, including `persona` parts (`PERSONA.md`, served from the compile manifest: `skaile rebuild` captures it) and `ruleset` parts (`RULESET.md`, read from its source at each new run; a resumed run reuses the bytes); the runner resolves them at session start, install renders none |
+| 8   | composed      | inline blocks from `composes:`, including `persona` parts (`PERSONA.md`, served from the compile manifest: `skaile rebuild` captures it) and `ruleset` parts (`RULESET.md`, read from its source at each new run; a resumed run reuses the bytes); the runner resolves them at session start, install renders none; see the compile manifest in workspaces `docs/concepts/agent-composition.md` |
 | 9   | extensions    | per-project `prompt-extensions`                                                        |
 
 Which part builds what: the installed agent file carries sections 1 and 3-7 (and 9, when the

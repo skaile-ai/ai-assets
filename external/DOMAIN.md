@@ -4,11 +4,10 @@ description: "Placeholder domain for third-party and externally sourced assets t
 type: domain
 building_blocks:
   contracts: "n/a — external assets follow their own conventions"
-  docs: "Registry of tracked external sources, their provenance, and any integration notes."
   skills: "n/a — external assets are not locally maintained skills"
-  agents: "n/a"
-  prompts: "n/a"
-  tools: "n/a"
+  agents: "TBD"
+  prompts: "TBD"
+  tools: "TBD"
 stage: alpha
 ---
 

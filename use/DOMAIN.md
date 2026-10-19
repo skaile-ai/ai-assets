@@ -4,7 +4,6 @@ description: 'Integration skills for external services and APIs — each skill w
 type: domain
 building_blocks:
   contracts: 'Integration skill conventions: output format (always JSON-compatible), error handling protocol, authentication patterns, and when to use CLI vs API variant.'
-  docs: 'Service capability matrix, authentication setup guides, and rate-limit notes.'
   skills: 'Service and tool-backed workflows: exa (AI search), perplexity (research via OpenRouter), searxng (local privacy search), context7-api (library docs), anydoc and docling (document extraction), word-document (generic organization Word documents) and word-template (a client-specific house-template example), elevenlabs (TTS), use-ideogram-image (image generation via REST), outline (wiki), decks (Skaile presentations), revealjs and slidev (other presentation workflows).'
   agents: 'TBD'
   prompts: 'TBD'
@@ -23,7 +22,6 @@ This separation means service-specific knowledge (API quirks, rate limits, auth 
 | Folder       | Purpose                                                                      |
 | ------------ | ---------------------------------------------------------------------------- |
 | `contracts/` | Integration skill conventions — output format, error protocol, auth patterns |
-| `docs/`      | Service capability matrix, setup guides, rate-limit notes                    |
 | `skills/`    | One skill per service                                                        |
 
 ## Skills

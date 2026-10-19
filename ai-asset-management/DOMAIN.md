@@ -4,7 +4,6 @@ description: "Meta-management of the skill ecosystem: scaffolding new skills, do
 type: domain
 building_blocks:
   contracts: "Skill folder structure, SKILL.md frontmatter, CLI.md format, and progressive disclosure loading strategy shared by all skill-creation skills."
-  docs: "Architecture notes for the skill ecosystem and how skills relate to each other."
   skills: "Invocable skills for creating skills (skill-builder), creating domains (domain-builder), building CLI tools (uv-cli-implementer), and navigating the asset catalog (ai-resource-navigator)."
   agents: "TBD"
   prompts: "TBD"
@@ -23,7 +22,6 @@ Everything that creates or manages AI assets lives here — from scaffolding a n
 | Folder | Purpose |
 |--------|---------|
 | `contracts/` | Shared contracts — the `skill-builder-contract` defines skill folder layout, frontmatter fields, and progressive disclosure loading for all skill-creation workflows |
-| `docs/` | Domain documentation — architecture notes on how the skill system is structured |
 | `skills/` | Invocable skills — `skill-builder`, `domain-builder`, `uv-cli-implementer`, `ai-resource-navigator` |
 | `tools/` | CLI tools — `scaffold_skill.py`, `scaffold_domain.py`; run with `uv run` by skills in this domain |
 

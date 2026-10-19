@@ -33,7 +33,7 @@ The assistant's identity comes from its agent definition (its `SOUL.md`). There 
 - **learned** — lessons about what worked or failed when helping you
 - **self** — the assistant's own notes about how it works
 
-You can review and correct memory entries in the memory review. The home assistant and the assistants inside a project keep the same four blocks.
+You can view and edit the four blocks in the Memory panel (the Memory button in the assistant sidebar). The home assistant and the assistants inside a project keep the same four blocks.
 
 ## Per-Project Settings
 
