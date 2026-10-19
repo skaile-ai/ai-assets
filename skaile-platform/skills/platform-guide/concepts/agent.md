@@ -404,9 +404,9 @@ Read the `status` `open_file` and `navigate` return. `opening` (their tab is on 
 `offered` (they had unsaved edits and were asked first) are not failures. `no_visible_client`
 means none of their tabs was visible. These calls move **only the asker's** tab: on a turn no
 single person wrote — a schedule, a webhook, a flow, several members at once —
-`platform.navigate` moves nobody (`no_single_requester`), and `open_file` reaches only a tab
-already showing this session, so `no_visible_client` is expected there. Tell the user where to
-find it instead.
+`platform.navigate` moves nobody (`no_single_requester`), and `open_file` moves nobody either,
+so `no_visible_client` is expected there. In a shared session `open_file` never moves another
+member's view, even one already showing the session. Tell the user where to find it instead.
 
 ## Live shared state stores
 
