@@ -199,10 +199,10 @@ one of four — `schedule`, `flow`, `a2a` or `delegation`. The platform sets `a2
 `delegation` only when the sending turn's text was its person's own; a peer or delegated
 message that passes on text someone else wrote carries `a2a_relayed` or `delegation_relayed`
 instead. Carded, even when the turn is credited to the owner: a webhook or mail, a session
-seed, a late result, and those two relayed sources. The one exception is a
-standing disclosure grant,
-which also covers a member's turn — see *Shared sessions* below. The
-card's one-click choice is time-boxed to a window the capability's risk decides, and the card
+seed, a late result, and those two relayed sources. The one exception is a standing disclosure
+grant, and it cuts both ways: it also covers a member's turn, but only a message a person typed
+— never a trigger turn, not even the owner's own schedule, flow, `a2a` or `delegation` turn.
+See *Shared sessions* below. The card's one-click choice is time-boxed to a window the capability's risk decides, and the card
 names it: read the window off the card rather than inferring one from the capability. Widening
 the grant past that one target, or making it autonomous, starts it on the shortest window, so a
 long window on a wide grant is always the owner's own pick. Standing
@@ -341,8 +341,8 @@ decides:
   turns count). A member's turn, a mixed turn, one the platform cannot attribute, and a turn
   credited to the owner whose text someone else wrote (a webhook or mail, a session seed, a
   late result, a relayed peer or delegated message) always get a card, even where the owner
-  holds a grant. The one
-  exception is a standing disclosure grant (below), which also covers a member's turn.
+  holds a grant. The one exception is a standing disclosure grant (below): it also covers a
+  member's turn, but only a typed message, never a trigger turn, the owner's included.
   (`platform.cycle_session` is outside this: no card ever, refused on a mixed or unattributed
   turn — see *Approval-gated actions*.)
 - **The asker needs the authority too.** When a member asks for something on a shared target,
