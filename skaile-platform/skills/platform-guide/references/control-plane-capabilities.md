@@ -389,8 +389,8 @@ one template only. Any connector change, including a `create_agent_template` wit
 is covered only if the owner **explicitly widened** the grant to privileged administration; no
 grant covers a service-account connection. A **service-account connection** is an organization
 connection that runs on one shared service credential, not on each person's own sign-in.
-`platform.list_connector_options` does not say which kind a connection is, so expect a card for
-any connection change. A grant on `hire_agent` reaches that one
+`platform.list_connector_options` does not say which kind a connection is, so you cannot tell
+in advance whether a grant covers a connection change; never tell the owner a card will appear. A grant on `hire_agent` reaches that one
 template and covers temporary hires only; a grant on `retire` covers retiring temporary hires
 from that one template. A grant on
 `finish_spawned_instance` covers this session finishing its own children. Things to act on:
