@@ -1,7 +1,7 @@
 spec_version: '0.2'
 name: 'skaile'
 version: '1.1.0'
-description: 'Skaile unified AI agent — orchestrates conceptualization, architecture, implementation, and quality workflows across the full software development lifecycle.'
+description: 'Skaile unified AI agent — orchestrates conceptualization, implementation, and quality workflows (architecture questions it answers itself) across the full software development lifecycle.'
 
 # ── Composition (mixin pattern) ──────────────────────────────────────────────
 # Paths are relative to this agent.yaml's directory.
@@ -53,14 +53,6 @@ agents:
         - 'audit_requested'
         - 'test_generation_requested'
         - 'readiness_check_requested'
-  architecture:
-    description: 'System architecture and AI agent integration design — produces design documents and integration blueprints'
-    delegation:
-      mode: 'auto'
-      triggers:
-        - 'architecture_requested'
-        - 'integration_design_requested'
-        - 'system_design_requested'
 author: 'skaile'
 license: 'MIT'
 tags:
@@ -69,11 +61,10 @@ tags:
   - 'conceptualization'
   - 'implementation'
   - 'quality'
-  - 'architecture'
 metadata:
   monorepo: 'skaile-skills'
   framework: 'gitagent'
   spec_source: 'gitagent.sh'
   stage: 'alpha'
   dropped_delegates:
-    - 'architecture — no agent asset is published yet; the former requires entry pointed at a path that no longer exists'
+    - 'architecture — no agent asset is published yet; the former requires entry pointed at a path that no longer exists. Its `agents:` block and routing triggers are gone too; Skaile answers architecture questions itself.'

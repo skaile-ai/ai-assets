@@ -30,7 +30,7 @@ Two agent backends are available:
 Each project's AI assistant has a customizable identity:
 - **Name** — the assistant's display name
 - **Persona** — personality and system prompt
-- **Facts** — persistent facts the assistant always remembers
+- **Facts** — persistent facts the assistant always remembers (in this home workspace the assistant keeps them in its `user` memory block; its `soul` block holds persona notes, `learned` lessons and `self` self-notes)
 - **Voice** — communication style note
 
 Edit these in the Imprint panel of any project.

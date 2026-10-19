@@ -92,7 +92,9 @@ handful of pure-stdlib ones — a runner that is red for the normal case is wors
 than no runner, because someone will "fix" it by not writing the test.
 
 The correct Python lane is `uv run`, which resolves each script's own PEP 723
-block. It costs an `astral-sh/setup-uv` step in `test.yml` and a second discovery
-branch in `run-tests.sh`. Wire it when the first Python subject exists — there are zero
-Python tests in this repo today, so wiring it now would ship a runner that has
-never been observed to go red.
+block. It costs a uv install step in `test.yml` and a second discovery
+branch in `run-tests.sh`. There is still no Python test lane, but one Python
+subject is covered through bash: `scripts/migrate-skaile-manifest.test.sh` runs
+`migrate.py` with `uv run` against its smoke fixture. `test.yml` installs uv
+(`pipx install uv`) for it; the test skips locally without uv and fails under
+`CI`. Wire a real `uv run` lane when a second Python subject exists.

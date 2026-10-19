@@ -8,3 +8,7 @@ items:
   - ref: skill:@skaile-ai/knowledge-paper-extractor
   - ref: skill:@skaile-ai/knowledge-paper-research
   - ref: agent:@skaile-ai/researcher
+  # Search skills the researcher agent composes (ship from use/).
+  - ref: skill:@skaile-ai/use-exa
+  - ref: skill:@skaile-ai/use-perplexity
+  - ref: skill:@skaile-ai/use-searxng

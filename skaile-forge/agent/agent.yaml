@@ -46,15 +46,15 @@ composes:
   - { kind: skill, ref: ./skills/code-assistance }
   - { kind: skill, ref: ./skills/file-management }
   - { kind: skill, ref: ./skills/project-exploration }
-# The former `session_error` hook (hooks/hooks.yaml: log-session-error) now runs as a trigger.
+# The former `session_error` hook (hooks/hooks.yaml: log-session-error) now runs as a trigger (`report-session-error`: it reports instead of logging).
 # The 0.2 trigger schema has no async/background flag and the host decides how a fired trigger is
 # scheduled, so the old `async: true` has no equivalent here. The prompt is plain text: the framework
 # defines no payload interpolation for `event` triggers, and the old `scripts/log-error.sh` never existed.
 triggers:
   - kind: event
-    id: log-session-error
+    id: report-session-error
     event: session_error
-    prompt: "A session error was reported for this project. Tell the user in one or two sentences what failed, quoting the error message if this notification includes one. Do not retry the failed step unless the user asks, then carry on."
+    prompt: "A session error was reported for this project. Tell the user in one or two sentences what failed, quoting the error message if this notification includes one. Do not retry the failed step unless the user asks; otherwise carry on."
 runtime:
   max_turns: 100
   timeout: 1800

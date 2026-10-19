@@ -149,5 +149,7 @@ uv run scripts/migrate.py \
 diff -u scripts/smoke_fixture/expected.yaml /tmp/migrated.yaml
 ```
 
-Empty diff = green. Update `expected.yaml` only when the spec's mapping
+Empty diff = green. `npm test` runs the same check
+(`scripts/migrate-skaile-manifest.test.sh` at the repo root; needs `uv`).
+Update `expected.yaml` only when the spec's mapping
 rules change; never to paper over a regression.

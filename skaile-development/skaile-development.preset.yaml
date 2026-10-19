@@ -21,3 +21,7 @@ items:
   - ref: skill:@skaile-ai/postxl
   - ref: skill:@skaile-ai/good-morning
   - ref: agent:@skaile-ai/skaile-development
+  # Delegate agents the skaile-development agent inherits through `extends:` (ship from ai-assets-skaileup).
+  - ref: agent:@skaile-ai/skaileup-conceptualize
+  - ref: agent:@skaile-ai/impl-build-implement
+  - ref: agent:@skaile-ai/quality

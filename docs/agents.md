@@ -3,7 +3,7 @@ title: Agents
 description: The GitAgent format — agent.yaml spec, SOUL.md, RULES.md, knowledge/, imprint assembly, and how agents are used by the runner.
 _sources:
   - path: ai-assets/ai-asset-management/agents/skaile/agent.yaml
-    description: Root orchestrator — persona/rules mixin pattern, model config, delegation, requires
+    description: Root orchestrator — persona/ruleset composition, model config, delegation, delegate agents
   - path: ai-assets/skaileup/agents/skaileup/agent.yaml
     description: Guide agent — skaileup-* discovery convention
   - path: ai-assets/skaileup-conceptualization/agents/skaileup-conceptualize/agent.yaml
@@ -30,7 +30,7 @@ An **agent** in ai-assets is a [GitAgent](https://gitagent.sh) — a portable, v
 
 ```
 <agent-name>/
-├── agent.yaml          ← Manifest — spec version, name, model, delegation, requires
+├── agent.yaml          ← Manifest — spec version, name, model, delegation, composes
 ├── SOUL.md             ← Agent identity: who it is, what it cares about, its values
 ├── RULES.md            ← Behavioral constraints: what it must and must never do
 └── knowledge/
@@ -43,20 +43,20 @@ An agent definition is valid when `agent.yaml` is present. All other files are o
 ## agent.yaml Fields
 
 ```yaml
-spec_version: '0.1.0' # GitAgent spec version — always "0.1.0"
+spec_version: '0.2' # agent spec version — "0.2" (composes:, lifecycle, memory, triggers)
 name: skaileup-conceptualize # Unique agent ID
 version: 1.0.0 # Semver
 description: >
   Concept pipeline orchestrator — runs Discovery → Experience → Blueprint.
 
-extends: ../../ai-asset-management/agents/skaile/agent.yaml # optional inheritance
+extends: ../../../ai-asset-management/agents/skaile/agent.yaml # optional inheritance
 
-# Mixin composition (optional — pulls in shared persona/rules fragments)
-persona:
-  - ../../../_agent-parts/personas/skaile-base.md
-
-rules:
-  - ../../../_agent-parts/rules/skaile-safety.md
+# Composition (optional) — shared persona/ruleset parts, skills, delegate agents
+composes:
+  - { kind: persona, ref: ../../../_agent-parts/personas/skaile-base/PERSONA.md }
+  - { kind: ruleset, ref: ../../../_agent-parts/rules/skaile-safety/RULESET.md }
+  - { kind: skill, ref: skill:@skaile-ai/git }
+  - { kind: agent, ref: 'agent:@skaile-ai/quality', as: quality, binding: delegate }
 
 model:
   preferred: claude-opus-4-6 # Primary model
@@ -84,19 +84,23 @@ metadata: # Freeform — domain, skill paths, pipeline notes
 
 ## Field Reference
 
-### `persona` and `rules` (mixin composition)
+### `composes`
 
-Optional arrays of relative file paths. The runner reads each file and prepends its content to the assembled system prompt, before SOUL.md and RULES.md respectively.
+A list of `{kind, ref, as?, binding?}` items. `ref` is either a catalog ref in the one
+grammar `kind:@publisher/name[#range]` (for example `skill:@skaile-ai/git`,
+`agent:@skaile-ai/quality`) or a path relative to the `agent.yaml` file.
 
 ```yaml
-persona:
-  - ../../../_agent-parts/personas/skaile-base.md # shared identity fragment
-
-rules:
-  - ../../../_agent-parts/rules/skaile-safety.md # shared constraint fragment
+composes:
+  - { kind: persona, ref: ../../../_agent-parts/personas/skaile-base/PERSONA.md } # shared identity fragment
+  - { kind: ruleset, ref: ../../../_agent-parts/rules/skaile-safety/RULESET.md } # shared constraint fragment
+  - { kind: skill, ref: ./skills/code-assistance } # a skill inside this agent's directory
+  - { kind: agent, ref: 'agent:@skaile-ai/quality', as: quality, binding: delegate }
 ```
 
-Mixin files live in `_agent-parts/` at the ai-assets root and are reused across multiple agents to avoid duplication. Paths are relative to the `agent.yaml` file.
+Persona and ruleset parts live in `_agent-parts/<name>/PERSONA.md` and `RULESET.md` at the
+ai-assets root and are reused across agents (an agent's own `RULES.md` is never a standalone
+asset). `scripts/presets-resolve.test.sh` checks that every ref and every `extends:` path resolves.
 
 ### `model`
 
@@ -132,21 +136,16 @@ agents:
         - discovery_requested
 ```
 
-### `requires`
+### Delegate agents
 
-Declares which other agent definitions this agent depends on. The runner resolves these at startup and mounts them at the specified path:
-
-```yaml
-requires:
-  - name: conceptualization
-    source: ../../skaileup-conceptualization/agents/skaileup-conceptualize
-    version: 1.0.0
-    mount: agents/conceptualization
-```
+A `composes` item with `kind: agent` and `binding: delegate` (the default) is rendered at
+`skaile install` as a sub-agent file next to the parent. `as:` sets the sub-agent's name.
+This replaces the 0.1 `requires:` list; the `agents:` map above is metadata only, since no
+runtime reads it.
 
 ### `extends`
 
-Inherits base configuration from a parent `agent.yaml`. Fields in the child override parent fields; `agents`, `requires`, and `tags` are merged.
+Inherits from a parent `agent.yaml`, resolved relative to the child's directory. Only `skaile install` reads it (the runner's composition resolver does not), and it skips the parent with a warning when the path does not exist. Merge rules: scalars and objects (`model`, `delegation`, `agents`, `metadata`) are replaced by the child's value; `composes` is parent + child, deduplicated by kind, ref and slot id; other arrays are unioned.
 
 ## SOUL.md
 
@@ -209,7 +208,6 @@ Parts are joined with `\n\n---\n\n`. Missing files are silently skipped.
 | `skaileup-conceptualize`          | `skaileup-conceptualization/agents/skaileup-conceptualize/` | Concept pipeline (Discovery → Blueprint)                                       |
 | `skaileup-implement`              | `skaileup-implementation/agents/skaileup-implement/`        | Implementation pipeline (Setup → Verify)                                       |
 | `quality`                         | `skaileup-evaluate/agents/quality/`                         | Quality assurance                                                              |
-| `architecture`                    | `skaileup-architecture/agents/architecture/`                | System architecture                                                            |
 | `skaile-development`              | `skaile-development/agents/skaile-development/`             | skaile-dev monorepo expert — routes tasks to skills and prog-experts           |
 | `forge-project-assistant`         | `skaile-forge/agent/`                                       | In-app dev assistant for skaile-forge workspaces                                |
 | `forge-project-base-orchestrator` | `skaile-forge/base-orchestrator/`                           | Home workspace guide — creates projects, explains Forge Project features       |
