@@ -193,9 +193,16 @@ disclosure grant: it names one source — one mailbox, or the owner's session li
 project — and covers every read of that source; see *Shared sessions*.) It either has an
 absolute expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it
 may carry use and budget caps. It stays anchored to the session it was approved in, and it covers only calls on
-**the owner's own turns** (or a trigger the owner set up), except a standing disclosure grant,
-which also covers a member's turn — see *Shared sessions* below. The
-card's one-click choice is time-boxed to a window the capability's risk decides, and the card
+**the owner's own turns**. What counts is who wrote the turn's text, not who it is credited
+to. Covered: a message the owner typed, or a turn credited to the owner whose trigger source is
+one of four — `schedule`, `flow`, `a2a` or `delegation`. The platform sets `a2a` and
+`delegation` only when the sending turn's text was its person's own; a peer or delegated
+message that passes on text someone else wrote carries `a2a_relayed` or `delegation_relayed`
+instead. Carded, even when the turn is credited to the owner: a webhook or mail, a session
+seed, a late result, and those two relayed sources. The one exception is a standing disclosure
+grant, and it cuts both ways: it also covers a member's turn, but only a message a person typed
+— never a trigger turn, not even the owner's own schedule, flow, `a2a` or `delegation` turn.
+See *Shared sessions* below. The card's one-click choice is time-boxed to a window the capability's risk decides, and the card
 names it: read the window off the card rather than inferring one from the capability. Widening
 the grant past that one target, or making it autonomous, starts it on the shortest window, so a
 long window on a wide grant is always the owner's own pick. Standing
@@ -330,9 +337,12 @@ platform records **who set off each turn** — the one member who wrote, several
 or the person a schedule, webhook or peer request acts for. You cannot set or claim it. It
 decides:
 
-- **Grants apply only to the owner's own turns.** A member's turn, a mixed turn, or one the
-  platform cannot attribute always gets a card, even where the owner holds a grant. The one
-  exception is a standing disclosure grant (below), which also covers a member's turn.
+- **Grants apply only to the owner's own turns** (see *Autonomy grants* above for which
+  turns count). A member's turn, a mixed turn, one the platform cannot attribute, and a turn
+  credited to the owner whose text someone else wrote (a webhook or mail, a session seed, a
+  late result, a relayed peer or delegated message) always get a card, even where the owner
+  holds a grant. The one exception is a standing disclosure grant (below): it also covers a
+  member's turn, but only a typed message, never a trigger turn, the owner's included.
   (`platform.cycle_session` is outside this: no card ever, refused on a mixed or unattributed
   turn — see *Approval-gated actions*.)
 - **The asker needs the authority too.** When a member asks for something on a shared target,
@@ -351,8 +361,10 @@ decides:
   only (the card names the one-click window; today that is 90 days), and one grant covers every
   read of the source. Unlike any other grant, it covers a turn started by any one member who
   can act in the session (not a Viewer, re-checked on every call), including people who join
-  later, as well as the owner's own turns. A turn no single person started — a schedule, a
-  webhook, another agent, a mixed turn — still gets a card, the owner's included. The owner
+  later, as well as the owner's own turns. But it covers only a message a person typed: unlike
+  an ordinary grant, it never covers a trigger turn, so a schedule, flow, peer agent or
+  delegation turn gets a card even when it is the owner's own, and so do a webhook and a mixed
+  turn. The owner
   revokes it in session settings, **Permissions** tab; the next read is carded again. Small effects that normally run with no card — drafting and filing mail, attaching a
   file, messaging a linked peer, renaming the assistant — are refused unless the owner asked
   ("Only `<owner>` can ask for this"). In a session only the owner can read, such as the
@@ -483,4 +495,7 @@ standing disclosure grants: skaile-ai/platform#6962 (`disclosure-policy.ts`
 `approval-policy.service.ts`), `platform/decisions/2026-10-08-standing-disclosure-grants.md` and
 `platform/docs/personal-assistant-control-plane.md` (*Owner-private reads in a shared session*),
 the co-owner decider of the finish card: skaile-ai/platform#8072
-(`finish-spawned-instance.handler.ts`, `finish-spawned-instance-policy.service.ts`).
+(`finish-spawned-instance.handler.ts`, `finish-spawned-instance-policy.service.ts`),
+grants answer only owner-proposed turns: skaile-ai/platform#7997 (`approval-policy.service.ts`
+`isCoveredAsker`, `turn-principal.ts` `isOwnerProposedTurn`, `SELF_AUTHORED_TRIGGER_SOURCES` and
+`TurnTriggerSource`, which holds `a2a_relayed` and `delegation_relayed`).

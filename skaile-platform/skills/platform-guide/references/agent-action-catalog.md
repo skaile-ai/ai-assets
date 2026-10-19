@@ -95,8 +95,12 @@ or to create or replace one there, the personal assistant has `platform.read_ses
 The platform records who set off each turn; the agent cannot set it. All three capabilities key
 on it:
 
-- **Grants cover only the owner's own turns** (and triggers the owner set up). A member's turn,
-  several members at once, or an unattributable turn always gets a card.
+- **Grants cover only the owner's own turns**: a message they typed, or their own schedule, flow,
+  agent message or delegation — turns whose text the owner wrote.
+  - A turn credited to the owner whose text someone else wrote always gets a card: a webhook or
+    mail turn, a session seed, a late result, a relayed agent or delegated message.
+  - A turn the owner did not set off always gets a card: a member's turn, several members at
+    once, or an unattributable turn.
 - `find_actions` hides actions on the owner's own things from anyone but the owner, and shows
   nothing on a turn it cannot attribute.
 - When a member asks, they must be able to do it themselves as well; the owner's authority is not
@@ -111,4 +115,6 @@ Grounded in: `platform/docs/agent-action-declarations.md`,
 `platform/docs/personal-assistant-control-plane.md` §4 and §5.7–5.8,
 `platform/decisions/2026-09-30-agent-action-catalogue.md`, and
 `platform/backend/libs/capabilities/src/handlers/` (`find-actions.handler.ts`,
-`invoke.handler.ts`, `batch.handler.ts`) and `resource-reference.ts`.
+`invoke.handler.ts`, `batch.handler.ts`) and `resource-reference.ts`; the grant rule in
+`approval-policy.service.ts` (`isCoveredAsker`) and `platform/backend/libs/agent-gateway/src/turn-principal.ts`
+(`isOwnerProposedTurn`), skaile-ai/platform#7997.
