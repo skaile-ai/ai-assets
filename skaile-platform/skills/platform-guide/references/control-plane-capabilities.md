@@ -862,7 +862,12 @@ skaile-ai/platform#7266 (`platform.hire_agent`: `hire-agent.handler.ts`, `spawn-
 `hireContract`), skaile-ai/platform#7760 (`platform.list_grants`: `list-grants.handler.ts`,
 `owner-grant-overview.service.ts`), skaile-ai/platform#7738 (`platform.list_org_grants`:
 `list-org-grants.handler.ts`, `list-org-grants-policy.service.ts`, `owner-grant-overview.service.ts`
-`listForOrganization`), and
+`listForOrganization`), skaile-ai/platform#8092 (job description connectors and
+`platform.add_template_connection` / `platform.remove_template_connection`:
+`template-connection.handler.ts`, `template-connection-policy.service.ts`,
+`create-agent-template.handler.ts`, `update-agent-template.handler.ts`), skaile-ai/platform#8072
+(the shared `finish_spawned_instance` card: `finish-spawned-instance.handler.ts`,
+`finish-spawned-instance-policy.service.ts`), and
 skaile-ai/platform#6962 (standing disclosure grants: `disclosure-policy.ts`,
 `disclosure-preparer.ts`, `ungrantable-by-design.ts`, `approval-policy.service.ts`;
 `platform/decisions/2026-10-08-standing-disclosure-grants.md`).
