@@ -27,13 +27,13 @@ Two agent backends are available:
 
 ## Assistant Identity and Memory
 
-The assistant's identity comes from its agent definition (`SOUL.md`, plus a shared persona composed in). There is no per-project Imprint panel and no per-project system prompt to edit. What the assistant learns about you is kept in four memory blocks that are shared across your sessions:
+The assistant's identity comes from its agent definition (its `SOUL.md`). There is no per-project Imprint panel and no per-project system prompt to edit. What the assistant learns about you is kept in four memory blocks that are shared across your sessions:
 - **user** — persistent facts about you: name, preferences, interests, timezone, work context
 - **soul** — tone and personality notes you ask for ("be more concise", "call me Sam")
 - **learned** — lessons about what worked or failed when helping you
 - **self** — the assistant's own notes about how it works
 
-You can review and correct memory entries in the memory review. Only the home assistant keeps these blocks as described here; the assistants inside a project keep the same four blocks.
+You can review and correct memory entries in the memory review. The home assistant and the assistants inside a project keep the same four blocks.
 
 ## Per-Project Settings
 

@@ -60,7 +60,7 @@ Ask the user about:
 4. **Lifecycle**: A `standing` identity (long-running, optionally with memory) or a `role` (short-lived, called with typed input and output)?
 5. **Composition**: Which skills, knowledge, connectors, MCP servers, personas/rulesets and sub-agents does it compose? Which of those are delegates (`kind: agent`)?
 6. **Memory and triggers**: Does it need memory blocks that persist between runs? Should the host start it on a schedule, webhook, channel message or event?
-7. **Delegation intent**: Does it work alone (`explicit`), route to sub-agents (`router`), or auto-delegate (`auto`)? This is descriptive metadata; delegation itself is a `composes` item.
+7. **Delegation intent**: Does it call sub-agents explicitly from its skill prompts (`explicit`), act as a top-level router (`router`), or have sub-agents used when their triggers match (`auto`)? This is descriptive metadata; delegation itself is a `composes` item.
 8. **Compliance**: Any regulatory requirements (FINRA, SOD, human-in-the-loop)?
 
 ---
@@ -128,12 +128,12 @@ metadata:
 
 **Key rules:**
 - `name` must be kebab-case and match the directory name
-- `extends` inherits from a parent `agent.yaml`; `composes` is parent + child, objects such as `model`, `delegation`, `runtime` and `agents` are replaced by the child's value, not deep-merged. Only `skaile install` resolves it, and the relative path must stay inside the repo.
+- `extends` inherits from a parent `agent.yaml`; `composes` is parent + child, other arrays are unioned, and every object-valued key (e.g. `model`, `delegation`, `runtime`) is replaced by the child's value, not deep-merged. Only `skaile install` resolves it, and the relative path must stay inside the repo.
 - There is no `skills:`, `requires:`, `persona:`, `rules:` or `abilities:` in 0.2. They are deprecated 0.1 inputs; write `composes:` items instead.
 - `delegation.mode` is descriptive metadata and nothing in the runtime acts on it; real delegation is a `composes` item of `kind: agent`:
-  - `explicit` — agent acts alone, no sub-agents
-  - `router` — declares that it routes requests to named sub-agents
-  - `auto` — declares that it selects sub-agents based on context
+  - `explicit` — sub-agents are called explicitly from within skill prompts, with no automatic routing
+  - `router` — declares itself a top-level dispatcher that routes requests to named sub-agents
+  - `auto` — declares that sub-agents are used when the entry's `delegation.triggers` match
 
 #### `composes:` items
 
@@ -277,7 +277,7 @@ Priority determines the order documents are listed in. Default priority is 99. K
 ```yaml
 extends: ../../../ai-asset-management/agents/skaile/agent.yaml
 ```
-The child inherits every key it does not declare. `model`, `delegation`, `runtime`, `tools`, `agents` and `metadata` are replaced wholesale, not deep-merged: restate every sub-field you still want (a child that sets only `model.preferred` loses the parent's `fallback` and `constraints`). `composes` is parent + child. Only `skaile install` resolves `extends`, and it reads the manifest only: the parent's `SOUL.md` and `RULES.md` are not inherited, and a persona or ruleset item that arrives only through `extends` is not rendered into the prompt.
+The child inherits every key it does not declare. every object-valued key (e.g. `model`, `delegation`, `runtime`, `tools`, `metadata`) is replaced wholesale by the child's value, not deep-merged: restate every sub-field you still want (a child that sets only `model.preferred` loses the parent's `fallback` and `constraints`). `composes` is parent + child, and every other array (e.g. `tags`) is unioned. Only `skaile install` resolves `extends`, and it reads the manifest only: the parent's `SOUL.md` and `RULES.md` are not inherited, and a persona or ruleset item that arrives only through `extends` is not rendered into the prompt.
 
 ### Sub-agent delegation
 A delegate is a `composes` item of `kind: agent`. `skaile install` renders it as a sub-agent file next to the parent (`as:` names it).

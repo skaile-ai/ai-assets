@@ -3,8 +3,10 @@ name: 'skaile-development'
 version: '1.2.0'
 description: 'Expert advisor for the skaile-dev monorepo. Routes implementation tasks to the right skills and prog-experts, orchestrates multi-step workflows (implement → test → docs → devlog), and provides context-aware guidance grounded in the actual package CLAUDE.md files.'
 # Parent agent. `skaile install` merges it in (asset-manager install-agent.ts, applyExtendsMerge):
-# `composes` is parent + child (deduped by kind/ref/id), other arrays are unioned, and every
-# object key (`model`, `delegation`, `runtime`, `agents`, `metadata`) is replaced by the child's value.
+# `composes` is parent + child (deduped by kind/ref/id), every other array is unioned, and every
+# object-valued key (e.g. `model`, `delegation`, `runtime`, `agents`) is replaced by the child's value.
+# `tags` is such a unioned array, and this is the agent where it fires: the merged agent carries the
+# parent's `ai-agent`, `skills`, `conceptualization`, `implementation` and `quality` tags next to its own.
 # The parent's three delegate agents therefore ship with this agent (they are in the
 # skaile-development preset). Its persona and ruleset items are inherited by the merge but never
 # rendered: the install renders no composed persona/ruleset blocks and the runner does not follow

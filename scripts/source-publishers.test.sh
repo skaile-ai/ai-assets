@@ -27,17 +27,19 @@ overrides="$(awk '/^publisher_overrides:/{a=1; next} a && /^[A-Za-z_]/{a=0} a' "
 expected_publisher() {
   case "$1" in
     catalogs) echo "@skaile" ;;
+    # Never had a folder-derived publisher: its parts were not discoverable before 5.6.
+    _agent-parts) echo "@skaile-ai" ;;
     *) echo "@$1" ;;
   esac
 }
 
-# Folders that hold an asset manifest at any depth. _agent-parts holds mixin
-# fragments pulled in by relative path, not standalone assets.
+# Folders that hold an asset manifest at any depth. _agent-parts counts: its
+# PERSONA.md and RULESET.md parts are published assets.
 folders="$(cd "$ROOT" && find . -mindepth 2 \( -name SKILL.md -o -name agent.yaml -o -name AGENT.md \
   -o -name MCP.md -o -name CONTRACT.md -o -name CONNECTOR.md -o -name PROMPT.md \
   -o -name PERSONA.md -o -name RULESET.md \
   -o -name '*.preset.yaml' -o -name '*.catalog.yaml' \) -not -path './node_modules/*' -not -path './.*' \
-  | cut -d/ -f2 | grep -vx '_agent-parts' | sort -u)"
+  | cut -d/ -f2 | sort -u)"
 
 count="$(printf '%s\n' "$folders" | grep -c . || true)"
 if [ "$count" -lt 10 ]; then

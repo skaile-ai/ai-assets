@@ -4,7 +4,6 @@ description: "Knowledge acquisition skills: deep multi-phase research, academic 
 type: domain
 building_blocks:
   contracts: "Research output structure (findings/, summaries/), metadata fields for research artifacts, and citation conventions."
-  docs: "None yet."
   skills: "Three skills: deep-research (integrated 3-phase research), knowledge-paper-extractor (PDF metadata extraction), knowledge-paper-research (multi-phase paper knowledge extraction). Content-production skills live in the nested domain skills/knowledge-writing/ (see its DOMAIN.md)."
   agents: "researcher — role agent (input {topic}, output {summary, sources}) for one-shot, read-only research runs (skips the `deep-research` storage phase)."
   prompts: "TBD"

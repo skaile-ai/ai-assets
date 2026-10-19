@@ -4,10 +4,9 @@ description: "Content generation skills that transform structured research (from
 type: domain
 building_blocks:
   contracts: "Output format conventions for each content type (podcast scripts, book structure), speaker/character protocols, and quality criteria (`contracts/`)."
-  docs: "None yet."
   skills: "Three skills (preset `knowledge-writing`), each a directory next to this file: knowledge-paper-podcast (academic paper → podcast script), book-writer (autonomous 5-agent book writing), knowledge-writer-podcast (hyper-realistic two-speaker podcast)."
   agents: "TBD"
-  prompts: "None yet."
+  prompts: "TBD"
   tools: "TBD"
 stage: alpha
 ---

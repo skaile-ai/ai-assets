@@ -241,7 +241,7 @@ The 0.2 trigger schema has no async or background flag. Ids must be unique per a
 
 ### `extends`
 
-Inherits from a parent `agent.yaml`, resolved relative to the child's directory. Only `skaile install` reads it (the runner's composition resolver does not), and it skips the parent with a warning when the path does not exist. Merge rules: scalars and objects (`model`, `delegation`, `runtime`, `tools`, `agents`, `metadata`, any object-valued key) are replaced wholesale by the child's value, not deep-merged, so restate every sub-field you still want; `composes` is parent + child, deduplicated by kind, ref and slot id; other arrays are unioned.
+Inherits from a parent `agent.yaml`, resolved relative to the child's directory. Only `skaile install` reads it (the runner's composition resolver does not), and it skips the parent with a warning when the path does not exist. Merge rules: scalars and every object-valued key (e.g. `model`, `delegation`, `runtime`, `tools`, `metadata`) are replaced wholesale by the child's value, not deep-merged, so restate every sub-field you still want; `composes` is parent + child, deduplicated by kind, ref and slot id; every other array (e.g. `tags`) is unioned, so the child's `tags` carry the parent's too.
 
 Inheritance covers the manifest only. The parent's `SOUL.md`, `RULES.md`, `DUTIES.md` and `knowledge/` are not read: the install renders the child directory's own files. The merged `composes` drives the install (delegate sub-agent files, abilities, contracts, MCP servers) but the install renders no composed `persona` or `ruleset` blocks, and the runner builds those from the agent's own `agent.yaml` without resolving `extends` (see System Prompt Assembly). A `persona` or `ruleset` item that only arrives through `extends` is therefore never rendered; declare it in the child if it must reach the prompt. `skaile-development` inherits the `skaile` agent's persona and ruleset this way and ships without them.
 
@@ -305,7 +305,7 @@ uses it for the live prompt, so the two cannot disagree on order. The order is f
 | 5   | `## Duties`   | `DUTIES.md`                                                                            |
 | 6   | `## Installed Abilities` | composed skills, as slash commands                                          |
 | 7   | `## Contracts` | composed contracts                                                                    |
-| 8   | composed      | inline blocks from `composes:`, including `persona` parts (`PERSONA.md`, snapshotted) and `ruleset` parts (`RULESET.md`, read live) |
+| 8   | composed      | inline blocks from `composes:`, including `persona` parts (`PERSONA.md`, served from the compile manifest: `skaile rebuild` captures it) and `ruleset` parts (`RULESET.md`, read from its source at each new run; a resumed run reuses the bytes); the runner resolves them at session start, install renders none |
 | 9   | extensions    | per-project `prompt-extensions`                                                        |
 
 Which part builds what: the installed agent file carries sections 1 and 3-7 (and 9, when the

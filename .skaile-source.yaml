@@ -11,6 +11,8 @@ version: 1
 publisher_default: '@skaile-ai'
 default_ref: main
 publisher_overrides:
+  - path: _agent-parts/
+    publisher: '@skaile-ai'
   - path: ai-asset-management/
     publisher: '@ai-asset-management'
   - path: catalogs/
