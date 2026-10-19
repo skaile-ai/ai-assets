@@ -128,7 +128,7 @@ metadata:
 
 **Key rules:**
 - `name` must be kebab-case and match the directory name
-- `extends` inherits from a parent `agent.yaml`; `composes` is parent + child, objects such as `model` and `delegation` are replaced by the child's value. Only `skaile install` resolves it, and the relative path must stay inside the repo.
+- `extends` inherits from a parent `agent.yaml`; `composes` is parent + child, objects such as `model`, `delegation`, `runtime` and `agents` are replaced by the child's value, not deep-merged. Only `skaile install` resolves it, and the relative path must stay inside the repo.
 - There is no `skills:`, `requires:`, `persona:`, `rules:` or `abilities:` in 0.2. They are deprecated 0.1 inputs; write `composes:` items instead.
 - `delegation.mode` is descriptive metadata and nothing in the runtime acts on it; real delegation is a `composes` item of `kind: agent`:
   - `explicit` — agent acts alone, no sub-agents
@@ -246,7 +246,8 @@ Add reference documents the agent should load:
 
 ```yaml
 # knowledge/index.yaml
-files:
+version: "1.0"
+documents:
   - path: domain-overview.md
     priority: 10       # lower = listed first
   - path: best-practices.md
@@ -276,7 +277,7 @@ Priority determines the order documents are listed in. Default priority is 99. K
 ```yaml
 extends: ../../../ai-asset-management/agents/skaile/agent.yaml
 ```
-Child inherits model/delegation/runtime. Override any field locally.
+The child inherits every key it does not declare. `model`, `delegation`, `runtime`, `tools`, `agents` and `metadata` are replaced wholesale, not deep-merged: restate every sub-field you still want (a child that sets only `model.preferred` loses the parent's `fallback` and `constraints`). `composes` is parent + child. Only `skaile install` resolves `extends`, and it reads the manifest only: the parent's `SOUL.md` and `RULES.md` are not inherited, and a persona or ruleset item that arrives only through `extends` is not rendered into the prompt.
 
 ### Sub-agent delegation
 A delegate is a `composes` item of `kind: agent`. `skaile install` renders it as a sub-agent file next to the parent (`as:` names it).

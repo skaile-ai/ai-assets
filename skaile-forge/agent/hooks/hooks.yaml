@@ -1,8 +1,0 @@
-version: "1.0"
-
-hooks:
-  - event: agent_definition_change_requested
-    id: propose-via-pr
-    description: Route any agent self-modification request through the propose-change workflow
-    workflow: workflows/propose-change.yaml
-    async: false

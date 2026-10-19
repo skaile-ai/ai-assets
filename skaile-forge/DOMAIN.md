@@ -19,11 +19,8 @@ ai-assets/skaile-forge/
 │   ├── SOUL.md
 │   ├── RULES.md
 │   ├── DUTIES.md
-│   ├── hooks/
 │   ├── knowledge/
-│   ├── scripts/
-│   ├── skills/                    ← code-assistance, file-management, project-exploration
-│   └── workflows/
+│   └── skills/                    ← code-assistance, file-management, project-exploration
 ├── base-orchestrator/             ← home workspace orchestrator
 │   ├── agent.yaml
 │   ├── SOUL.md
@@ -59,7 +56,7 @@ The last three live under the assistant agent's directory (`agent/skills/`), not
 
 ## Usage
 
-The agent definition is loaded at runtime by `forge/skaile-forge/server/utils/agent-definition.ts` and injected as the system prompt for each coding session. The canonical path is `ai-assets/skaile-forge/agent` relative to the skaile-dev monorepo root.
+`forge/skaile-forge/server/utils/agent-definition.ts` only locates the definition: it indexes the agent manifests in this domain by their declared `name:` and resolves a workspace's `agent:@skaile-ai/<name>` ref to a directory (the canonical path is `ai-assets/skaile-forge/agent` relative to the skaile-dev monorepo root). It does not build any prompt. The `@skaile/workspaces` runtime assembles the system prompt from that directory in the fixed order described in `docs/agents.md` (System Prompt Assembly), with the `<MEMORY>` section rendered from the agent's `memory.blocks`.
 
 ## Notes
 

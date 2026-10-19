@@ -46,7 +46,7 @@ composes:
   - { kind: skill, ref: ./skills/code-assistance }
   - { kind: skill, ref: ./skills/file-management }
   - { kind: skill, ref: ./skills/project-exploration }
-# The former `session_error` hook (hooks/hooks.yaml: log-session-error) now runs as a trigger (`report-session-error`: it reports instead of logging).
+# This trigger replaces the former `session_error` hook (`log-session-error`; the hooks/ directory is gone, see the CHANGELOG). It reports instead of logging.
 # The 0.2 trigger schema has no async/background flag and the host decides how a fired trigger is
 # scheduled, so the old `async: true` has no equivalent here. The prompt is plain text: the framework
 # defines no payload interpolation for `event` triggers, and the old `scripts/log-error.sh` never existed.

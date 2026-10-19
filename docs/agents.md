@@ -45,12 +45,13 @@ An agent definition is valid when `agent.yaml` is present. All other files are o
 
 ```yaml
 spec_version: '0.2' # agent spec version — "0.2" (composes:, lifecycle, memory, triggers)
-name: skaile-development # Unique agent ID
-version: 1.2.0 # Semver
+name: <agent-name> # Unique agent ID; kebab-case, equals the directory name
+version: 1.0.0 # Semver
 description: >
-  Expert advisor for the skaile-dev monorepo — routes tasks to the right skills.
+  One or two sentences: what the agent does and when to use it.
 
-extends: ../../../ai-asset-management/agents/skaile/agent.yaml # optional inheritance; the path must stay inside the repo
+# optional inheritance (see `extends`); the path must stay inside the repo
+extends: ../../../ai-asset-management/agents/skaile/agent.yaml
 
 # Composition (optional) — shared persona/ruleset parts, skills, delegate agents
 composes:
@@ -60,7 +61,7 @@ composes:
   - { kind: agent, ref: 'agent:@skaile-ai/quality', as: quality, binding: delegate }
 
 model:
-  preferred: claude-opus-4-6 # Primary model
+  preferred: claude-opus-4-6 # Primary model (full ID, see `model`)
   fallback:
     - claude-sonnet-4-6 # Ordered fallback list
   constraints:
@@ -79,12 +80,18 @@ runtime:
 
 author: skaile
 license: MIT
-tags: [orchestrator, concept-pipeline]
+tags: [orchestrator, workspace]
 
 metadata: # Freeform — domain, routing notes, knowledge notes
-  domain: skaile-development
+  domain: <domain-folder>
   stage: beta
+  routing_notes: where to route which kind of request
 ```
+
+This example is deliberately generic. The shipped agents are the faithful references:
+`skaile-development/agents/skaile-development/agent.yaml` (extends, family-alias model, delegation
+`explicit`), `ai-asset-management/agents/skaile/agent.yaml` (persona, ruleset and delegate
+composition) and `knowledge-research/agents/researcher/agent.yaml` (a role).
 
 ## Field Reference
 
@@ -102,8 +109,8 @@ composes:
   - { kind: agent, ref: 'agent:@skaile-ai/quality', as: quality, binding: delegate }
 ```
 
-Persona and ruleset parts live in `_agent-parts/<name>/PERSONA.md` and `RULESET.md` at the
-ai-assets root and are reused across agents (an agent's own `RULES.md` is never a standalone
+Persona and ruleset parts live at the ai-assets root as `_agent-parts/personas/<name>/PERSONA.md`
+and `_agent-parts/rules/<name>/RULESET.md` and are reused across agents (an agent's own `RULES.md` is never a standalone
 asset). `scripts/presets-resolve.test.sh` checks that every ref and every `extends:` path resolves.
 
 ### `model`
@@ -114,6 +121,12 @@ asset). `scripts/presets-resolve.test.sh` checks that every ref and every `exten
 | `fallback`                | Ordered list of fallback models            |
 | `constraints.temperature` | Sampling temperature (0.0–1.0)             |
 | `constraints.max_tokens`  | Maximum output tokens per turn             |
+
+Two forms of model ID are in use. A full ID (`claude-opus-4-6`) pins a generation; a family alias
+(`opus`, `sonnet`) auto-rolls to the current top model of that family and is the only form that
+works for a model newer than the manifest's `ModelIdSchema` knows. Use the full ID by default; use the alias, with a
+`# Family alias:` comment saying why, when the agent should follow the newest model
+(`skaile-development` and the three `skaile-forge` agents do).
 
 ### `delegation`
 
@@ -228,7 +241,9 @@ The 0.2 trigger schema has no async or background flag. Ids must be unique per a
 
 ### `extends`
 
-Inherits from a parent `agent.yaml`, resolved relative to the child's directory. Only `skaile install` reads it (the runner's composition resolver does not), and it skips the parent with a warning when the path does not exist. Merge rules: scalars and objects (`model`, `delegation`, `agents`, `metadata`) are replaced by the child's value; `composes` is parent + child, deduplicated by kind, ref and slot id; other arrays are unioned.
+Inherits from a parent `agent.yaml`, resolved relative to the child's directory. Only `skaile install` reads it (the runner's composition resolver does not), and it skips the parent with a warning when the path does not exist. Merge rules: scalars and objects (`model`, `delegation`, `runtime`, `tools`, `agents`, `metadata`, any object-valued key) are replaced wholesale by the child's value, not deep-merged, so restate every sub-field you still want; `composes` is parent + child, deduplicated by kind, ref and slot id; other arrays are unioned.
+
+Inheritance covers the manifest only. The parent's `SOUL.md`, `RULES.md`, `DUTIES.md` and `knowledge/` are not read: the install renders the child directory's own files. The merged `composes` drives the install (delegate sub-agent files, abilities, contracts, MCP servers) but the install renders no composed `persona` or `ruleset` blocks, and the runner builds those from the agent's own `agent.yaml` without resolving `extends` (see System Prompt Assembly). A `persona` or `ruleset` item that only arrives through `extends` is therefore never rendered; declare it in the child if it must reach the prompt. `skaile-development` inherits the `skaile` agent's persona and ruleset this way and ships without them.
 
 ## SOUL.md
 
@@ -256,15 +271,23 @@ inlined into the prompt. Ordered by `knowledge/index.yaml`:
 
 ```yaml
 # knowledge/index.yaml
-- path: concept_structure.md
-  priority: 1 # lower = listed first
-- path: golden_principles.md
-  priority: 2
-- path: iron_laws.md
-  priority: 3
+version: '1.0'
+description: What this knowledge base holds
+documents:
+  - path: concept_structure.md
+    priority: 1 # lower = listed first
+  - path: golden_principles.md
+    priority: 2
+  - path: iron_laws.md
+    priority: 3
 ```
 
-Files not listed in `index.yaml` get a default priority of `99` and are listed last.
+`documents:` is the one shape to write: the runtime reads each entry's `path:` and optional
+`priority:`, and recognises `documents: []` as a valid, empty knowledge base (as in the two shipped
+`index.yaml` files, `skaile-forge/agent/` and `skaile-platform/agents/assistant/`, which are
+empty on purpose and carry no `priority`). Files not listed in `index.yaml` get a default priority of
+`99` and are listed last. `retrieval:` (for example `strategy: load_all`) is not read by
+`@skaile/workspaces`; leave it out.
 
 ## System Prompt Assembly
 
@@ -284,6 +307,14 @@ uses it for the live prompt, so the two cannot disagree on order. The order is f
 | 7   | `## Contracts` | composed contracts                                                                    |
 | 8   | composed      | inline blocks from `composes:`, including `persona` parts (`PERSONA.md`, snapshotted) and `ruleset` parts (`RULESET.md`, read live) |
 | 9   | extensions    | per-project `prompt-extensions`                                                        |
+
+Which part builds what: the installed agent file carries sections 1 and 3-7 (and 9, when the
+workspace configures `prompt-extensions`). `<MEMORY>` (2) and the composed blocks (8) need a
+resolved agent instance, so the runner adds them when the session starts, from the agent's own
+`agent.yaml` (it does not follow `extends`, see above). A host may also add prompt text of its own
+around these sections: skaile-forge's work channel, for example, adds the list of the user's other
+workspaces and a working-directory constraint as a system-prompt extension. Section 1 is
+therefore the first section of the agent part, not necessarily the first thing the model reads.
 
 Consequences for authors: a shared `PERSONA.md` composed through `composes:` lands in section 8,
 after the agent's own `SOUL.md`, `RULES.md` and `DUTIES.md`; it supplements the identity and does
