@@ -387,7 +387,10 @@ A grant on `create_agent_template` reaches that one project only. A grant on `sp
 `update_agent_template`, `add_template_connection` or `remove_template_connection` reaches that
 one template only. Any connector change, including a `create_agent_template` with `connectors`,
 is covered only if the owner **explicitly widened** the grant to privileged administration; no
-grant covers a service-account connection. A grant on `hire_agent` reaches that one
+grant covers a service-account connection. A **service-account connection** is an organization
+connection that runs on one shared service credential, not on each person's own sign-in.
+`platform.list_connector_options` does not say which kind a connection is, so expect a card for
+any connection change. A grant on `hire_agent` reaches that one
 template and covers temporary hires only; a grant on `retire` covers retiring temporary hires
 from that one template. A grant on
 `finish_spawned_instance` covers this session finishing its own children. Things to act on:
@@ -435,9 +438,9 @@ from that one template. A grant on
   done. Use it rather than the **Archive** action from `platform.find_actions`, which is the
   owner's. Only the session that spawned it may call it, and only on its own children: a child
   of another session (`not_spawner`), an ordinary session (`not_an_instance`) and an archived
-  child (`already_done`) are refused before any card, and each is final, so do not retry. If the
-  owner has not answered the card by the time the call stops waiting, it comes back as
-  `{ status: "awaiting_approval", invocationId }` like any carded call. If the owner approves
+  child (`already_done`) are refused before any card, and each is final, so do not retry. If
+  nobody has decided the card by the time the call stops waiting, it comes back as
+  `{ status: "awaiting_approval", invocationId }` like any carded call. If it is approved
   after that, it still runs, but its result is not kept:
   `platform.get_operation({ invocationId })` tells you only that they approved, not whether the
   child was archived or asked to be marked done. Read the child instead:
