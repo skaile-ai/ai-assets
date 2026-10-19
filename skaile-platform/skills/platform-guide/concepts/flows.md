@@ -138,6 +138,50 @@ both fail on the first mismatch.
 that one node and is the only repeat in the schema (see the DAG consequence above). The
 node-level `gate` object carries `approval`: `none` | `optional` | `mandatory`.
 
+## Sub-flow outputs — what a flow returns
+
+A `sub-flow` node returns to its parent only what the child flow declares in its own
+top-level `output`. The block has two maps that must agree key for key:
+
+- `output.schema` is a JSON Schema **object**, like `contract.output.fields`: each returned
+  field is a property under `properties`, typed with `type`.
+- `output.bindings` gives every property one binding, in the same syntax as a node's
+  `contract.input`: a `${…}` reference (usually to a node's declared output field), or a
+  literal.
+
+```json
+"output": {
+  "schema": {
+    "type": "object",
+    "properties": { "verdict": { "type": "string" }, "risks": { "type": "array" } }
+  },
+  "bindings": {
+    "verdict": "${nodes.review.output.fields.verdict}",
+    "risks": "${nodes.review.output.fields.risks}"
+  }
+}
+```
+
+The parent then reads `nodes.<sub-flow node>.output.fields.verdict`. The rules:
+
+- A property without a binding is refused at `output.bindings`, and a binding without a
+  property at `output.bindings.<name>`. Bind every property or omit `bindings`. A flow with no
+  `bindings` returns nothing, whatever its schema declares.
+- A binding's references are checked like a node binding's: the producer must exist and
+  declare the field it reads.
+- A parent may read `nodes.<sub>.output.fields.<f>` only when the child both declares and binds
+  `<f>`. This is checked at save time, and again when the sub-flow node starts.
+- When the parent's sub-flow node declares a type for the field in its own
+  `contract.output.fields`, the child's `type` must fit it (`integer` fits `number`). This is
+  checked when the sub-flow node starts, not at save time.
+- When the child run completes, each binding is resolved and the result is validated against
+  `output.schema`. A binding whose producer did not produce a value fails the sub-flow node,
+  and so does a value that does not match the schema.
+
+In the flow editor, **Output** in the editing toolbar (or "Edit flow output" in the command
+palette) opens the section. Each row is a returned field: its name, type, description and
+binding. Adding a field writes the property and its binding together.
+
 ## Gates versus checks
 
 Two distinct concepts, deliberately not two flavours of one.
@@ -240,6 +284,16 @@ For `platform.revise_flow` the scope is the stored flow's own, not the session's
 **Renaming a flow.** `platform.revise_flow` with only `name` renames a flow without resending
 its nodes. The new name is what the flow list shows, and the owner's card says "Renames the flow
 from … to …". It is a revision like any other: the same admin rule and the same card or grant.
+
+**Revisions are locked against a changed flow.** `platform.revise_flow` takes an optional
+`expectedFlowDefinitionHash`: the `flowDefinitionHash` from `platform.get_flow`, or the
+`change.flowDefinitionHash` your previous revision returned. A hash that no longer matches the
+stored flow is refused before any card appears. Without it, the stored hash is recorded when
+the card is prepared. Either way, an approved revision whose flow changed before the write is
+refused and nothing is written: re-read with `platform.get_flow` and compose the revision
+against what is stored now. A card prepared before this lock existed still executes as
+approved, and a full `definition` can still repair a flow whose stored definition cannot be
+read.
 
 So an owner who is not an admin of that scope is refused **before any card appears**, and
 someone else approving cannot change that. The refusal is prose that names the role, plus a
