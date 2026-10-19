@@ -483,7 +483,8 @@ service-account connection. Things to act on:
   result when done, and subscribe to it (`platform.notify_when_idle`) to hear that it has
   finished.
 - **Bound credentials narrow who can spawn or hire.** A template that holds them spawns or hires
-  only on the owner's own turn or an automation acting for them; a project member's request is
+  only on a turn the owner wrote (a message they typed, or their own schedule, flow, `a2a` or
+  `delegation` turn — not a webhook, mail or relayed turn); a project member's request is
   refused before any card, and no standing approval can be asked for ahead.
 - **A limit refusal is not final.** The server sets a spawn-depth limit, a limit on live
   children per session and a limit on live instances per owner per template (a template may set
@@ -569,8 +570,8 @@ already answers to it), `empty_name` or `name_too_long` (over 120 characters). I
   `"spawner"`; ask it to `send` you its result, and close it with
   `platform.finish_spawned_instance` when its work is done.
 - **Class `routine`**, and `privileged` when this session has a connector on a shared service
-  account: then only the owner's own turn (or an automation acting for them) can have one
-  spawned, and a member's request is refused before any card (`owner_turn_required`). A grant
+  account: then only a turn the owner wrote (as above; not a webhook, mail or relayed turn) can
+  have one spawned, and a member's request is refused before any card (`owner_turn_required`). A grant
   covers this session starting helpers, for requests of the class it was granted at.
 - **Refused by design:** a session limited to a folder (`scoped_session_unsupported`; the copy
   would see the whole project), a run group's session, and an archived session. The depth and
@@ -772,17 +773,16 @@ Revocation is immediate, and the platform re-checks the owner's live authorizati
 and the budget right before the effect. **A call that dispatched silently a minute ago can come
 back parked on approval** — that means it is no longer covered, not that something failed.
 
-A grant covers a call only on **the owner's own turn**, and what counts is who wrote the
-turn's text: a message the owner typed, or their own `schedule`, `flow`, peer agent message
-(`a2a`) or `delegation`. A turn credited to the owner whose text someone else wrote (a webhook
-or mail, a session seed, a late result, or a relayed peer or delegated message — trigger source
-`a2a_relayed` or `delegation_relayed`), and a turn that
-another member, several members, or nobody attributable set off, is carded whatever grants
-exist (`concepts/agent.md`, *Autonomy grants* and *Shared sessions*). A standing disclosure
-grant is the one exception: it also covers a turn started by one member who can act in the
-session (not a Viewer), but only on a message a person typed: unlike an ordinary grant it never
-covers a trigger turn, so even the owner's own schedule, flow, peer agent or delegation turn,
-a webhook and a mixed turn get a card.
+A grant covers a call only on **the owner's own turn**, and what counts is who wrote the turn's
+text: a message the owner typed, or their own `schedule`, `flow`, peer agent message (`a2a`) or
+`delegation`. A turn credited to the owner whose text someone else wrote (a webhook or mail, a
+session seed, a late result, or a relayed peer or delegated message — trigger source
+`a2a_relayed` or `delegation_relayed`), and a turn that another member, several members, or
+nobody attributable set off, is carded whatever grants exist (`concepts/agent.md`, *Autonomy
+grants* and *Shared sessions*). A standing disclosure grant is the one exception: it also covers
+a turn started by one member who can act in the session (not a Viewer), but only on a message a
+person typed: unlike an ordinary grant it never covers a trigger turn, so even the owner's own
+schedule, flow, peer agent or delegation turn, a webhook and a mixed turn get a card.
 
 You see grants only on turns a human sent, in the `<AUTONOMY>` block: which capability, how far
 it reaches, until when, and what is left of any caps, plus notice when one has been **revoked**.
@@ -877,7 +877,8 @@ skaile-ai/platform#7266 (`platform.hire_agent`: `hire-agent.handler.ts`, `spawn-
 (the shared `finish_spawned_instance` card: `finish-spawned-instance.handler.ts`,
 `finish-spawned-instance-policy.service.ts`), skaile-ai/platform#7997 (a grant answers only an
 owner-proposed turn: `approval-policy.service.ts` `isCoveredAsker`, `turn-principal.ts`
-`isOwnerProposedTurn`), and
+`isOwnerProposedTurn`, `TurnTriggerSource` for the `a2a_relayed` and `delegation_relayed`
+values), and
 skaile-ai/platform#6962 (standing disclosure grants: `disclosure-policy.ts`,
 `disclosure-preparer.ts`, `ungrantable-by-design.ts`, `approval-policy.service.ts`;
 `platform/decisions/2026-10-08-standing-disclosure-grants.md`).

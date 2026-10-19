@@ -497,4 +497,5 @@ standing disclosure grants: skaile-ai/platform#6962 (`disclosure-policy.ts`
 the co-owner decider of the finish card: skaile-ai/platform#8072
 (`finish-spawned-instance.handler.ts`, `finish-spawned-instance-policy.service.ts`),
 grants answer only owner-proposed turns: skaile-ai/platform#7997 (`approval-policy.service.ts`
-`isCoveredAsker`, `turn-principal.ts` `isOwnerProposedTurn` and `SELF_AUTHORED_TRIGGER_SOURCES`).
+`isCoveredAsker`, `turn-principal.ts` `isOwnerProposedTurn`, `SELF_AUTHORED_TRIGGER_SOURCES` and
+`TurnTriggerSource`, which holds `a2a_relayed` and `delegation_relayed`).
