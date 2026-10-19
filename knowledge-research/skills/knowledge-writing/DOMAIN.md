@@ -5,7 +5,7 @@ type: domain
 building_blocks:
   contracts: "Output format conventions for each content type (podcast scripts, book structure), speaker/character protocols, and quality criteria."
   docs: "Writing workflow guides, format templates, and production notes for audio/text output."
-  skills: "Three skills: knowledge-paper-podcast (academic paper → podcast script), knowledge-writer-book (autonomous 5-agent book writing), knowledge-writer-podcast (hyper-realistic two-speaker podcast)."
+  skills: "Three skills (preset `knowledge-writing`): knowledge-paper-podcast (academic paper → podcast script), book-writer (autonomous 5-agent book writing), knowledge-writer-podcast (hyper-realistic two-speaker podcast)."
   agents: "TBD"
   prompts: "Reusable prompt fragments for tone, voice, speaker personas, and chapter structures."
   tools: "TBD"
@@ -24,7 +24,7 @@ Writing skills prioritize voice, narrative arc, and accessibility — they are t
 |--------|---------|
 | `contracts/` | Output format conventions, speaker protocols, quality criteria per content type |
 | `docs/` | Writing workflow guides, format templates, production notes |
-| `skills/` | `knowledge-paper-podcast`, `knowledge-writer-book`, `knowledge-writer-podcast` |
+| `skills/` | `knowledge-paper-podcast`, `book-writer`, `knowledge-writer-podcast` |
 | `prompts/` | Reusable speaker personas, tone instructions, chapter structure templates |
 
 ## Skills
@@ -32,7 +32,7 @@ Writing skills prioritize voice, narrative arc, and accessibility — they are t
 | Skill | Purpose |
 |-------|---------|
 | `knowledge-paper-podcast` | Transform an academic paper (or paper extraction) into a two-speaker podcast script |
-| `knowledge-writer-book` | Autonomous 5-agent system for writing a structured book from a research corpus |
+| `book-writer` | Autonomous 5-agent system for writing a structured book from a research corpus |
 | `knowledge-writer-podcast` | Hyper-realistic two-speaker podcast production with natural dialogue, interruptions, and pacing |
 
 ## Conventions

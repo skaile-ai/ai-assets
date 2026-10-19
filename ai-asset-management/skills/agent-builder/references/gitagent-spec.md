@@ -40,7 +40,7 @@ agent-name/
 
 | Field | Description |
 |---|---|
-| `spec_version` | GitAgent spec version ("0.1.0") |
+| `spec_version` | Agent spec version: `"0.2"` for skaile assets (upstream GitAgent itself is "0.1.0") |
 | `name` | kebab-case identifier |
 | `version` | semver |
 | `description` | One-line description |
@@ -54,10 +54,13 @@ agent-name/
 | `tags` | Searchable keywords |
 | `extends` | Path to parent agent.yaml for inheritance |
 | `model` | LLM preferences: preferred, fallback, constraints |
-| `skills` | List of skill names the agent can invoke |
-| `delegation` | Mode: explicit, router, auto |
+| `composes` | Typed items the agent is built from: `{kind, ref, id?, as?, binding?}` (skills, sub-agents, personas, rulesets, connectors, ...) |
+| `lifecycle` | `standing` (default) or `role` (short-lived, callable; needs `io`) |
+| `io` | JSON Schemas `{input, output}` for a role |
+| `memory` | `blocks[{name, scope, max_chars, source?}]`, stored by the host and rendered as `<MEMORY>` |
+| `triggers` | Host-fired `schedule` / `webhook` / `channel` / `event` triggers, each with an `id` |
+| `delegation` | Mode: explicit, router, auto (descriptive only) |
 | `runtime` | max_turns, timeout |
-| `requires` | Dependencies (sub-agents, skills) |
 | `compliance` | Regulatory config (risk_tier, supervision, recordkeeping, SOD) |
 | `metadata` | Arbitrary extensions |
 
@@ -67,13 +70,13 @@ agent-name/
 # Inherit from parent
 extends: https://github.com/org/base-agent.git
 
-# Depend on sub-agents
-requires:
-  - name: fact-checker
-    source: https://github.com/org/fact-checker.git
-    version: ^1.0.0
-    mount: agents/fact-checker
+# Compose skills and sub-agents (0.2; replaces the 0.1 `skills:` and `requires:` lists)
+composes:
+  - { kind: skill, ref: skill:@skaile-ai/deep-research }
+  - { kind: agent, ref: "agent:@skaile-ai/fact-checker", as: fact-checker, binding: delegate }
 ```
+
+`skills:`, `requires:`, `persona:`, `rules:` and `abilities:` are deprecated 0.1 inputs.
 
 ## Export Targets
 
@@ -91,4 +94,4 @@ gitagent audit
 
 ## Spec Version
 
-v0.1.0 — https://github.com/open-gitagent/gitagent
+Upstream GitAgent: v0.1.0 — https://github.com/open-gitagent/gitagent. Skaile assets use `spec_version: "0.2"`, which adds `composes`, `lifecycle`, `io`, `memory` and `triggers` (see `docs/agents.md` in ai-assets).

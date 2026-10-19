@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["ruamel.yaml>=0.18"]
+# dependencies = ["ruamel.yaml==0.19.1"]
 # ///
 """Mechanical rewriter from legacy skaile.yaml to canonical-identity shape.
 

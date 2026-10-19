@@ -1,9 +1,10 @@
 ---
 name: agent-builder
-description: "Scaffolds and implements GitAgent definitions (agent.yaml + SOUL.md
-  + RULES.md). Use when you need to create a new AI agent identity with model configuration,
-  delegation rules, and composable sub-agents. Supports domain agents (ai-assets),
-  local project agents (.claude/agents, .omp/agents), and global agents."
+description: "Scaffolds and implements GitAgent definitions (agent.yaml spec 0.2 + SOUL.md
+  + RULES.md). Use when you need to create a new AI agent identity or a short-lived role agent
+  with model configuration, composed skills/knowledge/sub-agents, typed io, memory blocks and
+  triggers. Supports domain agents (ai-assets), local project agents (.claude/agents,
+  .omp/agents), and global agents."
 license: MIT
 compatibility: "Git required for version-controlled agent definitions"
 metadata:
@@ -56,8 +57,11 @@ Ask the user about:
 1. **Purpose**: What does this agent do? What domain does it operate in?
 2. **Personality**: Formal, friendly, terse, verbose? Any communication style requirements?
 3. **Model preferences**: Which LLM? Temperature? Token limits?
-4. **Delegation**: Does it work alone (`explicit`), route to sub-agents (`router`), or auto-delegate (`auto`)?
-5. **Compliance**: Any regulatory requirements (FINRA, SOD, human-in-the-loop)?
+4. **Lifecycle**: A `standing` identity (long-running, optionally with memory) or a `role` (short-lived, called with typed input and output)?
+5. **Composition**: Which skills, knowledge, connectors, MCP servers, personas/rulesets and sub-agents does it compose? Which of those are delegates (`kind: agent`)?
+6. **Memory and triggers**: Does it need memory blocks that persist between runs? Should the host start it on a schedule, webhook, channel message or event?
+7. **Delegation intent**: Does it work alone (`explicit`), route to sub-agents (`router`), or auto-delegate (`auto`)? This is descriptive metadata; delegation itself is a `composes` item.
+8. **Compliance**: Any regulatory requirements (FINRA, SOD, human-in-the-loop)?
 
 ---
 
@@ -79,6 +83,8 @@ agent-name/
 **Standard (4 files):** Add `RULES.md` + `knowledge/`
 **Full:** Add `DUTIES.md`, `skills/`, `tools/`, `workflows/`, `hooks/`, `config/`, `compliance/`, `agents/`
 
+`SOUL.md`, `RULES.md`, `DUTIES.md` and `knowledge/` are implicit `composes` items: they are picked up by file name with no entry in `agent.yaml`. Everything else (skills, shared personas and rulesets, connectors, sub-agents) is an explicit `composes:` item.
+
 ---
 
 ### Step 3: Write agent.yaml
@@ -86,7 +92,7 @@ agent-name/
 Follow the GitAgent spec + skaile extensions:
 
 ```yaml
-spec_version: "0.1.0"
+spec_version: "0.2"
 name: agent-name
 version: "1.0.0"
 description: "One-line description."
@@ -94,7 +100,7 @@ author: skaile
 license: MIT
 tags: [relevant, tags]
 
-extends: ../path/to/parent/agent.yaml   # optional inheritance
+extends: ../path/to/parent/agent.yaml   # optional; only `skaile install` resolves it
 
 model:
   preferred: claude-sonnet-4-6
@@ -105,13 +111,15 @@ model:
     max_tokens: 8192
 
 delegation:
-  mode: explicit                         # explicit | router | auto
+  mode: explicit                         # explicit | router | auto (descriptive only)
 
 runtime:
   max_turns: 100
   timeout: 1800
 
-requires: []                             # sub-agent or skill dependencies
+composes:                                # everything the agent is built from
+  - { kind: skill, ref: skill:@skaile-ai/deep-research }
+  - { kind: agent, ref: "agent:@skaile-ai/quality", as: quality, binding: delegate }
 
 metadata:
   stage: alpha
@@ -120,12 +128,64 @@ metadata:
 
 **Key rules:**
 - `name` must be kebab-case and match the directory name
-- `extends` enables inheritance — child agents inherit model/delegation/runtime from parent
-- `requires` uses the unified dependency format: bare strings or `{name, source, version, mount}` objects
-- `delegation.mode`:
+- `extends` inherits from a parent `agent.yaml`; `composes` is parent + child, objects such as `model` and `delegation` are replaced by the child's value. Only `skaile install` resolves it, and the relative path must stay inside the repo.
+- There is no `skills:`, `requires:`, `persona:`, `rules:` or `abilities:` in 0.2. They are deprecated 0.1 inputs; write `composes:` items instead.
+- `delegation.mode` is descriptive metadata and nothing in the runtime acts on it; real delegation is a `composes` item of `kind: agent`:
   - `explicit` — agent acts alone, no sub-agents
-  - `router` — routes requests to named sub-agents based on triggers
-  - `auto` — automatically selects sub-agents based on context
+  - `router` — declares that it routes requests to named sub-agents
+  - `auto` — declares that it selects sub-agents based on context
+
+#### `composes:` items
+
+An item is `{kind, ref, id?, as?, binding?, instance?, config?}`.
+
+| Field | Rule |
+|---|---|
+| `kind` | A registered asset kind: `skill`, `agent`, `prompt`, `persona`, `ruleset`, `knowledge`, `contract`, `connector`, `mcp-server`, `flow`. Never `memory` or `trigger`; those are top-level fields. |
+| `ref` | One grammar for catalog refs: `kind:@publisher/name[#range]` (for example `skill:@skaile-ai/audit#^1.4`), or a path relative to the `agent.yaml` (`./skills/code-assistance`, `../../../_agent-parts/personas/skaile-base/PERSONA.md`). |
+| `id` | The slot id, `[a-z][a-z0-9_-]*`. Required for `connector` and `mcp-server` items (it names `composition.<id>` and `<id>.<operation>`); a workspace binds it to a concrete connector. Optional elsewhere. |
+| `as` | Local alias, also the rendered sub-agent file name; same pattern as the slot id. |
+| `binding` | How the content reaches the agent. Content kinds: `discoverable` (default for skill, knowledge, connector, flow, mcp-server), `inline-live` (default for ruleset, prompt, contract), `inline-snapshot` (default for persona). `kind: agent` takes `delegate` (default; rendered as a harness-native sub-agent) or `run` (called through `agent.run`, no native file). |
+
+Shared persona and ruleset parts live at `_agent-parts/personas/<name>/PERSONA.md` and `_agent-parts/rules/<name>/RULESET.md`; an agent's own `RULES.md` is never a standalone asset.
+
+#### Role agents: `lifecycle` and `io`
+
+A short-lived, callable agent sets `lifecycle: role` (the default is `standing`) and must declare `io`, JSON Schemas for its input and output. `agent.run` validates both. Make `io.output` strict (`additionalProperties: false`, list every field the caller relies on in `required`).
+
+```yaml
+lifecycle: role
+io:
+  input:
+    type: object
+    required: [topic]
+    additionalProperties: false
+    properties:
+      topic: { type: string, minLength: 1 }
+  output:
+    type: object
+    required: [summary, sources]
+    additionalProperties: false
+    properties:
+      summary: { type: string }
+      sources: { type: array, items: { type: string } }
+```
+
+Keep a role's `tools.allowed` minimal and say in `RULES.md` what it must not do; a role that composes a skill which persists files must say which of that skill's phases it skips.
+
+#### `memory` and `triggers`
+
+```yaml
+memory:                                  # standing agents; the host stores the blocks, the runner renders <MEMORY>
+  blocks:
+    - { name: user, scope: user, max_chars: 3000, description: "Facts about the user." }
+    - { name: learned, scope: instance, max_chars: 6000 }
+triggers:                                # the host fires these; unrelated to delegation.triggers
+  - { kind: schedule, id: weekly-digest, cron: "0 8 * * 1", prompt: "Write the weekly digest." }
+  - { kind: event, id: report-session-error, event: session_error, prompt: "Tell the user what failed." }
+```
+
+`scope` is `instance`, `user` or `workspace`. Trigger `kind` is `schedule`, `webhook`, `channel` or `event`; ids are unique per agent, `prompt` is plain text (no interpolation), and there is no async flag. When a block exists, say in `SOUL.md` and `RULES.md` what goes in it and that writing to it is not editing files.
 
 ---
 
@@ -203,8 +263,9 @@ Priority determines load order. Default priority is 99. Keep total knowledge und
 
 - Confirm `agent.yaml` is valid YAML
 - Confirm `name` matches directory name
-- If `extends` is set, verify parent path exists
-- If `requires` has entries, verify sources exist
+- If `extends` is set, verify parent path exists and stays inside the repo
+- Verify every `composes` ref resolves to exactly one asset (`bash scripts/presets-resolve.test.sh` in ai-assets); connector and `mcp-server` items carry a slot `id`
+- A `lifecycle: role` agent has an `io` block
 - Review SOUL.md tone with user
 
 ---
@@ -218,29 +279,55 @@ extends: ../../../ai-asset-management/agents/skaile/agent.yaml
 Child inherits model/delegation/runtime. Override any field locally.
 
 ### Sub-agent delegation
+A delegate is a `composes` item of `kind: agent`. `skaile install` renders it as a sub-agent file next to the parent (`as:` names it).
 ```yaml
 delegation:
-  mode: router
-  router: orchestrator
+  mode: router                           # descriptive: this agent routes to its delegates
 
-agents:
-  researcher:
-    description: "Deep research and analysis"
-    delegation:
-      mode: auto
-      triggers: [research_requested, analysis_needed]
-  implementer:
-    description: "Code implementation"
-    delegation:
-      mode: auto
-      triggers: [implementation_requested, code_requested]
-
-requires:
-  - name: researcher
-    source: ../../knowledge-research/agents/researcher
-    version: "1.0.0"
-    mount: agents/researcher
+composes:
+  - { kind: agent, ref: "agent:@skaile-ai/researcher", as: researcher, binding: delegate }
+  - { kind: agent, ref: "agent:@skaile-ai/quality", as: quality, binding: run }   # called through agent.run
 ```
+An `agents:` map with per-entry `delegation.triggers` may document the routing for readers, but nothing reads it.
+
+### Worked example: a role agent
+
+`knowledge-research/agents/researcher/agent.yaml` is the reference shape: `lifecycle: role`, a strict `io`, read-only `tools.allowed`, and four composed skills.
+
+```yaml
+spec_version: '0.2'
+name: 'researcher'
+version: '1.0.0'
+description: 'Short-lived, read-only research role: takes a topic, searches the web and the workspace, and returns a sourced summary.'
+lifecycle: role
+io:
+  input:
+    type: object
+    required: [topic]
+    additionalProperties: false
+    properties:
+      topic: { type: string, minLength: 1 }
+  output:
+    type: object
+    required: [summary, sources]
+    additionalProperties: false
+    properties:
+      summary: { type: string }
+      sources: { type: array, items: { type: string } }
+model:
+  preferred: 'claude-sonnet-4-6'
+  fallback: ['claude-haiku-4-5-20251001']
+tools:
+  allowed: [Read, Glob, Grep, Bash, WebSearch, WebFetch]
+runtime: { max_turns: 40, timeout: 900 }
+composes:
+  - { kind: skill, ref: skill:@skaile-ai/deep-research }
+  - { kind: skill, ref: skill:@skaile-ai/use-exa }
+  - { kind: skill, ref: skill:@skaile-ai/use-perplexity }
+  - { kind: skill, ref: skill:@skaile-ai/use-searxng }
+```
+
+Its `SOUL.md` tells it to follow only the collection and synthesis phases of `deep-research` and to return results instead of storing them; its `RULES.md` forbids modifying files, so the composed skill's storage phase is skipped on purpose. Read both before copying the pattern.
 
 ### Compliance configuration (regulated environments)
 ```yaml
@@ -276,7 +363,7 @@ GitAgent definitions are framework-agnostic. Export adapters produce target-spec
 | `openai` | OpenAI Agents SDK Python code |
 | `crewai` | CrewAI YAML config |
 
-agent-runner natively loads GitAgent directories via `buildAgentImprint()`.
+The runner and `skaile install` build the system prompt with the same function, `buildAgentPromptSections`; order: `SOUL.md`, `<MEMORY>` blocks, framework fragments, `## Constraints` (`RULES.md`), `## Duties` (`DUTIES.md`), abilities, contracts, composed inline blocks (persona and ruleset parts), prompt-extensions. See `docs/agents.md`.
 
 ---
 

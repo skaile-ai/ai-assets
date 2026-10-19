@@ -7,7 +7,7 @@
 
 ### Changed
 
-- `DOMAIN.md` indexes the three `knowledge-writing` skills (`book-writer`, `knowledge-paper-podcast`, `knowledge-writer-podcast`) that live under `skills/knowledge-writing/`.
+- `DOMAIN.md` points to the nested `skills/knowledge-writing/DOMAIN.md`, which is the one index for `book-writer`, `knowledge-paper-podcast` and `knowledge-writer-podcast`; that file called `book-writer` `knowledge-writer-book`, a skill that does not exist, and is corrected.
 - `knowledge-research` bundle → `knowledge-research.preset.yaml` (preset `@skaile-ai/knowledge-research` 1.0.0); `knowledge-writing` likewise. Presets are versioned by hand (bump `version:` when `items:` changes); they no longer follow the git tag.
 
 ### Fixes

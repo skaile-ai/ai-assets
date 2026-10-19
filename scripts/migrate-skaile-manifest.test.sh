@@ -10,7 +10,7 @@
 # Lives in scripts/, not next to the skill: a test inside a skill directory is
 # copied wholesale into every consumer repo (see scripts/TESTING.md).
 #
-# migrate.py declares its dependency (ruamel.yaml) inline (PEP 723), so it needs
+# migrate.py declares its dependency (ruamel.yaml, pinned exactly) inline (PEP 723), so it needs
 # `uv`. CI installs uv; a machine without it skips this file locally but fails
 # under CI=true, where a skipped lane would be false confidence. `uv run` resolves
 # ruamel.yaml from PyPI on a cold cache, so this is the one test in the suite that
@@ -47,7 +47,10 @@ assert_eq 0 "$status" "migrate.py exits 0 on the smoke fixture"
 
 # The fixture's `bundle:skaile-development@skaile#^2.0` loses its bundle-era pin. That is an
 # absence in the output, which expected.yaml cannot encode, so the warning is the only signal.
-assert_true "migrate.py warns that the bundle-era pin was dropped" grep -q "dropped pin" "$err"
+# Gated on the exit status so a uv/network failure reports one cause, not two.
+if [ "$status" -eq 0 ]; then
+  assert_true "migrate.py warns that the bundle-era pin was dropped" grep -q "dropped pin" "$err"
+fi
 
 diff_out="$(diff -u "$FIXTURE/expected.yaml" "$out" 2>&1)"
 assert_eq "" "$diff_out" "migrated output equals expected.yaml"
