@@ -3,11 +3,11 @@ name: knowledge-writing
 description: "Content generation skills that transform structured research (from knowledge-research) into polished written artifacts: podcast scripts, book chapters, and audio productions."
 type: domain
 building_blocks:
-  contracts: "Output format conventions for each content type (podcast scripts, book structure), speaker/character protocols, and quality criteria."
-  docs: "Writing workflow guides, format templates, and production notes for audio/text output."
-  skills: "Three skills (preset `knowledge-writing`): knowledge-paper-podcast (academic paper → podcast script), book-writer (autonomous 5-agent book writing), knowledge-writer-podcast (hyper-realistic two-speaker podcast)."
+  contracts: "Output format conventions for each content type (podcast scripts, book structure), speaker/character protocols, and quality criteria (`contracts/`)."
+  docs: "None yet."
+  skills: "Three skills (preset `knowledge-writing`), each a directory next to this file: knowledge-paper-podcast (academic paper → podcast script), book-writer (autonomous 5-agent book writing), knowledge-writer-podcast (hyper-realistic two-speaker podcast)."
   agents: "TBD"
-  prompts: "Reusable prompt fragments for tone, voice, speaker personas, and chapter structures."
+  prompts: "None yet."
   tools: "TBD"
 stage: alpha
 ---
@@ -23,9 +23,11 @@ Writing skills prioritize voice, narrative arc, and accessibility — they are t
 | Folder | Purpose |
 |--------|---------|
 | `contracts/` | Output format conventions, speaker protocols, quality criteria per content type |
-| `docs/` | Writing workflow guides, format templates, production notes |
-| `skills/` | `knowledge-paper-podcast`, `book-writer`, `knowledge-writer-podcast` |
-| `prompts/` | Reusable speaker personas, tone instructions, chapter structure templates |
+| `book-writer/`, `knowledge-paper-podcast/`, `knowledge-writer-podcast/` | The three skills, each directly next to this `DOMAIN.md` (no `skills/` subfolder) |
+
+There is no `docs/` or `prompts/` folder yet.
+
+This is the one nested domain in the repo: it sits at `knowledge-research/skills/knowledge-writing/`, one level deeper than the usual `<domain>/skills/<name>/`. The skills are still published catalog assets (`skill:@skaile-ai/<name>`, listed in `knowledge-writing.preset.yaml`); discovery finds them by file name, not by depth, and `scripts/presets-resolve.test.sh` checks that each ref resolves.
 
 ## Skills
 

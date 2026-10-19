@@ -4,26 +4,21 @@ description: The GitAgent format — agent.yaml spec 0.2, SOUL.md, RULES.md, kno
 _sources:
   - path: ai-assets/ai-asset-management/agents/skaile/agent.yaml
     description: Root orchestrator — persona/ruleset composition, model config, delegation, delegate agents
-  - path: ai-assets/skaileup/agents/skaileup/agent.yaml
-    description: Guide agent — skaileup-* discovery convention
-  - path: ai-assets/skaileup-conceptualization/agents/skaileup-conceptualize/agent.yaml
-    description: Concept pipeline agent — extends pattern, metadata fields
-  - path: ai-assets/skaileup-implementation/agents/skaileup-implement/agent.yaml
-    description: Implementation pipeline agent
   - path: ai-assets/skaile-forge/agent/agent.yaml
-    description: Forge-Project in-app dev assistant — skills field, app-specific pattern
+    description: Forge-Project in-app dev assistant — composes of local skills, event trigger (report-session-error)
   - path: ai-assets/skaile-development/agents/skaile-development/agent.yaml
-    description: Skaile-dev workflow agent
+    description: Skaile-dev workflow agent — extends the skaile agent
   - path: ai-assets/skaile-platform/agents/assistant/agent.yaml
     description: Platform assistant agent
   - path: ai-assets/knowledge-research/agents/researcher/agent.yaml
     description: Role agent — lifecycle, io, composes of skills
   - path: ai-assets/skaile-forge/base-orchestrator/agent.yaml
     description: Standing agent — memory.blocks
-  - path: ai-assets/skaile-forge/agent/agent.yaml
-    description: Event trigger (report-session-error)
-_based_on_commit: 5fd26c1
-_last_synced: '2026-04-25'
+# The skaileup agents (skaileup, skaileup-conceptualize, skaileup-implement, quality) ship from the
+# ai-assets-skaileup repo and are not sourced here. The workspaces commit below is where
+# agent-prompt-sections.ts, install-agent.ts and the 0.2 manifest schema were read.
+_based_on_commit: ec12483
+_last_synced: '2026-10-19'
 sidebar:
   order: 30
 ---
@@ -40,7 +35,7 @@ An **agent** in ai-assets is a [GitAgent](https://gitagent.sh) — a portable, v
 ├── SOUL.md             ← Agent identity: who it is, what it cares about, its values
 ├── RULES.md            ← Behavioral constraints: what it must and must never do
 └── knowledge/
-    ├── index.yaml      ← Priority ordering for knowledge documents (lower = loaded first)
+    ├── index.yaml      ← Order of the knowledge documents (lower priority number = listed first)
     └── *.md            ← Domain knowledge, reference material, context docs
 ```
 
@@ -50,12 +45,12 @@ An agent definition is valid when `agent.yaml` is present. All other files are o
 
 ```yaml
 spec_version: '0.2' # agent spec version — "0.2" (composes:, lifecycle, memory, triggers)
-name: skaileup-conceptualize # Unique agent ID
-version: 1.0.0 # Semver
+name: skaile-development # Unique agent ID
+version: 1.2.0 # Semver
 description: >
-  Concept pipeline orchestrator — runs Discovery → Experience → Blueprint.
+  Expert advisor for the skaile-dev monorepo — routes tasks to the right skills.
 
-extends: ../../../ai-asset-management/agents/skaile/agent.yaml # optional inheritance
+extends: ../../../ai-asset-management/agents/skaile/agent.yaml # optional inheritance; the path must stay inside the repo
 
 # Composition (optional) — shared persona/ruleset parts, skills, delegate agents
 composes:
@@ -86,9 +81,9 @@ author: skaile
 license: MIT
 tags: [orchestrator, concept-pipeline]
 
-metadata: # Freeform — domain, skill paths, pipeline notes
-  domain: skaileup-conceptualization
-  phases: 'Discovery, Experience, Blueprint'
+metadata: # Freeform — domain, routing notes, knowledge notes
+  domain: skaile-development
+  stage: beta
 ```
 
 ## Field Reference
@@ -237,7 +232,7 @@ Inherits from a parent `agent.yaml`, resolved relative to the child's directory.
 
 ## SOUL.md
 
-The agent's identity document. Written in first person. Describes:
+The agent's identity document. Written in second person ("You are …"), addressed to the model — the voice of every shipped `SOUL.md` and of the shared `PERSONA.md` parts, so that a composed persona (section 8 of the assembled prompt) continues the identity instead of switching voice. Describes:
 
 - What the agent is and what it is trying to accomplish
 - Its values, priorities, and working style
@@ -262,14 +257,14 @@ inlined into the prompt. Ordered by `knowledge/index.yaml`:
 ```yaml
 # knowledge/index.yaml
 - path: concept_structure.md
-  priority: 1 # lower = loaded earlier
+  priority: 1 # lower = listed first
 - path: golden_principles.md
   priority: 2
 - path: iron_laws.md
   priority: 3
 ```
 
-Files not listed in `index.yaml` get a default priority of `99` and are loaded last.
+Files not listed in `index.yaml` get a default priority of `99` and are listed last.
 
 ## System Prompt Assembly
 
@@ -295,21 +290,32 @@ after the agent's own `SOUL.md`, `RULES.md` and `DUTIES.md`; it supplements the 
 not replace it. `knowledge/` is discoverable and is not part of the prompt text. Empty parts are
 dropped, and missing convention files are silently skipped.
 
+A host may replace the assembled prompt. `skaile-forge/agent/hooks/hooks.yaml` declares an
+`imprint-on-open` hook on `project_open`, and `skaile-forge/agent/workflows/imprint-project.yaml`
+builds its own system prompt (`SOUL.md`, two inlined knowledge docs and the project `CLAUDE.md`,
+then `set_session_context`). That path bypasses this builder: it has no `<MEMORY>` section and no
+`## Constraints`. Neither `@skaile/workspaces` nor `skaile-forge` contains code that reads
+`hooks/hooks.yaml` or runs `set_session_context`, and the hook's `scripts/on-project-open.sh` does
+not exist, so this document treats the hook workflow as host-defined and unverified. If a host
+runs it, the agent loses its rules and memory blocks in that session.
+
 ## Agents in ai-assets
 
 | Agent                             | Path                                                        | Role                                                                           |
 | --------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | `skaile`                          | `ai-asset-management/agents/skaile/`                        | Root orchestrator — routes by intent to domain agents                          |
-| `skaileup`                        | `skaileup/agents/skaileup/`                                 | Conversational guide — discovers installed orchestrators, guides through flows |
-| `skaileup-conceptualize`          | `skaileup-conceptualization/agents/skaileup-conceptualize/` | Concept pipeline (Discovery → Blueprint)                                       |
-| `skaileup-implement`              | `skaileup-implementation/agents/skaileup-implement/`        | Implementation pipeline (Setup → Verify)                                       |
-| `quality`                         | `skaileup-evaluate/agents/quality/`                         | Quality assurance                                                              |
+| `skaileup`                        | `ai-assets-skaileup/00_skaileup-orchestrator/agents/skaileup/` | Conversational guide — discovers installed orchestrators, guides through flows |
+| `skaileup-conceptualize`          | `ai-assets-skaileup/00_skaileup-orchestrator/agents/skaileup-conceptualize/` | Concept pipeline (Discovery → Blueprint)                                       |
+| `skaileup-implement`              | `ai-assets-skaileup/10_impl-build/agents/skaileup-implement/` | Implementation pipeline (Setup → Verify)                                       |
+| `quality`                         | `ai-assets-skaileup/13_impl-quality/agents/quality/` | Quality assurance                                                              |
 | `skaile-development`              | `skaile-development/agents/skaile-development/`             | skaile-dev monorepo expert — routes tasks to skills and prog-experts           |
 | `forge-project-assistant`         | `skaile-forge/agent/`                                       | In-app dev assistant for skaile-forge workspaces                                |
 | `forge-project-base-orchestrator` | `skaile-forge/base-orchestrator/`                           | Home workspace guide — creates projects, explains Forge Project features       |
 | `forge-project-orchestrator`      | `skaile-forge/project-orchestrator/`                        | Project workspace assistant — coding, writing, research, file management       |
 | `skaile-assistant`                | `skaile-platform/agents/assistant/`                         | Skaile platform enterprise assistant — research, analysis, writing, code       |
 | `researcher`                      | `knowledge-research/agents/researcher/`                     | Read-only research role (`lifecycle: role`): `{topic}` in, `{summary, sources}` out |
+
+The four `skaileup*` and `quality` agents ship from the separate `ai-assets-skaileup` repo (paths above are relative to it); the other agents live in this repo.
 
 The `skaileup-*` naming convention is significant: any agent installed to `.claude/agents/` whose name starts with `skaileup-` is automatically discovered by the `skaileup` guide agent at session start. New orchestrators (e.g. `skaileup-implement-supabase`) are discovered without any change to `skaileup` itself.
 
@@ -321,7 +327,7 @@ skaile run cli-concept --project-dir ./my-project
 
 # With a different agent definition
 skaile run cli-concept --project-dir ./my-project \
-  --agent-dir ./ai-assets/skaileup-conceptualization/agents/skaileup-conceptualize
+  --agent-dir ./ai-assets-skaileup/00_skaileup-orchestrator/agents/skaileup-conceptualize
 
 # Via Claude Code --agent flag (after skaile install)
 claude --agent skaileup                  # interactive guide — start here
@@ -329,6 +335,6 @@ claude --agent skaileup-conceptualize    # concept pipeline directly
 claude --agent skaileup-implement        # implementation pipeline directly
 
 # Via GitAgent CLI
-gitagent run ai-assets/skaileup-conceptualization/agents/skaileup-conceptualize/
-gitagent validate ai-assets/ai-asset-management/agents/skaile/
+gitagent run ai-assets-skaileup/00_skaileup-orchestrator/agents/skaileup-conceptualize/
+gitagent validate ai-asset-management/agents/skaile/
 ```

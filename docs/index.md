@@ -37,7 +37,7 @@ skaile add cf_concept_overview
 
 **[Agents](./agents)** — The identity layer. A GitAgent definition directory (`agent.yaml` + `SOUL.md` + `RULES.md` + `knowledge/`) that is assembled into a system prompt before any flow starts. Agents give the LLM its persona, constraints, and domain knowledge.
 
-**[Prompts](./prompts)** — Reusable text fragments. Lighter-weight than skills — no procedure, no I/O declarations. Injected into skill prompts or agent imprints.
+**[Prompts](./prompts)** — Reusable text fragments. Lighter-weight than skills — no procedure, no I/O declarations. Injected into skill prompts or agent system prompts.
 
 **[Domains](./domains)** — The organizational layer. Folders grouping related skills, agents, flows, and contracts by concern. Browse per-domain details in the [AI Resource Catalog](/catalog/).
 
@@ -47,7 +47,7 @@ skaile add cf_concept_overview
 
 - [Skills](./skills) — SKILL.md format, frontmatter reference, body sections, resolution, optional files
 - [Flows](./flows) — flow definition structure, nodes, edges, globals, execution model, available flows
-- [Agents](./agents) — GitAgent format, agent.yaml fields, imprint assembly
+- [Agents](./agents) — GitAgent format, agent.yaml fields, system prompt assembly
 - [Prompts](./prompts) — prompt format, prompts vs skills, usage
 - [Domains](./domains) — domain structure, types, relationships
 - [Developer Guide](./developer-guide/) — repository structure, skill resolution, contract inheritance, adding a domain

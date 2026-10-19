@@ -27,7 +27,7 @@ agent-name/
 ├── tools/                  # MCP-compatible schemas
 ├── workflows/              # SkillsFlow multi-step procedures
 ├── knowledge/              # Reference documents
-│   └── index.yaml          # Priority ordering
+│   └── index.yaml          # Listing order
 ├── memory/runtime/         # Live state (gitignored)
 ├── hooks/                  # Lifecycle handlers
 ├── config/                 # Environment overrides
@@ -67,8 +67,9 @@ agent-name/
 ## Composition
 
 ```yaml
-# Inherit from parent
-extends: https://github.com/org/base-agent.git
+# Inherit from a parent agent.yaml (upstream GitAgent also accepts a git URL;
+# in ai-assets the path must be relative and stay inside the repo)
+extends: ../../../ai-asset-management/agents/skaile/agent.yaml
 
 # Compose skills and sub-agents (0.2; replaces the 0.1 `skills:` and `requires:` lists)
 composes:

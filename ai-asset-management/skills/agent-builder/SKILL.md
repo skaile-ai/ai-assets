@@ -74,8 +74,8 @@ agent-name/
 ├── agent.yaml          # Manifest: name, version, model, delegation, compliance
 ├── SOUL.md             # Identity: personality, communication style, values
 ├── RULES.md            # Hard constraints: what the agent must/must never do
-├── knowledge/          # Reference documents sorted by priority
-│   └── index.yaml      # Priority ordering (lower number = loaded first)
+├── knowledge/          # Reference documents, looked up on demand
+│   └── index.yaml      # Listing order (lower priority number = listed first)
 └── examples/           # Optional: few-shot calibration interactions
 ```
 
@@ -211,7 +211,7 @@ How you approach tasks. Methodology. Tools you prefer.
 ```
 
 **Rules:**
-- Write in second person ("You are...")
+- Write in second person ("You are..."): every shipped SOUL.md and shared PERSONA.md does, and a composed persona lands after SOUL.md in the same prompt, so the voices must match (`docs/agents.md`, "SOUL.md")
 - Be specific about expertise and limitations
 - Include concrete examples of preferred responses
 - Keep under 200 lines — this loads on every interaction
@@ -248,14 +248,14 @@ Add reference documents the agent should load:
 # knowledge/index.yaml
 files:
   - path: domain-overview.md
-    priority: 10       # lower = loaded earlier
+    priority: 10       # lower = listed first
   - path: best-practices.md
     priority: 20
   - path: common-patterns.md
     priority: 30
 ```
 
-Priority determines load order. Default priority is 99. Keep total knowledge under 5000 tokens.
+Priority determines the order documents are listed in. Default priority is 99. Knowledge is discoverable, not inlined into the prompt, so the token budget that matters is each document's size when the agent reads it: keep documents short and focused.
 
 ---
 

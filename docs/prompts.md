@@ -65,7 +65,7 @@ knowledge-writing/
 
 ## Using Prompts
 
-Prompts are referenced by skills in their prompt body or in `resources/`. They are not executed as flow nodes — a skill composes them, or an agent loads them as part of its imprint.
+Prompts are referenced by skills in their prompt body or in `resources/`. They are not executed as flow nodes — a skill composes them, or an agent loads them as part of its system prompt.
 
 ```bash
 # Install a prompt

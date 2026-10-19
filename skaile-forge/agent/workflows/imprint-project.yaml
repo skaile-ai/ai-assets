@@ -1,3 +1,9 @@
+# Host-defined hook workflow. It builds its own system prompt and sets it with `set_session_context`,
+# which bypasses the shared assembly in docs/agents.md ("System Prompt Assembly"): no `<MEMORY>` section
+# and no `## Constraints` (RULES.md). Nothing in @skaile/workspaces or skaile-forge reads
+# hooks/hooks.yaml or implements `set_session_context`, and hooks.yaml points at a missing
+# scripts/on-project-open.sh, so treat this file as unverified; a host that runs it loses RULES.md
+# and the memory blocks for that session.
 name: imprint-project
 version: "1.0"
 description: >-
