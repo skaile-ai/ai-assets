@@ -593,7 +593,7 @@ auth / policy through the platform's built-in machinery.
    for ordering; mark approval gates with `awaiting_approval`.
 5. **(Optional) Author an agent definition** -- SOUL/RULES/agent.yaml/
    knowledge if you need a specific persona / hard constraints.
-6. **Bundle** in a `*.bundle.yaml` and a `*.catalog.yaml` for one-shot
+6. **Preset** in a `*.preset.yaml` and a `*.catalog.yaml` for one-shot
    installation.
 7. **Connect the catalog source** in the platform admin UI.
 8. **Configure taxonomy and permissions** -- who can see and run what.

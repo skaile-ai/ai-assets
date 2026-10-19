@@ -72,20 +72,36 @@ def _rewrite_pin(pin: str) -> str:
     return pin
 
 
+def _split_ref(ref: str) -> tuple[str, str, str | None]:
+    """Split a dep ref (pin already removed) into (kind, name, publisher or None).
+
+    Accepts the scoped form `kind:@publisher/name` (`@` optional), the legacy
+    form `kind:name@publisher`, and the bare form `kind:name`.
+    """
+    kind, sep, rest = ref.partition(":")
+    if not sep:
+        raise MigrationError(f"dep '{ref}' has no 'kind:' prefix.")
+    if "/" in rest:
+        publisher, name = rest.lstrip("@").split("/", 1)
+        return kind, name, publisher
+    if "@" in rest:
+        name, publisher = rest.rsplit("@", 1)
+        return kind, name, publisher
+    return kind, rest, None
+
+
 def _rewrite_dep(ref: str, pub_map: dict) -> str:
-    """Rewrite a single dependency ref to canonical shape."""
+    """Rewrite a single dependency ref to the canonical `kind:@publisher/name[#pin]`."""
     ref = ref.strip()
     pin = None
     if "#" in ref:
         ref, pin = ref.split("#", 1)
         pin = _rewrite_pin(pin)
 
-    if "@" in ref:
-        body, publisher = ref.rsplit("@", 1)
-        if publisher == "skaile":  # legacy curated namespace rebrand
-            publisher = "skaile-ai"
-    else:
-        body = ref
+    kind, name, publisher = _split_ref(ref)
+    if publisher == "skaile":  # legacy curated namespace rebrand
+        publisher = "skaile-ai"
+    if publisher is None:
         publisher = pub_map.get("_bare_default")
         if not publisher:
             raise MigrationError(
@@ -93,7 +109,18 @@ def _rewrite_dep(ref: str, pub_map: dict) -> str:
                 "resolve this with the user and pass _bare_default in --publisher-map."
             )
 
-    out = f"{body}@{publisher}"
+    if kind == "bundle":  # the bundle kind is gone; the grouping primitive is a preset
+        kind = "preset"
+        if pin is not None:
+            # Presets version independently (they start at 1.0.0), so a bundle-era
+            # range such as #^2.0 can never match. Drop it and say so.
+            sys.stderr.write(
+                f"warning: bundle:{name} -> preset:@{publisher}/{name}: dropped pin '#{pin}' "
+                "(presets are versioned on their own, starting at 1.0.0)\n"
+            )
+            pin = None
+
+    out = f"{kind}:@{publisher}/{name}"
     if pin is not None:
         out += f"#{pin}"
     return out
@@ -102,7 +129,7 @@ def _rewrite_dep(ref: str, pub_map: dict) -> str:
 def _scoped_dep(ref: str, publisher: str) -> str:
     """Scope a lifted dep to a specific publisher (used for ai_resources deps)."""
     ref = ref.strip()
-    if "@" in ref.split("#", 1)[0]:
+    if _split_ref(ref.split("#", 1)[0])[2] is not None:
         # already has a publisher; honor it (with rebrand + pin rewrite)
         return _rewrite_dep(ref, {})
     return _rewrite_dep(ref, {"_bare_default": publisher})

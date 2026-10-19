@@ -17,3 +17,8 @@ items:
   - ref: skill:@skaile-ai/use-mcp2cli
   - ref: skill:@skaile-ai/agent-browser
   - ref: skill:@skaile-ai/use-skills-sh
+  - ref: skill:@skaile-ai/decks
+  - ref: skill:@skaile-ai/use-revealjs
+  - ref: skill:@skaile-ai/use-slidev
+  - ref: skill:@skaile-ai/word-document
+# Not listed on purpose: skill:@skaile-ai/word-template is a client-specific worked example (see DOMAIN.md), not a generic skill.

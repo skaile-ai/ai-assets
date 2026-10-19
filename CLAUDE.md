@@ -22,8 +22,7 @@ dev-implementation-experts-js/    ← JS/TS framework experts
 dev-implementation-experts-python/ ← Python experts
 dev-implementation-experts-typst/  ← Typst expert
 external/                         ← tracked external resources
-knowledge-research/               ← deep research, paper extraction
-knowledge-writing/                ← book/podcast generation
+knowledge-research/               ← deep research, paper extraction; skills/knowledge-writing/ holds book/podcast generation
 use/                              ← external service integrations (exa, perplexity, outline, etc.)
 ```
 
@@ -63,8 +62,17 @@ extensions (the agentskills.io convention the parser follows). MCP servers
 under `mcp/` source their version from `pom.xml` and mirror it into the
 `version` field of their single `MCP.md` — see `mcp/DOMAIN.md`.
 
-Consumer projects pull from this repo via a `sources:` entry in their own
-`skaile.yaml`:
+Agents (`agent.yaml`) and presets (`*.preset.yaml`) carry an explicit `version:`
+in the file. It is hand-managed: it does not follow the git tag, so bump it (and
+add a CHANGELOG entry) whenever the agent's content or the preset's `items:`
+change. Presets start at `1.0.0`; they never inherited the old bundle versions, so
+a consumer range written for a bundle (such as `#^2.0`) must become `#^1.0`.
+
+Two files carry the word "manifest", and they are different things. The
+**publisher** manifest is `skaile.manifest.yaml` in this repo: it names the
+publisher and nothing else (no `assets:` list; discovery walks the tree). A
+**consuming** project's own workspace file stays `skaile.yaml`. Consumers pull
+from this repo via a `sources:` entry in it:
 
 ```yaml
 sources:
@@ -72,7 +80,7 @@ sources:
     pin: v1.4.0     # branch | tag | 40-char sha; defaults to HEAD of default branch
 dependencies:
   - preset:@skaile-ai/skaile-development#^1.0
-  - skill:audit@skaile-ai#~1.4
+  - skill:@skaile-ai/audit#~1.4
 ```
 
 Full schema:

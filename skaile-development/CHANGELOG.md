@@ -7,7 +7,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 - Agent `skaile-development` 1.2.0 moves to `spec_version: "0.2"`: `metadata.orchestrates` becomes `composes:` skill items; `routes_to` / `knows` prose moves to `metadata.routing_notes` / `knowledge_notes`.
-- `skaile-development.bundle.yaml` → `skaile-development.preset.yaml` (preset `@skaile-ai/skaile-development`). Consumers: replace `bundle:@skaile-ai/skaile-development` with `preset:@skaile-ai/skaile-development` in `dependencies:`.
+- `skaile-development.bundle.yaml` → `skaile-development.preset.yaml` (preset `@skaile-ai/skaile-development` 1.0.0). Consumers: replace `bundle:skaile-development@skaile-ai#^2.0` with `preset:@skaile-ai/skaile-development#^1.0` in `dependencies:`. The bundle inherited the repo git tag; the preset carries its own `version:`, starts at 1.0.0 and is bumped by hand whenever `items:` changes, so a bundle-era range such as `#^2.0` never matches it and must be rewritten.
+- Agent `skaile-development` 1.2.0: `extends` pointed at `../../../../ai-asset-management/agents/skaile/agent.yaml`, one level above the repo root, so the inheritance never happened. It now reads `../../../ai-asset-management/agents/skaile/agent.yaml`, which means the agent inherits the `skaile` agent's persona, ruleset and delegate agents.
+- `migrate-skaile-manifest`: migrates dependency refs to the scoped form `kind:@<publisher>/name[#pin]` (the old `kind:name@<publisher>` no longer parses) and rewrites `bundle:` refs to `preset:@<publisher>/<name>`, dropping the bundle-era pin with a warning. `scripts/migrate.py`, the smoke fixture and `references/mapping-rules.md` follow.
+- `skaile-stack-decide` references teach presets (`<domain>.preset.yaml`, `preset:@<publisher>/<domain>` in `dependencies:`) instead of bundles.
+- `release` reads and bumps a domain's version in `<domain>.preset.yaml` (latest git tag when the domain ships no preset) instead of the removed `bundle.yaml`.
 
 ### Fixes
 - `git` `deploy` (retired) now says never to push `deploy`: the platform `deploy` branch is protected by the `deploy-protection` ruleset, and a release deploys when the Version PR merges in the 06:00-07:00 Berlin window (#192). `ship` 1.9.1 `references/platform.md` says the same.

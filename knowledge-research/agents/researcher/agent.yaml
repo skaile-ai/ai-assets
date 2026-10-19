@@ -1,7 +1,7 @@
 spec_version: '0.2'
 name: 'researcher'
 version: '1.0.0'
-description: 'Short-lived research role: takes a topic, searches the web and the workspace, and returns a sourced summary. Callable via agent.run with typed input and output.'
+description: 'Short-lived, read-only research role: takes a topic, searches the web and the workspace, and returns a sourced summary. Callable via agent.run with typed input and output.'
 lifecycle: role
 io:
   input:
@@ -15,20 +15,21 @@ io:
         description: The question or subject to research.
   output:
     type: object
-    required: [summary]
+    required: [summary, sources]
+    additionalProperties: false
     properties:
       summary:
         type: string
         description: Findings in plain prose, every claim traceable to a source.
       sources:
         type: array
-        description: URLs or workspace paths the summary relies on.
+        description: URLs or workspace paths the summary relies on; an empty list when nothing reliable was found.
         items:
           type: string
 model:
-  preferred: 'sonnet'
+  preferred: 'claude-sonnet-4-6'
   fallback:
-    - 'haiku'
+    - 'claude-haiku-4-5-20251001'
   constraints:
     temperature: 0.2
     max_tokens: 8192

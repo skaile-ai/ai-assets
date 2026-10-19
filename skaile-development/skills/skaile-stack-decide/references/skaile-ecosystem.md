@@ -108,7 +108,7 @@ Think in five horizontal layers; each one builds on the layers beneath:
 |    platform/, your app                                        |
 +---------------------------------------------------------------+
 | 4. ORCHESTRATION                                              |
-|    flows (multi-step pipelines), bundles (group-installed     |
+|    flows (multi-step pipelines), presets (group-installed     |
 |    skill+agent sets), domains (skill catalogs)                |
 +---------------------------------------------------------------+
 | 3. CAPABILITIES                                               |
@@ -155,7 +155,7 @@ then pick a **reference app** to mimic in `forge/` or `platform/`.
 | Multi-user real-time collaborative AI editor | `forge/L5-concept` | Hocuspocus + Yjs + flow engine + per-document sessions |
 | Multi-tenant SaaS with org/project/session hierarchy | `platform/` | Container manager, gateway, durable flow mirror, voice IO |
 | AI co-design / spec generation pipeline | `ai-assets-skaileup/` flows | Concept pipeline produces structured `_concept/` from a brief |
-| Vertical domain expert (legal/medical/ops) | New `ai-assets/<my-domain>/` | Author SKILL.md + agent definition + bundle |
+| Vertical domain expert (legal/medical/ops) | New `ai-assets/<my-domain>/` | Author SKILL.md + agent definition + preset |
 | Add data source to an existing agent | New connector in `ai-assets-skaile/` | Adapter + `CONNECTOR.md` + register in framework |
 
 ### Forge ladder (one-line each)
@@ -391,10 +391,10 @@ Documented at `platform/docs/protocol-extensions.md`:
 - Author a domain at `ai-assets/<my-domain>/` with:
   - `skills/<task-name>/SKILL.md` for each capability
   - `agents/<expert-name>/` with `SOUL.md`, `RULES.md`, `agent.yaml`, `knowledge/`
-  - `<my-domain>.bundle.yaml` for one-shot install
+  - `<my-domain>.preset.yaml` (items are `kind:@<publisher>/name` refs) for one-shot install
 - Add domain-specific connectors (CRM, ticketing, KB) to `ai-assets-skaile/`
   if needed.
-- Install on the project: `skaile install bundle:my-domain`.
+- Install on the project: add `preset:@<publisher>/my-domain` to `dependencies:` in `skaile.yaml` (or `skaile add preset:@<publisher>/my-domain`), then `skaile install`.
 
 ### "Embed an agent in an existing CLI"
 
@@ -516,7 +516,7 @@ ai-assets/<domain>/
 ├── skills/
 ├── agents/        # optional
 ├── flows/         # optional
-└── <domain>.bundle.yaml
+└── <domain>.preset.yaml
 ```
 
 ### A new mount driver or connector adapter
@@ -585,7 +585,7 @@ The Skaile dev ecosystem is a five-layer stack: a runtime
 (`agent-framework`) under a resource model (mounts + connectors, with
 adapters in `ai-assets-skaile`) under a capability layer (skills + agent
 definitions + MCP, drawn from `ai-assets`) under an orchestration layer
-(flows, bundles, domains, with the canonical concept-to-code pipeline in
+(flows, presets, domains, with the canonical concept-to-code pipeline in
 `ai-assets-skaileup`) under an application layer (forge reference apps and
 the enterprise platform). To add AI to an app, pick the runtime tier
 (in-process, subprocess, or container), declare resources in `skaile.yaml`,

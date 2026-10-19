@@ -14,20 +14,24 @@ interactive-disambiguation cases and a pin-rewrite table.
 - Legacy `ai_resources` legacy object shape (`{sources: [...], requires: [...]}`)
   → same treatment as the array shape; `requires:` becomes top-level
   `dependencies:` scoped to the inferred publisher.
-- Bare deps (`skill:foo` with no `@`) → `skill:foo@<inferred-publisher>` using the
+- Bare deps (`skill:foo` with no publisher) → `skill:@<inferred-publisher>/foo` using the
   URL inheritance rule. If the project has multiple sources from different GitHub
   orgs and the dep is ambiguous, the skill asks the user.
 - Dep refs that name the legacy curated `@skaile` namespace → rebrand to
   `@skaile-ai`.
+- `bundle:<name>@<publisher>` → `preset:@<publisher>/<name>`. The bundle kind was
+  removed; `*.preset.yaml` is the grouping primitive. A `#pin` on a bundle ref is
+  dropped with a warning, because presets are versioned on their own (1.0.0 first),
+  so a bundle-era range like `#^2.0` never matches.
 - `metadata.version` in any SKILL.md frontmatter → stripped (version ownership
-  moves to source `skaile.yaml`).
-- For repos that are also sources: write the publication half (`publisher`,
-  `version`, optionally `assets:` list).
+  moves to the source repo: the per-asset `version:` or the git tag).
+- For repos that are also sources: write the publisher manifest `skaile.manifest.yaml` (`publisher`,
+  `version`; no `assets:` list, which would switch discovery off the tree walk).
 
-## Canonical dep-ref grammar (verbatim from spec §"Dependency refs")
+## Canonical dep-ref grammar (spec §"Dependency refs", scoped form per `2026-06-02-scoped-asset-ref-grammar`)
 
 ```
-kind:name@<publisher>[#pin]
+kind:@<publisher>/name[#pin]
 ```
 
 Pin forms (`#pin`):
@@ -85,7 +89,7 @@ Which publisher owns skill:audit?
 
 User answers `skaile-ai` → `--publisher-map` gets
 `{"_bare_default": "skaile-ai"}` (or a per-dep override). Output:
-`skill:audit@skaile-ai`.
+`skill:@skaile-ai/audit`.
 
 ## Worked example: (b) source URL not on github.com
 
@@ -139,3 +143,8 @@ When a source declares no per-asset version, the resolver derives it:
 SHA-synthetic versions never satisfy SemVer-constraint pins (caret/tilde/
 wildcard); they satisfy only their exact literal pin or the commit-SHA pin that
 produced them.
+
+Where the spec says "source `skaile.yaml`", read the publisher manifest
+`skaile.manifest.yaml` (publisher only; assets are discovered by walking the tree)
+or the asset's own `version:` field. A consuming project's `skaile.yaml` carries
+no versions.

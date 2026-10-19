@@ -6,7 +6,8 @@ sources:
   - url: https://github.com/some-author/some-assets
     pin: v1.2.0
 dependencies:
-  - bundle:skaile-development@skaile-ai
-  - skill:audit@skaile-ai
-  - skill:notify@skaile-ai
-  - skill:legacy-thing@some-author
+  - preset:@skaile-ai/skaile-development
+  - skill:@skaile-ai/audit
+  - skill:@skaile-ai/review#~1.4
+  - skill:@skaile-ai/notify
+  - skill:@some-author/legacy-thing

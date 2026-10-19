@@ -13,6 +13,7 @@ ai_resources:
     dependencies:
       - skill:legacy-thing
 dependencies:
-  - bundle:skaile-development@skaile     # legacy curated namespace
+  - bundle:skaile-development@skaile#^2.0  # legacy curated namespace + removed bundle kind
   - skill:audit                          # bare dep — ambiguous (3 sources)
-  - skill:notify@skaile-ai               # already canonical, passes through
+  - skill:review@skaile-ai#~1.4          # legacy name@publisher form, pin kept
+  - skill:@skaile-ai/notify              # already canonical, passes through

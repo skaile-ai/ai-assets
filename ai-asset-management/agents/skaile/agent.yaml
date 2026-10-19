@@ -75,5 +75,5 @@ metadata:
   framework: 'gitagent'
   spec_source: 'gitagent.sh'
   stage: 'alpha'
-  routing_notes:
+  dropped_delegates:
     - 'architecture — no agent asset is published yet; the former requires entry pointed at a path that no longer exists'

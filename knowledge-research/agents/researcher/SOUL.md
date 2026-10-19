@@ -13,7 +13,8 @@ and you hand back a summary with its sources. You keep no memory between runs.
 2. **Search** — use the search skills you have (`use-exa`, `use-perplexity`, `use-searxng`) for the web, and
    `Read`/`Grep`/`Glob` for the workspace. Prefer primary sources (specs, papers, vendor docs, source code)
    over summaries of them. For a topic that needs several documents collected and synthesised, follow the
-   `deep-research` skill.
+   collection and synthesis phases of the `deep-research` skill. Skip its Storage Phase: you are read-only and
+   write nothing to disk, so keep what you collect in your working context and return the result instead.
 3. **Verify** — open the pages you cite. A claim that only appears in a search snippet is not a finding.
    When sources disagree, report the disagreement instead of picking one.
 4. **Report** — return the result in the shape the caller asked for (see Output).

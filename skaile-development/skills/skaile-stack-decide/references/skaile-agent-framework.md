@@ -79,9 +79,9 @@ peers and field-schema validation.
 | Concept | What it is |
 |---|---|
 | **Skill** | A `SKILL.md` file with YAML frontmatter (`name`, `description`, `metadata.user_inputs.dialog`, `reads_from`, `writes_to`) plus markdown instructions. The agent reads and follows the markdown at execution time. No compilation. |
-| **Domain** | A directory of related skills with a `DOMAIN.md` index, optional `agents/`, `contracts/`, `flows/`, and a `*.bundle.yaml` for group install. |
+| **Domain** | A directory of related skills with a `DOMAIN.md` index, optional `agents/`, `contracts/`, `flows/`, and a `<domain>.preset.yaml` for group install. |
 | **Agent definition** | `SOUL.md` (persona) + `RULES.md` (hard constraints) + `agent.yaml` (model, tools, max_turns, abilities) + `knowledge/` (priority-ordered domain knowledge). Renders to `.claude/agents/`, `.omp/agents/`, `.codex/agents/` via the asset-manager. |
-| **Bundle** | A manifest grouping skills + agents under one install command (`skaile install bundle:my-domain`). |
+| **Preset** | A `*.preset.yaml` manifest grouping skills + agents under one dependency (`preset:@<publisher>/my-domain` in `dependencies:`); the former bundle kind is gone. |
 
 ### Flows
 
@@ -381,8 +381,8 @@ isolation. Switch by config (`driver:` in `skaile.yaml` or env
 - Build a domain under `ai-assets/<my-domain>/` with skills + an agent
   definition (SOUL.md = expert persona, RULES.md = compliance constraints,
   knowledge/ = domain reference material).
-- Bundle with `*.bundle.yaml`. Install on the project with
-  `skaile install bundle:my-domain`.
+- Group them with a `<my-domain>.preset.yaml`. Install on the project by listing
+  `preset:@<publisher>/my-domain` under `dependencies:` in `skaile.yaml` and running `skaile install`.
 - Add domain-specific connectors if external systems are involved (CRM,
   ticketing, knowledge base).
 

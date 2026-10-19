@@ -35,6 +35,7 @@ expected_publisher() {
 # fragments pulled in by relative path, not standalone assets.
 folders="$(cd "$ROOT" && find . -mindepth 2 \( -name SKILL.md -o -name agent.yaml -o -name AGENT.md \
   -o -name MCP.md -o -name CONTRACT.md -o -name CONNECTOR.md -o -name PROMPT.md \
+  -o -name PERSONA.md -o -name RULESET.md \
   -o -name '*.preset.yaml' -o -name '*.catalog.yaml' \) -not -path './node_modules/*' -not -path './.*' \
   | cut -d/ -f2 | grep -vx '_agent-parts' | sort -u)"
 
