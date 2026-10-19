@@ -775,7 +775,8 @@ back parked on approval** — that means it is no longer covered, not that somet
 A grant covers a call only on **the owner's own turn**, and what counts is who wrote the
 turn's text: a message the owner typed, or their own `schedule`, `flow`, peer agent message
 (`a2a`) or `delegation`. A turn credited to the owner whose text someone else wrote (a webhook
-or mail, a session seed, a late result, `a2a_relayed`, `delegation_relayed`), and a turn that
+or mail, a session seed, a late result, or a relayed peer or delegated message — trigger source
+`a2a_relayed` or `delegation_relayed`), and a turn that
 another member, several members, or nobody attributable set off, is carded whatever grants
 exist (`concepts/agent.md`, *Autonomy grants* and *Shared sessions*). A standing disclosure
 grant is the one exception: it also covers a turn started by one member who can act in the

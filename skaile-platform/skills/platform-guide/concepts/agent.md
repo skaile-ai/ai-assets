@@ -194,11 +194,12 @@ project — and covers every read of that source; see *Shared sessions*.) It eit
 absolute expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it
 may carry use and budget caps. It stays anchored to the session it was approved in, and it covers only calls on
 **the owner's own turns**. What counts is who wrote the turn's text, not who it is credited
-to. Covered: a message the owner typed, or a turn from one of four sources whose text is the
-owner's own — their `schedule`, their `flow`, a peer agent message (`a2a`) that the owner's own
-turn sent, or their `delegation`. Carded, even when the turn is credited to the owner: a
-webhook or mail, a session seed, a late result, and a peer or delegated message that only
-passes on text someone else wrote (`a2a_relayed`, `delegation_relayed`). The one exception is a
+to. Covered: a message the owner typed, or a turn credited to the owner whose trigger source is
+one of four — `schedule`, `flow`, `a2a` or `delegation`. The platform sets `a2a` and
+`delegation` only when the sending turn's text was its person's own; a peer or delegated
+message that passes on text someone else wrote carries `a2a_relayed` or `delegation_relayed`
+instead. Carded, even when the turn is credited to the owner: a webhook or mail, a session
+seed, a late result, and those two relayed sources. The one exception is a
 standing disclosure grant,
 which also covers a member's turn — see *Shared sessions* below. The
 card's one-click choice is time-boxed to a window the capability's risk decides, and the card
