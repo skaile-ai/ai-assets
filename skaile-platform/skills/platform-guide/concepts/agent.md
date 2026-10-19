@@ -193,10 +193,13 @@ disclosure grant: it names one source — one mailbox, or the owner's session li
 project — and covers every read of that source; see *Shared sessions*.) It either has an
 absolute expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it
 may carry use and budget caps. It stays anchored to the session it was approved in, and it covers only calls on
-**the owner's own turns**: a message they typed, or their own schedule, flow, agent message or
-delegation. A turn whose text someone else wrote gets a card even when it is credited to the
-owner: a webhook or mail, a session seed, a late result, a relayed agent or delegated message.
-The one exception is a standing disclosure grant,
+**the owner's own turns**. What counts is who wrote the turn's text, not who it is credited
+to. Covered: a message the owner typed, or a turn from one of four sources whose text is the
+owner's own — their `schedule`, their `flow`, a peer agent message (`a2a`) that the owner's own
+turn sent, or their `delegation`. Carded, even when the turn is credited to the owner: a
+webhook or mail, a session seed, a late result, and a peer or delegated message that only
+passes on text someone else wrote (`a2a_relayed`, `delegation_relayed`). The one exception is a
+standing disclosure grant,
 which also covers a member's turn — see *Shared sessions* below. The
 card's one-click choice is time-boxed to a window the capability's risk decides, and the card
 names it: read the window off the card rather than inferring one from the capability. Widening
@@ -333,8 +336,11 @@ platform records **who set off each turn** — the one member who wrote, several
 or the person a schedule, webhook or peer request acts for. You cannot set or claim it. It
 decides:
 
-- **Grants apply only to the owner's own turns.** A member's turn, a mixed turn, or one the
-  platform cannot attribute always gets a card, even where the owner holds a grant. The one
+- **Grants apply only to the owner's own turns** (see *Autonomy grants* above for which
+  turns count). A member's turn, a mixed turn, one the platform cannot attribute, and a turn
+  credited to the owner whose text someone else wrote (a webhook or mail, a session seed, a
+  late result, a relayed peer or delegated message) always get a card, even where the owner
+  holds a grant. The one
   exception is a standing disclosure grant (below), which also covers a member's turn.
   (`platform.cycle_session` is outside this: no card ever, refused on a mixed or unattributed
   turn — see *Approval-gated actions*.)
@@ -354,8 +360,9 @@ decides:
   only (the card names the one-click window; today that is 90 days), and one grant covers every
   read of the source. Unlike any other grant, it covers a turn started by any one member who
   can act in the session (not a Viewer, re-checked on every call), including people who join
-  later, as well as the owner's own turns. A turn no single person started — a schedule, a
-  webhook, another agent, a mixed turn — still gets a card, the owner's included. The owner
+  later, as well as the owner's own turns. Even under this grant, a turn no single person
+  started — a schedule, a webhook, another agent, a mixed turn — still gets a card, the owner's
+  included. The owner
   revokes it in session settings, **Permissions** tab; the next read is carded again. Small effects that normally run with no card — drafting and filing mail, attaching a
   file, messaging a linked peer, renaming the assistant — are refused unless the owner asked
   ("Only `<owner>` can ask for this"). In a session only the owner can read, such as the

@@ -772,15 +772,15 @@ Revocation is immediate, and the platform re-checks the owner's live authorizati
 and the budget right before the effect. **A call that dispatched silently a minute ago can come
 back parked on approval** — that means it is no longer covered, not that something failed.
 
-A grant covers a call only on **the owner's own turn**: a message they typed, or their own
-schedule, flow, agent message or delegation. When someone else wrote the turn's text (a webhook
-or mail, a session seed, a late result, a relayed agent or delegated message — even when the
-turn is credited to the owner), or another member, several members, or nobody attributable set
-off the turn, the call is carded
-whatever grants exist (`concepts/agent.md`, *Shared sessions*). A standing disclosure grant is
-the one exception: it also covers a turn started by one member who can act in the session
-(not a Viewer). A schedule, a webhook, another agent or a mixed turn still gets a card, the
-owner's included.
+A grant covers a call only on **the owner's own turn**, and what counts is who wrote the
+turn's text: a message the owner typed, or their own `schedule`, `flow`, peer agent message
+(`a2a`) or `delegation`. A turn credited to the owner whose text someone else wrote (a webhook
+or mail, a session seed, a late result, `a2a_relayed`, `delegation_relayed`), and a turn that
+another member, several members, or nobody attributable set off, is carded whatever grants
+exist (`concepts/agent.md`, *Autonomy grants* and *Shared sessions*). A standing disclosure
+grant is the one exception: it also covers a turn started by one member who can act in the
+session (not a Viewer). Even under that exception, a schedule, a webhook, another agent or a
+mixed turn still gets a card, the owner's included.
 
 You see grants only on turns a human sent, in the `<AUTONOMY>` block: which capability, how far
 it reaches, until when, and what is left of any caps, plus notice when one has been **revoked**.
