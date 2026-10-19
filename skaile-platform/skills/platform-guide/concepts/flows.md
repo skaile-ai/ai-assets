@@ -144,7 +144,9 @@ A `sub-flow` node returns to its parent only what the child flow declares in its
 top-level `output`. The block has two maps that must agree key for key:
 
 - `output.schema` is a JSON Schema **object**, like `contract.output.fields`: each returned
-  field is a property under `properties`, typed with `type`.
+  field is a property under `properties`, typed with `type`. Put the fields under
+  `properties` here too; a bare map of field names is the same trap as at
+  `contract.output.fields`.
 - `output.bindings` gives every property one binding, in the same syntax as a node's
   `contract.input`: a `${…}` reference (usually to a node's declared output field), or a
   literal.
@@ -164,9 +166,10 @@ top-level `output`. The block has two maps that must agree key for key:
 
 The parent then reads `nodes.<sub-flow node>.output.fields.verdict`. The rules:
 
-- A property without a binding is refused at `output.bindings`, and a binding without a
-  property at `output.bindings.<name>`. Bind every property or omit `bindings`. A flow with no
-  `bindings` returns nothing, whatever its schema declares.
+- When `bindings` is present, it must agree with `schema` key for key: a property with no
+  binding is refused at `output.bindings`, and a binding with no property at
+  `output.bindings.<name>`. Omitting `bindings` entirely is allowed and is not that refusal:
+  such a flow returns nothing, whatever its schema declares.
 - A binding's references are checked like a node binding's: the producer must exist and
   declare the field it reads.
 - A parent may read `nodes.<sub>.output.fields.<f>` only when the child both declares and binds
@@ -285,16 +288,6 @@ For `platform.revise_flow` the scope is the stored flow's own, not the session's
 its nodes. The new name is what the flow list shows, and the owner's card says "Renames the flow
 from … to …". It is a revision like any other: the same admin rule and the same card or grant.
 
-**Revisions are locked against a changed flow.** `platform.revise_flow` takes an optional
-`expectedFlowDefinitionHash`: the `flowDefinitionHash` from `platform.get_flow`, or the
-`change.flowDefinitionHash` your previous revision returned. A hash that no longer matches the
-stored flow is refused before any card appears. Without it, the stored hash is recorded when
-the card is prepared. Either way, an approved revision whose flow changed before the write is
-refused and nothing is written: re-read with `platform.get_flow` and compose the revision
-against what is stored now. A card prepared before this lock existed still executes as
-approved, and a full `definition` can still repair a flow whose stored definition cannot be
-read.
-
 So an owner who is not an admin of that scope is refused **before any card appears**, and
 someone else approving cannot change that. The refusal is prose that names the role, plus a
 structured `remedy` (`capability`, `requiredScope`, `requiredRole`) that no screen renders;
@@ -305,6 +298,17 @@ administers the project.
 A standing grant can cover these writes: `platform.revise_flow` at that exact flow or its
 project, `platform.create_flow` at that exact target only. You cannot create, extend or widen
 a grant yourself — see [Autonomy grants](agent.md).
+
+**Revisions are locked against a changed flow.** `platform.revise_flow` takes an optional
+`expectedFlowDefinitionHash`: the `flowDefinitionHash` from `platform.get_flow`, or the
+`change.flowDefinitionHash` your previous revision returned. A hash that no longer matches the
+stored flow is refused before any card appears, so the owner is never asked to approve a
+revision of a flow that has changed. Without it, the stored hash is recorded when
+the card is prepared. Either way, an approved revision whose flow changed before the write is
+refused and nothing is written: re-read with `platform.get_flow` and compose the revision
+against what is stored now. A card prepared before this lock existed still executes as
+approved, and a full `definition` can still repair a flow whose stored definition cannot be
+read.
 
 `platform.assign_project_asset` and `platform.unassign_project_asset` follow the same rule: the
 session owner must administer the project, checked at the same three points, and a grant
