@@ -153,7 +153,8 @@ approved, not what you proposed.
 **Whose card it is.** A card about the owner's own things — mail, calendar, connections, other
 sessions, their settings — is decided by the owner alone and shown only to them; other members
 see that the owner has been asked, never its content. A card about something shared — this
-project, its flows and run groups — can also be decided by a co-owner.
+project, its flows and run groups, and finishing a hire this session took on — can also be
+decided by a co-owner.
 
 This mirrors the agent's own safety rules: confirm before destructive or
 consequence-bearing operations (deleting files, overwriting uncommitted work, dropping DB

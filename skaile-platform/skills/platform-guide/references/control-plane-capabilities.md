@@ -385,8 +385,9 @@ it.
 
 A grant on `create_agent_template` reaches that one project only. A grant on `spawn_agent`,
 `update_agent_template`, `add_template_connection` or `remove_template_connection` reaches that
-one template only, and a connection change needs a grant the owner widened to privileged
-changes; no grant covers a service-account connection. A grant on `hire_agent` reaches that one
+one template only. Any connector change, including a `create_agent_template` with `connectors`,
+is covered only if the owner **explicitly widened** the grant to privileged administration; no
+grant covers a service-account connection. A grant on `hire_agent` reaches that one
 template and covers temporary hires only; a grant on `retire` covers retiring temporary hires
 from that one template. A grant on
 `finish_spawned_instance` covers this session finishing its own children. Things to act on:
@@ -495,7 +496,8 @@ from that one template. A grant on
   turn; an edit set off by anyone or anything else always gets a card. Instructions are capped at
   8000 characters per edit.
 - **The rest of an existing template is changed by a person.** Once it exists, only its
-  instructions and skills are reachable here (`update_agent_template`); its name, picture,
+  instructions, skills and connections are reachable here (`update_agent_template`,
+  `add_template_connection`, `remove_template_connection`); its name, picture,
   identity, who may start it and whether its instances are listed are set at creation or by a
   person. Its limits and archiving it are never reachable. Point the person to **Edit job
   description…** in its menu in the sidebar, or the pen on its card in the project graph. Only a
