@@ -7,7 +7,7 @@ _sources:
   - path: ai-assets/skaile-forge/agent/agent.yaml
     description: Forge-Project in-app dev assistant — composes of local skills, event trigger (report-session-error)
   - path: ai-assets/skaile-development/agents/skaile-development/agent.yaml
-    description: Skaile-dev workflow agent — self-contained: own skills plus the shared ruleset part
+    description: Skaile-dev workflow agent — self-contained, composes its own skills only
   - path: ai-assets/skaile-platform/agents/assistant/agent.yaml
     description: Platform assistant agent
   - path: ai-assets/knowledge-research/agents/researcher/agent.yaml
@@ -16,6 +16,12 @@ _sources:
     description: Standing agent — memory.blocks
   - path: workspaces/docs/concepts/agent-composition.md
     description: Concept page for composition bindings, the compile manifest (schema 2), `skaile rebuild` and run snapshots
+  - path: workspaces/packages/workspaces/core/src/agent-prompt-sections.ts
+    description: 'The `buildAgentPromptSections` order (the 9-row System Prompt Assembly) and the memory block render; read at `_based_on_commit`'
+  - path: workspaces/packages/workspaces/asset-manager/src/install-agent.ts
+    description: 'What `skaile install` renders per agent, the `extends` merge (`applyExtendsMerge`) and delegate sub-agent files; read at `_based_on_commit`'
+  - path: workspaces/packages/workspaces/types/src/manifests/agent.ts
+    description: 'The 0.2 manifest schema (`lifecycle`, `io`, `memory`, `triggers`, `composes` items); read at `_based_on_commit`'
   - path: workspaces/packages/workspaces/runner/src/composition/types.ts
     description: Default binding per kind (persona inline-snapshot, ruleset inline-live)
   - path: workspaces/packages/workspaces/runner/src/composition/resolve.ts
@@ -38,7 +44,7 @@ sidebar:
 
 An **agent** in ai-assets is a [GitAgent](https://gitagent.sh) — a portable, version-controlled agent definition stored as a plain directory. The GitAgent format defines the structure and schema; the runner assembles the definition into a system prompt (see System Prompt Assembly below) before executing a flow.
 
-> [GitAgent specification on GitHub](https://github.com/gitagent/spec)
+> [GitAgent specification on GitHub](https://github.com/open-gitagent/gitagent)
 
 ## Directory Structure
 
@@ -103,7 +109,7 @@ metadata: # Freeform — domain, routing notes, knowledge notes
 
 This example is deliberately generic. The shipped agents are the faithful references:
 `skaile-development/agents/skaile-development/agent.yaml` (self-contained, family-alias model, delegation
-`explicit`, the shared ruleset composed directly), `ai-asset-management/agents/skaile/agent.yaml` (persona, ruleset and delegate
+`explicit`, skills only), `ai-asset-management/agents/skaile/agent.yaml` (persona, ruleset and delegate
 composition) and `knowledge-research/agents/researcher/agent.yaml` (a role).
 
 ## Field Reference
@@ -123,7 +129,7 @@ composes:
 ```
 
 Persona and ruleset parts live at the ai-assets root as `_agent-parts/personas/<name>/PERSONA.md`
-and `_agent-parts/rules/<name>/RULESET.md` and are reused across agents (an agent's own `RULES.md` is never a standalone
+and `_agent-parts/rules/<name>/RULESET.md`; any agent can compose them (today only `skaile` does; an agent's own `RULES.md` is never a standalone
 asset). `scripts/presets-resolve.test.sh` checks that every ref and every `extends:` path resolves.
 
 ### `model`
@@ -256,7 +262,7 @@ The 0.2 trigger schema has no async or background flag. Ids must be unique per a
 
 Inherits from a parent `agent.yaml`, resolved relative to the child's directory. Only `skaile install` reads it (the runner's composition resolver does not), and it skips the parent with a warning when the path does not exist. Merge rules: scalars and every object-valued key (e.g. `model`, `delegation`, `runtime`, `tools`, `metadata`) are replaced wholesale by the child's value, not deep-merged, so restate every sub-field you still want; `composes` is parent + child, deduplicated by kind, ref and slot id; every other array (e.g. `tags`) is unioned, so the child's `tags` carry the parent's too.
 
-Inheritance covers the manifest only. The parent's `SOUL.md`, `RULES.md`, `DUTIES.md` and `knowledge/` are not read: the install renders the child directory's own files. The merged `composes` drives the install (delegate sub-agent files, abilities, contracts, MCP servers) but the install renders no composed `persona` or `ruleset` blocks, and the runner builds those from the agent's own `agent.yaml` without resolving `extends` (see System Prompt Assembly). A `persona` or `ruleset` item that only arrives through `extends` is therefore never rendered; declare it in the child if it must reach the prompt. Because the runner ignores `extends`, install and runner build different agents from an inheriting manifest; no shipped agent uses it for that reason (`skaile-development` composes the shared ruleset directly and omits the router persona).
+Inheritance covers the manifest only. The parent's `SOUL.md`, `RULES.md`, `DUTIES.md` and `knowledge/` are not read: the install renders the child directory's own files. The merged `composes` drives the install (delegate sub-agent files, abilities, contracts, MCP servers) but the install renders no composed `persona` or `ruleset` blocks, and the runner builds those from the agent's own `agent.yaml` without resolving `extends` (see System Prompt Assembly). A `persona` or `ruleset` item that only arrives through `extends` is therefore never rendered; declare it in the child if it must reach the prompt. Because the runner ignores `extends`, install and runner build different agents from an inheriting manifest; no shipped agent uses it for that reason (`skaile-development` composes its own skills and none of the parent's parts).
 
 ## SOUL.md
 
@@ -371,5 +377,7 @@ claude --agent skaileup-implement        # implementation pipeline directly
 
 # Via GitAgent CLI
 gitagent run ai-assets-skaileup/00_skaileup-orchestrator/agents/skaileup-conceptualize/
-gitagent validate ai-asset-management/agents/skaile/
+
+# Validate a 0.2 manifest (the upstream `gitagent validate` only knows spec 0.1)
+skaile validate                          # from the ai-assets root: checks every manifest, including agent.yaml
 ```

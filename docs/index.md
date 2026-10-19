@@ -3,8 +3,8 @@ title: ai-assets
 description: The master library of AI agent skills, flows, and agents for the Skaile ecosystem.
 _sources:
   - path: ai-assets/README.md
-_based_on_commit: 5fd26c1
-_last_synced: "2026-04-25"
+_based_on_commit: 165f04c
+_last_synced: '2026-10-19'
 sidebar:
   order: 1
 ---

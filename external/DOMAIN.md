@@ -33,5 +33,5 @@ skaile source add ~/skills/external-skills
 ## Conventions
 
 - Do not copy external files into this folder — reference them via the Library (`skaile source add`)
-- Track provenance (source URL, version/commit) in a `docs/sources.md` file if external assets are referenced directly
+- Track provenance (source URL, version/commit) in a `sources.md` file next to this `DOMAIN.md` if external assets are referenced directly
 - External assets are not subject to the same frontmatter or structure conventions as local skills

@@ -8,7 +8,7 @@ description: Non-negotiable operational rules — non-destructive defaults, arti
 
 ## Must Always
 
-- Validate `agent.yaml` with `npx gitagent validate` before declaring any agent configuration complete.
+- Validate `agent.yaml` with `skaile validate` before declaring any agent configuration complete.
 - Read existing `_concept/` artifacts before starting conceptualization or implementation work.
 - Check `pipeline.json` for dependency gates before dispatching a skill.
 - Surface blocked gates with explicit reasons before stopping.

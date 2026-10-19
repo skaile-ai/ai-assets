@@ -76,7 +76,9 @@ a consumer range written for a bundle (such as `#^2.0`) must become `#^1.0`.
 
 Two files carry the word "manifest", and they are different things. The
 **publisher** manifest is `skaile.manifest.yaml` in this repo: it names the
-publisher and nothing else (no `assets:` list; discovery walks the tree). A
+publisher and nothing else (no `assets:` list; discovery walks the tree). The
+v1 file `.skaile-source.yaml` also declares a publisher (`publisher_default`); it
+must agree with the manifest, which `scripts/source-publishers.test.sh` checks. A
 **consuming** project's own workspace file stays `skaile.yaml`. Consumers pull
 from this repo via a `sources:` entry in it:
 

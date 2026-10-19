@@ -6,7 +6,7 @@
 # the failure surfaces in the consumer's resolver, far from the edit that caused
 # it.
 #
-# This pins five properties, driven by a walk of the tree (no manifest list):
+# This pins six properties, driven by a walk of the tree (no manifest list):
 #
 #   1. every SKILL.md frontmatter `name:` equals its parent directory name
 #      (CLAUDE.md rule; the resolver depends on both agreeing),
@@ -22,7 +22,9 @@
 #      (this is how an `extends:` once pointed above the repo root unnoticed),
 #   5. every `assets:` entry and `include:` glob of catalogs/*.catalog.yaml
 #      resolves to a skill or flow in this tree (an entry from another repo goes
-#      on the allowlist as `catalog:<entry>`).
+#      on the allowlist as `catalog:<entry>`),
+#   6. every `source_path` in catalogs/dist/*.catalog.json exists on disk (dist/ is
+#      compiled elsewhere and may lag the YAML; it must not dangle).
 #
 # How an asset is identified: skill = SKILL.md `name:`, agent = agent.yaml `name:`,
 # contract = CONTRACT.md `name:`, persona/ruleset = PERSONA.md/RULESET.md `name:`,
@@ -192,7 +194,7 @@ done < <(find "$ROOT" -mindepth 1 \( -name node_modules -o -name '.*' \) -prune 
   \( -name agent.yaml -o -name '*.preset.yaml' \) -print | sort)
 
 path_count="$(grep -c . "$PATHREFS" || true)"
-if [ "$path_count" -lt 6 ]; then
+if [ "$path_count" -lt 5 ]; then
   fail "found only $path_count path refs / extends — the path-ref scan is broken"
   assert_done
 fi
@@ -250,7 +252,7 @@ for cat in "$ROOT"/catalogs/*.catalog.yaml; do
       continue
     fi
     [ -n "$found" ] || { fail "$crel — assets entry '$entry' matches no skill or flow under $dom/"; bad_catalog=$((bad_catalog + 1)); }
-  done < <(sed -nE 's/^[[:space:]]*-[[:space:]]*"([a-z0-9][^" ]*\/[^" ]+)"[[:space:]]*$/\1/p' "$STRIPPED" | grep -v '/SKILL\.md$' | grep -v '\.flow\.yaml$')
+  done < <(sed -nE 's/^[[:space:]]*-[[:space:]]*["'"'"']?([a-z0-9][^"'"'"' ]*\/[^"'"'"' ]+)["'"'"']?[[:space:]]*$/\1/p' "$STRIPPED" | grep -v '/SKILL\.md$' | grep -v '\.flow\.yaml$')
   # include: globs (and only those: they end in SKILL.md or .flow.yaml)
   while IFS= read -r glob; do
     CATALOG_COUNT=$((CATALOG_COUNT + 1))
@@ -258,12 +260,39 @@ for cat in "$ROOT"/catalogs/*.catalog.yaml; do
       fail "$crel — include glob '$glob' matches no file"
       bad_catalog=$((bad_catalog + 1))
     fi
-  done < <(sed -nE 's/^[[:space:]]*-[[:space:]]*"([^" ]+(SKILL\.md|\.flow\.yaml))"[[:space:]]*$/\1/p' "$STRIPPED")
+  done < <(sed -nE 's/^[[:space:]]*-[[:space:]]*["'"'"']?([^"'"'"' ]+(SKILL\.md|\.flow\.yaml))["'"'"']?[[:space:]]*$/\1/p' "$STRIPPED")
+  # catalog.manifest.schema.json also allows `exclude:` globs. None is used; one that
+  # appeared would be invisible to the scan above, so it fails until the scan handles it.
+  if grep -qE '^[[:space:]]*exclude:' "$STRIPPED"; then
+    fail "$crel — uses exclude:, which this scan does not evaluate; extend section 5"
+    bad_catalog=$((bad_catalog + 1))
+  fi
 done
-if [ "$CATALOG_COUNT" -lt 30 ]; then
+if [ "$CATALOG_COUNT" -lt 45 ]; then
   fail "checked only $CATALOG_COUNT catalog entries and globs - the catalog scan is broken"
   assert_done
 fi
 assert_eq 0 "$bad_catalog" "every catalogs/*.catalog.yaml asset entry and include glob resolves ($CATALOG_COUNT checked)"
+
+# ── 6. catalogs/dist/*.catalog.json source paths exist ──────────────────────
+# dist/ is build output compiled from the YAML above by a compiler that lives in
+# the consumer monorepo (catalogs/build.ts), so it cannot be regenerated here and
+# may lag its manifest (see the CHANGELOG of ai-asset-management). It must not
+# point at a directory that no longer exists: a rename leaves a dangling path.
+DIST_COUNT=0
+bad_dist=0
+for json in "$ROOT"/catalogs/dist/*.catalog.json; do
+  [ -f "$json" ] || continue
+  jrel="${json#"$ROOT"/}"
+  while IFS= read -r sp; do
+    DIST_COUNT=$((DIST_COUNT + 1))
+    [ -d "$ROOT/$sp" ] || [ -f "$ROOT/$sp" ] || { fail "$jrel — source_path '$sp' does not exist"; bad_dist=$((bad_dist + 1)); }
+  done < <(sed -nE 's/^[[:space:]]*"source_path":[[:space:]]*"([^"]+)".*$/\1/p' "$json")
+done
+if [ "$DIST_COUNT" -lt 40 ]; then
+  fail "checked only $DIST_COUNT dist source paths - the dist scan is broken"
+  assert_done
+fi
+assert_eq 0 "$bad_dist" "every catalogs/dist/*.catalog.json source_path exists ($DIST_COUNT checked)"
 
 assert_done
