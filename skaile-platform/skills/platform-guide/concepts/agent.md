@@ -193,7 +193,10 @@ disclosure grant: it names one source — one mailbox, or the owner's session li
 project — and covers every read of that source; see *Shared sessions*.) It either has an
 absolute expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it
 may carry use and budget caps. It stays anchored to the session it was approved in, and it covers only calls on
-**the owner's own turns** (or a trigger the owner set up), except a standing disclosure grant,
+**the owner's own turns**: a message they typed, or their own schedule, flow, agent message or
+delegation. A turn whose text someone else wrote gets a card even when it is credited to the
+owner: a webhook or mail, a session seed, a late result, a relayed agent or delegated message.
+The one exception is a standing disclosure grant,
 which also covers a member's turn — see *Shared sessions* below. The
 card's one-click choice is time-boxed to a window the capability's risk decides, and the card
 names it: read the window off the card rather than inferring one from the capability. Widening
@@ -483,4 +486,6 @@ standing disclosure grants: skaile-ai/platform#6962 (`disclosure-policy.ts`
 `approval-policy.service.ts`), `platform/decisions/2026-10-08-standing-disclosure-grants.md` and
 `platform/docs/personal-assistant-control-plane.md` (*Owner-private reads in a shared session*),
 the co-owner decider of the finish card: skaile-ai/platform#8072
-(`finish-spawned-instance.handler.ts`, `finish-spawned-instance-policy.service.ts`).
+(`finish-spawned-instance.handler.ts`, `finish-spawned-instance-policy.service.ts`),
+grants answer only owner-proposed turns: skaile-ai/platform#7997 (`approval-policy.service.ts`
+`isCoveredAsker`, `turn-principal.ts` `isOwnerProposedTurn` and `SELF_AUTHORED_TRIGGER_SOURCES`).

@@ -95,7 +95,9 @@ or to create or replace one there, the personal assistant has `platform.read_ses
 The platform records who set off each turn; the agent cannot set it. All three capabilities key
 on it:
 
-- **Grants cover only the owner's own turns** (and triggers the owner set up). A member's turn,
+- **Grants cover only the owner's own turns**: a message they typed, or their own schedule, flow,
+  agent message or delegation. A webhook or mail turn, a session seed, a late result, a relayed
+  agent or delegated message, a member's turn,
   several members at once, or an unattributable turn always gets a card.
 - `find_actions` hides actions on the owner's own things from anyone but the owner, and shows
   nothing on a turn it cannot attribute.

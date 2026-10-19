@@ -772,8 +772,11 @@ Revocation is immediate, and the platform re-checks the owner's live authorizati
 and the budget right before the effect. **A call that dispatched silently a minute ago can come
 back parked on approval** — that means it is no longer covered, not that something failed.
 
-A grant covers a call only on **the owner's own turn**, or a trigger the owner set up: when
-another member, several members, or nobody attributable set off the turn, the call is carded
+A grant covers a call only on **the owner's own turn**: a message they typed, or their own
+schedule, flow, agent message or delegation. When someone else wrote the turn's text (a webhook
+or mail, a session seed, a late result, a relayed agent or delegated message — even when the
+turn is credited to the owner), or another member, several members, or nobody attributable set
+off the turn, the call is carded
 whatever grants exist (`concepts/agent.md`, *Shared sessions*). A standing disclosure grant is
 the one exception: it also covers a turn started by one member who can act in the session
 (not a Viewer). A schedule, a webhook, another agent or a mixed turn still gets a card, the
@@ -870,7 +873,9 @@ skaile-ai/platform#7266 (`platform.hire_agent`: `hire-agent.handler.ts`, `spawn-
 `template-connection.handler.ts`, `template-connection-policy.service.ts`,
 `create-agent-template.handler.ts`, `update-agent-template.handler.ts`), skaile-ai/platform#8072
 (the shared `finish_spawned_instance` card: `finish-spawned-instance.handler.ts`,
-`finish-spawned-instance-policy.service.ts`), and
+`finish-spawned-instance-policy.service.ts`), skaile-ai/platform#7997 (a grant answers only an
+owner-proposed turn: `approval-policy.service.ts` `isCoveredAsker`, `turn-principal.ts`
+`isOwnerProposedTurn`), and
 skaile-ai/platform#6962 (standing disclosure grants: `disclosure-policy.ts`,
 `disclosure-preparer.ts`, `ungrantable-by-design.ts`, `approval-policy.service.ts`;
 `platform/decisions/2026-10-08-standing-disclosure-grants.md`).
