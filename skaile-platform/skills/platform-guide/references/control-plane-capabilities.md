@@ -334,15 +334,18 @@ work — never call it an assistant. One hired with `platform.hire_agent({ kind:
 you have to tell it apart from those. Capability names, ids and fields keep the code
 words (`agent_template`, `templateId`, `instance`, `subagent`); say the product words to people.
 
-Six effects create a template or act on one or its instances, from any session in that project,
-as the session owner; only the session owner decides their cards. Your personal assistant can
+Eight effects create a template or act on one or its instances, from any session in that project,
+as the session owner. Only the session owner decides their cards, with one exception: an
+Owner-role member of this session may also decide a `finish_spawned_instance` card, and ask for
+one on their own turn, if they could mark that hire done themselves. Your personal assistant can
 also read, create or edit a template in another project by naming it with `projectId` (below).
-`create_agent_template`, `spawn_agent`, `hire_agent` and `update_agent_template` are durable: each returns an
+`create_agent_template`, `spawn_agent`, `hire_agent`, `update_agent_template`,
+`add_template_connection` and `remove_template_connection` are durable: each returns an
 operation receipt, read with `platform.get_operation` (*The operation lifecycle* below), and
 `result.payload` is set once it has `Succeeded`. `finish_spawned_instance` and `retire` are not:
 once one runs it returns its result itself, with no operation id and nothing to poll.
 
-Besides those six, one more effect, `platform.spawn_subagent`, starts a helper, a copy of this
+Besides those eight, one more effect, `platform.spawn_subagent`, starts a helper, a copy of this
 session rather than a hire from a job description (*Helpers* below).
 
 Two reads need no card. `platform.list_agent_templates({ projectId? })` lists all of this
@@ -367,22 +370,32 @@ comes back as unavailable from `list` and as not found from `get`. `canSpawn` is
 
 A template **holds bound credentials** when connector credentials are attached to the template
 itself, so every instance reaches those systems on the template's connection, whoever spawned
-it.
+it. A **service-account connection** is an organization connection that runs on one shared
+service credential, not on each person's own sign-in (`concepts/integrations.md`, *Two auth
+modes*). `platform.list_connector_options` does not say which kind a connection is, so you
+cannot tell in advance whether a grant covers a connection change; never tell the owner a card
+will appear.
 
 | Call | Effect | Effect class |
 | --- | --- | --- |
-| `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl?, projectId? })` | a new template in this session's project, or, from the personal assistant, in the project `projectId` names. It copies the project's connectors and settings, never a credential; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit job description…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL (or a path starting with `/`), since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it and `result.payload.version` is `1`. | `routine` on the owner's own turn; `never` on any other turn |
+| `platform.create_agent_template({ name, listed, invokeRole, instructions?, skills?, identity?, avatarUrl?, connectors?, projectId? })` | a new template in this session's project, or, from the personal assistant, in the project `projectId` names. It copies the project's connectors and settings, never a credential; `connectors` replaces the copied connector list, in the same form and under the same owner rule as a connector change in `update_agent_template`; you cannot send config or set spawn limits, how much instances see of each other, or a model: a person sets those with **Edit job description…**, and until then the template follows the project's model and does not let a spawn choose one, so leave `model` off a `spawn_agent` from it. `name` must be free in the project (a taken name is refused before a card, saying so); `listed` says whether its instances are listed under the template in the sidebar (`false` keeps them hidden workers); `invokeRole` (`User` or `Owner`) says who may start one by hand; `identity` is a short persona text its instances take on, not an assistant-profile document; `avatarUrl` is a stable https URL (or a path starting with `/`), since the platform keeps the address, not the image. Once `Succeeded`, `result.payload.templateId` names it and `result.payload.version` is `1`. | `routine` on the owner's own turn (`privileged` with `connectors`, `never` when a connector attaches a service-account connection); `never` on any other turn |
 | `platform.spawn_agent({ templateId, name?, visibility?, task?, model? })` | a new session from the template, a child of this one, sent `task` as your first message once it exists. Once `Succeeded`, `result.payload.sessionId` and `slug` name it, `agentName` and `handle` are the name and `@handle` it answers to (the agent name the job description carries, which it takes from its own name when it is created; else `name`), and `result.payload.task` says whether the task went out. | `routine`; `privileged` when the template holds bound credentials |
 | `platform.hire_agent({ templateId, kind, name?, visibility?, task?, model?, autoArchive? })` | hires from the template. `kind: "temporary"` is one job as a child of this session, exactly like `spawn_agent`, so either call works for one; end it with `finish_spawned_instance` or `retire`. Only `hire_agent` makes a permanent hire. `kind: "permanent"` is a standing member of the team: it runs as the session owner, has no parent session, keeps running if this session is archived, and is never archived when idle. It does not count against the limit on running temporary hires, and `autoArchive` is refused for it. This session ends it with `platform.retire`, or a person archives it. The card is titled "Hire an agent: temporary" or "Hire an agent: permanent". Once `Succeeded`, `result.payload` has `sessionId`, `slug`, `agentName`, `handle`, its `kind`, and whether the `task` was sent. From the personal assistant, a permanent hire stays inside the assistant's reach. `task` and `model` work as for `spawn_agent` for both kinds, and this session and the hire message each other with `send_to_session` without a link. | temporary: as `spawn_agent`; permanent: `never`, so the owner decides every one on a card |
-| `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills?, projectId? })` | replaces the template's instructions or skill list (from the personal assistant, `projectId` finds the template in that project); never its name, policy, connectors or credentials. `result.payload.version` is the new version. | `routine`, or `privileged` when the template holds bound credentials, on the owner's own turn; `never` on any other turn |
+| `platform.update_agent_template({ templateId, basedOnVersion, instructions?, skills?, connectors?, projectId? })` | replaces the template's instructions, skill list or connector list (from the personal assistant, `projectId` finds the template in that project); never its name, spawn policy or credentials. Send at least one of the three. In `connectors`, `{ id }` keeps that connector as it is and a full entry (`id`, `driver`, `providerLinkId`, `source`, `target`, `access`, `options`) adds or replaces one. A list with no `workspace` entry is refused before any card. `list_agent_templates` and `get_agent_template` do not return a template's connectors, and the list replaces the whole connector list, so any connector you do not name is dropped. For one change prefer `add_template_connection` or `remove_template_connection`. References only, from `platform.list_connector_options`; never a credential, `env` or `auth`. A connector change needs the owner to be a project Owner who can use each connection themselves, or it is refused before any card. `result.payload.version` is the new version; hires taken on afterwards use it, running ones keep theirs. | `routine`, or `privileged` when the template holds bound credentials or `connectors` changes, on the owner's own turn; `never` when a connector attaches a service-account connection, and on any other turn |
+| `platform.add_template_connection({ templateId, basedOnVersion, connection, projectId? })` | adds one connection (a mount or repository) to the template, or points its `workspace` at another repository (`connection.id: "workspace"`). `connection` is references only: `id`, `driver` (git, sharepoint, googledrive or box), `providerLinkId` of a connection from `platform.list_connector_options`, `source` (for git, a repository URL on that connection's host), `target`, `access`, `options`. `connection.id` is a name you choose for the connector in this template: `workspace` replaces the repository, and an id the template already uses is refused (remove that one first, or choose another id). The same owner rule as a connector change in `update_agent_template`. `result.payload.version` is the new version. | `privileged` on the owner's own turn; `never` when it attaches a service-account connection, and on any other turn |
+| `platform.remove_template_connection({ templateId, basedOnVersion, connectorId, projectId? })` | removes one connection from the template. `connectorId` is that connector's `id` in the template; an id the template does not have is refused. The reads do not list connector ids, so remove one you added, or ask the person which one. `workspace` cannot be removed; point it elsewhere with `add_template_connection`. The owner must be a project Owner. `result.payload.version` is the new version. | `privileged` on the owner's own turn; `never` on any other turn |
 | `platform.retire({ sessionId, handoff? })` | retires a hire this session took on with `hire_agent` or `spawn_agent`, temporary or permanent: it is archived, and if still open it is first closed, so its work is synced back to the project. Its conversation and the optional `handoff` note (kept in its chat) stay; the owner can unarchive it. Only the hiring session can retire a hire. It returns its result itself: `retired`, `proposed` (a person has written in this temporary hire, so the owner was asked there to mark it done; do not call again) or `already_retired` (it was archived while the approval waited). Refused before any card, each final for that session: `not_hirer`, `not_a_hire` (finish a helper with `finish_spawned_instance`), `cannot_retire_self`, and `already_retired` when it is archived already. For a temporary hire both calls work; `retire` adds the note. From this session, a permanent hire ends only with `retire`. | temporary: `routine`; permanent: `never` |
-| `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine` |
+| `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine`; the session owner decides the card, or an Owner-role member of this session who could mark that hire done themselves; any other member's request is refused before any card (`principal_not_authorized`) |
 
-A grant on `create_agent_template` reaches that one project only. A grant on `spawn_agent` or
-`update_agent_template` reaches that one template only. A grant on `hire_agent` reaches that one
-template and covers temporary hires only; a grant on `retire` covers retiring temporary hires
-from that one template. A grant on
-`finish_spawned_instance` covers this session finishing its own children. Things to act on:
+A grant on `create_agent_template` reaches that one project only. A grant on `spawn_agent`,
+`update_agent_template`, `add_template_connection` or `remove_template_connection` reaches that
+one template only. A grant on `hire_agent` reaches that one template and covers temporary hires
+only; a grant on `retire` covers retiring temporary hires from that one template. A grant on
+`finish_spawned_instance` covers this session finishing its own children.
+
+Any connector change, including a `create_agent_template` with `connectors`, is covered only if
+the owner **explicitly widened** the grant to privileged administration; no grant covers a
+service-account connection. Things to act on:
 
 - **Setting up another project (personal assistant only).** From the owner's personal
   assistant, pass `projectId` to `create_agent_template` or `update_agent_template` to act in a
@@ -427,9 +440,12 @@ from that one template. A grant on
   done. Use it rather than the **Archive** action from `platform.find_actions`, which is the
   owner's. Only the session that spawned it may call it, and only on its own children: a child
   of another session (`not_spawner`), an ordinary session (`not_an_instance`) and an archived
-  child (`already_done`) are refused before any card, and each is final, so do not retry. If the
-  owner has not answered the card by the time the call stops waiting, it comes back as
-  `{ status: "awaiting_approval", invocationId }` like any carded call. If the owner approves
+  child (`already_done`) are refused before any card, and each is final, so do not retry. On a
+  member's turn, `principal_not_authorized` is different: that member cannot ask for this card.
+  It is not final for the child; tell them to ask the owner, or to use **Mark done** on the hire
+  if they manage it. If
+  nobody has decided the card by the time the call stops waiting, it comes back as
+  `{ status: "awaiting_approval", invocationId }` like any carded call. If it is approved
   after that, it still runs, but its result is not kept:
   `platform.get_operation({ invocationId })` tells you only that they approved, not whether the
   child was archived or asked to be marked done. Read the child instead:
@@ -488,7 +504,8 @@ from that one template. A grant on
   turn; an edit set off by anyone or anything else always gets a card. Instructions are capped at
   8000 characters per edit.
 - **The rest of an existing template is changed by a person.** Once it exists, only its
-  instructions and skills are reachable here (`update_agent_template`); its name, picture,
+  instructions, skills and connections are reachable here (`update_agent_template`,
+  `add_template_connection`, `remove_template_connection`); its name, picture,
   identity, who may start it and whether its instances are listed are set at creation or by a
   person. Its limits and archiving it are never reachable. Point the person to **Edit job
   description…** in its menu in the sidebar, or the pen on its card in the project graph. Only a
@@ -848,7 +865,12 @@ skaile-ai/platform#7266 (`platform.hire_agent`: `hire-agent.handler.ts`, `spawn-
 `hireContract`), skaile-ai/platform#7760 (`platform.list_grants`: `list-grants.handler.ts`,
 `owner-grant-overview.service.ts`), skaile-ai/platform#7738 (`platform.list_org_grants`:
 `list-org-grants.handler.ts`, `list-org-grants-policy.service.ts`, `owner-grant-overview.service.ts`
-`listForOrganization`), and
+`listForOrganization`), skaile-ai/platform#8092 (job description connectors and
+`platform.add_template_connection` / `platform.remove_template_connection`:
+`template-connection.handler.ts`, `template-connection-policy.service.ts`,
+`create-agent-template.handler.ts`, `update-agent-template.handler.ts`), skaile-ai/platform#8072
+(the shared `finish_spawned_instance` card: `finish-spawned-instance.handler.ts`,
+`finish-spawned-instance-policy.service.ts`), and
 skaile-ai/platform#6962 (standing disclosure grants: `disclosure-policy.ts`,
 `disclosure-preparer.ts`, `ungrantable-by-design.ts`, `approval-policy.service.ts`;
 `platform/decisions/2026-10-08-standing-disclosure-grants.md`).

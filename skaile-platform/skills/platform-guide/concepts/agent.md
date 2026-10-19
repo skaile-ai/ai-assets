@@ -153,7 +153,9 @@ approved, not what you proposed.
 **Whose card it is.** A card about the owner's own things — mail, calendar, connections, other
 sessions, their settings — is decided by the owner alone and shown only to them; other members
 see that the owner has been asked, never its content. A card about something shared — this
-project, its flows and run groups — can also be decided by a co-owner.
+project, its flows and run groups, and finishing a child this session spawned
+(`finish_spawned_instance`) where that co-owner could mark the hire done themselves — can also
+be decided by a co-owner.
 
 This mirrors the agent's own safety rules: confirm before destructive or
 consequence-bearing operations (deleting files, overwriting uncommitted work, dropping DB
@@ -182,7 +184,7 @@ Each capability declares an **effect class** that decides how far a grant may re
 | --- | --- | --- |
 | `routine` | Effect stays inside the owner's own platform surface. | Yes — this is what an ordinary grant covers. |
 | `external` | Reaches a person or system outside Skaile (an invitation email, a sent mail, a calendar invitation, GitHub or another third-party API). A message delivered into another Skaile session is not external. | Only if the owner **explicitly widened** the grant to external communication. |
-| `privileged` | Administrative — changes who or what exists at organization level. | Only if the owner **explicitly widened** the grant to privileged administration. |
+| `privileged` | Administrative — changes who or what exists at organization level, or hands an organization connection to a job description. | Only if the owner **explicitly widened** the grant to privileged administration. |
 | `never` | Never auto-approvable — a disclosure read in a shared session other than the two standing sources (see *Shared sessions*), a file attached across organizations. | No — it is carded, or refused outright. Never dispatched silently. |
 
 A grant is narrow: it names **one capability** and one target scope — that exact target, its
@@ -479,4 +481,6 @@ platform #6065 (creating an agent in a project) and #6133 (`cycle-session.handle
 standing disclosure grants: skaile-ai/platform#6962 (`disclosure-policy.ts`
 `STANDING_DISCLOSURE_SOURCES`, `disclosure-preparer.ts`, `ungrantable-by-design.ts`,
 `approval-policy.service.ts`), `platform/decisions/2026-10-08-standing-disclosure-grants.md` and
-`platform/docs/personal-assistant-control-plane.md` (*Owner-private reads in a shared session*).
+`platform/docs/personal-assistant-control-plane.md` (*Owner-private reads in a shared session*),
+the co-owner decider of the finish card: skaile-ai/platform#8072
+(`finish-spawned-instance.handler.ts`, `finish-spawned-instance-policy.service.ts`).
