@@ -354,6 +354,7 @@ dropped, and missing convention files are silently skipped.
 | `forge-project-base-orchestrator` | `skaile-forge/base-orchestrator/`                           | Home workspace guide — creates projects, explains Forge Project features       |
 | `forge-project-orchestrator`      | `skaile-forge/project-orchestrator/`                        | Project workspace assistant — coding, writing, research, file management       |
 | `skaile-assistant`                | `skaile-platform/agents/assistant/`                         | Skaile platform enterprise assistant — research, analysis, writing, code       |
+| `workspace-orchestrator`          | `forge-mattermost/workspace-orchestrator/`                  | Mattermost channel workspace orchestrator — manages threads, shared state and team coordination |
 | `researcher`                      | `knowledge-research/agents/researcher/`                     | Read-only research role (`lifecycle: role`): `{topic}` in, `{summary, sources}` out |
 
 The four `skaileup*` and `quality` agents ship from the separate `ai-assets-skaileup` repo (the paths above are repo-qualified: `ai-assets-skaileup/` plus the path inside that repo); the other agents live in this repo.

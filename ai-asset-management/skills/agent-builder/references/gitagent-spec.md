@@ -83,7 +83,9 @@ composes:
 
 system-prompt, claude-code, openai, crewai, lyzr, github, git, opencode, openclaw, nanobot
 
-## CLI
+## CLI (upstream GitAgent 0.1)
+
+This is the upstream tool and it only knows spec 0.1. For a Skaile 0.2 manifest run `skaile validate` instead.
 
 ```bash
 gitagent init --template standard

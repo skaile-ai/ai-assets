@@ -260,6 +260,7 @@ Priority determines the order documents are listed in. Default priority is 99. K
 
 ### Step 7: Verify
 
+- Run `skaile validate` (it checks `agent.yaml` against the 0.2 schema; the upstream `gitagent validate` only knows 0.1)
 - Confirm `agent.yaml` is valid YAML
 - Confirm `name` matches directory name
 - If `extends` is set, verify parent path exists and stays inside the repo

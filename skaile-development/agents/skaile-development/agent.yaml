@@ -6,11 +6,13 @@ description: 'Expert advisor for the skaile-dev monorepo. Routes implementation 
 # `skaile install` does, so an inherited agent was built differently by the two. Everything this agent
 # uses is declared here: its skills. Nothing is taken from the `skaile` agent: its `skaile-base` persona
 # is the router agent's identity ("route to domain agents") and would contradict this agent's own SOUL.md;
-# its `skaile-safety` ruleset is concept-pipeline rules (`_concept/` artifacts, a boundary against any work
-# outside `_concept/` or the project directory), which contradict this agent's job of git, tests, docs and
-# devlogs across the monorepo; and its three pipeline delegates (conceptualize / implement / quality): this
-# agent's SOUL.md routes to skills only. On `main` this agent inherited none of it (its `extends` path was
-# broken), so composing none of it keeps `main`'s behaviour.
+# its `skaile-safety` ruleset is mostly concept-pipeline rules (`_concept/` artifacts, a boundary against any
+# work outside `_concept/` or the project directory), which contradict this agent's job of git, tests, docs
+# and devlogs across the monorepo, so this agent's own RULES.md carries only the generic clauses that apply
+# (diff before commit, no overwriting user files, the golden_principles / iron_laws pointers its `implement`
+# skill relies on, the two Safety & Ethics clauses); and its three pipeline delegates (conceptualize /
+# implement / quality): this agent's SOUL.md routes to skills only. On `main` this agent inherited none of
+# it (its `extends` path was broken), so composing none of it keeps `main`'s behaviour.
 model:
   # Family alias: auto-rolls to the current top Opus model. A full ID like
   # claude-opus-5 fails ModelIdSchema today (see workspaces#03).
