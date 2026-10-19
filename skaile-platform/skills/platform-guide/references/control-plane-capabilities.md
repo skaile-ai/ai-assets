@@ -370,7 +370,11 @@ comes back as unavailable from `list` and as not found from `get`. `canSpawn` is
 
 A template **holds bound credentials** when connector credentials are attached to the template
 itself, so every instance reaches those systems on the template's connection, whoever spawned
-it.
+it. A **service-account connection** is an organization connection that runs on one shared
+service credential, not on each person's own sign-in (`concepts/integrations.md`, *Two auth
+modes*). `platform.list_connector_options` does not say which kind a connection is, so you
+cannot tell in advance whether a grant covers a connection change; never tell the owner a card
+will appear.
 
 | Call | Effect | Effect class |
 | --- | --- | --- |
@@ -381,19 +385,17 @@ it.
 | `platform.add_template_connection({ templateId, basedOnVersion, connection, projectId? })` | adds one connection (a mount or repository) to the template, or points its `workspace` at another repository (`connection.id: "workspace"`). `connection` is references only: `id`, `driver` (git, sharepoint, googledrive or box), `providerLinkId` of a connection from `platform.list_connector_options`, `source` (for git, a repository URL on that connection's host), `target`, `access`, `options`. `connection.id` is a name you choose for the connector in this template: `workspace` replaces the repository, and an id the template already uses is refused (remove that one first, or choose another id). The same owner rule as a connector change in `update_agent_template`. `result.payload.version` is the new version. | `privileged` on the owner's own turn; `never` when it attaches a service-account connection, and on any other turn |
 | `platform.remove_template_connection({ templateId, basedOnVersion, connectorId, projectId? })` | removes one connection from the template. `connectorId` is that connector's `id` in the template; an id the template does not have is refused. The reads do not list connector ids, so remove one you added, or ask the person which one. `workspace` cannot be removed; point it elsewhere with `add_template_connection`. The owner must be a project Owner. `result.payload.version` is the new version. | `privileged` on the owner's own turn; `never` on any other turn |
 | `platform.retire({ sessionId, handoff? })` | retires a hire this session took on with `hire_agent` or `spawn_agent`, temporary or permanent: it is archived, and if still open it is first closed, so its work is synced back to the project. Its conversation and the optional `handoff` note (kept in its chat) stay; the owner can unarchive it. Only the hiring session can retire a hire. It returns its result itself: `retired`, `proposed` (a person has written in this temporary hire, so the owner was asked there to mark it done; do not call again) or `already_retired` (it was archived while the approval waited). Refused before any card, each final for that session: `not_hirer`, `not_a_hire` (finish a helper with `finish_spawned_instance`), `cannot_retire_self`, and `already_retired` when it is archived already. For a temporary hire both calls work; `retire` adds the note. From this session, a permanent hire ends only with `retire`. | temporary: `routine`; permanent: `never` |
-| `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine`; the session owner decides the card, or an Owner-role member of this session who could mark that hire done themselves |
+| `platform.finish_spawned_instance({ sessionId })` | closes a child this session spawned, syncing its work back to the project, then archives it; or, once a person has written there, asks its owner to mark it done. The reply's `status` says which. | `routine`; the session owner decides the card, or an Owner-role member of this session who could mark that hire done themselves; any other member's request is refused before any card (`principal_not_authorized`) |
 
 A grant on `create_agent_template` reaches that one project only. A grant on `spawn_agent`,
 `update_agent_template`, `add_template_connection` or `remove_template_connection` reaches that
-one template only. Any connector change, including a `create_agent_template` with `connectors`,
-is covered only if the owner **explicitly widened** the grant to privileged administration; no
-grant covers a service-account connection. A **service-account connection** is an organization
-connection that runs on one shared service credential, not on each person's own sign-in.
-`platform.list_connector_options` does not say which kind a connection is, so you cannot tell
-in advance whether a grant covers a connection change; never tell the owner a card will appear. A grant on `hire_agent` reaches that one
-template and covers temporary hires only; a grant on `retire` covers retiring temporary hires
-from that one template. A grant on
-`finish_spawned_instance` covers this session finishing its own children. Things to act on:
+one template only. A grant on `hire_agent` reaches that one template and covers temporary hires
+only; a grant on `retire` covers retiring temporary hires from that one template. A grant on
+`finish_spawned_instance` covers this session finishing its own children.
+
+Any connector change, including a `create_agent_template` with `connectors`, is covered only if
+the owner **explicitly widened** the grant to privileged administration; no grant covers a
+service-account connection. Things to act on:
 
 - **Setting up another project (personal assistant only).** From the owner's personal
   assistant, pass `projectId` to `create_agent_template` or `update_agent_template` to act in a
