@@ -49,13 +49,13 @@ identity, role and status fields.
 
 Two read the sessions of the *current* project (the one the agent's session is in), keeping to
 what the owner could open in the product: their own sessions, sessions they are a member of, and
-Shared sessions their project role lets them see. Neither uses the cursor contract above, and
-neither is the same call as `platform.get_session_context`:
+Shared sessions their project role lets them see. They are not paged with cursors, and neither
+is the same call as `platform.get_session_context`:
 
 | Call | Gives you |
 | --- | --- |
 | `platform.list_sessions({ status?, limit? })` | the sessions of this project, most recently active first (`limit` defaults to 20, caps at 100): id, name, status, `isArchived`, `lastActivityAt`, `ownerId`, visibility, plus `total`, `returned` and `omitted` counts. Archived, hibernated and spawned sessions are included. |
-| `platform.get_session({ sessionId })` | one session of this project by id, with the same fields. One that does not exist, is in another project or that the owner cannot see gives the same not-found error — check with it before concluding a session you know of is gone. A standing session-list grant does not cover it: in a shared session it is carded per read. |
+| `platform.get_session({ sessionId })` | one session of this project by id, with the same fields. One that does not exist, is in another project or that the owner cannot see gives the same not-found error — check with it before concluding a session you know of is gone. A standing session-list grant does not cover it: in a shared session it is carded per read, unless the read shows no reader anything new (see *Shared sessions* in `concepts/agent.md`). |
 
 Two more read the *conversations* rather than the structure. Neither uses the cursor contract
 above:
