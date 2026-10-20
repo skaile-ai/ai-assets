@@ -775,10 +775,13 @@ back parked on approval** — that means it is no longer covered, not that somet
 
 A grant covers a call only on **the owner's own turn**, and what counts is who wrote the turn's
 text: a message the owner typed, or their own `schedule`, `flow`, peer agent message (`a2a`) or
-`delegation`. A turn credited to the owner whose text someone else wrote (a webhook or mail, a
-session seed, a late result, or a relayed peer or delegated message — trigger source
-`a2a_relayed` or `delegation_relayed`), and a turn that another member, several members, or
-nobody attributable set off, is carded whatever grants exist (`concepts/agent.md`, *Autonomy
+`delegation`. It also covers a `late_result` credited to the owner, and an `a2a_relayed` or
+`delegation_relayed` turn that carries the platform's owner-chain mark: every hop ran in the
+owner's own sessions and no starter carried anyone else's text. A turn credited to the owner
+whose text came from elsewhere (a webhook or mail, a session seed, or a relayed peer or
+delegated message without the mark, such as one through someone else's session or across an
+organization), and a turn that another member, several members, or nobody attributable set off,
+is carded whatever grants exist (`concepts/agent.md`, *Autonomy
 grants* and *Shared sessions*). A standing disclosure grant is the one exception: it also covers
 a turn started by one member who can act in the session (not a Viewer), but only on a message a
 person typed: unlike an ordinary grant it never covers a trigger turn, so even the owner's own
@@ -878,7 +881,9 @@ skaile-ai/platform#7266 (`platform.hire_agent`: `hire-agent.handler.ts`, `spawn-
 `finish-spawned-instance-policy.service.ts`), skaile-ai/platform#7997 (a grant answers only an
 owner-proposed turn: `approval-policy.service.ts` `isCoveredAsker`, `turn-principal.ts`
 `isOwnerProposedTurn`, `TurnTriggerSource` for the `a2a_relayed` and `delegation_relayed`
-values), and
+values), skaile-ai/platform#8186 (owner-chain turns: `turn-principal.ts` `isOwnerAgentTurn` and
+`keepsOwnerChain`, `a2a-router.service.ts` `peerOwnerChain`;
+`platform/decisions/2026-10-20-owner-chain-agent-turns.md`), and
 skaile-ai/platform#6962 (standing disclosure grants: `disclosure-policy.ts`,
 `disclosure-preparer.ts`, `ungrantable-by-design.ts`, `approval-policy.service.ts`;
 `platform/decisions/2026-10-08-standing-disclosure-grants.md`).
