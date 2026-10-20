@@ -7,7 +7,7 @@ description: "Use when an agent needs to author, modify, review, render, or expo
   fills), update chart data in existing charts, render slides to PNG/JPG/SVG at low
   or high fidelity, and export to PPTX/PDF/HTML/PNG-batch/JPG-batch/SVG-batch/outline-text.
   Stateful Apache POI 5.5.x + LibreOffice engine over stdio, 52 tools."
-version: 1.0.0 # mcp-catalog-version
+version: 1.1.0 # mcp-catalog-version
 transport: stdio
 recipe:
   attr: mcps.ppt
