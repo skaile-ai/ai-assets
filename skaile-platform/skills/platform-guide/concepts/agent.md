@@ -108,8 +108,8 @@ one reaches depends on where it lives:
   read or write.
 - **The level is the lowest of** the organization's default, an override an org Owner set
   for the member (**Organization settings > Assistants**), and the owner's own lowering
-  (**Preferences > My home assistant's reach**). Reach only narrows: the owner's own role
-  on the target still decides everything a level allows.
+  (**Preferences > Assistants > My home assistant's reach**). Reach only narrows: the
+  owner's own role on the target still decides everything a level allows.
 - **An organization you create for the owner starts at Full.** One the owner's assistant
   creates with `platform.create_organization` starts with its default at **Full**, so you can
   go straight on to create its projects and sessions. Tell the owner, and that any Owner of the
@@ -210,7 +210,7 @@ approvals live
 only on cards: the former `preApprovedCapabilities` agent-config list is retired, and any
 entries still in a config are ignored.
 
-Two consequences you must actually act on:
+Three consequences you must actually act on:
 
 - **A grant can stop at any instant.** The owner can revoke it, it can expire, or a limit can
   run out — and the platform re-checks the owner's live authorization, the limits and the
@@ -224,6 +224,14 @@ Two consequences you must actually act on:
   Turns nobody sent (a schedule firing, a peer agent, a webhook) carry no block at all, so
   **its absence there tells you nothing**. Never infer "I have no autonomy" from a missing
   block.
+- **A platform update can end a grant that still looks active.** A grant covers an action
+  only as it was when the owner approved it. When an update changes what that action does, the
+  grant stops matching. The `<AUTONOMY>` block then lists it under **no longer applies**, not
+  as in force. The owner sees it marked **No longer applies** in **Preferences > Grants**
+  (**Grants I have given**) and in the session's **Permissions** tab. Expect a card for that
+  action again. The card comes pre-filled to renew the grant as it was (the same capability,
+  scope, reach, window and caps), and renewing it retires the old one. Tell the owner why the
+  card is back. Do not ask them to approve "again" as if they had forgotten.
 
 ## Durable operations — the receipt, not the result
 
@@ -498,4 +506,8 @@ the co-owner decider of the finish card: skaile-ai/platform#8072
 (`finish-spawned-instance.handler.ts`, `finish-spawned-instance-policy.service.ts`),
 grants answer only owner-proposed turns: skaile-ai/platform#7997 (`approval-policy.service.ts`
 `isCoveredAsker`, `turn-principal.ts` `isOwnerProposedTurn`, `SELF_AUTHORED_TRIGGER_SOURCES` and
-`TurnTriggerSource`, which holds `a2a_relayed` and `delegation_relayed`).
+`TurnTriggerSource`, which holds `a2a_relayed` and `delegation_relayed`),
+grants a platform update ended shown as no longer applying, with a pre-filled renewal:
+skaile-ai/platform#8196 (`autonomy-grant-applicability.service.ts`,
+`policy-version-compatibility.ts`, `agent-gateway/src/autonomy-awareness.ts`,
+`pages/settings/my-grants-card.tsx`).
