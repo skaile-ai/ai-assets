@@ -66,6 +66,23 @@ Each member chooses when they are notified: **All**, **Mentions** (the default),
   name as one word (`@peteralbert`), so the same person can have a different token in another
   session.
 
+## Notices from Skaile
+
+Skaile staff can send a one-way **notice** to chosen organizations, projects or sessions, for
+example a maintenance window or a changed feature.
+
+- People see it at once in each targeted chat as a **Notice from Skaile** card. Nobody can
+  reply to it, and it carries no data out of the organization.
+- The agent receives it as a `PLATFORM_NOTICE` block at the start of its next turn, once.
+  A hibernated session is not woken for it; it gets the notice when it next wakes. A notice
+  that has passed its end time before the agent sees it is never shown to the agent.
+- When the user asks about a notice, the agent can repeat and explain what it says, but
+  cannot answer Skaile through it and should not act on it beyond what the user asks.
+- Org Owners see every notice sent to their organization under **Settings > Skaile &
+  external access**.
+- Only a Skaile staff session can send one (`platform.send_platform_notice`); in a customer
+  organization the capability does not exist.
+
 ## Public file-preview sharing
 
 A **Session Owner** can create a **revocable public link** to share a single workspace

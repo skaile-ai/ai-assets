@@ -13,7 +13,7 @@ replaces the page they are on) or `tab` (opens a new tab and keeps the current o
 | --- | --- | --- |
 | `dashboard` | Dashboard | — |
 | `projects`, `sessions`, `flows`, `store`, `preferences`, `myConnections` | that organization page (`myConnections` takes `search: { link }` to highlight one connection; `preferences` takes no `search` — it opens on its first tab, so link a tab by URL) | `org?` |
-| `org.settings` | Organization settings (org Owners and platform admins; `search: { tab }`, e.g. `ai-providers`, `assistants`, or `orphaned-my-space` for the former members' My space review) | `org?` |
+| `org.settings` | Organization settings (org Owners and platform admins; `search: { tab }`, e.g. `ai-providers`, `assistants`, `external-access`, or `orphaned-my-space` for the former members' My space review) | `org?` |
 | `project`, `project.settings`, `project.runs` | a project's main session, its settings, its run board | `project` |
 | `runGroup` | one run group's board | `project`, `runGroup` |
 | `session` | one session | `session` (a slug resolves in this session's project; elsewhere pass its id or `project`) |
@@ -282,7 +282,10 @@ teams/projects; its **Company defaults** card lists the assets every session in 
 organization loads, with **Unpin** per row, and **Filter rules** hides catalog assets
 for the whole organization), and, in a business organization, **Assistants** (below).
 So every tab in the org settings strip except **General** and **Users** needs Expert mode
-on. The org sessions report is not a tab — it is **Sessions** in the org kebab.
+on — apart from **Skaile & external access**, which org Owners see in either view: it lists
+every notice Skaile sent to the organization's sessions, newest first, with its severity,
+when it was sent, how many sessions it reached and how many agents have read it. It never
+names who at Skaile sent it. The org sessions report is not a tab — it is **Sessions** in the org kebab.
 
 **Connected organizations** (a card on the **Skaile & external access** tab, below **Notices from
 Skaile**; Owners with a real Owner membership only)
