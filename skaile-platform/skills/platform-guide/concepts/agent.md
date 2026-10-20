@@ -394,6 +394,8 @@ decides:
   Viewers included: a Viewer of this session keeps the card unless they too can open the
   session, or for `ask_session` prompt the peer. Someone invited who has not joined yet always
   keeps it, and so does a session with more than 50 other readers or any check that fails.
+  When the card does come, `platform.get_session` is a per-read card: a standing session-list
+  grant covers `platform.list_sessions` only.
 - **"Me" means the asker** where a capability acts on the asker's own setting: changing
   notification mode changes the asking member's, and is refused when no single person asked.
 - **Steering the UI moves only the asker's screen** — see below.
@@ -531,7 +533,8 @@ skaile-ai/platform#8196 (`autonomy-grant-applicability.service.ts`,
 owner's own sessions: skaile-ai/platform#8213 (`turn-principal.ts` `isOwnerAgentTurn` and
 `keepsOwnerChain`, `a2a-router.service.ts` `peerOwnerChain`; platform `main` @ `dda30d4a5`,
 2026-10-20), and a disclosure read that shows no reader anything new skips its card:
-skaile-ai/platform#8193 (`disclosure-audience.ts` `DisclosureAudience`,
-`list-sessions.handler.ts` `sessionVisibilityFor`, `v2-capability-registry.service.ts`
-`needsDisclosureCard`, `platform/decisions/2026-10-20-disclosure-without-a-new-reader.md`;
-platform `main` @ `85e8a4114`, 2026-10-20).
+skaile-ai/platform#8180, shipped in skaile-ai/platform#8193 (`disclosure-audience.ts`
+`DisclosureAudience`, `list-sessions.handler.ts` `sessionVisibilityFor`,
+`v2-capability-registry.service.ts` `needsDisclosureCard`,
+`platform/decisions/2026-10-20-disclosure-without-a-new-reader.md`; platform `main` @
+`85e8a4114`, 2026-10-20).
