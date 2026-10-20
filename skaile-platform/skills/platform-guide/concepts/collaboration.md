@@ -216,4 +216,4 @@ and the not-delivered notice), #6263 (sibling instances of a template, `spawn-ch
 permissions), platform #6690 (the session settings Config tab renamed **General**), platform
 issues #4754 (agent replies notify only in assistant sessions) and #2350 (phone push, not
 built yet), platform #8151 (research questions from Skaile, `platform/backend/libs/research/`),
-platform #8275 (staff notice target lookup, `platform.staff_find_targets`).
+platform PR #8275 for issue #8273 (staff notice target lookup, `platform.staff_find_targets`).
