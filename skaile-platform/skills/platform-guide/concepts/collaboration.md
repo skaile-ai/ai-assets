@@ -130,6 +130,33 @@ description (the last two are in the last bullet below).
   (`"spawner"`, `"child"` or `"sibling"`); a peer you reach only through a link carries none.
   The label describes the peer; it does not say whether a link is needed.
 
+## Research questions from Skaile
+
+An organization's Owners can let Skaile ask the organization's agents **research questions**,
+for example how a kind of task usually goes. It is off until an Owner turns it on under
+**Settings > Skaile & external access**, and a personal organization never takes part.
+
+- With it on, shared sessions take part by default (an Owner can make them take part only when
+  opted in). A project owner can opt a whole project out under project **Settings > General**,
+  which wins over every session in it; a session's owner (or its project's owner) can set the
+  session to **Take part**, **Do not take part** or **Follow the organization's default** under
+  session **Settings > General**, which also says why it is or is not asked. Personal
+  assistants, private spaces, shared agents, run sessions and projects not shared in the
+  organization are never asked.
+- A question shows in the chat as a **Question from Skaile** card, and the agent answers it in
+  a turn of its own, started only when nothing else is running (a hibernated session is woken
+  for it). That turn is **read-only**: the agent can read files and use read-only capabilities,
+  but cannot write, send, spawn, link, approve or contact anyone, and shell, web fetch and other
+  MCP servers are off for it. Its reply is the answer, sent straight to Skaile without anyone
+  approving it, and it runs on the organization's own AI credentials.
+- When the user asks about a research question, the agent can say what was asked and what it
+  answered. Nobody can reply to Skaile through it; a follow-up from Skaile is a new question.
+- Owners see every question and answer under **Skaile & external access** and can delete an
+  answer, which removes it from Skaile's results too. Turning research off, or a session or
+  project opting out, stops questions not yet answered.
+- Only a Skaile staff session can ask (`platform.research_list_targets`, `platform.research_ask`,
+  `platform.research_results`); in a customer organization these capabilities do not exist.
+
 Source of truth: `platform/docs/protocol-extensions.md`,
 `platform/docs/public-file-preview-sharing.md`, `platform/backend/libs/agent-to-agent/`,
 platform PRs #4917 (notification modes), #4566 (cross-org A2A), #5152 (share wake budget),
@@ -138,4 +165,4 @@ and the not-delivered notice), #6263 (sibling instances of a template, `spawn-ch
 `platform/docs/roles-permissions-matrix.md` (share and invite
 permissions), platform #6690 (the session settings Config tab renamed **General**), platform
 issues #4754 (agent replies notify only in assistant sessions) and #2350 (phone push, not
-built yet).
+built yet), platform #8151 (research questions from Skaile, `platform/backend/libs/research/`).
