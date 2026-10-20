@@ -351,7 +351,11 @@ decides:
   read the session, a read of the owner's mail, calendar, other sessions or other owner-scoped
   lists — asking a linked peer included — goes to the owner as a card, and its result is then
   visible to the session. Only the owner decides it; other members see that the owner has been
-  asked. Most of these cards cover one read only (no standing approval): calendar, the owner's
+  asked. There is no card when the read would show nobody anything new: looking up a session
+  (`platform.get_session`) that every reader of this session can already open, asking a peer
+  (`platform.ask_session`) that every reader could prompt themselves, or listing the project's
+  sessions (`platform.list_sessions`) when every session it would list is one all readers can
+  open. One session a reader cannot open keeps the card for the whole list. Most of these cards cover one read only (no standing approval): calendar, the owner's
   other sessions and the other owner-scoped lists. Two sources are the exception, a **standing
   disclosure grant**: one Exchange mailbox (`list_mail`, `search_mail`, `read_mail`,
   `read_mail_attachment`, `list_mail_folders`; not `list_mail_categories`) and the owner's
