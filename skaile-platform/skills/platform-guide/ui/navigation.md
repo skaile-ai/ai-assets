@@ -285,7 +285,8 @@ for the whole organization), and, in a business organization, **Assistants** (be
 So every tab in the org settings strip except **General** and **Users** needs Expert mode
 on. The org sessions report is not a tab — it is **Sessions** in the org kebab.
 
-**Connected organizations** (a card on **General**, Owners with a real Owner membership only)
+**Connected organizations** (a card on the **Skaile & external access** tab, below **Notices from
+Skaile**; Owners with a real Owner membership only)
 lists the organization's connections with other organizations, with **Approve** / **Decline**
 on a request it received and **Withdraw** / **Disconnect** on the rest, and **Ask an
 organization to connect** for organizations the Owner is a member of. Each connection shows

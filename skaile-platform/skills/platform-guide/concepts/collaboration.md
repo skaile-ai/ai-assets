@@ -118,7 +118,7 @@ description (the last two are in the last bullet below).
   dialog's **Agent communication** toggles. Inbound A2A messages render distinctly in the
   chat.
 - **Connected organizations.** Two organizations can connect: an Owner asks, from
-  **Organization settings** > **Connected organizations**, another organization they are a
+  **Organization settings** > **Skaile & external access** > **Connected organizations**, another organization they are a
   member of, and an Owner there approves (or declines). Either side can **Disconnect**, which
   removes every link made across it at once. Each session's owner then switches **Let agents
   of <org> reach this session** on in its **Agent to agent communication** card; shared agents,
