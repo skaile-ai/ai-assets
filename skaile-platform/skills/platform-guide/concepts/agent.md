@@ -194,12 +194,17 @@ project — and covers every read of that source; see *Shared sessions*.) It eit
 absolute expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it
 may carry use and budget caps. It stays anchored to the session it was approved in, and it covers only calls on
 **the owner's own turns**. What counts is who wrote the turn's text, not who it is credited
-to. Covered: a message the owner typed, or a turn credited to the owner whose trigger source is
-one of four — `schedule`, `flow`, `a2a` or `delegation`. The platform sets `a2a` and
-`delegation` only when the sending turn's text was its person's own; a peer or delegated
+to. Covered: a message the owner typed, a turn credited to the owner whose trigger source is
+`schedule`, `flow`, `a2a` or `delegation`, and the two owner-chain cases below. The platform
+sets `a2a` and `delegation` only when the sending turn's text was its person's own; a peer or delegated
 message that passes on text someone else wrote carries `a2a_relayed` or `delegation_relayed`
-instead. Carded, even when the turn is credited to the owner: a webhook or mail, a session
-seed, a late result, and those two relayed sources. The one exception is a standing disclosure
+instead. Those two relayed sources are covered too when the platform marks them owner-chain:
+every hop ran in the owner's own sessions and no starter carried anyone else's text. So is a
+late result credited to the owner: a read the owner's own turn asked for, delivered after you
+stopped waiting. A late result credited to a member is carded, whoever approved the read.
+Carded, even when the turn is credited to the owner: a webhook or mail, a session seed, and a
+relayed message without that mark (through someone else's session, across an organization, or
+from a turn the platform could not attribute). The one exception is a standing disclosure
 grant, and it cuts both ways: it also covers a member's turn, but only a message a person typed
 — never a trigger turn, not even the owner's own schedule, flow, `a2a` or `delegation` turn.
 See *Shared sessions* below. The card's one-click choice is time-boxed to a window the capability's risk decides, and the card
@@ -347,9 +352,10 @@ decides:
 
 - **Grants apply only to the owner's own turns** (see *Autonomy grants* above for which
   turns count). A member's turn, a mixed turn, one the platform cannot attribute, and a turn
-  credited to the owner whose text someone else wrote (a webhook or mail, a session seed, a
-  late result, a relayed peer or delegated message) always get a card, even where the owner
-  holds a grant. The one exception is a standing disclosure grant (below): it also covers a
+  credited to the owner whose text came from outside the owner's own sessions or across an
+  organization (a webhook or mail, a session seed, a relayed peer or delegated message without
+  the owner-chain mark: through someone else's session, across an organization, or from a turn
+  the platform could not attribute) always get a card, even where the owner holds a grant. The one exception is a standing disclosure grant (below): it also covers a
   member's turn, but only a typed message, never a trigger turn, the owner's included.
   (`platform.cycle_session` is outside this: no card ever, refused on a mixed or unattributed
   turn — see *Approval-gated actions*.)
@@ -510,4 +516,7 @@ grants answer only owner-proposed turns: skaile-ai/platform#7997 (`approval-poli
 grants a platform update ended shown as no longer applying, with a pre-filled renewal:
 skaile-ai/platform#8196 (`autonomy-grant-applicability.service.ts`,
 `policy-version-compatibility.ts`, `agent-gateway/src/autonomy-awareness.ts`,
-`pages/settings/my-grants-card.tsx`).
+`pages/settings/my-grants-card.tsx`), and grants also answer turns passed on only between the
+owner's own sessions: skaile-ai/platform#8213 (`turn-principal.ts` `isOwnerAgentTurn` and
+`keepsOwnerChain`, `a2a-router.service.ts` `peerOwnerChain`; platform `main` @ `dda30d4a5`,
+2026-10-20).

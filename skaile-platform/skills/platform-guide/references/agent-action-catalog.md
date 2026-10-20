@@ -96,9 +96,13 @@ The platform records who set off each turn; the agent cannot set it. All three c
 on it:
 
 - **Grants cover only the owner's own turns**: a message they typed, or their own schedule, flow,
-  agent message or delegation — turns whose text the owner wrote.
-  - A turn credited to the owner whose text someone else wrote always gets a card: a webhook or
-    mail turn, a session seed, a late result, a relayed agent or delegated message.
+  agent message or delegation — turns whose text the owner wrote — plus work the owner's agents
+  pass on only between the owner's own sessions: a late result credited to the owner (a read the
+  owner's own turn asked for), or a relayed agent or delegated message whose every hop ran in the
+  owner's own sessions, inside one organization.
+  - A turn credited to the owner whose text came from anywhere else always gets a card: a webhook
+    or mail turn, a session seed, or a message that came through someone else's session or across
+    an organization.
   - A turn the owner did not set off always gets a card: a member's turn, several members at
     once, or an unattributable turn.
 - `find_actions` hides actions on the owner's own things from anyone but the owner, and shows
@@ -117,4 +121,5 @@ Grounded in: `platform/docs/agent-action-declarations.md`,
 `platform/backend/libs/capabilities/src/handlers/` (`find-actions.handler.ts`,
 `invoke.handler.ts`, `batch.handler.ts`) and `resource-reference.ts`; the grant rule in
 `approval-policy.service.ts` (`isCoveredAsker`) and `platform/backend/libs/agent-gateway/src/turn-principal.ts`
-(`isOwnerProposedTurn`), skaile-ai/platform#7997.
+(`isOwnerProposedTurn`), skaile-ai/platform#7997; owner-chain turns (`isOwnerAgentTurn`,
+`keepsOwnerChain`), skaile-ai/platform#8213, platform `main` @ `dda30d4a5`, 2026-10-20.
