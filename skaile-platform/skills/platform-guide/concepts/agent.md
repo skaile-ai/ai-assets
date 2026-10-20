@@ -193,7 +193,8 @@ disclosure grant: it names one source — one mailbox, or the owner's session li
 project — and covers every read of that source; see *Shared sessions*.) It either has an
 absolute expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it
 may carry use and budget caps. It stays anchored to the session it was approved in, and it covers only calls on
-**the owner's own turns**. What counts is who wrote the turn's text, not who it is credited
+**the owner's own turns**, or on the turns of people the owner trusts in the project (*Trusted
+people* below). What counts is who wrote the turn's text, not who it is credited
 to. Covered: a message the owner typed, a turn credited to the owner whose trigger source is
 `schedule`, `flow`, `a2a` or `delegation`, and the two owner-chain cases below. The platform
 sets `a2a` and `delegation` only when the sending turn's text was its person's own; a peer or delegated
@@ -201,13 +202,42 @@ message that passes on text someone else wrote carries `a2a_relayed` or `delegat
 instead. Those two relayed sources are covered too when the platform marks them owner-chain:
 every hop ran in the owner's own sessions and no starter carried anyone else's text. So is a
 late result credited to the owner: a read the owner's own turn asked for, delivered after you
-stopped waiting. A late result credited to a member is carded, whoever approved the read.
+stopped waiting. A late result credited to a member is carded, whoever approved the read,
+unless the owner trusts that member (below).
 Carded, even when the turn is credited to the owner: a webhook or mail, a session seed, and a
 relayed message without that mark (through someone else's session, across an organization, or
 from a turn the platform could not attribute). The one exception is a standing disclosure
 grant, and it cuts both ways: it also covers a member's turn, but only a message a person typed
 — never a trigger turn, not even the owner's own schedule, flow, `a2a` or `delegation` turn.
-See *Shared sessions* below. The card's one-click choice is time-boxed to a window the capability's risk decides, and the card
+See *Shared sessions* below.
+
+**Trusted people.** In a shared project the owner can name people they trust there. The list is
+per project, but the owner edits it on the **Permissions** tab of any session's settings in that
+project (*Trusted people in this project*), or from the command palette; you cannot change it, and
+no action reaches it. The owner's grants in that project's sessions then also cover those people's
+turns, alone or in a turn mixed with the owner's, under the same text rule as the owner's own:
+what each trusted person typed, their own schedule, flow, `a2a` or `delegation` turn, a late
+result credited to them, or an owner-chain relay of theirs. Only a privileged effect is left out:
+it still needs the owner's own turn. A standing disclosure grant keeps its own narrower rule
+either way: a typed message only, never a trigger turn and never a mixed turn, trusted or not.
+Everything else a grant covers is included, `external`
+too, so a grant the owner widened to external communication also sends mail or calls a
+third-party service on a trusted person's turn without a card. Anyone untrusted in the turn, a
+webhook or mail, a session seed or other text from outside still gets a card. Trust counts only
+while both the owner and the trusted person are active members of the project who are not
+Viewers. It is the project role that counts, not a session-level role override. It is read live, so someone who leaves, becomes a Viewer or is untrusted stops counting
+at once. Trust changes which turns a grant answers, nothing else: an action whose effect class
+itself depends on the owner's own turn (such as `create_agent_template`, `never` on any other
+turn) stays `never` on a trusted person's turn.
+
+When a grant would not answer the turn of the card it is offered on, the card says so before the
+owner mints it: who else asked (leaving out the people the owner trusts), that nobody can be
+named, that the text came from outside, or that the action needs the owner's own request even
+when trusted people ask. The line under the standing options names the trusted people when the
+owner has any (*from the people you trust in this project*). So a card that warns is not a grant
+that failed.
+
+The card's one-click choice is time-boxed to a window the capability's risk decides, and the card
 names it: read the window off the card rather than inferring one from the capability. Widening
 the grant past that one target, or making it autonomous, starts it on the shortest window, so a
 long window on a wide grant is always the owner's own pick. Standing
@@ -222,8 +252,8 @@ Three consequences you must actually act on:
   budget immediately *before* the effect. A call that dispatched silently a minute ago can
   come back parked on approval instead. That is not a failure and not an error; it means the
   call is no longer covered.
-- **You only see grants on turns a human sent.** When the owner sends a turn you are also
-  shown an `<AUTONOMY>` block listing each grant in force — the capability, how far it
+- **You only see grants on turns a human sent.** When a person sends a turn (the owner or
+  any member) you are also shown an `<AUTONOMY>` block listing each grant in force — the capability, how far it
   reaches, until when, and what is left of any use and budget caps — and naming any that have
   been **revoked**. A grant that merely expired produces no notice; it just stops appearing.
   Turns nobody sent (a schedule firing, a peer agent, a webhook) carry no block at all, so
@@ -350,8 +380,11 @@ platform records **who set off each turn** — the one member who wrote, several
 or the person a schedule, webhook or peer request acts for. You cannot set or claim it. It
 decides:
 
-- **Grants apply only to the owner's own turns** (see *Autonomy grants* above for which
-  turns count). A member's turn, a mixed turn, one the platform cannot attribute, and a turn
+- **Grants apply only to the owner's own turns**, and to the turns of people the owner trusts
+  in the project (see *Autonomy grants* above for which turns count). The `<AUTONOMY>` block
+  appears on a member's turn too, and lists the owner's grants: they cover that turn only if the
+  owner trusts that member. An untrusted member's
+  turn, a mixed turn with anyone untrusted in it, one the platform cannot attribute, and a turn
   credited to the owner whose text came from outside the owner's own sessions or across an
   organization (a webhook or mail, a session seed, a relayed peer or delegated message without
   the owner-chain mark: through someone else's session, across an organization, or from a turn
@@ -537,4 +570,11 @@ skaile-ai/platform#8180, shipped in skaile-ai/platform#8193 (`disclosure-audienc
 `DisclosureAudience`, `list-sessions.handler.ts` `sessionVisibilityFor`,
 `v2-capability-registry.service.ts` `needsDisclosureCard`,
 `platform/decisions/2026-10-20-disclosure-without-a-new-reader.md`; platform `main` @
-`85e8a4114`, 2026-10-20).
+`85e8a4114`, 2026-10-20); trusted requesters per project and the card saying when a grant
+would not answer its own request: skaile-ai/platform#8274 (issue #8267), platform `main` @ `de7dc20ce`, 2026-10-21, with skaile-ai/platform#8271
+(`requester-coverage.ts` `requesterCoverage`, `trusted-requester.service.ts`,
+`approval-policy.service.ts` `isCoveredAsker`, `turn-principal.ts` `ownerAgentOnly`,
+`autonomy-grant-console.service.ts` `thisRequest` and `grantTurns`,
+`ws-agent-gateway.service.ts` `decoratePrompt` (the `<AUTONOMY>` block on any sender's turn),
+`create-agent-template-policy.service.ts` `isOwnerHumanTurn`,
+`platform/decisions/2026-10-20-trusted-requesters.md`).
