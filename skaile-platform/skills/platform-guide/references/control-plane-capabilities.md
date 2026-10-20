@@ -785,10 +785,11 @@ Revocation is immediate, and the platform re-checks the owner's live authorizati
 and the budget right before the effect. **A call that dispatched silently a minute ago can come
 back parked on approval** — that means it is no longer covered, not that something failed.
 
-A grant covers a call only on **the owner's own turn**, and what counts is who wrote the turn's
+A grant covers a call only on **the owner's own turn**, or on a trusted person's (below), and what counts is who wrote the turn's
 text: a message the owner typed, or their own `schedule`, `flow`, peer agent message (`a2a`) or
 `delegation`. It also covers a `late_result` credited to the owner (a read the owner's own turn
-asked for; one credited to a member is carded, whoever approved it), and an `a2a_relayed` or
+asked for; one credited to a member is carded, whoever approved it, unless the owner trusts that
+member), and an `a2a_relayed` or
 `delegation_relayed` turn that carries the platform's owner-chain mark: every hop ran in the
 owner's own sessions and no starter carried anyone else's text. A turn credited to the owner
 whose text came from elsewhere (a webhook or mail, a session seed, or a relayed peer or
@@ -802,12 +803,19 @@ schedule, flow, peer agent or delegation turn, a webhook and a mixed turn get a 
 
 In a shared project the owner can also trust named people there. The owner's grants then cover a
 turn whose every credited person is the owner or trusted, as long as each person's text is their
-own (typed, or their own `schedule`, `flow`, `a2a` or `delegation` turn, or a mixed turn of such
-starters) and the effect is not `privileged`. A turn with anyone untrusted in it, a webhook or
-mail, a session seed, or a privileged effect is carded as before (`concepts/agent.md`, *Autonomy
-grants*). Only the owner changes the list, in the UI.
+own — typed, their own `schedule`, `flow`, `a2a` or `delegation` turn, a `late_result` credited to
+them, or an owner-chain relay of theirs — and the effect is not `privileged`. `external` is not
+excluded: a grant the owner widened to external communication covers a trusted person's turn too.
+Trust counts only while both the owner and the trusted person are active, non-Viewer members of
+the project, and the list is read live (re-checked on every call): someone who leaves the
+project, becomes a Viewer or is untrusted stops counting at once. A turn with anyone untrusted in
+it, a webhook or mail, a session seed, or a privileged effect is carded as before
+(`concepts/agent.md`, *Autonomy grants*). Trust changes only which turns a grant answers: a row
+above whose effect class reads "on the owner's own turn … `never` on any other turn" (the agent
+template rows) still reads a trusted person's turn as *any other turn*, so it stays `never`. Only
+the owner changes the list, in the UI.
 
-You see grants only on turns a human sent, in the `<AUTONOMY>` block: which capability, how far
+You see grants only on turns a human sent (the owner or a member), in the `<AUTONOMY>` block: which capability, how far
 it reaches, until when, and what is left of any caps, plus notice when one has been **revoked**.
 Expiry produces no notice at all — the row simply stops appearing — so a grant vanishing from the
 block is not evidence of revocation. A grant a platform update ended (the action changed since
@@ -914,5 +922,6 @@ between the owner's own sessions: `turn-principal.ts` `isOwnerAgentTurn` and `ke
 skaile-ai/platform#6962 (standing disclosure grants: `disclosure-policy.ts`,
 `disclosure-preparer.ts`, `ungrantable-by-design.ts`, `approval-policy.service.ts`;
 `platform/decisions/2026-10-08-standing-disclosure-grants.md`), and
-skaile-ai/platform#8267 (trusted requesters per project: `requester-coverage.ts`,
-`trusted-requester.service.ts`, `platform/decisions/2026-10-20-trusted-requesters.md`).
+trusted requesters per project: skaile-ai/platform#8274 (issue #8267), platform `main` @ `de7dc20ce`, 2026-10-21 (`requester-coverage.ts`,
+`trusted-requester.service.ts`, `create-agent-template-policy.service.ts` `isOwnerHumanTurn`,
+`platform/decisions/2026-10-20-trusted-requesters.md`).

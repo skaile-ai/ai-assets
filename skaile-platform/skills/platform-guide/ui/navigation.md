@@ -258,7 +258,7 @@ Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner).
 | **General**  | Session-scoped Skaile config (overrides project defaults). Always shown: **Session address**, the **Agent** card (its AI configuration row only in Expert mode), **Mounts** (edits this session's workspace mount with **Edit mount** and removes other mounts; see `concepts/integrations.md`) and **Agent to agent communication**. In Expert mode only: **Idle timeout**, **AI provider**, **Agent runtime**, **Context compaction** (when this agent compacts; see `concepts/sessions.md`), **Git provider**, **Connectors**, and the **Danger zone** (archive; an archived session is read-only until its owner restores it), which sits at the bottom of the tab. Formerly the **Config** tab; `?tab=config` links still open it. |
 | **Members**  | Session-scoped role overrides on top of project membership; add session-only members. |
 | **Shares**   | Session visibility (**Everyone in the project** / **Invited only**) and public file-preview links. |
-| **Permissions** | The session's standing autonomy grants: revoke one, or stop all. One a platform update ended is marked **No longer applies**; the next card for that action offers to renew it. |
+| **Permissions** | The session's standing autonomy grants: revoke one, or stop all. One a platform update ended is marked **No longer applies**; the next card for that action offers to renew it. Below them, **Trusted people in this project**: one switch per other active member, whether the viewer's standing approvals in this project's sessions also answer that person's requests. The list is per project, so it is the same on every session's tab there; each toggle is also a command-palette action. |
 
 In the user's own assistant session, a **Your assistant** card above the tabs links to the
 **Your assistant** page.
@@ -428,4 +428,6 @@ on it and on the session **Permissions** tab: `pages/settings/preferences-tabs.t
 `pages/settings/resolve-preferences-tab.ts`, `pages/settings/preferences.page.tsx`,
 `pages/settings/my-grants-card.tsx`, `lib/agent-routes.ts`,
 `components/ui/autonomy-console/autonomy-console-dialog.tsx`; platform `main` @ `8776e9e1a`
-(2026-10-20), skaile-ai/platform#8196.
+(2026-10-20), skaile-ai/platform#8196; the **Trusted people in this project** section of the Permissions tab:
+`components/ui/autonomy-console/trusted-requesters-section.tsx`,
+`trusted-requesters.actions.tsx`, `pages/sessions/settings/session-permissions-tab.tsx`, skaile-ai/platform#8274 (issue #8267), platform `main` @ `de7dc20ce`, 2026-10-21.

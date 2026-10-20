@@ -105,8 +105,9 @@ on it:
     an organization.
   - A turn the owner did not set off gets a card: a member's turn, several members at once, or
     an unattributable turn. The exception is people the owner trusts in the project: their own
-    turns, alone or mixed with the owner's, are covered like the owner's, except for a privileged
-    effect.
+    turns, alone or mixed with the owner's, are covered like the owner's. Only a privileged effect
+    is left out; an `external` grant does cover them, so a trusted person's turn can send mail or
+    call a third-party service under the owner's grant without a card.
 - `find_actions` hides actions on the owner's own things from anyone but the owner, and shows
   nothing on a turn it cannot attribute.
 - When a member asks, they must be able to do it themselves as well; the owner's authority is not
@@ -127,4 +128,4 @@ Grounded in: `platform/docs/agent-action-declarations.md`,
 `keepsOwnerChain`), skaile-ai/platform#8213, platform `main` @ `dda30d4a5`, 2026-10-20;
 trusted requesters per project (`requester-coverage.ts` `requesterCoverage`,
 `trusted-requester.service.ts`, `platform/decisions/2026-10-20-trusted-requesters.md`),
-skaile-ai/platform#8267, platform `main` @ `026065372`, 2026-10-20.
+skaile-ai/platform#8274 (issue #8267), platform `main` @ `de7dc20ce`, 2026-10-21.
