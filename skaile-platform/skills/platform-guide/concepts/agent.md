@@ -185,7 +185,7 @@ Each capability declares an **effect class** that decides how far a grant may re
 | `routine` | Effect stays inside the owner's own platform surface. | Yes — this is what an ordinary grant covers. |
 | `external` | Reaches a person or system outside Skaile (an invitation email, a sent mail, a calendar invitation, GitHub or another third-party API). A message delivered into another Skaile session is not external. | Only if the owner **explicitly widened** the grant to external communication. |
 | `privileged` | Administrative — changes who or what exists at organization level, or hands an organization connection to a job description. | Only if the owner **explicitly widened** the grant to privileged administration. |
-| `never` | Never auto-approvable — a disclosure read in a shared session other than the two standing sources (see *Shared sessions*), a file attached across organizations. | No — it is carded, or refused outright. Never dispatched silently. |
+| `never` | Never auto-approvable — a disclosure read in a shared session other than the two standing sources (see *Shared sessions*), a file attached across organizations. | No — it is carded, or refused outright. Never dispatched silently. The one exception is a disclosure read that shows no reader anything new, which runs with no card (see *Shared sessions*). |
 
 A grant is narrow: it names **one capability** and one target scope — that exact target, its
 project, and so on up, or for Exchange mail one mailbox. (The one exception is a standing
@@ -365,11 +365,7 @@ decides:
   read the session, a read of the owner's mail, calendar, other sessions or other owner-scoped
   lists — asking a linked peer included — goes to the owner as a card, and its result is then
   visible to the session. Only the owner decides it; other members see that the owner has been
-  asked. There is no card when the read would show nobody anything new: looking up a session
-  (`platform.get_session`) that every reader of this session can already open, asking a peer
-  (`platform.ask_session`) that every reader could prompt themselves, or listing the project's
-  sessions (`platform.list_sessions`) when every session it would list is one all readers can
-  open. One session a reader cannot open keeps the card for the whole list. Most of these cards cover one read only (no standing approval): calendar, the owner's
+  asked. Most of these cards cover one read only (no standing approval): calendar, the owner's
   other sessions and the other owner-scoped lists. Two sources are the exception, a **standing
   disclosure grant**: one Exchange mailbox (`list_mail`, `search_mail`, `read_mail`,
   `read_mail_attachment`, `list_mail_folders`; not `list_mail_categories`) and the owner's
@@ -387,6 +383,17 @@ decides:
   file, messaging a linked peer, renaming the assistant — are refused unless the owner asked
   ("Only `<owner>` can ask for this"). In a session only the owner can read, such as the
   personal assistant, all of this runs as before.
+
+  **No card when the read shows nobody anything new.** Three of these reads skip the card, and
+  run as in a session only the owner reads, when every other reader of this session already
+  has the source: looking up one session (`platform.get_session`) that every reader can open,
+  asking a peer (`platform.ask_session`) that every reader could prompt themselves, or listing
+  the project's sessions (`platform.list_sessions`) when every session it would list (under its
+  status filter, past the `limit`) is one all readers can open. One session a reader cannot open
+  keeps the card for the whole list; the list is never shortened to fit. Every reader counts,
+  Viewers included: a Viewer of this session keeps the card unless they too can open the
+  session, or for `ask_session` prompt the peer. Someone invited who has not joined yet always
+  keeps it, and so does a session with more than 50 other readers or any check that fails.
 - **"Me" means the asker** where a capability acts on the asker's own setting: changing
   notification mode changes the asking member's, and is refused when no single person asked.
 - **Steering the UI moves only the asker's screen** — see below.
@@ -520,7 +527,11 @@ grants answer only owner-proposed turns: skaile-ai/platform#7997 (`approval-poli
 grants a platform update ended shown as no longer applying, with a pre-filled renewal:
 skaile-ai/platform#8196 (`autonomy-grant-applicability.service.ts`,
 `policy-version-compatibility.ts`, `agent-gateway/src/autonomy-awareness.ts`,
-`pages/settings/my-grants-card.tsx`), and grants also answer turns passed on only between the
+`pages/settings/my-grants-card.tsx`), grants also answer turns passed on only between the
 owner's own sessions: skaile-ai/platform#8213 (`turn-principal.ts` `isOwnerAgentTurn` and
 `keepsOwnerChain`, `a2a-router.service.ts` `peerOwnerChain`; platform `main` @ `dda30d4a5`,
-2026-10-20).
+2026-10-20), and a disclosure read that shows no reader anything new skips its card:
+skaile-ai/platform#8193 (`disclosure-audience.ts` `DisclosureAudience`,
+`list-sessions.handler.ts` `sessionVisibilityFor`, `v2-capability-registry.service.ts`
+`needsDisclosureCard`, `platform/decisions/2026-10-20-disclosure-without-a-new-reader.md`;
+platform `main` @ `85e8a4114`, 2026-10-20).

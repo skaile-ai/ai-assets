@@ -47,6 +47,16 @@ out. `nextCursor` is non-null only when more rows exist. A cursor replayed after
 filter or `limit` is rejected — restart paging without one. Results are already redacted to safe
 identity, role and status fields.
 
+Two read the sessions of the *current* project (the one the agent's session is in), keeping to
+what the owner could open in the product: their own sessions, sessions they are a member of, and
+Shared sessions their project role lets them see. Neither uses the cursor contract above, and
+neither is the same call as `platform.get_session_context`:
+
+| Call | Gives you |
+| --- | --- |
+| `platform.list_sessions({ status?, limit? })` | the sessions of this project, most recently active first (`limit` defaults to 20, caps at 100): id, name, status, `isArchived`, `lastActivityAt`, `ownerId`, visibility, plus `total`, `returned` and `omitted` counts. Archived, hibernated and spawned sessions are included. |
+| `platform.get_session({ sessionId })` | one session of this project by id, with the same fields. One that does not exist, is in another project or that the owner cannot see gives the same not-found error — check with it before concluding a session you know of is gone. |
+
 Two more read the *conversations* rather than the structure. Neither uses the cursor contract
 above:
 
@@ -764,8 +774,10 @@ themselves approved — and it is narrow by construction:
   the owner's private data except the two standing sources above, which prepare as `routine`,
   grantable for that exact source only — and so is `platform.batch` as a whole (each step
   matches its own action's grants). Ungrantable means it can only be carded or refused — never
-  dispatched silently. (`cycle_session` is not ungrantable in this sense: it has no consent
-  step at all.)
+  dispatched silently. The one exception is a disclosure read that shows no reader anything
+  new (`get_session`, `ask_session` or `list_sessions` on a source every reader already has),
+  which runs with no card at all — see *Shared sessions* in `concepts/agent.md`.
+  (`cycle_session` is not ungrantable in this sense: it has no consent step at all.)
 - **Only on a card.** Config pre-approvals (`preApprovedCapabilities`) are retired and ignored;
   the card is the one place a standing approval comes from.
 
