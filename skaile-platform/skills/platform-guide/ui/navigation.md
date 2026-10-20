@@ -84,8 +84,8 @@ The capability's own description carries the live list; prefer it if the two dif
     a business org where they have a Home, that org's assistant; in their Private
     workspace, on the dashboard, or in an org where they are only a Viewer, their home
     assistant (the one in their home Private workspace). Each falls back to the other when it
-    does not exist, and **Launcher always opens my home assistant** in **Preferences > Assistants**
-    makes it the home assistant everywhere. On the collapsed icon rail the launcher is its
+    does not exist, and **Launcher always opens my home assistant** in **Preferences >
+    Assistants** makes it the home assistant everywhere. On the collapsed icon rail the launcher is its
     own icon above the avatar. The avatar opens the user menu — **Invite someone to
     Skaile**, **Report a problem**, **Account**, **Preferences**, **Invites**,
     **Approvals** (with a count of what waits on the user), **My Connections** (hidden
@@ -410,4 +410,10 @@ order, which tabs and cards each view shows, the session Permissions tab):
 `pages/sessions/settings/session-config-tab.tsx`, `pages/projects/settings/project-metadata-tab.tsx`;
 platform `main` @ `f8cbab8fb` (2026-10-08), skaile-ai/platform#6690. The **Restore** route for an
 archived session and the read-only note on the Danger zone: skaile-ai/platform#6810
-(`workspace-status-screens.tsx`, `chat-input-area-banner.tsx`).
+(`workspace-status-screens.tsx`, `chat-input-area-banner.tsx`). The three **Preferences** tabs and
+their `?tab=` names, the **Grants** tab's **Grants I have given** card, and the **No longer
+applies** marker and renewal on it and on the session **Permissions** tab:
+`pages/settings/preferences-tabs.tsx`, `pages/settings/resolve-preferences-tab.ts`,
+`pages/settings/preferences.page.tsx`, `pages/settings/my-grants-card.tsx`,
+`components/ui/autonomy-console/autonomy-console-dialog.tsx`; platform `main` @ `8776e9e1a`
+(2026-10-20), skaile-ai/platform#8196.

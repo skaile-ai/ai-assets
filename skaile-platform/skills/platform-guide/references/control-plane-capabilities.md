@@ -805,8 +805,8 @@ assistant reach** lists, per organization, how far the owner's home assistant ma
 (`level`, the lowest of `orgDefault`, `override` and `self`) and so who set it; **Lower my
 assistant reach** lowers it in one organization, with the owner's approval like any action.
 Neither can raise a level: a request to go higher is refused. Only the owner can remove
-their own limit (**Remove my limit** in **Preferences > Assistants**), and only an org Owner can allow
-more. The owner's own Private workspace has no such setting. Lowering from **Full** — by the
+their own limit (**Remove my limit** in **Preferences > Assistants**), and only an org Owner
+can allow more. The owner's own Private workspace has no such setting. Lowering from **Full** — by the
 owner, or by an org Owner's default or override — revokes the home assistant's standing
 grants that cover that organization, and every grant that covers all organizations; tell
 the owner they will see those cards again. A level lowered after approval makes the
@@ -880,7 +880,10 @@ skaile-ai/platform#7266 (`platform.hire_agent`: `hire-agent.handler.ts`, `spawn-
 `finish-spawned-instance-policy.service.ts`), skaile-ai/platform#7997 (a grant answers only an
 owner-proposed turn: `approval-policy.service.ts` `isCoveredAsker`, `turn-principal.ts`
 `isOwnerProposedTurn`, `TurnTriggerSource` for the `a2a_relayed` and `delegation_relayed`
-values), and
+values), skaile-ai/platform#8196 (a grant a policy update ended is listed as no longer
+applying, with a pre-filled renewal: `autonomy-grant-applicability.service.ts`,
+`policy-version-compatibility.ts`, `agent-gateway/src/autonomy-awareness.ts`; platform `main` @
+`8776e9e1a`, 2026-10-20), and
 skaile-ai/platform#6962 (standing disclosure grants: `disclosure-policy.ts`,
 `disclosure-preparer.ts`, `ungrantable-by-design.ts`, `approval-policy.service.ts`;
 `platform/decisions/2026-10-08-standing-disclosure-grants.md`).
