@@ -207,7 +207,18 @@ relayed message without that mark (through someone else's session, across an org
 from a turn the platform could not attribute). The one exception is a standing disclosure
 grant, and it cuts both ways: it also covers a member's turn, but only a message a person typed
 — never a trigger turn, not even the owner's own schedule, flow, `a2a` or `delegation` turn.
-See *Shared sessions* below. The card's one-click choice is time-boxed to a window the capability's risk decides, and the card
+See *Shared sessions* below.
+
+**Trusted people.** In a shared project the owner can name people they trust there (on the
+session's Permissions tab; you cannot change the list, and no action reaches it). The owner's
+grants in that project's sessions then also cover those people's turns, alone or in a turn mixed
+with the owner's, under the same text rule as the owner's own: what each trusted person typed, or
+their own schedule, flow, `a2a` or `delegation` turn. A privileged effect is never covered by
+trust; it still needs the owner's own turn. Anyone untrusted in the turn, a webhook or mail, a
+session seed or other text from outside still gets a card. The list is read live, so a person who
+leaves the project, becomes a Viewer or is untrusted stops counting at once.
+
+The card's one-click choice is time-boxed to a window the capability's risk decides, and the card
 names it: read the window off the card rather than inferring one from the capability. Widening
 the grant past that one target, or making it autonomous, starts it on the shortest window, so a
 long window on a wide grant is always the owner's own pick. Standing
@@ -350,8 +361,9 @@ platform records **who set off each turn** — the one member who wrote, several
 or the person a schedule, webhook or peer request acts for. You cannot set or claim it. It
 decides:
 
-- **Grants apply only to the owner's own turns** (see *Autonomy grants* above for which
-  turns count). A member's turn, a mixed turn, one the platform cannot attribute, and a turn
+- **Grants apply only to the owner's own turns**, and to the turns of people the owner trusts
+  in the project (see *Autonomy grants* above for which turns count). An untrusted member's
+  turn, a mixed turn with anyone untrusted in it, one the platform cannot attribute, and a turn
   credited to the owner whose text came from outside the owner's own sessions or across an
   organization (a webhook or mail, a session seed, a relayed peer or delegated message without
   the owner-chain mark: through someone else's session, across an organization, or from a turn
@@ -537,4 +549,7 @@ skaile-ai/platform#8180, shipped in skaile-ai/platform#8193 (`disclosure-audienc
 `DisclosureAudience`, `list-sessions.handler.ts` `sessionVisibilityFor`,
 `v2-capability-registry.service.ts` `needsDisclosureCard`,
 `platform/decisions/2026-10-20-disclosure-without-a-new-reader.md`; platform `main` @
-`85e8a4114`, 2026-10-20).
+`85e8a4114`, 2026-10-20); trusted requesters per project, skaile-ai/platform#8267
+(`requester-coverage.ts` `requesterCoverage`, `trusted-requester.service.ts`,
+`approval-policy.service.ts` `isCoveredAsker`, `turn-principal.ts` `ownerAgentOnly`,
+`platform/decisions/2026-10-20-trusted-requesters.md`; platform `main` @ `026065372`, 2026-10-20).

@@ -800,6 +800,13 @@ a turn started by one member who can act in the session (not a Viewer), but only
 person typed: unlike an ordinary grant it never covers a trigger turn, so even the owner's own
 schedule, flow, peer agent or delegation turn, a webhook and a mixed turn get a card.
 
+In a shared project the owner can also trust named people there. The owner's grants then cover a
+turn whose every credited person is the owner or trusted, as long as each person's text is their
+own (typed, or their own `schedule`, `flow`, `a2a` or `delegation` turn, or a mixed turn of such
+starters) and the effect is not `privileged`. A turn with anyone untrusted in it, a webhook or
+mail, a session seed, or a privileged effect is carded as before (`concepts/agent.md`, *Autonomy
+grants*). Only the owner changes the list, in the UI.
+
 You see grants only on turns a human sent, in the `<AUTONOMY>` block: which capability, how far
 it reaches, until when, and what is left of any caps, plus notice when one has been **revoked**.
 Expiry produces no notice at all — the row simply stops appearing — so a grant vanishing from the
@@ -903,7 +910,9 @@ applying, with a pre-filled renewal: `autonomy-grant-applicability.service.ts`,
 between the owner's own sessions: `turn-principal.ts` `isOwnerAgentTurn` and `keepsOwnerChain`,
 `a2a-router.service.ts` `peerOwnerChain`, `delegate-to-session.handler.ts`;
 `platform/decisions/2026-10-20-owner-chain-agent-turns.md`; platform `main` @ `dda30d4a5`,
-2026-10-20), and
+2026-10-20),
 skaile-ai/platform#6962 (standing disclosure grants: `disclosure-policy.ts`,
 `disclosure-preparer.ts`, `ungrantable-by-design.ts`, `approval-policy.service.ts`;
-`platform/decisions/2026-10-08-standing-disclosure-grants.md`).
+`platform/decisions/2026-10-08-standing-disclosure-grants.md`), and
+skaile-ai/platform#8267 (trusted requesters per project: `requester-coverage.ts`,
+`trusted-requester.service.ts`, `platform/decisions/2026-10-20-trusted-requesters.md`).

@@ -103,8 +103,10 @@ on it:
   - A turn credited to the owner whose text came from anywhere else always gets a card: a webhook
     or mail turn, a session seed, or a message that came through someone else's session or across
     an organization.
-  - A turn the owner did not set off always gets a card: a member's turn, several members at
-    once, or an unattributable turn.
+  - A turn the owner did not set off gets a card: a member's turn, several members at once, or
+    an unattributable turn. The exception is people the owner trusts in the project: their own
+    turns, alone or mixed with the owner's, are covered like the owner's, except for a privileged
+    effect.
 - `find_actions` hides actions on the owner's own things from anyone but the owner, and shows
   nothing on a turn it cannot attribute.
 - When a member asks, they must be able to do it themselves as well; the owner's authority is not
@@ -122,4 +124,7 @@ Grounded in: `platform/docs/agent-action-declarations.md`,
 `invoke.handler.ts`, `batch.handler.ts`) and `resource-reference.ts`; the grant rule in
 `approval-policy.service.ts` (`isCoveredAsker`) and `platform/backend/libs/agent-gateway/src/turn-principal.ts`
 (`isOwnerProposedTurn`), skaile-ai/platform#7997; owner-chain turns (`isOwnerAgentTurn`,
-`keepsOwnerChain`), skaile-ai/platform#8213, platform `main` @ `dda30d4a5`, 2026-10-20.
+`keepsOwnerChain`), skaile-ai/platform#8213, platform `main` @ `dda30d4a5`, 2026-10-20;
+trusted requesters per project (`requester-coverage.ts` `requesterCoverage`,
+`trusted-requester.service.ts`, `platform/decisions/2026-10-20-trusted-requesters.md`),
+skaile-ai/platform#8267, platform `main` @ `026065372`, 2026-10-20.
