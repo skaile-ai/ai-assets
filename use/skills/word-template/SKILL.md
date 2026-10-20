@@ -17,10 +17,9 @@ keywords:
 
 # Word template
 
-Use the installed `word` MCP dependency for every DOCX operation. Its
-runtime guidance is materialized at
-`.skaile/assets/mcp-server/word/MCP.md`; its source is the
-[Word MCP catalog entry](../../../mcp/docx/MCP.md). Follow the installed server's
+Use the installed `word` MCP dependency for every DOCX operation. The server
+sends its own runtime guidance as its MCP `initialize` instructions (the
+[Word MCP catalog entry](../../../mcp/docx/MCP.md) points at it). Follow the installed server's
 live tool descriptions for exact inputs and current capabilities. This skill
 adds only the bundled template's mechanics and house writing rules.
 
