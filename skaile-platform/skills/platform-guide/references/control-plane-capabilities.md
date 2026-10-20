@@ -880,7 +880,7 @@ skaile-ai/platform#7266 (`platform.hire_agent`: `hire-agent.handler.ts`, `spawn-
 `finish-spawned-instance-policy.service.ts`), skaile-ai/platform#7997 (a grant answers only an
 owner-proposed turn: `approval-policy.service.ts` `isCoveredAsker`, `turn-principal.ts`
 `isOwnerProposedTurn`, `TurnTriggerSource` for the `a2a_relayed` and `delegation_relayed`
-values), skaile-ai/platform#8196 (a grant a policy update ended is listed as no longer
+values), skaile-ai/platform#8196 (a grant a platform update ended is listed as no longer
 applying, with a pre-filled renewal: `autonomy-grant-applicability.service.ts`,
 `policy-version-compatibility.ts`, `agent-gateway/src/autonomy-awareness.ts`; platform `main` @
 `8776e9e1a`, 2026-10-20), and
