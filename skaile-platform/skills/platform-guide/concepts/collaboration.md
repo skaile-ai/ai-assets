@@ -81,10 +81,11 @@ example a maintenance window or a changed feature.
 - Org Owners see every notice sent to their organization under **Settings > Skaile &
   external access**.
 - Only a Skaile staff session can send one (`platform.send_platform_notice`); in a customer
-  organization the capability does not exist. There, the staff member names the targets in
-  plain words or pastes a platform link: the agent resolves them to ids with
-  `platform.staff_find_targets` (names and ids only), and the approval card names the
-  organizations the notice will reach before anything is sent.
+  organization the capability does not exist.
+- In a staff session the staff member names the target organizations, projects or sessions in
+  plain words, or pastes a platform link: the agent resolves them to ids with
+  `platform.staff_find_targets`, which returns names and ids only, and the approval card names
+  the organizations the notice will reach before anything is sent.
 
 ## Public file-preview sharing
 
@@ -214,4 +215,5 @@ and the not-delivered notice), #6263 (sibling instances of a template, `spawn-ch
 `platform/docs/roles-permissions-matrix.md` (share and invite
 permissions), platform #6690 (the session settings Config tab renamed **General**), platform
 issues #4754 (agent replies notify only in assistant sessions) and #2350 (phone push, not
-built yet), platform #8151 (research questions from Skaile, `platform/backend/libs/research/`).
+built yet), platform #8151 (research questions from Skaile, `platform/backend/libs/research/`),
+platform #8275 (staff notice target lookup, `platform.staff_find_targets`).
