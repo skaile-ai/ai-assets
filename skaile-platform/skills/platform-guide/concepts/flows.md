@@ -579,7 +579,10 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   (`platform.preflight_flow_requirements`, no approval); it does not check binaries,
   credential scopes, or node kinds.
 - A status board shows per-item progress and cost, with click-through into the run group's
-  detail page. Approvals and input requests raised by unattended runs surface inside the
+  detail page. The detail page's header shows what the whole group has **spent** so far
+  ("**spent of** €Y **budget**" when the group has a budget) beside **cost / processed
+  input**. It is the same total the scheduler pauses on when the budget runs out: the
+  recorded cost of finished runs plus the live usage of runs still in flight. Approvals and input requests raised by unattended runs surface inside the
   run itself — the flow gate panel in the session, and the run group detail page. There is
   no org-level inbox that collects them outside a session. (The **Approvals** tab on the
   org **Store** page is a different surface: it holds asset-share requests.)
