@@ -95,7 +95,8 @@ or to create or replace one there, the personal assistant has `platform.read_ses
 The platform records who set off each turn; the agent cannot set it. All three capabilities key
 on it:
 
-- **Grants cover only the owner's own turns**: a message they typed, or their own schedule, flow,
+- **Grants cover the owner's own turns**, and the turns of people the owner trusts in the
+  project (below): a message they typed, or their own schedule, flow,
   agent message or delegation — turns whose text the owner wrote — plus work the owner's agents
   pass on only between the owner's own sessions: a late result credited to the owner (a read the
   owner's own turn asked for), or a relayed agent or delegated message whose every hop ran in the

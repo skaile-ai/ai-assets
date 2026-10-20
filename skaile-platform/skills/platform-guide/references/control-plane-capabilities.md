@@ -804,16 +804,17 @@ schedule, flow, peer agent or delegation turn, a webhook and a mixed turn get a 
 In a shared project the owner can also trust named people there. The owner's grants then cover a
 turn whose every credited person is the owner or trusted, as long as each person's text is their
 own — typed, their own `schedule`, `flow`, `a2a` or `delegation` turn, a `late_result` credited to
-them, or an owner-chain relay of theirs — and the effect is not `privileged`. `external` is not
+them, or an owner-chain relay of theirs — and the effect is not `privileged`. A standing disclosure grant keeps its own narrower rule
+(above): a typed message only, never a trigger turn or a mixed turn, trusted or not. `external` is not
 excluded: a grant the owner widened to external communication covers a trusted person's turn too.
 Trust counts only while both the owner and the trusted person are active, non-Viewer members of
-the project, and the list is read live (re-checked on every call): someone who leaves the
+the project (the project role, not a session override), and the list is read live (re-checked on every call): someone who leaves the
 project, becomes a Viewer or is untrusted stops counting at once. A turn with anyone untrusted in
 it, a webhook or mail, a session seed, or a privileged effect is carded as before
 (`concepts/agent.md`, *Autonomy grants*). Trust changes only which turns a grant answers: a row
 above whose effect class reads "on the owner's own turn … `never` on any other turn" (the agent
-template rows) still reads a trusted person's turn as *any other turn*, so it stays `never`. Only
-the owner changes the list, in the UI.
+template rows) still reads a trusted person's turn as *any other turn*, so it stays `never`. Each person
+changes only their own list, in the UI.
 
 You see grants only on turns a human sent (the owner or a member), in the `<AUTONOMY>` block: which capability, how far
 it reaches, until when, and what is left of any caps, plus notice when one has been **revoked**.

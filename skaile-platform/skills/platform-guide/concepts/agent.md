@@ -218,12 +218,14 @@ no action reaches it. The owner's grants in that project's sessions then also co
 turns, alone or in a turn mixed with the owner's, under the same text rule as the owner's own:
 what each trusted person typed, their own schedule, flow, `a2a` or `delegation` turn, a late
 result credited to them, or an owner-chain relay of theirs. Only a privileged effect is left out:
-it still needs the owner's own turn. Everything else a grant covers is included, `external`
+it still needs the owner's own turn. A standing disclosure grant keeps its own narrower rule
+either way: a typed message only, never a trigger turn and never a mixed turn, trusted or not.
+Everything else a grant covers is included, `external`
 too, so a grant the owner widened to external communication also sends mail or calls a
 third-party service on a trusted person's turn without a card. Anyone untrusted in the turn, a
 webhook or mail, a session seed or other text from outside still gets a card. Trust counts only
 while both the owner and the trusted person are active members of the project who are not
-Viewers. It is read live, so someone who leaves, becomes a Viewer or is untrusted stops counting
+Viewers. It is the project role that counts, not a session-level role override. It is read live, so someone who leaves, becomes a Viewer or is untrusted stops counting
 at once. Trust changes which turns a grant answers, nothing else: an action whose effect class
 itself depends on the owner's own turn (such as `create_agent_template`, `never` on any other
 turn) stays `never` on a trusted person's turn.
