@@ -85,9 +85,9 @@ The capability's own description carries the live list; prefer it if the two dif
     workspace, on the dashboard, or in an org where they are only a Viewer, their home
     assistant (the one in their home Private workspace). Each falls back to the other when it
     does not exist, and **Launcher always opens my home assistant** in **Preferences >
-    Assistants** makes it the home assistant everywhere. On the collapsed icon rail the launcher is its
-    own icon above the avatar. The avatar opens the user menu — **Invite someone to
-    Skaile**, **Report a problem**, **Account**, **Preferences**, **Invites**,
+    Assistants** makes it the home assistant everywhere. On the collapsed icon rail the
+    launcher is its own icon above the avatar. The avatar opens the user menu — **Invite
+    someone to Skaile**, **Report a problem**, **Account**, **Preferences**, **Invites**,
     **Approvals** (with a count of what waits on the user), **My Connections** (hidden
     from org Viewers), an **Expert mode** toggle, a **Theme** submenu, an **Info** submenu
     (**What's new**, **Open-source licenses** and the frontend/backend version numbers; for
@@ -410,8 +410,8 @@ order, which tabs and cards each view shows, the session Permissions tab):
 `pages/sessions/settings/session-config-tab.tsx`, `pages/projects/settings/project-metadata-tab.tsx`;
 platform `main` @ `f8cbab8fb` (2026-10-08), skaile-ai/platform#6690. The **Restore** route for an
 archived session and the read-only note on the Danger zone: skaile-ai/platform#6810
-(`workspace-status-screens.tsx`, `chat-input-area-banner.tsx`). The three **Preferences** tabs and
-their `?tab=` names, the **Grants** tab's **Grants I have given** card, and the **No longer
+(`workspace-status-screens.tsx`, `chat-input-area-banner.tsx`). The three **Preferences** tabs
+and their `?tab=` names, the **Grants** tab's **Grants I have given** card, and the **No longer
 applies** marker and renewal on it and on the session **Permissions** tab:
 `pages/settings/preferences-tabs.tsx`, `pages/settings/resolve-preferences-tab.ts`,
 `pages/settings/preferences.page.tsx`, `pages/settings/my-grants-card.tsx`,
