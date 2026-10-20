@@ -12,7 +12,7 @@ replaces the page they are on) or `tab` (opens a new tab and keeps the current o
 | `route` | Screen | `params` |
 | --- | --- | --- |
 | `dashboard` | Dashboard | — |
-| `projects`, `sessions`, `flows`, `store`, `preferences`, `myConnections` | that organization page (`myConnections` takes `search: { link }` to highlight one connection) | `org?` |
+| `projects`, `sessions`, `flows`, `store`, `preferences`, `myConnections` | that organization page (`myConnections` takes `search: { link }` to highlight one connection; `preferences` takes no `search` — it opens on its first tab, so link a tab by URL) | `org?` |
 | `org.settings` | Organization settings (org Owners and platform admins; `search: { tab }`, e.g. `ai-providers`, `assistants`, or `orphaned-my-space` for the former members' My space review) | `org?` |
 | `project`, `project.settings`, `project.runs` | a project's main session, its settings, its run board | `project` |
 | `runGroup` | one run group's board | `project`, `runGroup` |
@@ -410,9 +410,10 @@ order, which tabs and cards each view shows, the session Permissions tab):
 platform `main` @ `f8cbab8fb` (2026-10-08), skaile-ai/platform#6690. The **Restore** route for an
 archived session and the read-only note on the Danger zone: skaile-ai/platform#6810
 (`workspace-status-screens.tsx`, `chat-input-area-banner.tsx`). The three **Preferences** tabs
-and their `?tab=` names, the **Grants** tab's **Grants I have given** card, and the **No longer
-applies** marker and renewal on it and on the session **Permissions** tab:
-`pages/settings/preferences-tabs.tsx`, `pages/settings/resolve-preferences-tab.ts`,
-`pages/settings/preferences.page.tsx`, `pages/settings/my-grants-card.tsx`,
+and their `?tab=` names, that `platform.navigate` takes no `search` for `preferences`, the
+**Grants** tab's **Grants I have given** card, and the **No longer applies** marker and renewal
+on it and on the session **Permissions** tab: `pages/settings/preferences-tabs.tsx`,
+`pages/settings/resolve-preferences-tab.ts`, `pages/settings/preferences.page.tsx`,
+`pages/settings/my-grants-card.tsx`, `lib/agent-routes.ts`,
 `components/ui/autonomy-console/autonomy-console-dialog.tsx`; platform `main` @ `8776e9e1a`
 (2026-10-20), skaile-ai/platform#8196.
