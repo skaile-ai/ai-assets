@@ -194,8 +194,9 @@ all of it — for bringing someone in on one folder without exposing the rest.
   does not cover. The mounts cannot be widened afterwards.
 - Supported for **On Skaile, SharePoint, Google Drive, WebDAV/NextCloud, Box, and Local
   Folder** workspaces. **Not** supported for **Git** (branches isolate instead), **S3**,
-  or **Empty** workspaces, nor on broker deployments — the action is shown disabled with
-  the reason.
+  or **Empty** workspaces. On broker deployments only **On Skaile** workspaces can be
+  shared this way, and a scoped session there has no app preview yet. Where it is not
+  supported, the action is shown disabled with the reason.
 - Scoped sessions can be nested (sharing a folder from inside a scoped session); a child
   is never wider than its parent.
 
