@@ -81,7 +81,10 @@ example a maintenance window or a changed feature.
 - Org Owners see every notice sent to their organization under **Settings > Skaile &
   external access**.
 - Only a Skaile staff session can send one (`platform.send_platform_notice`); in a customer
-  organization the capability does not exist.
+  organization the capability does not exist. There, the staff member names the targets in
+  plain words or pastes a platform link: the agent resolves them to ids with
+  `platform.staff_find_targets` (names and ids only), and the approval card names the
+  organizations the notice will reach before anything is sent.
 
 ## Public file-preview sharing
 
