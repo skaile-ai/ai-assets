@@ -284,6 +284,15 @@ for the whole organization), and, in a business organization, **Assistants** (be
 So every tab in the org settings strip except **General** and **Users** needs Expert mode
 on. The org sessions report is not a tab — it is **Sessions** in the org kebab.
 
+**Connected organizations** (a card on the **Skaile & external access** tab, below **Notices from
+Skaile**; Owners with a real Owner membership only)
+lists the organization's connections with other organizations, with **Approve** / **Decline**
+on a request it received and **Withdraw** / **Disconnect** on the rest, and **Ask an
+organization to connect** for organizations the Owner is a member of. Each connection shows
+which of this organization's sessions it can reach; a session's owner opts it in from that
+session's **Agent to agent communication** card. All of it is also in Cmd+K. See
+`concepts/collaboration.md` § *Agent-to-Agent*.
+
 **Former members' My space** is a tab reached only by link: while projects that people
 left behind in their My space are waiting, the **Users** tab shows a callout with
 **Review**. In the standard view the **Users** tab hides that callout and its own **Former
