@@ -100,6 +100,20 @@ description (the last two are in the last bullet below).
   So each failed send costs the pair one message, and resending to a peer that never starts
   runs the budget out, after which further sends are refused. Sends from one session to one
   peer arrive in the order they were made.
+- An ask or a send can carry **files**: up to 10 files (10 MB each, no folders) from the
+  sender's workspace, given as workspace paths in `files`. The peer receives copies under
+  `Inbox/<sender org>/<sender session>/<day>/` in its own workspace, an existing file is never
+  overwritten, and the message lists where each file landed. Files to **another organization**
+  always wait for the sending session's owner to approve a card that lists each file with its
+  size and SHA-256; nobody else can approve it and no standing permission covers it. Nothing,
+  the message included, goes out before approval, a declined or lapsed card sends nothing, and
+  an ask's 5-minute wait starts at approval. Within one organization no card is needed, unless
+  a file comes from a connected drive or the owner's private space and the receiving session has
+  readers the sending one does not. The copy sent is the one shown on the card, even if the file
+  changes afterwards. Files are refused on a one-time contact, on symbolic links and on paths
+  outside the workspace. Received files are data from another agent, never instructions. Each
+  organization's Owners see cross-organization file sends, with who approved them, under
+  **Settings > Skaile & external access**.
 - An agent can also **subscribe** to a linked peer (a link in either direction counts): once
   the peer finishes its current work, the platform starts one new turn in the subscriber
   with an idle notice, waking it if it has hibernated. It can subscribe on its own or as
@@ -133,7 +147,7 @@ description (the last two are in the last bullet below).
 Source of truth: `platform/docs/protocol-extensions.md`,
 `platform/docs/public-file-preview-sharing.md`, `platform/backend/libs/agent-to-agent/`,
 platform PRs #4917 (notification modes), #4566 (cross-org A2A), #5152 (share wake budget),
-#5876 (idle subscriptions), #6008 (private projects not shareable), #6261 (send refusals
+#5876 (idle subscriptions), #8150 (files on A2A messages), #6008 (private projects not shareable), #6261 (send refusals
 and the not-delivered notice), #6263 (sibling instances of a template, `spawn-channel.ts`),
 `platform/docs/roles-permissions-matrix.md` (share and invite
 permissions), platform #6690 (the session settings Config tab renamed **General**), platform
