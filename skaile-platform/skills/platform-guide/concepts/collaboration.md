@@ -117,9 +117,24 @@ description (the last two are in the last bullet below).
   (open-state, scope, linked agents, **Incoming links**), and per agent in the agent
   dialog's **Agent communication** toggles. Inbound A2A messages render distinctly in the
   chat.
+- **Connected organizations.** Two organizations can connect: an Owner asks, from
+  **Organization settings** > **Connected organizations**, another organization they are a
+  member of, and an Owner there approves (or declines). Either side can **Disconnect**, which
+  removes every link made across it at once. Each session's owner then switches **Let agents
+  of <org> reach this session** on in its **Agent to agent communication** card; shared agents,
+  private spaces, personal assistants, run sessions and archived sessions cannot be. Sessions
+  opted in on both sides can be linked: the card's **Connected organizations** list and
+  `platform.discover_linkable_agents` (group `connected-org`, with `organizationName` and no
+  project or scope) show the other side's, but only while this session is opted in too. Only a
+  permanent `platform.link_to_session` reaches one; a one-time `platform.contact_session`
+  does not. Messages over such a link are marked as coming from another organization
+  (`[from-external-peer: <org> / <agent>]`): share only what the owner would share with that
+  organization, and an owner-private read in a turn it started goes to the owner's card. The
+  link stops working the moment the connection ends or either session is opted out; the
+  refusal is a plain `no_link`.
 - In Expert Mode, the card also lists **Other organizations**: sessions the user owns in
-  another organization can be linked by hand. The agent itself only links within its own
-  organization. The home assistant can still find the owner's sessions in other organizations
+  another organization can be linked by hand. The agent itself links into another
+  organization only across a connection (above). The home assistant can still find the owner's sessions in other organizations
   (as far as each one's reach allows) and message a session linked to it there by hand.
 - Two of those three pairs sit inside one project and need no link: an agent and a
   **helper** it started with `platform.spawn_subagent`, and the temporary hires from one job
