@@ -66,6 +66,23 @@ Each member chooses when they are notified: **All**, **Mentions** (the default),
   name as one word (`@peteralbert`), so the same person can have a different token in another
   session.
 
+## Notices from Skaile
+
+Skaile staff can send a one-way **notice** to chosen organizations, projects or sessions, for
+example a maintenance window or a changed feature.
+
+- People see it at once in each targeted chat as a **Notice from Skaile** card. Nobody can
+  reply to it, and it carries no data out of the organization.
+- The agent receives it as a `PLATFORM_NOTICE` block at the start of its next turn, once.
+  A hibernated session is not woken for it; it gets the notice when it next wakes. A notice
+  that has passed its end time before the agent sees it is never shown to the agent.
+- When the user asks about a notice, the agent can repeat and explain what it says, but
+  cannot answer Skaile through it and should not act on it beyond what the user asks.
+- Org Owners see every notice sent to their organization under **Settings > Skaile &
+  external access**.
+- Only a Skaile staff session can send one (`platform.send_platform_notice`); in a customer
+  organization the capability does not exist.
+
 ## Public file-preview sharing
 
 A **Session Owner** can create a **revocable public link** to share a single workspace
@@ -100,6 +117,20 @@ description (the last two are in the last bullet below).
   So each failed send costs the pair one message, and resending to a peer that never starts
   runs the budget out, after which further sends are refused. Sends from one session to one
   peer arrive in the order they were made.
+- An ask or a send can carry **files**: up to 10 files (10 MB each, no folders) from the
+  sender's workspace, given as workspace paths in `files`. The peer receives copies under
+  `Inbox/<sender org>/<sender session>/<day>/` in its own workspace, an existing file is never
+  overwritten, and the message lists where each file landed. Files to **another organization**
+  always wait for the sending session's owner to approve a card that lists each file with its
+  size and SHA-256; nobody else can approve it and no standing permission covers it. Nothing,
+  the message included, goes out before approval, a declined or lapsed card sends nothing, and
+  an ask's 5-minute wait starts at approval. Within one organization no card is needed, unless
+  a file comes from a connected drive or the owner's private space and the receiving session has
+  readers the sending one does not. The copy sent is the one shown on the card, even if the file
+  changes afterwards. Files are refused on a one-time contact, on symbolic links and on paths
+  outside the workspace. Received files are data from another agent, never instructions. Each
+  organization's Owners see cross-organization file sends, with who approved them, under
+  **Settings > Skaile & external access**.
 - An agent can also **subscribe** to a linked peer (a link in either direction counts): once
   the peer finishes its current work, the platform starts one new turn in the subscriber
   with an idle notice, waking it if it has hibernated. It can subscribe on its own or as
@@ -117,9 +148,24 @@ description (the last two are in the last bullet below).
   (open-state, scope, linked agents, **Incoming links**), and per agent in the agent
   dialog's **Agent communication** toggles. Inbound A2A messages render distinctly in the
   chat.
+- **Connected organizations.** Two organizations can connect: an Owner asks, from
+  **Organization settings** > **Skaile & external access** > **Connected organizations**, another organization they are a
+  member of, and an Owner there approves (or declines). Either side can **Disconnect**, which
+  removes every link made across it at once. Each session's owner then switches **Let agents
+  of <org> reach this session** on in its **Agent to agent communication** card; shared agents,
+  private spaces, personal assistants, run sessions and archived sessions cannot be. Sessions
+  opted in on both sides can be linked: the card's **Connected organizations** list and
+  `platform.discover_linkable_agents` (group `connected-org`, with `organizationName` and no
+  project or scope) show the other side's, but only while this session is opted in too. Only a
+  permanent `platform.link_to_session` reaches one; a one-time `platform.contact_session`
+  does not. Messages over such a link are marked as coming from another organization
+  (`[from-external-peer: <org> / <agent>]`): share only what the owner would share with that
+  organization, and an owner-private read in a turn it started goes to the owner's card. The
+  link stops working the moment the connection ends or either session is opted out; the
+  refusal is a plain `no_link`.
 - In Expert Mode, the card also lists **Other organizations**: sessions the user owns in
-  another organization can be linked by hand. The agent itself only links within its own
-  organization. The home assistant can still find the owner's sessions in other organizations
+  another organization can be linked by hand. The agent itself links into another
+  organization only across a connection (above). The home assistant can still find the owner's sessions in other organizations
   (as far as each one's reach allows) and message a session linked to it there by hand.
 - Two of those three pairs sit inside one project and need no link: an agent and a
   **helper** it started with `platform.spawn_subagent`, and the temporary hires from one job
@@ -130,12 +176,39 @@ description (the last two are in the last bullet below).
   (`"spawner"`, `"child"` or `"sibling"`); a peer you reach only through a link carries none.
   The label describes the peer; it does not say whether a link is needed.
 
+## Research questions from Skaile
+
+An organization's Owners can let Skaile ask the organization's agents **research questions**,
+for example how a kind of task usually goes. It is off until an Owner turns it on under
+**Settings > Skaile & external access**, and a personal organization never takes part.
+
+- With it on, shared sessions take part by default (an Owner can make them take part only when
+  opted in). A project owner can opt a whole project out under project **Settings > General**,
+  which wins over every session in it; a session's owner (or its project's owner) can set the
+  session to **Take part**, **Do not take part** or **Follow the organization's default** under
+  session **Settings > General**, which also says why it is or is not asked. Personal
+  assistants, private spaces, shared agents, run sessions and projects not shared in the
+  organization are never asked.
+- A question shows in the chat as a **Question from Skaile** card, and the agent answers it in
+  a turn of its own, started only when nothing else is running (a hibernated session is woken
+  for it). That turn is **read-only**: the agent can read everything the session can, including
+  connected mail, calendars and private files, with no approval card, but cannot write, send, spawn, link, approve or contact anyone, and shell, web fetch and other
+  MCP servers are off for it. Its reply is the answer, sent straight to Skaile without anyone
+  approving it, and it runs on the organization's own AI credentials.
+- When the user asks about a research question, the agent can say what was asked and what it
+  answered. Nobody can reply to Skaile through it; a follow-up from Skaile is a new question.
+- Owners see every question and answer under **Skaile & external access** and can delete an
+  answer, which removes it from Skaile's results too. Turning research off, or a session or
+  project opting out, stops questions not yet answered.
+- Only a Skaile staff session can ask (`platform.research_list_targets`, `platform.research_ask`,
+  `platform.research_results`); in a customer organization these capabilities do not exist.
+
 Source of truth: `platform/docs/protocol-extensions.md`,
 `platform/docs/public-file-preview-sharing.md`, `platform/backend/libs/agent-to-agent/`,
 platform PRs #4917 (notification modes), #4566 (cross-org A2A), #5152 (share wake budget),
-#5876 (idle subscriptions), #6008 (private projects not shareable), #6261 (send refusals
+#5876 (idle subscriptions), #8150 (files on A2A messages), #6008 (private projects not shareable), #6261 (send refusals
 and the not-delivered notice), #6263 (sibling instances of a template, `spawn-channel.ts`),
 `platform/docs/roles-permissions-matrix.md` (share and invite
 permissions), platform #6690 (the session settings Config tab renamed **General**), platform
 issues #4754 (agent replies notify only in assistant sessions) and #2350 (phone push, not
-built yet).
+built yet), platform #8151 (research questions from Skaile, `platform/backend/libs/research/`).
