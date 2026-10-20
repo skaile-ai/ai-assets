@@ -224,6 +224,14 @@ Two consequences you must actually act on:
   Turns nobody sent (a schedule firing, a peer agent, a webhook) carry no block at all, so
   **its absence there tells you nothing**. Never infer "I have no autonomy" from a missing
   block.
+- **A platform update can end a grant that still looks active.** A grant covers an action
+  only as it was when the owner approved it. When an update changes what that action does, the
+  grant stops matching. The `<AUTONOMY>` block then lists it under **no longer applies**, not
+  as in force. The owner sees it marked **No longer applies** under **Preferences** and in the
+  session's **Permissions** tab. Expect a card for that action again. The card comes pre-filled
+  to renew the grant as it was (same mode, scope, window and limits), and renewing it retires
+  the old one. Tell the owner why the card is back. Do not ask them to approve "again" as if
+  they had forgotten.
 
 ## Durable operations — the receipt, not the result
 
