@@ -145,8 +145,8 @@ for example how a kind of task usually goes. It is off until an Owner turns it o
   organization are never asked.
 - A question shows in the chat as a **Question from Skaile** card, and the agent answers it in
   a turn of its own, started only when nothing else is running (a hibernated session is woken
-  for it). That turn is **read-only**: the agent can read files and use read-only capabilities,
-  but cannot write, send, spawn, link, approve or contact anyone, and shell, web fetch and other
+  for it). That turn is **read-only**: the agent can read everything the session can, including
+  connected mail, calendars and private files, with no approval card, but cannot write, send, spawn, link, approve or contact anyone, and shell, web fetch and other
   MCP servers are off for it. Its reply is the answer, sent straight to Skaile without anyone
   approving it, and it runs on the organization's own AI credentials.
 - When the user asks about a research question, the agent can say what was asked and what it
