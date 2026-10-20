@@ -108,8 +108,8 @@ one reaches depends on where it lives:
   read or write.
 - **The level is the lowest of** the organization's default, an override an org Owner set
   for the member (**Organization settings > Assistants**), and the owner's own lowering
-  (**Preferences > My home assistant's reach**). Reach only narrows: the owner's own role
-  on the target still decides everything a level allows.
+  (**Preferences > Assistants > My home assistant's reach**). Reach only narrows: the
+  owner's own role on the target still decides everything a level allows.
 - **An organization you create for the owner starts at Full.** One the owner's assistant
   creates with `platform.create_organization` starts with its default at **Full**, so you can
   go straight on to create its projects and sessions. Tell the owner, and that any Owner of the
@@ -194,12 +194,17 @@ project — and covers every read of that source; see *Shared sessions*.) It eit
 absolute expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it
 may carry use and budget caps. It stays anchored to the session it was approved in, and it covers only calls on
 **the owner's own turns**. What counts is who wrote the turn's text, not who it is credited
-to. Covered: a message the owner typed, or a turn credited to the owner whose trigger source is
-one of four — `schedule`, `flow`, `a2a` or `delegation`. The platform sets `a2a` and
-`delegation` only when the sending turn's text was its person's own; a peer or delegated
+to. Covered: a message the owner typed, a turn credited to the owner whose trigger source is
+`schedule`, `flow`, `a2a` or `delegation`, and the two owner-chain cases below. The platform
+sets `a2a` and `delegation` only when the sending turn's text was its person's own; a peer or delegated
 message that passes on text someone else wrote carries `a2a_relayed` or `delegation_relayed`
-instead. Carded, even when the turn is credited to the owner: a webhook or mail, a session
-seed, a late result, and those two relayed sources. The one exception is a standing disclosure
+instead. Those two relayed sources are covered too when the platform marks them owner-chain:
+every hop ran in the owner's own sessions and no starter carried anyone else's text. So is a
+late result credited to the owner: a read the owner's own turn asked for, delivered after you
+stopped waiting. A late result credited to a member is carded, whoever approved the read.
+Carded, even when the turn is credited to the owner: a webhook or mail, a session seed, and a
+relayed message without that mark (through someone else's session, across an organization, or
+from a turn the platform could not attribute). The one exception is a standing disclosure
 grant, and it cuts both ways: it also covers a member's turn, but only a message a person typed
 — never a trigger turn, not even the owner's own schedule, flow, `a2a` or `delegation` turn.
 See *Shared sessions* below. The card's one-click choice is time-boxed to a window the capability's risk decides, and the card
@@ -210,7 +215,7 @@ approvals live
 only on cards: the former `preApprovedCapabilities` agent-config list is retired, and any
 entries still in a config are ignored.
 
-Two consequences you must actually act on:
+Three consequences you must actually act on:
 
 - **A grant can stop at any instant.** The owner can revoke it, it can expire, or a limit can
   run out — and the platform re-checks the owner's live authorization, the limits and the
@@ -224,6 +229,14 @@ Two consequences you must actually act on:
   Turns nobody sent (a schedule firing, a peer agent, a webhook) carry no block at all, so
   **its absence there tells you nothing**. Never infer "I have no autonomy" from a missing
   block.
+- **A platform update can end a grant that still looks active.** A grant covers an action
+  only as it was when the owner approved it. When an update changes what that action does, the
+  grant stops matching. The `<AUTONOMY>` block then lists it under **no longer applies**, not
+  as in force. The owner sees it marked **No longer applies** in **Preferences > Grants**
+  (**Grants I have given**) and in the session's **Permissions** tab. Expect a card for that
+  action again. The card comes pre-filled to renew the grant as it was (the same capability,
+  scope, reach, window and caps), and renewing it retires the old one. Tell the owner why the
+  card is back. Do not ask them to approve "again" as if they had forgotten.
 
 ## Durable operations — the receipt, not the result
 
@@ -339,9 +352,10 @@ decides:
 
 - **Grants apply only to the owner's own turns** (see *Autonomy grants* above for which
   turns count). A member's turn, a mixed turn, one the platform cannot attribute, and a turn
-  credited to the owner whose text someone else wrote (a webhook or mail, a session seed, a
-  late result, a relayed peer or delegated message) always get a card, even where the owner
-  holds a grant. The one exception is a standing disclosure grant (below): it also covers a
+  credited to the owner whose text came from outside the owner's own sessions or across an
+  organization (a webhook or mail, a session seed, a relayed peer or delegated message without
+  the owner-chain mark: through someone else's session, across an organization, or from a turn
+  the platform could not attribute) always get a card, even where the owner holds a grant. The one exception is a standing disclosure grant (below): it also covers a
   member's turn, but only a typed message, never a trigger turn, the owner's included.
   (`platform.cycle_session` is outside this: no card ever, refused on a mixed or unattributed
   turn — see *Approval-gated actions*.)
@@ -502,4 +516,11 @@ the co-owner decider of the finish card: skaile-ai/platform#8072
 (`finish-spawned-instance.handler.ts`, `finish-spawned-instance-policy.service.ts`),
 grants answer only owner-proposed turns: skaile-ai/platform#7997 (`approval-policy.service.ts`
 `isCoveredAsker`, `turn-principal.ts` `isOwnerProposedTurn`, `SELF_AUTHORED_TRIGGER_SOURCES` and
-`TurnTriggerSource`, which holds `a2a_relayed` and `delegation_relayed`).
+`TurnTriggerSource`, which holds `a2a_relayed` and `delegation_relayed`),
+grants a platform update ended shown as no longer applying, with a pre-filled renewal:
+skaile-ai/platform#8196 (`autonomy-grant-applicability.service.ts`,
+`policy-version-compatibility.ts`, `agent-gateway/src/autonomy-awareness.ts`,
+`pages/settings/my-grants-card.tsx`), and grants also answer turns passed on only between the
+owner's own sessions: skaile-ai/platform#8213 (`turn-principal.ts` `isOwnerAgentTurn` and
+`keepsOwnerChain`, `a2a-router.service.ts` `peerOwnerChain`; platform `main` @ `dda30d4a5`,
+2026-10-20).
