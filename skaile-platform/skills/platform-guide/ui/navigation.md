@@ -12,7 +12,7 @@ replaces the page they are on) or `tab` (opens a new tab and keeps the current o
 | `route` | Screen | `params` |
 | --- | --- | --- |
 | `dashboard` | Dashboard | — |
-| `projects`, `sessions`, `flows`, `store`, `preferences`, `myConnections` | that organization page (`myConnections` takes `search: { link }` to highlight one connection) | `org?` |
+| `projects`, `sessions`, `flows`, `store`, `preferences`, `myConnections` | that organization page (`myConnections` takes `search: { link }` to highlight one connection; `preferences` takes no `search` — it opens on its first tab, so link a tab by URL) | `org?` |
 | `org.settings` | Organization settings (org Owners and platform admins; `search: { tab }`, e.g. `ai-providers`, `assistants`, or `orphaned-my-space` for the former members' My space review) | `org?` |
 | `project`, `project.settings`, `project.runs` | a project's main session, its settings, its run board | `project` |
 | `runGroup` | one run group's board | `project`, `runGroup` |
@@ -84,17 +84,16 @@ The capability's own description carries the live list; prefer it if the two dif
     a business org where they have a Home, that org's assistant; in their Private
     workspace, on the dashboard, or in an org where they are only a Viewer, their home
     assistant (the one in their home Private workspace). Each falls back to the other when it
-    does not exist, and **Launcher always opens my home assistant** in **Preferences**
-    makes it the home assistant everywhere. On the collapsed icon rail the launcher is its
-    own icon above the avatar. The avatar opens the user menu — **Invite someone to
-    Skaile**, **Report a problem**, **Account**, **Preferences**, **Invites**,
-    **Approvals** (with a count of what waits on the user), **My Connections** (hidden
-    from org Viewers), an **Expert mode** toggle, a **Theme** submenu, an **Info** submenu
-    (**What's new**, **Open-source licenses** and the frontend/backend version numbers; for
-    everyone),
-    **Focus organization** (only on deployments with organization subdomains), a **Platform**
-    admin submenu (platform admins only: **Admin Dashboard**, **User Dashboard**, **Org
-    Dashboard**, **Platform Usage**, **Session Manager**), and **Sign Out**.
+    does not exist, and **Launcher always opens my home assistant** in
+    **Preferences > Assistants** makes it the home assistant everywhere. On the collapsed
+    icon rail the launcher is its own icon above the avatar. The avatar opens the user
+    menu — **Invite someone to Skaile**, **Report a problem**, **Account**, **Preferences**,
+    **Invites**, **Approvals** (with a count of what waits on the user), **My Connections**
+    (hidden from org Viewers), an **Expert mode** toggle, a **Theme** submenu, an **Info**
+    submenu (**What's new**, **Open-source licenses** and the frontend/backend version numbers;
+    for everyone), **Focus organization** (only on deployments with organization subdomains), a
+    **Platform** admin submenu (platform admins only: **Admin Dashboard**, **User Dashboard**,
+    **Org Dashboard**, **Platform Usage**, **Session Manager**), and **Sign Out**.
   - Toggle the left sidebar with **Cmd/Ctrl+B**, the right one with **Cmd/Ctrl+.**.
 - **Top header** — two rows on desktop.
   - Row 1: the sidebar toggle plus a **tab bar** of fully rounded pills, one per open
@@ -136,7 +135,7 @@ The capability's own description carries the live list; prefer it if the two dif
 | **Dashboard**     | `/dashboard` (and `/<org>`)   | A bento grid of tiles the user rearranges with a pencil toggle (**Edit dashboard layout** / **Done editing dashboard**): **Assistant**, **Create Project**, **Create Session**, **Invite Users**, **Activity**, **Invitations**, **Recent Projects**, **Pinned Projects**, **Pinned Previews**. Those are the names in the layout editor; the three action tiles read **Create project**, **Create session** and **Invite users** on the tile itself. A viewer who cannot invite gets no **Invite Users** tile at all. Each **pinned session** (up to six) is its own live tile — its conversation, a status badge, and a composer the user can send from without leaving the dashboard; **Open full session** opens it, and in edit mode **Unpin \<name\>** removes it. The **Assistant** tile is the same kind of live chat. Pins are filtered to the current organization. One tile ships hidden: **Approvals**, a compact copy of the Approvals page (a count beside the title, the waiting approvals by session, **View all** to the full page; a row opens its session). The user adds it in edit mode from the **Approvals** button (eye icon) beside the pencil, or with Cmd+K **Show a hidden dashboard tile** > **Approvals**; it is read-only, the decision is made on the card in the session. |
 | **Account**       | `/account`                    | The profile (name, picture, roles) with **Edit profile**; the email is shown read-only. A **Your assistant** card links to the assistant's page (below). **Archived spaces** lists the user's own My space in each Private workspace they have left, with the date it is deleted and **Export** (its conversations, not its files); rejoining the workspace before then restores it. The card is absent when nothing is archived. |
 | **Your assistant**| `/assistant`                  | The Private assistant's name, and the profile every one of the user's assistants reads in every workspace: **Name, picture and voice**, and **What your assistant reads** (the IDENTITY, SOUL and USER documents, each with a live character count, plus one for **All three together** against 24 KiB). One **Save**; **Discard changes** drops the draft. If the profile changed elsewhere since the page loaded, the save is refused ("Changed elsewhere — reload") and the draft stays until **Reload**. Opens as its own tab and warns before unsaved changes are lost. Also reached from Cmd+K (**Edit \<name\>'s profile**) and from a **Your assistant** card in the assistant's own session settings. An assistant in a business workspace is renamed there, and renaming one never renames another. Changing the picture (avatar) or voice here sets it for every one of the user's assistants, including one in a business workspace that had set its own. |
-| **Preferences**   | `/<org>/preferences`          | Notification mode (All / Mentions / Direct / Off), sound, browser notifications. **Assistant**: **Launcher always opens my home assistant** (only for someone with a home assistant). **My home assistant's reach**: one row per business organization the user belongs to, with how far the assistant in their Private workspace may reach there (**Off**, **Coordinate** or **Full**) and who set it (**Lowered by you.**, **Set for you by an organization admin.**, or the organization's default). The user can only lower a level; **Remove my limit** undoes their own lowering, back to what the organization allows. Lowering from **Full** asks for confirmation and revokes the standing approvals the assistant held there. See `concepts/agent.md` § *Assistant reach*. |
+| **Preferences**   | `/<org>/preferences`          | Three tabs, addressable as `?tab=notifications` / `?tab=assistants` / `?tab=grants` (**Assistants** only with Work and Private spaces on). `platform.navigate` opens `preferences` on its first tab only — it takes no `search` — so for a tab give the user the URL, e.g. `/<org>/preferences?tab=grants`. **Notifications**: notification mode (All / Mentions / Direct / Off), sound, browser notifications. **Assistants**: **Launcher always opens my home assistant** (only for someone with a home assistant). **My home assistant's reach**: one row per business organization the user belongs to, with how far the assistant in their Private workspace may reach there (**Off**, **Coordinate** or **Full**) and who set it (**Lowered by you.**, **Set for you by an organization admin.**, or the organization's default). The user can only lower a level; **Remove my limit** undoes their own lowering, back to what the organization allows. Lowering from **Full** asks for confirmation and revokes the standing approvals the assistant held there. See `concepts/agent.md` § *Assistant reach*. **Grants**: **Grants I have given**, every standing approval, mailbox access grant and agent-to-agent link the user gave, across organizations, each with **Revoke**. One a platform update ended is marked **No longer applies**. |
 | **My Connections**| `/<org>/my-connections`       | The user's own sign-ins, **one provider at a time**: a tab each for **SharePoint**, **Exchange**, **Box**, **GitHub**, **Google Drive** and **Nextcloud** (with a count of connected accounts), plus **Other** when the org has further provider links. Each tab has a **Skaile-managed** one-click connect and an **IT-managed / bring your own app** section; a connection that stopped working offers **Reconnect**. The **Exchange** tab also holds **Shared mailboxes** — see below. Dropbox has no tab and is **not usable yet** (no driver behind it), even if an admin has added a Dropbox provider. A finished Connect stores a credential only — see `concepts/integrations.md` § *From a connection to files in a session* for the follow-up step users always need. |
 | **Store**         | `/<org>/store`                | The organization's asset/skill catalog, reached from the org kebab. Tabs: **Catalog**, **Library**, **Approvals** (approvals are admin-only). |
 | **Run groups**    | `/<org>/runs`                 | Batch / unattended processing: the status board for every run group, with click-through into a group's detail page, which holds its controls: **Activate** (a Draft only), **Pause** / **Resume**, **Close** (Standing groups), **Cancel group**, and the **Autonomous** switch. See `concepts/flows.md`. |
@@ -259,7 +258,7 @@ Path: `/<org>/projects/<project>/<session>/settings` (Session or Project Owner).
 | **General**  | Session-scoped Skaile config (overrides project defaults). Always shown: **Session address**, the **Agent** card (its AI configuration row only in Expert mode), **Mounts** (edits this session's workspace mount with **Edit mount** and removes other mounts; see `concepts/integrations.md`) and **Agent to agent communication**. In Expert mode only: **Idle timeout**, **AI provider**, **Agent runtime**, **Context compaction** (when this agent compacts; see `concepts/sessions.md`), **Git provider**, **Connectors**, and the **Danger zone** (archive; an archived session is read-only until its owner restores it), which sits at the bottom of the tab. Formerly the **Config** tab; `?tab=config` links still open it. |
 | **Members**  | Session-scoped role overrides on top of project membership; add session-only members. |
 | **Shares**   | Session visibility (**Everyone in the project** / **Invited only**) and public file-preview links. |
-| **Permissions** | The session's standing autonomy grants: revoke one, or stop all. |
+| **Permissions** | The session's standing autonomy grants: revoke one, or stop all. One a platform update ended is marked **No longer applies**; the next card for that action offers to renew it. |
 
 In the user's own assistant session, a **Your assistant** card above the tabs links to the
 **Your assistant** page.
@@ -410,4 +409,11 @@ order, which tabs and cards each view shows, the session Permissions tab):
 `pages/sessions/settings/session-config-tab.tsx`, `pages/projects/settings/project-metadata-tab.tsx`;
 platform `main` @ `f8cbab8fb` (2026-10-08), skaile-ai/platform#6690. The **Restore** route for an
 archived session and the read-only note on the Danger zone: skaile-ai/platform#6810
-(`workspace-status-screens.tsx`, `chat-input-area-banner.tsx`).
+(`workspace-status-screens.tsx`, `chat-input-area-banner.tsx`). The three **Preferences** tabs
+and their `?tab=` names, that `platform.navigate` takes no `search` for `preferences`, the
+**Grants** tab's **Grants I have given** card, and the **No longer applies** marker and renewal
+on it and on the session **Permissions** tab: `pages/settings/preferences-tabs.tsx`,
+`pages/settings/resolve-preferences-tab.ts`, `pages/settings/preferences.page.tsx`,
+`pages/settings/my-grants-card.tsx`, `lib/agent-routes.ts`,
+`components/ui/autonomy-console/autonomy-console-dialog.tsx`; platform `main` @ `8776e9e1a`
+(2026-10-20), skaile-ai/platform#8196.
