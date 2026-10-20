@@ -108,7 +108,7 @@ one reaches depends on where it lives:
   read or write.
 - **The level is the lowest of** the organization's default, an override an org Owner set
   for the member (**Organization settings > Assistants**), and the owner's own lowering
-  (**Preferences > My home assistant's reach**). Reach only narrows: the owner's own role
+  (**Preferences > Assistants > My home assistant's reach**). Reach only narrows: the owner's own role
   on the target still decides everything a level allows.
 - **An organization you create for the owner starts at Full.** One the owner's assistant
   creates with `platform.create_organization` starts with its default at **Full**, so you can

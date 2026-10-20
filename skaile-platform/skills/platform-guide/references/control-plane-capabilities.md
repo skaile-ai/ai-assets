@@ -789,8 +789,8 @@ it reaches, until when, and what is left of any caps, plus notice when one has b
 Expiry produces no notice at all — the row simply stops appearing — so a grant vanishing from the
 block is not evidence of revocation. A grant a platform update ended (the action changed since
 the owner approved it) is listed under **no longer applies**, not as in force: expect a card,
-pre-filled to renew it as it was, and tell the owner why it is back. A schedule firing, a peer agent, or a webhook carries no
-block at all, and **its absence there tells you nothing.**
+pre-filled to renew it as it was, and tell the owner why it is back. A schedule firing, a peer
+agent, or a webhook carries no block at all, and **its absence there tells you nothing.**
 
 You cannot create, extend or widen a grant yourself. You can ask the owner for one with
 `platform.request_standing_approval`, and only the owner can grant it, from the card. Ask ahead
@@ -805,7 +805,7 @@ assistant reach** lists, per organization, how far the owner's home assistant ma
 (`level`, the lowest of `orgDefault`, `override` and `self`) and so who set it; **Lower my
 assistant reach** lowers it in one organization, with the owner's approval like any action.
 Neither can raise a level: a request to go higher is refused. Only the owner can remove
-their own limit (**Remove my limit** in **Preferences**), and only an org Owner can allow
+their own limit (**Remove my limit** in **Preferences > Assistants**), and only an org Owner can allow
 more. The owner's own Private workspace has no such setting. Lowering from **Full** — by the
 owner, or by an org Owner's default or override — revokes the home assistant's standing
 grants that cover that organization, and every grant that covers all organizations; tell
