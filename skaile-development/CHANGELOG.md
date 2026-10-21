@@ -21,6 +21,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `ship` 1.7.1: STEP 10b treats a `whats-new-fix:`-only changeset as `docs_impact=none`, matching the platform CI guard, instead of demanding a capabilities-doc edit and an ai-assets PR.
 
 ### Enhancements
+- `ship` 1.10.0: the `platform-guide` skill moved to `skaile-ai/platform` (`features/platform-guide/`). STEP 10b edits it in the platform worktree and runs `bun run guide:embed`, so the guide merges and deploys with the change; there is no ai-assets guide PR, no clone of ai-assets and no guide merge in Phase 13b. A declined doc is a `<!-- guide: n/a — … -->` / `<!-- capabilities-doc: n/a — … -->` marker in the changeset, checked by Build & Test, instead of the `## Docs` PR-body section.
 - `ship` 1.7.0: the platform capability-docs sync moved from post-merge Phase 13b (conditional, "only if accessible") to Phase 8b, before the commit. The capabilities doc now rides in the same PR, the `platform-guide` skill gets its own ai-assets PR (cloned when no checkout exists) merged with the platform PR, and the PR body carries a `## Docs` section that platform CI parses. Headless or forked runs stop before the merge gate and never reached the old step, which is why the docs were never updated.
 
 ### Docs
