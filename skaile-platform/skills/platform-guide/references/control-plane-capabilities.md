@@ -688,6 +688,10 @@ Reading a status reply:
 - `attempts` counts claimed executions, including recovery of an attempt whose worker died.
   For these effects a recovered attempt resumes from a checkpoint rather than repeating the
   write, so a rising count is not the effect happening twice.
+- `decidedBy` (`{ userId, displayName, via }`, on a reply for an `invocationId`) names who
+  answered the card: `via: "card"` when they decided it, `"standing_approval"` when their
+  standing approval covered the call. With several Owners that need not be the session owner, so
+  name them when you report who approved it.
 - A `Failed` reply may carry a `result.payload` reporting **partial progress**. Those steps
   really happened and were not rolled back — report them rather than a bare failure.
 - An unknown, malformed, or someone-else's operation id answers the same way as a missing one,
@@ -789,15 +793,14 @@ back parked on approval** — that means it is no longer covered, not that somet
 **The owner rule.** An Owner's "always" on something shared also covers the own requests of
 the other Owners of the project or session; members' requests and outside input still get a
 card. Personal things answer only to their owner: a personal mailbox and calendar to its
-Connection owner, and the session owner's connections and other sessions to the session owner.
-A shared mailbox added in the Exchange provider settings (the Exchange card in **My
-Connections**, `targetKind: 'Shared'`) follows the owner rule
+Connection owner, and anything else that is someone's alone to them. A shared mailbox
+added in **My Connections > Exchange > Shared mailboxes** and enabled for this project by a project Owner (`targetKind: 'Shared'`) follows the owner rule
 (`references/exchange-mail-calendar.md`). Within that, a grant
-covers a call only on an Owner's own turn, and what counts is who wrote the turn's text: a message the owner typed, or their own `schedule`, `flow`, peer agent message (`a2a`) or
-`delegation`. It also covers a `late_result` credited to the owner (a read the owner's own turn
+covers a call only on an Owner's own turn, and what counts is who wrote the turn's text: a message that Owner typed, or their own `schedule`, `flow`, peer agent message (`a2a`) or
+`delegation`. It also covers a `late_result` credited to that Owner (a read their own turn
 asked for; one credited to a member is carded, whoever approved it), and an `a2a_relayed` or
-`delegation_relayed` turn that carries the platform's owner-chain mark: every hop ran in the
-owner's own sessions and no starter carried anyone else's text. A turn credited to the owner
+`delegation_relayed` turn that carries the platform's owner-chain mark: every hop ran in that
+Owner's own sessions and no starter carried anyone else's text. A turn credited to an Owner
 whose text came from elsewhere (a webhook or mail, a session seed, or a relayed peer or
 delegated message without the mark, such as one through someone else's session or across an
 organization), and a turn that another member, several members, or nobody attributable set
@@ -816,7 +819,8 @@ pre-filled to renew it for the same action and reach, and tell the owner why it 
 agent, or a webhook carries no block at all, and **its absence there tells you nothing.**
 
 You cannot create, extend or widen a grant yourself. You can ask the owner for one with
-`platform.request_standing_approval`, and only the owner can grant it, from the card. Ask ahead
+`platform.request_standing_approval`, and only someone who may decide that card can grant it
+(an Owner on something shared, the owner alone on their personal things), from the card. Ask ahead
 of an unattended workflow — a scheduled mail digest, say — naming the capability and why, and
 optionally suggesting an audience (`suggested.audience`, the narrowest that does the job). The
 request itself runs nothing and returns `grant_requested` with an `invocationId`. At most 5
@@ -852,7 +856,7 @@ to agents.
 Grounded in: `platform/docs/protocol-v2-capabilities.md`,
 `platform/docs/personal-assistant-control-plane.md` and `platform/backend/libs/capabilities/`
 (`configure-connector.handler.ts`, `begin-asset-configuration.handler.ts`,
-`get-operation.handler.ts`, `personal-flows-policy.service.ts`, `cycle-session.handler.ts`),
+`get-operation.handler.ts` incl. `decidedBy` from skaile-ai/platform#8338, `personal-flows-policy.service.ts`, `cycle-session.handler.ts`),
 platform PRs #6006
 (business-workspace confinement, `assistant-reach.service.ts`), #6008 (private projects),
 #6009 (`update-assistant-profile.handler.ts`, `update-assistant-profile-policy.service.ts`),

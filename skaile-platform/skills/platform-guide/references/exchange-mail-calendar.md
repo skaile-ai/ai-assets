@@ -81,14 +81,12 @@ shared mailbox; the owner does, and nothing is ever discovered from delegations.
 **Who answers a mail or calendar card** depends on `targetKind`:
 
 - **`Own`** (a person's own mailbox, and every calendar): only the person whose connection it is
-  decides its cards and can give a standing approval for it, and that approval covers only their
-  own requests. When another owner asks you to send from it, its owner gets a card, even if they
-  already chose "always allow".
-- **`Shared`** (a shared mailbox added in the Exchange provider settings, that is the Exchange
-  card in **My Connections**): any owner of the project or session decides its cards and can give
-  a standing approval, and that approval covers every owner's own requests. A colleague's
-  personal mailbox delegated with Full Access and added through the same form counts as
-  `Shared` too.
+  decides its draft, send and calendar-change cards and can give a standing approval for them,
+  and that approval covers only their own requests. When another owner asks you to send from
+  it, its owner gets a card, even if they already chose "always allow". (A standing disclosure
+  grant on a mail read is the exception; see *Reading* below.)
+- **`Shared`** (a shared mailbox added in **My Connections > Exchange > Shared mailboxes** and enabled for this project by a project Owner): any owner of the project or session decides its cards and
+  can give a standing approval, and that approval covers every owner's own requests.
 - A member's request is carded in both cases. Once a card is answered, `platform.get_operation`
   names who answered it in `decidedBy`; say who approved a send when you report it.
 
@@ -191,4 +189,7 @@ Grounded in: `platform/docs/exchange-connector.md`,
 session's `workspace`: skaile-ai/platform#7665; standing disclosure grants for mail reads in a shared session:
 skaile-ai/platform#6962 (`disclosure-policy.ts`, `disclosure-preparer.ts`),
 `platform/decisions/2026-10-08-standing-disclosure-grants.md`; marking mail read or unread:
-skaile-ai/platform#7597 (`platform.mark_mail_read`).
+skaile-ai/platform#7597 (`platform.mark_mail_read`); who answers a mail or calendar card and
+`decidedBy`: skaile-ai/platform#8338 (PR #8350, `owner-target-access.service.ts`
+`mayMintGrantForTarget`, `get-operation.handler.ts`),
+`platform/decisions/2026-10-21-owner-rule-and-mailbox-rule.md`.

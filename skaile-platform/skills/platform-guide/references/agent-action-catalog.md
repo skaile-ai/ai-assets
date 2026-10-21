@@ -103,7 +103,7 @@ on it:
   owner's standing approval on something shared also covers the same request from a co-owner.
   - Personal things are the exception: a grant on a personal mailbox or calendar covers only its
     owner's own turns, and only its owner can give one (`references/exchange-mail-calendar.md`);
-    the same holds for the session owner's connections and other sessions.
+    the same holds for anything else that is someone's alone.
   - A turn credited to an Owner whose text came from anywhere else always gets a card: a webhook
     or mail turn, a session seed, or a message that came through someone else's session or across
     an organization.
@@ -126,4 +126,7 @@ Grounded in: `platform/docs/agent-action-declarations.md`,
 `invoke.handler.ts`, `batch.handler.ts`) and `resource-reference.ts`; the grant rule in
 `approval-policy.service.ts` (`isCoveredAsker`) and `platform/backend/libs/agent-gateway/src/turn-principal.ts`
 (`isOwnerProposedTurn`), skaile-ai/platform#7997; owner-chain turns (`isOwnerAgentTurn`,
-`keepsOwnerChain`), skaile-ai/platform#8213, platform `main` @ `dda30d4a5`, 2026-10-20.
+`keepsOwnerChain`), skaile-ai/platform#8213, platform `main` @ `dda30d4a5`, 2026-10-20; the owner
+rule and the mailbox rule (`requester-coverage.ts`, `owner-target-access.service.ts`
+`mayMintGrantForTarget`), skaile-ai/platform#8338 (PR #8350),
+`platform/decisions/2026-10-21-owner-rule-and-mailbox-rule.md`.

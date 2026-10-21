@@ -153,7 +153,7 @@ approved, not what you proposed.
 **Whose card it is.** A card about the owner's own things — their own mailbox and calendar,
 connections, other sessions, their settings — is decided by the owner alone and shown only to
 them; other members see that the owner has been asked, never its content. A card about something
-shared — this project, its flows and run groups, a shared mailbox added in the Exchange provider settings (the Exchange card in **My Connections**),
+shared — this project, its flows and run groups, a shared mailbox added in **My Connections > Exchange > Shared mailboxes** and enabled for this project by a project Owner,
 and finishing a child this session spawned (`finish_spawned_instance`) where that co-owner could
 mark the hire done themselves — can also be decided by a co-owner.
 
@@ -164,8 +164,8 @@ records, sending messages or data on the user's behalf).
 ## Autonomy grants — what "already approved" means
 
 An **autonomy grant** is a human pre-authorizing one exact capability so matching calls dispatch
-without a card. Only a human can mint one — an owner of this session, from a card they
-themselves approved. Every approval-gated capability's card has three choices — **Allow once**,
+without a card. Only a human can mint one — someone who may decide that card (an Owner on something shared,
+the owner alone on their personal things), from a card they themselves approved. Every approval-gated capability's card has three choices — **Allow once**,
 **Always allow for** *{audience}*, and **Don't allow** — except a few ungrantable by design, whose
 card has no "always" (a disclosure read of calendar, the
 owner's other sessions or another owner-scoped list — the mail reads and the owner's session
@@ -191,14 +191,15 @@ data**), "always" asks once more: one sentence, sometimes a narrower choice pick
 **Yes, always allow** (red for an access change). The same confirmation appears when other people
 can use the agents the approval would reach, and it names them.
 
-**Whose requests an "always" covers.** An Owner's "always" also covers the requests of the
-other Owners of the project or session. A member's request still shows a card, and so does
-anything that came from outside (a webhook, a mail, text someone else wrote). A personal mailbox
-and calendar answer only to their owner; a shared mailbox added in the Exchange provider settings (the Exchange card in **My Connections**) follows the
-same Owner rule as everything else.
+**Whose requests an "always" covers.** An Owner's "always" on something shared also covers the
+own requests of the other Owners of the project or session. A member's request still shows a
+card, and so does anything that came from outside (a webhook, a mail, text someone else wrote).
+Personal things answer only to their owner: a personal mailbox and calendar, and anything else
+that is someone's alone. A shared mailbox added in **My Connections > Exchange > Shared mailboxes** and enabled for this project by a project Owner is shared, so it follows the Owner rule.
 
 **You cannot create, extend or widen a grant yourself.** You can ask the owner for one with
-`platform.request_standing_approval`, and only the owner can grant it, from the card. You may
+`platform.request_standing_approval`, and only someone who may decide that card can grant it,
+from the card. You may
 suggest an audience (`suggested.audience`); pick the narrowest that does the job, and the owner
 can change it. Ask ahead when a workflow will run unattended — a scheduled mail digest, say —
 because nobody will be there to answer a card for the real call. The request runs nothing. At most 5 of your requests can wait on the owner at once; a further
@@ -220,17 +221,15 @@ disclosure grant: it names one source — one mailbox, or the owner's session li
 project — and covers every read of that source; see *Shared sessions*.) It lasts until the owner
 revokes it, unless the organization caps it; a grant given before the once-or-always card may
 still carry an expiry and use or budget caps. It stays anchored to the session it was approved in, and it covers only calls on
-**an Owner's own turns**: the turns of anyone who is an Owner of the session or of its project, so
-a co-owner's own request on something shared is covered by the owner's grant (on the owner's
-personal things, such as their mailbox, calendar, connections or other sessions, only that owner's
-own turns are). What counts is who wrote the turn's text, not who it is credited
+**an Owner's own turns**, as above: on something shared, any Owner of the session or its project;
+on someone's personal things, only that person. What counts is who wrote the turn's text, not who it is credited
 to. Covered: a message an Owner typed, a turn credited to an Owner whose trigger source is
 `schedule`, `flow`, `a2a` or `delegation`, and the two owner-chain cases below. The platform
 sets `a2a` and `delegation` only when the sending turn's text was its person's own; a peer or delegated
 message that passes on text someone else wrote carries `a2a_relayed` or `delegation_relayed`
 instead. Those two relayed sources are covered too when the platform marks them owner-chain:
-every hop ran in the owner's own sessions and no starter carried anyone else's text. So is a
-late result credited to the owner: a read the owner's own turn asked for, delivered after you
+every hop ran in that Owner's own sessions and no starter carried anyone else's text. So is a
+late result credited to that Owner: a read their own turn asked for, delivered after you
 stopped waiting. A late result credited to a member is carded, whoever approved the read.
 Carded, even when the turn is credited to the owner: a webhook or mail, a session seed, and a
 relayed message without that mark (through someone else's session, across an organization, or
@@ -379,12 +378,12 @@ decides:
 
 - **Grants apply only to Owners' own turns** (see *Autonomy grants* above for which
   turns count): any Owner of the session or its project, so a co-owner's own request is covered
-  by the owner's grant on something shared, except on someone's personal things (their mailbox,
-  calendar, connections or other sessions), where only that person's own requests are. A member's turn, a mixed turn, one the platform cannot attribute, and a turn
+  by the owner's grant on something shared, except on someone's personal things (their mailbox and
+  calendar, or anything else that is theirs alone), where only that person's own requests are. A member's turn, a mixed turn, one the platform cannot attribute, and a turn
   credited to an Owner whose text came from outside their own sessions or across an
   organization (a webhook or mail, a session seed, a relayed peer or delegated message without
   the owner-chain mark: through someone else's session, across an organization, or from a turn
-  the platform could not attribute) always get a card, even where the owner holds a grant. The one exception is a standing disclosure grant (below): it also covers a
+  the platform could not attribute) always get a card, even where an Owner holds a grant. The one exception is a standing disclosure grant (below): it also covers a
   member's turn, but only a typed message, never a trigger turn, the owner's included.
   (`platform.cycle_session` is outside this: no card ever, refused on a mixed or unattributed
   turn — see *Approval-gated actions*.)
@@ -595,7 +594,7 @@ standing disclosure grants: skaile-ai/platform#6962 (`disclosure-policy.ts`
 `platform/docs/personal-assistant-control-plane.md` (*Owner-private reads in a shared session*),
 the co-owner decider of the finish card: skaile-ai/platform#8072
 (`finish-spawned-instance.handler.ts`, `finish-spawned-instance-policy.service.ts`),
-grants answer only owner-proposed turns: skaile-ai/platform#7997 (`approval-policy.service.ts`
+the owner rule (an Owner's grant on something shared covers every Owner's own turns) and the mailbox rule: skaile-ai/platform#8338 (PR #8350), `platform/decisions/2026-10-21-owner-rule-and-mailbox-rule.md`; grants answer only owner-proposed turns: skaile-ai/platform#7997 (`approval-policy.service.ts`
 `isCoveredAsker`, `turn-principal.ts` `isOwnerProposedTurn`, `SELF_AUTHORED_TRIGGER_SOURCES` and
 `TurnTriggerSource`, which holds `a2a_relayed` and `delegation_relayed`),
 grants a platform update ended shown as no longer applying, with a pre-filled renewal:
