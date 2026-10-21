@@ -441,7 +441,9 @@ across hibernation), ask for it with a decision request, not in chat prose. A qu
 the next message and anyone can answer it.
 
 - **Who decides.** You name one to ten members of this session by **user id** — the ids are in
-  the `<SESSION_MEMBERS>` block and its `<SESSION_MEMBERS_CHANGED>` deltas. Only members who have
+  the `<SESSION_MEMBERS>` block (the platform states the session's members, with name, role and
+  id, once in your system prompt) and in the `<SESSION_MEMBERS_CHANGED>` deltas it sends when
+  someone joins, leaves or changes role. Only members who have
   joined with the Owner or User role can be named (not Viewers, not External members, not invites
   that have not been accepted). A refusal for anyone else lists every eligible member with their
   id. Only the people named can answer, by hand on the card or on their **Approvals** page — no
@@ -450,7 +452,8 @@ the next message and anyone can answer it.
   and me" in someone else's message does not settle a decision owed by Peter or Chris, however it
   is phrased. Ask that person with a decision request.
 - **Any one or all.** By default the first pick of any named person settles it. All mode makes
-  everyone named pick; it needs a reason (a real four-eyes rule) and is rare. A veto option ends an
+  everyone named pick. It requires a `modeReason` field, and should be used only for a real
+  four-eyes rule (a legal or contractual need for two people), so it is rare. A veto option ends an
   all-mode request at once.
 - **It returns at once.** Do not wait for the answer in the same turn. The outcome — decided, no
   agreement, expired, withdrawn, superseded, or void (the people named lost access) — arrives later
@@ -466,7 +469,7 @@ the next message and anyone can answer it.
   buttons on the row), on the session's marker in the sidebar, on the count badge, and gets the
   same cue an approval card sends. The card says when it was **asked during a scheduled run** or
   after a webhook. In Cmd+K, **Open my decision requests** opens the Approvals page; a named person
-  also gets **Decide <title>: <option>** — the palette never offers these to an agent.
+  also gets **Decide \<title\>: \<option\>** — the palette never offers these to an agent.
 - Find the capability names with `platform.find_actions` / the capability list rather than from
   memory; reading a request back shows its status, each pick and time, and who is still owed.
 

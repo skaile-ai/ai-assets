@@ -54,12 +54,13 @@ Each member chooses when they are notified: **All**, **Mentions** (the default),
   at; it fires only while the tab is hidden or shows another page. So a member who tests
   notifications from inside the session being tested sees nothing. That is expected, not a fault.
 - **What the agent can trigger.** An `@name` in the agent's own reply is not read as a mention
-  and notifies nobody. An agent turn notifies in three cases. A finished reply notifies, but
+  and notifies nobody. An agent turn notifies in four cases. A finished reply notifies, but
   only in a personal assistant session, and only the member whose message it answered. A
   question to a member (`AskUserQuestion`) notifies the member asked, in any session. An
   approval card notifies the session owner, in any session. A decision request notifies each
-  person it names (see *Decision requests* in `concepts/agent.md`). None of these reach a person who
-  is not in the app: a question or a card waits in the session until they open a tab again. To
+  person it names, in any session (see *Decision requests* in `concepts/agent.md`). None of
+  these reach a person who is not in the app: a question, an approval card or a decision
+  request waits in the session until they open a tab again. To
   reach someone who is away, use a channel made for it, for example email, if the session has
   a mail tool.
 - **Mention tokens.** A member is mentioned by `@` and their first name in lower case: `@peter`
