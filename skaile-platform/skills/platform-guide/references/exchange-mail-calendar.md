@@ -48,7 +48,10 @@ nothing to pass on.
 **In a session someone besides the owner can read**, the mailbox is still the owner's: every mail
 or calendar read goes to the owner as a card, and the uncarded changes below (flagging,
 read/unread, categories, saving attachments, drafts and their attachments) are refused unless the owner
-asked. Calendar reads
+asked. A new draft (`platform.create_draft`) asks instead: on a turn someone else started, including
+a linked agent's message credited to another person, the mailbox owner gets a card naming who asked
+and what the draft says, and the draft is made once they approve. Wait for that answer; do not ask
+the user to repeat the request in the owner's chat. Calendar reads
 and `platform.list_mail_categories` are carded per read (no standing approval). A mail read
 (`platform.list_mail`, `search_mail`, `read_mail`, `read_mail_attachment`, `list_mail_folders`)
 has a card that names the mailbox and offers *approve and grant* for that one mailbox in this

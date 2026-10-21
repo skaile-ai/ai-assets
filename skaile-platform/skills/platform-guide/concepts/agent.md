@@ -381,8 +381,11 @@ decides:
   turn. The owner
   revokes it in session settings, **Permissions** tab; the next read is carded again. Small effects that normally run with no card — drafting and filing mail, attaching a
   file, messaging a linked peer, renaming the assistant — are refused unless the owner asked
-  ("Only `<owner>` can ask for this"). In a session only the owner can read, such as the
-  personal assistant, all of this runs as before.
+  ("Only `<owner>` can ask for this"). Two of them ask instead of refusing: a mail draft
+  (`platform.create_draft`) and a message to a linked session (`platform.send_to_session`) go to
+  the owner (for a draft, the mailbox's owner) as a card that names who asked. In a session only
+  the owner can read, such as the personal assistant, all of this runs as before, and a turn a
+  linked agent started on the owner's own behalf runs without a card too.
 
   **No card when the read shows nobody anything new.** Three of these reads skip the card, and
   run as in a session only the owner reads, when every other reader of this session already
