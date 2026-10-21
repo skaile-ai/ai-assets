@@ -650,8 +650,8 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
                   behaviour the docs already describe — including a `whats-new-fix:`
                   changeset, for which CI asks for no docs. A fix that CHANGES what is
                   documented (a new option, a different limit) is user-visible. Write the
-                  one-sentence reason now for the final report. It needs no marker: a `none`
-                  change carries no triggering `whats-new*` marker, so CI asks for no docs.
+                  one-sentence reason now, in the `docs_impact=none reason=<…>` record below;
+                  a `none` change carries no triggering `whats-new*` marker, so it needs none.
   When unsure whether a change alters what the docs say, it is `user-visible`; the cost of
   one extra paragraph is lower than a stale guide.
 
