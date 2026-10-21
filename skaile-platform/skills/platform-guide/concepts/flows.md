@@ -284,6 +284,14 @@ decided, and again immediately before the write.
 
 For `platform.revise_flow` the scope is the stored flow's own, not the session's project.
 
+**What the owner sees on the card.** Besides your `rationale`, the card lists the flow's steps
+— each step's kind and label in the order a run reaches them, where a router branches, where a
+step waits for approval, and which flow a sub-flow runs — and folds a long flow after six steps.
+A revision's card lists the added, changed and removed steps first. Instructions, commands and
+prompts are not shown, so give every node a **label** that says what it does: the label is what
+the owner reads when deciding. If the owner asks what a step does, read it with `platform.get_flow`
+rather than describing it from memory.
+
 **Renaming a flow.** `platform.revise_flow` with only `name` renames a flow without resending
 its nodes. The new name is what the flow list shows, and the owner's card says "Renames the flow
 from … to …". It is a revision like any other: the same admin rule and the same card or grant.
