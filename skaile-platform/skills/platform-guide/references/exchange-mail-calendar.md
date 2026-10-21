@@ -84,7 +84,7 @@ shared mailbox; the owner does, and nothing is ever discovered from delegations.
   decides its cards and can give a standing approval for it, and that approval covers only their
   own requests. When another owner asks you to send from it, its owner gets a card, even if they
   already chose "always allow".
-- **`Shared`** (a shared mailbox switched on for this project): any owner of the project or
+- **`Shared`** (a shared mailbox added in the Exchange provider settings): any owner of the project or
   session decides its cards and can give a standing approval, and that approval covers every
   owner's own requests.
 - A member's request is carded in both cases. Once a card is answered, `platform.get_operation`

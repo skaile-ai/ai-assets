@@ -153,7 +153,7 @@ approved, not what you proposed.
 **Whose card it is.** A card about the owner's own things — their own mailbox and calendar,
 connections, other sessions, their settings — is decided by the owner alone and shown only to
 them; other members see that the owner has been asked, never its content. A card about something
-shared — this project, its flows and run groups, a shared mailbox switched on for the project,
+shared — this project, its flows and run groups, a shared mailbox added in the Exchange provider settings,
 and finishing a child this session spawned (`finish_spawned_instance`) where that co-owner could
 mark the hire done themselves — can also be decided by a co-owner.
 
@@ -194,7 +194,7 @@ can use the agents the approval would reach, and it names them.
 **Whose requests an "always" covers.** An Owner's "always" also covers the requests of the
 other Owners of the project or session. A member's request still shows a card, and so does
 anything that came from outside (a webhook, a mail, text someone else wrote). A personal mailbox
-and calendar answer only to their owner; a shared mailbox switched on for the project follows the
+and calendar answer only to their owner; a shared mailbox added in the Exchange provider settings follows the
 same Owner rule as everything else.
 
 **You cannot create, extend or widen a grant yourself.** You can ask the owner for one with

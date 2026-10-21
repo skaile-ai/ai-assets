@@ -790,7 +790,7 @@ back parked on approval** — that means it is no longer covered, not that somet
 the other Owners of the project or session; members' requests and outside input still get a
 card. Personal things answer only to their owner: a personal mailbox and calendar to its
 Connection owner, and the session owner's connections and other sessions to the session owner.
-A shared mailbox switched on for the project follows the owner rule
+A shared mailbox added in the Exchange provider settings (`targetKind: 'Shared'`) follows the owner rule
 (`references/exchange-mail-calendar.md`). Within that, a grant
 covers a call only on an Owner's own turn, and what counts is who wrote the turn's text: a message the owner typed, or their own `schedule`, `flow`, peer agent message (`a2a`) or
 `delegation`. It also covers a `late_result` credited to the owner (a read the owner's own turn
