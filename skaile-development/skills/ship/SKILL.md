@@ -477,7 +477,7 @@ STEP 3b: Resume detection (skip building if a PR already exists for this work)
       SKIP STEP 4..STEP 13 and JUMP to Phase 12 (STEP 14). Everything from there runs
       normally: Phase 12b (follow-up sweep), Phase 13 (STEP 14c body refresh, STEP 14d
       recap, STEP 15 disposition), Phase 13b (post-merge doc publication) and Phase 14.
-      If the resumed PR carries a `whats-new*` changeset (other than `whats-new-fix:`) but
+      If the resumed PR is `user-visible` by STEP 10b's rule (either branch) but carries
       neither the doc edits nor the decline markers, run STEP 10b against its diff first and
       push the docs commit before the gate.
       Note for STEP 14c: `fix_rounds` starts at 0 on this path, but the body was written
@@ -679,8 +679,11 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
     4. Resume path (STEP 3b skipped STEP 4–5): the worktree from STEP 3b is the checkout for
        the docs commit; push to the PR branch as for any babysit fix.
 
-  A declined doc is a marker in the changeset that carries the `whats-new*` marker — not a
-  PR-body line. CI (Build & Test) reads the changed files and the changesets:
+  A user-visible change always carries a `whats-new:`, `whats-new-highlight:` or
+  `whats-new-agent:` marker: if the verdict came from the diff and the changeset has none, add
+  the one that fits now (rules in the platform `.changeset/README.md`). That marker is what CI
+  keys the docs rule on. A declined doc is a marker in that same changeset — not a PR-body
+  line. CI (Build & Test) reads the changed files and the changesets:
     <!-- capabilities-doc: n/a — <reason, ≥ 10 characters> -->
     <!-- guide: n/a — <reason, ≥ 10 characters> -->
   A doc edited in the PR needs no marker. Write the chosen text only, with no angle brackets
