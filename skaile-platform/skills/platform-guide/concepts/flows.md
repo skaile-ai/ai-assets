@@ -613,9 +613,8 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   - `platform.list_run_groups` (no approval) lists the project's groups, newest first —
     use it to find a group whose create was approved after your call stopped waiting.
   - `platform.set_run_group_autonomous_mode({ groupId, autonomousMode })` switches
-    autonomous mode on or off. It is approval-gated, and classed `privileged`, so it has no
-    one-click grant option: a grant reaches it only if the owner deliberately turned that
-    opt-in on. It affects only runs admitted afterwards (so set it before activating), and
+    autonomous mode on or off. It is approval-gated, and classed `privileged`, so its
+    **Always allow** asks once more (**Changes access**) before it is given. It affects only runs admitted afterwards (so set it before activating), and
     gates the flow marks mandatory still stop every run. `create_run_group` itself still
     refuses `autonomousMode: true`.
   - `platform.activate_run_group({ groupId })` starts a Draft group, with the same check as
