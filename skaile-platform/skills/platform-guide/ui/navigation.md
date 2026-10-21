@@ -88,8 +88,9 @@ The capability's own description carries the live list; prefer it if the two dif
     **Preferences > Assistants** makes it the home assistant everywhere. On the collapsed
     icon rail the launcher is its own icon above the avatar. The avatar opens the user
     menu — **Invite someone to Skaile**, **Report a problem**, **Account**, **Preferences**,
-    **Invites**, **Approvals** (with a count of what waits on the user; it also lists the decision requests the user is named in, with the option buttons on each row, and Cmd+K **Open my decision requests** opens it), **My Connections**
-    (hidden from org Viewers), an **Expert mode** toggle, a **Theme** submenu, an **Info**
+    **Invites**, **Approvals** (with a count of what waits on the user; it also lists the
+    decision requests the user is named in, with the option buttons on each row, and Cmd+K
+    **Open my decision requests** opens it), **My Connections** (hidden from org Viewers), an **Expert mode** toggle, a **Theme** submenu, an **Info**
     submenu (**What's new**, **Open-source licenses** and the frontend/backend version numbers;
     for everyone), **Focus organization** (only on deployments with organization subdomains), a
     **Platform** admin submenu (platform admins only: **Admin Dashboard**, **User Dashboard**,

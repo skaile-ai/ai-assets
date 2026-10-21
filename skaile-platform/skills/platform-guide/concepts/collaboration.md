@@ -60,9 +60,8 @@ Each member chooses when they are notified: **All**, **Mentions** (the default),
   approval card notifies the session owner, in any session. A decision request notifies each
   person it names, in any session (see *Decision requests* in `concepts/agent.md`). None of
   these reach a person who is not in the app: a question, an approval card or a decision
-  request waits in the session until they open a tab again. To
-  reach someone who is away, use a channel made for it, for example email, if the session has
-  a mail tool.
+  request waits in the session until they open a tab again. To reach someone who is away, use
+  a channel made for it, for example email, if the session has a mail tool.
 - **Mention tokens.** A member is mentioned by `@` and their first name in lower case: `@peter`
   for Peter Albert. Only when two members of the session share a first name is it the whole
   name as one word (`@peteralbert`), so the same person can have a different token in another
