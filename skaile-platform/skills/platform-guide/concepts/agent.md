@@ -150,12 +150,12 @@ The edit re-prepares the request as a new one; `platform.get_operation` on your 
 then answers for the edited request and names it with `revisedFrom`. Report what was actually
 approved, not what you proposed.
 
-**Whose card it is.** A card about the owner's own things — mail, calendar, connections, other
-sessions, their settings — is decided by the owner alone and shown only to them; other members
-see that the owner has been asked, never its content. A card about something shared — this
-project, its flows and run groups, and finishing a child this session spawned
-(`finish_spawned_instance`) where that co-owner could mark the hire done themselves — can also
-be decided by a co-owner.
+**Whose card it is.** A card about the owner's own things — their own mailbox and calendar,
+connections, other sessions, their settings — is decided by the owner alone and shown only to
+them; other members see that the owner has been asked, never its content. A card about something
+shared — this project, its flows and run groups, a shared mailbox switched on for the project,
+and finishing a child this session spawned (`finish_spawned_instance`) where that co-owner could
+mark the hire done themselves — can also be decided by a co-owner.
 
 This mirrors the agent's own safety rules: confirm before destructive or
 consequence-bearing operations (deleting files, overwriting uncommitted work, dropping DB
@@ -193,8 +193,10 @@ disclosure grant: it names one source — one mailbox, or the owner's session li
 project — and covers every read of that source; see *Shared sessions*.) It either has an
 absolute expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it
 may carry use and budget caps. It stays anchored to the session it was approved in, and it covers only calls on
-**the owner's own turns**. What counts is who wrote the turn's text, not who it is credited
-to. Covered: a message the owner typed, a turn credited to the owner whose trigger source is
+**an Owner's own turns**: the turns of anyone who is an Owner of the session or of its project, so
+a co-owner's own request is covered by the owner's grant (on a personal mailbox or calendar, only
+its owner's own turns are). What counts is who wrote the turn's text, not who it is credited
+to. Covered: a message an Owner typed, a turn credited to an Owner whose trigger source is
 `schedule`, `flow`, `a2a` or `delegation`, and the two owner-chain cases below. The platform
 sets `a2a` and `delegation` only when the sending turn's text was its person's own; a peer or delegated
 message that passes on text someone else wrote carries `a2a_relayed` or `delegation_relayed`
@@ -350,9 +352,11 @@ platform records **who set off each turn** — the one member who wrote, several
 or the person a schedule, webhook or peer request acts for. You cannot set or claim it. It
 decides:
 
-- **Grants apply only to the owner's own turns** (see *Autonomy grants* above for which
-  turns count). A member's turn, a mixed turn, one the platform cannot attribute, and a turn
-  credited to the owner whose text came from outside the owner's own sessions or across an
+- **Grants apply only to Owners' own turns** (see *Autonomy grants* above for which
+  turns count): any Owner of the session or its project, so a co-owner's own request is covered
+  by the owner's grant, except on the owner's personal mailbox or calendar, where only the
+  owner's own requests are. A member's turn, a mixed turn, one the platform cannot attribute, and a turn
+  credited to an Owner whose text came from outside their own sessions or across an
   organization (a webhook or mail, a session seed, a relayed peer or delegated message without
   the owner-chain mark: through someone else's session, across an organization, or from a turn
   the platform could not attribute) always get a card, even where the owner holds a grant. The one exception is a standing disclosure grant (below): it also covers a

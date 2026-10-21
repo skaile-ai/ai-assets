@@ -75,6 +75,18 @@ shared mailbox; the owner does, and nothing is ever discovered from delegations.
 - **Reuse one handle** for a message, its draft, its attachments and its pagination. A wrong,
   disabled or foreign handle is refused and never falls back to another mailbox.
 
+**Who answers a mail or calendar card** depends on `targetKind`:
+
+- **`Own`** (a person's own mailbox, and every calendar): only the person whose connection it is
+  decides its cards and can give a standing approval for it, and that approval covers only their
+  own requests. When another owner asks you to send from it, its owner gets a card, even if they
+  already chose "always allow".
+- **`Shared`** (a shared mailbox switched on for this project): any owner of the project or
+  session decides its cards and can give a standing approval, and that approval covers every
+  owner's own requests.
+- A member's request is carded in both cases. Once a card is answered, `platform.get_operation`
+  names who answered it in `decidedBy`; say who approved a send when you report it.
+
 ## Reading — no approval while only the owner can read the session
 
 `platform.list_mail_folders`, `platform.list_mail`, `platform.search_mail`,

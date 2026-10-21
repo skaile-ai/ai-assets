@@ -95,16 +95,19 @@ or to create or replace one there, the personal assistant has `platform.read_ses
 The platform records who set off each turn; the agent cannot set it. All three capabilities key
 on it:
 
-- **Grants cover only the owner's own turns**: a message they typed, or their own schedule, flow,
-  agent message or delegation — turns whose text the owner wrote — plus work the owner's agents
-  pass on only between the owner's own sessions: a late result credited to the owner (a read the
-  owner's own turn asked for), or a relayed agent or delegated message whose every hop ran in the
-  owner's own sessions, inside one organization.
-  - A turn credited to the owner whose text came from anywhere else always gets a card: a webhook
+- **Grants cover only Owners' own turns**: the turns of anyone who is an Owner of the session or
+  of its project — a message they typed, or their own schedule, flow, agent message or
+  delegation, whose text they wrote — plus work their agents pass on only between their own
+  sessions: a late result credited to them (a read their own turn asked for), or a relayed agent
+  or delegated message whose every hop ran in their own sessions, inside one organization. So an
+  owner's standing approval also covers the same request from a co-owner.
+  - A personal mailbox or calendar is the exception: a grant on it covers only its owner's own
+    turns, and only its owner can give one (`references/exchange-mail-calendar.md`).
+  - A turn credited to an Owner whose text came from anywhere else always gets a card: a webhook
     or mail turn, a session seed, or a message that came through someone else's session or across
     an organization.
-  - A turn the owner did not set off always gets a card: a member's turn, several members at
-    once, or an unattributable turn.
+  - A member's turn always gets a card, as do several people at once (even several Owners) and
+    an unattributable turn.
 - `find_actions` hides actions on the owner's own things from anyone but the owner, and shows
   nothing on a turn it cannot attribute.
 - When a member asks, they must be able to do it themselves as well; the owner's authority is not
