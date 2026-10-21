@@ -188,12 +188,13 @@ for example how a kind of task usually goes. It is off until an Owner turns it o
 **Settings > Skaile & external access**, and a personal organization never takes part.
 
 - With it on, shared sessions take part by default (an Owner can make them take part only when
-  opted in). A project owner can opt a whole project out under project **Settings > General**,
-  which wins over every session in it; a session's owner (or its project's owner) can set the
-  session to **Take part**, **Do not take part** or **Follow the organization's default** under
-  session **Settings > General**, which also says why it is or is not asked. Personal
-  assistants, private spaces, shared agents, run sessions and projects not shared in the
-  organization are never asked.
+  opted in), in private projects as in shared ones. A private session is not asked unless its
+  owner sets it to **Take part**. A project owner can opt a whole project out under project
+  **Settings > General**, which wins over every session in it; a session's owner (or its
+  project's owner) can set the session to **Take part**, **Do not take part** or **Follow the
+  organization's default** under session **Settings > General**, which also says why it is or
+  is not asked. Personal assistants, private spaces, shared agents and run sessions are never
+  asked.
 - A question shows in the chat as a **Question from Skaile** card, and the agent answers it in
   a turn of its own, started only when nothing else is running (a hibernated session is woken
   for it). That turn is **read-only**: the agent can read everything the session can, including
