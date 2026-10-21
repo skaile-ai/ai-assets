@@ -54,13 +54,14 @@ Each member chooses when they are notified: **All**, **Mentions** (the default),
   at; it fires only while the tab is hidden or shows another page. So a member who tests
   notifications from inside the session being tested sees nothing. That is expected, not a fault.
 - **What the agent can trigger.** An `@name` in the agent's own reply is not read as a mention
-  and notifies nobody. An agent turn notifies in three cases. A finished reply notifies, but
+  and notifies nobody. An agent turn notifies in four cases. A finished reply notifies, but
   only in a personal assistant session, and only the member whose message it answered. A
   question to a member (`AskUserQuestion`) notifies the member asked, in any session. An
-  approval card notifies the session owner, in any session. None of these reach a person who
-  is not in the app: a question or a card waits in the session until they open a tab again. To
-  reach someone who is away, use a channel made for it, for example email, if the session has
-  a mail tool.
+  approval card notifies the session owner, in any session. A decision request notifies each
+  person it names, in any session (see *Decision requests* in `concepts/agent.md`). None of
+  these reach a person who is not in the app: a question, an approval card or a decision
+  request waits in the session until they open a tab again. To reach someone who is away, use
+  a channel made for it, for example email, if the session has a mail tool.
 - **Mention tokens.** A member is mentioned by `@` and their first name in lower case: `@peter`
   for Peter Albert. Only when two members of the session share a first name is it the whole
   name as one word (`@peteralbert`), so the same person can have a different token in another
@@ -84,7 +85,7 @@ example a maintenance window or a changed feature.
   organization the capability does not exist.
 - In a staff session the staff member names the target organizations, projects or sessions in
   plain words, or pastes a platform link: the agent resolves them to ids with
-  `platform.staff_find_targets`, which returns names and ids only, and the approval card names
+  `platform.staff_find_targets`, which returns names, slugs, ids and session status only, and the approval card names
   the organizations the notice will reach before anything is sent.
 
 ## Public file-preview sharing
@@ -216,4 +217,5 @@ and the not-delivered notice), #6263 (sibling instances of a template, `spawn-ch
 permissions), platform #6690 (the session settings Config tab renamed **General**), platform
 issues #4754 (agent replies notify only in assistant sessions) and #2350 (phone push, not
 built yet), platform #8151 (research questions from Skaile, `platform/backend/libs/research/`),
-platform PR #8275 for issue #8273 (staff notice target lookup, `platform.staff_find_targets`).
+platform #8319 (a decision request notifies each person it names, `notification-fanout.service.ts`),
+skaile-ai/platform#8275 (issue #8273, staff notice target lookup, `platform.staff_find_targets`).

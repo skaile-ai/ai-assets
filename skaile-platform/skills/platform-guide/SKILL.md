@@ -12,7 +12,7 @@ description: "Deep knowledge of the Skaile platform's UI and conceptual model so
   creating a project/session/organization, inviting someone, starting a connector setup or mount, or
   reading back a durable operation; or when you hit a platform problem, or the user wants
   to report a bug or suggest a feature to the Skaile team. Load on demand, not always-on."
-version: 0.16.29
+version: 0.16.32
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -36,6 +36,7 @@ keywords:
   - durable-operation
   - autonomy
   - approval
+  - decision-request
   - webhook
   - skailify
   - sharing
@@ -113,7 +114,7 @@ capability names, ids and fields keep the code words.
 | `concepts/integrations.md` | Connecting external systems: providers, auth modes (delegation vs service account), access levels, editing an existing mount, whose connection a mount runs on, **Reconnect**, Exchange mail and shared mailboxes, AI providers and subscription seats, classifier providers, the Word and Excel tools every organization gets by default, unlocking a permission-locked PDF. |
 | `concepts/collaboration.md` | Multi-user sessions (mentions/reactions/threading/presence), notifications (modes, where they arrive, what an agent turn triggers, mention tokens), sharing with people, public file-preview links, agent-to-agent (A2A). |
 | `concepts/previews.md` | Running and viewing an app preview; what makes a workspace previewable. |
-| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants (incl. asking the owner for one ahead), durable operations and the `AwaitingUser` handoff, discovery-then-propose, **assistant reach** (which organizations you can see and act in), reporting platform problems to the Skaile team, platform actions (`find_actions` / `invoke` / `batch`), shared sessions (whose turn it is), UI steering (`open_file`, `navigate`) and UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
+| `concepts/agent.md` | How the agent itself acts: runtime capabilities, approval gates and autonomy grants (incl. asking the owner for one ahead), **decision requests** (asking one or more named members to decide, any-one vs all mode, reading the outcome back), durable operations and the `AwaitingUser` handoff, discovery-then-propose, **assistant reach** (which organizations you can see and act in), reporting platform problems to the Skaile team, platform actions (`find_actions` / `invoke` / `batch`), shared sessions (whose turn it is), UI steering (`open_file`, `navigate`) and UI-context flags, the `session`/`presence` state stores, guiding vs doing. |
 
 ### Reference (load only when constructing an action)
 
