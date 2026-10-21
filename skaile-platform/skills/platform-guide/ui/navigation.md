@@ -91,8 +91,8 @@ The capability's own description carries the live list; prefer it if the two dif
     **Invites**, **Approvals** (with a count of what waits on the user; it also lists the
     decision requests the user is named in, with the option buttons on each row, and Cmd+K
     **Open my decision requests** opens it), **My Connections** (hidden from org Viewers), an
-    **Expert mode** toggle, a **Theme** submenu, an **Info**
-    submenu (**What's new**, **Open-source licenses** and the frontend/backend version numbers;
+    **Expert mode** toggle, a **Theme** submenu, an **Info** submenu (**What's new**,
+    **Open-source licenses** and the frontend/backend version numbers;
     for everyone), **Focus organization** (only on deployments with organization subdomains), a
     **Platform** admin submenu (platform admins only: **Admin Dashboard**, **User Dashboard**,
     **Org Dashboard**, **Platform Usage**, **Session Manager**), and **Sign Out**.
@@ -432,4 +432,7 @@ on it and on the session **Permissions** tab: `pages/settings/preferences-tabs.t
 `components/ui/autonomy-console/autonomy-console-dialog.tsx`; platform `main` @ `8776e9e1a`
 (2026-10-20), skaile-ai/platform#8196; the **Trusted people in this project** section of the Permissions tab:
 `components/ui/autonomy-console/trusted-requesters-section.tsx`,
-`trusted-requesters.actions.tsx`, `pages/sessions/settings/session-permissions-tab.tsx`, skaile-ai/platform#8274 (issue #8267), platform `main` @ `de7dc20ce`, 2026-10-21.
+`trusted-requesters.actions.tsx`, `pages/sessions/settings/session-permissions-tab.tsx`, skaile-ai/platform#8274 (issue #8267), platform `main` @ `de7dc20ce`, 2026-10-21. The decision-request rows on **Approvals** and Cmd+K **Open my decision requests**:
+`pages/approvals/approvals.page.tsx`, `components/ui/approval-inbox/approval-inbox-panel.tsx`,
+`approval-inbox.actions.tsx`, `pages/dashboard/approvals-card.tsx`, skaile-ai/platform#8319,
+platform `main` @ `4e64ce80e`, 2026-10-21.

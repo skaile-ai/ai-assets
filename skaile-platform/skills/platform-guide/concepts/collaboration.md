@@ -212,4 +212,5 @@ and the not-delivered notice), #6263 (sibling instances of a template, `spawn-ch
 `platform/docs/roles-permissions-matrix.md` (share and invite
 permissions), platform #6690 (the session settings Config tab renamed **General**), platform
 issues #4754 (agent replies notify only in assistant sessions) and #2350 (phone push, not
-built yet), platform #8151 (research questions from Skaile, `platform/backend/libs/research/`).
+built yet), platform #8151 (research questions from Skaile, `platform/backend/libs/research/`),
+platform #8319 (a decision request notifies each person it names, `notification-fanout.service.ts`).
