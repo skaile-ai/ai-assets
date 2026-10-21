@@ -165,16 +165,43 @@ records, sending messages or data on the user's behalf).
 
 An **autonomy grant** is a human pre-authorizing one exact capability so matching calls dispatch
 without a card. Only a human can mint one — an owner of this session, from a card they
-themselves approved. Every approval-gated capability's card offers one — *approve once*, or
-*approve and grant* — except a few ungrantable by design (a disclosure read of calendar, the
+themselves approved. Every approval-gated capability's card has three choices — **Allow once**,
+**Always allow for** *{audience}*, and **Don't allow** — except a few ungrantable by design, whose
+card has no "always" (a disclosure read of calendar, the
 owner's other sessions or another owner-scoped list — the mail reads and the owner's session
 list for this project are the exception, see *Shared sessions*; a file leaving its
 organization) and `platform.batch`, which is never granted whole: each of its steps is
-matched against that action's own grants. **You cannot create, extend or widen a grant
-yourself.** You can ask the owner for one with `platform.request_standing_approval`, and only
-the owner can grant it, from the card. Ask ahead when a workflow will run unattended — a
-scheduled mail digest, say — because nobody will be there to answer a card for the real call.
-The request runs nothing. At most 5 of your requests can wait on the owner at once; a further
+matched against that action's own grants.
+
+**"Always" means always.** It has no duration and no expiry, unless the organization caps
+standing approvals, in which case the card says so in one line. It lasts until the owner revokes
+it. What the owner picks is **whose requests it covers** (the audience):
+
+| Audience | The card says | Covers |
+| --- | --- | --- |
+| `agent` | *this agent* (*this run*, when a run asks) | only the session it was approved in |
+| `agentAndHires` | *this agent and its hires* (the usual default) | that session and the agents it hired |
+| `project` | *all your agents in* {project} | every agent of the owner's in that project |
+| `org` | *all your agents in* {organization} | every agent of the owner's in that organization |
+| `runGroup` | *every run in* "{group}" (the default when a run asks) | every run of that run group |
+
+"Your agents" are agents the owner owns. A change to who has access defaults to *this agent*.
+For a non-routine action (one that **leaves Skaile**, **changes access** or **shares private
+data**), "always" asks once more: one sentence, sometimes a narrower choice picked first, and
+**Yes, always allow** (red for an access change). The same confirmation appears when other people
+can use the agents the approval would reach, and it names them.
+
+**Whose requests an "always" covers.** An Owner's "always" also covers the requests of the
+other Owners of the project or session. A member's request still shows a card, and so does
+anything that came from outside (a webhook, a mail, text someone else wrote). A personal mailbox
+and calendar answer only to their owner; a shared mailbox switched on for the project follows the
+same Owner rule as everything else.
+
+**You cannot create, extend or widen a grant yourself.** You can ask the owner for one with
+`platform.request_standing_approval`, and only the owner can grant it, from the card. You may
+suggest an audience (`suggested.audience`); pick the narrowest that does the job, and the owner
+can change it. Ask ahead when a workflow will run unattended — a scheduled mail digest, say —
+because nobody will be there to answer a card for the real call. The request runs nothing. At most 5 of your requests can wait on the owner at once; a further
 one is refused until the owner decides one, and repeating an identical open request joins its
 existing card.
 
@@ -183,16 +210,16 @@ Each capability declares an **effect class** that decides how far a grant may re
 | Class | Means | Covered by a grant? |
 | --- | --- | --- |
 | `routine` | Effect stays inside the owner's own platform surface. | Yes — this is what an ordinary grant covers. |
-| `external` | Reaches a person or system outside Skaile (an invitation email, a sent mail, a calendar invitation, GitHub or another third-party API). A message delivered into another Skaile session is not external. | Only if the owner **explicitly widened** the grant to external communication. |
-| `privileged` | Administrative — changes who or what exists at organization level, or hands an organization connection to a job description. | Only if the owner **explicitly widened** the grant to privileged administration. |
+| `external` | Reaches a person or system outside Skaile (an invitation email, a sent mail, a calendar invitation, GitHub or another third-party API). A message delivered into another Skaile session is not external. | Only if the owner confirmed "always" for it (**Leaves Skaile**). |
+| `privileged` | Administrative — changes who or what exists at organization level, or hands an organization connection to a job description. | Only if the owner confirmed "always" for it (**Changes access**). |
 | `never` | Never auto-approvable — a disclosure read in a shared session other than the two standing sources (see *Shared sessions*), a file attached across organizations. | No — it is carded, or refused outright. Never dispatched silently. The one exception is a disclosure read that shows no reader anything new, which runs with no card (see *Shared sessions*). |
 
 A grant is narrow: it names **one capability** and one target scope — that exact target, its
 project, and so on up, or for Exchange mail one mailbox. (The one exception is a standing
 disclosure grant: it names one source — one mailbox, or the owner's session list for this
-project — and covers every read of that source; see *Shared sessions*.) It either has an
-absolute expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it
-may carry use and budget caps. It stays anchored to the session it was approved in, and it covers only calls on
+project — and covers every read of that source; see *Shared sessions*.) It lasts until the owner
+revokes it, unless the organization caps it; a grant given before the once-or-always card may
+still carry an expiry and use or budget caps. It stays anchored to the session it was approved in, and it covers only calls on
 **an Owner's own turns**: the turns of anyone who is an Owner of the session or of its project, so
 a co-owner's own request on something shared is covered by the owner's grant (on the owner's
 personal things, such as their mailbox, calendar, connections or other sessions, only that owner's
@@ -210,10 +237,7 @@ relayed message without that mark (through someone else's session, across an org
 from a turn the platform could not attribute). The one exception is a standing disclosure
 grant, and it cuts both ways: it also covers a member's turn, but only a message a person typed
 — never a trigger turn, not even the owner's own schedule, flow, `a2a` or `delegation` turn.
-See *Shared sessions* below. The card's one-click choice is time-boxed to a window the capability's risk decides, and the card
-names it: read the window off the card rather than inferring one from the capability. Widening
-the grant past that one target, or making it autonomous, starts it on the shortest window, so a
-long window on a wide grant is always the owner's own pick. Standing
+See *Shared sessions* below. Standing
 approvals live
 only on cards: the former `preApprovedCapabilities` agent-config list is retired, and any
 entries still in a config are ignored.
@@ -227,8 +251,8 @@ Three consequences you must actually act on:
   call is no longer covered.
 - **You only see grants on turns a human sent.** When the owner sends a turn you are also
   shown an `<AUTONOMY>` block listing each grant in force — the capability, how far it
-  reaches, until when, and what is left of any use and budget caps — and naming any that have
-  been **revoked**. A grant that merely expired produces no notice; it just stops appearing.
+  reaches, when it ends (only if it does), and what is left of any use and budget caps — and
+  naming any that have been **revoked**. A grant that merely expired produces no notice; it just stops appearing.
   Turns nobody sent (a schedule firing, a peer agent, a webhook) carry no block at all, so
   **its absence there tells you nothing**. Never infer "I have no autonomy" from a missing
   block.
@@ -237,8 +261,8 @@ Three consequences you must actually act on:
   grant stops matching. The `<AUTONOMY>` block then lists it under **no longer applies**, not
   as in force. The owner sees it marked **No longer applies** in **Preferences > Grants**
   (**Grants I have given**) and in the session's **Permissions** tab. Expect a card for that
-  action again. The card comes pre-filled to renew the grant as it was (the same capability,
-  scope, reach, window and caps), and renewing it retires the old one. Tell the owner why the
+  action again. The card comes pre-filled to renew the grant for the same action and reach, as an
+  "always" with no expiry, and renewing it retires the old one. Tell the owner why the
   card is back. Do not ask them to approve "again" as if they had forgotten.
 
 ## Durable operations — the receipt, not the result
@@ -376,9 +400,9 @@ decides:
   `read_mail_attachment`, `list_mail_folders`; not `list_mail_categories`) and the owner's
   session list for this project (`platform.list_sessions`: the sessions of this project the
   owner can see, the owner's Private ones included — not `platform.list_my_sessions`, which
-  stays per read). Their card offers *approve and grant* for that one source in this session
-  only (the card names the one-click window; today that is 90 days), and one grant covers every
-  read of the source. Unlike any other grant, it covers a turn started by any one member who
+  stays per read). Their card offers **Always allow** for that one source in this session only,
+  after one more confirmation (**Shares private data**), and one grant covers every read of the
+  source. Unlike any other grant, it covers a turn started by any one member who
   can act in the session (not a Viewer, re-checked on every call), including people who join
   later, as well as the owner's own turns. But it covers only a message a person typed: unlike
   an ordinary grant, it never covers a trigger turn, so a schedule, flow, peer agent or
@@ -386,8 +410,11 @@ decides:
   turn. The owner
   revokes it in session settings, **Permissions** tab; the next read is carded again. Small effects that normally run with no card — drafting and filing mail, attaching a
   file, messaging a linked peer, renaming the assistant — are refused unless the owner asked
-  ("Only `<owner>` can ask for this"). In a session only the owner can read, such as the
-  personal assistant, all of this runs as before.
+  ("Only `<owner>` can ask for this"). Two of them ask instead of refusing: a mail draft
+  (`platform.create_draft`) and a message to a linked session (`platform.send_to_session`) go to
+  the owner (for a draft, the mailbox's owner) as a card that names who asked. In a session only
+  the owner can read, such as the personal assistant, all of this runs as before, and a turn a
+  linked agent started on the owner's own behalf runs without a card too.
 
   **No card when the read shows nobody anything new.** Three of these reads skip the card, and
   run as in a session only the owner reads, when every other reader of this session already

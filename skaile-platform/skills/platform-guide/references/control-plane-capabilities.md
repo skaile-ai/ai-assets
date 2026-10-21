@@ -751,26 +751,27 @@ themselves approved — and it is narrow by construction:
   `read_mail_attachment` and `list_mail_folders`; for the session list `platform.list_sessions`
   — the sessions of this project the owner can see, the owner's Private ones included (not
   `platform.list_my_sessions`, which stays per read).
-- **One scope** — that exact target, everything under its project, everything under its
-  organization, everything of that kind the owner can reach, or, for Exchange mail, everything
-  in one mailbox. Only the scopes a capability declares, and its own target's ancestry supports,
-  are ever offered.
+- **One reach**, decided by the server from the action — that exact target, everything under
+  its project, everything under its organization, everything of that kind the owner can reach,
+  or, for Exchange mail, everything in one mailbox. Only the reaches a capability declares, and
+  its own target's ancestry supports, are possible. The card shows no scope choice.
 - **Anchored to one session** — the one whose card minted it.
-- **A named window.** The owner picks a duration by name from a server-owned list; the expiry is
-  computed on the server. *Unlimited* — no expiry, lasting until revoked — is one of those
-  names, never the default, and only when the owner explicitly chooses it. Every finite window
-  is capped by the organization's maximum grant duration (one year today); a longer one is
-  never offered. The one-click option alongside "approve once" is narrow by scope — that
-  exact target, both effect opt-ins off — and always time-boxed, its window following the
-  capability's risk: 90 days for low, 7 days for medium, 1 hour for high, within that
-  maximum. You may not know a capability's risk, so point the owner at the window the card
-  names rather than guessing. On the card's advanced options, widening the scope or choosing
-  autonomous mode resets the window to the shortest one, so a long window on a wide grant is
-  always picked by hand.
-- **Optional use and budget caps**, clamped down to the server's own ceilings.
-- **Effect opt-ins.** Because the safe default leaves both off, an `external` or `privileged`
-  effect has no one-click option at all — the owner has to widen it deliberately. An effect
-  classed `never` is ungrantable — in a shared session that includes every disclosure read of
+- **Whose requests it covers.** The card offers **Allow once**, **Always allow for**
+  *{audience}* and **Don't allow**. The audience is the owner's pick: *this agent*
+  (`agent`), *this agent and its hires* (`agentAndHires`, the usual default), *all your agents
+  in* {project} (`project`), *all your agents in* {organization} (`org`) or, when a run asks,
+  *every run in* "{group}" (`runGroup`, the default for runs). "Your agents" are the owner's
+  own; an access change defaults to *this agent*.
+- **No window.** "Always" has no duration and no expiry: it lasts until the owner revokes it,
+  unless the organization caps standing approvals, and then one line on the card names the cap.
+  There is no mode to pick. Grants given before this card may still carry an expiry and use or budget caps, and they keep
+  them.
+- **A confirmation for non-routine kinds.** "Always" on an action that **leaves Skaile**
+  (`external`), **changes access** (`privileged`) or **shares private data** (a disclosure) asks
+  once more: one sentence, sometimes narrower choices with the narrowest picked first, and
+  **Yes, always allow** (red for an access change). It also asks whenever other people can use
+  the agents the approval would reach, and names them.
+- **Ungrantable kinds.** An effect classed `never` is ungrantable — in a shared session that includes every disclosure read of
   the owner's private data except the two standing sources above, which prepare as `routine`,
   grantable for that exact source only — and so is `platform.batch` as a whole (each step
   matches its own action's grants). Ungrantable means it can only be carded or refused — never
@@ -785,8 +786,13 @@ Revocation is immediate, and the platform re-checks the owner's live authorizati
 and the budget right before the effect. **A call that dispatched silently a minute ago can come
 back parked on approval** — that means it is no longer covered, not that something failed.
 
-A grant covers a call only on **the owner's own turn**, and what counts is who wrote the turn's
-text: a message the owner typed, or their own `schedule`, `flow`, peer agent message (`a2a`) or
+**The owner rule.** An Owner's "always" on something shared also covers the own requests of
+the other Owners of the project or session; members' requests and outside input still get a
+card. Personal things answer only to their owner: a personal mailbox and calendar to its
+Connection owner, and the session owner's connections and other sessions to the session owner.
+A shared mailbox switched on for the project follows the owner rule
+(`references/exchange-mail-calendar.md`). Within that, a grant
+covers a call only on an Owner's own turn, and what counts is who wrote the turn's text: a message the owner typed, or their own `schedule`, `flow`, peer agent message (`a2a`) or
 `delegation`. It also covers a `late_result` credited to the owner (a read the owner's own turn
 asked for; one credited to a member is carded, whoever approved it), and an `a2a_relayed` or
 `delegation_relayed` turn that carries the platform's owner-chain mark: every hop ran in the
@@ -801,16 +807,17 @@ person typed: unlike an ordinary grant it never covers a trigger turn, so even t
 schedule, flow, peer agent or delegation turn, a webhook and a mixed turn get a card.
 
 You see grants only on turns a human sent, in the `<AUTONOMY>` block: which capability, how far
-it reaches, until when, and what is left of any caps, plus notice when one has been **revoked**.
+it reaches, when it ends (only if it does), and what is left of any caps, plus notice when one has been **revoked**.
 Expiry produces no notice at all — the row simply stops appearing — so a grant vanishing from the
 block is not evidence of revocation. A grant a platform update ended (the action changed since
 the owner approved it) is listed under **no longer applies**, not as in force: expect a card,
-pre-filled to renew it as it was, and tell the owner why it is back. A schedule firing, a peer
+pre-filled to renew it for the same action and reach, and tell the owner why it is back. A schedule firing, a peer
 agent, or a webhook carries no block at all, and **its absence there tells you nothing.**
 
 You cannot create, extend or widen a grant yourself. You can ask the owner for one with
 `platform.request_standing_approval`, and only the owner can grant it, from the card. Ask ahead
-of an unattended workflow — a scheduled mail digest, say — naming the capability and why. The
+of an unattended workflow — a scheduled mail digest, say — naming the capability and why, and
+optionally suggesting an audience (`suggested.audience`, the narrowest that does the job). The
 request itself runs nothing and returns `grant_requested` with an `invocationId`. At most 5
 requests can wait on the owner per session; a further one is refused until the owner decides
 one, and an identical repeat joins its open card.

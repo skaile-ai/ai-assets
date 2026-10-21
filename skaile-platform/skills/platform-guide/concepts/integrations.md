@@ -115,7 +115,9 @@ mailboxes, the owner picks which mailboxes the project may use.
 - Reading mail is not approval-gated, and neither is flagging or tagging a mail with a
   category. Moving, filing into folders, and creating or deleting a category need approval;
   deleting a mail moves it to Deleted Items and is privileged.
-- Drafts need no approval — the user reviews and sends them from Outlook. Sending from
+- Drafts need no approval when the user asked — they review and send them from Outlook. A
+  draft someone else asked for (a colleague, or another person's linked agent) goes to the
+  mailbox owner as an approval card first. Sending from
   the agent is approved per message unless a standing approval covers it: for the user's own
   mailbox, one pinned to that mailbox or the project; for a shared mailbox, one pinned to that
   mailbox.

@@ -284,6 +284,14 @@ decided, and again immediately before the write.
 
 For `platform.revise_flow` the scope is the stored flow's own, not the session's project.
 
+**What the owner sees on the card.** Besides your `rationale`, the card lists the flow's steps
+— each step's kind and label in the order a run reaches them, where a router branches, where a
+step waits for approval, and which flow a sub-flow runs — and folds a long flow after six steps.
+A revision's card lists the added, changed and removed steps first. Instructions, commands and
+prompts are not shown, so give every node a **label** that says what it does: the label is what
+the owner reads when deciding. If the owner asks what a step does, read it with `platform.get_flow`
+rather than describing it from memory.
+
 **Renaming a flow.** `platform.revise_flow` with only `name` renames a flow without resending
 its nodes. The new name is what the flow list shows, and the owner's card says "Renames the flow
 from … to …". It is a revision like any other: the same admin rule and the same card or grant.
@@ -613,9 +621,8 @@ Fuller treatment: `ai-assets/docs/flows.md`.
   - `platform.list_run_groups` (no approval) lists the project's groups, newest first —
     use it to find a group whose create was approved after your call stopped waiting.
   - `platform.set_run_group_autonomous_mode({ groupId, autonomousMode })` switches
-    autonomous mode on or off. It is approval-gated, and classed `privileged`, so it has no
-    one-click grant option: a grant reaches it only if the owner deliberately turned that
-    opt-in on. It affects only runs admitted afterwards (so set it before activating), and
+    autonomous mode on or off. It is approval-gated, and classed `privileged`, so its
+    **Always allow** asks once more (**Changes access**) before it is given. It affects only runs admitted afterwards (so set it before activating), and
     gates the flow marks mandatory still stop every run. `create_run_group` itself still
     refuses `autonomousMode: true`.
   - `platform.activate_run_group({ groupId })` starts a Draft group, with the same check as
