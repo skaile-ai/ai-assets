@@ -85,7 +85,7 @@ example a maintenance window or a changed feature.
   organization the capability does not exist.
 - In a staff session the staff member names the target organizations, projects or sessions in
   plain words, or pastes a platform link: the agent resolves them to ids with
-  `platform.staff_find_targets`, which returns names, slugs, ids and session status only, and the approval card names
+  `platform.staff_find_targets`, which returns names, slugs, ids and status only (and whether an organization is personal), and the approval card names
   the organizations the notice will reach before anything is sent.
 
 ## Public file-preview sharing
