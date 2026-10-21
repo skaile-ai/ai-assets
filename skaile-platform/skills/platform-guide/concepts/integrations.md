@@ -119,8 +119,9 @@ mailboxes, the owner picks which mailboxes the project may use.
   draft someone else asked for (a colleague, or another person's linked agent) goes to the
   mailbox owner as an approval card first. Sending from
   the agent is approved per message unless a standing approval covers it: for the user's own
-  mailbox, one pinned to that mailbox or the project; for a shared mailbox, one pinned to that
-  mailbox.
+  mailbox, one pinned to that mailbox or the project, which covers only that user's own
+  requests; for a shared mailbox, one pinned to that mailbox, which covers every project or
+  session Owner's own requests.
 - Calendar access covers the user's own mailbox only.
 - **Shared mailboxes**: the user adds them once per connection in **My connections**,
   after granting **Allow shared mail access**. A mailbox is admitted only if the user's

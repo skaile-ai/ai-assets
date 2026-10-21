@@ -80,7 +80,8 @@ shared mailbox; the owner does, and nothing is ever discovered from delegations.
 
 **Who answers a mail or calendar card** depends on `targetKind`:
 
-- **`Own`** (a person's own mailbox, and every calendar): only the person whose connection it is
+- **`Own`** (a person's own mailbox; a calendar follows the same rule, since calendar calls only
+  ever act on an own mailbox): only the person whose connection it is
   decides its draft, send and calendar-change cards and can give a standing approval for them,
   and that approval covers only their own requests. When another owner asks you to send from
   it, its owner gets a card, even if they already chose "always allow". (A standing disclosure
