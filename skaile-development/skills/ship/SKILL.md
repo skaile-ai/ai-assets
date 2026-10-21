@@ -16,7 +16,7 @@ description: >-
   existing code, for plans or design proposals, for filing an issue when implementation is
   explicitly deferred, for throwaway local experiments, or for work spanning several
   repositories.
-version: 1.10.0
+version: 1.10.1
 metadata:
   tags:
   - "ship"
@@ -650,7 +650,8 @@ STEP 10b: Decide docs_impact, and ship the docs in THIS PR
                   behaviour the docs already describe — including a `whats-new-fix:`
                   changeset, for which CI asks for no docs. A fix that CHANGES what is
                   documented (a new option, a different limit) is user-visible. Write the
-                  one-sentence reason now — it goes in the PR body and a reviewer will read it.
+                  one-sentence reason now for the final report. It needs no marker: a `none`
+                  change carries no triggering `whats-new*` marker, so CI asks for no docs.
   When unsure whether a change alters what the docs say, it is `user-visible`; the cost of
   one extra paragraph is lower than a stale guide.
 
