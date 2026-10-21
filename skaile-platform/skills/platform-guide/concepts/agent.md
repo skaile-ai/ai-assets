@@ -194,8 +194,9 @@ project — and covers every read of that source; see *Shared sessions*.) It eit
 absolute expiry or, when the owner explicitly chose *Unlimited*, lasts until they revoke it; it
 may carry use and budget caps. It stays anchored to the session it was approved in, and it covers only calls on
 **an Owner's own turns**: the turns of anyone who is an Owner of the session or of its project, so
-a co-owner's own request is covered by the owner's grant (on a personal mailbox or calendar, only
-its owner's own turns are). What counts is who wrote the turn's text, not who it is credited
+a co-owner's own request on something shared is covered by the owner's grant (on the owner's
+personal things, such as their mailbox, calendar, connections or other sessions, only that owner's
+own turns are). What counts is who wrote the turn's text, not who it is credited
 to. Covered: a message an Owner typed, a turn credited to an Owner whose trigger source is
 `schedule`, `flow`, `a2a` or `delegation`, and the two owner-chain cases below. The platform
 sets `a2a` and `delegation` only when the sending turn's text was its person's own; a peer or delegated
@@ -354,8 +355,8 @@ decides:
 
 - **Grants apply only to Owners' own turns** (see *Autonomy grants* above for which
   turns count): any Owner of the session or its project, so a co-owner's own request is covered
-  by the owner's grant, except on the owner's personal mailbox or calendar, where only the
-  owner's own requests are. A member's turn, a mixed turn, one the platform cannot attribute, and a turn
+  by the owner's grant on something shared, except on someone's personal things (their mailbox,
+  calendar, connections or other sessions), where only that person's own requests are. A member's turn, a mixed turn, one the platform cannot attribute, and a turn
   credited to an Owner whose text came from outside their own sessions or across an
   organization (a webhook or mail, a session seed, a relayed peer or delegated message without
   the owner-chain mark: through someone else's session, across an organization, or from a turn

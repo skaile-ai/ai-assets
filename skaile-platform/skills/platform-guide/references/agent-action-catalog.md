@@ -100,9 +100,10 @@ on it:
   delegation, whose text they wrote — plus work their agents pass on only between their own
   sessions: a late result credited to them (a read their own turn asked for), or a relayed agent
   or delegated message whose every hop ran in their own sessions, inside one organization. So an
-  owner's standing approval also covers the same request from a co-owner.
-  - A personal mailbox or calendar is the exception: a grant on it covers only its owner's own
-    turns, and only its owner can give one (`references/exchange-mail-calendar.md`).
+  owner's standing approval on something shared also covers the same request from a co-owner.
+  - Personal things are the exception: a grant on a personal mailbox or calendar covers only its
+    owner's own turns, and only its owner can give one (`references/exchange-mail-calendar.md`);
+    the same holds for the session owner's connections and other sessions.
   - A turn credited to an Owner whose text came from anywhere else always gets a card: a webhook
     or mail turn, a session seed, or a message that came through someone else's session or across
     an organization.
