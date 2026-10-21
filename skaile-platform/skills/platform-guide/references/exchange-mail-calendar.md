@@ -54,8 +54,8 @@ and what the draft says, and the draft is made once they approve. Wait for that 
 the user to repeat the request in the owner's chat. Calendar reads
 and `platform.list_mail_categories` are carded per read (no standing approval). A mail read
 (`platform.list_mail`, `search_mail`, `read_mail`, `read_mail_attachment`, `list_mail_folders`)
-has a card that names the mailbox and offers *approve and grant* for that one mailbox in this
-session (the card names the one-click window; today that is 90 days). One such grant covers
+has a card that names the mailbox and offers **Always allow** for that one mailbox in this
+session, after one more confirmation (**Shares private data**). One such grant covers
 every one of those reads of that mailbox, on the turn of any member who can act in the session
 (not a Viewer, re-checked on every call), including people who join later. Turns started by a
 schedule, a webhook or another agent still ask every time. Only the owner decides the card, and
@@ -152,9 +152,10 @@ Real refusals, not conservatism:
 - `send_draft({ draftId })` sends any draft, including one the owner wrote themselves. It is
   **not undoable**. Its card is built from the draft as Exchange holds it now and names every
   attachment and every link destination; a draft edited after approval invalidates that approval.
-- **Standing grant for sending.** The owner can mint one from the card's advanced options only:
-  bound to that session, with an expiry or *Unlimited*, and only with external communication
-  explicitly allowed. For the **own** mailbox it is pinned to that mailbox or to the project.
+- **Standing grant for sending.** The owner can give one with **Always allow for** on the send
+  card, after confirming it (**Leaves Skaile**). It lasts until revoked and covers the audience
+  they pick. A personal mailbox answers only to its owner: only they can give it, and it covers
+  only their own requests. A shared mailbox follows the owner rule. For the **own** mailbox it is pinned to that mailbox or to the project.
   A **shared-mailbox** send is covered only by a grant pinned to that same shared mailbox. For
   an unattended send workflow, ask for one ahead with `platform.request_standing_approval`.
 - Reading the send result: `outcome: "accepted"` is sent. `rejected` means Exchange refused and
