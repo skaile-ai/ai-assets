@@ -1,14 +1,14 @@
 ---
 name: sql
 description: "A dialect-agnostic SQL toolset giving an agent permission-scoped access to PostgreSQL, MySQL, SQLite, and MSSQL through one unified set of tools. Introspect schemas/tables/columns, run parameterized read-only SELECTs with stateless keyset pagination, and (in dml/full scopes) execute parameterized writes and atomic batches — all behind a statement classifier that blocks statement stacking, comment evasion, and data-modifying CTEs, plus DB-level read-only enforcement. One database (DSN) per server instance; the dialect is selected by config."
-version: 0.1.1
+version: 0.2.0
 transport: stdio
 command: node
 args:
   - "${workspace}/.skaile/assets/mcp-server/sql/server.js"
 payload:
-  url: https://github.com/skaile-ai/sql-mcp/releases/download/v0.1.1/server.js
-  sha256: d4448a1dc90901122c7e4ef9511e58fa97201f34cb91fe7feb67008c68bec74f
+  url: https://github.com/skaile-ai/sql-mcp/releases/download/v0.2.0/server.js
+  sha256: 38e97ffaf625e65f09cb930996d3062c2d49822238ff7d98bda38ea0d2d640ef
   dest: server.js
 env:
   SQL_MCP_DIALECT: postgres
