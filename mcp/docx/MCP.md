@@ -1,7 +1,7 @@
 ---
 name: word
-description: "A stateful Word (.docx) engine for source-free document creation, Template composition, and editing a real document in place instead of regenerating it. Its 38 tools expose a neutral blank-package baseline; identity-bound Blocks across body, headers, footers and text boxes; Named styles and resolved style audits; scoped text, paragraph and table composition; live PDF previews; core properties and Word fields; PNG/JPEG replacement and insertion; and complete Revision/Comment collaboration. document.save backs up, verifies the OOXML Part inventory and content, and atomically replaces the target. Use it when creating a new document or preserving a Template, numbering, review markup, media and package fidelity."
-version: 0.7.0 # mcp-catalog-version
+description: "A stateful Word (.docx) engine for source-free document creation, Template composition, and editing a real document in place instead of regenerating it. Its 39 tools expose a neutral blank-package baseline; identity-bound Blocks across body, headers, footers and text boxes; Named styles and resolved style audits; scoped text, paragraph and table composition; live PDF previews; core properties and Word fields; PNG/JPEG replacement and insertion; and complete Revision/Comment collaboration, including a one-call before/after review of a marked-up document. document.save backs up, verifies the OOXML Part inventory and content, and atomically replaces the target. Use it when creating a new document or preserving a Template, numbering, review markup, media and package fidelity."
+version: 0.9.0 # mcp-catalog-version
 transport: stdio
 recipe:
   attr: mcps.word
@@ -102,7 +102,7 @@ writing guide.
 
 ## Capabilities
 
-38 tools over stdio, grouped by area:
+39 tools over stdio, grouped by area:
 
 - **Document lifecycle, properties and freshness (9)** — `document.open` (handle plus optional
   OOXML Strict conversion), `document.save` (backup → temp → Part/content verification → atomic
@@ -141,11 +141,19 @@ writing guide.
   an existing PNG/JPEG payload while keeping Part identity, relationship, anchor and extent;
   `image.insert` byte-detects a root-contained PNG/JPEG and authors one aspect-locked inline image
   in a fresh body paragraph, with natural DPI sizing or an explicit width.
-- **Revisions (5)** — `revision.list` reports ids, kinds, authors and timestamps in XML order;
+- **Revisions (6)** — `revision.list` reports ids, kinds, authors and timestamps in XML order,
+  plus what each changed: its inserted/deleted/moved `text`, a property change's old → new
+  `description`, and `row`/`cell` inside a table (indices into `table.get`'s `rows[row][cell]`);
+  inserted/deleted table rows and cells are kinds `row_ins`/`row_del`/`cell_ins`/`cell_del`;
+  `revision.diff` returns, in one read-only call, every paragraph and cell whose text differs
+  between the original (reject all) and proposed (accept all, Word's No Markup) views with the
+  Revision and Comment ids touching each, or every Block's text in one view;
   `revision.track(handle, author)` makes supported later agent writes real Word Revisions;
   `revision.enable` sets Word's Track Changes mode for future human edits; `revision.accept` and
   `revision.reject` resolve one exact id or an explicit `all:true` atomically.
-- **Comments (4)** — `comment.list`, `comment.add` (whole Block or one exact literal anchor),
+- **Comments (4)** — `comment.list` (each Comment's body `text`, `anchored_text`, reply
+  `parent_id`, resolved `done`, and row/cell inside a table; `max_chars` bounds both lists),
+  `comment.add` (whole Block or one exact literal anchor),
   `comment.reply`, and `comment.resolve`. Replies use Word threads, resolving a reply resolves its
   root thread, re-resolving is a no-op, and a later reply reopens it.
 - **Templates (1)** — `template.find` discovers `.docx` files under the sandbox root via a neutral
@@ -257,12 +265,20 @@ document.create_blank                    # neutral package plus initial Normal p
   → document.save (path: <new destination>)  # required — a create_blank handle has none
 ```
 
+Reviewing someone else's markup is one read, then decisions by id:
+
+```
+revision.diff (view: changed)            # every changed paragraph/cell, original vs proposed
+comment.list                             # each Comment's text, passage, thread and done state
+  → revision.accept or revision.reject   # one id per decision, or explicit all:true
+```
+
 Authoring and completing a review loop are deliberately separate choices:
 
 ```
 revision.track (author)                  # later supported agent writes become Revisions
   → text.replace / block.* / table.edit / image.insert
-  → revision.list                        # inspect exact ids and kinds
+  → revision.list                        # inspect exact ids, kinds and what each changed
   → revision.accept or revision.reject   # one id, or explicit all:true
 
 comment.list
