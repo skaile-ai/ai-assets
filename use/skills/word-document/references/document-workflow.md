@@ -1,9 +1,9 @@
 # Document workflow
 
 This reference owns the generic procedure for creating and editing an
-organization's Word documents. The Word MCP lifecycle, tool contracts and
-limitations are materialized at `.skaile/assets/mcp-server/word/MCP.md`; their
-source is the [Word MCP catalog entry](../../../../mcp/docx/MCP.md). Prose rules
+organization's Word documents. The Word MCP lifecycle and cross-tool rules come
+from the server's MCP `initialize` instructions, and each tool's contract and
+limitations from its own description. Prose rules
 live in [writing-rules.md](writing-rules.md).
 
 When this reference and the installed Word MCP tool descriptions differ, follow

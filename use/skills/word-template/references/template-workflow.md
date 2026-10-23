@@ -1,9 +1,9 @@
 # Template mechanics and Word MCP workflow
 
 This reference owns the bundled template's mechanics. The general Word MCP
-lifecycle, tool contracts, and limitations are materialized at
-`.skaile/assets/mcp-server/word/MCP.md`; their source is the
-[Word MCP catalog entry](../../../../mcp/docx/MCP.md). The prose rules live in
+lifecycle and cross-tool rules come from the server's MCP `initialize`
+instructions, and each tool's contract and limitations from its own
+description. The prose rules live in
 [house-style-guide.md](house-style-guide.md).
 
 When this reference and the installed Word MCP tool descriptions differ, follow

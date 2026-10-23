@@ -19,11 +19,11 @@ keywords:
 
 # Word document
 
-Use the installed `word` MCP dependency for every DOCX operation. Its runtime
-guidance is materialized at `.skaile/assets/mcp-server/word/MCP.md`; its source
-is the [Word MCP catalog entry](../../../mcp/docx/MCP.md). Follow the installed
-server's live tool descriptions for exact inputs and current capabilities. This
-skill adds the generic production workflow and a set of default writing rules.
+Use the installed `word` MCP dependency for every DOCX operation. The server
+sends its own runtime guidance as its MCP `initialize` instructions. Follow
+the installed server's live tool descriptions for exact inputs and current
+capabilities. This skill adds the generic production workflow and a set of
+default writing rules.
 
 If the `word` MCP dependency or a tool the request needs is unavailable, report
 the missing capability instead of producing a degraded substitute. Never write a
