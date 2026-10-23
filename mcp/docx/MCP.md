@@ -1,7 +1,7 @@
 ---
 name: word
-description: "A stateful Word (.docx) engine for source-free document creation, Template composition, and editing a real document in place instead of regenerating it. Its 38 tools expose a neutral blank-package baseline; identity-bound Blocks across body, headers, footers and text boxes; Named styles and resolved style audits; scoped text, paragraph and table composition; live PDF previews; core properties and Word fields; PNG/JPEG replacement and insertion; and complete Revision/Comment collaboration. document.save backs up, verifies the OOXML Part inventory and content, and atomically replaces the target. Use it when creating a new document or preserving a Template, numbering, review markup, media and package fidelity."
-version: 0.8.0 # mcp-catalog-version
+description: "A stateful Word (.docx) engine for source-free document creation, Template composition, and editing a real document in place instead of regenerating it. Its 39 tools expose a neutral blank-package baseline; identity-bound Blocks across body, headers, footers and text boxes; Named styles and resolved style audits; scoped text, paragraph and table composition; live PDF previews; core properties and Word fields; PNG/JPEG replacement and insertion; and complete Revision/Comment collaboration, including a one-call before/after review of a marked-up document. document.save backs up, verifies the OOXML Part inventory and content, and atomically replaces the target. Use it when creating a new document or preserving a Template, numbering, review markup, media and package fidelity."
+version: 0.9.0 # mcp-catalog-version
 transport: stdio
 recipe:
   attr: mcps.word
@@ -43,7 +43,7 @@ turn.
 
 ## Capabilities
 
-38 tools over stdio, grouped by area as in the server's instructions:
+39 tools over stdio, grouped by area as in the server's instructions:
 
 <!-- mcp-catalog-tools -->
 - **Documents (9)** — `document.open`, `document.create_from`, `document.create_blank`, `document.save`, `document.close`, `document.render`, `document.get_properties`, `document.set_properties`, `document.mark_fields_dirty`
@@ -54,7 +54,7 @@ turn.
 - **Headers and footers (2)** — `header.get`, `footer.get`
 - **Fields (1)** — `field.insert`
 - **Media (3)** — `media.list`, `media.replace`, `image.insert`
-- **Revisions (5)** — `revision.track`, `revision.enable`, `revision.list`, `revision.accept`, `revision.reject`
+- **Revisions (6)** — `revision.track`, `revision.enable`, `revision.list`, `revision.diff`, `revision.accept`, `revision.reject`
 - **Comments (4)** — `comment.list`, `comment.add`, `comment.reply`, `comment.resolve`
 - **Templates (1)** — `template.find`
 <!-- /mcp-catalog-tools -->

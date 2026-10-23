@@ -1,7 +1,7 @@
 ---
 name: "auto-ship"
 description: "The invariants for driving one GitHub issue to a merged pull request inside the auto-ship flow — idempotent adoption by deterministic name, marked comments, typed request_input / request_approval gates, bounded CI polling, and recoverable-vs-terminal failure. The flow's nodes carry their own instructions; this skill carries the rules that hold across all of them. Use when a flow node hands you a run input carrying { repo, number, title, body, url }."
-version: 0.2.0
+version: 0.3.0
 metadata:
   stage: "alpha"
   source: "ORIGINAL"
@@ -37,6 +37,12 @@ instructions assume rather than restate.
   by overwriting human work.
 - **Ask with `request_input`, never in prose.** A question typed into chat is not a gate —
   the run is dark and nobody is reading. Always pass a schema.
+- **Platform docs ride in the same PR.** In `skaile-ai/platform`, a changeset with a
+  `whats-new:`, `whats-new-highlight:` or `whats-new-agent:` marker (not `whats-new-fix:`)
+  means the PR also edits `features/platform-guide/` (then `bun run guide:embed`, committing
+  the regenerated embed) and `features/SKAILE-PLATFORM-CAPABILITIES.md` — or that changeset
+  declines each with `<!-- guide: n/a — <reason> -->` / `<!-- capabilities-doc: n/a — <reason> -->`
+  (reason ≥ 10 characters). Build & Test fails the PR otherwise.
 - **Do not ask whether to merge or clean up at the end.** The merge approval gate is that
   decision.
 - **Never complete a node on an unknown outcome.** Unknown CI, an unanswered question, an
