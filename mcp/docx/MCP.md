@@ -14,6 +14,9 @@ env:
   # startup and refuses to start unbound (ADR-0006, ADR-0002 in skaile-ai/word-mcp).
   # Unlike the excel-mcp sibling this is a real per-session path, not `/` — word-mcp's
   # own design explicitly rejects an "effectively open" default root.
+  # Unset on purpose: DOCX_MCP_MAX_OPEN_HANDLES (default 8; past it document.open
+  # fails HANDLE_LIMIT_REACHED). document.save keeps backups in .docx-backups/
+  # beside the saved file, i.e. inside this root.
   DOCX_MCP_ROOT: /skaile/workspace
   DOCX_MCP_SOFFICE_PATH: ${recipe:word:bin}/soffice
   JAVA_HOME: ${recipe:word}
