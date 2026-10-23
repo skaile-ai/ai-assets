@@ -15,8 +15,9 @@ env:
   # Unlike the excel-mcp sibling this is a real per-session path, not `/` — word-mcp's
   # own design explicitly rejects an "effectively open" default root.
   # Unset on purpose: DOCX_MCP_MAX_OPEN_HANDLES (default 8; past it document.open
-  # fails HANDLE_LIMIT_REACHED). document.save keeps backups in .docx-backups/
-  # beside the saved file, i.e. inside this root.
+  # fails HANDLE_LIMIT_REACHED). document.save keeps the last 3 backups per file in
+  # .docx-backups/ at the root of DOCX_MCP_ROOT, not next to the saved file, so they
+  # show up as workspace-root clutter in a synced workspace.
   DOCX_MCP_ROOT: /skaile/workspace
   DOCX_MCP_SOFFICE_PATH: ${recipe:word:bin}/soffice
   JAVA_HOME: ${recipe:word}
