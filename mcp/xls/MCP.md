@@ -20,6 +20,13 @@ env:
   # set this to ${workspace} for a true per-session sandbox.
   EXCEL_MCP_ROOT: /
   JAVA_HOME: ${recipe:excel}
+  # Beta remote-Excel queue: the real-Excel worker's synced folder mounted inside
+  # Skaile session containers (must be a real directory, not a symlink).
+  # EXCEL_MCP_DEFAULT_QUEUE names a queue in EXCEL_MCP_QUEUES. Operators can
+  # override all three per session via env.
+  EXCEL_MCP_QUEUES: beta=/skaile/.fleet/sharepoint/live
+  EXCEL_MCP_DEFAULT_QUEUE: beta
+  EXCEL_MCP_REMOTE_WAIT_S: "600"
 keywords:
   - excel
   - xlsx
