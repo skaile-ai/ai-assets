@@ -22,9 +22,12 @@ env:
   JAVA_HOME: ${recipe:excel}
   # Beta remote-Excel queue: the real-Excel worker's synced folder mounted inside
   # Skaile session containers (must be a real directory, not a symlink).
+  # The new sync driver mounts the SharePoint queue library at /skaile/mcp (a real
+  # mount). Old-driver sessions had it at /skaile/.fleet/sharepoint/live behind a
+  # /skaile/mcp symlink, which excel-mcp refuses, so there the queue is unreachable.
   # EXCEL_MCP_DEFAULT_QUEUE names a queue in EXCEL_MCP_QUEUES. Operators can
   # override all three per session via env.
-  EXCEL_MCP_QUEUES: beta=/skaile/.fleet/sharepoint/live
+  EXCEL_MCP_QUEUES: beta=/skaile/mcp
   EXCEL_MCP_DEFAULT_QUEUE: beta
   EXCEL_MCP_REMOTE_WAIT_S: "600"
 keywords:
