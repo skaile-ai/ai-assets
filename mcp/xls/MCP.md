@@ -59,7 +59,7 @@ error codes. Keep this body short: the platform puts it in the prompt on every t
 what this server cannot do: macros, Power Query and pivot refresh, real recalculation, `.xlsb`
 conversion, and formulas it cannot parse (`LET`, `LAMBDA`, `FILTER`, via `write_cells`). It needs a
 running worker: check `queue.list` first. `state` is `ready` or `busy` (go ahead), `no_worker`
-(tell the user), or `stale` (no worker heartbeat within the queue's `liveness_s`; the job still queues, warn the user).
+(tell the user), `unreachable` (folder missing, or heartbeat unreadable for a moment from a sync glitch: call `queue.list` again in ~10 s before telling the user), or `stale` (no worker heartbeat within the queue's `liveness_s`; the job still queues, warn the user).
 `wait_s` is capped by `EXCEL_MCP_REMOTE_WAIT_S`; the result says `wait_s_clamped_to`. The
 `remote.run` op `refresh` takes `continue_on_error`: a failing query no longer stops the job, the
 op's `status` is `partial`, the saved copy keeps stale data for the failed queries, and the job
