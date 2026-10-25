@@ -72,7 +72,7 @@ before the queue counts as stale; admins add `,liveness=SECONDS` to a queue in `
 
 77 tools over stdio, grouped by area as in the server's README tool table:
 
-`workbook.open` and `workbook.create` are always loaded; every other tool is deferred, so a client that defers MCP tools must fetch it first. Both open a workbook handle that all other tools need.
+`workbook.open` and `workbook.create` are pinned `alwaysLoad` (eager); every other tool is deferred, so a client that defers MCP tools must fetch a deferred tool before first use. These two give the workbook handle that all other tools need.
 
 <!-- mcp-catalog-tools -->
 - **Workbook lifecycle (10)** — `workbook.open`, `workbook.create`, `workbook.save`, `workbook.close`, `workbook.list_sheets`, `workbook.metadata`, `workbook.recalculate`, `workbook.capabilities_report`, `workbook.audit`, `workbook.list_handles`
