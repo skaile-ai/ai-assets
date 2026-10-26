@@ -5,7 +5,7 @@ metadata:
   stage: "alpha"
   source: "MIGRATED"
   requires:
-    - "knowledge-writing-contract"
+    - "contract:knowledge-writing-contract"
 ---
 
 # Book Writer: Autonomous Medical Authoring System
