@@ -12,7 +12,7 @@ metadata:
   stage: "alpha"
   source: "MIGRATED"
   requires:
-    - "knowledge-research-contract"
+    - "contract:knowledge-research-contract"
   env_vars:
     SEARXNG_URL: "Optional. The base URL of your SearXNG instance (default: http://localhost:8080)."
 ---

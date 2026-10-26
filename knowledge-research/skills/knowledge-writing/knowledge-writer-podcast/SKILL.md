@@ -5,7 +5,7 @@ metadata:
   stage: "alpha"
   source: "MIGRATED"
   requires:
-    - "knowledge-writing-contract"
+    - "contract:knowledge-writing-contract"
 ---
 
 # Knowledge Writer Podcast

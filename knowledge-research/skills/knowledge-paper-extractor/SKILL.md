@@ -5,7 +5,7 @@ metadata:
   stage: "alpha"
   source: "MIGRATED"
   requires:
-    - "knowledge-research-contract"
+    - "contract:knowledge-research-contract"
 ---
 
 # Knowledge Paper Extractor

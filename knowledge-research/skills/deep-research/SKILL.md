@@ -7,7 +7,7 @@ metadata:
   stage: "alpha"
   source: "MIGRATED"
   requires:
-  - "knowledge-research-contract"
+  - "contract:knowledge-research-contract"
 ---
 
 # Deep Research - Integrated Research Skill
