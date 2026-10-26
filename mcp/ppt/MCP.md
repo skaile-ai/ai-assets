@@ -9,6 +9,8 @@ description: "Use when an agent needs to author, modify, review, render, or expo
   Stateful Apache POI 5.5.x + LibreOffice engine over stdio, 52 tools."
 version: 1.2.0 # mcp-catalog-version
 transport: stdio
+# Start the JVM on the first tool call, not at session start.
+lazy: true
 recipe:
   attr: mcps.ppt
 command: ${recipe:ppt:bin}/java
