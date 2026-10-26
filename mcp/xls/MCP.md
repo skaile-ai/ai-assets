@@ -7,6 +7,11 @@ recipe:
   attr: mcps.excel
 command: ${recipe:excel:bin}/java
 args:
+  # Serial GC and a 256 KiB thread stack: measured on JDK 21, a session that loads a
+  # workbook peaks at ~210 MB instead of ~300 MB (G1) at the same speed. An idle server
+  # stays ~105 MB either way; lazy start is tracked in skaile-ai/workspaces#1119.
+  - -XX:+UseSerialGC
+  - -Xss256k
   - -jar
   - ${recipe:excel:lib}/excel-mcp.jar
 env:
