@@ -438,7 +438,7 @@ the agent at these files (paths relative to the skaile-dev repo root):
 | Forge integration matrix | `forge/README.md`, `forge/CLAUDE.md` |
 | Per-app forge architecture | `forge/<L2-tui\|skaile-forge\|L4-assistant\|L5-concept>/CLAUDE.md` |
 | Platform architecture | `platform/CLAUDE.md` + `platform/docs/*.md` |
-| Skill authoring conventions | `dev/CLAUDE.md` Skill Structure Convention + `ai-assets-skaileup/skaileup-contracts/contracts/` |
+| Skill authoring conventions | `dev/CLAUDE.md` Skill Structure Convention + `ai-assets-skaileup/docs/skill-template.md` + `tree/README.md` |
 
 ---
 

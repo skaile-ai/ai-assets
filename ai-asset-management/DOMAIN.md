@@ -5,7 +5,7 @@ type: domain
 building_blocks:
   contracts: "Skill folder structure, SKILL.md frontmatter, CLI.md format, and progressive disclosure loading strategy shared by all skill-creation skills."
   skills: "Invocable skills for creating skills (skill-builder), creating domains (domain-builder), building CLI tools (uv-cli-implementer), writing agent definitions (agent-builder), and navigating the asset catalog (ai-resource-navigator)."
-  agents: "skaile, the root orchestrator: routes by intent to domain agents (the three skaileup pipeline delegates ship from ai-assets-skaileup)."
+  agents: "skaile, the root orchestrator: routes by intent to domain agents (the three skaileup pipeline delegates ship from the archived ai-assets-skaileup-v1)."
   prompts: "TBD"
   tools: "scaffold_skill.py (skills/skill-builder/scripts/), scaffold_domain.py (skills/domain-builder/scripts/) — uv-runnable scripts invoked by skill-builder and domain-builder."
 stage: alpha

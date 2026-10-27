@@ -6,7 +6,7 @@ description: 'Skaile unified AI agent — orchestrates conceptualization, implem
 # ── Composition (mixin pattern) ──────────────────────────────────────────────
 # Paths are relative to this agent.yaml's directory.
 # ../../../  → ai-assets/
-# Delegate agents are catalog refs: they ship from ai-assets-skaileup.
+# Delegate agents are catalog refs: they ship from the archived ai-assets-skaileup-v1.
 composes:
   - { kind: persona, ref: ../../../_agent-parts/personas/skaile-base/PERSONA.md }
   - { kind: ruleset, ref: ../../../_agent-parts/rules/skaile-safety/RULESET.md }

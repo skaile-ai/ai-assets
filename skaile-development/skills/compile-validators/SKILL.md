@@ -25,7 +25,7 @@ metadata:
     reads:
     - path: "ai-assets/skaile-development/skills/<skill>/SKILL.md"
       description: "Skill definition with MUST/NEVER/CHECKLIST rules"
-    - path: "ai-assets-skaileup/contracts/scripts/validator_lib.py"
+    - path: "ai-assets-skill-development/shared/scripts/validator_lib.py"
       description: "Shared validation library API"
     produces:
     - path: "ai-assets/skaile-development/skills/<skill>/validator.py"
@@ -65,7 +65,7 @@ ROLE  Validator compiler for skaile-development skills. Reads a SKILL.md, classi
 
 READS
   ! ai-assets/skaile-development/skills/<skill>/SKILL.md
-  ! ai-assets-skaileup/contracts/scripts/validator_lib.py   — shared validator API (referenced, not copied)
+  ! ai-assets-skill-development/shared/scripts/validator_lib.py   — shared validator API (referenced, not copied)
 
 WRITES
   ai-assets/skaile-development/skills/<skill>/validator.py
@@ -140,9 +140,8 @@ STEP 4: Write validator.py
   _VLIB = None
   for _base in (Path(__file__).resolve(), *Path(__file__).resolve().parents):
       for _rel in (
-          ("ai-assets-skaileup", "contracts", "scripts"),
-          ("ai-assets-skaileup", "skaileup-contracts", "scripts"),
-          ("skaileup-shared", "scripts"),
+          ("ai-assets-skill-development", "shared", "scripts"),
+          ("ai-assets", "ai-assets-skill-development", "shared", "scripts"),
       ):
           _cand = _base.joinpath(*_rel)
           if (_cand / "validator_lib.py").exists():
@@ -179,12 +178,12 @@ STEP 4: Write validator.py
 
   **Locating validator_lib:** never hardcode a single `parents[N]` — the shared
   `validator_lib.py` lives in the sibling submodule at
-  `ai-assets-skaileup/contracts/scripts/`, and the validator must also run from the
+  `ai-assets-skill-development/shared/scripts/`, and the validator must also run from the
   shallower `.claude/skills/<skill>/` copy. Use the walk-up resolver shown in the
   template above: it ascends from the validator's own directory through every
   ancestor, probing each candidate relative path, so it resolves correctly from any
-  copy/depth. `("ai-assets-skaileup", "skaileup-contracts", "scripts")` and
-  `("skaileup-shared", "scripts")` are kept only as legacy fallbacks.
+  copy/depth. The second candidate (`ai-assets/ai-assets-skill-development/...`) covers
+  a copy that sits under the super-repo root rather than next to the submodule.
 
 # ── Phase 5: Test ────────────────────────────────────────────────
 

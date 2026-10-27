@@ -30,8 +30,8 @@ _sources:
     description: Compile manifest entries and what `skaile rebuild` captures
   - path: workspaces/packages/workspaces/cli/src/commands/rebuild.ts
     description: The `skaile rebuild` command
-# The skaileup agents (skaileup, skaileup-conceptualize, skaileup-implement, quality) ship from the
-# ai-assets-skaileup repo and are not sourced here. The workspaces commit below is where
+# The skaileup agents (skaileup, skaileup-conceptualize, skaileup-implement, quality) shipped from the
+# archived ai-assets-skaileup-v1 repo and are not sourced here. The workspaces commit below is where
 # agent-prompt-sections.ts, install-agent.ts and the 0.2 manifest schema were read
 # (`_based_on_commit`); the composition sources above (binding defaults, compile manifest, run
 # snapshots) were read at the later workspaces commit in `_composition_read_at_commit`, and the concept page names the terms used in assembly row 8.
@@ -345,10 +345,10 @@ dropped, and missing convention files are silently skipped.
 | Agent                             | Path                                                        | Role                                                                           |
 | --------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | `skaile`                          | `ai-asset-management/agents/skaile/`                        | Root orchestrator — routes by intent to domain agents                          |
-| `skaileup`                        | `ai-assets-skaileup/00_skaileup-orchestrator/agents/skaileup/` | Conversational guide — discovers installed orchestrators, guides through flows |
-| `skaileup-conceptualize`          | `ai-assets-skaileup/00_skaileup-orchestrator/agents/skaileup-conceptualize/` | Concept pipeline (Discovery → Blueprint)                                       |
-| `skaileup-implement`              | `ai-assets-skaileup/10_impl-build/agents/skaileup-implement/` | Implementation pipeline (Setup → Verify)                                       |
-| `quality`                         | `ai-assets-skaileup/13_impl-quality/agents/quality/` | Quality assurance                                                              |
+| `skaileup`                        | `ai-assets-skaileup-v1/skaileup/00_skaileup-orchestrator/agents/skaileup/` | Conversational guide — discovers installed orchestrators, guides through flows |
+| `skaileup-conceptualize`          | `ai-assets-skaileup-v1/skaileup/00_skaileup-orchestrator/agents/skaileup-conceptualize/` | Concept pipeline (Discovery → Blueprint)                                       |
+| `skaileup-implement`              | `ai-assets-skaileup-v1/skaileup/10_impl-build/agents/skaileup-implement/` | Implementation pipeline (Setup → Verify)                                       |
+| `quality`                         | `ai-assets-skaileup-v1/skaileup/13_impl-quality/agents/quality/` | Quality assurance                                                              |
 | `skaile-development`              | `skaile-development/agents/skaile-development/`             | skaile-dev monorepo expert — routes tasks to skills and prog-experts           |
 | `forge-project-assistant`         | `skaile-forge/agent/`                                       | In-app dev assistant for skaile-forge workspaces                                |
 | `forge-project-base-orchestrator` | `skaile-forge/base-orchestrator/`                           | Home workspace guide — creates projects, explains Forge Project features       |
@@ -357,7 +357,7 @@ dropped, and missing convention files are silently skipped.
 | `workspace-orchestrator`          | `forge-mattermost/workspace-orchestrator/`                  | Mattermost channel workspace orchestrator — manages threads, shared state and team coordination |
 | `researcher`                      | `knowledge-research/agents/researcher/`                     | Read-only research role (`lifecycle: role`): `{topic}` in, `{summary, sources}` out |
 
-The four `skaileup*` and `quality` agents ship from the separate `ai-assets-skaileup` repo (the paths above are repo-qualified: `ai-assets-skaileup/` plus the path inside that repo); the other agents live in this repo.
+The four `skaileup*` and `quality` agents come from the archived `ai-assets-skaileup-v1` repo (the paths above are repo-qualified: `ai-assets-skaileup-v1/` plus the path inside that repo); the current `ai-assets-skaileup` collection ships skills and flows, no agents. The other agents live in this repo.
 
 The `skaileup-*` naming convention is significant: any agent installed to `.claude/agents/` whose name starts with `skaileup-` is automatically discovered by the `skaileup` guide agent at session start. New orchestrators (e.g. `skaileup-implement-supabase`) are discovered without any change to `skaileup` itself.
 
@@ -369,7 +369,7 @@ skaile run cli-concept --project-dir ./my-project
 
 # With a different agent definition
 skaile run cli-concept --project-dir ./my-project \
-  --agent-dir ./ai-assets-skaileup/00_skaileup-orchestrator/agents/skaileup-conceptualize
+  --agent-dir ./ai-assets-skaileup-v1/skaileup/00_skaileup-orchestrator/agents/skaileup-conceptualize
 
 # Via Claude Code --agent flag (after skaile install)
 claude --agent skaileup                  # interactive guide — start here
@@ -377,7 +377,7 @@ claude --agent skaileup-conceptualize    # concept pipeline directly
 claude --agent skaileup-implement        # implementation pipeline directly
 
 # Via GitAgent CLI
-gitagent run ai-assets-skaileup/00_skaileup-orchestrator/agents/skaileup-conceptualize/
+gitagent run ai-assets-skaileup-v1/skaileup/00_skaileup-orchestrator/agents/skaileup-conceptualize/
 
 # Validate a 0.2 manifest (the upstream `gitagent validate` only knows spec 0.1)
 skaile validate                          # from the ai-assets root: checks every manifest, including agent.yaml

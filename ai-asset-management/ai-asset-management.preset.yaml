@@ -10,7 +10,7 @@ items:
   - ref: skill:@skaile-ai/ai-resource-navigator
   - ref: skill:@skaile-ai/uv-cli-implementer
   # `agent:@skaile-ai/skaile` composes three delegate agents (skaileup-conceptualize,
-  # impl-build-implement, quality) that ship from the separate skaile-ai/ai-assets-skaileup repo
+  # impl-build-implement, quality) that ship from the archived skaile-ai/ai-assets-skaileup-v1 repo
   # (same publisher, @skaile-ai). A consumer needs a second `sources:` entry for
-  # https://github.com/skaile-ai/ai-assets-skaileup to install this preset completely.
+  # https://github.com/skaile-ai/ai-assets-skaileup-v1 to install this preset completely.
   - ref: agent:@skaile-ai/skaile
