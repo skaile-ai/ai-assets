@@ -48,13 +48,16 @@ jobs:
           # The catalog version can run ahead of the release (a catalog-only patch,
           # since the store publishes only versions it has never published). A
           # release at or below it would publish nothing, so say so instead.
-          if [ -n "$OLD" ] && [ "$OLD" != "$VERSION" ] \
-            && [ "$(printf '%s\n%s\n' "$OLD" "$VERSION" | sort -V | tail -n1)" = "$OLD" ]; then
+          # Compare the numeric cores: `sort -V` ranks `1.2.1-rc1` above `1.2.1`,
+          # and the store skips prereleases and ignores build metadata anyway.
+          OLD_CORE=${OLD%%[-+]*}; NEW_CORE=${VERSION%%[-+]*}
+          if [ -n "$OLD" ] && [ "$OLD_CORE" != "$NEW_CORE" ] \
+            && [ "$(printf '%s\n%s\n' "$OLD_CORE" "$NEW_CORE" | sort -V | tail -n1)" = "$OLD_CORE" ]; then
             echo "::error::release $VERSION is below the catalog version $OLD; the store would not publish it. Bump the catalog past $OLD by hand."
             exit 1
           fi
-          if [ "$OLD" = "$VERSION" ]; then
-            echo "::warning::catalog is already at $VERSION; if this is a new release, the store will not republish $VERSION. Bump the catalog past it by hand."
+          if [ -n "$OLD" ] && [ "$OLD_CORE" = "$NEW_CORE" ]; then
+            echo "::warning::catalog is already at $OLD and the release is $VERSION; the store will not publish it (it skips prereleases, ignores build metadata and never republishes a version). Bump the catalog past $OLD_CORE by hand if this is a new release."
           fi
           sed -i -E "s/^([[:space:]]*version:[[:space:]]*).*(# mcp-catalog-version)/\1${VERSION} \2/" "$FILE"
           echo "bumped $FILE -> $VERSION"
@@ -212,9 +215,9 @@ jobs:
 
           # An entry opts into this check by declaring the marker above an
           # enumeration whose backticked names are the *wire* names. Opt-in, not
-          # heuristics: mcp/ppt/MCP.md omits names for whole categories and writes
-          # bare `create_document` where the wire says `ppt.create_document`, so a
-          # parser that guessed would report ~52 removals that are not there — a
+          # heuristics: an entry that omits names for whole categories, or writes
+          # bare `create_document` where the wire says `ppt.create_document`, would
+          # make a guessing parser report dozens of removals that are not there — a
           # loud wrong answer, which is the failure this check exists to prevent.
           MARKER = "<!-- mcp-catalog-tools -->"
           MARKER_END = "<!-- /mcp-catalog-tools -->"
