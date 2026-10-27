@@ -44,7 +44,7 @@ agent:skaileup-conceptualize
 agent:impl-build-implement
 agent:quality
 "
-# ^ shipped from skaile-ai/ai-assets-skaileup (publisher skaile-ai). Referenced by
+# ^ shipped from the archived skaile-ai/ai-assets-skaileup-v1 (publisher skaile-ai). Referenced by
 #   ai-asset-management/agents/skaile/agent.yaml (composed as delegate agents).
 
 PUBLISHER="skaile-ai"

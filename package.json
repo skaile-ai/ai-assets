@@ -4,7 +4,7 @@
   "private": true,
   "description": "Skaile AI skills, domains, contracts, and shared resources",
   "scripts": {
-    "lint": "echo 'lint moved to ai-assets-skaileup/skaileup-contracts/scripts/lint_concept.py' && exit 0",
+    "lint": "echo 'lint moved to ai-assets-skaileup-v1/skaileup/contracts/scripts/ (archived)' && exit 0",
     "test": "bash scripts/run-tests.sh"
   }
 }

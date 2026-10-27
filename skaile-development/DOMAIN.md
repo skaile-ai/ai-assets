@@ -190,7 +190,8 @@ The `sync-docs` skill repairs cross-references between tiers.
 
 - **skaileup-implementation**: Builds apps _using_ skaile (consumes `_concept/`). This domain is for the skaile codebase itself.
 - **skaileup-evaluate**: Full QA pipeline for generated apps (concept-driven). `skaile-development` borrows its _patterns_ (sub-agent audits, readiness gates, sync) but does **not** depend on any skaileup-\* skill at runtime — all functionality is copied locally and adapted to the monorepo.
-- **skaileup-shared**: Shared contracts referenced by all domains. `compile-validators` reads `scripts/validator_lib.py` from here.
+- **skaileup-shared**: Shared contracts referenced by all domains.
+- **ai-assets-skill-development** (`shared/scripts/validator_lib.py`): the shared validator library. `compile-validators` and every generated `validator.py` resolve it as a sibling repo.
 
 ## Notes
 

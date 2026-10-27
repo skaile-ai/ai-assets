@@ -24,7 +24,7 @@ Two tiers, and nothing else:
 
 Extensions, in probe order: `.flow.yaml`, `.flow.yml`, `.flow.json`, and the legacy bare `.json`, which stays last so an explicit `.flow.json` wins a tie.
 
-The per-flow directory tier is **not recursion**. Discovery descends exactly one level, and the file must be named after its directory — that is what lets a flow keep siblings next to it without them being parsed as flows. `ai-assets-skaileup` uses this tier for every one of its flows, each flow file sitting beside a `.md` companion.
+The per-flow directory tier is **not recursion**. Discovery descends exactly one level, and the file must be named after its directory — that is what lets a flow keep siblings next to it without them being parsed as flows. `ai-assets-skaileup` uses this tier for every one of its flows (`flows/<id>/<id>.flow.yaml`).
 
 A misnamed flow is not dropped in silence. Where discovery does look, a subdirectory holding a file named `flow.yaml` or `<anything>.flow.yaml` — or the `.yml` / `.json` equivalents — but none named after itself is reported on stderr:
 
@@ -254,7 +254,7 @@ skaile run obligation-review --project-dir ./my-project --dry-run
 
 Use `skaile flow list` for the live set — it discovers flows across every content root, and a hard-coded table here rots.
 
-This repo ships one flow, the test fixture `testing/flows/test-echo.flow.yaml`. The skaileup concept / build / quality pipeline flows live in the separate `ai-assets-skaileup` repo under `skaileup/flows/`.
+This repo ships one flow, the test fixture `testing/flows/test-echo.flow.yaml`. The skaileup concept / build / quality pipeline flows live in the separate `ai-assets-skaileup` repo under `flows/`. The earlier collection, archived as `ai-assets-skaileup-v1`, kept them under `skaileup/flows/`.
 
 ## Writing a new flow
 
@@ -272,6 +272,6 @@ This repo ships one flow, the test fixture `testing/flows/test-echo.flow.yaml`. 
 
 If a flow is authored by an agent through the platform's flow-authoring capabilities rather than by hand, the `schemaVersion` declaration is mandatory: those capabilities refuse a definition without it, precisely so the v1 normalizer cannot turn the definition's non-`skill`, non-`sub-flow`, non-`gate` nodes into inert placeholders that run nothing.
 
-`ai-assets-skaileup/skaileup/contracts/flow.schema.json` is not a second runtime — its only consumer is that repo's authoring-time verifier script.
+The archived `ai-assets-skaileup-v1` repo carried a `skaileup/contracts/flow.schema.json`; it was not a second runtime, its only consumer was that repo's authoring-time verifier script. The current `ai-assets-skaileup` has no such schema.
 
 See the [flow-engine concepts](/integrate/flow-engine/concepts/) for engine internals, and `platform/docs/flow-authoring-v2.md` for the platform-side authoring reference.

@@ -85,7 +85,7 @@ here.
 | `agent-framework/` | Runtime stack (16 packages, `@skaile/agent-*`) | Always -- everything else builds on it |
 | `ai-assets/` | Skill catalog: dev workflow, experts, research, writing, external service wrappers | When the agent needs domain capabilities or you want to author your own |
 | `ai-assets-skaile/` | `@skaile/base-assets`: built-in mount drivers + connector adapters with manifests | When the agent needs to reach data sources; or you write a new connector |
-| `ai-assets-skaileup/` | Concept/build/quality pipeline skills (14 domains, flow-driven) | When you want to *generate* an app or run quality gates on one |
+| `ai-assets-skaileup/` | Concept/build/quality skills (9 domains, 31 skills, mirror tree, two advisory flows) | When you want to *generate* an app or run quality gates on one |
 | `forge/` | Reference apps L2-L5: TUI, Nuxt assistant, collaborative editor | Templates to copy-paste from |
 | `platform/` | Enterprise platform (NestJS + React 19 + vm-agent containers) | Multi-tenant SaaS / reference for enterprise patterns |
 | `theme/` | Design tokens (colors, fonts, Tailwind preset) | Brand consistency |
@@ -253,26 +253,20 @@ config.
 
 ### Concept-to-app pipelines (`ai-assets-skaileup/`)
 
-14 domains forming a concept -> implementation pipeline. Two reading paths:
+One collection: ~31 skills in 9 domains (concept, design, experience, spec, mockup,
+architecture, build, quality, ops), organised as a mirror tree. `tree/` mirrors the
+`_concept/` artifact tree one node per part (purpose, format, procedure, checks), and each
+`skills/<name>/SKILL.md` is the route of nodes it visits. The domain is the first segment of
+the skill name (`concept-brief`, `mockup-storybook`, `build-implement`); the router skill
+`skaileup` names the right skill for what you want.
 
-**Concept pipeline (greenfield):**
-```
-grounding -> discovery -> experience -> architecture -> datamodel
-                                    \-> concept-mockup
-                                    \-> concept-storybook
-```
-Produces a structured `_concept/` directory: brief, journeys, features,
-screens, components, techstack choice, data model.
+Two advisory flows (`flows/<id>/<id>.flow.yaml`) order the skills: `skaileup-greenfield`
+(idea to release grade) and `skaileup-reverse` (a concept from an existing repository).
+Nothing gates on the order; any skill runs on its own. Output is the numbered `_concept/`
+tree (`01_meta` ... `11_build`) plus `APP-DESIGN.md`.
 
-**Build pipeline (uses concept output):**
-```
-build (autonomous) | build-supervised (git-prepare/brainstorm/plan/finish)
-                                    -> quality (audit, tests, readiness)
-                                    -> lab (validate skills themselves)
-```
-
-Cross-cutting: `concept-ops` (review/eval/drift/sync), `contracts` (shared
-schemas referenced by every skill).
+The earlier layout (`00_skaileup-orchestrator/...`, 14 domains) is archived as
+`ai-assets-skaileup-v1`; `ai-assets-skaileup-mp` is archived too.
 
 When useful: any time you want an AI to design and build (or audit) an app
 end-to-end. The flows are `<id>.flow.yaml` definitions consumable by the runner's flow
@@ -404,20 +398,20 @@ Documented at `platform/docs/protocol-extensions.md`:
 
 ### "Generate an entire app from a brief" (concept-to-code)
 
-- Run the skaileup concept pipeline:
-  - `skaileup-grounding` to onboard + research
-  - `skaileup-discovery` for brief, brand identity
-  - `skaileup-experience` for journeys, features, screens
-  - `skaileup-architecture` + `skaileup-datamodel` for techstack + data
-- Then `skaileup-build` (or supervised `skaileup-build-supervised`) emits
-  scaffolding + features.
-- `skaileup-quality` runs audit + test generation + readiness gates.
+- Start with the router skill `skaileup`, or run the `skaileup-greenfield` flow:
+  - `concept-onboard`, `concept-research`, `concept-brief` to onboard + research + brief
+  - `design-brand` for brand identity
+  - `experience-journeys`, `spec-feature`, `experience-screen` for journeys, features, screens
+  - `architecture-techstack` + `architecture-datamodel` for techstack + data
+- Then `mockup-storybook`, and `build-plan` / `build-scaffold` / `build-implement`
+  emit scaffolding + features.
+- The `quality-*` skills run audit + test generation + readiness gates.
 - This is the path the Skaile platform automates for end users.
 
 ### "Audit / improve an existing skill or codebase"
 
-- `skaileup-quality` for code audit, test generation, readiness gates.
-- `skaileup-lab` for skill testing in Docker-isolated runs (validators).
+- the `quality-*` skills for code audit, test generation, readiness gates.
+- `ai-assets-skill-development` (the `lab` domain) for skill testing and validator compilation.
 - `ai-assets/skaile-development/skills/audit`, `test`, `review` for
   monorepo-aware variants used inside skaile-dev.
 
@@ -462,7 +456,7 @@ Documented at `platform/docs/protocol-extensions.md`:
 | Connectors (tool-accessed) | Built-ins: postgres / redis / sqlite / yjs / gmail / minio / mattermost / xstate / etc. | `ai-assets-skaile/connectors/` |
 | Skill capabilities | Existing skills in `ai-assets/` (or new ones in your own domain) | `ai-assets/` |
 | Concept->code pipeline | Skaileup flows + skills | `ai-assets-skaileup/` |
-| Code audit / tests / readiness | `skaileup-quality` + `skaile-development/skills/audit\|test\|review` | `ai-assets-skaileup/`, `ai-assets/` |
+| Code audit / tests / readiness | `quality-*` skills + `skaile-development/skills/audit\|test\|review` | `ai-assets-skaileup/`, `ai-assets/` |
 | Multi-user web app shell | `forge/skaile-forge` (cookie auth, SQLite, settings UI) | `forge/` |
 | Real-time collab editor | `forge/L5-concept` (Hocuspocus, Yjs, voice) | `forge/` |
 | Multi-tenant container hosting | `platform/` (vm-agent, gateway, container manager) | `platform/` |
@@ -536,9 +530,9 @@ Convention from `ai-assets-skaile/CLAUDE.md`:
 
 ### A new flow
 
-JSON/YAML at `ai-assets-skaileup/<domain>/flows/<flow>.flow.yaml` (or
-project-local `<projectDir>/.skaile/flows/<flow>/<flow>.flow.yaml`). Schema
-at `ai-assets-skaileup/skaileup-contracts/flow.schema.json`. Nodes are
+JSON/YAML at `ai-assets-skaileup/flows/<flow>/<flow>.flow.yaml` (or
+project-local `<projectDir>/.skaile/flows/<flow>/<flow>.flow.yaml`). The
+contract is the flow engine's (see `docs/flows.md` in `ai-assets`). Nodes are
 typed (`type: skill` is the common case); edges declare dependencies.
 
 ### A new agent definition

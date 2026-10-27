@@ -2,7 +2,7 @@
 
 AI agent skills for the Skaile ecosystem — development workflow skills, implementation experts, research, writing, and external service integrations.
 
-> **Skaileup skills** (concept, build, quality pipelines) have been moved to the separate [`ai-assets-skaileup`](https://github.com/skaile-ai/ai-assets-skaileup) repo.
+> **Skaileup skills** (concept, build, quality pipelines) live in the separate [`ai-assets-skaileup`](https://github.com/skaile-ai/ai-assets-skaileup) repo. Its predecessor is archived as [`ai-assets-skaileup-v1`](https://github.com/skaile-ai/ai-assets-skaileup-v1).
 
 ## Quick Start
 

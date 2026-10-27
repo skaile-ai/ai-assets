@@ -13,9 +13,8 @@ from pathlib import Path
 _VLIB = None
 for _base in (Path(__file__).resolve(), *Path(__file__).resolve().parents):
     for _rel in (
-        ("ai-assets-skaileup", "contracts", "scripts"),
-        ("ai-assets-skaileup", "skaileup-contracts", "scripts"),
-        ("skaileup-shared", "scripts"),
+        ("ai-assets-skill-development", "shared", "scripts"),
+        ("ai-assets", "ai-assets-skill-development", "shared", "scripts"),
     ):
         _cand = _base.joinpath(*_rel)
         if (_cand / "validator_lib.py").exists():
