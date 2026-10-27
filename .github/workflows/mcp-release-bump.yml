@@ -45,6 +45,17 @@ jobs:
           # otherwise carry into the literal search.
           OLD=$(sed -nE '/# mcp-catalog-version/{ s/^[[:space:]]*version:[[:space:]]*([^[:space:]]+).*/\1/p; q; }' "$FILE")
           OLD=${OLD%\"}; OLD=${OLD#\"}
+          # The catalog version can run ahead of the release (a catalog-only patch,
+          # since the store publishes only versions it has never published). A
+          # release at or below it would publish nothing, so say so instead.
+          if [ -n "$OLD" ] && [ "$OLD" != "$VERSION" ] \
+            && [ "$(printf '%s\n%s\n' "$OLD" "$VERSION" | sort -V | tail -n1)" = "$OLD" ]; then
+            echo "::error::release $VERSION is below the catalog version $OLD; the store would not publish it. Bump the catalog past $OLD by hand."
+            exit 1
+          fi
+          if [ "$OLD" = "$VERSION" ]; then
+            echo "::warning::catalog is already at $VERSION; if this is a new release, the store will not republish $VERSION. Bump the catalog past it by hand."
+          fi
           sed -i -E "s/^([[:space:]]*version:[[:space:]]*).*(# mcp-catalog-version)/\1${VERSION} \2/" "$FILE"
           echo "bumped $FILE -> $VERSION"
           grep -nE "version:.*# mcp-catalog-version" "$FILE"
