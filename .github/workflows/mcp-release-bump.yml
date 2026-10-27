@@ -58,6 +58,8 @@ jobs:
           fi
           if [ -n "$OLD" ] && [ "$OLD_CORE" = "$NEW_CORE" ]; then
             echo "::warning::catalog is already at $OLD and the release is $VERSION; the store will not publish it (it skips prereleases, ignores build metadata and never republishes a version). Bump the catalog past $OLD_CORE by hand if this is a new release."
+            # A differing suffix on the same core would rewrite the marker downwards.
+            if [ "$OLD" != "$VERSION" ]; then exit 0; fi
           fi
           sed -i -E "s/^([[:space:]]*version:[[:space:]]*).*(# mcp-catalog-version)/\1${VERSION} \2/" "$FILE"
           echo "bumped $FILE -> $VERSION"
