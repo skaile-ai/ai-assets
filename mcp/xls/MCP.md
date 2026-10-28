@@ -81,9 +81,9 @@ before the queue counts as stale; admins add `,liveness=SECONDS` to a queue in `
 Windows host with desktop Excel and an interactive login; there is no macOS or Linux worker. Guide the
 user: (1) copy `real-excel-worker/` from github.com/skaile-ai/excel-mcp to that host and install
 Python 3 and `pywin32`; (2) sync a SharePoint/OneDrive folder to it, set to always keep on the device
-(also on the server's side); (3) write `worker.json` with `"driver": "com"` and an absolute
-`trusted_dir` that is an Excel Trusted Location, Trust Center macros on "Disable all macros without
-notification"; (4) run `python worker.py --root <folder> --config worker.json` and leave it open.
+(also on the server's side); (3) for macro jobs only, make the worker's `trusted_dir` (default
+`C:\spike-scratch\worker\trusted`) an Excel Trusted Location, Trust Center macros on "Disable all
+macros without notification"; (4) run `python worker.py --root <folder>` and leave it open.
 Then take the folder path as this server sees it, call `queue.set`, and `queue.list` until `ready`.
 
 ## Capabilities
