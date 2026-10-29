@@ -1,7 +1,7 @@
 ---
 name: excel
 description: "A stateful, formula-aware Excel engine an agent can actually drive - not a file it has to parse by hand. Opens existing .xlsx/.xlsm/.xls workbooks (or creates new ones), password-encrypted .xlsx/.xlsm included, entirely in memory, then queries and richly edits them across a whole session without reloading: cell values, typed formulas, styling, conditional formatting, data validation, charts, merged regions, cell notes and threaded comments, sheet structure and outline grouping, rows and columns, table rows and columns, named ranges, sheet and workbook protection, and Power Query M - flushed to disk with an atomic, corruption-safe save. Its standout capability is headless recalculation: Apache POI evaluates ~280 Excel functions in place, so the agent works with real computed results instead of the stale cached zeros that code-based approaches (openpyxl/pandas, or Claude's built-in spreadsheet handling) leave behind - and every read distinguishes a genuine value from an as-yet-uncomputed formula. It can also review a model, not just write one: workbook.audit scans for hardcoded constants and hidden rows, and cell.trace walks precedents and dependents. Because all edits flow through one POI writer, it avoids the 'Excel repaired records' corruption a second serializer over the same file causes. A workbook too large to load can still be read: workbook.open's read-only stream mode pages through it in flat memory, and sheet.export writes a sheet out to CSV or JSON Lines in one pass. 77 tools across workbook lifecycle (incl. audit and stream mode), agent context, range I/O (incl. cell styling, conditional formats written and read back, data validation, formula tracing, formula-pattern search, and cell comments), sheet management (incl. merge/unmerge, sheet reordering, row paging, and CSV/JSON Lines export and import), presentation written and read back, print setup and outlining, row/column mutation, line and bar charts, tables (incl. adding and deleting rows), named ranges, sheet and workbook protection, read-only VBA extraction and export, Power Query read and write, multi-call batching, and queues to a real-Excel worker (macros, Power Query and pivot refresh, real recalculation, .xlsb conversion)."
-version: 0.13.6 # mcp-catalog-version
+version: 0.13.7 # mcp-catalog-version
 transport: stdio
 # Start the JVM on the first tool call, not at session start.
 lazy: true
@@ -32,7 +32,11 @@ env:
   # from choosing their own. Users register a queue with queue.set. An administrator who
   # wants a fixed one sets EXCEL_MCP_QUEUES (name=path[,mode=assigned][,liveness=SECONDS],
   # entries separated by ";") and EXCEL_MCP_DEFAULT_QUEUE per org or session via env.
-  EXCEL_MCP_REMOTE_WAIT_S: "600"
+  # The Skaile runner ends any MCP tool call after the TS SDK's 60 s default
+  # (skaile-ai/workspaces#1161), so a longer remote.run/remote.job wait is lost and the
+  # agent never sees the job id. 45 s returns `pending` in time; the agent polls remote.job.
+  # Raise it only once the runner sets a longer timeout.
+  EXCEL_MCP_REMOTE_WAIT_S: "45"
 keywords:
   - excel
   - xlsx
@@ -65,7 +69,9 @@ running worker: check `queue.list` first. `state` is `ready` or `busy` (go ahead
 (tell the user; setup below), `unreachable` (folder missing or unusable: check the mount; heartbeat
 unreadable for a moment: call `queue.list` again in ~10 s first), or `stale` (no worker heartbeat
 within the queue's `liveness_s`; the job still queues, warn the user).
-`wait_s` is capped by `EXCEL_MCP_REMOTE_WAIT_S`; the result says `wait_s_clamped_to`. The
+`wait_s` is capped at 45 s here (the client ends a call at about 60 s; the result says
+`wait_s_clamped_to`): a job still running comes back `pending` with its `job_id`, so poll
+`remote.job` with that id until it is done. The
 `remote.run` op `refresh` takes `continue_on_error`: a failing query no longer stops the job, the
 op's `status` is `partial`, the saved copy keeps stale data for the failed queries, and the job
 carries a `queries_failed` warning. The workbook leaves the machine, so use only a queue the user
