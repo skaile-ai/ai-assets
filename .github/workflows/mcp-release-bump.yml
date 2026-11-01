@@ -254,7 +254,8 @@ jobs:
           NAME_RE = re.compile(r"^[a-z_][a-z0-9_]*(\.[a-z0-9_]+)?$")
           # Per server, resolved by the bump step's `case`: 30 for excel/ppt/word,
           # deliberately the same as excel-mcp's MINIMUM_PLAUSIBLE_TOOL_COUNT rather
-          # than a second invented one, and resona-hub's full 8-tool surface. Below it,
+          # than a second invented one, and 5 for resona-hub (below its 8-tool surface,
+          # so a release that drops a tool still gets the removal diff). Below it,
           # a payload is far likelier to be a truncated build artefact than a real
           # inventory.
           MIN_PLAUSIBLE = int(os.environ["MIN_TOOLS"])
@@ -613,6 +614,9 @@ jobs:
           PY
 
       - name: Open PR
+        # Same guard as the parity step: on the same-core early exit there is no bump,
+        # and the parity step that writes the PR body did not run.
+        if: steps.bump.outputs.file != ''
         uses: peter-evans/create-pull-request@v6
         with:
           branch: mcp-release/${{ github.event.client_payload.mcp }}-${{ github.event.client_payload.version }}
