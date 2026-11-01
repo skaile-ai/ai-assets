@@ -64,9 +64,11 @@ top-level then `metadata.version`; `CommonMetadataSchema` in
 catalog entry and flow-node version pins, and it **overrides** the repo-wide
 git-tag version for that asset (`core/src/publish-manifest.ts`: "`version:`
 overrides the manifest-level version"). Prefer `metadata.version` for skaile
-extensions (the agentskills.io convention the parser follows). MCP servers
-under `mcp/` source their version from `pom.xml` and mirror it into the
-`version` field of their single `MCP.md` — see `mcp/DOMAIN.md`.
+extensions (the agentskills.io convention the parser follows). Locally-built MCP
+servers under `mcp/` source their version from `pom.xml` and mirror it into the
+`version` field of their single `MCP.md`; a remote server wired into the
+`mcp-release` dispatch (`resona-hub`) follows its server release instead — see
+`mcp/DOMAIN.md`.
 
 Agents (`agent.yaml`) and presets (`*.preset.yaml`) carry an explicit `version:`
 in the file. It is hand-managed: it does not follow the git tag, so bump it (and
