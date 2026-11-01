@@ -27,11 +27,15 @@ jobs:
           # MIN_TOOLS: below it a dispatched inventory is treated as a truncated build
           # artefact rather than a real one. Per server, because a whole release can be
           # small: resona-hub ships 8 tools, so excel's 30 would reject every release.
+          # Keep each floor strictly below the current surface so a release that drops
+          # a tool still gets the removal diff; a release that legitimately ships fewer
+          # tools than its floor needs the floor edited here first, otherwise it is
+          # reported as a producer fault.
           case "$MCP" in
             excel)      DIR=mcp/xls;        MIN_TOOLS=30 ;;
             ppt)        DIR=mcp/ppt;        MIN_TOOLS=30 ;;
             word)       DIR=mcp/docx;       MIN_TOOLS=30 ;;
-            resona-hub) DIR=mcp/resona-hub; MIN_TOOLS=8 ;;
+            resona-hub) DIR=mcp/resona-hub; MIN_TOOLS=5 ;;
             *) echo "::error::unknown mcp '$MCP'"; exit 1 ;;
           esac
           if [ -z "${VERSION:-}" ]; then echo "::error::empty version"; exit 1; fi
@@ -197,6 +201,9 @@ jobs:
       # rather than a reason to withhold the PR — the #62 lesson.
       - name: Check tool-inventory parity
         id: parity
+        # The bump step can exit 0 before resolving a file (same numeric core, other
+        # suffix): there is no bump and no MIN_TOOLS then, so nothing to compare.
+        if: steps.bump.outputs.file != ''
         env:
           # `toJSON` of an absent field is the JSON literal `null`. That is the
           # "this sender ships no inventory yet" state, not an error.
