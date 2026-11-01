@@ -3,7 +3,7 @@ name: mcp
 description: "MCP server catalog entries - MCP.md recipes that give agents typed tool access to external systems (Excel, PowerPoint, GitHub)."
 type: domain
 building_blocks:
-  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), docx/ (Word document in-place editing via Apache POI XWPF), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only)."
+  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), docx/ (Word document in-place editing via Apache POI XWPF), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only), resona-hub/ (Resona hosted remote MCP - private audio transcription and document OCR to Markdown, org-bound bearer token)."
 stage: alpha
 ---
 
@@ -31,8 +31,10 @@ mcp/                      <- MCP servers (one subfolder per server)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:alma resolution (transport: http, url per tenant)
 ├── ideogram/          <- Ideogram official hosted remote MCP (no image - per-user OAuth)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:ideogram resolution (transport: http, per-user OAuth)
-└── strava/            <- Strava catalog entry (code: r-huijts/strava-mcp on npm)
-    └── MCP.md         <- catalog manifest + guidance for mcp:strava resolution (command: npx + pinned version)
+├── strava/            <- Strava catalog entry (code: r-huijts/strava-mcp on npm)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:strava resolution (command: npx + pinned version)
+└── resona-hub/        <- Resona hosted remote MCP (no image - code: ecsplico/resona)
+    └── MCP.md         <- catalog manifest for mcp:resona-hub resolution (transport: http, bearer auth block)
 ```
 
 ## Servers in this domain
@@ -47,6 +49,7 @@ mcp/                      <- MCP servers (one subfolder per server)
 | [alma](alma/MCP.md) | `mcp/alma` | alpha (v1.0.0) | ALMA per-tenant hosted remote MCP over streamable HTTP - read-only scorecards, indicators, regions, period maps, time series, geo; permission- and region-scoped to a PAT. URL is per-slug; auth is a static PAT bound per-org at the platform. |
 | [ideogram](ideogram/MCP.md) | `mcp/ideogram` | alpha (v0.1.0) | Ideogram official hosted remote MCP over streamable HTTP - generate (incl. typography), edit/inpaint, reframe/outpaint, upscale. Per-user OAuth: each user signs in to their own Ideogram account and draws on their own subscription credits. (Central org-key route is the `use-ideogram-image` skill in `use/`.) |
 | [strava](strava/MCP.md) | `mcp/strava` | alpha (v0.1.0) | Strava REST API (`api/v3`) over stdio - activities, laps, streams, athlete profile/stats/zones, segments, routes, GPX/TCX export; 25 tools. Runs the third-party `@r-huijts/strava-mcp-server` npm package at a pinned version (first `command: npx` entry). Deliberately **not** Strava's hosted MCP, which refuses our egress IP range. Per-user credentials; **personal scope only** (Strava's API terms allow an athlete's data to be shown to that athlete alone). |
+| [resona-hub](resona-hub/MCP.md) | `mcp/resona-hub` | alpha (v0.1.0) | Resona hosted remote MCP over Streamable HTTP - private audio transcription and document OCR to Markdown as asynchronous jobs on the organization's approved workers; 8 tools. Auth is an org-bound Resona client token declared as a bearer `auth` block (instance secret), so the hub scopes every job to that organization. |
 
 ## Conventions
 

@@ -1,8 +1,8 @@
 name: MCP Catalog Version Bump
 
-# Triggered by a repository_dispatch from excel-mcp / powerpoint-mcp / word-mcp
-# when they cut a release. Bumps the catalog `version:` in the matching MCP.md
-# (the line carrying the `# mcp-catalog-version` marker) and opens a PR.
+# Triggered by a repository_dispatch from excel-mcp / powerpoint-mcp / word-mcp /
+# ecsplico/resona when they cut a release. Bumps the catalog `version:` in the
+# matching MCP.md (the line carrying the `# mcp-catalog-version` marker) and opens a PR.
 on:
   repository_dispatch:
     types: [mcp-release]
@@ -24,10 +24,14 @@ jobs:
           VERSION: ${{ github.event.client_payload.version }}
         run: |
           set -euo pipefail
+          # MIN_TOOLS: below it a dispatched inventory is treated as a truncated build
+          # artefact rather than a real one. Per server, because a whole release can be
+          # small: resona-hub ships 8 tools, so excel's 30 would reject every release.
           case "$MCP" in
-            excel) DIR=mcp/xls ;;
-            ppt)   DIR=mcp/ppt ;;
-            word)  DIR=mcp/docx ;;
+            excel)      DIR=mcp/xls;        MIN_TOOLS=30 ;;
+            ppt)        DIR=mcp/ppt;        MIN_TOOLS=30 ;;
+            word)       DIR=mcp/docx;       MIN_TOOLS=30 ;;
+            resona-hub) DIR=mcp/resona-hub; MIN_TOOLS=8 ;;
             *) echo "::error::unknown mcp '$MCP'"; exit 1 ;;
           esac
           if [ -z "${VERSION:-}" ]; then echo "::error::empty version"; exit 1; fi
@@ -176,9 +180,10 @@ jobs:
             echo "stale=false" >> "$GITHUB_OUTPUT"
           fi
 
-          # The parity step needs the file this step's `case` resolved. Exporting
-          # it keeps the mcp-to-directory mapping in exactly one place.
+          # The parity step needs the file and threshold this step's `case` resolved.
+          # Exporting them keeps the mcp-to-directory mapping in exactly one place.
           echo "file=$FILE" >> "$GITHUB_OUTPUT"
+          echo "min_tools=$MIN_TOOLS" >> "$GITHUB_OUTPUT"
 
       # The dispatch now carries a build-verified tool inventory (excel-mcp#135):
       # a top-level array of {name, deferred}, sorted by name, generated from the
@@ -197,6 +202,7 @@ jobs:
           # "this sender ships no inventory yet" state, not an error.
           TOOLS_JSON: ${{ toJSON(github.event.client_payload.tools) }}
           FILE: ${{ steps.bump.outputs.file }}
+          MIN_TOOLS: ${{ steps.bump.outputs.min_tools }}
           VERSION: ${{ github.event.client_payload.version }}
           BODY: ${{ runner.temp }}/pr-body.md
         # python3 (preinstalled on ubuntu-latest) rather than more awk: the work
@@ -239,12 +245,12 @@ jobs:
           # Everything inside the markers must be a tool name -- that is what declaring
           # the block asserts -- so a looser shape here is not a looser contract.
           NAME_RE = re.compile(r"^[a-z_][a-z0-9_]*(\.[a-z0-9_]+)?$")
-          # Deliberately the same threshold as excel-mcp's
-          # MINIMUM_PLAUSIBLE_TOOL_COUNT rather than a second invented one: below
-          # it, a payload is far likelier to be a truncated build artefact than a
-          # real inventory. Wants revisiting if a genuinely smaller server ever
-          # adopts the payload shape.
-          MIN_PLAUSIBLE = 30
+          # Per server, resolved by the bump step's `case`: 30 for excel/ppt/word,
+          # deliberately the same as excel-mcp's MINIMUM_PLAUSIBLE_TOOL_COUNT rather
+          # than a second invented one, and resona-hub's full 8-tool surface. Below it,
+          # a payload is far likelier to be a truncated build artefact than a real
+          # inventory.
+          MIN_PLAUSIBLE = int(os.environ["MIN_TOOLS"])
           # Ceiling on every rendered list. GitHub caps a PR body at 65,536 characters;
           # past that `create-pull-request` takes a 422, the step fails, and NO PR opens --
           # which inverts this step's whole contract, since a parity problem is meant to be
@@ -313,8 +319,8 @@ jobs:
                       "This dispatch carried no `tools` payload, so the enumeration in "
                       "`" + FILE + "` was not verified against the release.",
                       "",
-                      "Only the `excel` sender dispatches a `tools` array today; the `ppt` "
-                      "and `word` senders have not adopted the shape yet. Until they do, "
+                      "The `excel` and `resona-hub` senders dispatch a `tools` array; the "
+                      "`ppt` and `word` senders have not adopted the shape yet. Until they do, "
                       "re-derive their tool inventory from the release README by hand.",
                   ])
               if not isinstance(payload, list):
