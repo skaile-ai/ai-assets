@@ -56,10 +56,10 @@ upload and result to the token's organization, and a foreign job id answers 404.
 
 ## Capabilities
 
-8 tools over Streamable HTTP:
+9 tools over Streamable HTTP:
 
 <!-- mcp-catalog-tools -->
-- **Input (1)** — `upload_content`
+- **Input (2)** — `create_upload_url`, `upload_content`
 - **Jobs (5)** — `transcribe_audio`, `convert_document`, `get_job`, `get_result`, `cancel_job`
 - **Hub (2)** — `list_engines`, `get_settings`
 <!-- /mcp-catalog-tools -->
@@ -70,7 +70,10 @@ upload and result to the token's organization, and a foreign job id answers 404.
   `get_result` until `next_offset` is null. A `pending` job with
   `queue_reason=no_capable_worker` waits for an approved worker to come online; it is
   not an error.
-- **Remote inputs.** This endpoint accepts no local paths or URLs: send the file through
-  `upload_content` (base64, 8 MiB decoded at most) and pass the returned `upload_id`.
+- **Remote inputs.** This endpoint accepts no local paths or URLs. Call
+  `create_upload_url` and run the returned `curl` command in the shell with the file
+  path; the bytes go straight to the hub and the reply carries the `upload_id`. The
+  link is single-use and valid 10 minutes. `upload_content` (inline base64 plus the
+  file's `sha256`) is for files of a few KB only: models copy long base64 unreliably.
 - **Private by default.** `private: false` only works when the organization allows cloud
   processing; otherwise the hub answers `policy_denied`.
