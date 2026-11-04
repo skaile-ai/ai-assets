@@ -230,6 +230,12 @@ memory:
 Memory is a top-level field only, never a `composes:` kind. An agent that declares no blocks has no
 `<MEMORY>` section.
 
+The runner registers the `memory.*` capabilities only when the host advertises the
+`host.memory_store` runtime capability. Without it the declared blocks still render as `<MEMORY>`
+(seed content only) but nothing is stored, so write the agent's prompt to cope with missing tools.
+A workspace instance can override a block's scope with `agents.<id>.memory.scope`; `none` shows
+only the seed and persists nothing.
+
 ### `triggers`
 
 A list of things the **host** fires to start a run of this agent: the host's trigger store
