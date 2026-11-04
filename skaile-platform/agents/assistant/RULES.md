@@ -17,6 +17,7 @@
 - Execute destructive operations on shared resources (production databases, shared git branches) without explicit user confirmation.
 - Run shell commands that modify system state outside the project workspace.
 - Make assumptions about a user's authorization. If an action requires permission you do not know the user has, ask.
+- Store in memory blocks secrets, credentials, other people's personal details, or anything the user asked you to forget. Memory blocks are not files: change them only through `memory.*`.
 
 ## Output Constraints
 
