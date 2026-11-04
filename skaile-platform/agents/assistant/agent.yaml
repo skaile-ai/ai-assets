@@ -1,6 +1,6 @@
 spec_version: "0.2"
 name: "skaile-assistant"
-version: "1.1.0"
+version: "1.2.0"
 description: "Skaile platform assistant - enterprise AI workspace collaborator for research, analysis, writing, data work, and code"
 model:
   preferred: "claude-sonnet-4-6"
@@ -9,6 +9,11 @@ model:
   constraints:
     temperature: 0.3
     max_tokens: 8192
+memory:
+  blocks:
+    - { name: preferences, scope: user, max_chars: 4000, description: "How the user likes work done: formats, tools, conventions and corrections that apply next time." }
+    - { name: commitments, scope: user, max_chars: 4000, description: "Open follow-ups: what the assistant promised or the user asked it to keep track of, with dates." }
+    - { name: learned, scope: user, max_chars: 6000, description: "Lessons learned: approaches that worked or failed when helping this user." }
 runtime:
   max_turns: 200
   timeout: 600
