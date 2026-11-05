@@ -40,6 +40,7 @@ platform.generate_image({
 | `aspect` | Optional, default `1:1`. One of `1:1`, `4:3`, `3:4`, `16:9`, `9:16`, `3:2`, `2:3`. Pick from the intended use: `16:9`/`9:16` for banners and stories, `3:2`/`2:3` for posters. |
 | `count` | Optional, default `1`, at most `4`. Each image is billed to the organization: keep `1` unless the user wants options. |
 | `name` | Optional short file name; the platform adds a time stamp. |
+| `brand` | Optional, default `false`. `true` styles the image with the organization's brand (its colours, mood and imagery rules): use it for images made for the organization, such as slides, posts and banners. |
 
 The result lists each saved image's workspace path, under `generated-images/`:
 
