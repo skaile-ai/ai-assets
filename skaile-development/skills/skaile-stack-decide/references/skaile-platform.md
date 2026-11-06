@@ -586,8 +586,8 @@ auth / policy through the platform's built-in machinery.
 1. **Identify data sources** -> for each: mount / connector / MCP.
 2. **Configure ProviderLinks** in the platform admin -- pick UserDelegation
    or ServiceAccount per provider.
-3. **Author skills** under `ai-assets/<my-domain>/skills/` (use the
-   `skill-builder` skill). Declare `connectors:` in skill frontmatter
+3. **Author skills** under `ai-assets/<my-domain>/skills/` (use the skaile
+   CLI's bundled `authoring-skaile-assets` skill). Declare `connectors:` in skill frontmatter
    with required mode, scopes, paths.
 4. **(Optional) Compose a flow** -- nodes are skill IDs; declare edges
    for ordering; mark approval gates with `awaiting_approval`.

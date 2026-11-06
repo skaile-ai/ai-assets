@@ -3,8 +3,6 @@ name: "uv-cli-implementer"
 description: "Designs and implements small, focused, agent-friendly CLI tools using uv and Typer. Use when you need to wrap a capability as a command-line interface instead of an MCP server, so that LLM agents can invoke it via shell commands."
 metadata:
   stage: "alpha"
-  requires:
-    - "skill-builder-contract"
 ---
 
 # UV CLI Implementer

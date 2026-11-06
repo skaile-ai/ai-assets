@@ -13,7 +13,6 @@ AI agent skills, domains, and shared resources for the Skaile ecosystem. Pure co
 Skills are organized into domains. Each domain has a `DOMAIN.md` and contains skills, contracts, and docs.
 
 ```
-ai-asset-management/              ← meta: skill/domain scaffolding, catalog navigation
 skaile-development/               ← skaile-dev monorepo workflow skills (git, test, audit, implement, etc.)
 skaile-platform/                  ← skaile platform-specific skills (agent personas)
 mcp/                              ← MCP server catalog entries (xls, ppt, github)

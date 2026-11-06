@@ -18,7 +18,6 @@ skaile add <skill-name>
 
 | Domain                                                                              | Purpose                                                                 |
 | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [`ai-asset-management/`](ai-asset-management/DOMAIN.md)                             | Create skills, domains, CLI tools; navigate the catalog                 |
 | [`skaile-development/`](skaile-development/DOMAIN.md)                               | Skaile-dev monorepo workflow skills (git, test, audit, implement, etc.) |
 | [`skaile-platform/`](skaile-platform/DOMAIN.md)                                     | Skaile platform-specific skills                                         |
 | [`skaile-forge/`](skaile-forge/DOMAIN.md)                                           | skaile-forge app agents and skills                                      |
@@ -45,11 +44,10 @@ Every skill lives in `<domain>/skills/<skill-name>/`:
 
 ## Meta-Skills (Creating New Skills)
 
-| Goal                          | Skill to use            |
-| ----------------------------- | ----------------------- |
-| Create a new skill            | `skill-builder`         |
-| Create a new domain           | `domain-builder`        |
-| Build a CLI tool for a skill  | `uv-cli-implementer`    |
-| Browse / install from catalog | `ai-resource-navigator` |
+| Goal                          | Skill to use                                     |
+| ----------------------------- | ------------------------------------------------ |
+| Create skills, agents, domains | `authoring-skaile-assets` (bundled in the skaile CLI) |
+| Build a CLI tool for a skill  | `uv-cli-implementer`                             |
+| Browse / install assets       | `skaile-manage-workspace` (bundled in the skaile CLI) |
 
 → [Full docs](/ai-assets/)

@@ -2,8 +2,6 @@
 title: Agents
 description: The GitAgent format — agent.yaml spec 0.2, SOUL.md, RULES.md, knowledge/, system-prompt assembly, and how agents are used by the runner.
 _sources:
-  - path: ai-assets/ai-asset-management/agents/skaile/agent.yaml
-    description: Root orchestrator — persona/ruleset composition, model config, delegation, delegate agents
   - path: ai-assets/skaile-forge/agent/agent.yaml
     description: Forge-Project in-app dev assistant — composes of local skills, event trigger (report-session-error)
   - path: ai-assets/skaile-development/agents/skaile-development/agent.yaml
@@ -109,8 +107,7 @@ metadata: # Freeform — domain, routing notes, knowledge notes
 
 This example is deliberately generic. The shipped agents are the faithful references:
 `skaile-development/agents/skaile-development/agent.yaml` (self-contained, family-alias model, delegation
-`explicit`, skills only), `ai-asset-management/agents/skaile/agent.yaml` (persona, ruleset and delegate
-composition) and `knowledge-research/agents/researcher/agent.yaml` (a role).
+`explicit`, skills only) and `knowledge-research/agents/researcher/agent.yaml` (a role).
 
 ## Field Reference
 
@@ -350,7 +347,6 @@ dropped, and missing convention files are silently skipped.
 
 | Agent                             | Path                                                        | Role                                                                           |
 | --------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `skaile`                          | `ai-asset-management/agents/skaile/`                        | Root orchestrator — routes by intent to domain agents                          |
 | `skaileup`                        | `ai-assets-skaileup-v1/skaileup/00_skaileup-orchestrator/agents/skaileup/` | Conversational guide — discovers installed orchestrators, guides through flows |
 | `skaileup-conceptualize`          | `ai-assets-skaileup-v1/skaileup/00_skaileup-orchestrator/agents/skaileup-conceptualize/` | Concept pipeline (Discovery → Blueprint)                                       |
 | `skaileup-implement`              | `ai-assets-skaileup-v1/skaileup/10_impl-build/agents/skaileup-implement/` | Implementation pipeline (Setup → Verify)                                       |

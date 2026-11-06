@@ -249,7 +249,6 @@ config.
 | `knowledge-research/` | Deep research, paper extraction |
 | `knowledge-writing/` | Long-form writing from research (books, podcasts) |
 | `use/` | External service wrappers (Exa, Perplexity, Outline, ElevenLabs, Deepgram) |
-| `ai-asset-management/` | Meta: build new skills/domains/CLIs, navigate the catalog |
 
 ### Concept-to-app pipelines (`ai-assets-skaileup/`)
 
@@ -475,7 +474,7 @@ When the agent needs to *create* something new in this ecosystem.
 ### A new skill
 
 Path: `ai-assets/<domain>/skills/<skill-name>/SKILL.md`. Use the
-`skill-builder` skill for guided scaffolding.
+skaile CLI's bundled `authoring-skaile-assets` skill for guided scaffolding.
 
 ```yaml
 ---
@@ -502,7 +501,7 @@ Move detailed reference material into ./references/.]
 
 ### A new domain
 
-Use the `domain-builder` skill. Required structure:
+Use the skaile CLI's bundled `authoring-skaile-assets` skill. Required structure:
 
 ```
 ai-assets/<domain>/

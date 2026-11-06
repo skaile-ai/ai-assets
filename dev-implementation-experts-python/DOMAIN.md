@@ -4,7 +4,7 @@ description: "Deep implementation expertise for Python frameworks and libraries 
 type: domain
 building_blocks:
   contracts: "Expert skill conventions: recipe format, atomic examples, reference implementations; same protocol as dev-implementation-experts-js."
-  skills: "One expert skill per framework/library: python (core patterns), pydantic-ai (AI agent framework), marimo (reactive notebooks)."
+  skills: "One expert skill per framework/library: python (core patterns), pydantic-ai (AI agent framework), marimo (reactive notebooks), plus uv-cli-implementer (agent-friendly uv/Typer CLIs)."
   agents: "TBD"
   prompts: "TBD"
   tools: "TBD"
@@ -31,6 +31,7 @@ The same routing protocol applies as in `dev-implementation-experts-js`: feature
 | `skaileup-implementation-expert-python` | Core Python — idiomatic patterns, packaging with uv, type hints, testing |
 | `skaileup-implementation-expert-python-pydanticai` | Pydantic AI — AI agent framework, tool use, structured outputs |
 | `skaileup-implementation-expert-marimo` | Marimo — reactive Python notebooks, UI components, deployment |
+| `uv-cli-implementer` | uv + Typer — single-file, agent-friendly CLI tools (PEP 723) |
 
 ## Conventions
 

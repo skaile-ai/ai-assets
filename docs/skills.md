@@ -179,7 +179,7 @@ The runner reads the raw `SKILL.md` text and sends it as the prompt to `driver.p
 
 ## Creating a New Skill
 
-**Recommended**: use the `skill-builder` meta-skill — it creates the directory structure, frontmatter, and body sections interactively.
+**Recommended**: use the `authoring-skaile-assets` skill bundled in the skaile CLI — it creates the directory structure, frontmatter, and body sections.
 
 **Manual**:
 1. Create `<domain>/skills/<skill-name>/SKILL.md`
