@@ -13,9 +13,9 @@ stage: alpha
 
 # Dev Implementation Experts — Python
 
-This domain provides deep, focused implementation expertise for Python frameworks and libraries. Each skill is a specialist: it knows idiomatic patterns, packaging conventions (uv, PEP 723), and integration recipes for exactly one technology.
+This domain provides deep, focused implementation expertise for Python frameworks and libraries. Each `prog-expert-*` skill is a specialist: it knows idiomatic patterns, packaging conventions (uv, PEP 723), and integration recipes for exactly one technology.
 
-The same routing protocol applies as in `dev-implementation-experts-js`: feature-implementation skills delegate to these experts when Python-stack-specific guidance is needed.
+The same routing protocol applies as in `dev-implementation-experts-js`: feature-implementation skills delegate to these experts when Python-stack-specific guidance is needed (`uv-cli-implementer` is not an expert consultant; it is invoked directly).
 
 ## Building Blocks
 
@@ -28,9 +28,9 @@ The same routing protocol applies as in `dev-implementation-experts-js`: feature
 
 | Skill | Technology |
 |-------|-----------|
-| `skaileup-implementation-expert-python` | Core Python — idiomatic patterns, packaging with uv, type hints, testing |
-| `skaileup-implementation-expert-python-pydanticai` | Pydantic AI — AI agent framework, tool use, structured outputs |
-| `skaileup-implementation-expert-marimo` | Marimo — reactive Python notebooks, UI components, deployment |
+| `prog-expert-python` | Core Python — idiomatic patterns, packaging with uv, type hints, testing |
+| `prog-expert-python-pydanticai` | Pydantic AI — AI agent framework, tool use, structured outputs |
+| `prog-expert-marimo` | Marimo — reactive Python notebooks, UI components, deployment |
 | `uv-cli-implementer` | uv + Typer — single-file, agent-friendly CLI tools (PEP 723) |
 
 ## Conventions
