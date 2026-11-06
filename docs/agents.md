@@ -126,7 +126,7 @@ composes:
 ```
 
 Persona and ruleset parts live at the ai-assets root as `_agent-parts/personas/<name>/PERSONA.md`
-and `_agent-parts/rules/<name>/RULESET.md`; any agent can compose them (today only `skaile` does; an agent's own `RULES.md` is never a standalone
+and `_agent-parts/rules/<name>/RULESET.md`; any agent can compose them (no shipped agent composes them today; an agent's own `RULES.md` is never a standalone
 asset). `scripts/presets-resolve.test.sh` checks that every ref and every `extends:` path resolves.
 
 ### `model`

@@ -1,6 +1,6 @@
 ---
 name: dev-implementation-experts-python
-description: "Deep implementation expertise for Python frameworks and libraries — each skill is a specialist consultant for one technology."
+description: "Deep implementation expertise for Python frameworks and libraries — each `prog-expert-*` skill is a specialist consultant for one technology; `uv-cli-implementer` is a standalone builder skill."
 type: domain
 building_blocks:
   contracts: "Expert skill conventions: recipe format, atomic examples, reference implementations; same protocol as dev-implementation-experts-js."
@@ -35,7 +35,7 @@ The same routing protocol applies as in `dev-implementation-experts-js`: feature
 
 ## Conventions
 
-- Each expert skill includes `recipes/`, `atomic-examples/`, `reference-implementations/`, and `assets/`
+- Each `prog-expert-*` skill includes `recipes/`, `atomic-examples/`, `reference-implementations/`, and `assets/`; `uv-cli-implementer` ships `CLI.md`, `examples/` and `resources/` instead
 - Python ≥ 3.12 assumed unless a skill explicitly documents older version support
 - Scripts use PEP 723 inline deps (`# /// script`) for zero-setup execution with `uv run`
-- Expert skills are never the primary entry point — they are delegated to by orchestrator or feature-implementation skills
+- `prog-expert-*` skills are never the primary entry point — they are delegated to by orchestrator or feature-implementation skills; `uv-cli-implementer` is a primary entry point, invoked directly

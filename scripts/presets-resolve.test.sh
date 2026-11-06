@@ -39,6 +39,7 @@ source "$ROOT/scripts/lib/assert.sh"
 # Refs that name an asset published from another repo under the same publisher.
 # They cannot resolve inside this tree, so they are listed here with their owner.
 # A listed ref that DOES resolve in-tree fails the test: remove it from the list.
+# Intentionally empty today: no ref points at another repo, so property 3 holds vacuously.
 EXTERNAL_REFS="
 "
 
@@ -189,6 +190,8 @@ done < <(find "$ROOT" -mindepth 1 \( -name node_modules -o -name '.*' \) -prune 
   \( -name agent.yaml -o -name '*.preset.yaml' \) -print | sort)
 
 path_count="$(grep -c . "$PATHREFS" || true)"
+# Floor 3 = the live count: the three `./skills/*` refs in skaile-forge/agent/agent.yaml, no `extends:`
+# anywhere. If a legitimate edit drops below it, lower the floor; zero is what means a broken scan.
 if [ "$path_count" -lt 3 ]; then
   fail "found only $path_count path refs / extends — the path-ref scan is broken"
   assert_done

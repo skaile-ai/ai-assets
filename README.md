@@ -22,7 +22,7 @@ skaile add <skill-name>
 | [`skaile-platform/`](skaile-platform/DOMAIN.md)                                     | Skaile platform-specific skills                                         |
 | [`skaile-forge/`](skaile-forge/DOMAIN.md)                                           | skaile-forge app agents and skills                                      |
 | [`dev-implementation-experts-js/`](dev-implementation-experts-js/DOMAIN.md)         | Deep JS/TS expertise (Nuxt, Directus, TipTap, PrimeVue, etc.)           |
-| [`dev-implementation-experts-python/`](dev-implementation-experts-python/DOMAIN.md) | Deep Python expertise (Python, Pydantic AI, Marimo)                     |
+| [`dev-implementation-experts-python/`](dev-implementation-experts-python/DOMAIN.md) | Deep Python expertise (Python, Pydantic AI, Marimo) + uv CLI builder    |
 | [`dev-implementation-experts-typst/`](dev-implementation-experts-typst/DOMAIN.md)   | Typst document expertise + expert advisor router                        |
 | [`external/`](external/DOMAIN.md)                                                   | Tracked external/third-party resources                                  |
 | [`knowledge-research/`](knowledge-research/DOMAIN.md)                               | Deep research and paper extraction                                      |
