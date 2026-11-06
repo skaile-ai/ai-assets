@@ -15,15 +15,13 @@ Skills are organized into domains. Each domain has a `DOMAIN.md` and contains sk
 ```
 ai-asset-management/              ← meta: skill/domain scaffolding, catalog navigation
 skaile-development/               ← skaile-dev monorepo workflow skills (git, test, audit, implement, etc.)
-skaile-platform/                  ← skaile platform-specific skills (agent personas)
 mcp/                              ← MCP server catalog entries (xls, ppt, github)
-skaile-forge/                     ← skaile-forge app agents and skills
+skaile-forge/                     ← skaile-forge app agents and skills; listed in `dev_paths` (forge loads them from git, not the store)
 dev-implementation-experts-js/    ← JS/TS framework experts
 dev-implementation-experts-python/ ← Python experts
 dev-implementation-experts-typst/  ← Typst expert
 dev-implementation-experts/       ← prog-expert skills with no DOMAIN.md and no preset (pre-existing orphan)
 data-extraction/                  ← data extraction skills (MS Access VBA)
-forge-mattermost/                 ← Mattermost workspace orchestrator agent
 testing/                          ← flow-engine test fixtures; listed in `dev_paths`, so the store never syncs them
 _agent-parts/                     ← shared persona and ruleset assets (PERSONA.md, RULESET.md) composed by agents
 external/                         ← tracked external resources

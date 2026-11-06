@@ -8,8 +8,6 @@ _sources:
     description: Forge-Project in-app dev assistant — composes of local skills, event trigger (report-session-error)
   - path: ai-assets/skaile-development/agents/skaile-development/agent.yaml
     description: Skaile-dev workflow agent — self-contained, composes its own skills only
-  - path: ai-assets/skaile-platform/agents/assistant/agent.yaml
-    description: Platform assistant agent
   - path: ai-assets/knowledge-research/agents/researcher/agent.yaml
     description: Role agent — lifecycle, io, composes of skills
   - path: ai-assets/skaile-forge/base-orchestrator/agent.yaml
@@ -308,9 +306,9 @@ documents:
 ```
 
 `documents:` is the one shape to write: the runtime reads each entry's `path:` and optional
-`priority:`, and recognises `documents: []` as a valid, empty knowledge base (as in the two shipped
-`index.yaml` files, `skaile-forge/agent/` and `skaile-platform/agents/assistant/`, which are
-empty on purpose and carry no `priority`). Files not listed in `index.yaml` get a default priority of
+`priority:`, and recognises `documents: []` as a valid, empty knowledge base (as in
+`skaile-forge/agent/knowledge/index.yaml`, which is empty on purpose and carries no `priority`).
+Files not listed in `index.yaml` get a default priority of
 `99` and are listed last. `retrieval:` (for example `strategy: load_all`) is not read by
 `@skaile/workspaces`; leave it out.
 
@@ -359,8 +357,6 @@ dropped, and missing convention files are silently skipped.
 | `forge-project-assistant`         | `skaile-forge/agent/`                                       | In-app dev assistant for skaile-forge workspaces                                |
 | `forge-project-base-orchestrator` | `skaile-forge/base-orchestrator/`                           | Home workspace guide — creates projects, explains Forge Project features       |
 | `forge-project-orchestrator`      | `skaile-forge/project-orchestrator/`                        | Project workspace assistant — coding, writing, research, file management       |
-| `skaile-assistant`                | `skaile-platform/agents/assistant/`                         | Skaile platform enterprise assistant — research, analysis, writing, code       |
-| `workspace-orchestrator`          | `forge-mattermost/workspace-orchestrator/`                  | Mattermost channel workspace orchestrator — manages threads, shared state and team coordination |
 | `researcher`                      | `knowledge-research/agents/researcher/`                     | Read-only research role (`lifecycle: role`): `{topic}` in, `{summary, sources}` out |
 
 The four `skaileup*` and `quality` agents come from the archived `ai-assets-skaileup-v1` repo (the paths above are repo-qualified: `ai-assets-skaileup-v1/` plus the path inside that repo); the current `ai-assets-skaileup` collection ships skills and flows, no agents. The other agents live in this repo.
