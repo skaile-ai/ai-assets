@@ -5,7 +5,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Removed
+- Skill `ui-rendering`: no agent composed it, and nothing in forge or platform sends the `UI_MANIFEST` context it waits for.
+
 ### Changed
+- `skaile-forge` is listed under `dev_paths` in `skaile.manifest.yaml`, so the store sync no longer picks up these agents and skills. Forge loads them from the ai-assets checkout or the git source; a `skaile.yaml` dependency on them still resolves from the git source.
+
 - `base-orchestrator/knowledge/forge-project-features.md` names the Memory panel (the Memory button in the assistant sidebar) as the place to view and edit the four memory blocks (the `AssistantMemoryBrowser` component, `forge/skaile-forge/app/components/assistant/MemoryBrowser.vue`, opened from the Memory entry in `layouts/assistant.vue`).
 
 - Docs and knowledge no longer describe a host-injected prompt or an Imprint panel: `DOMAIN.md` says `agent-definition.ts` only locates a definition and the runtime assembles the prompt (`docs/agents.md`); `base-orchestrator/knowledge/forge-project-features.md` replaces its "Imprint System" section (per-project Persona, Facts, Voice, none of which exists) with the four memory blocks; `base-orchestrator/RULES.md` says "the assistant's memory" instead of "the imprint system". The empty `agent/knowledge/index.yaml` loses its "injected at project open" description and its unread `retrieval:` block.

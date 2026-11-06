@@ -1,1 +1,4 @@
 publisher: skaile-ai
+dev_paths:
+  - skaile-forge
+  - testing

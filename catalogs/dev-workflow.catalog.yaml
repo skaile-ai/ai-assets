@@ -6,7 +6,6 @@ suggested_taxonomy:
     assets:
       - "skaile-development/git"
       - "skaile-development/release"
-      - "github-ops/gh-create-pr"
   - label: "Testing"
     assets:
       - "skaile-development/test"
@@ -19,10 +18,8 @@ suggested_taxonomy:
   - label: "Communication"
     assets:
       - "skaile-development/notify"
-      - "github-ops/mm-post-to-thread"
   - label: "Implementation"
     assets:
       - "skaile-development/implement"
 include:
   - "skaile-development/skills/*/SKILL.md"
-  - "github-ops/skills/*/SKILL.md"

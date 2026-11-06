@@ -14,17 +14,14 @@ Skills are organized into domains. Each domain has a `DOMAIN.md` and contains sk
 
 ```
 skaile-development/               ← skaile-dev monorepo workflow skills (git, test, audit, implement, etc.)
-skaile-platform/                  ← skaile platform-specific skills (agent personas)
 mcp/                              ← MCP server catalog entries (xls, ppt, github)
-skaile-forge/                     ← skaile-forge app agents and skills
+skaile-forge/                     ← skaile-forge app agents and skills; listed in `dev_paths` (forge loads them from git, not the store)
 dev-implementation-experts-js/    ← JS/TS framework experts
 dev-implementation-experts-python/ ← Python experts
 dev-implementation-experts-typst/  ← Typst expert
 dev-implementation-experts/       ← prog-expert skills with no DOMAIN.md and no preset (pre-existing orphan)
 data-extraction/                  ← data extraction skills (MS Access VBA)
-forge-mattermost/                 ← Mattermost workspace orchestrator agent
-github-ops/                       ← GitHub operations skills and the github-worker agent
-testing/                          ← testing skills and flows
+testing/                          ← flow-engine test fixtures; listed in `dev_paths`, so the store skips them unless synced with `--dev`
 _agent-parts/                     ← shared persona and ruleset assets (PERSONA.md, RULESET.md) composed by agents
 external/                         ← tracked external resources
 knowledge-research/               ← deep research, paper extraction; skills/knowledge-writing/ holds book/podcast generation
@@ -77,9 +74,11 @@ a consumer range written for a bundle (such as `#^2.0`) must become `#^1.0`.
 
 Two files carry the word "manifest", and they are different things. The
 **publisher** manifest is `skaile.manifest.yaml` in this repo: it names the
-publisher and nothing else (no `assets:` list; discovery walks the tree). The
+publisher and a `dev_paths` list of trees the store sync skips unless run with
+`--dev` (no `assets:` list; discovery walks the tree). The
 v1 file `.skaile-source.yaml` also declares a publisher (`publisher_default`); it
-must agree with the manifest, which `scripts/source-publishers.test.sh` checks. A
+must agree with the manifest, which `scripts/source-publishers.test.sh` checks, and
+must carry the same `dev_paths`, mirrored by hand. A
 **consuming** project's own workspace file stays `skaile.yaml`. Consumers pull
 from this repo via a `sources:` entry in it:
 

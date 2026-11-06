@@ -15,7 +15,9 @@ versions.
 Do NOT include this domain in user-facing catalog packages. It is intended to
 be loaded only by test harnesses (e.g. the `testing.catalog.yaml` manifest is
 registered as a separate CatalogSource row in the E2E test seed-data so the
-default platform install never surfaces it).
+default platform install never surfaces it). `testing` is listed under
+`dev_paths` in `skaile.manifest.yaml`, so store sync and `skaile source sync`
+skip it unless run with `--dev`.
 
 ## Skills
 

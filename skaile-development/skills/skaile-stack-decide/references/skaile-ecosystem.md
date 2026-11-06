@@ -241,7 +241,6 @@ config.
 | Domain | What it gives you |
 |---|---|
 | `skaile-development/` | 30+ workflow skills for the monorepo (git, test, audit, implement, doc, devlog, review, release, ...) -- many usable on any TS monorepo with light edits |
-| `skaile-platform/` | Platform-specific tasks (e2e harness, preview ops) |
 | `skaile-forge/` | skaile-forge app agents and skills |
 | `dev-implementation-experts-js/` | Deep JS/TS expertise: Nuxt, Directus, TipTap, PrimeVue, SDK building, AI integration patterns |
 | `dev-implementation-experts-python/` | Python, Pydantic AI, Marimo |
