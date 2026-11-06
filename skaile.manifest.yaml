@@ -1,1 +1,3 @@
 publisher: skaile-ai
+dev_paths:
+  - testing

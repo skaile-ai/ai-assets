@@ -24,8 +24,7 @@ dev-implementation-experts-typst/  ← Typst expert
 dev-implementation-experts/       ← prog-expert skills with no DOMAIN.md and no preset (pre-existing orphan)
 data-extraction/                  ← data extraction skills (MS Access VBA)
 forge-mattermost/                 ← Mattermost workspace orchestrator agent
-github-ops/                       ← GitHub operations skills and the github-worker agent
-testing/                          ← testing skills and flows
+testing/                          ← flow-engine test fixtures; listed in `dev_paths`, so the store never syncs them
 _agent-parts/                     ← shared persona and ruleset assets (PERSONA.md, RULESET.md) composed by agents
 external/                         ← tracked external resources
 knowledge-research/               ← deep research, paper extraction; skills/knowledge-writing/ holds book/podcast generation

@@ -1,3 +1,0 @@
-# Changelog — github-ops
-
-## [Unreleased]

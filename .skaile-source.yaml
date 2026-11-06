@@ -10,5 +10,7 @@
 version: 1
 publisher_default: '@skaile-ai'
 default_ref: main
+dev_paths:
+  - testing
 sync:
   trigger: webhook
