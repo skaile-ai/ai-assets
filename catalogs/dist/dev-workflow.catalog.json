@@ -7,8 +7,7 @@
       "label": "Git & CI",
       "assets": [
         "skaile-development/git",
-        "skaile-development/release",
-        "github-ops/gh-create-pr"
+        "skaile-development/release"
       ]
     },
     {
@@ -29,8 +28,7 @@
     {
       "label": "Communication",
       "assets": [
-        "skaile-development/notify",
-        "github-ops/mm-post-to-thread"
+        "skaile-development/notify"
       ]
     },
     {
@@ -311,70 +309,6 @@
       "inputs": [],
       "source_domain": "skaile-development",
       "source_path": "skaile-development/skills/notify"
-    },
-    {
-      "id": "github-ops/gh-create-pr",
-      "kind": "skill",
-      "name": "gh-create-pr",
-      "description": "Use when all changes for a task are committed on a feature branch and you are ready to open a GitHub pull request for human review.",
-      "version": "1.0.0",
-      "stage": "stable",
-      "keywords": [
-        "github",
-        "pr",
-        "pull-request",
-        "git",
-        "review",
-        "gh-cli"
-      ],
-      "inputs": [
-        {
-          "key": "pr_title",
-          "required": false,
-          "label": "PR title",
-          "type": "text"
-        },
-        {
-          "key": "pr_body",
-          "required": false,
-          "label": "PR description (What / Why / Testing)",
-          "type": "textarea"
-        }
-      ],
-      "source_domain": "github-ops",
-      "source_path": "github-ops/skills/gh-create-pr"
-    },
-    {
-      "id": "github-ops/mm-post-to-thread",
-      "kind": "skill",
-      "name": "mm-post-to-thread",
-      "description": "Use when you have completed significant work and need to post a structured progress update or completion summary to the Mattermost thread that initiated this session.",
-      "version": "1.0.0",
-      "stage": "stable",
-      "keywords": [
-        "mattermost",
-        "reporting",
-        "completion",
-        "progress",
-        "thread",
-        "communication"
-      ],
-      "inputs": [
-        {
-          "key": "pr_url",
-          "required": false,
-          "label": "PR URL (if a PR was created)",
-          "type": "text"
-        },
-        {
-          "key": "summary",
-          "required": false,
-          "label": "Summary of what was accomplished",
-          "type": "textarea"
-        }
-      ],
-      "source_domain": "github-ops",
-      "source_path": "github-ops/skills/mm-post-to-thread"
     }
   ]
 }

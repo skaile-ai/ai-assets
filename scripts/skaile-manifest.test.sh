@@ -8,7 +8,7 @@
 # manifest mode, where only the listed assets exist and the glob walk is skipped
 # entirely: every skill, agent, preset, persona and ruleset left off the list
 # vanishes from the catalog. This repo relies on the walk, so the test pins a
-# publisher-only manifest.
+# manifest without an inventory (publisher plus `dev_paths`).
 
 set -uo pipefail
 ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && git rev-parse --show-toplevel)}"
