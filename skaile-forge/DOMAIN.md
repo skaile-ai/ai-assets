@@ -30,10 +30,10 @@ ai-assets/skaile-forge/
 │   ├── agent.yaml
 │   ├── SOUL.md
 │   └── RULES.md
-├── skills/                        ← application-specific skills
-│   └── ui-rendering/
 └── skaile-forge.preset.yaml
 ```
+
+`skaile-forge` is listed under `dev_paths` in `skaile.manifest.yaml`: the store sync skips it, because forge loads these agents from the ai-assets checkout or the git source, never from the store. A `skaile.yaml` dependency on one of them still resolves from the git source.
 
 ## Agents
 
@@ -47,12 +47,11 @@ ai-assets/skaile-forge/
 
 | Skill | Path | When to use |
 |-------|------|-------------|
-| ui-rendering | `skills/ui-rendering/` | Emit catalog UI components in response to user requests |
 | code-assistance | `agent/skills/code-assistance/` | Write, edit, refactor, debug and explain code; read before modifying, propose minimal diffs |
 | file-management | `agent/skills/file-management/` | Read, write, create, delete files and list trees, scoped to the active project workspace |
 | project-exploration | `agent/skills/project-exploration/` | Understand an unfamiliar codebase: map structure, entry points, data flow, where a feature lives |
 
-The last three live under the assistant agent's directory (`agent/skills/`), not `skills/`, but are published catalog assets (`skill:@skaile-ai/<name>`) listed in `skaile-forge.preset.yaml` and composed by `project-orchestrator`.
+They live under the assistant agent's directory (`agent/skills/`), are listed in `skaile-forge.preset.yaml` as `skill:@skaile-ai/<name>`, and are composed by `project-orchestrator`.
 
 ## Usage
 
@@ -61,5 +60,3 @@ The last three live under the assistant agent's directory (`agent/skills/`), not
 ## Notes
 
 The `forge-project-orchestrator` and `forge-project-base-orchestrator` are referenced by `forge/skaile-forge/server/utils/workspaces.ts` via scoped `agent:@skaile-ai/<name>` refs.
-
-The UI rendering skill depends on the manifest injected by the SessionDispatcher (`<system-context name="UI_MANIFEST">`). Check the manifest before rendering any component.

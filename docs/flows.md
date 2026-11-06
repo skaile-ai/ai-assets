@@ -102,7 +102,7 @@ A node is no longer identified by the skill it names. It carries its own instruc
 
 ### Assets are declared references
 
-`run.assets` is a list of asset references — never inlined content. A bare asset id is valid; normalized legacy flows use `kind:name` refs (`skill:auto-ship`, `flow:legal-escalation`). On the platform the list is resolved once, at run-group creation, over the transitive closure through `sub-flow` nodes, and creation is refused with the missing refs named.
+`run.assets` is a list of asset references — never inlined content. A bare asset id is valid; normalized legacy flows use `kind:name` refs (`skill:audit`, `flow:legal-escalation`). On the platform the list is resolved once, at run-group creation, over the transitive closure through `sub-flow` nodes, and creation is refused with the missing refs named.
 
 ### Contracts, gates and checks
 

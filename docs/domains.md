@@ -64,7 +64,7 @@ stage: alpha
 | **Expert domains**      | One skill per technology, no pipeline order                                 | `dev-implementation-experts-js`, `-python`, `-typst`                                               |
 | **Knowledge domains**   | Research and content production                                             | `knowledge-research`, `knowledge-writing`                                                          |
 | **Integration domains** | One skill per external service or workflow                                  | `use`                                                                                              |
-| **Application domains** | Agent definitions and skills scoped to a specific Skaile app                | `skaile-forge`, `skaile-platform`                                                                  |
+| **Application domains** | Agent definitions and skills scoped to a specific Skaile app                | `skaile-forge`                                                                                     |
 | **Meta domains**        | Manage the ecosystem itself                                                 | `ai-asset-management`, `skaileup-lab`                                                              |
 | **Shared domains**      | Reference material only, never invoked                                      | `skaileup-shared`                                                                                  |
 
