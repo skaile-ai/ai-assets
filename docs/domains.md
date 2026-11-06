@@ -63,7 +63,7 @@ stage: alpha
 | **Pipeline domains**    | Numbered skill groups following a workflow order                            | `skaileup-conceptualization`, `skaileup-implementation`, `skaileup-evaluate`, `skaile-development` |
 | **Expert domains**      | One skill per technology, no pipeline order                                 | `dev-implementation-experts-js`, `-python`, `-typst`                                               |
 | **Knowledge domains**   | Research and content production                                             | `knowledge-research`, `knowledge-writing`                                                          |
-| **Integration domains** | One skill per external service or workflow                                  | `use`, `github-ops`                                                                                |
+| **Integration domains** | One skill per external service or workflow                                  | `use`                                                                                              |
 | **Application domains** | Agent definitions and skills scoped to a specific Skaile app                | `skaile-forge`, `skaile-platform`                                                                  |
 | **Meta domains**        | Manage the ecosystem itself                                                 | `ai-asset-management`, `skaileup-lab`                                                              |
 | **Shared domains**      | Reference material only, never invoked                                      | `skaileup-shared`                                                                                  |
