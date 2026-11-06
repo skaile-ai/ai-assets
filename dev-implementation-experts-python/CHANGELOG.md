@@ -7,3 +7,4 @@
 
 ### Changed
 - `DOMAIN.md`: the `docs:` key and the `docs/` Building Blocks row are gone (there is no `docs/` folder here).
+- `DOMAIN.md`: the Skills table named the three consultants `skaileup-implementation-expert-*`; the real assets (and the preset refs) are `prog-expert-*`. The description and conventions are now scoped to `prog-expert-*`, with `uv-cli-implementer` called out as a standalone builder skill (ships `CLI.md`/`examples/`/`resources/`, is a primary entry point).
