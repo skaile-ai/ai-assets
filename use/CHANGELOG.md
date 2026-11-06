@@ -6,6 +6,7 @@
 - `word-document` 0.1.0: generic skill for creating or editing an organization's Word documents with the Word MCP. Finds the org's own template with `template.find` (`document.create_from`), falls back to `document.create_blank`, edits with `document.open`, composes with Named styles, saves under `DOCX_MCP_ROOT` and renders PDF on request. Derived from `word-template` with every client-specific item removed (skaile-ai/platform#6433).
 
 ### Changed
+- `use-skills-sh`: the scaffolding pointer names the skaile CLI's bundled `authoring-skaile-assets` skill instead of the retired `skill-builder`.
 - `DOMAIN.md`: the `docs:` key and the `docs/` Building Blocks row are gone (there is no `docs/` folder here).
 - `word-document` and `word-template` (and their `references/` workflows): point at the Word server's own MCP `initialize` instructions for runtime guidance instead of the `mcp/docx` catalog body, which now carries only a source pointer and the tool list (word-mcp 0.8.0+).
 - `use.bundle.yaml` → `use.preset.yaml` (preset `@skaile-ai/use` 1.0.0). The old bundle had drifted from the domain: the preset also lists `decks`, `use-revealjs`, `use-slidev` and `word-document`. `word-template` stays out on purpose (client-specific example).

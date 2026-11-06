@@ -68,7 +68,7 @@ umbrella can aggregate them.
 | New Nuxt page/component in forge-\*       | `prog-expert-nuxt` → `implement`                        |
 | Platform backend (NestJS/Prisma)          | read platform/CLAUDE.md, implement directly                        |
 | Platform frontend (React/TanStack)        | read platform/CLAUDE.md, implement directly                        |
-| New AI skill or domain                    | `ai-resource-navigator` → manual scaffold per CLAUDE.md convention |
+| New AI skill or domain                    | `skaile-manage-workspace` (bundled in the skaile CLI) → scaffold per CLAUDE.md convention |
 | Agent runtime change (bridge/runner/flow) | `prog-expert-omp` → `implement`                         |
 | Asset management                          | read `agent-framework/cli/CLAUDE.md` → `implement`      |
 | Bug / feature / UI / chore in any repo    | `ship` directly — full cycle (GitHub issue → worktree → plan → implement → review → PR → babysit → squash-merge) |

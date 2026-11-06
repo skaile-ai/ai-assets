@@ -30,7 +30,7 @@ Every domain follows the same layout (not all folders are present in every domai
 
 ## DOMAIN.md
 
-Every domain has a `DOMAIN.md` that describes its purpose and building blocks. This is both human documentation and a machine-readable manifest consumed by `arm` and the `domain-builder` meta-skill.
+Every domain has a `DOMAIN.md` that describes its purpose and building blocks. This is both human documentation and a machine-readable manifest consumed by `arm` and the skaile CLI's bundled `authoring-skaile-assets` skill.
 
 ```yaml
 ---
@@ -65,7 +65,7 @@ stage: alpha
 | **Knowledge domains**   | Research and content production                                             | `knowledge-research`, `knowledge-writing`                                                          |
 | **Integration domains** | One skill per external service or workflow                                  | `use`                                                                                              |
 | **Application domains** | Agent definitions and skills scoped to a specific Skaile app                | `skaile-forge`                                                                                     |
-| **Meta domains**        | Manage the ecosystem itself                                                 | `ai-asset-management`, `skaileup-lab`                                                              |
+| **Meta domains**        | Manage the ecosystem itself                                                 | `skaileup-lab`                                                                                     |
 | **Shared domains**      | Reference material only, never invoked                                      | `skaileup-shared`                                                                                  |
 
 ## How Domains Relate

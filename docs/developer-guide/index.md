@@ -10,10 +10,6 @@ sidebar:
 
 ```
 ai-assets/
-├── ai-asset-management/    ← meta-skills + root orchestrator agent
-│   ├── agents/skaile/         ← root router agent
-│   ├── skills/                ← skill-builder, domain-builder, etc.
-│   └── DOMAIN.md
 ├── skaileup-conceptualization/
 │   ├── agents/orchestrator/   ← concept pipeline agent
 │   ├── contracts/             ← domain-specific contracts

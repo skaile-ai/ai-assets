@@ -132,7 +132,7 @@ def advise(query: str = typer.Argument(..., help="The task to implement or the k
         console.print("Please review the table above manually to pick the best expert.")
         
         suggested_folder = "programming" if detected_tech == "general" else f"programming-{detected_tech}"
-        console.print(f"If no expert fits the requirement, suggest creating a new one using the [bold]skill-builder[/bold], inside the [bold blue]{suggested_folder}[/bold blue] directory.")
+        console.print(f"If no expert fits the requirement, suggest creating a new one using the [bold]authoring-skaile-assets[/bold] skill (bundled in the skaile CLI), inside the [bold blue]{suggested_folder}[/bold blue] directory.")
 
 if __name__ == "__main__":
     app()

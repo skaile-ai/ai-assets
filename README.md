@@ -18,11 +18,10 @@ skaile add <skill-name>
 
 | Domain                                                                              | Purpose                                                                 |
 | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [`ai-asset-management/`](ai-asset-management/DOMAIN.md)                             | Create skills, domains, CLI tools; navigate the catalog                 |
 | [`skaile-development/`](skaile-development/DOMAIN.md)                               | Skaile-dev monorepo workflow skills (git, test, audit, implement, etc.) |
 | [`skaile-forge/`](skaile-forge/DOMAIN.md)                                           | skaile-forge app agents and skills                                      |
 | [`dev-implementation-experts-js/`](dev-implementation-experts-js/DOMAIN.md)         | Deep JS/TS expertise (Nuxt, Directus, TipTap, PrimeVue, etc.)           |
-| [`dev-implementation-experts-python/`](dev-implementation-experts-python/DOMAIN.md) | Deep Python expertise (Python, Pydantic AI, Marimo)                     |
+| [`dev-implementation-experts-python/`](dev-implementation-experts-python/DOMAIN.md) | Deep Python expertise (Python, Pydantic AI, Marimo) + uv CLI builder    |
 | [`dev-implementation-experts-typst/`](dev-implementation-experts-typst/DOMAIN.md)   | Typst document expertise + expert advisor router                        |
 | [`external/`](external/DOMAIN.md)                                                   | Tracked external/third-party resources                                  |
 | [`knowledge-research/`](knowledge-research/DOMAIN.md)                               | Deep research and paper extraction                                      |
@@ -44,11 +43,10 @@ Every skill lives in `<domain>/skills/<skill-name>/`:
 
 ## Meta-Skills (Creating New Skills)
 
-| Goal                          | Skill to use            |
-| ----------------------------- | ----------------------- |
-| Create a new skill            | `skill-builder`         |
-| Create a new domain           | `domain-builder`        |
-| Build a CLI tool for a skill  | `uv-cli-implementer`    |
-| Browse / install from catalog | `ai-resource-navigator` |
+| Goal                          | Skill to use                                     |
+| ----------------------------- | ------------------------------------------------ |
+| Create skills, agents, domains | `authoring-skaile-assets` (bundled in the skaile CLI) |
+| Build a CLI tool for a skill  | `uv-cli-implementer`                             |
+| Browse / install assets       | `skaile-manage-workspace` (bundled in the skaile CLI) |
 
 → [Full docs](/ai-assets/)

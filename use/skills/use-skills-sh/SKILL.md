@@ -119,7 +119,7 @@ If no relevant skill exists in the ecosystem:
 skaile skill create <skill-name>
 ```
 
-Custom skills follow the standard `SKILL.md` + frontmatter convention. See `ai-assets/ai-asset-management/skills/skill-builder/` for the guided scaffolding workflow.
+Custom skills follow the standard `SKILL.md` + frontmatter convention. See the skaile CLI's bundled `authoring-skaile-assets` skill for the guided scaffolding workflow.
 
 ## Quality Standards
 

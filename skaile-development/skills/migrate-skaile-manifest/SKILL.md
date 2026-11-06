@@ -133,8 +133,7 @@ the three ambiguity cases.
 ## Auto-improve
 
 When the user hits a pain point the rules don't cover, capture it in
-`resources/improvement_ideas.md` for next-iteration triage (standard
-`skill-builder` pattern).
+`resources/improvement_ideas.md` for next-iteration triage.
 
 ## Smoke Test
 

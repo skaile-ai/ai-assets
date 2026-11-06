@@ -23,7 +23,7 @@ Acts as the central dispatcher for all `prog-expert-*` skills. It analyzes the u
 - ALWAYS run `scripts/advise.py` when asked to find an expert for an implementation task.
 - ALWAYS run `scripts/learn.py` when asked to store a recipe, pattern, or successful implementation.
 - Do not attempt to implement the code yourself; your job is to route to the correct `prog-expert-*` skill.
-- If no existing skill fits the implementation/knowledge request, suggest creating a *new* specific `prog-expert` skill using `skill-builder`. Ensure the new skill is placed in the correct `programming-{tech}` directory (e.g., `programming-js`, `programming-python`, `programming-typst`) based on the detected technology.
+- If no existing skill fits the implementation/knowledge request, suggest creating a *new* specific `prog-expert` skill using the skaile CLI's bundled `authoring-skaile-assets` skill. Ensure the new skill is placed in the correct `programming-{tech}` directory (e.g., `programming-js`, `programming-python`, `programming-typst`) based on the detected technology.
 
 ## How to Use an Expert Skill
 When an agent is delegated to or decides to use a specific `prog-expert-*` skill, they MUST follow these steps to utilize its knowledge effectively (Progressive Disclosure):
