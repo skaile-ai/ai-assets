@@ -56,11 +56,11 @@ upload and result to the token's organization, and a foreign job id answers 404.
 
 ## Capabilities
 
-9 tools over Streamable HTTP:
+10 tools over Streamable HTTP:
 
 <!-- mcp-catalog-tools -->
 - **Input (2)** — `create_upload_url`, `upload_content`
-- **Jobs (5)** — `transcribe_audio`, `convert_document`, `get_job`, `get_result`, `cancel_job`
+- **Jobs (6)** — `transcribe_audio`, `convert_document`, `postprocess_text`, `get_job`, `get_result`, `cancel_job`
 - **Hub (2)** — `list_engines`, `get_settings`
 <!-- /mcp-catalog-tools -->
 
