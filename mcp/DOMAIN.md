@@ -3,7 +3,7 @@ name: mcp
 description: "MCP server catalog entries - MCP.md recipes that give agents typed tool access to external systems (Excel, PowerPoint, GitHub)."
 type: domain
 building_blocks:
-  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), docx/ (Word document in-place editing via Apache POI XWPF), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only), resona-hub/ (Resona hosted remote MCP - private audio transcription, document OCR to Markdown and text postprocessing with a stored hub profile, org-bound bearer token)."
+  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), docx/ (Word document in-place editing via Apache POI XWPF), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only), resona-hub/ (Resona hosted remote MCP - private audio transcription, document OCR to Markdown and text postprocessing with a stored hub profile, org-bound bearer token), atlassian/ (Atlassian MCP v2 hosted remote - per-user OAuth Jira, Confluence, JSM, Bitbucket), linear/ (Linear hosted remote MCP - per-user OAuth issues, projects, cycles, comments), notion/ (Notion hosted remote MCP - per-user OAuth pages, databases, comments, files), stripe/ (Stripe hosted remote MCP - per-user OAuth payments, billing, invoices, docs; live writes move real money), sentry/ (Sentry hosted remote MCP - per-user OAuth issues, events, traces, Seer, monitors), monday/ (monday.com hosted remote MCP - per-user OAuth boards, items, updates, forms)."
 stage: alpha
 ---
 
@@ -33,8 +33,20 @@ mcp/                      <- MCP servers (one subfolder per server)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:ideogram resolution (transport: http, per-user OAuth)
 ├── strava/            <- Strava catalog entry (code: r-huijts/strava-mcp on npm)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:strava resolution (command: npx + pinned version)
-└── resona-hub/        <- Resona hosted remote MCP (no image - code: ecsplico/resona)
-    └── MCP.md         <- catalog manifest + guidance for mcp:resona-hub resolution (transport: http, bearer auth block)
+├── resona-hub/        <- Resona hosted remote MCP (no image - code: ecsplico/resona)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:resona-hub resolution (transport: http, bearer auth block)
+├── atlassian/         <- Atlassian MCP v2 hosted remote (no image - per-user OAuth)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:atlassian resolution (transport: http, per-user OAuth)
+├── linear/            <- Linear hosted remote MCP (no image - per-user OAuth)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:linear resolution (transport: http, per-user OAuth)
+├── notion/            <- Notion hosted remote MCP (no image - per-user OAuth)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:notion resolution (transport: http, per-user OAuth)
+├── stripe/            <- Stripe hosted remote MCP (no image - per-user OAuth)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:stripe resolution (transport: http, per-user OAuth)
+├── sentry/            <- Sentry hosted remote MCP (no image - per-user OAuth)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:sentry resolution (transport: http, per-user OAuth)
+└── monday/            <- monday.com hosted remote MCP (no image - per-user OAuth)
+    └── MCP.md         <- catalog manifest + guidance for mcp:monday resolution (transport: http, per-user OAuth)
 ```
 
 ## Servers in this domain
@@ -50,6 +62,12 @@ mcp/                      <- MCP servers (one subfolder per server)
 | [ideogram](ideogram/MCP.md) | `mcp/ideogram` | alpha (v0.1.0) | Ideogram official hosted remote MCP over streamable HTTP - generate (incl. typography), edit/inpaint, reframe/outpaint, upscale. Per-user OAuth: each user signs in to their own Ideogram account and draws on their own subscription credits. (Central org-key route is the `use-ideogram-image` skill in `use/`.) |
 | [strava](strava/MCP.md) | `mcp/strava` | alpha (v0.1.0) | Strava REST API (`api/v3`) over stdio - activities, laps, streams, athlete profile/stats/zones, segments, routes, GPX/TCX export; 25 tools. Runs the third-party `@r-huijts/strava-mcp-server` npm package at a pinned version (first `command: npx` entry). Deliberately **not** Strava's hosted MCP, which refuses our egress IP range. Per-user credentials; **personal scope only** (Strava's API terms allow an athlete's data to be shown to that athlete alone). |
 | [resona-hub](resona-hub/MCP.md) | `mcp/resona-hub` | alpha (v0.2.2) | Resona hosted remote MCP over Streamable HTTP - private audio transcription, document OCR to Markdown and postprocessing of text with a stored hub profile, as asynchronous jobs on the organization's approved workers; 10 tools. Auth is an org-bound Resona client token declared as a bearer `auth` block (instance secret), so the hub scopes every job to that organization. |
+| [atlassian](atlassian/MCP.md) | `mcp/atlassian` | alpha (v0.1.0) | Atlassian MCP v2 hosted remote (mcp.atlassian.com/v2/mcp) over streamable HTTP - Jira, Confluence, Jira Service Management and Bitbucket Cloud through a small primary toolset plus `discover`/`execute*` for the deferred catalog. Per-user OAuth: runs with the user's Atlassian permissions on the sites they grant; org admins enable permission groups (delete/manage off by default). |
+| [linear](linear/MCP.md) | `mcp/linear` | alpha (v0.1.0) | Linear official hosted remote MCP (mcp.linear.app/mcp) over streamable HTTP - find, create and update issues, projects, milestones, cycles, comments and documents. Per-user OAuth, one Linear workspace per sign-in; read-write scope. |
+| [notion](notion/MCP.md) | `mcp/notion` | alpha (v0.1.0) | Notion official hosted remote MCP (mcp.notion.com/mcp) over streamable HTTP - search, fetch, create and update pages, databases and views, comments and suggested edits, files. Per-user OAuth; toolset depends on the workspace plan and admin limits. |
+| [stripe](stripe/MCP.md) | `mcp/stripe` | alpha (v0.1.0) | Stripe official hosted remote MCP (mcp.stripe.com) over streamable HTTP - generic Stripe API read/write, analytics, Treasury (preview), docs search. Per-user OAuth with per-environment grants (live mode or sandbox); live-mode writes move real money, so prefer a sandbox grant. |
+| [sentry](sentry/MCP.md) | `mcp/sentry` | alpha (v0.1.0) | Sentry official hosted remote MCP (mcp.sentry.dev/mcp) over streamable HTTP - search issues, events, logs and traces, issue details, Seer root-cause analysis, releases, dashboards, monitors and alert rules. Per-user OAuth on sentry.io; self-hosted Sentry not covered. |
+| [monday](monday/MCP.md) | `mcp/monday` | alpha (v0.1.0) | monday.com official hosted remote MCP (mcp.monday.com/mcp) over streamable HTTP - board items, column values, updates, boards, groups, columns, users and teams, WorkForms. Per-user OAuth; admins install the monday MCP app and may limit it to workspaces. |
 
 ## Conventions
 
