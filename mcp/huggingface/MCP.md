@@ -14,6 +14,7 @@ keywords:
   - huggingface
   - models
   - datasets
+  - spaces
   - papers
   - documentation
   - mcp
@@ -71,12 +72,14 @@ run Gradio apps. Enumerate the live list rather than hard-coding it.
   and rate limits apply." Heavy use (many `hf_fs` reads, dataset previews) can hit
   HTTP 429; back off rather than retrying in a loop, and batch several operations
   into one `hf_fs` call.
-- **An optional token raises the limits.** A Hugging Face access token
-  (hf.co/settings/tokens) sent as `Authorization: Bearer <token>` raises the limits,
-  adds the account's private and gated repos, and applies the account's tool
-  settings. This entry deliberately sends **no** token, so every session sees only
-  public data and no one's account is involved. Do not ask the user to paste a token
-  into chat.
+- **An optional token raises the limits, and changes the tool surface.** A Hugging
+  Face access token (hf.co/settings/tokens) sent as `Authorization: Bearer <token>`
+  raises the limits, adds the account's private and gated repos, and applies the
+  account's tool settings, which can enable **write** tool groups (Contribute
+  Repos, Sandboxes, Run and Manage Jobs). This entry deliberately sends **no**
+  token, so every session sees only public data, no one's account is involved, and
+  the surface stays read-only. Do not add an `auth` block here; do not ask the user
+  to paste a token into chat.
 - **Public data only.** Anonymously, private repos and gated models' files are not
   readable; a gated model reports access errors rather than content.
 - **Read-only.** None of the anonymous tools write to the Hub; there is no side
