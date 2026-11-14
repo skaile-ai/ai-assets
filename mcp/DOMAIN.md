@@ -3,7 +3,7 @@ name: mcp
 description: "MCP server catalog entries - MCP.md recipes that give agents typed tool access to external systems (Excel, PowerPoint, GitHub)."
 type: domain
 building_blocks:
-  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), docx/ (Word document in-place editing via Apache POI XWPF), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only), resona-hub/ (Resona hosted remote MCP - private audio transcription, document OCR to Markdown and text postprocessing with a stored hub profile, org-bound bearer token)."
+  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), docx/ (Word document in-place editing via Apache POI XWPF), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only), resona-hub/ (Resona hosted remote MCP - private audio transcription, document OCR to Markdown and text postprocessing with a stored hub profile, org-bound bearer token), mslearn/ (Microsoft Learn hosted remote MCP - open, read-only official Microsoft/Azure docs search, code samples, page fetch), cloudflare-docs/ (Cloudflare hosted remote MCP - open, read-only Cloudflare developer docs search), huggingface/ (Hugging Face hosted remote MCP - open, read-only Hub models, datasets, Spaces, papers, docs; anonymous rate limits)."
 stage: alpha
 ---
 
@@ -33,8 +33,14 @@ mcp/                      <- MCP servers (one subfolder per server)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:ideogram resolution (transport: http, per-user OAuth)
 ├── strava/            <- Strava catalog entry (code: r-huijts/strava-mcp on npm)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:strava resolution (command: npx + pinned version)
-└── resona-hub/        <- Resona hosted remote MCP (no image - code: ecsplico/resona)
-    └── MCP.md         <- catalog manifest + guidance for mcp:resona-hub resolution (transport: http, bearer auth block)
+├── resona-hub/        <- Resona hosted remote MCP (no image - code: ecsplico/resona)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:resona-hub resolution (transport: http, bearer auth block)
+├── mslearn/           <- Microsoft Learn hosted remote MCP (no image - open, no credentials)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:mslearn resolution (transport: http, no auth)
+├── cloudflare-docs/   <- Cloudflare docs hosted remote MCP (no image - open, no credentials)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:cloudflare-docs resolution (transport: http, no auth)
+└── huggingface/       <- Hugging Face hosted remote MCP (no image - open, anonymous rate limits)
+    └── MCP.md         <- catalog manifest + guidance for mcp:huggingface resolution (transport: http, no auth)
 ```
 
 ## Servers in this domain
@@ -50,6 +56,9 @@ mcp/                      <- MCP servers (one subfolder per server)
 | [ideogram](ideogram/MCP.md) | `mcp/ideogram` | alpha (v0.1.0) | Ideogram official hosted remote MCP over streamable HTTP - generate (incl. typography), edit/inpaint, reframe/outpaint, upscale. Per-user OAuth: each user signs in to their own Ideogram account and draws on their own subscription credits. (Central org-key route is the `use-ideogram-image` skill in `use/`.) |
 | [strava](strava/MCP.md) | `mcp/strava` | alpha (v0.1.0) | Strava REST API (`api/v3`) over stdio - activities, laps, streams, athlete profile/stats/zones, segments, routes, GPX/TCX export; 25 tools. Runs the third-party `@r-huijts/strava-mcp-server` npm package at a pinned version (first `command: npx` entry). Deliberately **not** Strava's hosted MCP, which refuses our egress IP range. Per-user credentials; **personal scope only** (Strava's API terms allow an athlete's data to be shown to that athlete alone). |
 | [resona-hub](resona-hub/MCP.md) | `mcp/resona-hub` | alpha (v0.2.2) | Resona hosted remote MCP over Streamable HTTP - private audio transcription, document OCR to Markdown and postprocessing of text with a stored hub profile, as asynchronous jobs on the organization's approved workers; 10 tools. Auth is an org-bound Resona client token declared as a bearer `auth` block (instance secret), so the hub scopes every job to that organization. |
+| [mslearn](mslearn/MCP.md) | `mcp/mslearn` | alpha (v0.1.0) | Microsoft Learn hosted remote MCP (learn.microsoft.com/api/mcp) over streamable HTTP - search official Microsoft/Azure docs, search code samples, fetch a Learn page as Markdown; 3 read-only tools. Open server: no credentials, no `auth` block, safe for any job description. |
+| [cloudflare-docs](cloudflare-docs/MCP.md) | `mcp/cloudflare-docs` | alpha (v0.1.0) | Cloudflare documentation hosted remote MCP (docs.mcp.cloudflare.com/mcp) over streamable HTTP - search the Cloudflare developer docs, Pages-to-Workers migration guide; 2 read-only tools, no account access. Open server: no credentials, no `auth` block, safe for any job description. |
+| [huggingface](huggingface/MCP.md) | `mcp/huggingface` | alpha (v0.1.0) | Hugging Face hosted remote MCP (huggingface.co/mcp) over streamable HTTP - search and inspect Hub models, datasets, Spaces, papers and docs via `hf_fs`, `hub_repo_search`, `hub_repo_details`; 4 read-only tools anonymously. Open server: no credentials, no `auth` block; anonymous use is rate-limited (an optional HF token would raise limits, deliberately not bound). |
 
 ## Conventions
 
@@ -102,4 +111,6 @@ auth:
 When **not** to declare an `auth` block: remote MCPs whose auth is handled by the
 platform's OAuth path carry **no** `auth` block at all - `github/` (per-user GitHub
 OAuth) and `ideogram/` (per-user Ideogram OAuth) leave auth entirely to the platform.
-Use an `auth` block only for the static-key / paste-a-credential routes.
+Use an `auth` block only for the static-key / paste-a-credential routes. Open remote
+MCPs that need no credentials at all (`mslearn/`, `cloudflare-docs/`,
+`huggingface/`) carry neither an `auth` block nor any platform OAuth binding.
