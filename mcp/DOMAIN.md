@@ -1,9 +1,9 @@
 ---
 name: mcp
-description: "MCP server catalog entries - MCP.md recipes that give agents typed tool access to external systems (Excel, PowerPoint, GitHub)."
+description: "MCP server catalog entries - MCP.md recipes that give agents typed tool access to external systems (Excel, PowerPoint, GitHub, Canva, ClickUp, Airtable, Supabase, Vercel, Intercom)."
 type: domain
 building_blocks:
-  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), docx/ (Word document in-place editing via Apache POI XWPF), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only), resona-hub/ (Resona hosted remote MCP - private audio transcription, document OCR to Markdown and text postprocessing with a stored hub profile, org-bound bearer token)."
+  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), docx/ (Word document in-place editing via Apache POI XWPF), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only), resona-hub/ (Resona hosted remote MCP - private audio transcription, document OCR to Markdown and text postprocessing with a stored hub profile, org-bound bearer token), canva/ (Canva official hosted remote MCP - per-user OAuth design search, generation, editing, autofill, export), clickup/ (ClickUp official hosted remote MCP - per-user OAuth tasks, comments, time, Docs, Chat), airtable/ (Airtable official hosted remote MCP - per-user OAuth bases, records, schema, automations), supabase/ (Supabase official hosted remote MCP - per-user OAuth SQL, migrations, logs, Edge Functions; reaches production), vercel/ (Vercel official hosted remote MCP - per-user OAuth deployments, logs, analytics, project settings; reaches production), intercom/ (Intercom official hosted remote MCP, US region - per-user OAuth conversations, contacts, Help Center articles, internal notes)."
 stage: alpha
 ---
 
@@ -33,8 +33,20 @@ mcp/                      <- MCP servers (one subfolder per server)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:ideogram resolution (transport: http, per-user OAuth)
 ├── strava/            <- Strava catalog entry (code: r-huijts/strava-mcp on npm)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:strava resolution (command: npx + pinned version)
-└── resona-hub/        <- Resona hosted remote MCP (no image - code: ecsplico/resona)
-    └── MCP.md         <- catalog manifest + guidance for mcp:resona-hub resolution (transport: http, bearer auth block)
+├── resona-hub/        <- Resona hosted remote MCP (no image - code: ecsplico/resona)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:resona-hub resolution (transport: http, bearer auth block)
+├── canva/             <- Canva official hosted remote MCP (no image - per-user OAuth)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:canva resolution (transport: http, per-user OAuth)
+├── clickup/           <- ClickUp official hosted remote MCP (no image - per-user OAuth)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:clickup resolution (transport: http, per-user OAuth)
+├── airtable/          <- Airtable official hosted remote MCP (no image - per-user OAuth)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:airtable resolution (transport: http, per-user OAuth)
+├── supabase/          <- Supabase official hosted remote MCP (no image - per-user OAuth)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:supabase resolution (transport: http, per-user OAuth)
+├── vercel/            <- Vercel official hosted remote MCP (no image - per-user OAuth)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:vercel resolution (transport: http, per-user OAuth)
+└── intercom/          <- Intercom official hosted remote MCP, US region (no image - per-user OAuth)
+    └── MCP.md         <- catalog manifest + guidance for mcp:intercom resolution (transport: http, per-user OAuth)
 ```
 
 ## Servers in this domain
@@ -50,6 +62,12 @@ mcp/                      <- MCP servers (one subfolder per server)
 | [ideogram](ideogram/MCP.md) | `mcp/ideogram` | alpha (v0.1.0) | Ideogram official hosted remote MCP over streamable HTTP - generate (incl. typography), edit/inpaint, reframe/outpaint, upscale. Per-user OAuth: each user signs in to their own Ideogram account and draws on their own subscription credits. (Central org-key route is the `use-ideogram-image` skill in `use/`.) |
 | [strava](strava/MCP.md) | `mcp/strava` | alpha (v0.1.0) | Strava REST API (`api/v3`) over stdio - activities, laps, streams, athlete profile/stats/zones, segments, routes, GPX/TCX export; 25 tools. Runs the third-party `@r-huijts/strava-mcp-server` npm package at a pinned version (first `command: npx` entry). Deliberately **not** Strava's hosted MCP, which refuses our egress IP range. Per-user credentials; **personal scope only** (Strava's API terms allow an athlete's data to be shown to that athlete alone). |
 | [resona-hub](resona-hub/MCP.md) | `mcp/resona-hub` | alpha (v0.2.2) | Resona hosted remote MCP over Streamable HTTP - private audio transcription, document OCR to Markdown and postprocessing of text with a stored hub profile, as asynchronous jobs on the organization's approved workers; 10 tools. Auth is an org-bound Resona client token declared as a bearer `auth` block (instance secret), so the hub scopes every job to that organization. |
+| [canva](canva/MCP.md) | `mcp/canva` | alpha (v0.1.0) | Canva official hosted remote MCP over streamable HTTP - search/read designs, generate and edit designs, brand-template autofill, resize, export (PDF/PNG/JPG/PPTX/MP4), assets, folders, comments. Per-user OAuth; brand templates, autofill and resize need Canva Pro or above. |
+| [clickup](clickup/MCP.md) | `mcp/clickup` | alpha (v0.1.0) | ClickUp official hosted remote MCP over streamable HTTP - search, tasks (incl. bulk), comments, time tracking, Docs, Chat, hierarchy. Per-user OAuth with the user's ClickUp permissions; rolling 24-hour call limits by workspace plan. |
+| [airtable](airtable/MCP.md) | `mcp/airtable` | alpha (v0.1.0) | Airtable official hosted remote MCP over streamable HTTP - bases, schemas, records (read/write/delete), Interfaces, automation drafts. Per-user OAuth; the user picks shared bases at sign-in and their base role limits writes. |
+| [supabase](supabase/MCP.md) | `mcp/supabase` | alpha (v0.1.0) | Supabase official hosted remote MCP over streamable HTTP - tables, migrations, SQL, logs, advisors, TypeScript types, Edge Functions, branches, docs. Per-user OAuth with developer-level rights; reaches production databases, so writes need the user's go-ahead. |
+| [vercel](vercel/MCP.md) | `mcp/vercel` | alpha (v0.1.0) | Vercel official hosted remote MCP over streamable HTTP - teams, projects, deployments, build/runtime logs and errors, protected-URL fetch, Web Analytics, project settings, docs. Per-user OAuth with granted teams; reaches production deployments, so writes need the user's go-ahead. |
+| [intercom](intercom/MCP.md) | `mcp/intercom` | alpha (v0.1.0) | Intercom official hosted remote MCP (US region) over streamable HTTP - search/read conversations and contacts, companies, Help Center articles (incl. create/update), internal notes; 14 tools plus Fin Operator tools where enabled. Per-user OAuth as the authorizing teammate. EU workspaces need `mcp.eu.intercom.com`. |
 
 ## Conventions
 
