@@ -1,9 +1,9 @@
 ---
 name: mcp
-description: "MCP server catalog entries - MCP.md recipes that give agents typed tool access to external systems (Excel, PowerPoint, GitHub)."
+description: "MCP server catalog entries - MCP.md recipes that give agents typed tool access to external systems (Excel, PowerPoint, GitHub, HubSpot, Slack)."
 type: domain
 building_blocks:
-  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), docx/ (Word document in-place editing via Apache POI XWPF), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only), resona-hub/ (Resona hosted remote MCP - private audio transcription, document OCR to Markdown and text postprocessing with a stored hub profile, org-bound bearer token), mslearn/ (Microsoft Learn hosted remote MCP - open, read-only official Microsoft/Azure docs search, code samples, page fetch), cloudflare-docs/ (Cloudflare hosted remote MCP - open, read-only Cloudflare developer docs search), huggingface/ (Hugging Face hosted remote MCP - open, read-only Hub models, datasets, Spaces, papers, docs; anonymous rate limits)."
+  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), docx/ (Word document in-place editing via Apache POI XWPF), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only), resona-hub/ (Resona hosted remote MCP - private audio transcription, document OCR to Markdown and text postprocessing with a stored hub profile, org-bound bearer token), mslearn/ (Microsoft Learn hosted remote MCP - open, read-only official Microsoft/Azure docs search, code samples, page fetch), cloudflare-docs/ (Cloudflare hosted remote MCP - open, read-only Cloudflare developer docs search), huggingface/ (Hugging Face hosted remote MCP - open, read-only Hub models, datasets, Spaces, papers, docs; anonymous rate limits), hubspot/ (HubSpot official hosted remote MCP - per-user OAuth CRM records, activities, conversations, marketing analytics; org Owner registers the OAuth client first), slack/ (Slack official hosted remote MCP - per-user OAuth search, channel/thread history, canvases, lists, optional messaging; org Owner registers the OAuth client first)."
 stage: alpha
 ---
 
@@ -39,8 +39,12 @@ mcp/                      <- MCP servers (one subfolder per server)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:mslearn resolution (transport: http, no auth)
 ├── cloudflare-docs/   <- Cloudflare docs hosted remote MCP (no image - open, no credentials)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:cloudflare-docs resolution (transport: http, no auth)
-└── huggingface/       <- Hugging Face hosted remote MCP (no image - open, anonymous rate limits)
-    └── MCP.md         <- catalog manifest + guidance for mcp:huggingface resolution (transport: http, no auth)
+├── huggingface/       <- Hugging Face hosted remote MCP (no image - open, anonymous rate limits)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:huggingface resolution (transport: http, no auth)
+├── hubspot/           <- HubSpot official hosted remote MCP (no image - per-user OAuth, org-registered client)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:hubspot resolution (transport: http, per-user OAuth)
+└── slack/             <- Slack official hosted remote MCP (no image - per-user OAuth, org-registered client)
+    └── MCP.md         <- catalog manifest + guidance for mcp:slack resolution (transport: http, per-user OAuth)
 ```
 
 ## Servers in this domain
@@ -59,6 +63,8 @@ mcp/                      <- MCP servers (one subfolder per server)
 | [mslearn](mslearn/MCP.md) | `mcp/mslearn` | alpha (v0.1.0) | Microsoft Learn hosted remote MCP (learn.microsoft.com/api/mcp) over streamable HTTP - search official Microsoft/Azure docs, search code samples, fetch a Learn page as Markdown; 3 read-only tools. Open server: no credentials, no `auth` block, safe for any job description. |
 | [cloudflare-docs](cloudflare-docs/MCP.md) | `mcp/cloudflare-docs` | alpha (v0.1.0) | Cloudflare documentation hosted remote MCP (docs.mcp.cloudflare.com/mcp) over streamable HTTP - search the Cloudflare developer docs, Pages-to-Workers migration guide; 2 read-only tools, no account access. Open server: no credentials, no `auth` block, safe for any job description. |
 | [huggingface](huggingface/MCP.md) | `mcp/huggingface` | alpha (v0.1.0) | Hugging Face hosted remote MCP (huggingface.co/mcp) over streamable HTTP - search and inspect Hub models, datasets, Spaces, papers and docs via `hf_fs`, `hub_repo_search`, `hub_repo_details`; 4 read-only tools anonymously. Open server: no credentials, no `auth` block; anonymous use is rate-limited (an optional HF token would raise limits, deliberately not bound). |
+| [hubspot](hubspot/MCP.md) | `mcp/hubspot` | alpha (v0.1.0) | HubSpot official hosted remote MCP (mcp.hubspot.com) over streamable HTTP - search, fetch and SQL-query CRM records, activities, conversations, campaign/email/content analytics, and confirmed CRM and marketing writes. Per-user OAuth with PKCE through the organization's own HubSpot MCP connector: no dynamic client registration, so an organization Owner registers the client under Organization settings → Providers → OAuth clients for MCP servers first. No `auth` block. |
+| [slack](slack/MCP.md) | `mcp/slack` | alpha (v0.1.0) | Slack official hosted remote MCP (mcp.slack.com/mcp) over streamable HTTP - search messages, files, channels and users, read channel/thread history, canvases, lists, profiles; send/schedule messages, reactions, channel/canvas/list creation and uploads only with write scopes. Per-user OAuth (user token) through the organization's own internal Slack app with the MCP feature on: no dynamic client registration, so an organization Owner registers the client and its user scopes under Organization settings → Providers → OAuth clients for MCP servers first. No `auth` block. |
 
 ## Conventions
 
@@ -111,6 +117,10 @@ auth:
 When **not** to declare an `auth` block: remote MCPs whose auth is handled by the
 platform's OAuth path carry **no** `auth` block at all - `github/` (per-user GitHub
 OAuth) and `ideogram/` (per-user Ideogram OAuth) leave auth entirely to the platform.
+So do `hubspot/` and `slack/`, whose servers offer no dynamic client registration:
+there the platform signs users in through an OAuth client an organization Owner
+registered once (Organization settings → Providers → OAuth clients for MCP servers),
+still without an `auth` block in the manifest.
 Use an `auth` block only for the static-key / paste-a-credential routes. Open remote
 MCPs that need no credentials at all (`mslearn/`, `cloudflare-docs/`,
 `huggingface/`) carry neither an `auth` block nor any platform OAuth binding.
