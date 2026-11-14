@@ -3,7 +3,7 @@ name: mcp
 description: "MCP server catalog entries - MCP.md recipes that give agents typed tool access to external systems (Excel, PowerPoint, GitHub)."
 type: domain
 building_blocks:
-  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), docx/ (Word document in-place editing via Apache POI XWPF), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only), resona-hub/ (Resona hosted remote MCP - private audio transcription, document OCR to Markdown and text postprocessing with a stored hub profile, org-bound bearer token)."
+  servers: "One subfolder per MCP server. Currently: xls/ (Excel workbook read/write via Apache POI), ppt/ (PowerPoint authoring/rendering/export via Apache POI + LibreOffice), docx/ (Word document in-place editing via Apache POI XWPF), github/ (GitHub hosted remote MCP - repos, issues, PRs, Actions, code search), sql/ (dialect-agnostic SQL over Postgres/MySQL/SQLite/MSSQL, run on baseline node via a sha256-verified release-asset bundle), alma/ (ALMA per-tenant hosted remote MCP - read-only scorecards, indicators, regions, geo), ideogram/ (Ideogram official hosted remote MCP - per-user OAuth image generation, edit, reframe, upscale), strava/ (Strava REST API over a pinned npm package on stdio - per-user activities, segments, routes; personal scope only), resona-hub/ (Resona hosted remote MCP - private audio transcription, document OCR to Markdown and text postprocessing with a stored hub profile, org-bound bearer token), atlassian-key/ (Atlassian Rovo hosted remote MCP - Jira/Confluence for agent fleets via one shared service account API key, bearer auth block), linear-key/ (Linear hosted remote MCP - issues and projects for agent fleets via one shared Linear API key, bearer auth block), stripe-key/ (Stripe hosted remote MCP - payments and billing for agent fleets via one shared Stripe agent API key, bearer auth block)."
 stage: alpha
 ---
 
@@ -33,8 +33,14 @@ mcp/                      <- MCP servers (one subfolder per server)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:ideogram resolution (transport: http, per-user OAuth)
 ├── strava/            <- Strava catalog entry (code: r-huijts/strava-mcp on npm)
 │   └── MCP.md         <- catalog manifest + guidance for mcp:strava resolution (command: npx + pinned version)
-└── resona-hub/        <- Resona hosted remote MCP (no image - code: ecsplico/resona)
-    └── MCP.md         <- catalog manifest + guidance for mcp:resona-hub resolution (transport: http, bearer auth block)
+├── resona-hub/        <- Resona hosted remote MCP (no image - code: ecsplico/resona)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:resona-hub resolution (transport: http, bearer auth block)
+├── atlassian-key/     <- Atlassian Rovo hosted remote MCP, shared service account key (fleet variant of atlassian/)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:atlassian-key resolution (transport: http, bearer auth block)
+├── linear-key/        <- Linear hosted remote MCP, shared API key (fleet variant of linear/)
+│   └── MCP.md         <- catalog manifest + guidance for mcp:linear-key resolution (transport: http, bearer auth block)
+└── stripe-key/        <- Stripe hosted remote MCP, shared agent API key (fleet variant of stripe/)
+    └── MCP.md         <- catalog manifest + guidance for mcp:stripe-key resolution (transport: http, bearer auth block)
 ```
 
 ## Servers in this domain
@@ -50,6 +56,9 @@ mcp/                      <- MCP servers (one subfolder per server)
 | [ideogram](ideogram/MCP.md) | `mcp/ideogram` | alpha (v0.1.0) | Ideogram official hosted remote MCP over streamable HTTP - generate (incl. typography), edit/inpaint, reframe/outpaint, upscale. Per-user OAuth: each user signs in to their own Ideogram account and draws on their own subscription credits. (Central org-key route is the `use-ideogram-image` skill in `use/`.) |
 | [strava](strava/MCP.md) | `mcp/strava` | alpha (v0.1.0) | Strava REST API (`api/v3`) over stdio - activities, laps, streams, athlete profile/stats/zones, segments, routes, GPX/TCX export; 25 tools. Runs the third-party `@r-huijts/strava-mcp-server` npm package at a pinned version (first `command: npx` entry). Deliberately **not** Strava's hosted MCP, which refuses our egress IP range. Per-user credentials; **personal scope only** (Strava's API terms allow an athlete's data to be shown to that athlete alone). |
 | [resona-hub](resona-hub/MCP.md) | `mcp/resona-hub` | alpha (v0.2.2) | Resona hosted remote MCP over Streamable HTTP - private audio transcription, document OCR to Markdown and postprocessing of text with a stored hub profile, as asynchronous jobs on the organization's approved workers; 10 tools. Auth is an org-bound Resona client token declared as a bearer `auth` block (instance secret), so the hub scopes every job to that organization. |
+| [atlassian-key](atlassian-key/MCP.md) | `mcp/atlassian-key` | alpha (v0.1.0) | Atlassian Rovo hosted remote MCP (mcp.atlassian.com/v2/mcp) over streamable HTTP - Jira, Confluence and other Atlassian Cloud apps for agent fleets. Auth is one Atlassian service account API key declared as a bearer `auth` block, shared by every hire of a job description; the org admin must allow API-token auth. Per-person default: `atlassian` (OAuth). |
+| [linear-key](linear-key/MCP.md) | `mcp/linear-key` | alpha (v0.1.0) | Linear hosted remote MCP (mcp.linear.app/mcp) over streamable HTTP - issues, projects, cycles, documents, comments for agent fleets. Auth is one Linear API key (permission- and team-restricted) declared as a bearer `auth` block, shared by every hire of a job description. Per-person default: `linear` (OAuth). |
+| [stripe-key](stripe-key/MCP.md) | `mcp/stripe-key` | alpha (v0.1.0) | Stripe hosted remote MCP (mcp.stripe.com) over streamable HTTP - customers, payments, subscriptions, invoices, API and docs search for agent fleets. Auth is one Stripe agent API key (agent-tagged restricted key) declared as a bearer `auth` block, shared by every hire of a job description. Per-person default: `stripe` (OAuth). |
 
 ## Conventions
 
