@@ -196,6 +196,6 @@ The `sync-docs` skill repairs cross-references between tiers.
 ## Notes
 
 - The `skaile-development` agent orchestrates multi-skill workflows. For single-skill operations, call skills directly.
-- `devlog` should run after any meaningful change. `implement` triggers it automatically.
+- `devlog` is not part of the `skaile-development` preset or the agent, and `implement` does not run it: a repo that keeps a dev log calls it directly.
 - Skills in this domain read `CLAUDE.md` files from affected packages before acting.
 - The four quality skills (`test`, `audit`, `doc --mode audit`, `ready`) all emit a JSON artifact to the target repo's `_devlog/reports/` so `quality` can aggregate them.
