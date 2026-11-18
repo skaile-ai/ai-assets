@@ -107,7 +107,7 @@ Reach for `skaile-development` when you are:
 | `compile-validators` | Generating deterministic Python validators for skaile-development SKILL.md files               |
 | `quality`     | Umbrella gate: test → audit → doc-audit → ready, with one aggregated snapshot                  |
 | `doc`             | Write, update, audit, or check status of documentation across all tiers                        |
-| `devlog`           | After completing work — records what changed and why in plain language                         |
+| `devlog`           | In a repo that keeps a dev log: records what changed and why in plain language                 |
 | `notify`           | Post messages, announcements, or devlog summaries to team channels                             |
 | `faq`              | After resolving a question — curates FAQ entries with user approval                            |
 | `release`          | Preparing a release — changelog generation, version bumps, and git tagging                     |
@@ -169,9 +169,9 @@ Every change in a skaile repo may affect up to five documentation surfaces, all 
 | Dev guide | `CLAUDE.md`              | Architecture, conventions, or environment changes  |
 | Reference | `docs/<pkg>/`            | New commands, configuration options, component API |
 | AI guide  | `DOMAIN.md` / `SKILL.md` | Changes to AI resource structure or skill behavior |
-| Dev log   | `_devlog/entries/` (in the target repo) | After every meaningful change (always)  |
+| Dev log   | `_devlog/entries/` (in the target repo) | Only in a repo that keeps a dev log     |
 
-The `doc` skill covers tiers 1-4. The `devlog` skill handles the dev log tier.
+The `doc` skill covers tiers 1-4. The `devlog` skill handles the dev log tier, in repos that keep one.
 The `sync-docs` skill repairs cross-references between tiers.
 
 ## Test Layer Map

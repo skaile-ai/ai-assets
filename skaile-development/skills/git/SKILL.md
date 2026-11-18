@@ -399,7 +399,6 @@ IF mode = pr
     - [ ] README.md updated (if public API changed)
     - [ ] CLAUDE.md updated (if architecture/conventions changed)
     - [ ] Starlight docs updated (if commands/API changed)
-    - [ ] Devlog entry written
 
     ## Notes
 

@@ -403,15 +403,13 @@ STEP 9: Update docs
 
 EMIT [implement] docs_synced pages_updated=<N>
 
-# ── Phase 6: Session Review ───────────────────────────────────────
-
 SUGGEST session-review
   > "Session complete. Run `/session-review` to see token usage, cost, workflow analysis,
   >  and suggestions for this session."
 
-# ── Phase 6b: Notify (optional) ──────────────────────────────────
+# ── Phase 6: Notify (optional) ────────────────────────────────────
 
-STEP 10b: Send notifications (if warranted)
+STEP 10: Send notifications (if warranted)
   IF breaking: true in any commit on this branch
     - RUN notify template=breaking-change
   IF complexity = large

@@ -325,7 +325,7 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** `implement` (step 10: write devlog)
+- **Called by:** the user directly, and `doc` after a write or update, in a repo that keeps `_devlog/entries/`
 - **Calls:** none
 - **Preceded by:** `test`, `doc`
 - **References:** `references/doc_tiers.md` for the report decision criteria

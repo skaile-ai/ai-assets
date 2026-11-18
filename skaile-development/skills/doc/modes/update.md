@@ -93,7 +93,7 @@ After updating pages, run these checks:
 
 ### Step 7 — Delegate _devlog (if substantial updates)
 
-If more than one page was updated, or if a CLAUDE.md architecture section changed, trigger `devlog` to record a plain-language summary of what was brought back in sync and why it had drifted.
+Skip this step unless the target repo keeps a dev log (`_devlog/entries/` exists). If more than one page was updated, or if a CLAUDE.md architecture section changed, trigger `devlog` to record a plain-language summary of what was brought back in sync and why it had drifted.
 
 ---
 
