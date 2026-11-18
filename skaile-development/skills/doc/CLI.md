@@ -263,5 +263,5 @@ Before merging a feature branch to `main`:
 ## Related Skills
 
 - **`implement`** — calls `doc update` automatically after implementation succeeds
-- **`devlog`** — record what was documented in the project devlog (called after write/update, skipped when the target repo's CLAUDE.md or AGENTS.md says its `_devlog/entries/` is retired)
+- **`devlog`** — record what was documented in the project devlog (called after write/update, only when the dev log tier applies (`skaile-development/references/doc_tiers.md`, tier 5))
 - **`update-starlight-docs`** — generic Starlight sync skill (no skaile-dev-specific knowledge)

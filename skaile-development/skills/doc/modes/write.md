@@ -46,7 +46,7 @@ Quick-reference for common targets:
 | New config file or format | No | Yes | Maybe | No | Yes |
 | Architecture addition | No | Yes | Maybe | No | Yes |
 
-The `_devlog` column does not apply when the target repo's CLAUDE.md or AGENTS.md says its `_devlog/entries/` is retired (Step 9).
+The `_devlog` column applies only when the dev log tier applies (`skaile-development/references/doc_tiers.md`, tier 5).
 
 When in doubt, apply the most conservative tier that satisfies the audience. Do not write Starlight pages for internal implementation details.
 
@@ -125,7 +125,7 @@ If the target is a new or updated AI skill or domain:
 
 ### Step 9 — Delegate _devlog to devlog
 
-Skip this step when the target repo's CLAUDE.md or AGENTS.md says its `_devlog/entries/` is retired (platform's says so; the folder alone proves nothing, since a repo can retire its dev log and keep the old entries). After completing documentation work, trigger `devlog` to record what was written. This is a short-entry-only change unless the documentation reveals a new architectural pattern.
+Skip this step unless the dev log tier applies (`skaile-development/references/doc_tiers.md`, tier 5). After completing documentation work, trigger `devlog` to record what was written. This is a short-entry-only change unless the documentation reveals a new architectural pattern.
 
 ---
 

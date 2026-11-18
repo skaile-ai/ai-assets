@@ -93,7 +93,7 @@ After updating pages, run these checks:
 
 ### Step 7 — Delegate _devlog (if substantial updates)
 
-Skip this step when the target repo's CLAUDE.md or AGENTS.md says its `_devlog/entries/` is retired (platform's says so; the folder alone proves nothing, since a repo can retire its dev log and keep the old entries). If more than one page was updated, or if a CLAUDE.md architecture section changed, trigger `devlog` to record a plain-language summary of what was brought back in sync and why it had drifted.
+Skip this step unless the dev log tier applies (`skaile-development/references/doc_tiers.md`, tier 5). If more than one page was updated, or if a CLAUDE.md architecture section changed, trigger `devlog` to record a plain-language summary of what was brought back in sync and why it had drifted.
 
 ---
 

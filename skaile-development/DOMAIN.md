@@ -107,7 +107,7 @@ Reach for `skaile-development` when you are:
 | `compile-validators` | Generating deterministic Python validators for skaile-development SKILL.md files               |
 | `quality`     | Umbrella gate: test → audit → doc-audit → ready, with one aggregated snapshot                  |
 | `doc`             | Write, update, audit, or check status of documentation across all tiers                        |
-| `devlog`           | Unless the repo retired its dev log: records what changed and why in plain language            |
+| `devlog`           | Where the dev log tier applies: records what changed and why in plain language                 |
 | `notify`           | Post messages, announcements, or devlog summaries to team channels                             |
 | `faq`              | After resolving a question — curates FAQ entries with user approval                            |
 | `release`          | Preparing a release — changelog generation, version bumps, and git tagging                     |
@@ -169,9 +169,9 @@ Every change in a skaile repo may affect up to five documentation surfaces, all 
 | Dev guide | `CLAUDE.md`              | Architecture, conventions, or environment changes  |
 | Reference | `docs/<pkg>/`            | New commands, configuration options, component API |
 | AI guide  | `DOMAIN.md` / `SKILL.md` | Changes to AI resource structure or skill behavior |
-| Dev log   | `_devlog/entries/` (in the target repo) | Unless the repo retired its dev log     |
+| Dev log   | `_devlog/entries/` (in the target repo) | Where the dev log tier applies (tier 5) |
 
-The `doc` skill covers tiers 1-4. The `devlog` skill handles the dev log tier, except in a repo whose CLAUDE.md or AGENTS.md retires `_devlog/entries/`.
+The `doc` skill covers tiers 1-4. The `devlog` skill handles the dev log tier where it applies (`references/doc_tiers.md`, tier 5).
 The `sync-docs` skill repairs cross-references between tiers.
 
 ## Test Layer Map
@@ -196,6 +196,6 @@ The `sync-docs` skill repairs cross-references between tiers.
 ## Notes
 
 - The `skaile-development` agent orchestrates multi-skill workflows. For single-skill operations, call skills directly.
-- `devlog` is not part of the `skaile-development` preset or the agent, and `implement` does not run it; `doc`, `test` and `jenkins-debug` skip it where the repo's CLAUDE.md or AGENTS.md retires `_devlog/entries/` (platform).
+- `devlog` is not part of the `skaile-development` preset or the agent, and `implement` does not run it; `doc`, `test` and `jenkins-debug` call it only when the dev log tier applies (`references/doc_tiers.md`, tier 5): the skill is available and the repo has not retired `_devlog/entries/` (platform has).
 - Skills in this domain read `CLAUDE.md` files from affected packages before acting.
 - The four quality skills (`test`, `audit`, `doc --mode audit`, `ready`) all emit a JSON artifact to the target repo's `_devlog/reports/` so `quality` can aggregate them.
