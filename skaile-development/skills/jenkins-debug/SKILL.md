@@ -346,8 +346,8 @@ How this skill relates to others in the skaile-development domain:
 - **`git`** — once the likely culprit commit is identified in Step 5, the user may want to
   revert or amend it. Hand off to `git` for the actual change.
 - **`devlog`** — if the investigation surfaces a non-trivial pattern (e.g. a recurring class of
-  Jenkinsfile bug, a Jenkins config drift), record it via `devlog` so future agents can learn
-  from it. Skip the devlog for one-off transient failures.
+  Jenkinsfile bug, a Jenkins config drift) and the target repo's CLAUDE.md or AGENTS.md says it keeps a dev log, record it via `devlog` so future agents
+  can learn from it. Skip the devlog for one-off transient failures.
 - **`audit scope=diff`** — if the failure is caused by a recently-merged commit, run `audit`
   against that diff to check whether other defects rode along.
 - **`release`** — when a deploy fails mid-release, the release skill consumes this skill's
