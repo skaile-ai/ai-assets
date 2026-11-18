@@ -38,7 +38,7 @@ def validate(cwd: str) -> dict:
     v.skip("use monorepo-relative paths in all `_sources` frontmatter entries", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     v.skip("set `_based_on_commit` to the current HEAD SHA and `_last_synced` to today's date on all Starlight pages", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     v.skip("preserve existing frontmatter fields (title, description, badge, _sources) when updating pages", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
-    v.skip("delegate `_devlog` entries to `devlog`, only when the target repo keeps a dev log (`_devlog/entries/` exists) — never write devlog content directly", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
+    v.skip("delegate `_devlog` entries to `devlog`, only when the target repo's CLAUDE.md or AGENTS.md says it keeps a dev log in `_devlog/entries/` — never write devlog content directly", rule_type="MUST", reason="see SKILL.md — semantic/runtime")
     return v.result()
 
 
