@@ -7,8 +7,8 @@ description: 'Expert advisor for the skaile-dev monorepo. Routes implementation 
 # uses is declared here: its skills. Nothing is taken from the `skaile` agent: its `skaile-base` persona
 # is the router agent's identity ("route to domain agents") and would contradict this agent's own SOUL.md;
 # its `skaile-safety` ruleset is mostly concept-pipeline rules (`_concept/` artifacts, a boundary against any
-# work outside `_concept/` or the project directory), which contradict this agent's job of git, tests, docs
-# and devlogs across the monorepo, so this agent's own RULES.md carries only the generic clauses that apply
+# work outside `_concept/` or the project directory), which contradict this agent's job of git, tests and docs
+# across the monorepo, so this agent's own RULES.md carries only the generic clauses that apply
 # (diff before commit, no overwriting user files, the golden_principles / iron_laws pointers its `implement`
 # skill relies on, the two Safety & Ethics clauses); and its three pipeline delegates (conceptualize /
 # implement / quality): this agent's SOUL.md routes to skills only. On `main` this agent inherited none of

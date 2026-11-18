@@ -46,6 +46,8 @@ Quick-reference for common targets:
 | New config file or format | No | Yes | Maybe | No | Yes |
 | Architecture addition | No | Yes | Maybe | No | Yes |
 
+The `_devlog` column does not apply when the target repo's CLAUDE.md or AGENTS.md says its `_devlog/entries/` is retired (Step 9).
+
 When in doubt, apply the most conservative tier that satisfies the audience. Do not write Starlight pages for internal implementation details.
 
 ### Step 3 — Read source files and annotations
