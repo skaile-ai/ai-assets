@@ -115,7 +115,7 @@ Only create new pages when there is enough material (≥ 3 significant topics).
 **Location (in the target repo):** `_devlog/entries/<date>-<slug>.md` (short entries, one file each; there is no index file) + `_devlog/reports/<date>-<topic>.md` (detailed reports)
 **Purpose:** Human-readable record of what changed, why it changed, and what the implications are.
 
-**Update after EVERY meaningful change** — no exceptions. This is the institutional memory.
+**Update after every meaningful change**, unless the target repo's CLAUDE.md or AGENTS.md says its `_devlog/entries/` is retired (platform's does): then skip this tier and the `_devlog` column below entirely.
 
 **Short entry:** 1–3 sentences per change. Plain language. No jargon. Who-what-why-implications.
 **Detailed report:** Only when a **concept or architecture changes fundamentally**. Full analysis,
@@ -138,6 +138,8 @@ migration guidance, rationale, and downstream effects.
 ---
 
 ## Decision Table: Which Tiers to Update?
+
+The `_devlog` column applies only where the dev log is not retired (see tier 5).
 
 | Change type | README | CLAUDE.md | Starlight | DOMAIN/SKILL | _devlog |
 |-------------|--------|-----------|-----------|--------------|---------|

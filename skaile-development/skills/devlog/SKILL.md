@@ -325,7 +325,7 @@ CHECKLIST
 
 ## Integration
 
-- **Called by:** the user directly, and `doc` after a write or update, in a repo whose CLAUDE.md or AGENTS.md says it keeps a dev log
+- **Called by:** the user directly, and `doc` after a write or update, unless the target repo's CLAUDE.md or AGENTS.md says its `_devlog/entries/` is retired
 - **Calls:** none
 - **Preceded by:** `test`, `doc`
 - **References:** `references/doc_tiers.md` for the report decision criteria

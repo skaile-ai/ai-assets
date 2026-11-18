@@ -123,7 +123,7 @@ If the target is a new or updated AI skill or domain:
 
 ### Step 9 — Delegate _devlog to devlog
 
-Skip this step unless the target repo's CLAUDE.md or AGENTS.md says it keeps a dev log in `_devlog/entries/` (an existing folder is not enough: a repo can retire its dev log and keep the history; saying so in CLAUDE.md is the opt-in). After completing documentation work, trigger `devlog` to record what was written. This is a short-entry-only change unless the documentation reveals a new architectural pattern.
+Skip this step when the target repo's CLAUDE.md or AGENTS.md says its `_devlog/entries/` is retired (platform's says so; the folder alone proves nothing, since a repo can retire its dev log and keep the old entries). After completing documentation work, trigger `devlog` to record what was written. This is a short-entry-only change unless the documentation reveals a new architectural pattern.
 
 ---
 
