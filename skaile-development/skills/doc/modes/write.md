@@ -46,6 +46,8 @@ Quick-reference for common targets:
 | New config file or format | No | Yes | Maybe | No | Yes |
 | Architecture addition | No | Yes | Maybe | No | Yes |
 
+The `_devlog` column applies only when the dev log tier applies (`skaile-development/references/doc_tiers.md`, tier 5).
+
 When in doubt, apply the most conservative tier that satisfies the audience. Do not write Starlight pages for internal implementation details.
 
 ### Step 3 — Read source files and annotations
@@ -123,7 +125,7 @@ If the target is a new or updated AI skill or domain:
 
 ### Step 9 — Delegate _devlog to devlog
 
-After completing documentation work, trigger `devlog` to record what was written. This is a short-entry-only change unless the documentation reveals a new architectural pattern.
+Skip this step unless the dev log tier applies (`skaile-development/references/doc_tiers.md`, tier 5). After completing documentation work, trigger `devlog` to record what was written. This is a short-entry-only change unless the documentation reveals a new architectural pattern.
 
 ---
 

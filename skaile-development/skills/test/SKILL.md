@@ -535,8 +535,9 @@ After finishing test work — especially construct mode — recommend:
    If the ratchet reports `baseline-improved` for a package and the gain is
    intentional, update that package's entry in
    `_devlog/reports/coverage-baseline-2026-04-22/summary.json` in the same PR.
-2. **Record the change.** Call the `devlog` skill so a `_devlog/entries/` file captures
-   the testing work (new test files added, coverage moved, known-skip list changes).
+2. **Record the change** (only when the dev log tier applies,
+   `skaile-development/references/doc_tiers.md` tier 5). Call the `devlog` skill so a `_devlog/entries/` file
+   captures the testing work (new test files added, coverage moved, known-skip list changes).
 3. **Before opening a PR**, run the local equivalent of test-full.yml
    (via the `quality` skill in `mode=full`) — see that skill for the canonical
    pre-PR sequence.
@@ -559,4 +560,4 @@ After finishing test work — especially construct mode — recommend:
 - **Called by:** `implement` (after each task and before finish), `audit` (as a pre-analysis gate), `quality`
 - **Calls:** `test-plan`, `test-unit`, `test-integration`, `test-e2e` (from construct mode — test-plan first when no TEST_PLAN.md exists, then the level-specific skill)
 - **Delegates to:** `test-plan` → `test-unit` / `test-integration` / `test-e2e` — all in the skaileup-evaluate domain, no external dependencies
-- **Followed by:** `_scripts/check-coverage-ratchet.ts` (ratchet), then `devlog` (record)
+- **Followed by:** `_scripts/check-coverage-ratchet.ts` (ratchet), then `devlog` (record, only when the dev log tier applies (`skaile-development/references/doc_tiers.md`, tier 5))

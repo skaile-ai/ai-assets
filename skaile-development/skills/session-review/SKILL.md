@@ -226,7 +226,7 @@ Mark each as ✅ done / ⚠️ skipped / — not applicable.
 | `test` run | any `skill_calls` entry starts with `test` |
 | `audit` run | any `skill_calls` entry starts with `audit` |
 | `doc --mode update` run | any `skill_calls` entry starts with `doc` and contains `update` |
-| `devlog` added | any `skill_calls` entry starts with `devlog` |
+| `devlog` added | any `skill_calls` entry starts with `devlog`; `—` unless the dev log tier applies (`skaile-development/references/doc_tiers.md`, tier 5) |
 | `/compact` before Agent dispatch | `compact_before_agent` = true (coarse — see Known Limitations) |
 | Worktree used | `worktree_used` = true |
 
@@ -277,7 +277,7 @@ Output the four blocks:
 | `test` run after implementation | ✅/⚠️/— | ... |
 | `audit scope=diff` run | ✅/⚠️/— | ... |
 | `doc --mode update` run | ✅/⚠️/— | ... |
-| `devlog` added | ✅/⚠️/— | ... |
+| `devlog` added (where the dev log tier applies) | ✅/⚠️/— | ... |
 | `/compact` before Agent dispatch | ✅/⚠️/— | (coarse check — see Known Limitations) |
 | Worktree used for isolation | ✅/⚠️/— | ... |
 
@@ -322,7 +322,7 @@ EMIT [session-review] complete grade=<grade>
 
 ## Integration
 
-- **Suggested by:** `implement` skill (after devlog phase), `skaile-development` agent (on wrap-up)
+- **Suggested by:** `implement` skill (after the documentation sync, Phase 5), `skaile-development` agent (on wrap-up)
 - **Reads:** Claude Code session JSONL at `~/.claude/projects/<slug>/<session-id>.jsonl`
 - **Sub-agent costs:** In `~/.claude/projects/<slug>/<session-id>/subagents/` — not parsed here
 

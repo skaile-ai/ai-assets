@@ -115,7 +115,9 @@ Only create new pages when there is enough material (≥ 3 significant topics).
 **Location (in the target repo):** `_devlog/entries/<date>-<slug>.md` (short entries, one file each; there is no index file) + `_devlog/reports/<date>-<topic>.md` (detailed reports)
 **Purpose:** Human-readable record of what changed, why it changed, and what the implications are.
 
-**Update after EVERY meaningful change** — no exceptions. This is the institutional memory.
+**When this tier applies.** Only when both hold: (1) the `devlog` skill is available in the session. It is not in the `skaile-development` preset or agent, so a repo that keeps a dev log pins `skill:@skaile-ai/devlog` in its own `skaile.yaml` `dependencies:` (or the user has it installed globally); and (2) the target repo's CLAUDE.md or AGENTS.md does not say its `_devlog/entries/` is retired (platform's does; old entries in the folder prove nothing). Otherwise skip this tier and the `_devlog` column below: do not call `devlog` and do not write entries by hand. Where it applies, `devlog` creates `_devlog/entries/` on first use. Every other skill that mentions `devlog` defers to this paragraph.
+
+**Update after every meaningful change** where the tier applies.
 
 **Short entry:** 1–3 sentences per change. Plain language. No jargon. Who-what-why-implications.
 **Detailed report:** Only when a **concept or architecture changes fundamentally**. Full analysis,
@@ -138,6 +140,8 @@ migration guidance, rationale, and downstream effects.
 ---
 
 ## Decision Table: Which Tiers to Update?
+
+The `_devlog` column applies only when the dev log tier applies (tier 5).
 
 | Change type | README | CLAUDE.md | Starlight | DOMAIN/SKILL | _devlog |
 |-------------|--------|-----------|-----------|--------------|---------|

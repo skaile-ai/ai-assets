@@ -3,7 +3,7 @@ name: "implement"
 description: "Monorepo-aware implementation orchestrator for the skaile-dev codebase.
   Reads the affected package CLAUDE.md files, identifies the tech stack, routes to
   the right prog-experts, produces a plan, executes with supervised dispatch, then
-  triggers test, doc, and devlog on completion. Use for any non-trivial change to
+  triggers test and doc on completion. Use for any non-trivial change to
   the skaile-dev monorepo."
 metadata:
   tags:
@@ -40,8 +40,6 @@ metadata:
   produces:
   - path: "_implementation/skaile-plan.md"
     description: "Structured plan for this implementation task"
-  - path: "_devlog/entries/<date>-<slug>.md"
-    description: "Devlog entry added after completion"
   user_inputs:
     dialog:
     - id: "task_description"
@@ -69,7 +67,7 @@ Drives implementation tasks in the skaile-dev monorepo from task description to 
 tested, documented code. Unlike the generic `implement` skill (which consumes `_concept/`
 to build apps), this skill works on the codebase itself.
 
-**Workflow:** Read context → Identify packages → Route to experts → Plan → Execute (supervised) → Test → Docs → Devlog
+**Workflow:** Read context → Identify packages → Route to experts → Plan → Execute (supervised) → Test → Docs
 
 **Complexity tiers:**
 - `small` — single-file or contained change; direct implementation without full subagent dispatch
@@ -88,11 +86,10 @@ to build apps), this skill works on the codebase itself.
 - Pure git operations (no code changes) — use `git` directly
 - Documentation-only update — use `doc` directly
 - Running existing tests — use `test` directly
-- Writing a devlog entry for work already done — use `devlog` directly
 
 ---
 
-ROLE  Monorepo-aware implementation orchestrator — reads context, plans, executes, and closes the loop with tests + docs + devlog.
+ROLE  Monorepo-aware implementation orchestrator — reads context, plans, executes, and closes the loop with tests + docs.
 
 READS
   <repo>/CLAUDE.md                                       — the target repo's conventions, package map (the authority; the skaile-dev shell is retired)
@@ -104,7 +101,6 @@ WRITES
   _implementation/skaile-plan.md                         — task plan with checklist
   _implementation/decisions.md                           — decisions and concerns log
   <target source files>                                   — actual code changes
-  _devlog/entries/<date>-<slug>.md                       — devlog entry on completion
 
 REFERENCES
   skaileup-shared/contracts/golden_principles.md              — naming and structure rules
@@ -122,7 +118,6 @@ MUST  run doc --mode update after any public API or structure change
 MUST  annotate all added or modified exported symbols with TSDoc (per references/doc_pattern.md) before running doc --mode update
 MUST  update README.md (The Problem / What It Does / Features) when the package's value proposition or user-facing capabilities change
 MUST  update CLAUDE.md when architecture, conventions, or environment variables change
-MUST  add a devlog entry after every completed implementation
 MUST  create a git branch before implementing (via git skill)
 MUST  verify platform/backend starts (bun run dev) after any structural backend change before marking the phase complete — structural changes include: new @Injectable service, constructor parameter changes, *.module.ts providers/imports/exports changes, import path changes in a service or module
 MUST  run formatting and linting on all affected packages before each commit — the git skill's STEP 1c handles this, but ensure it runs: Biome (format+lint) for workspaces; Prettier+ESLint for platform and store
@@ -408,25 +403,13 @@ STEP 9: Update docs
 
 EMIT [implement] docs_synced pages_updated=<N>
 
-# ── Phase 6: Devlog ───────────────────────────────────────────────
-
-STEP 10: Write devlog entry
-  - RUN devlog with:
-    - what_changed: summary of what was implemented (1–2 sentences, plain language)
-    - why: motivation and context
-    - packages: list of affected packages
-    - implications: what downstream effects or breaking changes exist (if any)
-    - report_needed: true if this is a conceptual/architectural change
-
-EMIT [implement] devlog_written
-
 SUGGEST session-review
   > "Session complete. Run `/session-review` to see token usage, cost, workflow analysis,
   >  and suggestions for this session."
 
-# ── Phase 6b: Notify (optional) ──────────────────────────────────
+# ── Phase 6: Notify (optional) ────────────────────────────────────
 
-STEP 10b: Send notifications (if warranted)
+STEP 10: Send notifications (if warranted)
   IF breaking: true in any commit on this branch
     - RUN notify template=breaking-change
   IF complexity = large
@@ -446,7 +429,6 @@ CHECKPOINT completion
   > Tasks: <N> done
   > Tests: all passing
   > Docs: <N pages> updated
-  > Devlog: entry added
   >
   > What would you like to do with the branch? (merge / pull-request / keep)"
 
@@ -480,7 +462,6 @@ CHECKLIST
   - [ ] audit scope=diff run and verdict ≠ fail before docs sync
   - [ ] TSDoc added to all new/modified exported symbols (TypeScript packages)
   - [ ] doc --mode update run after any public API change
-  - [ ] Devlog entry written
   - [ ] Branch finished (merge / PR / keep)
 
 ---
@@ -494,7 +475,6 @@ CHECKLIST
 | Skipping spec compliance for "simple" tasks | All tasks get spec compliance review — even small ones |
 | Forgetting test after implementation | Tests are the safety net; never skip |
 | Skipping doc for non-trivial changes | If a public API, command, or structure changed, docs must sync |
-| Skipping the devlog | Every completed change gets a devlog entry — this is the institutional memory |
 | Dispatching one sub-agent per task sequentially | Use batch+parallel pattern from references/sub-agent-dispatch.md — see decision table |
 | Sub-agent prompt says "based on our conversation…" | Always build an explicit MVC prompt — sub-agents must be self-contained |
 | Sub-agent prompt asks agent to "read CLAUDE.md" | Paste the relevant CLAUDE.md excerpt directly into the prompt |
@@ -503,5 +483,5 @@ CHECKLIST
 ## Integration
 
 - **Routes to:** `prog-expert-nuxt`, `prog-expert-omp`, `prog-expert-python`, `implement-supervised`
-- **Calls:** `git`, `test`, `audit`, `doc`, `devlog`, `notify`
+- **Calls:** `git`, `test`, `audit`, `doc`, `notify`
 - **Called by:** `skaile-development` or user directly

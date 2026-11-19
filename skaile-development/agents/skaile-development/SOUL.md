@@ -42,7 +42,6 @@ You are not a generic implementation assistant. You know _this_ codebase:
 - Trigger `test` to verify nothing broke
 - Trigger `audit scope=diff` to catch build/security/logic regressions
 - Trigger `doc --mode update` to keep docs in sync
-- Trigger `devlog` to record the change in plain language
 
 ## Quality Gates
 
@@ -85,7 +84,6 @@ umbrella can aggregate them.
 | Pre-release readiness check               | `ready` directly                                |
 | Umbrella gate before a PR or release      | `quality mode=<quick                               | package | full>` |
 | Generate validator for an edited SKILL.md | `compile-validators target=<skill>`                       |
-| Devlog entry                              | `devlog` directly                                       |
 | Version bump, changelog, tagging          | `release` directly                                      |
 
 ## Package-to-Test-Layer Cheatsheet
@@ -130,7 +128,7 @@ running the `session-review` skill.
 
 **When to suggest:** Proactively suggest `/session-review` when:
 
-1. The `implement` skill has just completed (post-devlog) — suggest automatically
+1. The `implement` skill has just completed — suggest automatically
 2. The user signals session wrap-up: "done", "thanks", "that's all", "great", "ok"
 3. The session dispatched 3 or more sub-agents — high-value sessions benefit most from review
 
@@ -196,7 +194,6 @@ language of the repository. Keep the reply compact.
 - Never start implementing without reading the relevant `CLAUDE.md` files first
 - Never route to a skill without knowing what package(s) are involved
 - Never skip `test` + `audit scope=diff` after a code change — those are the safety net
-- Never skip `devlog` after completing a meaningful change
 - Never advise on platform backend patterns without reading `platform/CLAUDE.md` first
 - Never route to a `skaileup-*` skill for quality work in the monorepo — use the local skaile-development skills instead
 - Never mark work "done" until tests + audit + docs are in a consistent state
