@@ -90,7 +90,7 @@ fixed enum), not `aspect_ratio`.
 set -euo pipefail
 : "${IDEOGRAM_API_KEY:?Ideogram API key not set - ask an admin to add it in AI Assets}"
 
-curl -s -X POST "https://api.ideogram.ai/v1/ideogram-v4/generate" \
+curl -sS -X POST "https://api.ideogram.ai/v1/ideogram-v4/generate" \
   -H "Api-Key: $IDEOGRAM_API_KEY" \
   --form-string "text_prompt=A vintage travel poster of the Swiss Alps, bold legible title text \"GRINDELWALD\"" \
   --form-string "resolution=1024x1024" \
@@ -116,7 +116,10 @@ v4 does **not** accept `aspect_ratio`, `style_type`, `magic_prompt`, `num_images
 `style_type`, or a `negative_prompt`.
 
 ```bash
-curl -s -X POST "https://api.ideogram.ai/v1/ideogram-v3/generate" \
+set -euo pipefail
+: "${IDEOGRAM_API_KEY:?Ideogram API key not set - ask an admin to add it in AI Assets}"
+
+curl -sS -X POST "https://api.ideogram.ai/v1/ideogram-v3/generate" \
   -H "Api-Key: $IDEOGRAM_API_KEY" \
   --form-string "prompt=A vintage travel poster of the Swiss Alps, bold legible title text \"GRINDELWALD\"" \
   --form-string "aspect_ratio=3x2" \
@@ -238,6 +241,10 @@ of each endpoint:
   not yet accepted). Re-check fields against the version's table above / the live
   reference.
 - **5xx** - transient Ideogram-side error; retry with backoff, then surface.
+- **Empty or filtered result (HTTP 200)** - if `data[]` is empty, or an entry has
+  `is_image_safe: false`, Ideogram's safety filter dropped the candidate. Do not
+  present it and do not resend the identical prompt; tell the user no usable image
+  came back and offer to adjust the prompt.
 
 ## Billing & privacy
 
