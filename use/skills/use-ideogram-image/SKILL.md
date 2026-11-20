@@ -90,9 +90,9 @@ set -euo pipefail
 
 curl -s -X POST "https://api.ideogram.ai/v1/ideogram-v4/generate" \
   -H "Api-Key: $IDEOGRAM_API_KEY" \
-  -F "text_prompt=A vintage travel poster of the Swiss Alps, bold legible title text \"GRINDELWALD\"" \
-  -F "resolution=1024x1024" \
-  -F "rendering_speed=DEFAULT" \
+  --form-string "text_prompt=A vintage travel poster of the Swiss Alps, bold legible title text \"GRINDELWALD\"" \
+  --form-string "resolution=1024x1024" \
+  --form-string "rendering_speed=DEFAULT" \
 | jq '.data[] | {url, resolution, seed, is_image_safe}'
 ```
 
@@ -116,11 +116,11 @@ v4 does **not** accept `aspect_ratio`, `style_type`, `magic_prompt`, `num_images
 ```bash
 curl -s -X POST "https://api.ideogram.ai/v1/ideogram-v3/generate" \
   -H "Api-Key: $IDEOGRAM_API_KEY" \
-  -F "prompt=A vintage travel poster of the Swiss Alps, bold legible title text \"GRINDELWALD\"" \
-  -F "aspect_ratio=3x2" \
-  -F "rendering_speed=DEFAULT" \
-  -F "style_type=DESIGN" \
-  -F "num_images=1" \
+  --form-string "prompt=A vintage travel poster of the Swiss Alps, bold legible title text \"GRINDELWALD\"" \
+  --form-string "aspect_ratio=3x2" \
+  --form-string "rendering_speed=DEFAULT" \
+  --form-string "style_type=DESIGN" \
+  --form-string "num_images=1" \
 | jq '.data[] | {url, resolution, seed, is_image_safe}'
 ```
 
@@ -135,7 +135,7 @@ curl -s -X POST "https://api.ideogram.ai/v1/ideogram-v3/generate" \
 | `num_images` | Optional, default `1` (1-8). Each image is a billed generation - keep small unless the user asks for options. |
 | `seed` | Optional integer for reproducibility. |
 | `negative_prompt` | Optional - what to avoid. |
-| `style_reference_images` | Optional multipart **file** fields to steer style (`-F "style_reference_images=@ref.png"`). |
+| `style_reference_images` | Optional multipart **file** fields to steer style (`-F "style_reference_images=@ref.png"`). Use `-F` only for file uploads; send text fields with `--form-string`, which never reads a value starting with `@` or `<` as a file. |
 
 The exact, authoritative field lists, enums and the full 2K resolution table live at
 <https://developer.ideogram.ai> (api-reference → "Generate with Ideogram 4.0" /
@@ -178,16 +178,20 @@ download anything the user wants to keep promptly.
    session workspace and reference the saved path:
 
    ```bash
-   url=$(curl -s -X POST "https://api.ideogram.ai/v1/ideogram-v4/generate" \
+   set -euo pipefail
+   : "${IDEOGRAM_API_KEY:?Ideogram API key not set - ask an admin to add it in AI Assets}"
+
+   url=$(curl -sS -X POST "https://api.ideogram.ai/v1/ideogram-v4/generate" \
      -H "Api-Key: $IDEOGRAM_API_KEY" \
-     -F "text_prompt=A vintage travel poster of the Swiss Alps" \
-     -F "resolution=1024x1024" | jq -r '.data[0].url')
-   mkdir -p outputs
-   curl -s "$url" -o outputs/alps-poster.png
+     --form-string "text_prompt=A vintage travel poster of the Swiss Alps" \
+     --form-string "resolution=1024x1024" | jq -r '.data[0].url // empty')
+   [ -n "$url" ] || { echo "Ideogram returned no image URL" >&2; exit 1; }
+   mkdir -p generated-images
+   curl -fsS "$url" -o generated-images/alps-poster.png
    ```
 
-   Then reference `outputs/alps-poster.png` (and you can still preview it inline with
-   `![...](outputs/alps-poster.png)`). Because hosted URLs expire, prefer saving when
+   Then reference `generated-images/alps-poster.png` (and you can still preview it
+   inline with `![...](generated-images/alps-poster.png)`). Because hosted URLs expire, prefer saving when
    the image needs to survive past the current turn.
 
 ## Other capabilities (brief)
