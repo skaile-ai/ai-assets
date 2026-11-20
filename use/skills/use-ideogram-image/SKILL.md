@@ -189,7 +189,8 @@ download anything the user wants to keep promptly.
    url=$(curl -sS -X POST "https://api.ideogram.ai/v1/ideogram-v4/generate" \
      -H "Api-Key: $IDEOGRAM_API_KEY" \
      --form-string "text_prompt=A vintage travel poster of the Swiss Alps" \
-     --form-string "resolution=1024x1024" | jq -r '.data[0].url // empty')
+     --form-string "resolution=1024x1024" \
+     | jq -r 'first(.data[] | select(.is_image_safe != false) | .url) // empty')
    [ -n "$url" ] || { echo "Ideogram returned no image URL" >&2; exit 1; }
    mkdir -p generated-images
    curl -fsS "$url" -o generated-images/alps-poster.png
