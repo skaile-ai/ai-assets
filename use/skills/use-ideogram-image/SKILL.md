@@ -8,6 +8,7 @@ auth:
   fields:
     - { key: apiKey, label: "Ideogram API key", secret: true }
 metadata:
+  version: "0.1.1"
   stage: "alpha"
   requires:
     - "contract:use-contract"
@@ -17,9 +18,10 @@ keywords:
   - ideogram
   - image
   - generation
+  - illustration
+  - poster
   - edit
   - upscale
-  - rest-api
 ---
 
 # Use Ideogram Image (REST API)
