@@ -105,7 +105,7 @@ The skaile CLI and platform consume these at **runtime** by reading SKILL.md fil
 
 ### Issue tracker
 
-Issues live as markdown files under `.scratch/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+Issues live in GitHub issues of `skaile-ai/ai-assets` (parent `plan` issues, `ready-for-agent` sub-issues). See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
