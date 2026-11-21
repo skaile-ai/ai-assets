@@ -1,7 +1,7 @@
 ---
 name: excel
 description: "A stateful, formula-aware Excel engine an agent can actually drive - not a file it has to parse by hand. Opens existing .xlsx/.xlsm/.xls workbooks (or creates new ones), password-encrypted .xlsx/.xlsm included, entirely in memory, then queries and richly edits them across a whole session without reloading: cell values, typed formulas, styling, conditional formatting, data validation, charts, merged regions, cell notes and threaded comments, sheet structure and outline grouping, rows and columns, table rows and columns, named ranges, sheet and workbook protection, and Power Query M - flushed to disk with an atomic, corruption-safe save. Its standout capability is headless recalculation: Apache POI evaluates ~280 Excel functions in place, so the agent works with real computed results instead of the stale cached zeros that code-based approaches (openpyxl/pandas, or Claude's built-in spreadsheet handling) leave behind - and every read distinguishes a genuine value from an as-yet-uncomputed formula. It can also review a model, not just write one: workbook.audit scans for hardcoded constants and hidden rows, and cell.trace walks precedents and dependents. Because all edits flow through one POI writer, it avoids the 'Excel repaired records' corruption a second serializer over the same file causes. A workbook too large to load can still be read: workbook.open's read-only stream mode pages through it in flat memory, and sheet.export writes a sheet out to CSV or JSON Lines in one pass. 79 tools across workbook lifecycle (incl. audit and stream mode), agent context, range I/O (incl. cell styling, conditional formats written and read back, data validation, formula tracing, formula-pattern search, and cell comments), sheet management (incl. merge/unmerge, sheet reordering, row paging, and CSV/JSON Lines export and import), presentation written and read back, print setup and outlining, row/column mutation, line and bar charts, tables (incl. adding, deleting and updating rows by key, and diffing two tables), named ranges, sheet and workbook protection, read-only VBA extraction and export, Power Query read and write, multi-call batching, and queues to a real-Excel worker (macros, Power Query and pivot refresh, real recalculation, .xlsb conversion)."
-version: 0.16.2 # mcp-catalog-version
+version: 0.17.0 # mcp-catalog-version
 transport: stdio
 # Start the JVM on the first tool call, not at session start.
 lazy: true
@@ -81,13 +81,16 @@ before the queue counts as stale; admins add `,liveness=SECONDS` to a queue in `
 
 **Setting up a worker** (no queue, or `no_worker`): first check whether a synced queue folder is
 already mounted in the session (a real directory, not a symlink); if so, just `queue.set` it. Otherwise the worker is a separate Python process on a
-Windows host with desktop Excel and an interactive login; there is no macOS or Linux worker. Guide the
-user: (1) copy `real-excel-worker/` from github.com/skaile-ai/excel-mcp to that host and install
-Python 3 and `pywin32`; (2) sync a SharePoint/OneDrive folder to it, set to always keep on the device
-(also on the server's side); (3) for macro jobs only, make the worker's `trusted_dir` (default
-`C:\spike-scratch\worker\trusted`) an Excel Trusted Location, Trust Center macros on "Disable all
-macros without notification"; (4) run `python worker.py --root <folder>` and leave it open.
-Then take the folder path as this server sees it, call `queue.set`, and `queue.list` until `ready`.
+Windows host with desktop Excel and an interactive login; there is no macOS or Linux worker. This
+server carries the worker: never send the user to GitHub for it. Guide the user: (1) on that host,
+install Python 3 and then `py -3 -m pip install pywin32`; (2) sync a SharePoint/OneDrive folder to it,
+set to always keep on the device (also on the server's side); (3) take the folder path as this
+server sees it and call `queue.set`, which places the worker in `worker-app/` there (`worker_app` in
+the result); (4) once `worker-app/` has appeared on the host, the user runs `worker-app\start-worker.cmd` in that folder on
+the host and leaves the window open; (5) for macro jobs only, make the worker's `trusted_dir`
+(default `C:\spike-scratch\worker\trusted`, or the one in `worker.json`; the worker window prints it as "macro folder") an Excel Trusted Location, Trust Center macros on
+"Disable all macros without notification". Then `queue.list` until `ready`. Later releases reach
+the host by themselves: a worker started that way switches, when idle, to the newer copy the server places in that same queue folder.
 
 ## Capabilities
 
