@@ -81,13 +81,16 @@ before the queue counts as stale; admins add `,liveness=SECONDS` to a queue in `
 
 **Setting up a worker** (no queue, or `no_worker`): first check whether a synced queue folder is
 already mounted in the session (a real directory, not a symlink); if so, just `queue.set` it. Otherwise the worker is a separate Python process on a
-Windows host with desktop Excel and an interactive login; there is no macOS or Linux worker. Guide the
-user: (1) copy `real-excel-worker/` from github.com/skaile-ai/excel-mcp to that host and install
-Python 3 and `pywin32`; (2) sync a SharePoint/OneDrive folder to it, set to always keep on the device
-(also on the server's side); (3) for macro jobs only, make the worker's `trusted_dir` (default
-`C:\spike-scratch\worker\trusted`) an Excel Trusted Location, Trust Center macros on "Disable all
-macros without notification"; (4) run `python worker.py --root <folder>` and leave it open.
-Then take the folder path as this server sees it, call `queue.set`, and `queue.list` until `ready`.
+Windows host with desktop Excel and an interactive login; there is no macOS or Linux worker. This
+server carries the worker: never send the user to GitHub for it. Guide the user: (1) on that host,
+install Python 3 and then `py -m pip install pywin32`; (2) sync a SharePoint/OneDrive folder to it,
+set to always keep on the device (also on the server's side); (3) take the folder path as this
+server sees it and call `queue.set`, which places the worker in `worker-app/` there (`worker_app` in
+the result); (4) once it has synced, the user runs `worker-app\start-worker.cmd` in that folder on
+the host and leaves the window open; (5) for macro jobs only, make the worker's `trusted_dir`
+(default `C:\spike-scratch\worker\trusted`) an Excel Trusted Location, Trust Center macros on
+"Disable all macros without notification". Then `queue.list` until `ready`. Later releases reach
+the host by themselves: a worker started that way switches to the newer copy when idle.
 
 ## Capabilities
 
