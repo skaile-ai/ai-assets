@@ -50,8 +50,9 @@ the record says "no candidate in skaile-inventory" for a need the index does not
 
 ## Superseded repos
 
-Fifteen single-package and app repos (mostly `forge-*`, plus `skaile-forge` and
-`skaile-model`) were imported into the `skaile-ai/forge` monorepo on 2026-11-09 and are frozen, without an archive flag or a README notice. A change to one of
+Fifteen single-package and app repos (mostly `forge-*`, plus `skaile-forge`
+and `skaile-model`) were imported into the `skaile-ai/forge` monorepo on
+2026-11-09 and are frozen, without an archive flag or a README notice. A change to one of
 those packages goes to `forge/packages/<name>` or `forge/apps/<name>`. The inventory's
 *Superseded and archived* section lists each repo and where it went.
 

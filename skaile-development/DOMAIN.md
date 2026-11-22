@@ -101,6 +101,8 @@ Reach for `skaile-development` when you are:
 | `review`      | Before committing or pushing — local quality/security review of changes                        |
 | `implement`        | Starting any non-trivial implementation task in the monorepo                                   |
 | `ship`             | Implement AND ship a work item end-to-end in any repo: GitHub issue, worktree, plan, implement, review, PR, babysit CI + reviews, squash-merge |
+| `meat`             | Reading a diff for comprehension before approving a merge or catching up on a branch           |
+| `issue-bar`        | Before filing an agent-found issue, or when triaging or sweeping a backlog                     |
 | `test`             | Running an existing test suite and triaging failures                                           |
 | `test-plan`        | Generating or refreshing a per-package `TEST_PLAN.md`                                          |
 | `test-unit`        | Setting up unit-test infra and generating unit tests for one package                           |
