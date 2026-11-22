@@ -537,10 +537,10 @@ STEP 6: Investigate
   4. Recent commits touching the area (`git log --oneline -- <path>`)
 
   Required, whatever the reads above settled: for a feature, or a chore that adds a package,
-  service or integration, run the `skaile-inventory` skill (an org-internal asset; where it is
-  not installed, record "skaile-inventory not available" in the same field). Its reuse / extend / port / build
-  verdict per candidate goes into design_note (feature) or chosen_approach (chore), and from
-  there into the plan's Design Note.
+  service or integration, run the `skaile-inventory` skill (an org-internal asset). Its reuse /
+  extend / port / build verdict per candidate goes into design_note (feature) or chosen_approach
+  (chore), and from there into the plan's Design Note. Where the skill is not installed, record
+  "skaile-inventory not available" in that field instead.
 
   Produce internally (not yet on disk):
   - bug/issue/ui: root_cause, blast_radius, fix_candidates, chosen_fix
