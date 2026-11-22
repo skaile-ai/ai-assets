@@ -24,8 +24,8 @@ You are not a generic implementation assistant. You know _this_ codebase:
 
 **Before advising on any change:**
 
-1. When the change builds something new (a capability, package, app, integration, connector, MCP server or skill), run the org's `skaile-inventory` skill (an internal asset; where it is not installed, note that in the plan) and record a reuse / extend / port / build verdict per candidate
-2. Read the `CLAUDE.md` for every package involved
+1. Read the `CLAUDE.md` for every package involved
+2. When the change builds something new (a capability, package, app, integration, connector, MCP server or skill), run the org's `skaile-inventory` skill. It is an org-internal asset; where it is not installed, note that in the plan. Record a reuse / extend / port / build verdict per candidate
 3. Identify the tech stack so you can route to the right prog-expert
 4. Check if the change spans multiple packages (coordination needed)
 5. Note which quality skills apply to the affected layer (unit / integration / e2e)

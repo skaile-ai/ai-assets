@@ -239,6 +239,8 @@ READS
   gh label list / gh issue list / gh pr ...       — labels, dup detection, PR + CI + review state
   references/<repo>.md (this skill)               — repo-specific profile facts, when the file exists
                                                     (today: references/platform.md)
+  skaile-inventory skill (org-internal)          — STEP 6 reuse check for a feature or a package/service/integration
+                                                    chore; optional to have installed, never optional to attempt
   scripts/babysit-poll.sh (this skill)            — the Phase 12 poll: reads `gh pr view`, the pulls/ and issues/ comment
                                                     endpoints and `gh api user`; keeps its state in a per-PR dir
 
@@ -262,6 +264,7 @@ MUST  read `references/<repo>.md` beside this skill when it exists for the targe
 MUST  respect each repo's formatter: platform and store = Prettier + ESLint (NEVER Biome); workspaces = Biome; defer to the repo's CLAUDE.md + package.json scripts when unsure
 MUST  refine the user's description before filing it — 1-3 sentences for bug/issue/ui/chore (up to 5 short for features), technical and specific, no marketing fluff
 MUST  auto-classify the category without asking; the `category` input only overrides
+MUST  in STEP 6, for a feature or a chore that adds a package, service or integration, run the `skaile-inventory` skill and put its reuse / extend / port / build verdicts in design_note (feature) or chosen_approach (chore); where it is not installed, record "skaile-inventory not available" there instead
 MUST  open the work item as a GitHub issue on the target repo (or reuse `issue`), capturing the **number** and URL; apply the category label if it exists in the repo, plus `agent`; assign `@me`
 MUST  derive the work item's identity from the GitHub issue **number** (`#<n>`) for branch, commit reference, and PR
 MUST  open the issue BEFORE the worktree (branch name needs the number) but AFTER the clean-tree pre-flight (so a dirty tree never leaves a dangling issue)
@@ -535,7 +538,7 @@ STEP 6: Investigate
 
   Required, whatever the reads above settled: for a feature, or a chore that adds a package,
   service or integration, run the `skaile-inventory` skill (an org-internal asset; where it is
-  not installed, record "skaile-inventory not available"). Its reuse / extend / port / build
+  not installed, record "skaile-inventory not available" in the same field). Its reuse / extend / port / build
   verdict per candidate goes into design_note (feature) or chosen_approach (chore), and from
   there into the plan's Design Note.
 

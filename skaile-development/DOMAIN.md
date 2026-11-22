@@ -200,6 +200,11 @@ The `sync-docs` skill repairs cross-references between tiers.
 
 ## Relationship to Other Domains
 
+The domain uses one skill it does not ship: `skaile-inventory`, the org-internal index of what
+the Skaile org already has. `ship` STEP 6 and the agent's `SOUL.md` call it before building
+something new. It comes from the Skaile org's own asset setup; ask an org admin for it. Where it
+is missing, both record that it was not available and carry on.
+
 - **skaileup-implementation**: Builds apps _using_ skaile (consumes `_concept/`). This domain is for the skaile codebase itself.
 - **skaileup-evaluate**: Full QA pipeline for generated apps (concept-driven). `skaile-development` borrows its _patterns_ (sub-agent audits, readiness gates, sync) but does **not** depend on any skaileup-\* skill at runtime — all functionality is copied locally and adapted to the monorepo.
 - **skaileup-shared**: Shared contracts referenced by all domains.
