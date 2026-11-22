@@ -16,7 +16,7 @@ description: >-
   existing code, for plans or design proposals, for filing an issue when implementation is
   explicitly deferred, for throwaway local experiments, or for work spanning several
   repositories.
-version: 1.10.1
+version: 1.11.1
 metadata:
   tags:
   - "ship"
@@ -532,6 +532,12 @@ STEP 6: Investigate
   2. The exact file(s) the user named
   3. Adjacent files along the data flow
   4. Recent commits touching the area (`git log --oneline -- <path>`)
+
+  Required, whatever the reads above settled: for a feature, or a chore that adds a package,
+  service or integration, run the `skaile-inventory` skill (an org-internal asset; where it is
+  not installed, record "skaile-inventory not available"). Its reuse / extend / port / build
+  verdict per candidate goes into design_note (feature) or chosen_approach (chore), and from
+  there into the plan's Design Note.
 
   Produce internally (not yet on disk):
   - bug/issue/ui: root_cause, blast_radius, fix_candidates, chosen_fix

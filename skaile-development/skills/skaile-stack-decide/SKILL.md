@@ -62,7 +62,8 @@ Trigger on questions like:
 - "Should we use PostXL for this admin tool?"
 - "Where in the skaile-dev monorepo does this idea live?"
 - "Platform skills+flows or a standalone forge app?"
-- "What's already on the shelf for X?" (mounts, connectors, MCP, skills)
+- "What's already on the shelf for X?" -- answer with the `skaile-inventory` skill where
+  installed (the org-internal index); this skill's packs explain the stacks, not what each repo holds
 - "Walk me through the trade-offs between PostXL alone and the Skaile platform."
 
 Skip when the user has a concrete code-level task that does not require
