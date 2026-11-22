@@ -177,6 +177,10 @@ settings manager).
 
 ## 5. Capability Inventory (what's already on the shelf)
 
+> Superseded for "does it exist?" questions by the `skaile-inventory` skill, which covers
+> every repo in the skaile-ai org, including the `forge` monorepo. Paths below name the
+> pre-split layout (`agent-framework/`, `ai-assets-skaile/`); read them as history.
+
 Use this as the "do I need to build it?" checklist. If a capability appears
 here, you reuse it; you don't reimplement it.
 

@@ -1,6 +1,6 @@
 publisher: skaile-ai
 name: skaile-development
-version: 1.1.0
+version: 1.2.0
 description: Day-to-day skaile-dev workflow — git ops, implementation, tests, docs, notifications, FAQ, and releases
 items:
   - ref: skill:@skaile-ai/git
@@ -8,6 +8,7 @@ items:
   - ref: skill:@skaile-ai/ship
   - ref: skill:@skaile-ai/meat
   - ref: skill:@skaile-ai/issue-bar
+  - ref: skill:@skaile-ai/skaile-inventory
   - ref: skill:@skaile-ai/test
   - ref: skill:@skaile-ai/e2e-platform
   - ref: skill:@skaile-ai/doc

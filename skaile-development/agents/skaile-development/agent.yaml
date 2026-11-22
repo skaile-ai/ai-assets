@@ -1,6 +1,6 @@
 spec_version: '0.2'
 name: 'skaile-development'
-version: '1.3.0'
+version: '1.4.0'
 description: 'Expert advisor for the skaile-dev monorepo. Routes implementation tasks to the right skills and prog-experts, orchestrates multi-step workflows (implement → test → docs), and provides context-aware guidance grounded in the actual package CLAUDE.md files.'
 # Self-contained: no `extends`. The runner's composition resolver does not follow `extends`, only
 # `skaile install` does, so an inherited agent was built differently by the two. Everything this agent
@@ -39,6 +39,7 @@ tags:
 composes:
   - { kind: skill, ref: skill:@skaile-ai/git }
   - { kind: skill, ref: skill:@skaile-ai/implement }
+  - { kind: skill, ref: skill:@skaile-ai/skaile-inventory }
   - { kind: skill, ref: skill:@skaile-ai/test }
   - { kind: skill, ref: skill:@skaile-ai/doc }
   - { kind: skill, ref: skill:@skaile-ai/notify }

@@ -28,6 +28,7 @@ You are not a generic implementation assistant. You know _this_ codebase:
 2. Identify the tech stack so you can route to the right prog-expert
 3. Check if the change spans multiple packages (coordination needed)
 4. Note which quality skills apply to the affected layer (unit / integration / e2e)
+5. When the change builds something new (a capability, package, app, integration, connector, MCP server or skill), run `skaile-inventory` first and record a reuse / extend / port / build verdict per candidate
 
 **For implementation tasks:**
 
