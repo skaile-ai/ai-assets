@@ -4,7 +4,7 @@ description: 'Day-to-day development workflow for the standalone skaile repos (p
 type: domain
 building_blocks:
   agents: 'skaile-development — routes tasks to the right skills, maintains session context.'
-  skills: 'git, implement, ship, meat, issue-bar, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, e2e-platform, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, jenkins-debug, session-review, session-analysis, verify-ui'
+  skills: 'git, implement, ship, meat, issue-bar, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, e2e-platform, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, jenkins-debug, session-review, session-analysis, verify-ui, skaile-stack-decide, postxl, component-builder, good-morning, migrate-skaile-manifest'
   references: 'Branch naming, worktree patterns, test stack map, audit checklists, readiness criteria, devlog entry formats, documentation tier roles, commit spec.'
 stage: beta
 ---
@@ -81,6 +81,11 @@ Reach for `skaile-development` when you are:
 | `skills/session-review/`           | `session-review` — end-of-session analysis: token usage, cost, workflow adherence, optimization tips                    |
 | `skills/session-analysis/`         | `session-analysis` — session pattern analysis and workflow optimization recommendations                                |
 | `skills/verify-ui/`                | `verify-ui` — UI verification and visual regression checks                                                             |
+| `skills/skaile-stack-decide/`      | `skaile-stack-decide` — whether and how to build: pick the stack and seams for new work                                  |
+| `skills/postxl/`                   | `postxl` — create, build or extend a PostXL-generated app (schema, regenerate, custom blocks)                            |
+| `skills/component-builder/`        | `component-builder` — scaffold a dynamic web component for the agent UI                                                 |
+| `skills/good-morning/`             | `good-morning` — morning startup ritual for a skaile dev session                                                         |
+| `skills/migrate-skaile-manifest/`  | `migrate-skaile-manifest` — migrate a schema 4.x `skaile.yaml` to the canonical-identity shape                           |
 | `references/doc_tiers.md`          | Five-tier documentation role table                                                                                                |
 | `references/test_stack_map.md`     | Repo → framework + run-command quick map (the target repo's `CLAUDE.md` wins on conflict)                                          |
 | `references/audit_checklists.md`   | Logic / security / UI-UX checklists per sub-agent                                                                                 |
@@ -95,6 +100,8 @@ Reach for `skaile-development` when you are:
 | `review`      | Before committing or pushing — local quality/security review of changes                        |
 | `implement`        | Starting any non-trivial implementation task in the monorepo                                   |
 | `ship`             | Implement AND ship a work item end-to-end in any repo: GitHub issue, worktree, plan, implement, review, PR, babysit CI + reviews, squash-merge |
+| `meat`             | Reading a diff for comprehension before approving a merge or catching up on a branch           |
+| `issue-bar`        | Before filing an agent-found issue, or when triaging or sweeping a backlog                     |
 | `test`             | Running an existing test suite and triaging failures                                           |
 | `test-plan`        | Generating or refreshing a per-package `TEST_PLAN.md`                                          |
 | `test-unit`        | Setting up unit-test infra and generating unit tests for one package                           |
@@ -116,6 +123,11 @@ Reach for `skaile-development` when you are:
 | `session-review`    | At the end of an implementation session — token cost, workflow grade, and improvement tips     |
 | `session-analysis` | Session pattern analysis and workflow optimization recommendations                             |
 | `verify-ui`        | UI verification and visual regression checks                                                   |
+| `skaile-stack-decide` | Deciding whether and how to build something new, and on which stack                          |
+| `postxl`           | Working on a PostXL-generated app (platform, store backend, new apps)                          |
+| `component-builder` | Scaffolding a new dynamic web component for the agent UI                                      |
+| `good-morning`     | Starting the working day in a skaile dev session                                               |
+| `migrate-skaile-manifest` | Migrating a legacy schema 4.x `skaile.yaml`                                             |
 
 ## Quality Gates
 
@@ -195,6 +207,10 @@ The `sync-docs` skill repairs cross-references between tiers.
 
 ## Notes
 
+- **`skaile-inventory` is used, not shipped.** It is the org-internal index of what the Skaile org
+  already has, and it is not published to the store. `ship` STEP 6 and the agent's `SOUL.md` call
+  it before building something new; an org admin provides it. Where it is missing, both record
+  that it was not available and carry on.
 - The `skaile-development` agent orchestrates multi-skill workflows. For single-skill operations, call skills directly.
 - `devlog` is not part of the `skaile-development` preset or the agent, and `implement` does not run it; `doc`, `test` and `jenkins-debug` call it only when the dev log tier applies (`references/doc_tiers.md`, tier 5): the skill is available and the repo has not retired `_devlog/entries/` (platform has).
 - Skills in this domain read `CLAUDE.md` files from affected packages before acting.
