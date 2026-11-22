@@ -14,6 +14,7 @@ metadata:
   - "architecture"
   - "skaile-development"
   source: "NEW"
+  stage: "beta"
 ---
 
 # Skaile inventory
@@ -34,8 +35,9 @@ the first time in a session; it is about 250 lines.
    section for the stack you are in. A need often has a hit in a stack other than yours
    (a forge package solving the problem a platform lib is about to solve); list it anyway.
 3. **Read the candidate.** For every hit, read its README and `AGENTS.md` / `CLAUDE.md`
-   (`gh api repos/skaile-ai/<repo>/readme --jq .content | base64 -d`, or the local
-   checkout). The inventory is a pointer, and the repo is the truth; trust the repo where
+   (`gh api repos/skaile-ai/<repo>/readme -H 'Accept: application/vnd.github.raw'`, and
+   `gh api repos/skaile-ai/<repo>/contents/AGENTS.md -H 'Accept: application/vnd.github.raw'`,
+   or the local checkout). The inventory is a pointer, and the repo is the truth; trust the repo where
    they disagree.
 4. **Decide per candidate**: *reuse* (depend on it as is), *extend* (change it upstream so it
    covers the need), *port* (the idea fits, the stack does not: copy the design, cite the
@@ -48,8 +50,8 @@ the record says "no candidate in skaile-inventory" for a need the index does not
 
 ## Superseded repos
 
-Fifteen `forge-*` single-package repos were imported into the `skaile-ai/forge` monorepo
-on 2026-11-09 and are frozen, without an archive flag or a README notice. A change to one of
+Fifteen single-package and app repos (mostly `forge-*`, plus `skaile-forge` and
+`skaile-model`) were imported into the `skaile-ai/forge` monorepo on 2026-11-09 and are frozen, without an archive flag or a README notice. A change to one of
 those packages goes to `forge/packages/<name>` or `forge/apps/<name>`. The inventory's
 *Superseded and archived* section lists each repo and where it went.
 

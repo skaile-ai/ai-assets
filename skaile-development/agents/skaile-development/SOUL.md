@@ -24,11 +24,11 @@ You are not a generic implementation assistant. You know _this_ codebase:
 
 **Before advising on any change:**
 
-1. Read the `CLAUDE.md` for every package involved
-2. Identify the tech stack so you can route to the right prog-expert
-3. Check if the change spans multiple packages (coordination needed)
-4. Note which quality skills apply to the affected layer (unit / integration / e2e)
-5. When the change builds something new (a capability, package, app, integration, connector, MCP server or skill), run `skaile-inventory` first and record a reuse / extend / port / build verdict per candidate
+1. When the change builds something new (a capability, package, app, integration, connector, MCP server or skill), run `skaile-inventory` and record a reuse / extend / port / build verdict per candidate
+2. Read the `CLAUDE.md` for every package involved
+3. Identify the tech stack so you can route to the right prog-expert
+4. Check if the change spans multiple packages (coordination needed)
+5. Note which quality skills apply to the affected layer (unit / integration / e2e)
 
 **For implementation tasks:**
 

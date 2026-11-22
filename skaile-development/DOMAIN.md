@@ -4,7 +4,7 @@ description: 'Day-to-day development workflow for the standalone skaile repos (p
 type: domain
 building_blocks:
   agents: 'skaile-development — routes tasks to the right skills, maintains session context.'
-  skills: 'git, implement, ship, meat, issue-bar, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, e2e-platform, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, jenkins-debug, session-review, session-analysis, verify-ui'
+  skills: 'git, implement, ship, meat, issue-bar, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, e2e-platform, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, jenkins-debug, session-review, session-analysis, verify-ui, skaile-inventory, skaile-stack-decide, postxl, component-builder, good-morning, migrate-skaile-manifest'
   references: 'Branch naming, worktree patterns, test stack map, audit checklists, readiness criteria, devlog entry formats, documentation tier roles, commit spec.'
 stage: beta
 ---
@@ -81,6 +81,12 @@ Reach for `skaile-development` when you are:
 | `skills/session-review/`           | `session-review` — end-of-session analysis: token usage, cost, workflow adherence, optimization tips                    |
 | `skills/session-analysis/`         | `session-analysis` — session pattern analysis and workflow optimization recommendations                                |
 | `skills/verify-ui/`                | `verify-ui` — UI verification and visual regression checks                                                             |
+| `skills/skaile-inventory/`         | `skaile-inventory` — index of what exists across the skaile-ai org; reuse / extend / port / build verdict before building |
+| `skills/skaile-stack-decide/`      | `skaile-stack-decide` — whether and how to build: pick the stack and seams for new work                                  |
+| `skills/postxl/`                   | `postxl` — create, build or extend a PostXL-generated app (schema, regenerate, custom blocks)                            |
+| `skills/component-builder/`        | `component-builder` — scaffold a dynamic web component for the agent UI                                                 |
+| `skills/good-morning/`             | `good-morning` — morning startup ritual for a skaile dev session                                                         |
+| `skills/migrate-skaile-manifest/`  | `migrate-skaile-manifest` — migrate a schema 4.x `skaile.yaml` to the canonical-identity shape                           |
 | `references/doc_tiers.md`          | Five-tier documentation role table                                                                                                |
 | `references/test_stack_map.md`     | Repo → framework + run-command quick map (the target repo's `CLAUDE.md` wins on conflict)                                          |
 | `references/audit_checklists.md`   | Logic / security / UI-UX checklists per sub-agent                                                                                 |
@@ -116,6 +122,12 @@ Reach for `skaile-development` when you are:
 | `session-review`    | At the end of an implementation session — token cost, workflow grade, and improvement tips     |
 | `session-analysis` | Session pattern analysis and workflow optimization recommendations                             |
 | `verify-ui`        | UI verification and visual regression checks                                                   |
+| `skaile-inventory` | Before building a new capability, package, integration, connector, MCP server or skill          |
+| `skaile-stack-decide` | Deciding whether and how to build something new, and on which stack                          |
+| `postxl`           | Working on a PostXL-generated app (platform, store backend, new apps)                          |
+| `component-builder` | Scaffolding a new dynamic web component for the agent UI                                      |
+| `good-morning`     | Starting the working day in a skaile dev session                                               |
+| `migrate-skaile-manifest` | Migrating a legacy schema 4.x `skaile.yaml`                                             |
 
 ## Quality Gates
 
