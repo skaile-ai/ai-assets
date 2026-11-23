@@ -16,7 +16,7 @@ description: >-
   existing code, for plans or design proposals, for filing an issue when implementation is
   explicitly deferred, for throwaway local experiments, or for work spanning several
   repositories.
-version: 1.11.1
+version: 1.11.2
 metadata:
   tags:
   - "ship"
@@ -298,7 +298,7 @@ NEVER  remove the worktree or delete a branch before Phase 13 — fixes during b
 NEVER  open a PR before the branch is pushed
 NEVER  force-push, rewrite history, or commit to the repo's main from inside the worktree
 NEVER  run `git stash` in a repo that may have sibling worktrees — the stash is shared by the whole repository, not one worktree, and a `git stash pop` once applied another session's `stash@{0}` into a ship worktree
-NEVER  discard edits with `git checkout -- <path>`: it restores from the index, which a background auto-commit may already hold the bad content in. Use `git restore --source=HEAD --staged --worktree <paths>`. (`git checkout --ours/--theirs <file>` while resolving a STEP 11b merge conflict is a different operation and stays allowed.)
+NEVER  discard edits with `git checkout -- <path>`: it restores from the index, which a platform commit may already hold the bad content in. In a Skaile session the platform commits when the session hibernates or closes, onto the session's own `session/<slug>` branch (`session/main` for the main session); in an organization with Git session branches switched off it also auto-commits after an idle pause. Use `git restore --source=HEAD --staged --worktree <paths>`. (`git checkout --ours/--theirs <file>` while resolving a STEP 11b merge conflict is a different operation and stays allowed.)
 NEVER  stash, commit, revert, format or otherwise touch a path listed in `allowed_dirty`
 NEVER  start fixing problems that are out of the change's scope (broken CI architecture, pre-existing failures, unrelated tech debt) — report them instead
 
@@ -1465,7 +1465,7 @@ CHECKLIST
 | Proposing follow-ups after the merge | Sweep in Phase 12b, before the gate. A follow-up proposed after the merge is a follow-up nobody files. |
 | Fixing unrelated/pre-existing/architectural problems during babysitting | Report them; don't fix. Scope is this change. (Fix our lint; don't rebuild a broken CI pipeline.) |
 | Telling the user to stash a dirty checkout | The stash is shared by every worktree of the repo; a `git stash pop` once applied another session's stash into a ship worktree. Commit the changes, or leave them and pass the paths in `allowed_dirty`. |
-| Undoing your own edit with `git checkout -- <path>` | It restores from the index, which an auto-commit may already hold the bad content in. Use `git restore --source=HEAD --staged --worktree <paths>`. |
+| Undoing your own edit with `git checkout -- <path>` | It restores from the index, which a platform commit (at hibernate or close, or an idle auto-commit where Git session branches are off) may already hold the bad content in. Use `git restore --source=HEAD --staged --worktree <paths>`. |
 | Opening a second branch for an issue that is already closed | STEP 3b checks merged PRs too. If the fix is on main, the ship is a no-op: report the merged PR and its deploy state. |
 | Reporting "merged" as if it were live | Merged is not deployed. Say what release step the change still waits for (the profile reference names it). |
 | Chasing a known flaky CI signature | Check the profile reference. If the failing file is outside the diff and a sibling PR on the same base passed the same job, it is a flake: record it, do not fix it. |
