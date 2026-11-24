@@ -222,14 +222,9 @@ on the default branch gets the same report plus "needs a hand close".
 
 **Otherwise:**
 
-- With an `issue` input: reuse it. Self-assign and add the `agent` and `in-progress`
-  labels where the repo has them. If it carries a queue label (the profile reference
-  names them), never remove that label. If a sign of work in progress that the profile
-  lists is present, another runner builds it: stop and report (gate 11), or, when you
-  chose the issue yourself, choose another. Otherwise continue, and say in the PR that
-  the issue is queued.
+- With an `issue` input: reuse it (see "Reusing an issue" below).
 - Without one: search open issues for two or three key terms. A clear duplicate is
-  reused. Else refine the description (one to three sentences: the surface, observed
+  reused (see below). Else refine the description (one to three sentences: the surface, observed
   against expected or the new behaviour, the person's constraints kept verbatim), derive
   an imperative title of at most 72 characters, and create the issue:
 
@@ -241,6 +236,13 @@ on the default branch gets the same report plus "needs a hand close".
   work, plus `agent`. A label the repo lacks makes the command fail.
 
 Print: `Opened #<n> - <url>.`
+
+**Reusing an issue** (an input, a duplicate, or one you chose): check first whether
+another runner builds it, from the signs of work in progress the profile reference
+lists. If one is present, stop and report (gate 11); when you chose the issue yourself,
+choose another instead. Otherwise self-assign and add the `agent` and `in-progress`
+labels where the repo has them. Never remove a queue label (the profile reference names
+them); if one is present, say in the PR that the issue is queued.
 
 ## 4. Worktree and branch
 
