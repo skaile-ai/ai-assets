@@ -136,9 +136,14 @@ table disagree, it wins.
 |---|---|---|
 | 0 | green | merge now, with the printed SHA |
 | 1 | red; it names the failed jobs | fix the branch; do not merge |
-| 3 | timed out; the run it printed still goes | watch that run; do not start a second one. On its green, merge with the `<head>` of its `testing <base>..<head>` line, and only while `main` is still at that `<base>` (`git ls-remote origin refs/heads/main`); else run the check again |
-| 4 | could not start (closed or conflicting PR, a PR from a forked repository, lagging merge ref) | read the message: reopen the PR or resolve its conflict; on a lagging merge ref wait and run the check again; a PR from a forked repository is a person's call |
+| 3 | timed out; the run it dispatched still goes | do not start a second run. Follow the hint in the message: `gh run watch <id>`, and merge on that run's green only while `main` is still at the `<base>` the message names (`git ls-remote origin refs/heads/main`); else run the check again. Merge with the PR head: the last SHA inside the parentheses of the `testing <base>..<head> (...)` line. The `<head>` before the parentheses is the merge commit, not the PR head |
+| 4 | no result (a closed or merged PR, a conflict, a PR from a forked repository, a dispatch or a read that failed) | do not merge; read the message. A PR from a forked repository is a person's call |
 | 6 | green, but `main` moved past the tested tip | run the check again |
+
+Everything except the SHA goes to stderr, so the messages stay visible through the
+command substitution. A shell tool that ends the script early (a time limit, exit 129,
+130 or 143) leaves the run going, as exit 3 does: run the script in the background
+when the tool has a limit, and treat an early end like exit 3.
 
 ## Merged is not deployed (step 3, step 13)
 
