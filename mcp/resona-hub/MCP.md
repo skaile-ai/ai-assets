@@ -10,7 +10,7 @@ description: "Use when an agent needs a private audio transcription, a document
   workers, private by default, so no external AI provider sees the content. The
   bearer token is an organization-bound Resona client token: the hub derives the
   organization from it, and one organization's jobs are invisible to another's."
-version: 0.2.2 # mcp-catalog-version
+version: 0.2.4 # mcp-catalog-version
 transport: http
 url: https://resona.ecsplico.de/mcp
 auth:
