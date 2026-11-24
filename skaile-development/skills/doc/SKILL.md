@@ -30,17 +30,17 @@ metadata:
       prompt: "Target files or topic for write mode"
       description: "Source files to document or topic to write about (write mode only)"
     reads:
-    - docs/
-    - "*/README.md"
-    - "*/CLAUDE.md"
-    - ai-assets/**/DOMAIN.md
-    - ai-assets/**/SKILL.md
+    - path: "docs/"
+    - path: "*/README.md"
+    - path: "*/CLAUDE.md"
+    - path: "ai-assets/**/DOMAIN.md"
+    - path: "ai-assets/**/SKILL.md"
     produces:
-    - docs/src/content/docs/**/*.md
-    - "*/README.md"
-    - "*/CLAUDE.md"
-    - ai-assets/**/DOMAIN.md
-    - ai-assets/**/SKILL.md
+    - path: "docs/src/content/docs/**/*.md"
+    - path: "*/README.md"
+    - path: "*/CLAUDE.md"
+    - path: "ai-assets/**/DOMAIN.md"
+    - path: "ai-assets/**/SKILL.md"
 ---
 
 # doc — Skaile Dev Documentation Skill
