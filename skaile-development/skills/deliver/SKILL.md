@@ -223,8 +223,10 @@ on the default branch gets the same report plus "needs a hand close".
 **Otherwise:**
 
 - With an `issue` input: reuse it. Self-assign and add the `agent` and `in-progress`
-  labels where the repo has them. Remove a label that queues the issue for another
-  runner (the profile reference names it), so no second agent builds it.
+  labels where the repo has them. If it carries a queue label (the profile reference
+  names them), another runner may build it too: never remove that label, check the
+  signs of work in progress the profile lists, and say in the PR that the issue is
+  queued. When you choose an issue yourself, prefer one with no queue label.
 - Without one: search open issues for two or three key terms. A clear duplicate is
   reused. Else refine the description (one to three sentences: the surface, observed
   against expected or the new behaviour, the person's constraints kept verbatim), derive
@@ -246,6 +248,8 @@ git -C <repo_path> worktree prune
 git -C <repo_path> worktree add <repos_root>/.worktrees/<repo>-<n> \
     -b <prefix>/<n>-<slug> origin/<default_branch>
 ```
+
+That path is `<worktree>` for every later step.
 
 `<prefix>` is `fix`, `feat` or `chore`; `<slug>` is up to 40 characters of concrete
 nouns. The worktree sits beside the clone, never inside it. Then, from inside the
@@ -273,6 +277,9 @@ Then size the work:
 |---|---|---|
 | `small` | The fix is known, touches at most 2 files and about 30 lines, and needs no design choice | You read the diff once; no review subagent |
 | `standard` | Everything else | A fresh subagent reviews the diff (step 7) |
+
+A run that cannot spawn subagents treats both sizes the same: it reads the diff once,
+and the PR's review bot is the independent reviewer.
 
 Print: `Sized as <size>: <one-line cause or design>.`
 

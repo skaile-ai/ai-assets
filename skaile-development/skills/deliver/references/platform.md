@@ -4,10 +4,17 @@ Facts that apply only when the target repo is platform. `SKILL.md` stays repo-ag
 and points here. Every item below already cost a real run. When this file and the
 platform repo's own `AGENTS.md` disagree, the repo wins: fix this file.
 
-## Queue label (step 3)
+## Queue labels (step 3)
 
-`skaile-queued` puts an issue in the cloud agent queue. Remove it when you claim the
-issue: `gh issue edit <n> --remove-label skaile-queued`.
+| Label | Meaning |
+|---|---|
+| `skaile-queued` | Enqueued in the auto-ship run group |
+| `ship:local` | Queued for the local ship loop |
+
+Never remove one. `skaile-queued` is also the filter of the reconcile cron: every 30
+minutes it enqueues each open issue that lacks the label, so a removal queues the issue
+again. Signs that another runner already works on it: an open PR for the issue, the
+label `ship:local-claimed` or `status:shipping`, or another worktree for it.
 
 ## A fresh worktree (step 4)
 
@@ -69,18 +76,23 @@ A doc you decline is a marker in that same changeset, which CI reads:
 
 ## Pre-push checks (step 8)
 
-Lint is Oxlint and the formatter is Oxfmt (no Prettier, no ESLint, no Biome). For the
-changed files run what the pre-push hook runs:
+Lint is Oxlint and the formatter is Oxfmt (no Prettier, no ESLint, no Biome). Oxfmt
+covers `.ts` and `.tsx` files only.
+
+A worktree that sits inside a directory which ignores `.worktrees/` (the old `skaile-dev`
+shell does) makes the file-based checks match nothing, and they then report success:
+`oxfmt --check <files>` prints `Expected at least one target file`, and
+`node scripts/pre-push-lint.mjs --files <paths>` passes, because it calls oxfmt with
+`--no-error-on-unmatched-pattern`. So check each changed `.ts` / `.tsx` file through
+stdin, and lint the files directly:
 
 ```bash
-node scripts/pre-push-lint.mjs --files <paths>   # oxfmt --check + oxlint, by slice
+diff <(bunx oxfmt --stdin-filepath=<file> < <file>) <file>   # no output = formatted
+bunx oxlint -c .oxlintrc.json <files>                         # no output = clean
 ```
 
-A direct `bunx oxfmt --check <files>` in a worktree that sits inside a directory
-ignoring `.worktrees/` prints `Expected at least one target file` and checks nothing.
-That is not a clean result. Check each file through stdin instead; no output means the
-file is formatted:
-`diff <(bunx oxfmt --stdin-filepath=<file> < <file>) <file>`
+A `diff` that prints the whole file means oxfmt failed (read its stderr). An oxlint
+output of `No files found to lint` means it checked nothing.
 
 In addition to lint and the affected tests:
 
