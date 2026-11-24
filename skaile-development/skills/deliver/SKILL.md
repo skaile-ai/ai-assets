@@ -17,7 +17,7 @@ description: >-
   diagnosis or code explanation, for reviewing someone else's existing code, for plans or
   design proposals, for filing an issue when implementation is explicitly deferred, for
   throwaway local experiments, or for work spanning several repositories.
-version: 2.0.1
+version: 2.0.2
 metadata:
   tags:
   - "deliver"

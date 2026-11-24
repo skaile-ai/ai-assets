@@ -128,15 +128,11 @@ sha=$(scripts/pre-merge-fresh-check.sh <pr>)    # can run longer than 10 minutes
 gh pr merge <pr> --squash --match-head-commit "$sha" ...
 ```
 
-Merge only on exit 0, and at once: stdout is the full head SHA it tested.
-
-| Exit | Meaning |
-|---|---|
-| 0 | green: merge now |
-| 1 | red: do not merge; it names the failed jobs |
-| 3 | timed out; the run still goes: wait and run it again |
-| 4 | could not start (closed or conflicting PR, lagging merge ref) |
-| 6 | green, but `main` moved since: run it again |
+Merge only on exit 0, and at once: stdout is the full head SHA it tested. For every
+other exit code follow the platform `AGENTS.md` ("Commits and PRs"), which is the
+authority. In short: 1 is red, fix the branch; 3 means the run still goes, so watch the
+printed run and do not start a second one; 4 says why it could not start; 6 was green
+but `main` moved, so run it again.
 
 ## Merged is not deployed (step 3, step 13)
 
