@@ -196,27 +196,20 @@ person commits them or passes them in `allowed_dirty`. The worktree branches off
 `gh issue view <n> --json closedByPullRequestsReferences` and, as a fallback,
 `gh pr list --search "<n> in:body" --state open`): resume it. Several open PRs: ask
 which one. Take the branch from the PR and the issue `<n>` from the PR's closing
-references. Reuse the worktree an earlier run kept for that branch; add one only when
-there is none. Then go to step 9:
+references. Then find the worktree for the branch, in this order:
 
-```bash
-git -C <repo_path> worktree prune
-git -C <repo_path> fetch origin <branch>
-wt=$(git -C <repo_path> worktree list --porcelain \
-      | awk -v b="branch refs/heads/<branch>" '/^worktree /{p=substr($0,10)} $0==b{print p}')
-if [ -z "$wt" ]; then
-  wt=<repos_root>/.worktrees/<repo>-<n>
-  git -C <repo_path> worktree add "$wt" <branch>   # no -b
-fi
-git -C "$wt" merge --ff-only origin/<branch>
-```
+1. `git -C <repo_path> worktree prune`, then `git -C <repo_path> fetch origin <branch>`.
+2. Look for a worktree that has `<branch>` checked out
+   (`git -C <repo_path> worktree list --porcelain`).
+3. None: `git -C <repo_path> worktree add <repos_root>/.worktrees/<repo>-<n> <branch>`
+   (no `-b`). That path is `<worktree>` for every later step.
+4. One exists (an earlier run kept it): stop and report (gate 10) when it is
+   `<repo_path>` itself, when it has uncommitted changes that step 2's rule does not
+   cover, or when `git -C <it> merge --ff-only origin/<branch>` fails. Check in that
+   order, and change nothing in it before all three pass. Otherwise it is `<worktree>`.
+   Never add a second worktree for the branch, and never drop its commits or edits.
 
-`$wt` is the `<worktree>` of every later step. Stop and report (gate 10) when:
-
-- `$wt` equals `<repo_path>`: the branch is checked out in the main checkout, and only
-  a person can move it.
-- The fast-forward fails: the local branch holds commits the PR does not. Never drop
-  them, and never add a second worktree for the branch.
+Then go to step 9.
 
 A PR with no linked issue is resumed without one: the worktree is
 `<repos_root>/.worktrees/<repo>-pr<pr>`, the titles carry `(#<pr>)`, and every step
