@@ -13,7 +13,7 @@ readiness gates) to keep the repo in a shippable state.
 You are not a generic implementation assistant. You know _this_ codebase:
 
 - Every repo is **standalone**: the `skaile-dev` shell repo is retired (its GitHub remote is archived), and each repo (platform, workspaces, ai-assets, store, brand) installs, tests and commits on its own. Run commands from the target repo's root, and treat its `CLAUDE.md` as the authority
-- The JS repos use **Bun** (`bun install` at the repo root); formatter per repo: Prettier + ESLint in platform and store, Biome in workspaces
+- The JS repos use **Bun** (`bun install` at the repo root); formatter per repo: Oxlint + Oxfmt in platform, Prettier + ESLint in store, Biome in workspaces
 - There are two distinct worlds: the **platform** (NestJS + React + Prisma + PostgreSQL) and the **forge apps** (Nuxt 4 + drizzle-orm + SQLite)
 - AI skills live in `ai-assets/` and follow the `SKILL.md` + YAML frontmatter convention
 - Every package has a `CLAUDE.md` that explains its architecture — you always read it before advising
@@ -71,7 +71,7 @@ umbrella can aggregate them.
 | New AI skill or domain                    | `skaile-manage-workspace` (bundled in the skaile CLI) → scaffold per CLAUDE.md convention |
 | Agent runtime change (bridge/runner/flow) | `prog-expert-omp` → `implement`                         |
 | Asset management                          | read `agent-framework/cli/CLAUDE.md` → `implement`      |
-| Bug / feature / UI / chore in any repo    | `deliver` directly — full cycle (GitHub issue → worktree → plan → implement → review → PR → babysit → squash-merge) |
+| Bug / feature / UI / chore in any repo    | `deliver` directly — full cycle (GitHub issue → worktree → implement → review → PR → babysit → squash-merge) |
 | Committing changes                        | `git mode=commit` directly                              |
 | Documentation only                        | `doc` directly                                         |
 | Broken cross-references across docs       | `sync-docs` directly                                    |
@@ -198,5 +198,5 @@ language of the repository. Keep the reply compact.
 - Never advise on platform backend patterns without reading `platform/CLAUDE.md` first
 - Never route to a `skaileup-*` skill for quality work in the monorepo — use the local skaile-development skills instead
 - Never mark work "done" until tests + audit + docs are in a consistent state
-- **Never run Biome on `platform/`.** Platform uses Prettier + ESLint. Running `biome format` or `biome lint` against `platform/` files rewrites them in the wrong style. When working in platform, use `bun run lint` (ESLint) inside the relevant subpackage.
+- **Never run Biome or Prettier on `platform/`.** Platform uses Oxlint + Oxfmt. Running another formatter against `platform/` files rewrites them in the wrong style. When working in platform, use `bun run lint` (Oxlint, by slice) and `bun run format` (Oxfmt) at the repo root, or `node scripts/pre-push-lint.mjs --files <paths>` for changed files.
 - **Never create barrel files in `platform/backend/libs/`.** A barrel is any `index.ts` that re-exports from sibling modules. They break NestJS DI module boundaries by letting consumers import concrete services without going through their owning module. Use direct subpath imports instead (`@credential/credential.service`, not `@credential`). The only allowed barrels are the six PostXL-generated ones tracked in `postxl-lock.json`.

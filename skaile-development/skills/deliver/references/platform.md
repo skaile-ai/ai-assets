@@ -4,6 +4,32 @@ Facts that apply only when the target repo is platform. `SKILL.md` stays repo-ag
 and points here. Every item below already cost a real run. When this file and the
 platform repo's own `AGENTS.md` disagree, the repo wins: fix this file.
 
+## Queue labels (step 3)
+
+| Label | Meaning |
+|---|---|
+| `skaile-queued` | Enqueued in the auto-ship run group |
+| `ship:local` | Queued for the local ship loop |
+
+Never remove one. `skaile-queued` is also the filter of the reconcile cron: every 30
+minutes it enqueues each open issue that lacks the label, so a removal queues the issue
+again. Signs that another runner already works on the issue: an open PR for it, the
+label `ship:local-claimed` or `status:shipping`, or another worktree for it.
+
+## A fresh worktree (step 4)
+
+Do this before the first test, not only before the boot:
+
+```bash
+cp .env.example .env
+cp backend/apps/api/.env.example backend/apps/api/.env
+cp frontend/.env.example frontend/.env
+bun install
+```
+
+Without the `.env` files a test fails with a config ZodError that looks like a real
+failure. Set `API_PORT` in `backend/apps/api/.env` before a boot (see below).
+
 ## Changesets (step 6)
 
 Every PR that touches `backend/` or `frontend/` needs a changeset. Use the package name
@@ -50,6 +76,17 @@ A doc you decline is a marker in that same changeset, which CI reads:
 
 ## Pre-push checks (step 8)
 
+Lint is Oxlint and the formatter is Oxfmt (no Prettier, no ESLint, no Biome). Oxfmt
+covers `.ts` and `.tsx` files only. For the changed files run what the pre-push hook
+runs:
+
+```bash
+node scripts/pre-push-lint.mjs --files <paths>   # oxfmt --check + oxlint, by slice
+```
+
+It runs oxlint slice by slice because the type-aware rules need too much memory for a
+whole workspace; do not replace it with one direct `oxlint` call.
+
 In addition to lint and the affected tests:
 
 ```bash
@@ -60,7 +97,7 @@ In addition to lint and the affected tests:
 Backend jest does not type-check. For changed test files run
 `node scripts/pre-push-typecheck.mjs --files <paths>`.
 
-Obey the machine's rules for heavy jobs (jest, vitest, tsc, eslint over a tree, a
+Obey the machine's rules for heavy jobs (jest, vitest, tsc, oxlint over a tree, a
 build) when its instructions define a wrapper or a lock.
 
 ## Boot verification (step 8, any backend change)
@@ -72,9 +109,7 @@ ports and process names, so isolate each boot:
 - **Give each run its own `API_PORT`.** `main.ts` checks the port before
   `NestFactory.create` and exits 1 with `Port <n> is already in use!`. A port collision
   looks exactly like a DI break. Read the log for that line before you blame the diff.
-- **A fresh worktree has no `.env` files.** Copy `backend/apps/api/.env.example` to
-  `backend/apps/api/.env` (and the root `.env.example` to `.env`), then set `API_PORT`
-  in the copy. `PORT` is ignored.
+- **Set `API_PORT`** in `backend/apps/api/.env` (copied in step 4). `PORT` is ignored.
 - **Boot:** `cd backend && bun run dev` in the background with its output in a log
   file. Success = the log contains `API is running`. Without the watcher:
   `bun run build`, then `backend/scripts/boot-smoke.sh` (what CI runs).
@@ -107,7 +142,7 @@ retry to the code.
 |---|---|
 | jest `signal=SIGSEGV`, or `N failed` suites with zero failed tests | a jest worker died in V8 GC; the named suite is only the one the worker held |
 | durable-Postgres lane: `1 failed` suite, zero failed tests, `terminating connection due to administrator command` at `Client.idleListener` | a migration test's teardown races `pool.end()`; the victim suite changes between runs |
-| `tsc` / `eslint` exit 134, `FATAL ERROR: … heap out of memory`, no diagnostics | a V8 out-of-memory, not a type or lint error |
+| `tsc` / `oxlint` exit 134, `FATAL ERROR: … heap out of memory`, no diagnostics | a V8 out-of-memory, not a type or lint error |
 
 It is a flake only when both hold:
 

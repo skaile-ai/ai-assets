@@ -57,7 +57,7 @@ Reach for `skaile-development` when you are:
 | `skills/proposal/`                 | `proposal` — design specs and proposals with structured frontmatter, review tracking, and alternatives analysis     |
 | `skills/review/`                   | `review` — local code review for staged/committed changes (quality, security, scope)                              |
 | `skills/implement/`                | `implement` — monorepo-aware implementation orchestrator                                                               |
-| `skills/deliver/`                  | `deliver` — implement & deliver a work item end-to-end in any repo: GitHub issue → worktree → plan → implement → review → PR → babysit CI/reviews → squash-merge |
+| `skills/deliver/`                  | `deliver` — implement & deliver a work item end-to-end in any repo: GitHub issue → worktree → implement → review → PR → babysit CI/reviews → squash-merge |
 | `skills/meat/`                     | `meat` — distill a git diff into a human "reading diff" (judgment calls surfaced, mechanical noise collapsed); optional preview at deliver's merge question |
 | `skills/issue-bar/`                | `issue-bar` — six impact questions a ticket must clear (user harm, money, stability, security, team drag, significant benefit); gates deliver's follow-ups and sweeps a backlog (KEEP / CLOSE / ASK) |
 | `skills/test/`                     | `test` — test runner: executes suites across the monorepo; triages failures                                            |
@@ -99,7 +99,7 @@ Reach for `skaile-development` when you are:
 | `proposal`      | Creating, reviewing, or updating design specs for new features or architectural changes        |
 | `review`      | Before committing or pushing — local quality/security review of changes                        |
 | `implement`        | Starting any non-trivial implementation task in the monorepo                                   |
-| `deliver`          | Implement AND deliver a work item end-to-end in any repo: GitHub issue, worktree, plan, implement, review, PR, babysit CI + reviews, squash-merge |
+| `deliver`          | Implement AND deliver a work item end-to-end in any repo: GitHub issue, worktree, implement, review, PR, babysit CI + reviews, squash-merge |
 | `meat`             | Reading a diff for comprehension before approving a merge or catching up on a branch           |
 | `issue-bar`        | Before filing an agent-found issue, or when triaging or sweeping a backlog                     |
 | `test`             | Running an existing test suite and triaging failures                                           |

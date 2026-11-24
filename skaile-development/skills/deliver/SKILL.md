@@ -17,7 +17,7 @@ description: >-
   diagnosis or code explanation, for reviewing someone else's existing code, for plans or
   design proposals, for filing an issue when implementation is explicitly deferred, for
   throwaway local experiments, or for work spanning several repositories.
-version: 2.0.2
+version: 2.1.0
 metadata:
   tags:
   - "deliver"
@@ -103,9 +103,9 @@ The worktree and the branch stay alive from step 4 until step 12 decides their f
   - At most **two** fix pushes in step 9, then hand back with the open findings.
   - Hand back **at once** when CI is green, the review is clean, and the only pending
     check is a gate that waits for a person (see `references/watch.md`).
-- **No subagents** (a fork cannot spawn children). Build inline in step 6. In step 7 the
-  PR's review bot is the independent reviewer; if the repo has none, say in the report
-  that the change had no independent review.
+- **No subagents** (a fork cannot spawn children). The PR's review bot stands in for the
+  review subagent (step 7); if the repo has none, say in the report that the change had
+  no independent review.
 
 One unattended PR runs best as a fork: it already has the caller's context.
 
@@ -113,7 +113,7 @@ One unattended PR runs best as a fork: it already has the caller's context.
 
 Each rule is stated once, here or in the step it belongs to.
 
-- **Decide from evidence, do not ask.** Repo, wording, branch name, size, plan, which
+- **Decide from evidence, do not ask.** Repo, wording, branch name, size, which
   findings to apply: decide, print one short progress line, continue. Ask only at a
   stop gate (listed at the end).
 - **Tracking is GitHub Issues** on the target repo. The work item's identity is the
@@ -222,10 +222,9 @@ on the default branch gets the same report plus "needs a hand close".
 
 **Otherwise:**
 
-- With an `issue` input: reuse it. Self-assign and add the `agent` and `in-progress`
-  labels where the repo has them.
+- With an `issue` input: reuse it (see "Reusing an issue" below).
 - Without one: search open issues for two or three key terms. A clear duplicate is
-  reused. Else refine the description (one to three sentences: the surface, observed
+  reused (see below). Else refine the description (one to three sentences: the surface, observed
   against expected or the new behaviour, the person's constraints kept verbatim), derive
   an imperative title of at most 72 characters, and create the issue:
 
@@ -238,6 +237,13 @@ on the default branch gets the same report plus "needs a hand close".
 
 Print: `Opened #<n> - <url>.`
 
+**Reusing an issue** (an input, a duplicate, or one you chose): check first whether
+another runner builds it, from the signs of work in progress the profile reference
+lists. If one is present, stop and report (gate 11); when you chose the issue yourself,
+choose another instead. Otherwise self-assign and add the `agent` and `in-progress`
+labels where the repo has them. Never remove a queue label (the profile reference names
+them); if one is present, say in the PR that the issue is queued.
+
 ## 4. Worktree and branch
 
 ```bash
@@ -246,10 +252,13 @@ git -C <repo_path> worktree add <repos_root>/.worktrees/<repo>-<n> \
     -b <prefix>/<n>-<slug> origin/<default_branch>
 ```
 
+That path is `<worktree>` for every later step.
+
 `<prefix>` is `fix`, `feat` or `chore`; `<slug>` is up to 40 characters of concrete
-nouns. The worktree sits beside the clone, never inside it. Install dependencies in the
-worktree when the repo needs them (`bun install`). All work until step 12 happens
-there.
+nouns. The worktree sits beside the clone, never inside it. Then, from inside the
+worktree, do the setup the profile reference lists for a fresh one (platform: `.env`
+files and `bun install`); where there is no profile, install dependencies if the repo
+needs them. All work until step 12 happens there.
 
 ## 5. Investigate and size the work
 
@@ -269,8 +278,8 @@ Then size the work:
 
 | Size | When | Consequence |
 |---|---|---|
-| `small` | The fix is known, touches at most 2 files and about 30 lines, and needs no design choice | Build inline; no plan file; no review subagent |
-| `standard` | Everything else | Plan, subagent build, subagent review |
+| `small` | The fix is known, touches at most 2 files and about 30 lines, and needs no design choice | You read the diff once; no review subagent |
+| `standard` | Everything else | A fresh subagent reviews the diff (step 7) |
 
 Print: `Sized as <size>: <one-line cause or design>.`
 
@@ -279,15 +288,8 @@ Print: `Sized as <size>: <one-line cause or design>.`
 Every build adds or extends a test that pins the behaviour, and adds a changeset when
 the repo requires one.
 
-**`small`, or no subagents:** make the change in the worktree yourself.
-
-**`standard`:** write the plan to `<worktree>/<n>-plan.md`: summary, cause or design
-note, files to touch, steps, acceptance criteria, out of scope. Then dispatch one fresh
-`general-purpose` subagent with a self-contained prompt: the worktree path, the full
-plan, the repo's lint, test and format commands, and these limits: follow the repo's
-docs, do not commit or push, do not edit the plan, report the files changed and the
-criteria verified. Do not pass the conversation. The plan is never committed: delete it
-before step 8.
+Make the change in the worktree yourself, whatever the size: the session that
+investigated holds the context, and a hand-off to a build subagent only loses it.
 
 ## 7. Review
 
@@ -295,9 +297,11 @@ Measure the diff with `git diff --numstat origin/<default_branch>`. A `small` ch
 that stayed small is read once by you, and the step ends.
 
 Otherwise dispatch a fresh `general-purpose` subagent that sees the diff and the work
-item, not the plan. It checks: correctness against the work item, scope creep, the
+item, not your reasoning. It checks: correctness against the work item, scope creep, the
 repo's conventions, test coverage, performance, security. It reports each finding as
-`important | nit | preexisting - file:line - text`, with at most five nits.
+`important | nit | preexisting - file:line - text`, with at most five nits. A run that
+cannot spawn subagents reads the diff once itself and relies on the PR's review bot
+instead (step 9).
 
 Triage every finding yourself, without asking:
 
@@ -313,7 +317,7 @@ Triage every finding yourself, without asking:
 
 1. Run the checks the profile reference lists for this point (platform: docs impact,
    invariant suites, a boot of the backend).
-2. Delete the plan file. Run `lint_cmd` and the affected tests. On a failure make one
+2. Run `lint_cmd`, `format_cmd` (as a check) and the affected tests. On a failure make one
    focused fix; if it still fails, stop with the worktree kept.
 3. Commit with the repo's convention: `<type>(<scope>): <title> (#<n>)` and one to
    three sentences of plain prose.
@@ -459,11 +463,12 @@ Stop and ask (interactive) or stop and report (unattended) only for these:
 8. The watch does not converge (the cases are in `references/watch.md`).
 9. The finish (step 12).
 10. The resume cannot attach a clean worktree to the PR's branch (step 3).
+11. Another runner already works on the issue (step 3).
 
 ## Integration
 
 - **Uses:** `gh` and `git`; `scripts/babysit-poll.sh` for the step 9 poll.
-- **Dispatches:** `general-purpose` subagents for the build and the review.
+- **Dispatches:** one `general-purpose` subagent for the review of a `standard` change.
 - **Optional skills:** `skaile-inventory` (step 5), `issue-bar` (step 10), `meat`
   (step 12).
 - **Not the same as** Claude Code's `/ship` and `/steward`. Those start from finished
