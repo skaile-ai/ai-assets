@@ -24,9 +24,9 @@ metadata:
       description: "Package names or areas relevant to the question (e.g., bridge,
         runner, flow-engine, forge, platform)"
     reads:
-    - "*/docs/faq.md"
-    - "**/docs/**/*.md"
-    - "*/README.md"
+    - path: "*/docs/faq.md"
+    - path: "**/docs/**/*.md"
+    - path: "*/README.md"
     produces:
     - path: "<area>/docs/faq.md"
       description: "FAQ page with curated Q&A entries appended"
