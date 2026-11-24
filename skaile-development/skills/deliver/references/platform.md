@@ -124,7 +124,7 @@ Two green PRs that are each behind `main` have broken `main` together. Before ev
 removed):
 
 ```bash
-sha=$(scripts/pre-merge-fresh-check.sh <pr>)    # can run longer than 10 minutes
+sha=$(scripts/pre-merge-fresh-check.sh <pr>) &&   # can run longer than 10 minutes
 gh pr merge <pr> --squash --match-head-commit "$sha" ...
 ```
 
@@ -137,7 +137,7 @@ table disagree, it wins.
 | 0 | green | merge now, with the printed SHA |
 | 1 | red; it names the failed jobs | fix the branch; do not merge |
 | 3 | timed out; the run it printed still goes | watch that run; do not start a second one. On its green, merge with the `<head>` of its `testing <base>..<head>` line, and only while `main` is still at that `<base>` (`git ls-remote origin refs/heads/main`); else run the check again |
-| 4 | could not start (closed or conflicting PR, fork branch, lagging merge ref) | read the message; a fork PR is a person's call |
+| 4 | could not start (closed or conflicting PR, a PR from a forked repository, lagging merge ref) | read the message: reopen the PR or resolve its conflict; on a lagging merge ref wait and run the check again; a PR from a forked repository is a person's call |
 | 6 | green, but `main` moved past the tested tip | run the check again |
 
 ## Merged is not deployed (step 3, step 13)
