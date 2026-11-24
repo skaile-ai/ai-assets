@@ -77,22 +77,15 @@ A doc you decline is a marker in that same changeset, which CI reads:
 ## Pre-push checks (step 8)
 
 Lint is Oxlint and the formatter is Oxfmt (no Prettier, no ESLint, no Biome). Oxfmt
-covers `.ts` and `.tsx` files only.
-
-A worktree that sits inside a directory which ignores `.worktrees/` (the old `skaile-dev`
-shell does) makes the file-based checks match nothing, and they then report success:
-`oxfmt --check <files>` prints `Expected at least one target file`, and
-`node scripts/pre-push-lint.mjs --files <paths>` passes, because it calls oxfmt with
-`--no-error-on-unmatched-pattern`. So check each changed `.ts` / `.tsx` file through
-stdin, and lint the files directly:
+covers `.ts` and `.tsx` files only. For the changed files run what the pre-push hook runs:
 
 ```bash
-diff <(bunx oxfmt --stdin-filepath=<file> < <file>) <file>   # no output = formatted
-bunx oxlint -c .oxlintrc.json <files>                         # no output = clean
+node scripts/pre-push-lint.mjs --files <paths>   # oxfmt --check + oxlint, by slice
 ```
 
-A `diff` that prints the whole file means oxfmt failed (read its stderr). An oxlint
-output of `No files found to lint` means it checked nothing.
+It runs oxlint slice by slice because the type-aware rules need too much memory for a
+whole workspace; do not replace it with one direct `oxlint` call. Read its output: it
+names the number of files it checked.
 
 In addition to lint and the affected tests:
 
