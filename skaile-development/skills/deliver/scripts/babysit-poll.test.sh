@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016 # single-quoted text that holds a backtick or a $ is literal on purpose
 #
 # Pins the edges of babysit-poll.sh against recorded `gh` payloads, offline.
 #
@@ -10,6 +11,7 @@
 
 set -uo pipefail
 ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && git rev-parse --show-toplevel)}"
+# shellcheck source=/dev/null # the repo-level helper is absent where this skill is deployed
 source "$ROOT/scripts/lib/assert.sh"
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
