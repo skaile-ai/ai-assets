@@ -13,7 +13,7 @@ platform repo's own `AGENTS.md` disagree, the repo wins: fix this file.
 
 Never remove one. `skaile-queued` is also the filter of the reconcile cron: every 30
 minutes it enqueues each open issue that lacks the label, so a removal queues the issue
-again. Signs that another runner already works on it: an open PR for the issue, the
+again. Signs that another runner already works on the issue: an open PR for it, the
 label `ship:local-claimed` or `status:shipping`, or another worktree for it.
 
 ## A fresh worktree (step 4)
@@ -77,15 +77,15 @@ A doc you decline is a marker in that same changeset, which CI reads:
 ## Pre-push checks (step 8)
 
 Lint is Oxlint and the formatter is Oxfmt (no Prettier, no ESLint, no Biome). Oxfmt
-covers `.ts` and `.tsx` files only. For the changed files run what the pre-push hook runs:
+covers `.ts` and `.tsx` files only. For the changed files run what the pre-push hook
+runs:
 
 ```bash
 node scripts/pre-push-lint.mjs --files <paths>   # oxfmt --check + oxlint, by slice
 ```
 
 It runs oxlint slice by slice because the type-aware rules need too much memory for a
-whole workspace; do not replace it with one direct `oxlint` call. Read its output: it
-names the number of files it checked.
+whole workspace; do not replace it with one direct `oxlint` call.
 
 In addition to lint and the affected tests:
 

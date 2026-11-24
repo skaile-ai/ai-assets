@@ -224,9 +224,10 @@ on the default branch gets the same report plus "needs a hand close".
 
 - With an `issue` input: reuse it. Self-assign and add the `agent` and `in-progress`
   labels where the repo has them. If it carries a queue label (the profile reference
-  names them), another runner may build it too: never remove that label, check the
-  signs of work in progress the profile lists, and say in the PR that the issue is
-  queued. When you choose an issue yourself, prefer one with no queue label.
+  names them), never remove that label. If a sign of work in progress that the profile
+  lists is present, another runner builds it: stop and report (gate 11), or, when you
+  chose the issue yourself, choose another. Otherwise continue, and say in the PR that
+  the issue is queued.
 - Without one: search open issues for two or three key terms. A clear duplicate is
   reused. Else refine the description (one to three sentences: the surface, observed
   against expected or the new behaviour, the person's constraints kept verbatim), derive
@@ -277,9 +278,6 @@ Then size the work:
 |---|---|---|
 | `small` | The fix is known, touches at most 2 files and about 30 lines, and needs no design choice | You read the diff once; no review subagent |
 | `standard` | Everything else | A fresh subagent reviews the diff (step 7) |
-
-A run that cannot spawn subagents treats both sizes the same: it reads the diff once,
-and the PR's review bot is the independent reviewer.
 
 Print: `Sized as <size>: <one-line cause or design>.`
 
@@ -463,6 +461,7 @@ Stop and ask (interactive) or stop and report (unattended) only for these:
 8. The watch does not converge (the cases are in `references/watch.md`).
 9. The finish (step 12).
 10. The resume cannot attach a clean worktree to the PR's branch (step 3).
+11. Another runner already works on the issue (step 3).
 
 ## Integration
 
