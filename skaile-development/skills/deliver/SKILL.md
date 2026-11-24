@@ -103,9 +103,9 @@ The worktree and the branch stay alive from step 4 until step 12 decides their f
   - At most **two** fix pushes in step 9, then hand back with the open findings.
   - Hand back **at once** when CI is green, the review is clean, and the only pending
     check is a gate that waits for a person (see `references/watch.md`).
-- **No subagents** (a fork cannot spawn children). In step 7 the PR's review bot is the
-  independent reviewer; if the repo has none, say in the report
-  that the change had no independent review.
+- **No subagents** (a fork cannot spawn children). The PR's review bot stands in for the
+  review subagent (step 7); if the repo has none, say in the report that the change had
+  no independent review.
 
 One unattended PR runs best as a fork: it already has the caller's context.
 
@@ -248,10 +248,10 @@ git -C <repo_path> worktree add <repos_root>/.worktrees/<repo>-<n> \
 ```
 
 `<prefix>` is `fix`, `feat` or `chore`; `<slug>` is up to 40 characters of concrete
-nouns. The worktree sits beside the clone, never inside it. Then do the setup the
-profile reference lists for a fresh worktree (platform: `.env` files and `bun install`),
-or install dependencies when the repo needs them. All work until step 12 happens
-there.
+nouns. The worktree sits beside the clone, never inside it. Then, from inside the
+worktree, do the setup the profile reference lists for a fresh one (platform: `.env`
+files and `bun install`); where there is no profile, install dependencies if the repo
+needs them. All work until step 12 happens there.
 
 ## 5. Investigate and size the work
 
@@ -290,10 +290,11 @@ Measure the diff with `git diff --numstat origin/<default_branch>`. A `small` ch
 that stayed small is read once by you, and the step ends.
 
 Otherwise dispatch a fresh `general-purpose` subagent that sees the diff and the work
-item, not your reasoning. A run that cannot spawn subagents reads the diff once itself,
-and the PR's review bot is the independent reviewer in step 9. It checks: correctness against the work item, scope creep, the
+item, not your reasoning. It checks: correctness against the work item, scope creep, the
 repo's conventions, test coverage, performance, security. It reports each finding as
-`important | nit | preexisting - file:line - text`, with at most five nits.
+`important | nit | preexisting - file:line - text`, with at most five nits. A run that
+cannot spawn subagents reads the diff once itself and relies on the PR's review bot
+instead (step 9).
 
 Triage every finding yourself, without asking:
 
