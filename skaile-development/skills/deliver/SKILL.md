@@ -25,6 +25,7 @@ metadata:
   - "implement"
   - "bug-fix"
   - "feature"
+  - "ui-fix"
   - "chore"
   - "work-item"
   - "any-repo"
