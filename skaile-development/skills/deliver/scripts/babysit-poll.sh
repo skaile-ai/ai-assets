@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016 # the jq programs are single-quoted on purpose: $x there is a jq variable
 #
 # The `deliver` skill's PR poll (step 9, references/watch.md), as code rather than prose.
 #
