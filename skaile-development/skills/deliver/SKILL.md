@@ -193,9 +193,18 @@ person commits them or passes them in `allowed_dirty`. The worktree branches off
 
 **The input is a pull request** (or the issue already has one open PR, read from
 `gh issue view <n> --json closedByPullRequestsReferences` and, as a fallback,
-`gh pr list --search "<n> in:body" --state open`): resume it. Take the branch from the
-PR, `git worktree add <worktree_path> <branch>` (no `-b`), take the issue from the
-PR's closing references, and go to step 9. Several open PRs: ask which one.
+`gh pr list --search "<n> in:body" --state open`): resume it. Several open PRs: ask
+which one. Take the branch from the PR and the issue `<n>` from the PR's closing
+references, then attach a worktree to the existing branch and go to step 9:
+
+```bash
+git -C <repo_path> fetch origin <branch>
+git -C <repo_path> worktree add <repos_root>/.worktrees/<repo>-<n> <branch>   # no -b
+```
+
+A PR with no linked issue is resumed without one: the worktree is
+`<repos_root>/.worktrees/<repo>-pr<pr>`, the titles carry `(#<pr>)`, and every step
+that reads, confirms or closes the issue is skipped. Do not open an issue for it.
 
 **The issue is closed and a merged PR closed it:** do nothing. Report the merged PR,
 its merge commit and whether it is deployed (the profile reference names the deploy
@@ -327,6 +336,8 @@ declined. Sort each one:
 
 - **Deliver now:** inside this diff, no design decision, under about 15 minutes. Fix
   and push, then run step 9 once more with the same counters. Do not sweep again.
+  This push is a fix push like any other: an unattended run that has used its two
+  lists the item in the hand-back instead.
 - **Follow-up issue:** it cannot ride along, and one of the six issue-bar questions
   answers YES with one line of evidence: user harm, money, stability, security, team
   drag, significant benefit. The `issue-bar` skill has the full catalogue.

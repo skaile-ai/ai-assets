@@ -4,7 +4,7 @@ description: 'Day-to-day development workflow for the standalone skaile repos (p
 type: domain
 building_blocks:
   agents: 'skaile-development — routes tasks to the right skills, maintains session context.'
-  skills: 'git, implement, ship, meat, issue-bar, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, e2e-platform, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, jenkins-debug, session-review, session-analysis, verify-ui, skaile-stack-decide, postxl, component-builder, good-morning, migrate-skaile-manifest'
+  skills: 'git, implement, deliver, meat, issue-bar, proposal, review, test, test-plan, test-unit, test-integration, test-e2e, e2e-platform, audit, ready, sync-docs, compile-validators, quality, doc, devlog, notify, faq, release, kill-backend, jenkins-debug, session-review, session-analysis, verify-ui, skaile-stack-decide, postxl, component-builder, good-morning, migrate-skaile-manifest'
   references: 'Branch naming, worktree patterns, test stack map, audit checklists, readiness criteria, devlog entry formats, documentation tier roles, commit spec.'
 stage: beta
 ---
