@@ -211,8 +211,12 @@ fi
 git -C "$wt" merge --ff-only origin/<branch>
 ```
 
-If the fast-forward fails, the local branch holds commits the PR does not: stop and
-report them. Never drop them, and never add a second worktree for the branch.
+`$wt` is the `<worktree>` of every later step. Stop and report (gate 10) when:
+
+- `$wt` equals `<repo_path>`: the branch is checked out in the main checkout, and only
+  a person can move it.
+- The fast-forward fails: the local branch holds commits the PR does not. Never drop
+  them, and never add a second worktree for the branch.
 
 A PR with no linked issue is resumed without one: the worktree is
 `<repos_root>/.worktrees/<repo>-pr<pr>`, the titles carry `(#<pr>)`, and every step
@@ -461,6 +465,7 @@ Stop and ask (interactive) or stop and report (unattended) only for these:
 7. A push fails for a reason other than a moved default branch.
 8. The watch does not converge (the cases are in `references/watch.md`).
 9. The finish (step 12).
+10. The resume cannot attach a clean worktree to the PR's branch (step 3).
 
 ## Integration
 
