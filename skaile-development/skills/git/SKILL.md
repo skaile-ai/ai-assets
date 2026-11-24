@@ -334,7 +334,7 @@ IF mode = worktree
     > Confirm? (yes / use branch mode instead)"
 
   STEP 3: Create branch + worktree
-    The worktree goes BESIDE the clone, not inside it (same rule as the `ship` skill):
+    The worktree goes BESIDE the clone, not inside it (same rule as the `deliver` skill):
       repo_root      = dirname of `git rev-parse --path-format=absolute --git-common-dir`
                        (the MAIN checkout, also when run from inside a linked worktree;
                        `--show-toplevel` would name the worktree and nest `.worktrees/`)

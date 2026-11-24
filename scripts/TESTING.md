@@ -17,7 +17,7 @@ their subjects in the platform repo.
 
 | subject | test |
 | --- | --- |
-| `skaile-development/skills/ship/scripts/babysit-poll.sh` | `skaile-development/skills/ship/scripts/babysit-poll.test.sh` |
+| `skaile-development/skills/deliver/scripts/babysit-poll.sh` | `skaile-development/skills/deliver/scripts/babysit-poll.test.sh` |
 | something repo-level, like `skaile.manifest.yaml` | `scripts/<name>.test.sh` |
 
 Discovery is a repo-wide `find` for `*.test.sh`, pruning `node_modules`, `.git`,
@@ -30,7 +30,7 @@ A skill directory installed from this repo is copied into consumer repos
 **wholesale** — `installer.ts` calls `cpSync(dir, dest, { recursive: true })`,
 with no filter, and there is no exclude or ignore mechanism anywhere in the
 deploy path. So a co-located test ships into every consumer alongside the script
-it covers: platform gets `.claude/skills/ship/scripts/babysit-poll.test.sh`.
+it covers: platform gets `.claude/skills/deliver/scripts/babysit-poll.test.sh`.
 
 That is unavoidable while the script itself has to ship — it has to be there for
 the skill to run — and it is **not** asset drift, because the deploy rewrites
@@ -71,7 +71,7 @@ to `run-tests.sh`. A lane that cannot go red is worse than no lane.
 
 ## Runners
 
-**Bash only, today.** The first subject is the `ship` skill's babysit poll,
+**Bash only, today.** The first subject is the `deliver` skill's PR poll,
 which is shell and `jq`.
 
 **`node --test` is deliberately not wired.** It would have no subject: the only

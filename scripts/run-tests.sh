@@ -16,7 +16,7 @@
 #
 # A test sits NEXT TO the thing it covers, the way `scripts/*.test.mjs` and
 # `deploy/bin/*.test.sh` do in the platform repo. So a test for
-# `skaile-development/skills/ship/scripts/babysit-poll.sh` is that script's
+# `skaile-development/skills/deliver/scripts/babysit-poll.sh` is that script's
 # neighbour, and a test for something repo-level lives here in `scripts/`.
 #
 # Know the one consequence: a skill directory installed from this repo is copied
