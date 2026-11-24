@@ -124,19 +124,26 @@ Two green PRs that are each behind `main` have broken `main` together. Before ev
 removed):
 
 ```bash
-sha=$(scripts/pre-merge-fresh-check.sh <pr>)    # can run longer than 10 minutes
+sha=$(scripts/pre-merge-fresh-check.sh <pr>) &&   # can run longer than 10 minutes
 gh pr merge <pr> --squash --match-head-commit "$sha" ...
 ```
 
-Merge only on exit 0, and at once: stdout is the full head SHA it tested.
+Merge only on exit 0, and at once: stdout is the full head SHA it tested. The platform
+`AGENTS.md` ("Commits and PRs") is the authority for the exit codes; when it and this
+table disagree, it wins.
 
-| Exit | Meaning |
-|---|---|
-| 0 | green: merge now |
-| 1 | red: do not merge; it names the failed jobs |
-| 3 | timed out; the run still goes: wait and run it again |
-| 4 | could not start (closed or conflicting PR, lagging merge ref) |
-| 6 | green, but `main` moved since: run it again |
+| Exit | Meaning | Do |
+|---|---|---|
+| 0 | green | merge now, with the printed SHA |
+| 1 | red; it names the failed jobs | fix the branch; do not merge |
+| 3 | timed out; the run it dispatched still goes | do not start a second run. Follow the hint in the message: `gh run watch <id>`, and merge on that run's green only while `main` is still at the `<base>` the message names (`git ls-remote origin refs/heads/main`); else run the check again. Merge with the PR head: the last SHA inside the parentheses of the `testing <base>..<head> (...)` line. The `<head>` before the parentheses is the merge commit, not the PR head |
+| 4 | no result (a closed or merged PR, a conflict, a PR from a forked repository, a dispatch or a read that failed) | do not merge; read the message. A PR from a forked repository is a person's call |
+| 6 | green, but `main` moved past the tested tip | run the check again |
+
+Everything except the SHA goes to stderr, so the messages stay visible through the
+command substitution. A shell tool that ends the script early (a time limit, exit 129,
+130 or 143) leaves the run going, as exit 3 does: run the script in the background
+when the tool has a limit, and treat an early end like exit 3.
 
 ## Merged is not deployed (step 3, step 13)
 
