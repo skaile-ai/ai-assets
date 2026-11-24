@@ -248,8 +248,9 @@ git -C <repo_path> worktree add <repos_root>/.worktrees/<repo>-<n> \
 ```
 
 `<prefix>` is `fix`, `feat` or `chore`; `<slug>` is up to 40 characters of concrete
-nouns. The worktree sits beside the clone, never inside it. Install dependencies in the
-worktree when the repo needs them (`bun install`). All work until step 12 happens
+nouns. The worktree sits beside the clone, never inside it. Then do the setup the
+profile reference lists for a fresh worktree (platform: `.env` files and `bun install`),
+or install dependencies when the repo needs them. All work until step 12 happens
 there.
 
 ## 5. Investigate and size the work
@@ -281,8 +282,7 @@ Every build adds or extends a test that pins the behaviour, and adds a changeset
 the repo requires one.
 
 Make the change in the worktree yourself, whatever the size: the session that
-investigated holds the context, and a hand-off to a build subagent only loses it. Do the
-setup the profile reference lists for a fresh worktree first (platform: `.env` files).
+investigated holds the context, and a hand-off to a build subagent only loses it.
 
 ## 7. Review
 
@@ -290,7 +290,8 @@ Measure the diff with `git diff --numstat origin/<default_branch>`. A `small` ch
 that stayed small is read once by you, and the step ends.
 
 Otherwise dispatch a fresh `general-purpose` subagent that sees the diff and the work
-item, not your reasoning. It checks: correctness against the work item, scope creep, the
+item, not your reasoning. A run that cannot spawn subagents reads the diff once itself,
+and the PR's review bot is the independent reviewer in step 9. It checks: correctness against the work item, scope creep, the
 repo's conventions, test coverage, performance, security. It reports each finding as
 `important | nit | preexisting - file:line - text`, with at most five nits.
 
@@ -308,7 +309,7 @@ Triage every finding yourself, without asking:
 
 1. Run the checks the profile reference lists for this point (platform: docs impact,
    invariant suites, a boot of the backend).
-2. Run `lint_cmd`, the repo's format check and the affected tests. On a failure make one
+2. Run `lint_cmd`, `format_cmd` (as a check) and the affected tests. On a failure make one
    focused fix; if it still fails, stop with the worktree kept.
 3. Commit with the repo's convention: `<type>(<scope>): <title> (#<n>)` and one to
    three sentences of plain prose.

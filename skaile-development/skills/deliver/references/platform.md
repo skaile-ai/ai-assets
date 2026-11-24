@@ -4,6 +4,11 @@ Facts that apply only when the target repo is platform. `SKILL.md` stays repo-ag
 and points here. Every item below already cost a real run. When this file and the
 platform repo's own `AGENTS.md` disagree, the repo wins: fix this file.
 
+## Queue label (step 3)
+
+`skaile-queued` puts an issue in the cloud agent queue. Remove it when you claim the
+issue: `gh issue edit <n> --remove-label skaile-queued`.
+
 ## A fresh worktree (step 4)
 
 Do this before the first test, not only before the boot:
@@ -17,12 +22,6 @@ bun install
 
 Without the `.env` files a test fails with a config ZodError that looks like a real
 failure. Set `API_PORT` in `backend/apps/api/.env` before a boot (see below).
-
-## Queue label (step 3)
-
-`skaile-queued` puts an issue in the cloud agent queue. Remove it when you claim the
-issue: `gh issue edit <n> --remove-label skaile-queued`. Before the claim, check that
-no open PR and no other worktree already works on the issue.
 
 ## Changesets (step 6)
 
@@ -79,8 +78,9 @@ node scripts/pre-push-lint.mjs --files <paths>   # oxfmt --check + oxlint, by sl
 
 A direct `bunx oxfmt --check <files>` in a worktree that sits inside a directory
 ignoring `.worktrees/` prints `Expected at least one target file` and checks nothing.
-That is not a clean result. Format each file through stdin instead:
-`bunx oxfmt --stdin-filepath=<file> < <file>`, and compare the output with the file.
+That is not a clean result. Check each file through stdin instead; no output means the
+file is formatted:
+`diff <(bunx oxfmt --stdin-filepath=<file> < <file>) <file>`
 
 In addition to lint and the affected tests:
 
