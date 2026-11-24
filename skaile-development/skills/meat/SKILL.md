@@ -6,10 +6,10 @@ description: "[skaile-development] Distill a git diff into a 'reading diff' for 
   import churn) collapsed or dropped. Comprehension, not critique - it does not
   hunt defects. Use when the user wants to understand a diff rather than review
   it: before approving a merge, catching up on a branch, reading agent-written
-  code, or when the ship skill offers a reading diff at its final merge question.
+  code, or when the deliver skill offers a reading diff at its final merge question.
   Concept and rubric from boldsoftware/meat, reimplemented as a prompt - no
   binary, no extra API key."
-version: 1.0.0
+version: 1.0.1
 metadata:
   tags:
   - "meat"
@@ -48,7 +48,7 @@ metadata:
 
 ## When to Use
 
-- Before approving a merge (the `ship` skill offers this at its final question)
+- Before approving a merge (the `deliver` skill offers this at its final question)
 - Catching up on a branch or a batch of agent-written commits
 - Any "what does this diff actually do?" question
 
@@ -163,7 +163,7 @@ STEP 3: Emit the reading diff
 
 ## Integration
 
-- **Called by:** the `ship` skill (optional "Reading diff first" option at its final
+- **Called by:** the `deliver` skill (optional "Reading diff first" option at its final
   merge question, when this skill is installed); usable standalone via `/meat`
 - **Reads:** git state only · **Writes:** nothing
 - **Provenance:** abridging rubric distilled from boldsoftware/meat's system prompt

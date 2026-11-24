@@ -14,7 +14,7 @@ A worktree goes **beside** the clone, never inside it:
 ```
 
 Why beside, not inside: the main checkout stays clean without a `.gitignore` entry (brand and
-ai-assets do not ignore `.worktrees/`), and it is the same path the `ship` skill and existing
+ai-assets do not ignore `.worktrees/`), and it is the same path the `deliver` skill and existing
 tooling use. The worktree root holds the repo's own `CLAUDE.md`, so agents working there load it.
 
 ## When to Use Worktrees

@@ -57,9 +57,9 @@ Reach for `skaile-development` when you are:
 | `skills/proposal/`                 | `proposal` — design specs and proposals with structured frontmatter, review tracking, and alternatives analysis     |
 | `skills/review/`                   | `review` — local code review for staged/committed changes (quality, security, scope)                              |
 | `skills/implement/`                | `implement` — monorepo-aware implementation orchestrator                                                               |
-| `skills/ship/`                     | `ship` — implement & ship a work item end-to-end in any repo: GitHub issue → worktree → plan → implement → review → PR → babysit CI/reviews → squash-merge |
-| `skills/meat/`                     | `meat` — distill a git diff into a human "reading diff" (judgment calls surfaced, mechanical noise collapsed); optional preview at ship's merge gate |
-| `skills/issue-bar/`                | `issue-bar` — six impact questions a ticket must clear (user harm, money, stability, security, team drag, significant benefit); gates ship's follow-ups and sweeps a backlog (KEEP / CLOSE / ASK) |
+| `skills/deliver/`                  | `deliver` — implement & deliver a work item end-to-end in any repo: GitHub issue → worktree → plan → implement → review → PR → babysit CI/reviews → squash-merge |
+| `skills/meat/`                     | `meat` — distill a git diff into a human "reading diff" (judgment calls surfaced, mechanical noise collapsed); optional preview at deliver's merge question |
+| `skills/issue-bar/`                | `issue-bar` — six impact questions a ticket must clear (user harm, money, stability, security, team drag, significant benefit); gates deliver's follow-ups and sweeps a backlog (KEEP / CLOSE / ASK) |
 | `skills/test/`                     | `test` — test runner: executes suites across the monorepo; triages failures                                            |
 | `skills/test-plan/`                | `test-plan` — per-package test plan from CLAUDE.md + source tree (feeds test-unit/-integration/-e2e)                   |
 | `skills/test-unit/`                | `test-unit` — unit test setup + generation (vitest/jest-aware, per package)                                            |
@@ -99,7 +99,7 @@ Reach for `skaile-development` when you are:
 | `proposal`      | Creating, reviewing, or updating design specs for new features or architectural changes        |
 | `review`      | Before committing or pushing — local quality/security review of changes                        |
 | `implement`        | Starting any non-trivial implementation task in the monorepo                                   |
-| `ship`             | Implement AND ship a work item end-to-end in any repo: GitHub issue, worktree, plan, implement, review, PR, babysit CI + reviews, squash-merge |
+| `deliver`          | Implement AND deliver a work item end-to-end in any repo: GitHub issue, worktree, plan, implement, review, PR, babysit CI + reviews, squash-merge |
 | `meat`             | Reading a diff for comprehension before approving a merge or catching up on a branch           |
 | `issue-bar`        | Before filing an agent-found issue, or when triaging or sweeping a backlog                     |
 | `test`             | Running an existing test suite and triaging failures                                           |
@@ -208,7 +208,7 @@ The `sync-docs` skill repairs cross-references between tiers.
 ## Notes
 
 - **`skaile-inventory` is used, not shipped.** It is the org-internal index of what the Skaile org
-  already has, and it is not published to the store. `ship` STEP 6 and the agent's `SOUL.md` call
+  already has, and it is not published to the store. `deliver` step 5 and the agent's `SOUL.md` call
   it before building something new; an org admin provides it. Where it is missing, both record
   that it was not available and carry on.
 - The `skaile-development` agent orchestrates multi-skill workflows. For single-skill operations, call skills directly.

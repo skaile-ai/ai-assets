@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# The `ship` skill's babysit poll (Phase 12, step (a)), as code rather than prose.
+# The `deliver` skill's PR poll (step 9, references/watch.md), as code rather than prose.
 #
 # WHY this is a script: the poll is a small state machine whose edges only GitHub's live
 # API can confirm, and when it lived as prose seven of eight review rounds on the PR that

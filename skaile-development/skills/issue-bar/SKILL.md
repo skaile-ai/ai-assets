@@ -2,11 +2,11 @@
 name: "issue-bar"
 description: "[skaile-development] The bar a ticket must clear to exist: six impact
   questions (user harm, money, stability, security, team drag, significant benefit),
-  each answered with evidence. Use before filing an issue an agent found on its own (a ship follow-up,
+  each answered with evidence. Use before filing an issue an agent found on its own (a deliver follow-up,
   a review leftover, an audit finding), when triaging incoming issues, or when
   sweeping an existing backlog for tickets that can be closed. Returns KEEP / CLOSE /
   ASK per ticket with the evidence, and a ready-to-post close comment."
-version: 1.0.0
+version: 1.0.1
 metadata:
   tags:
   - "issue-bar"
