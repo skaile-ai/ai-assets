@@ -512,7 +512,9 @@ IF mode = fix
 
   STEP F8: Cleanup services we auto-started (if any)
     FIRST, a safety net for the F2 built-bundle proof: if
-    `frontend/.env.e2e-bak` still exists, its step 5 did not run. Do step 5 now.
+    `frontend/.env.e2e-bak` still exists, or :3000 still serves the preview
+    bundle (`pgrep -lf 'vite preview'` on macOS, `pgrep -af` on Linux), its
+    step 5 did not run. Do step 5 now.
     Then:
     Same dispatch as run mode's STEP R5 — refer to that step's table. Print the
     script's output verbatim; do NOT escalate beyond the script's pkill patterns.
