@@ -15,7 +15,7 @@ description: 'Run, fix, or extend the Skaile platform e2e suite. Three modes: `r
   the user says "run e2e tests", "fix the failing e2e tests", "the e2e suite is red",
   "add e2e coverage for <feature>", "write e2e tests for my PR", or similar.'
 metadata:
-  version: '1.3.2'
+  version: '1.3.3'
   tags:
   - 'testing'
   - 'e2e'
@@ -139,6 +139,7 @@ MUST   (add mode) gate writing behind explicit user approval of the proposed pla
 MUST   (add mode) live-inspect UI via chrome-devtools MCP before committing selectors (when live_inspect=true)
 MUST   (fix mode) classify EVERY failure as stale-test or regression WITH EVIDENCE (the commit/PR that changed behavior, the source, and a live-UI inspection for selector drift) BEFORE editing any spec
 MUST   (fix mode) confirm the FEATURE still works before calling a test "stale" — a passing sibling test, the control actually performing its action, the API returning data when called correctly. Burden of proof is on "stale"; if unproven, treat as a suspected regression
+MUST   (fix mode) before calling a test a REGRESSION, prove it failed on CI (CI stops at `--max-failures`; tests it did not run count as "skipped") and fails against the built frontend bundle (`bun run e2e:ci`), not only under the Vite dev server
 MUST   (fix mode) STOP and report a confirmed/suspected regression to the human — never edit, weaken, or skip the test to pass over it
 MUST   (fix mode) gate any spec DELETION or `.skip` behind explicit user approval; prefer rewriting to preserve coverage
 MUST   delegate execution to `bunx playwright test` / the existing npm scripts — do not re-invent runners
@@ -380,6 +381,20 @@ IF mode = fix
     |---|---|---|
     | STALE | The product changed on purpose; the test still asserts the old shape (moved selector, renamed label, changed route, new required input) | The PR/commit that changed it (`git log -S "<symbol>"`, blame), a design spec/CLAUDE.md note, the current source, and — for selector/UI drift — a live chrome-devtools MCP inspection |
     | REGRESSION | The product broke; the red test is correct and is doing its job | The feature genuinely fails for a real user — not merely that a selector moved |
+
+    Before you call a test a REGRESSION, prove two more things. Without them,
+    the "regression" can be an artefact of the run or of your local setup:
+    - **The test failed on CI.** CI stops at `--max-failures`
+      (`docker/ci/run-e2e.sh`). A stopped run counts the tests it did not run as
+      "skipped", and its report lists only some failures. Read the Jenkins test
+      results, or a later build that ran the spec. A test that CI did not run is
+      no evidence of a failure.
+    - **The test fails against the built bundle.** `scripts/e2e.sh` serves the
+      frontend from the Vite dev server (`dev:noAuth`); CI serves a built
+      bundle. Timing-sensitive specs (`e2e/README.md`) fail at random under the
+      dev server. Run the test again with `cd frontend && bun run e2e:ci`. A
+      test that fails only under the dev server has an environment problem, not
+      a product problem.
 
     Burden of proof is on STALE. Before declaring a test stale, CONFIRM THE
     FEATURE STILL WORKS — e.g. a sibling test still passes, the control still
@@ -717,6 +732,7 @@ CHECKLIST
 | Hardcoding `proj-1` / `proj-2` / `proj-3` in URLs | Use slugs: `inventory-tracker`, `hr-onboarding`, `expense-reports` |
 | Assuming `PlatformAdmin` sees all projects | Default mock user (`test`) owns no seed projects. Use `user-bu-1` / `user-bu-2` to see content. |
 | Skipping the approval gate in `add` mode | The gate is the entire point — it prevents spec sprawl |
+| Calling a test a regression because it fails locally | Prove it failed on CI (a run stopped at `--max-failures` lists only some failures, and counts the tests it did not run as "skipped") and that it fails against the built bundle (`bun run e2e:ci`), not only under the Vite dev server |
 | Rewriting a failing spec to green without triage | `mode=fix` STEP F2: classify stale-vs-regression with evidence FIRST; a moved selector and a real bug look identical until you check the feature works |
 | Weakening an assertion / adding a blind wait to pass | Never make a test lie. Rewrite to the new shape (keep/tighten the assertion), or report the regression |
 | `.skip`-ing a test you couldn't get working | That's a cop-out. Delete-and-note the gap (feature gone) or fix it; `.skip` is only for temporarily-unverifiable-but-returning behaviour, with a reason |
