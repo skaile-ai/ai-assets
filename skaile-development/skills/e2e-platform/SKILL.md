@@ -404,28 +404,45 @@ IF mode = fix
       `127.0.0.1`. Do not use `bun run e2e:ci`: it builds in production mode and,
       without `--strictPort`, moves to another port when :3000 is taken.
 
-      This swap stops the frontend on :3000 and moves the local `frontend/.env`
-      aside. If the frontend was already up at preflight
-      (`WE_STARTED_FRONTEND = false`), it belongs to someone else: get explicit
-      user approval first, as Step 0 §3 requires for a restart. Record
-      `WE_SWAPPED_FRONTEND = true`; STEP F8 puts both back. Then, from the
-      platform root, run each command as ONE invocation (shell variables do not
-      persist between tool calls):
-      ```bash
-      ./scripts/e2e.sh --stop-frontend
-      # A dev .env adds ~13 KB of inlined values to the bundle, which then fails the
-      # auth-layout size budget in frontend/vite.config.ts and stops the build.
-      [ ! -e frontend/.env.e2e-bak ] && { [ ! -e frontend/.env ] || mv frontend/.env frontend/.env.e2e-bak; } \
-        || { echo "frontend/.env.e2e-bak exists: restore it first"; exit 1; }
-      VITE_PUBLIC_API_URL='http://127.0.0.1:3001' VITE_PUBLIC_BASE_URL='http://127.0.0.1:3000' \
-        VITE_PUBLIC_KEYCLOAK_URL='http://127.0.0.1' VITE_PUBLIC_KEYCLOAK_REALM='e2e' \
-        VITE_PUBLIC_KEYCLOAK_CLIENT_ID='e2e' SKAILE_E2E_FRONTEND_MODE=preview ./scripts/e2e.sh
-      ```
-      The build takes several minutes and can outlast the script's port wait. Do
-      not run the script again to wait (a second run without all six variables
-      builds a wrong bundle); poll until :3000 listens. Then run the scoped
-      spec with the STEP R1 command, but with `BASE_URL='http://127.0.0.1:3000'
-      API_URL='http://127.0.0.1:3001'`, as CI does.
+      The proof swaps the frontend on :3000 and moves the local `frontend/.env`
+      aside, then puts both back before F2 continues. If the frontend was
+      already up at preflight (`WE_STARTED_FRONTEND = false`), it belongs to
+      someone else: get explicit user approval first, as Step 0 §3 requires for
+      a restart. Run the six steps in order, from the platform root, each as ONE
+      invocation (shell variables do not persist between tool calls):
+      1. **Guard, before you touch anything.** If `frontend/.env.e2e-bak`
+         exists, an earlier proof did not restore it: STOP and ask the person.
+         ```bash
+         [ ! -e frontend/.env.e2e-bak ] || echo "STOP: frontend/.env.e2e-bak exists"
+         ```
+      2. **Swap.** A dev `.env` adds ~13 KB of inlined values to the bundle, which
+         then fails the auth-layout size budget in `frontend/vite.config.ts` and
+         stops the build.
+         ```bash
+         ./scripts/e2e.sh --stop-frontend
+         [ ! -e frontend/.env ] || mv frontend/.env frontend/.env.e2e-bak
+         ```
+      3. **Build and serve, all six variables in the same invocation.**
+         ```bash
+         VITE_PUBLIC_API_URL='http://127.0.0.1:3001' VITE_PUBLIC_BASE_URL='http://127.0.0.1:3000' \
+           VITE_PUBLIC_KEYCLOAK_URL='http://127.0.0.1' VITE_PUBLIC_KEYCLOAK_REALM='e2e' \
+           VITE_PUBLIC_KEYCLOAK_CLIENT_ID='e2e' SKAILE_E2E_FRONTEND_MODE=preview ./scripts/e2e.sh
+         ```
+         The build takes several minutes and can outlast the script's port wait.
+         Do not run the script again to wait (without all six variables it
+         builds a wrong bundle); poll until :3000 listens.
+      4. **Run** the scoped spec with the STEP R1 command, but with
+         `BASE_URL='http://127.0.0.1:3000' API_URL='http://127.0.0.1:3001'`, as CI
+         does. Record the result.
+      5. **Restore at once, whatever the result** (pass, fail, or an error in
+         steps 2–4), before you classify, escalate (F4/F5) or edit anything:
+         ```bash
+         ./scripts/e2e.sh --stop-frontend
+         [ ! -e frontend/.env.e2e-bak ] || mv frontend/.env.e2e-bak frontend/.env
+         ./scripts/e2e.sh   # the dev frontend again, for F3/F6 and for the person
+         ```
+      6. **Check** that `frontend/.env.e2e-bak` is gone and :3000 serves the dev
+         frontend again.
 
     With both proofs, the regression is CONFIRMED. Without them, it stays a
     SUSPECTED regression (F4). A test that passes against the built bundle is
@@ -494,15 +511,9 @@ IF mode = fix
   EMIT   [e2e-platform] fix_complete stale=<N> regressions=<N> rewritten=<N> deleted=<N>
 
   STEP F8: Cleanup services we auto-started (if any)
-    FIRST, IF `WE_SWAPPED_FRONTEND = true` (the F2 built-bundle proof), and also
-    when F4 or F5 stops the run early:
-    ```bash
-    ./scripts/e2e.sh --stop-frontend
-    [ -e frontend/.env.e2e-bak ] && mv frontend/.env.e2e-bak frontend/.env
-    ```
-    If the frontend was up at preflight (`WE_STARTED_FRONTEND = false`), start
-    the dev frontend again (`./scripts/e2e.sh`), so the person finds what they
-    had. Then:
+    FIRST, a safety net for the F2 built-bundle proof: if
+    `frontend/.env.e2e-bak` still exists, its step 5 did not run. Do step 5 now.
+    Then:
     Same dispatch as run mode's STEP R5 — refer to that step's table. Print the
     script's output verbatim; do NOT escalate beyond the script's pkill patterns.
     EMIT   [e2e-platform] cleanup_complete
@@ -749,7 +760,7 @@ CHECKLIST
   - [ ] (fix) Touched specs AND their full files re-run green on fresh services (--retries=0)
   - [ ] (run) Failures categorized, infra auto-recovered, spec-design failures reported not auto-fixed
   - [ ] Report includes follow-ups + coverage notes
-  - [ ] (fix) After a built-bundle proof: `frontend/.env` is back, and a displaced dev frontend runs again (STEP F8)
+  - [ ] (fix) After a built-bundle proof: `frontend/.env` is back and :3000 serves the dev frontend (F2 proof step 5, before F3–F5)
   - [ ] (all) Cleanup ran ONLY for services we auto-started — pre-existing services left untouched (Step R5 / F8 / A8 dispatch table)
 
 ---
