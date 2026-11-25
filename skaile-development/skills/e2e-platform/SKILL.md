@@ -125,6 +125,7 @@ READS
   (fix mode) test-results/**/error-context.md — the failing run's assertion + stack
   (fix mode) the PR/commit that last changed the asserted behavior (git log -S / blame)
   (fix mode) source + live UI (chrome-devtools MCP) — to prove stale-vs-regression
+  (fix mode) the CI evidence: the `skaile_platform_e2e` Jenkins test report or Teams summary — did CI run and fail the test
 
 WRITES
   (add + fix modes)
@@ -139,7 +140,7 @@ MUST   (add mode) gate writing behind explicit user approval of the proposed pla
 MUST   (add mode) live-inspect UI via chrome-devtools MCP before committing selectors (when live_inspect=true)
 MUST   (fix mode) classify EVERY failure as stale-test or regression WITH EVIDENCE (the commit/PR that changed behavior, the source, and a live-UI inspection for selector drift) BEFORE editing any spec
 MUST   (fix mode) confirm the FEATURE still works before calling a test "stale" — a passing sibling test, the control actually performing its action, the API returning data when called correctly. Burden of proof is on "stale"; if unproven, treat as a suspected regression
-MUST   (fix mode) before calling a test a REGRESSION, prove it failed on CI (CI stops at `--max-failures`; tests it did not run count as "skipped") and fails against the built frontend bundle (`bun run e2e:ci`), not only under the Vite dev server
+MUST   (fix mode) treat a failing test as a SUSPECTED regression until it is CONFIRMED: it failed on CI (CI stops at `--max-failures`; tests it did not run count as "skipped") and it fails against the frontend built the CI way (`SKAILE_E2E_FRONTEND_MODE=preview`), not only under the Vite dev server. Missing proof never makes a test stale and never licenses a spec edit
 MUST   (fix mode) STOP and report a confirmed/suspected regression to the human — never edit, weaken, or skip the test to pass over it
 MUST   (fix mode) gate any spec DELETION or `.skip` behind explicit user approval; prefer rewriting to preserve coverage
 MUST   delegate execution to `bunx playwright test` / the existing npm scripts — do not re-invent runners
@@ -382,19 +383,39 @@ IF mode = fix
     | STALE | The product changed on purpose; the test still asserts the old shape (moved selector, renamed label, changed route, new required input) | The PR/commit that changed it (`git log -S "<symbol>"`, blame), a design spec/CLAUDE.md note, the current source, and — for selector/UI drift — a live chrome-devtools MCP inspection |
     | REGRESSION | The product broke; the red test is correct and is doing its job | The feature genuinely fails for a real user — not merely that a selector moved |
 
-    Before you call a test a REGRESSION, prove two more things. Without them,
-    the "regression" can be an artefact of the run or of your local setup:
+    A failing test is a SUSPECTED regression until two proofs CONFIRM it.
+    Without them the failure can be an artefact of the CI run or of your local
+    setup:
     - **The test failed on CI.** CI stops at `--max-failures`
-      (`docker/ci/run-e2e.sh`). A stopped run counts the tests it did not run as
-      "skipped", and its report lists only some failures. Read the Jenkins test
-      results, or a later build that ran the spec. A test that CI did not run is
-      no evidence of a failure.
-    - **The test fails against the built bundle.** `scripts/e2e.sh` serves the
-      frontend from the Vite dev server (`dev:noAuth`); CI serves a built
-      bundle. Timing-sensitive specs (`e2e/README.md`) fail at random under the
-      dev server. Run the test again with `cd frontend && bun run e2e:ci`. A
-      test that fails only under the dev server has an environment problem, not
-      a product problem.
+      (`platform/docker/ci/run-e2e.sh`). A stopped run counts the tests it did
+      not run as "skipped", and its summary lists only some failures. Read the
+      `skaile_platform_e2e` build's test report on Jenkins, or the Teams summary
+      (`platform/docker/ci/teams-summary.mjs`), or a later build that ran the
+      spec. A test that CI did not run is no evidence either way. For branch work
+      that CI has not run yet, the built-bundle proof below is the bar.
+    - **The test fails against the built bundle, served as CI serves it.** By
+      default `platform/scripts/e2e.sh` serves the frontend from the Vite dev
+      server (`dev:noAuth`). Timing-sensitive specs (`platform/e2e/README.md`)
+      fail at random there. Serve the frontend the CI way, then re-run the scoped
+      spec with the STEP R1 command:
+      ```bash
+      ./scripts/e2e.sh --stop-frontend          # the dev server would hold :3000
+      mv frontend/.env /tmp/frontend.env.bak    # a dev .env makes the bundle exceed the size budget
+      export VITE_PUBLIC_API_URL='http://127.0.0.1:3001' VITE_PUBLIC_BASE_URL='http://127.0.0.1:3000' \
+        VITE_PUBLIC_KEYCLOAK_URL='http://127.0.0.1' VITE_PUBLIC_KEYCLOAK_REALM='e2e' VITE_PUBLIC_KEYCLOAK_CLIENT_ID='e2e'
+      SKAILE_E2E_FRONTEND_MODE=preview ./scripts/e2e.sh   # vite build --mode development, then vite preview --strictPort
+      ```
+      These are the build mode and the five variables CI uses
+      (`platform/Jenkinsfile.e2e`). Do not use `bun run e2e:ci`: it builds in
+      production mode and, without `--strictPort`, moves to another port when
+      :3000 is taken. The build takes several minutes and can outlast the
+      script's port wait: confirm :3000 listens before you run the spec. After
+      the run, stop the frontend again and put `frontend/.env` back.
+
+    With both proofs, the regression is CONFIRMED. Without them, it stays a
+    SUSPECTED regression (F4). A test that passes against the built bundle is
+    flaky or an environment problem: handle it via `mode=run` recovery. Neither
+    case is ever a reason to edit the spec.
 
     Burden of proof is on STALE. Before declaring a test stale, CONFIRM THE
     FEATURE STILL WORKS — e.g. a sibling test still passes, the control still
@@ -711,7 +732,7 @@ CHECKLIST
 ## Integration
 
 - **Called by:** human or `implement` skill (after a user-facing feature lands)
-- **Calls:** `platform/scripts/e2e.sh` (auto-start FE+BE when missing; selective `--stop-backend` / `--stop-frontend` / `--stop` for end-of-mode cleanup of only services this skill put up), chrome-devtools MCP (via `mcp__chrome-devtools__*` tools, for live inspection), `sync-seed-data.js` via `bun run sync-seed`
+- **Calls:** `platform/scripts/e2e.sh` (auto-start FE+BE when missing; `SKAILE_E2E_FRONTEND_MODE=preview` serves the frontend as a built bundle, as CI does, for the F2 regression proof; selective `--stop-backend` / `--stop-frontend` / `--stop` for end-of-mode cleanup of only services this skill put up), chrome-devtools MCP (via `mcp__chrome-devtools__*` tools, for live inspection), `sync-seed-data.js` via `bun run sync-seed`
 - **Delegates to:** `verify-ui` (when user wants visual coverage alongside specs), `test-e2e` (when user asks about scaffolding a fresh e2e setup for a different package), **the human** (`fix` mode escalates a confirmed/suspected regression instead of editing the test to pass)
 - **Reads:** `platform/e2e/CLAUDE.md`, `platform/e2e/README.md`, `platform/e2e/E2E-GUIDE.md`, existing specs under `platform/e2e/specs/**`
 
@@ -732,7 +753,7 @@ CHECKLIST
 | Hardcoding `proj-1` / `proj-2` / `proj-3` in URLs | Use slugs: `inventory-tracker`, `hr-onboarding`, `expense-reports` |
 | Assuming `PlatformAdmin` sees all projects | Default mock user (`test`) owns no seed projects. Use `user-bu-1` / `user-bu-2` to see content. |
 | Skipping the approval gate in `add` mode | The gate is the entire point — it prevents spec sprawl |
-| Calling a test a regression because it fails locally | Prove it failed on CI (a run stopped at `--max-failures` lists only some failures, and counts the tests it did not run as "skipped") and that it fails against the built bundle (`bun run e2e:ci`), not only under the Vite dev server |
+| Calling a test a confirmed regression because it fails locally | Prove it failed on CI (a run stopped at `--max-failures` lists only some failures, and counts the tests it did not run as "skipped") and that it fails against the frontend built the CI way (`SKAILE_E2E_FRONTEND_MODE=preview`), not only under the Vite dev server. Until then it is a suspected regression |
 | Rewriting a failing spec to green without triage | `mode=fix` STEP F2: classify stale-vs-regression with evidence FIRST; a moved selector and a real bug look identical until you check the feature works |
 | Weakening an assertion / adding a blind wait to pass | Never make a test lie. Rewrite to the new shape (keep/tighten the assertion), or report the regression |
 | `.skip`-ing a test you couldn't get working | That's a cop-out. Delete-and-note the gap (feature gone) or fix it; `.skip` is only for temporarily-unverifiable-but-returning behaviour, with a reason |
