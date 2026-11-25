@@ -197,3 +197,9 @@ Nothing deploys on a plain merge to `main`. The release and the deploy are one e
 
 So the final report says `Deployed: no - waits for the next platform Version PR` (or
 the workspaces hop it waits on), never just `merged`.
+
+When the work item is a platform issue that only tracks the workspaces change (its text
+says it closes when the workspaces PR merges), the workspaces PR body says
+`Closes skaile-ai/platform#<n>`: nothing else closes it, and a dependent issue stays
+blocked until it closes. An issue that also needs the pin bump stays open: write
+`Part of skaile-ai/platform#<n>` there.
